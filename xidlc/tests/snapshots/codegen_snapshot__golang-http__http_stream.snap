@@ -13,10 +13,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
 )
 
 var (
@@ -31,63 +33,61 @@ type HttpStreamApiService interface {
 	UploadAsset(ctx context.Context, stream *xidlgohttp.ClientStreamReader[HttpStreamApiUploadAssetRequest]) (*HttpStreamApiUploadAssetResponse, error)
 }
 
-func NewHttpStreamApiHandler(svc HttpStreamApiService) http.Handler {
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /alerts/{district}", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "text/event-stream"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+func RegisterHttpStreamApiHandler(r gin.IRouter, svc HttpStreamApiService) {
+	r.GET("/alerts/:district", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "text/event-stream"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
-		ctx, err := xidlgohttp.RequireAuth(r, HttpStreamApiAlertsSecurityRequirements())
+		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpStreamApiAlertsSecurityRequirements())
 		if err != nil {
-			xidlgohttp.Unauthorized(w, HttpStreamApiAlertsSecurityRequirements())
+			xidlgohttp.Unauthorized(c.Writer, HttpStreamApiAlertsSecurityRequirements())
 			return
 		}
-		r = r.WithContext(ctx)
+		c.Request = c.Request.WithContext(ctx)
 
 		req := &HttpStreamApiAlertsRequest{}
 
-		if value, err := xidlgohttp.PathString(r, "district"); err == nil {
+		if value, err := xidlgohttp.GinPathString(c, "district"); err == nil {
 			req.District = value
 		} else {
-			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 			return
 		}
-		stream := xidlgohttp.NewSSEServerStreamWriter[string](w)
-		if err := svc.Alerts(r.Context(), req, stream); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+		stream := xidlgohttp.NewSSEServerStreamWriter[string](c.Writer)
+		if err := svc.Alerts(c.Request.Context(), req, stream); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 		_ = stream.Close()
 	})
-	mux.HandleFunc("POST /upload", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+	r.POST("/upload", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
-		ctx, err := xidlgohttp.RequireAuth(r, HttpStreamApiUploadAssetSecurityRequirements())
+		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpStreamApiUploadAssetSecurityRequirements())
 		if err != nil {
-			xidlgohttp.Unauthorized(w, HttpStreamApiUploadAssetSecurityRequirements())
+			xidlgohttp.Unauthorized(c.Writer, HttpStreamApiUploadAssetSecurityRequirements())
 			return
 		}
-		r = r.WithContext(ctx)
-		if err := xidlgohttp.RequireContentType(r, "application/x-ndjson"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
+		c.Request = c.Request.WithContext(ctx)
+		if err := xidlgohttp.GinRequireContentType(c, "application/x-ndjson"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
 			return
 		}
 
-		stream := xidlgohttp.NewClientStreamReader[HttpStreamApiUploadAssetRequest](r.Context(), r.Body)
-		resp, err := svc.UploadAsset(r.Context(), stream)
+		stream := xidlgohttp.NewClientStreamReader[HttpStreamApiUploadAssetRequest](c.Request.Context(), c.Request.Body)
+		resp, err := svc.UploadAsset(c.Request.Context(), stream)
 		if err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
-		if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
 		}
 	})
-	return mux
 }
 
 type HttpStreamApiClient struct {

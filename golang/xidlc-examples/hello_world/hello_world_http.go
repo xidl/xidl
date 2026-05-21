@@ -23,10 +23,12 @@ var (
 
 type HelloWorldService interface {
 	SayHello(ctx context.Context, req *HelloWorldSayHelloRequest) (*HelloWorldSayHelloResponse, error)
+	Trusted(ctx context.Context, req *HelloWorldTrustedRequest) (*HelloWorldTrustedResponse, error)
 }
 
 func RegisterHelloWorldHandler(r gin.IRouter, svc HelloWorldService) {
-	r.POST("/hello", func(c *gin.Context) {
+	r.OPTIONS("/hello", xidlgohttp.CORSMiddleware([]string{"*"}))
+	r.POST("/hello", xidlgohttp.CORSMiddleware([]string{"*"}), func(c *gin.Context) {
 		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
@@ -44,6 +46,20 @@ func RegisterHelloWorldHandler(r gin.IRouter, svc HelloWorldService) {
 		}
 		req.Name = body.Name
 		if _, err := svc.SayHello(c.Request.Context(), req); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
+			return
+		}
+		c.Status(http.StatusNoContent)
+	})
+	r.OPTIONS("/trusted", xidlgohttp.CORSMiddleware([]string{"http://trust.me"}))
+	r.GET("/trusted", xidlgohttp.CORSMiddleware([]string{"http://trust.me"}), func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+			return
+		}
+
+		req := &HelloWorldTrustedRequest{}
+		if _, err := svc.Trusted(c.Request.Context(), req); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
@@ -94,6 +110,28 @@ func (c *HelloWorldClient) SayHello(ctx context.Context, req *HelloWorldSayHello
 	return &decoded, nil
 }
 
+func (c *HelloWorldClient) Trusted(ctx context.Context, req *HelloWorldTrustedRequest) (*HelloWorldTrustedResponse, error) {
+	requestURL := c.baseURL + formatHelloWorldTrustedPath(req)
+	httpReq, err := http.NewRequestWithContext(ctx, "GET", requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Accept", "application/json")
+	resp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	}
+	decoded, err := decodeHelloWorldTrustedResponse(resp)
+	if err != nil {
+		return nil, err
+	}
+	return &decoded, nil
+}
+
 type HelloWorldSayHelloRequest struct {
 	Name string `json:"name" form:"name"`
 }
@@ -121,5 +159,30 @@ func formatHelloWorldSayHelloPath(req *HelloWorldSayHelloRequest) string {
 }
 func decodeHelloWorldSayHelloResponse(resp *http.Response) (HelloWorldSayHelloResponse, error) {
 	out := HelloWorldSayHelloResponse{}
+	return out, nil
+}
+
+type HelloWorldTrustedRequest struct {
+}
+
+type HelloWorldTrustedResponse struct {
+}
+
+func HelloWorldTrustedSecurityRequirements() []xidlgohttp.SecurityRequirement {
+	return []xidlgohttp.SecurityRequirement{}
+}
+
+func HelloWorldTrustedDeprecated() xidlgohttp.DeprecatedInfo {
+	return xidlgohttp.DeprecatedInfo{
+		Deprecated: false,
+	}
+}
+
+func formatHelloWorldTrustedPath(req *HelloWorldTrustedRequest) string {
+	path := "/trusted"
+	return path
+}
+func decodeHelloWorldTrustedResponse(resp *http.Response) (HelloWorldTrustedResponse, error) {
+	out := HelloWorldTrustedResponse{}
 	return out, nil
 }

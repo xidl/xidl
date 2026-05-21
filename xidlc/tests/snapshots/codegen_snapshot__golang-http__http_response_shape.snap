@@ -19,10 +19,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
 )
 
 var (
@@ -40,63 +42,62 @@ type HttpResponseShapeServiceService interface {
 	Ping(ctx context.Context, req *HttpResponseShapeServicePingRequest) (*HttpResponseShapeServicePingResponse, error)
 }
 
-func NewHttpResponseShapeServiceHandler(svc HttpResponseShapeServiceService) http.Handler {
-	mux := http.NewServeMux()
-	mux.HandleFunc("POST /hello", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+func RegisterHttpResponseShapeServiceHandler(r gin.IRouter, svc HttpResponseShapeServiceService) {
+	r.POST("/hello", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
 
 		req := &HttpResponseShapeServiceHelloRequest{}
-		resp, err := svc.Hello(r.Context(), req)
+		resp, err := svc.Hello(c.Request.Context(), req)
 		if err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
-		if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
 		}
 	})
-	mux.HandleFunc("POST /get_count", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+	r.POST("/get_count", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
 
 		req := &HttpResponseShapeServiceGetCountRequest{}
-		resp, err := svc.GetCount(r.Context(), req)
+		resp, err := svc.GetCount(c.Request.Context(), req)
 		if err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
-		if err := xidlgohttp.EncodeBody(w, "application/json", resp.Count); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Count); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
 		}
 	})
-	mux.HandleFunc("POST /add", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+	r.POST("/add", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
-		if err := xidlgohttp.RequireContentType(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
+		if err := xidlgohttp.GinRequireContentType(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
 			return
 		}
 
 		req := &HttpResponseShapeServiceAddRequest{}
 		body := HttpResponseShapeServiceAddRequestBody{}
-		if err := xidlgohttp.DecodeBody(r, "application/json", &body); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+		if err := xidlgohttp.GinDecodeBody(c, "application/json", &body); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 			return
 		}
 		req.A = body.A
 		req.B = body.B
-		resp, err := svc.Add(r.Context(), req)
+		resp, err := svc.Add(c.Request.Context(), req)
 		if err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
@@ -104,30 +105,30 @@ func NewHttpResponseShapeServiceHandler(svc HttpResponseShapeServiceService) htt
 			Return: resp.Return,
 			Sum:    resp.Sum,
 		}
-		if err := xidlgohttp.EncodeBody(w, "application/json", respBody); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		if err := xidlgohttp.GinEncodeBody(c, "application/json", respBody); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
 		}
 	})
-	mux.HandleFunc("POST /bump", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+	r.POST("/bump", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
-		if err := xidlgohttp.RequireContentType(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
+		if err := xidlgohttp.GinRequireContentType(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
 			return
 		}
 
 		req := &HttpResponseShapeServiceBumpRequest{}
 		body := HttpResponseShapeServiceBumpRequestBody{}
-		if err := xidlgohttp.DecodeBody(r, "application/json", &body); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+		if err := xidlgohttp.GinDecodeBody(c, "application/json", &body); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 			return
 		}
 		req.Value = body.Value
-		resp, err := svc.Bump(r.Context(), req)
+		resp, err := svc.Bump(c.Request.Context(), req)
 		if err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
@@ -135,24 +136,23 @@ func NewHttpResponseShapeServiceHandler(svc HttpResponseShapeServiceService) htt
 			Return: resp.Return,
 			Value:  resp.Value,
 		}
-		if err := xidlgohttp.EncodeBody(w, "application/json", respBody); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		if err := xidlgohttp.GinEncodeBody(c, "application/json", respBody); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
 		}
 	})
-	mux.HandleFunc("POST /ping", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+	r.POST("/ping", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
 
 		req := &HttpResponseShapeServicePingRequest{}
-		if _, err := svc.Ping(r.Context(), req); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+		if _, err := svc.Ping(c.Request.Context(), req); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
-		w.WriteHeader(http.StatusNoContent)
+		c.Status(http.StatusNoContent)
 	})
-	return mux
 }
 
 type HttpResponseShapeServiceClient struct {

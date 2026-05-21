@@ -1,7 +1,12 @@
+@cors("*")
 interface HelloWorld {
     @post(path = "/hello")
     void sayHello(
         in string name
     );
+
+    @cors("http://trust.me")
+    @get(path = "/trusted")
+    void trusted();
 
 };

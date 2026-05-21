@@ -159,6 +159,7 @@ pub(crate) fn build_method_meta(
         return_ty,
         stream_kind: op.meta.stream.kind,
         stream_codec: op.meta.stream.codec,
+        cors: op.meta.cors.clone(),
         security,
         basic_realm,
         deprecated: deprecated.deprecated,
