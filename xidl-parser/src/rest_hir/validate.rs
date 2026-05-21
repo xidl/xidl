@@ -291,3 +291,44 @@ pub(super) fn http_method_name(method: HttpMethod) -> &'static str {
         HttpMethod::Options => "OPTIONS",
     }
 }
+
+pub(super) fn validate_upgrade_constraints(
+    op_name: &str,
+    has_upgrade: bool,
+    upgrade_protocol: Option<&str>,
+    method: HttpMethod,
+    request_params: &[HttpParam],
+    return_type: Option<&hir::TypeSpec>,
+) -> RestHirResult<()> {
+    if !has_upgrade {
+        return Ok(());
+    }
+    let Some(proto) = upgrade_protocol else {
+        return Err(format!(
+            "@upgrade annotation on method '{}' requires a 'protocol' parameter (e.g. @upgrade(protocol=\"xidl-raw\"))",
+            op_name
+        ));
+    };
+    if proto.is_empty() {
+        return Err(format!(
+            "@upgrade 'protocol' parameter on method '{}' cannot be empty",
+            op_name
+        ));
+    }
+    if return_type.is_some() {
+        return Err(format!("@upgrade method '{}' must return void", op_name));
+    }
+    let has_body_param = request_params
+        .iter()
+        .any(|param| matches!(param.kind, HttpParamKind::Body));
+    if has_body_param {
+        return Err(format!(
+            "@upgrade method '{}' cannot have @body parameters",
+            op_name
+        ));
+    }
+    if method != HttpMethod::Get {
+        return Err(format!("@upgrade method '{}' must use GET", op_name));
+    }
+    Ok(())
+}

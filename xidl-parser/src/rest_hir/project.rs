@@ -15,6 +15,7 @@ use super::semantics::{
 use super::validate::{
     effective_basic_auth_realm, effective_deprecated, validate_head_constraints,
     validate_request_shape, validate_route_bindings, validate_stream_method, validate_stream_shape,
+    validate_upgrade_constraints,
 };
 use super::{
     HttpDocumentMetadata, HttpDocumentServer, HttpInterface, HttpOperation, HttpOperationMeta,
@@ -191,10 +192,12 @@ fn project_operation(
         .map_err(ParseError::Message)?;
     let stream = http_stream_config(&op.annotations).map_err(ParseError::Message)?;
     validate_stream_shape(&op.ident, stream).map_err(parse_err)?;
+    let has_upgrade = has_annotation(&op.annotations, "upgrade");
     let default_method = if matches!(
         stream.kind,
         Some(HttpStreamKind::Server) | Some(HttpStreamKind::Bidi)
-    ) {
+    ) || has_upgrade
+    {
         super::HttpMethod::Get
     } else {
         super::HttpMethod::Post
@@ -247,6 +250,24 @@ fn project_operation(
     )
     .map_err(parse_err)?;
 
+    let upgrade_protocol = super::semantics::find_annotation(&op.annotations, "upgrade")
+        .and_then(super::semantics::annotation_params)
+        .map(super::semantics::normalize_annotation_params)
+        .and_then(|params| params.get("protocol").cloned());
+
+    validate_upgrade_constraints(
+        &op.ident,
+        has_upgrade,
+        upgrade_protocol.as_deref(),
+        method,
+        &request_params,
+        match &op.ty {
+            hir::OpTypeSpec::Void => None,
+            hir::OpTypeSpec::TypeSpec(ty) => Some(ty),
+        },
+    )
+    .map_err(parse_err)?;
+
     let request_content_type =
         effective_media_type(interface_annotations, &op.annotations, "Consumes");
     let response_content_type =
@@ -287,6 +308,7 @@ fn project_operation(
             security,
             basic_auth_realm,
             deprecated,
+            upgrade_protocol,
         },
         signature,
         http,

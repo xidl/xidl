@@ -33,11 +33,12 @@ T: {{ ident }} + Send + Sync + 'static,
         async fn {{ method.name }}(
         ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap{% if method.has_bearer_auth %},
-        auth_header: Option<::xidl_rust_axum::axum_extra::extract::TypedHeader<::xidl_rust_axum::auth::bearer::BearerHeader>>{% endif %}{% if method.path_params | length > 0 and (method.is_server_stream or method.is_client_stream or method.is_bidi_stream) %},
-        ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<{{ method.struct_prefix }}Path>{% endif %}{% if method.query_params | length > 0 and (method.is_server_stream or method.is_client_stream or method.is_bidi_stream) %},
+        auth_header: Option<::xidl_rust_axum::axum_extra::extract::TypedHeader<::xidl_rust_axum::auth::bearer::BearerHeader>>{% endif %}{% if method.path_params | length > 0 and (method.is_server_stream or method.is_client_stream or method.is_bidi_stream or method.is_upgrade) %},
+        ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<{{ method.struct_prefix }}Path>{% endif %}{% if method.query_params | length > 0 and (method.is_server_stream or method.is_client_stream or method.is_bidi_stream or method.is_upgrade) %},
         xidl_rust_axum::axum::extract::Query(query): xidl_rust_axum::axum::extract::Query<{{ method.struct_prefix }}RequestInQuery>{% endif %}{% if method.is_bidi_stream %},
         ws: ::xidl_rust_axum::axum::extract::ws::WebSocketUpgrade{% elif method.is_client_stream %},
-        body: ::xidl_rust_axum::axum::body::Body{% elif method.request_struct is defined and method.request_struct and not method.is_server_stream and not method.is_client_stream and not method.is_bidi_stream %},
+        body: ::xidl_rust_axum::axum::body::Body{% elif method.is_upgrade %},
+        req: ::xidl_rust_axum::axum::extract::Request{% elif method.request_struct is defined and method.request_struct and not method.is_server_stream and not method.is_client_stream and not method.is_bidi_stream %},
         request: {{ method.request_struct }}{% endif %}
         ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
             let _ = &headers;
@@ -61,21 +62,21 @@ T: {{ ident }} + Send + Sync + 'static,
                     None => return Err(xidl_rust_axum::Error::unauthorized()),
                 };
             {% endif %}
-            {% if method.path_params | length > 0 and (method.is_server_stream or method.is_client_stream or method.is_bidi_stream) %}
+            {% if method.path_params | length > 0 and (method.is_server_stream or method.is_client_stream or method.is_bidi_stream or method.is_upgrade) %}
                 let {{ method.struct_prefix }}Path {
                     {% for param in method.path_params %}
                         {{ param.name }},
                     {% endfor %}
                 } = path;
             {% endif %}
-            {% if method.query_params | length > 0 and (method.is_server_stream or method.is_client_stream or method.is_bidi_stream) %}
+            {% if method.query_params | length > 0 and (method.is_server_stream or method.is_client_stream or method.is_bidi_stream or method.is_upgrade) %}
                 let {{ method.struct_prefix }}RequestInQuery {
                     {% for param in method.query_params %}
                         {{ param.name }},
                     {% endfor %}
                 } = query;
             {% endif %}
-            {% if method.header_params | length > 0 and (method.is_server_stream or method.is_client_stream or method.is_bidi_stream) %}
+            {% if method.header_params | length > 0 and (method.is_server_stream or method.is_client_stream or method.is_bidi_stream or method.is_upgrade) %}
                 {% for param in method.header_params %}
                     {% if param.header_is_multi %}
                         let mut {{ param.name }}: Vec<{{ param.header_item_ty }}> = Vec::new();
@@ -116,7 +117,7 @@ T: {{ ident }} + Send + Sync + 'static,
                         {% endif %}
                     {% endfor %}
                 {% endif %}
-                {% if method.cookie_params | length > 0 and (method.is_server_stream or method.is_client_stream or method.is_bidi_stream) %}
+                {% if method.cookie_params | length > 0 and (method.is_server_stream or method.is_client_stream or method.is_bidi_stream or method.is_upgrade) %}
                     let mut cookie_map: ::std::collections::HashMap<String, Vec<String>> = ::std::collections::HashMap::new();
                     for header_value in headers.get_all("cookie").iter() {
                         let cookie_str = header_value
@@ -165,7 +166,7 @@ T: {{ ident }} + Send + Sync + 'static,
                         {% endif %}
                     {% endfor %}
                 {% endif %}
-                {% if method.request_struct is defined and method.request_struct and not method.is_server_stream and not method.is_client_stream and not method.is_bidi_stream %}
+                {% if method.request_struct is defined and method.request_struct and not method.is_server_stream and not method.is_client_stream and not method.is_bidi_stream and not method.is_upgrade %}
                     let {{ method.request_struct }} {
                         {% for param in method.request_params %}
                             {{ param.name }},
@@ -241,185 +242,196 @@ T: {{ ident }} + Send + Sync + 'static,
                     let data = ();
                 {% endif %}
                 {% if not method.is_bidi_stream %}
-                    let mut resp = match svc.{{ method.name }}({% if method.is_server_stream or method.is_client_stream %}::xidl_rust_axum::Request::new(headers, data){% elif method.server_param_names | length > 0 %}{{ method.server_param_names | join(", ") }}{% endif %}).await {
-                        Ok(resp_value) => {
-                            {% if method.response_header_params | length > 0 or method.response_cookie_params | length > 0 %}
-                                {% for param in method.response_header_params %}
-                                    {% if method.response_struct %}
-                                        {% if param.header_is_multi %}
-                                            let {{ param.name }}_header_values: Vec<String> = {
-                                                let values = &resp_value.{{ param.name }};
-                                                values.iter().map(|value| {
+                    let mut resp = match svc.{{ method.name }}(
+                    {%- if method.is_server_stream or method.is_client_stream -%}
+                        ::xidl_rust_axum::Request::new(headers, data)
+                    {%- elif method.is_upgrade -%}
+                        {%- if method.server_param_names | length > 0 -%}{{ method.server_param_names | join(", ") }}, {% endif -%}
+                            ::xidl_rust_axum::upgrade::Upgrade::new(req, "{{ method.upgrade_protocol }}".to_string())
+                        {%- elif method.server_param_names | length > 0 -%}
+                            {{ method.server_param_names | join(", ") }}
+                        {%- endif -%}
+                        ).await {
+                            Ok(resp_value) => {
+                                {% if method.response_header_params | length > 0 or method.response_cookie_params | length > 0 %}
+                                    {% for param in method.response_header_params %}
+                                        {% if method.response_struct %}
+                                            {% if param.header_is_multi %}
+                                                let {{ param.name }}_header_values: Vec<String> = {
+                                                    let values = &resp_value.{{ param.name }};
+                                                    values.iter().map(|value| {
+                                                        {% if param.header_item_is_string %}value.clone(){% elif param.header_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
+                                                        .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+                                                    }).collect()
+                                                };
+                                            {% else %}
+                                                let {{ param.name }}_header_value: String = {
+                                                    let value = &resp_value.{{ param.name }};
                                                     {% if param.header_item_is_string %}value.clone(){% elif param.header_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
                                                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
-                                                }).collect()
-                                            };
-                                        {% else %}
-                                            let {{ param.name }}_header_value: String = {
-                                                let value = &resp_value.{{ param.name }};
-                                                {% if param.header_item_is_string %}value.clone(){% elif param.header_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
-                                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
-                                            };
-                                        {% endif %}
-                                    {% elif method.response_params | length == 1 and not method.response_include_return %}
-                                        {% if param.header_is_multi %}
-                                            let {{ param.name }}_header_values: Vec<String> = {
-                                                let values = &resp_value;
-                                                values.iter().map(|value| {
+                                                };
+                                            {% endif %}
+                                        {% elif method.response_params | length == 1 and not method.response_include_return %}
+                                            {% if param.header_is_multi %}
+                                                let {{ param.name }}_header_values: Vec<String> = {
+                                                    let values = &resp_value;
+                                                    values.iter().map(|value| {
+                                                        {% if param.header_item_is_string %}value.clone(){% elif param.header_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
+                                                        .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+                                                    }).collect()
+                                                };
+                                            {% else %}
+                                                let {{ param.name }}_header_value: String = {
+                                                    let value = &resp_value;
                                                     {% if param.header_item_is_string %}value.clone(){% elif param.header_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
                                                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
-                                                }).collect()
-                                            };
-                                        {% else %}
-                                            let {{ param.name }}_header_value: String = {
-                                                let value = &resp_value;
-                                                {% if param.header_item_is_string %}value.clone(){% elif param.header_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
-                                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
-                                            };
+                                                };
+                                            {% endif %}
                                         {% endif %}
-                                    {% endif %}
-                                {% endfor %}
-                                {% for param in method.response_cookie_params %}
-                                    {% if method.response_struct %}
-                                        {% if param.cookie_is_multi %}
-                                            let {{ param.name }}_cookie_values: Vec<String> = {
-                                                let values = &resp_value.{{ param.name }};
-                                                values.iter().map(|value| {
+                                    {% endfor %}
+                                    {% for param in method.response_cookie_params %}
+                                        {% if method.response_struct %}
+                                            {% if param.cookie_is_multi %}
+                                                let {{ param.name }}_cookie_values: Vec<String> = {
+                                                    let values = &resp_value.{{ param.name }};
+                                                    values.iter().map(|value| {
+                                                        {% if param.cookie_item_is_string %}value.clone(){% elif param.cookie_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
+                                                        .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+                                                    }).collect()
+                                                };
+                                            {% else %}
+                                                let {{ param.name }}_cookie_value: String = {
+                                                    let value = &resp_value.{{ param.name }};
                                                     {% if param.cookie_item_is_string %}value.clone(){% elif param.cookie_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
                                                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
-                                                }).collect()
-                                            };
-                                        {% else %}
-                                            let {{ param.name }}_cookie_value: String = {
-                                                let value = &resp_value.{{ param.name }};
-                                                {% if param.cookie_item_is_string %}value.clone(){% elif param.cookie_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
-                                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
-                                            };
-                                        {% endif %}
-                                    {% elif method.response_params | length == 1 and not method.response_include_return %}
-                                        {% if param.cookie_is_multi %}
-                                            let {{ param.name }}_cookie_values: Vec<String> = {
-                                                let values = &resp_value;
-                                                values.iter().map(|value| {
+                                                };
+                                            {% endif %}
+                                        {% elif method.response_params | length == 1 and not method.response_include_return %}
+                                            {% if param.cookie_is_multi %}
+                                                let {{ param.name }}_cookie_values: Vec<String> = {
+                                                    let values = &resp_value;
+                                                    values.iter().map(|value| {
+                                                        {% if param.cookie_item_is_string %}value.clone(){% elif param.cookie_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
+                                                        .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+                                                    }).collect()
+                                                };
+                                            {% else %}
+                                                let {{ param.name }}_cookie_value: String = {
+                                                    let value = &resp_value;
                                                     {% if param.cookie_item_is_string %}value.clone(){% elif param.cookie_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
                                                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
-                                                }).collect()
-                                            };
-                                        {% else %}
-                                            let {{ param.name }}_cookie_value: String = {
-                                                let value = &resp_value;
-                                                {% if param.cookie_item_is_string %}value.clone(){% elif param.cookie_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
-                                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
-                                            };
+                                                };
+                                            {% endif %}
                                         {% endif %}
-                                    {% endif %}
-                                {% endfor %}
-                            {% endif %}
-                            let mut resp = {% if method.is_server_stream %}
-                            xidl_rust_axum::stream::sse_response(resp_value)
-                        {% elif method.response_is_empty %}
-                            {
-                                let _ = resp_value;
-                                ::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT)
-                            }
-                        {% else %}
-                            {
-                                {% set response_body_count = method.response_body_params | length + (0 if method.return_is_unit else 1) %}
-                                {% if method.response_struct and response_body_count > 0 %}
-                                    let body_value: {{ method.struct_prefix }}ResponseOutBody = resp_value.into();
-                                {% elif not method.response_struct and method.response_include_return and method.response_params | length == 0 %}
-                                    let body_value: {{ method.ret_out_ty }} = {{ method.ret_out_expr }};
-                                {% elif not method.response_struct and method.return_is_unit and method.response_body_params | length == 1 and method.response_header_params | length == 0 and method.response_cookie_params | length == 0 %}
-                                    let body_value: {{ method.response_body_params[0].out_ty }} = {{ method.response_body_params[0].out_expr | replace(method.response_body_params[0].name, "resp_value") }};
-                                {% else %}
-                                    let body_value = resp_value;
+                                    {% endfor %}
                                 {% endif %}
-                                let _ = &body_value;
-                                let body = xidl_rust_axum::SerializeFactory::new("{{ method.response_content_type }}")
-                                .to_vec(&body_value)?;
-                                ::xidl_rust_axum::axum::response::Response::builder()
-                                .status(::xidl_rust_axum::axum::http::StatusCode::from_u16({{ method.response_status }}).unwrap())
-                                .header(
-                                ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                                "{{ method.response_content_type }}",
-                                )
-                                .body(::xidl_rust_axum::axum::body::Body::from(body))
-                                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?
-                            }
-                            {% endif %};
-                            {% if method.response_header_params | length > 0 %}
-
-                                {% for param in method.response_header_params %}
-                                    let header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
-                                    "{{ param.wire_name }}".as_bytes(),
-                                    ).map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-                                    {% if param.header_is_multi %}
-                                        for value_str in {{ param.name }}_header_values {
-                                            let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&value_str)
-                                            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-                                            resp.headers_mut().append(header_name.clone(), header_value);
-                                        }
+                                let mut resp = {% if method.is_server_stream %}
+                                xidl_rust_axum::stream::sse_response(resp_value)
+                            {% elif method.is_upgrade %}
+                                resp_value
+                            {% elif method.response_is_empty %}
+                                {
+                                    let _ = resp_value;
+                                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT)
+                                }
+                            {% else %}
+                                {
+                                    {% set response_body_count = method.response_body_params | length + (0 if method.return_is_unit else 1) %}
+                                    {% if method.response_struct and response_body_count > 0 %}
+                                        let body_value: {{ method.struct_prefix }}ResponseOutBody = resp_value.into();
+                                    {% elif not method.response_struct and method.response_include_return and method.response_params | length == 0 %}
+                                        let body_value: {{ method.ret_out_ty }} = {{ method.ret_out_expr }};
+                                    {% elif not method.response_struct and method.return_is_unit and method.response_body_params | length == 1 and method.response_header_params | length == 0 and method.response_cookie_params | length == 0 %}
+                                        let body_value: {{ method.response_body_params[0].out_ty }} = {{ method.response_body_params[0].out_expr | replace(method.response_body_params[0].name, "resp_value") }};
                                     {% else %}
-                                        let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&{{ param.name }}_header_value)
-                                        .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-                                        resp.headers_mut().insert(header_name, header_value);
+                                        let body_value = resp_value;
                                     {% endif %}
-                                {% endfor %}
-                            {% endif %}
-                            {% if method.response_cookie_params | length > 0 %}
-                                {% for param in method.response_cookie_params %}
-                                    {% if param.cookie_is_multi %}
-                                        for value_str in {{ param.name }}_cookie_values {
-                                            let cookie_str = format!("{}={}", "{{ param.wire_name }}", value_str);
+                                    let _ = &body_value;
+                                    let body = xidl_rust_axum::SerializeFactory::new("{{ method.response_content_type }}")
+                                    .to_vec(&body_value)?;
+                                    ::xidl_rust_axum::axum::response::Response::builder()
+                                    .status(::xidl_rust_axum::axum::http::StatusCode::from_u16({{ method.response_status }}).unwrap())
+                                    .header(
+                                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                                    "{{ method.response_content_type }}",
+                                    )
+                                    .body(::xidl_rust_axum::axum::body::Body::from(body))
+                                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?
+                                }
+                                {% endif %};
+                                {% if method.response_header_params | length > 0 %}
+
+                                    {% for param in method.response_header_params %}
+                                        let header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
+                                        "{{ param.wire_name }}".as_bytes(),
+                                        ).map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                                        {% if param.header_is_multi %}
+                                            for value_str in {{ param.name }}_header_values {
+                                                let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&value_str)
+                                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                                                resp.headers_mut().append(header_name.clone(), header_value);
+                                            }
+                                        {% else %}
+                                            let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&{{ param.name }}_header_value)
+                                            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                                            resp.headers_mut().insert(header_name, header_value);
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                                {% if method.response_cookie_params | length > 0 %}
+                                    {% for param in method.response_cookie_params %}
+                                        {% if param.cookie_is_multi %}
+                                            for value_str in {{ param.name }}_cookie_values {
+                                                let cookie_str = format!("{}={}", "{{ param.wire_name }}", value_str);
+                                                let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&cookie_str)
+                                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                                                resp.headers_mut().append(::xidl_rust_axum::axum::http::header::SET_COOKIE, header_value);
+                                            }
+                                        {% else %}
+                                            let cookie_str = format!("{}={}", "{{ param.wire_name }}", {{ param.name }}_cookie_value);
                                             let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&cookie_str)
                                             .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
                                             resp.headers_mut().append(::xidl_rust_axum::axum::http::header::SET_COOKIE, header_value);
-                                        }
-                                    {% else %}
-                                        let cookie_str = format!("{}={}", "{{ param.wire_name }}", {{ param.name }}_cookie_value);
-                                        let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&cookie_str)
-                                        .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-                                        resp.headers_mut().append(::xidl_rust_axum::axum::http::header::SET_COOKIE, header_value);
-                                    {% endif %}
-                                {% endfor %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                                resp
+                            }
+                            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+                        };
+                        {% if method.deprecated %}
+                            resp.headers_mut().insert(
+                            ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated"),
+                            ::xidl_rust_axum::axum::http::HeaderValue::from_static("true"),
+                            );
+                            {% if method.deprecated_since %}
+                                let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str("{{ method.deprecated_since }}")
+                                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                                resp.headers_mut().insert(
+                                ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated-since"),
+                                value,
+                                );
                             {% endif %}
-                            resp
-                        }
-                        Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
-                    };
-                    {% if method.deprecated %}
-                        resp.headers_mut().insert(
-                        ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated"),
-                        ::xidl_rust_axum::axum::http::HeaderValue::from_static("true"),
-                        );
-                        {% if method.deprecated_since %}
-                            let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str("{{ method.deprecated_since }}")
-                            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-                            resp.headers_mut().insert(
-                            ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated-since"),
-                            value,
-                            );
+                            {% if method.deprecated_after %}
+                                let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str("{{ method.deprecated_after }}")
+                                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                                resp.headers_mut().insert(
+                                ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated-from"),
+                                value,
+                                );
+                            {% endif %}
                         {% endif %}
-                        {% if method.deprecated_after %}
-                            let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str("{{ method.deprecated_after }}")
-                            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-                            resp.headers_mut().insert(
-                            ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated-from"),
-                            value,
-                            );
-                        {% endif %}
+                        Ok(resp)
                     {% endif %}
-                    Ok(resp)
-                {% endif %}
-            }
-        {% endfor %}
-    }
-
-    impl<T> xidl_rust_axum::Service for {{ ident }}Server<T>
-    where
-    T: {{ ident }} + Send + Sync + 'static,
-    {
-        fn into_router(self) -> xidl_rust_axum::axum::Router {
-            self.router()
+                }
+            {% endfor %}
         }
-    }
+
+        impl<T> xidl_rust_axum::Service for {{ ident }}Server<T>
+        where
+        T: {{ ident }} + Send + Sync + 'static,
+        {
+            fn into_router(self) -> xidl_rust_axum::axum::Router {
+                self.router()
+            }
+        }

@@ -3650,6 +3650,8 @@ dependencies = [
  "axum-extra",
  "base64",
  "futures-util",
+ "hyper",
+ "hyper-util",
  "reqwest",
  "rmp-serde",
  "serde",

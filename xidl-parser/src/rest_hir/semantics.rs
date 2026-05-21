@@ -12,7 +12,7 @@ use jiff::{Timestamp, civil, tz::TimeZone};
 use serde::{Deserialize, Serialize};
 
 pub use self::annotations::{
-    annotation_name, annotation_params, effective_media_type, has_annotation,
+    annotation_name, annotation_params, effective_media_type, find_annotation, has_annotation,
     has_optional_annotation, normalize_annotation_params,
 };
 pub use self::cors::{HttpCorsProfile, effective_cors};

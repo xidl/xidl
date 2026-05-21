@@ -32,6 +32,17 @@ pub fn has_annotation(annotations: &[hir::Annotation], target: &str) -> bool {
     })
 }
 
+pub fn find_annotation<'a>(
+    annotations: &'a [hir::Annotation],
+    target: &str,
+) -> Option<&'a hir::Annotation> {
+    annotations.iter().find(|annotation| {
+        annotation_name(annotation)
+            .map(|name| name.eq_ignore_ascii_case(target))
+            .unwrap_or(false)
+    })
+}
+
 pub fn has_optional_annotation(annotations: &[hir::Annotation]) -> bool {
     annotations.iter().any(|annotation| {
         matches!(annotation, hir::Annotation::Optional { .. })

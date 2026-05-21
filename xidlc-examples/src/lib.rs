@@ -20,3 +20,7 @@ pub mod rest_server;
 pub mod union_serde;
 
 pub mod e2e_test;
+
+pub mod upgrade {
+    include!(concat!(env!("OUT_DIR"), "/upgrade.rs"));
+}

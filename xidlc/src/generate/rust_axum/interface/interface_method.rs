@@ -29,6 +29,8 @@ pub(crate) fn render_op_from_http(
     let is_server_stream = matches!(stream.kind, Some(HttpStreamKind::Server));
     let is_client_stream = matches!(stream.kind, Some(HttpStreamKind::Client));
     let is_bidi_stream = matches!(stream.kind, Some(HttpStreamKind::Bidi));
+    let upgrade_protocol = http_op.meta.upgrade_protocol.clone();
+    let is_upgrade = upgrade_protocol.is_some();
     let deprecated = deprecated_context_from_http(http_op);
     let security = security_context(&http_op.meta.security);
     if security.has_basic_auth && security.has_bearer_auth {
@@ -219,6 +221,8 @@ pub(crate) fn render_op_from_http(
         is_server_stream,
         is_client_stream,
         is_bidi_stream,
+        is_upgrade,
+        upgrade_protocol,
         request_item_ty: request_ty,
         ret_in_ty,
         ret_out_ty,
