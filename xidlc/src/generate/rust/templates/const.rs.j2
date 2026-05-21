@@ -4,4 +4,7 @@
 {% for attr in rust_attrs %}
     #[{{ attr }}]
 {% endfor %}
+{% if not is_upper(ident) %}
+    #[allow(non_upper_case_globals)]
+{% endif %}
 pub const {{ ident }}: {{ ty }} = {{ value }};

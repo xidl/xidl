@@ -7,14 +7,6 @@ use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use std::collections::HashMap;
 use xidl_parser::hir;
 
-const RUST_ITEM_ALLOW_ATTRS: &[&str] = &[
-    "allow(unused_imports)",
-    "allow(non_upper_case_globals)",
-    "allow(non_snake_case)",
-    "allow(unused_variables)",
-    "allow(unreachable_patterns)",
-];
-
 impl RustRender for hir::ModuleDcl {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
         let defs = self.definition.iter().collect::<Vec<_>>();
@@ -76,12 +68,7 @@ impl<'a> DefinitionRenderContext<'a> {
                 }
                 other => {
                     let rendered = self.render_definition(other)?;
-                    out.extend(
-                        rendered
-                            .source
-                            .into_iter()
-                            .map(wrap_with_generated_allow_attrs),
-                    );
+                    out.extend(rendered.source.into_iter());
                 }
             }
         }
@@ -137,16 +124,4 @@ impl<'a> DefinitionRenderContext<'a> {
             hir::TypeDcl::NativeDcl(_) => def.render(self.renderer),
         }
     }
-}
-
-fn wrap_with_generated_allow_attrs(source: String) -> String {
-    let source = source.trim_start_matches(char::is_whitespace);
-    let mut out = String::new();
-    for attr in RUST_ITEM_ALLOW_ATTRS {
-        out.push_str("#[");
-        out.push_str(attr);
-        out.push_str("]\n");
-    }
-    out.push_str(source);
-    out
 }

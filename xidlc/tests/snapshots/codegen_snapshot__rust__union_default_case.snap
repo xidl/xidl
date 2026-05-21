@@ -5,11 +5,6 @@ expression: output
 ===============
 union_default_case.rs
 ===============
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(
     Debug,
     Clone,
@@ -25,11 +20,6 @@ pub enum Tag {
     A,
     B,
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct DefaultUnion {
     tag: Tag,
     data: DefaultUnionData,

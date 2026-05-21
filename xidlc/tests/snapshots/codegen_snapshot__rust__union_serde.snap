@@ -5,11 +5,6 @@ expression: output
 ===============
 union_serde.rs
 ===============
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(
     Debug,
     Clone,
@@ -26,11 +21,6 @@ pub enum Tag {
     V2,
     V3,
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct UnionValue {
     tag: Tag,
     data: UnionValueData,
@@ -322,11 +312,6 @@ impl<'de> serde::Deserialize<'de> for UnionValue {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct IntTagValue {
     tag: i32,
     data: IntTagValueData,
@@ -621,11 +606,6 @@ impl<'de> serde::Deserialize<'de> for IntTagValue {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct BoolTagValue {
     tag: bool,
     data: BoolTagValueData,
@@ -855,11 +835,6 @@ impl<'de> serde::Deserialize<'de> for BoolTagValue {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct CharTagValue {
     tag: char,
     data: CharTagValueData,

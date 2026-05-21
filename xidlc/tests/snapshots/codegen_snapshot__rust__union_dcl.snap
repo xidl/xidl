@@ -5,11 +5,6 @@ expression: output
 ===============
 union_dcl.rs
 ===============
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct B {
     tag: i32,
     data: BData,
@@ -102,11 +97,6 @@ impl<'de> serde::Deserialize<'de> for B {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct C {
     tag: i32,
     data: CData,

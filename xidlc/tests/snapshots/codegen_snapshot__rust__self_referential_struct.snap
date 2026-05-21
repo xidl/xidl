@@ -5,11 +5,6 @@ expression: output
 ===============
 self_referential_struct.rs
 ===============
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct Node {
@@ -18,22 +13,12 @@ pub struct Node {
     pub children: Vec<Node>,
 }
 impl Node {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct Left {
     pub right: Box<Right>,
 }
 impl Left {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct Right {

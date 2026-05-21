@@ -346,11 +346,6 @@ impl HttpClientStreamReportServiceClient {
 ===============
 http_client_stream_report.rs
 ===============
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct UploadChunk {
@@ -358,11 +353,6 @@ pub struct UploadChunk {
     pub bytes: Vec<u8>,
 }
 impl UploadChunk {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct UploadSummary {

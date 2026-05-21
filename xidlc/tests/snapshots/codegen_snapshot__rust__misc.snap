@@ -5,11 +5,6 @@ expression: output
 ===============
 misc.rs
 ===============
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(
     Debug,
     Clone,
@@ -26,53 +21,15 @@ pub enum Color {
     green,
     blue,
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub const FAVORITE_COLOR: Color = red;
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub const MYSIZE: M::Size = M::medium;
-#[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub const col: Color = red;
-#[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub const another: Color = M::medium;
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub type FooSeq = Vec<Foo>;
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub type FooSeq = Vec<Foo>;
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub type FooSeq = Vec<Foo>;
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct Foo {
@@ -80,17 +37,7 @@ pub struct Foo {
     pub chain: FooSeq,
 }
 impl Foo {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub type BarSeq = Vec<Bar>;
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct Bar {
     tag: i32,
     data: BarData,
@@ -313,69 +260,25 @@ impl<'de> serde::Deserialize<'de> for Bar {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub trait A {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub trait B {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub trait C {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub trait D {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub trait E {}
-#[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub const A_make_it_so_Hash: i32 = 4027367364;
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_make_it_so_In {
     pub dummy: dds::rpc::UnusedMember,
 }
 impl A_make_it_so_In {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_make_it_so_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
 impl A_make_it_so_Out {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct A_make_it_so_Result {
     tag: i32,
     data: A_make_it_so_ResultData,
@@ -544,11 +447,6 @@ impl<'de> serde::Deserialize<'de> for A_make_it_so_Result {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct A_Call {
     tag: i32,
     data: A_CallData,
@@ -769,11 +667,6 @@ impl<'de> serde::Deserialize<'de> for A_Call {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_Request {
@@ -781,11 +674,6 @@ pub struct A_Request {
     pub data: A_Call,
 }
 impl A_Request {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct A_Return {
     tag: i32,
     data: A_ReturnData,
@@ -1006,11 +894,6 @@ impl<'de> serde::Deserialize<'de> for A_Return {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_Reply {
@@ -1018,47 +901,23 @@ pub struct A_Reply {
     pub data: A_Return,
 }
 impl A_Reply {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub trait A {
     fn make_it_so(&self) -> ();
 }
-#[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub const B_make_it_so_Hash: i32 = 4027367364;
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct B_make_it_so_In {
     pub times: i32,
 }
 impl B_make_it_so_In {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct B_make_it_so_Out {
     pub return_: i16,
 }
 impl B_make_it_so_Out {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct B_make_it_so_Result {
     tag: i32,
     data: B_make_it_so_ResultData,
@@ -1227,11 +1086,6 @@ impl<'de> serde::Deserialize<'de> for B_make_it_so_Result {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct B_Call {
     tag: i32,
     data: B_CallData,
@@ -1452,11 +1306,6 @@ impl<'de> serde::Deserialize<'de> for B_Call {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct B_Request {
@@ -1464,11 +1313,6 @@ pub struct B_Request {
     pub data: B_Call,
 }
 impl B_Request {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct B_Return {
     tag: i32,
     data: B_ReturnData,
@@ -1689,11 +1533,6 @@ impl<'de> serde::Deserialize<'de> for B_Return {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct B_Reply {
@@ -1701,47 +1540,23 @@ pub struct B_Reply {
     pub data: B_Return,
 }
 impl B_Reply {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub trait B {
     fn make_it_so(&self, times: i32) -> i16;
 }
-#[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub const A_opA_Hash: i32 = 3927698569;
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_opA_In {
     pub l_1: L1,
 }
 impl A_opA_In {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_opA_Out {
     pub return_: i16,
 }
 impl A_opA_Out {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct A_opA_Result {
     tag: i32,
     data: A_opA_ResultData,
@@ -1910,11 +1725,6 @@ impl<'de> serde::Deserialize<'de> for A_opA_Result {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct A_Call {
     tag: i32,
     data: A_CallData,
@@ -2135,11 +1945,6 @@ impl<'de> serde::Deserialize<'de> for A_Call {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_Request {
@@ -2147,11 +1952,6 @@ pub struct A_Request {
     pub data: A_Call,
 }
 impl A_Request {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct A_Return {
     tag: i32,
     data: A_ReturnData,
@@ -2372,11 +2172,6 @@ impl<'de> serde::Deserialize<'de> for A_Return {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_Reply {
@@ -2384,53 +2179,24 @@ pub struct A_Reply {
     pub data: A_Return,
 }
 impl A_Reply {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub type L1 = i32;
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub trait A {
     fn opA(&self, l_1: &L1) -> i16;
 }
-#[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub const B_opB_Hash: i32 = 772252025;
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct B_opB_In {
     pub l: i32,
 }
 impl B_opB_In {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct B_opB_Out {
     pub return_: L1,
 }
 impl B_opB_Out {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct B_opB_Result {
     tag: i32,
     data: B_opB_ResultData,
@@ -2599,11 +2365,6 @@ impl<'de> serde::Deserialize<'de> for B_opB_Result {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct B_Call {
     tag: i32,
     data: B_CallData,
@@ -2824,11 +2585,6 @@ impl<'de> serde::Deserialize<'de> for B_Call {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct B_Request {
@@ -2836,11 +2592,6 @@ pub struct B_Request {
     pub data: B_Call,
 }
 impl B_Request {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct B_Return {
     tag: i32,
     data: B_ReturnData,
@@ -3061,11 +2812,6 @@ impl<'de> serde::Deserialize<'de> for B_Return {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct B_Reply {
@@ -3073,53 +2819,24 @@ pub struct B_Reply {
     pub data: B_Return,
 }
 impl B_Reply {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub type L1 = i16;
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub trait B {
     fn opB(&self, l: i32) -> L1;
 }
-#[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub const C_opC_Hash: i32 = 1200187224;
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_opC_In {
     pub l_3: L3,
 }
 impl C_opC_In {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_opC_Out {
     pub return_: B::L1,
 }
 impl C_opC_Out {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct C_opC_Result {
     tag: i32,
     data: C_opC_ResultData,
@@ -3288,11 +3005,6 @@ impl<'de> serde::Deserialize<'de> for C_opC_Result {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct C_Call {
     tag: i32,
     data: C_CallData,
@@ -3513,11 +3225,6 @@ impl<'de> serde::Deserialize<'de> for C_Call {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_Request {
@@ -3525,11 +3232,6 @@ pub struct C_Request {
     pub data: C_Call,
 }
 impl C_Request {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct C_Return {
     tag: i32,
     data: C_ReturnData,
@@ -3750,11 +3452,6 @@ impl<'de> serde::Deserialize<'de> for C_Return {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_Reply {
@@ -3762,65 +3459,26 @@ pub struct C_Reply {
     pub data: C_Return,
 }
 impl C_Reply {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub type L2 = L1;
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub type L3 = A::L1;
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub trait C {
     fn opC(&self, l_3: &L3) -> B::L1;
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub const L: i32 = 3;
-#[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub const A_f_Hash: i32 = 3712786831;
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_f_In {
     pub s: coord,
 }
 impl A_f_In {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_f_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
 impl A_f_Out {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct A_f_Result {
     tag: i32,
     data: A_f_ResultData,
@@ -3988,11 +3646,6 @@ impl<'de> serde::Deserialize<'de> for A_f_Result {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct A_Call {
     tag: i32,
     data: A_CallData,
@@ -4213,11 +3866,6 @@ impl<'de> serde::Deserialize<'de> for A_Call {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_Request {
@@ -4225,11 +3873,6 @@ pub struct A_Request {
     pub data: A_Call,
 }
 impl A_Request {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct A_Return {
     tag: i32,
     data: A_ReturnData,
@@ -4450,11 +4093,6 @@ impl<'de> serde::Deserialize<'de> for A_Return {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_Reply {
@@ -4462,125 +4100,41 @@ pub struct A_Reply {
     pub data: A_Return,
 }
 impl A_Reply {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub type coord = [f64; 1];
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub trait A {
     fn f(&self, s: &coord) -> ();
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub const L: i32 = 4;
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub trait B {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub trait C {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub type string_t = String;
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub trait A {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub type string_t = String;
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub trait B {}
-#[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub const C_get_attribute_Title_Hash: i32 = 2561239307;
-#[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub const C_set_attribute_Title_Hash: i32 = 601397578;
-#[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub const C_get_attribute_Name_Hash: i32 = 1786101153;
-#[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub const C_set_attribute_Name_Hash: i32 = 2852545551;
-#[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub const C_get_attribute_City_Hash: i32 = 3564363613;
-#[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub const C_set_attribute_City_Hash: i32 = 1017480313;
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_get_attribute_Title_In {
     pub dummy: dds::rpc::UnusedMember,
 }
 impl C_get_attribute_Title_In {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_get_attribute_Title_Out {
     pub return_: string_t,
 }
 impl C_get_attribute_Title_Out {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct C_get_attribute_Title_Result {
     tag: i32,
     data: C_get_attribute_Title_ResultData,
@@ -4755,33 +4309,18 @@ impl<'de> serde::Deserialize<'de> for C_get_attribute_Title_Result {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_set_attribute_Title_In {
     pub Title: string_t,
 }
 impl C_set_attribute_Title_In {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_set_attribute_Title_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
 impl C_set_attribute_Title_Out {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct C_set_attribute_Title_Result {
     tag: i32,
     data: C_set_attribute_Title_ResultData,
@@ -4956,33 +4495,18 @@ impl<'de> serde::Deserialize<'de> for C_set_attribute_Title_Result {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_get_attribute_Name_In {
     pub dummy: dds::rpc::UnusedMember,
 }
 impl C_get_attribute_Name_In {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_get_attribute_Name_Out {
     pub return_: A::string_t,
 }
 impl C_get_attribute_Name_Out {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct C_get_attribute_Name_Result {
     tag: i32,
     data: C_get_attribute_Name_ResultData,
@@ -5155,33 +4679,18 @@ impl<'de> serde::Deserialize<'de> for C_get_attribute_Name_Result {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_set_attribute_Name_In {
     pub Name: A::string_t,
 }
 impl C_set_attribute_Name_In {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_set_attribute_Name_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
 impl C_set_attribute_Name_Out {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct C_set_attribute_Name_Result {
     tag: i32,
     data: C_set_attribute_Name_ResultData,
@@ -5354,33 +4863,18 @@ impl<'de> serde::Deserialize<'de> for C_set_attribute_Name_Result {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_get_attribute_City_In {
     pub dummy: dds::rpc::UnusedMember,
 }
 impl C_get_attribute_City_In {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_get_attribute_City_Out {
     pub return_: B::string_t,
 }
 impl C_get_attribute_City_Out {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct C_get_attribute_City_Result {
     tag: i32,
     data: C_get_attribute_City_ResultData,
@@ -5553,33 +5047,18 @@ impl<'de> serde::Deserialize<'de> for C_get_attribute_City_Result {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_set_attribute_City_In {
     pub City: B::string_t,
 }
 impl C_set_attribute_City_In {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_set_attribute_City_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
 impl C_set_attribute_City_Out {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct C_set_attribute_City_Result {
     tag: i32,
     data: C_set_attribute_City_ResultData,
@@ -5752,11 +5231,6 @@ impl<'de> serde::Deserialize<'de> for C_set_attribute_City_Result {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct C_Call {
     tag: i32,
     data: C_CallData,
@@ -6289,11 +5763,6 @@ impl<'de> serde::Deserialize<'de> for C_Call {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_Request {
@@ -6301,11 +5770,6 @@ pub struct C_Request {
     pub data: C_Call,
 }
 impl C_Request {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub struct C_Return {
     tag: i32,
     data: C_ReturnData,
@@ -6838,11 +6302,6 @@ impl<'de> serde::Deserialize<'de> for C_Return {
         }
     }
 }
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_Reply {
@@ -6850,11 +6309,6 @@ pub struct C_Reply {
     pub data: C_Return,
 }
 impl C_Reply {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 pub trait C {
     fn Title(&self) -> &string_t;
     fn set_Title(&self, value: &string_t) -> ();
@@ -6865,11 +6319,6 @@ pub trait C {
 }
 #[allow(non_snake_case)]
 pub mod M {
-    #[allow(unused_imports)]
-    #[allow(non_upper_case_globals)]
-    #[allow(non_snake_case)]
-    #[allow(unused_variables)]
-    #[allow(unreachable_patterns)]
     #[derive(
         Debug,
         Clone,
@@ -6889,22 +6338,7 @@ pub mod M {
 }
 #[allow(non_snake_case)]
 pub mod Example {
-    #[allow(unused_imports)]
-    #[allow(non_upper_case_globals)]
-    #[allow(non_snake_case)]
-    #[allow(unused_variables)]
-    #[allow(unreachable_patterns)]
     pub trait derived {}
-    #[allow(unused_imports)]
-    #[allow(non_upper_case_globals)]
-    #[allow(non_snake_case)]
-    #[allow(unused_variables)]
-    #[allow(unreachable_patterns)]
     pub trait base {}
-    #[allow(unused_imports)]
-    #[allow(non_upper_case_globals)]
-    #[allow(non_snake_case)]
-    #[allow(unused_variables)]
-    #[allow(unreachable_patterns)]
     pub trait derived {}
 }
