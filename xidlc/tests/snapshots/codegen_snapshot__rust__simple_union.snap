@@ -39,6 +39,7 @@ union SimpleUnionData {
     b: core::mem::ManuallyDrop<int>,
 }
 impl Drop for SimpleUnion {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             A => {
@@ -51,19 +52,23 @@ impl Drop for SimpleUnion {
                     core::mem::ManuallyDrop::drop(&mut self.data.b);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for SimpleUnion {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             A => Self::new_a(self.as_a().clone()),
             B => Self::new_b(self.as_b().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for SimpleUnion {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("SimpleUnion");
         d.field("tag", &self.tag);
@@ -74,11 +79,13 @@ impl core::fmt::Debug for SimpleUnion {
             B => {
                 d.field("b", self.as_b());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for SimpleUnion {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
@@ -86,6 +93,7 @@ impl PartialEq for SimpleUnion {
         match self.tag {
             A => self.as_a() == other.as_a(),
             B => self.as_b() == other.as_b(),
+            _ => false,
         }
     }
 }
@@ -101,10 +109,12 @@ impl SimpleUnion {
     pub fn is_a(&self) -> bool {
         matches!(self.tag, A)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_a(&self) -> &int {
         debug_assert!(self.is_a());
         unsafe { &self.data.a }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_a_mut(&mut self) -> &mut int {
         debug_assert!(self.is_a());
         unsafe { &mut self.data.a }
@@ -127,10 +137,12 @@ impl SimpleUnion {
     pub fn is_b(&self) -> bool {
         matches!(self.tag, B)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_b(&self) -> &int {
         debug_assert!(self.is_b());
         unsafe { &self.data.b }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_b_mut(&mut self) -> &mut int {
         debug_assert!(self.is_b());
         unsafe { &mut self.data.b }
@@ -161,6 +173,7 @@ struct SimpleUnionSerdeRef<'__a> {
     tag: &'__a str,
     data: SimpleUnionSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum SimpleUnionSerdeRefData<'__a> {
@@ -168,6 +181,7 @@ enum SimpleUnionSerdeRefData<'__a> {
     Case1(&'__a int),
 }
 impl serde::Serialize for SimpleUnion {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -187,6 +201,7 @@ impl serde::Serialize for SimpleUnion {
                     data: SimpleUnionSerdeRefData::Case1(self.as_b()),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }

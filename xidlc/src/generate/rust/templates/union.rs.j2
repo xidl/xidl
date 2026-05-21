@@ -28,6 +28,7 @@ union {{ ident }}Data {
 }
 
 impl Drop for {{ ident }} {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         {% if has_default %}
             {% for case in cases %}
@@ -46,6 +47,7 @@ impl Drop for {{ ident }} {
                         }
                     }
                 {% endfor %}
+                _ => {}
             }
         {% endif %}
     }
@@ -54,6 +56,7 @@ impl Drop for {{ ident }} {
 {% if manual_derives and "Clone" in manual_derives %}
     impl Clone for {{ ident }} {
         #[allow(clippy::clone_on_copy)]
+        #[allow(unreachable_patterns)]
         fn clone(&self) -> Self {
             {% if has_default %}
                 {% for case in cases %}
@@ -68,6 +71,7 @@ impl Drop for {{ ident }} {
                             Self::new_{{ case.member }}(self.as_{{ case.member }}().clone())
                         }
                     {% endfor %}
+                    _ => unreachable!(),
                 }
             {% endif %}
         }
@@ -76,6 +80,7 @@ impl Drop for {{ ident }} {
 
 {% if manual_derives and "Debug" in manual_derives %}
     impl core::fmt::Debug for {{ ident }} {
+        #[allow(unreachable_patterns)]
         fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("{{ ident }}");
         d.field("tag", &self.tag);
@@ -92,6 +97,7 @@ impl Drop for {{ ident }} {
                         d.field("{{ case.member }}", self.as_{{ case.member }}());
                     }
                 {% endfor %}
+                _ => {}
             }
         {% endif %}
         d.finish()
@@ -101,6 +107,7 @@ impl Drop for {{ ident }} {
 
 {% if manual_derives and "PartialEq" in manual_derives %}
     impl PartialEq for {{ ident }} {
+        #[allow(unreachable_patterns)]
         fn eq(&self, other: &Self) -> bool {
             if self.tag != other.tag {
                 return false;
@@ -118,6 +125,7 @@ impl Drop for {{ ident }} {
                             self.as_{{ case.member }}() == other.as_{{ case.member }}()
                         }
                     {% endfor %}
+                    _ => false,
                 }
             {% endif %}
         }
@@ -150,11 +158,13 @@ impl {{ ident }} {
             {% endif %}
         }
 
+        #[allow(clippy::borrowed_box)]
         pub fn as_{{ member.name }}(&self) -> &{{ member.ty }} {
             debug_assert!(self.is_{{ member.name }}());
             unsafe { &self.data.{{ member.name }} }
         }
 
+        #[allow(clippy::borrowed_box)]
         pub fn as_{{ member.name }}_mut(&mut self) -> &mut {{ member.ty }} {
             debug_assert!(self.is_{{ member.name }}());
             unsafe { &mut self.data.{{ member.name }} }
@@ -216,6 +226,7 @@ impl {{ ident }} {
     data: {{ ident }}SerdeRefData<'__a>,
     }
 
+    #[allow(clippy::borrowed_box)]
     #[derive(::serde::Serialize)]
     #[serde(untagged)]
     enum {{ ident }}SerdeRefData<'__a> {
@@ -225,6 +236,7 @@ impl {{ ident }} {
     }
 
     impl serde::Serialize for {{ ident }} {
+        #[allow(unreachable_patterns)]
         fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
         where
         __S: serde::Serializer,
@@ -242,6 +254,7 @@ impl {{ ident }} {
                         {{ serialize_arm(case) }}
                     }
                 {% endfor %}
+                _ => unreachable!(),
             }
             {% endif %};
             helper.serialize(__serializer)

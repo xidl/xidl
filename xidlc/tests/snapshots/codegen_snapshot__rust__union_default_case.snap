@@ -39,6 +39,7 @@ union DefaultUnionData {
     fallback: core::mem::ManuallyDrop<String>,
 }
 impl Drop for DefaultUnion {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         if matches!(self.tag, A) {
             unsafe {
@@ -53,6 +54,7 @@ impl Drop for DefaultUnion {
 }
 impl Clone for DefaultUnion {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         if matches!(self.tag, A) {
             Self::new_a(self.as_a().clone())
@@ -62,6 +64,7 @@ impl Clone for DefaultUnion {
     }
 }
 impl core::fmt::Debug for DefaultUnion {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("DefaultUnion");
         d.field("tag", &self.tag);
@@ -74,6 +77,7 @@ impl core::fmt::Debug for DefaultUnion {
     }
 }
 impl PartialEq for DefaultUnion {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
@@ -97,10 +101,12 @@ impl DefaultUnion {
     pub fn is_a(&self) -> bool {
         matches!(self.tag, A)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_a(&self) -> &int {
         debug_assert!(self.is_a());
         unsafe { &self.data.a }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_a_mut(&mut self) -> &mut int {
         debug_assert!(self.is_a());
         unsafe { &mut self.data.a }
@@ -123,10 +129,12 @@ impl DefaultUnion {
     pub fn is_fallback(&self) -> bool {
         matches!(self.tag, _)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_fallback(&self) -> &String {
         debug_assert!(self.is_fallback());
         unsafe { &self.data.fallback }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_fallback_mut(&mut self) -> &mut String {
         debug_assert!(self.is_fallback());
         unsafe { &mut self.data.fallback }
@@ -157,6 +165,7 @@ struct DefaultUnionSerdeRef<'__a> {
     tag: &'__a str,
     data: DefaultUnionSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum DefaultUnionSerdeRefData<'__a> {
@@ -164,6 +173,7 @@ enum DefaultUnionSerdeRefData<'__a> {
     Case1(&'__a String),
 }
 impl serde::Serialize for DefaultUnion {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,

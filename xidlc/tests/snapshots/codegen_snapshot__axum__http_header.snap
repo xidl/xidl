@@ -698,6 +698,7 @@ pub mod test {
 ===============
 http_header.rs
 ===============
+#[allow(non_snake_case)]
 pub mod test {
     #[allow(unused_imports)]
     #[allow(non_upper_case_globals)]

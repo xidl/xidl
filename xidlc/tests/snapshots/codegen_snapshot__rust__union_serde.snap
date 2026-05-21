@@ -41,6 +41,7 @@ union UnionValueData {
     case3: core::mem::ManuallyDrop<::std::collections::BTreeMap<String, String>>,
 }
 impl Drop for UnionValue {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             Tag::V1 => {
@@ -58,20 +59,24 @@ impl Drop for UnionValue {
                     core::mem::ManuallyDrop::drop(&mut self.data.case3);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for UnionValue {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             Tag::V1 => Self::new_case1(self.as_case1().clone()),
             Tag::V2 => Self::new_case2(self.as_case2().clone()),
             Tag::V3 => Self::new_case3(self.as_case3().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for UnionValue {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("UnionValue");
         d.field("tag", &self.tag);
@@ -85,11 +90,13 @@ impl core::fmt::Debug for UnionValue {
             Tag::V3 => {
                 d.field("case3", self.as_case3());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for UnionValue {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
@@ -98,6 +105,7 @@ impl PartialEq for UnionValue {
             Tag::V1 => self.as_case1() == other.as_case1(),
             Tag::V2 => self.as_case2() == other.as_case2(),
             Tag::V3 => self.as_case3() == other.as_case3(),
+            _ => false,
         }
     }
 }
@@ -113,10 +121,12 @@ impl UnionValue {
     pub fn is_case1(&self) -> bool {
         matches!(self.tag, Tag::V1)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_case1(&self) -> &int {
         debug_assert!(self.is_case1());
         unsafe { &self.data.case1 }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_case1_mut(&mut self) -> &mut int {
         debug_assert!(self.is_case1());
         unsafe { &mut self.data.case1 }
@@ -139,10 +149,12 @@ impl UnionValue {
     pub fn is_case2(&self) -> bool {
         matches!(self.tag, Tag::V2)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_case2(&self) -> &Vec<String> {
         debug_assert!(self.is_case2());
         unsafe { &self.data.case2 }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_case2_mut(&mut self) -> &mut Vec<String> {
         debug_assert!(self.is_case2());
         unsafe { &mut self.data.case2 }
@@ -165,10 +177,12 @@ impl UnionValue {
     pub fn is_case3(&self) -> bool {
         matches!(self.tag, Tag::V3)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_case3(&self) -> &::std::collections::BTreeMap<String, String> {
         debug_assert!(self.is_case3());
         unsafe { &self.data.case3 }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_case3_mut(&mut self) -> &mut ::std::collections::BTreeMap<String, String> {
         debug_assert!(self.is_case3());
         unsafe { &mut self.data.case3 }
@@ -199,6 +213,7 @@ struct UnionValueSerdeRef<'__a> {
     tag: &'__a str,
     data: UnionValueSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum UnionValueSerdeRefData<'__a> {
@@ -207,6 +222,7 @@ enum UnionValueSerdeRefData<'__a> {
     Case2(&'__a ::std::collections::BTreeMap<String, String>),
 }
 impl serde::Serialize for UnionValue {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -233,6 +249,7 @@ impl serde::Serialize for UnionValue {
                     data: UnionValueSerdeRefData::Case2(self.as_case3()),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -320,6 +337,7 @@ union IntTagValueData {
     fallback: core::mem::ManuallyDrop<bool>,
 }
 impl Drop for IntTagValue {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         if matches!(self.tag, 1) {
             unsafe {
@@ -338,6 +356,7 @@ impl Drop for IntTagValue {
 }
 impl Clone for IntTagValue {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         if matches!(self.tag, 1) {
             Self::new_one(self.as_one().clone())
@@ -349,6 +368,7 @@ impl Clone for IntTagValue {
     }
 }
 impl core::fmt::Debug for IntTagValue {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("IntTagValue");
         d.field("tag", &self.tag);
@@ -363,6 +383,7 @@ impl core::fmt::Debug for IntTagValue {
     }
 }
 impl PartialEq for IntTagValue {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
@@ -388,10 +409,12 @@ impl IntTagValue {
     pub fn is_one(&self) -> bool {
         matches!(self.tag, 1)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_one(&self) -> &String {
         debug_assert!(self.is_one());
         unsafe { &self.data.one }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_one_mut(&mut self) -> &mut String {
         debug_assert!(self.is_one());
         unsafe { &mut self.data.one }
@@ -414,10 +437,12 @@ impl IntTagValue {
     pub fn is_two_or_three(&self) -> bool {
         matches!(self.tag, 2 | 3)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_two_or_three(&self) -> &int {
         debug_assert!(self.is_two_or_three());
         unsafe { &self.data.two_or_three }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_two_or_three_mut(&mut self) -> &mut int {
         debug_assert!(self.is_two_or_three());
         unsafe { &mut self.data.two_or_three }
@@ -440,10 +465,12 @@ impl IntTagValue {
     pub fn is_fallback(&self) -> bool {
         matches!(self.tag, _)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_fallback(&self) -> &bool {
         debug_assert!(self.is_fallback());
         unsafe { &self.data.fallback }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_fallback_mut(&mut self) -> &mut bool {
         debug_assert!(self.is_fallback());
         unsafe { &mut self.data.fallback }
@@ -474,6 +501,7 @@ struct IntTagValueSerdeRef<'__a> {
     tag: &'__a str,
     data: IntTagValueSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum IntTagValueSerdeRefData<'__a> {
@@ -482,6 +510,7 @@ enum IntTagValueSerdeRefData<'__a> {
     Case2(&'__a bool),
 }
 impl serde::Serialize for IntTagValue {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -606,6 +635,7 @@ union BoolTagValueData {
     no: core::mem::ManuallyDrop<String>,
 }
 impl Drop for BoolTagValue {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             true => {
@@ -618,19 +648,23 @@ impl Drop for BoolTagValue {
                     core::mem::ManuallyDrop::drop(&mut self.data.no);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for BoolTagValue {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             true => Self::new_yes(self.as_yes().clone()),
             false => Self::new_no(self.as_no().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for BoolTagValue {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("BoolTagValue");
         d.field("tag", &self.tag);
@@ -641,11 +675,13 @@ impl core::fmt::Debug for BoolTagValue {
             false => {
                 d.field("no", self.as_no());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for BoolTagValue {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
@@ -653,6 +689,7 @@ impl PartialEq for BoolTagValue {
         match self.tag {
             true => self.as_yes() == other.as_yes(),
             false => self.as_no() == other.as_no(),
+            _ => false,
         }
     }
 }
@@ -668,10 +705,12 @@ impl BoolTagValue {
     pub fn is_yes(&self) -> bool {
         self.tag
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_yes(&self) -> &String {
         debug_assert!(self.is_yes());
         unsafe { &self.data.yes }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_yes_mut(&mut self) -> &mut String {
         debug_assert!(self.is_yes());
         unsafe { &mut self.data.yes }
@@ -694,10 +733,12 @@ impl BoolTagValue {
     pub fn is_no(&self) -> bool {
         !self.tag
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_no(&self) -> &String {
         debug_assert!(self.is_no());
         unsafe { &self.data.no }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_no_mut(&mut self) -> &mut String {
         debug_assert!(self.is_no());
         unsafe { &mut self.data.no }
@@ -728,6 +769,7 @@ struct BoolTagValueSerdeRef<'__a> {
     tag: &'__a str,
     data: BoolTagValueSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum BoolTagValueSerdeRefData<'__a> {
@@ -735,6 +777,7 @@ enum BoolTagValueSerdeRefData<'__a> {
     Case1(&'__a String),
 }
 impl serde::Serialize for BoolTagValue {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -754,6 +797,7 @@ impl serde::Serialize for BoolTagValue {
                     data: BoolTagValueSerdeRefData::Case1(self.as_no()),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -826,6 +870,7 @@ union CharTagValueData {
     other: core::mem::ManuallyDrop<String>,
 }
 impl Drop for CharTagValue {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         if matches!(self.tag, 'x') {
             unsafe {
@@ -844,6 +889,7 @@ impl Drop for CharTagValue {
 }
 impl Clone for CharTagValue {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         if matches!(self.tag, 'x') {
             Self::new_ex(self.as_ex().clone())
@@ -855,6 +901,7 @@ impl Clone for CharTagValue {
     }
 }
 impl core::fmt::Debug for CharTagValue {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("CharTagValue");
         d.field("tag", &self.tag);
@@ -869,6 +916,7 @@ impl core::fmt::Debug for CharTagValue {
     }
 }
 impl PartialEq for CharTagValue {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
@@ -894,10 +942,12 @@ impl CharTagValue {
     pub fn is_ex(&self) -> bool {
         matches!(self.tag, 'x')
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_ex(&self) -> &String {
         debug_assert!(self.is_ex());
         unsafe { &self.data.ex }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_ex_mut(&mut self) -> &mut String {
         debug_assert!(self.is_ex());
         unsafe { &mut self.data.ex }
@@ -920,10 +970,12 @@ impl CharTagValue {
     pub fn is_why(&self) -> bool {
         matches!(self.tag, 'y')
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_why(&self) -> &String {
         debug_assert!(self.is_why());
         unsafe { &self.data.why }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_why_mut(&mut self) -> &mut String {
         debug_assert!(self.is_why());
         unsafe { &mut self.data.why }
@@ -946,10 +998,12 @@ impl CharTagValue {
     pub fn is_other(&self) -> bool {
         matches!(self.tag, _)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_other(&self) -> &String {
         debug_assert!(self.is_other());
         unsafe { &self.data.other }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_other_mut(&mut self) -> &mut String {
         debug_assert!(self.is_other());
         unsafe { &mut self.data.other }
@@ -980,6 +1034,7 @@ struct CharTagValueSerdeRef<'__a> {
     tag: &'__a str,
     data: CharTagValueSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum CharTagValueSerdeRefData<'__a> {
@@ -988,6 +1043,7 @@ enum CharTagValueSerdeRefData<'__a> {
     Case2(&'__a String),
 }
 impl serde::Serialize for CharTagValue {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
