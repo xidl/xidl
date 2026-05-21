@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.65.0](https://github.com/xidl/xidl/compare/v0.64.0...v0.65.0) (2026-05-21)
+
+
+### Features
+
+* **xidlc:** remove uncessary attribute ([bcdb9b6](https://github.com/xidl/xidl/commit/bcdb9b65c756fc5cd97f9e8cde18c063821678d6))
+* **xidl:** remove timestampe in header ([c04c585](https://github.com/xidl/xidl/commit/c04c585b3a7381282729708583cefacd6f000990))
+
+
+### Bug Fixes
+
+* **typeobject:** restore generation and compilation for typeobject idl ([6bc389a](https://github.com/xidl/xidl/commit/6bc389aba4797b97f3f0a9d7576ac82696f0cb73))
+
 ## [0.64.0](https://github.com/xidl/xidl/compare/v0.63.0...v0.64.0) (2026-05-20)
 
 
