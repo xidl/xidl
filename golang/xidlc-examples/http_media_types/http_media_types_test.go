@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
 )
 
@@ -32,7 +33,10 @@ func (testRestMediaTypesService) GetMsgpackUser(
 }
 
 func TestRestMediaTypes(t *testing.T) {
-	server := httptest.NewServer(NewRestMediaTypesApiHandler(testRestMediaTypesService{}))
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	RegisterRestMediaTypesApiHandler(r, testRestMediaTypesService{})
+	server := httptest.NewServer(r)
 	defer server.Close()
 
 	client := NewRestMediaTypesApiClient(server.URL, server.Client(), xidlgohttp.ClientAuth{})

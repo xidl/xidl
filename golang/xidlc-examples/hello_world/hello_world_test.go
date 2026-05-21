@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
 )
 
@@ -18,7 +19,10 @@ func (testHelloWorldService) SayHello(_ context.Context, req *HelloWorldSayHello
 }
 
 func TestHelloWorld(t *testing.T) {
-	server := httptest.NewServer(NewHelloWorldHandler(testHelloWorldService{}))
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	RegisterHelloWorldHandler(r, testHelloWorldService{})
+	server := httptest.NewServer(r)
 	defer server.Close()
 
 	client := NewHelloWorldClient(server.URL, server.Client(), xidlgohttp.ClientAuth{})

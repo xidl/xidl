@@ -75,15 +75,24 @@ pub(crate) fn go_pattern_path(path: &str) -> String {
     let mut chars = path.chars().peekable();
 
     while let Some(ch) = chars.next() {
-        if ch == '{' && chars.peek() == Some(&'*') {
-            chars.next();
-            out.push('{');
-            for token in chars.by_ref() {
-                if token == '}' {
-                    out.push_str("...}");
-                    break;
+        if ch == '{' {
+            if chars.peek() == Some(&'*') {
+                chars.next();
+                out.push('*');
+                for token in chars.by_ref() {
+                    if token == '}' {
+                        break;
+                    }
+                    out.push(token);
                 }
-                out.push(token);
+            } else {
+                out.push(':');
+                for token in chars.by_ref() {
+                    if token == '}' {
+                        break;
+                    }
+                    out.push(token);
+                }
             }
             continue;
         }

@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
 )
 
@@ -51,7 +52,10 @@ func (testHttpStreamService) UploadAsset(
 }
 
 func TestHttpStream(t *testing.T) {
-	server := httptest.NewServer(NewHttpStreamApiHandler(testHttpStreamService{}))
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	RegisterHttpStreamApiHandler(r, testHttpStreamService{})
+	server := httptest.NewServer(r)
 	defer server.Close()
 
 	client := NewHttpStreamApiClient(server.URL, server.Client(), xidlgohttp.ClientAuth{

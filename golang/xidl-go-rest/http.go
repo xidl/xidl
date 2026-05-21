@@ -8,6 +8,8 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 type DeprecatedInfo struct {
@@ -26,15 +28,33 @@ func WriteJSONError(w http.ResponseWriter, status int, code string, message stri
 	})
 }
 
+func GinWriteJSONError(c *gin.Context, status int, code string, message string) {
+	c.JSON(status, map[string]any{
+		"code":    code,
+		"message": message,
+	})
+}
+
 func DecodeBody(r *http.Request, mime string, dst any) error {
 	codec := MustCodecForMime(mime)
 	return codec.Decode(r.Body, dst)
+}
+
+func GinDecodeBody(c *gin.Context, mime string, dst any) error {
+	codec := MustCodecForMime(mime)
+	return codec.Decode(c.Request.Body, dst)
 }
 
 func EncodeBody(w http.ResponseWriter, mime string, value any) error {
 	codec := MustCodecForMime(mime)
 	w.Header().Set("Content-Type", codec.ContentType())
 	return codec.Encode(w, value)
+}
+
+func GinEncodeBody(c *gin.Context, mime string, value any) error {
+	codec := MustCodecForMime(mime)
+	c.Header("Content-Type", codec.ContentType())
+	return codec.Encode(c.Writer, value)
 }
 
 func RequireAccept(r *http.Request, mime string) error {
@@ -46,6 +66,10 @@ func RequireAccept(r *http.Request, mime string) error {
 		return nil
 	}
 	return fmt.Errorf("accept %q does not include %q", accept, mime)
+}
+
+func GinRequireAccept(c *gin.Context, mime string) error {
+	return RequireAccept(c.Request, mime)
 }
 
 func RequireContentType(r *http.Request, mime string) error {
@@ -61,6 +85,10 @@ func RequireContentType(r *http.Request, mime string) error {
 		return fmt.Errorf("content type %q does not match %q", mediaType, mime)
 	}
 	return nil
+}
+
+func GinRequireContentType(c *gin.Context, mime string) error {
+	return RequireContentType(c.Request, mime)
 }
 
 func ParseString(value string) (string, error) {
@@ -104,6 +132,10 @@ func PathString(r *http.Request, key string) (string, error) {
 	return ParseString(r.PathValue(key))
 }
 
+func GinPathString(c *gin.Context, key string) (string, error) {
+	return ParseString(c.Param(key))
+}
+
 func QueryString(values url.Values, key string) (string, error) {
 	return ParseString(values.Get(key))
 }
@@ -126,6 +158,10 @@ func CookieString(r *http.Request, key string) (string, error) {
 		return "", err
 	}
 	return cookie.Value, nil
+}
+
+func GinCookieString(c *gin.Context, key string) (string, error) {
+	return c.Cookie(key)
 }
 
 func FormatString(value string) string {

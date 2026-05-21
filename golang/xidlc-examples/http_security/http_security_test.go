@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"net/http/httptest"
 
 	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
@@ -36,7 +37,10 @@ func (testHttpSecurityService) Health(_ context.Context, _ *HttpSecurityApiHealt
 }
 
 func TestHttpSecurity(t *testing.T) {
-	server := httptest.NewServer(NewHttpSecurityApiHandler(testHttpSecurityService{}))
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	RegisterHttpSecurityApiHandler(r, testHttpSecurityService{})
+	server := httptest.NewServer(r)
 	defer server.Close()
 
 	client := NewHttpSecurityApiClient(server.URL, server.Client(), xidlgohttp.ClientAuth{

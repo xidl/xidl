@@ -8,17 +8,17 @@ use crate::generate::go_rest::{GoRestRenderer, ParamMeta};
 
 pub(crate) fn emit_request_bind(
     out: &mut String,
-    source_expr: &str,
+    _source_expr: &str,
     param: &ParamMeta,
     source_kind: &str,
 ) -> IdlcResult<()> {
     let field = format!("req.{}", param.field_name);
     let wire = &param.wire_name;
     let call = match source_kind {
-        "Path" => format!("xidlgohttp.PathString({source_expr}, {wire:?})"),
-        "Query" => format!("xidlgohttp.QueryString({source_expr}, {wire:?})"),
-        "Header" => format!("xidlgohttp.HeaderString({source_expr}, {wire:?})"),
-        "Cookie" => format!("xidlgohttp.CookieString({source_expr}, {wire:?})"),
+        "Path" => format!("xidlgohttp.GinPathString(c, {wire:?})"),
+        "Query" => format!("xidlgohttp.QueryString(c.Request.URL.Query(), {wire:?})"),
+        "Header" => format!("xidlgohttp.HeaderString(c.Request.Header, {wire:?})"),
+        "Cookie" => format!("xidlgohttp.GinCookieString(c, {wire:?})"),
         _ => return Ok(()),
     };
     if param.ty != "string" && param.ty != "uint32" && param.ty != "int32" && param.ty != "bool" {
