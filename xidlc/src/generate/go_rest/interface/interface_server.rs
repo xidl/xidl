@@ -62,13 +62,46 @@ fn register_route(
         HttpMethod::Options => "OPTIONS",
     };
 
-    writeln!(
-        out,
-        "\tr.{}(\"{}\", func(c *gin.Context) {{",
-        gin_method,
-        definition::go_pattern_path(path)
-    )
-    .unwrap();
+    if let Some(cors) = &method.cors {
+        use xidl_parser::rest_hir::semantics::HttpCorsProfile;
+        let origins = match cors {
+            HttpCorsProfile::Any => vec!["*".to_string()],
+            HttpCorsProfile::Origins(o) => o.clone(),
+        };
+        let cors_mw = format!(
+            "xidlgohttp.CORSMiddleware([]string{{{}}})",
+            origins
+                .iter()
+                .map(|o| format!("{o:?}"))
+                .collect::<Vec<_>>()
+                .join(", ")
+        );
+
+        writeln!(
+            out,
+            "\tr.OPTIONS(\"{}\", {cors_mw})",
+            definition::go_pattern_path(path)
+        )
+        .unwrap();
+
+        write!(
+            out,
+            "\tr.{}(\"{}\", {cors_mw}, ",
+            gin_method,
+            definition::go_pattern_path(path)
+        )
+        .unwrap();
+    } else {
+        write!(
+            out,
+            "\tr.{}(\"{}\", ",
+            gin_method,
+            definition::go_pattern_path(path)
+        )
+        .unwrap();
+    }
+
+    writeln!(out, "func(c *gin.Context) {{").unwrap();
     render_accept_check(out, method);
     render_auth_check(out, method);
     render_content_type_check(out, method);

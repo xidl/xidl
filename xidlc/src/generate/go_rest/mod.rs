@@ -146,6 +146,7 @@ pub(crate) struct MethodMeta {
     pub(crate) return_ty: Option<String>,
     pub(crate) stream_kind: Option<xidl_parser::rest_hir::semantics::HttpStreamKind>,
     pub(crate) stream_codec: xidl_parser::rest_hir::semantics::HttpStreamCodec,
+    pub(crate) cors: Option<xidl_parser::rest_hir::semantics::HttpCorsProfile>,
     pub(crate) security: Vec<xidl_parser::rest_hir::semantics::HttpSecurityRequirement>,
     pub(crate) basic_realm: Option<String>,
     pub(crate) deprecated: bool,

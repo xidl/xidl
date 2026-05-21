@@ -13,10 +13,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
 )
 
 var (
@@ -31,75 +33,73 @@ type ReportApiService interface {
 	WatchReport(ctx context.Context, req *ReportApiWatchReportRequest, stream xidlgohttp.ServerStreamWriter[string]) error
 }
 
-func NewReportApiHandler(svc ReportApiService) http.Handler {
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /reports/{id}", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+func RegisterReportApiHandler(r gin.IRouter, svc ReportApiService) {
+	r.GET("/reports/:id", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
-		ctx, err := xidlgohttp.RequireAuth(r, ReportApiGetReportSecurityRequirements())
+		ctx, err := xidlgohttp.RequireAuth(c.Request, ReportApiGetReportSecurityRequirements())
 		if err != nil {
-			xidlgohttp.Unauthorized(w, ReportApiGetReportSecurityRequirements())
+			xidlgohttp.Unauthorized(c.Writer, ReportApiGetReportSecurityRequirements())
 			return
 		}
-		r = r.WithContext(ctx)
+		c.Request = c.Request.WithContext(ctx)
 
 		req := &ReportApiGetReportRequest{}
 
-		if value, err := xidlgohttp.PathString(r, "id"); err == nil {
+		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
 			req.Id = value
 		} else {
-			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 			return
 		}
 
-		req.Lang = xidlgohttp.QueryOptionalString(xidlgohttp.QueryString(r.URL.Query(), "lang"))
+		req.Lang = xidlgohttp.QueryOptionalString(xidlgohttp.QueryString(c.Request.URL.Query(), "lang"))
 
-		if value, err := xidlgohttp.HeaderString(r.Header, "X-Trace-Id"); err == nil {
+		if value, err := xidlgohttp.HeaderString(c.Request.Header, "X-Trace-Id"); err == nil {
 			req.TraceId = value
 		} else {
-			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 			return
 		}
-		resp, err := svc.GetReport(r.Context(), req)
+		resp, err := svc.GetReport(c.Request.Context(), req)
 		if err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
-		if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
 		}
 	})
-	mux.HandleFunc("GET /reports/{id}/events", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "text/event-stream"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+	r.GET("/reports/:id/events", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "text/event-stream"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
-		ctx, err := xidlgohttp.RequireAuth(r, ReportApiWatchReportSecurityRequirements())
+		ctx, err := xidlgohttp.RequireAuth(c.Request, ReportApiWatchReportSecurityRequirements())
 		if err != nil {
-			xidlgohttp.Unauthorized(w, ReportApiWatchReportSecurityRequirements())
+			xidlgohttp.Unauthorized(c.Writer, ReportApiWatchReportSecurityRequirements())
 			return
 		}
-		r = r.WithContext(ctx)
+		c.Request = c.Request.WithContext(ctx)
 
 		req := &ReportApiWatchReportRequest{}
 
-		if value, err := xidlgohttp.PathString(r, "id"); err == nil {
+		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
 			req.Id = value
 		} else {
-			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 			return
 		}
-		stream := xidlgohttp.NewSSEServerStreamWriter[string](w)
-		if err := svc.WatchReport(r.Context(), req, stream); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+		stream := xidlgohttp.NewSSEServerStreamWriter[string](c.Writer)
+		if err := svc.WatchReport(c.Request.Context(), req, stream); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 		_ = stream.Close()
 	})
-	return mux
 }
 
 type ReportApiClient struct {

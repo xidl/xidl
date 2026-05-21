@@ -25,10 +25,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
 )
 
 var (
@@ -48,56 +50,55 @@ type HttpScopeMatrixServiceService interface {
 	DeprecatedWindow(ctx context.Context, req *HttpScopeMatrixServiceDeprecatedWindowRequest) (*HttpScopeMatrixServiceDeprecatedWindowResponse, error)
 }
 
-func NewHttpScopeMatrixServiceHandler(svc HttpScopeMatrixServiceService) http.Handler {
-	mux := http.NewServeMux()
-	mux.HandleFunc("POST /v2/scope/default", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+func RegisterHttpScopeMatrixServiceHandler(r gin.IRouter, svc HttpScopeMatrixServiceService) {
+	r.POST("/v2/scope/default", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
-		if err := xidlgohttp.RequireContentType(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
+		if err := xidlgohttp.GinRequireContentType(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
 			return
 		}
 
 		req := &HttpScopeMatrixServiceDefaultScopeRequest{}
 		body := HttpScopeMatrixServiceDefaultScopeRequestBody{}
-		if err := xidlgohttp.DecodeBody(r, "application/json", &body); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+		if err := xidlgohttp.GinDecodeBody(c, "application/json", &body); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 			return
 		}
 		req.Req = body.Req
-		resp, err := svc.DefaultScope(r.Context(), req)
+		resp, err := svc.DefaultScope(c.Request.Context(), req)
 		if err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
-		if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
 		}
 	})
-	mux.HandleFunc("POST /v2/scope/override-consumes", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+	r.POST("/v2/scope/override-consumes", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
-		if err := xidlgohttp.RequireContentType(r, "application/x-www-form-urlencoded"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
+		if err := xidlgohttp.GinRequireContentType(c, "application/x-www-form-urlencoded"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
 			return
 		}
 
 		req := &HttpScopeMatrixServiceOverrideConsumesOnlyRequest{}
 		body := HttpScopeMatrixServiceOverrideConsumesOnlyRequestBody{}
-		if err := xidlgohttp.DecodeBody(r, "application/x-www-form-urlencoded", &body); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+		if err := xidlgohttp.GinDecodeBody(c, "application/x-www-form-urlencoded", &body); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 			return
 		}
 		req.Name = body.Name
 		req.Age = body.Age
-		resp, err := svc.OverrideConsumesOnly(r.Context(), req)
+		resp, err := svc.OverrideConsumesOnly(c.Request.Context(), req)
 		if err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
@@ -105,27 +106,27 @@ func NewHttpScopeMatrixServiceHandler(svc HttpScopeMatrixServiceService) http.Ha
 			Return:         resp.Return,
 			NormalizedName: resp.NormalizedName,
 		}
-		if err := xidlgohttp.EncodeBody(w, "application/json", respBody); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		if err := xidlgohttp.GinEncodeBody(c, "application/json", respBody); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
 		}
 	})
-	mux.HandleFunc("GET /v2/scope/override-produces/{id}", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/msgpack"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+	r.GET("/v2/scope/override-produces/:id", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/msgpack"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
 
 		req := &HttpScopeMatrixServiceOverrideProducesOnlyRequest{}
 
-		if value, err := xidlgohttp.PathString(r, "id"); err == nil {
+		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
 			req.Id = value
 		} else {
-			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 			return
 		}
-		resp, err := svc.OverrideProducesOnly(r.Context(), req)
+		resp, err := svc.OverrideProducesOnly(c.Request.Context(), req)
 		if err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
@@ -133,31 +134,31 @@ func NewHttpScopeMatrixServiceHandler(svc HttpScopeMatrixServiceService) http.Ha
 			Return:   resp.Return,
 			Revision: resp.Revision,
 		}
-		if err := xidlgohttp.EncodeBody(w, "application/msgpack", respBody); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		if err := xidlgohttp.GinEncodeBody(c, "application/msgpack", respBody); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
 		}
 	})
-	mux.HandleFunc("POST /v2/scope/override-both", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/msgpack"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+	r.POST("/v2/scope/override-both", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/msgpack"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
-		if err := xidlgohttp.RequireContentType(r, "application/x-www-form-urlencoded"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
+		if err := xidlgohttp.GinRequireContentType(c, "application/x-www-form-urlencoded"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
 			return
 		}
 
 		req := &HttpScopeMatrixServiceOverrideBothMediaRequest{}
 		body := HttpScopeMatrixServiceOverrideBothMediaRequestBody{}
-		if err := xidlgohttp.DecodeBody(r, "application/x-www-form-urlencoded", &body); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+		if err := xidlgohttp.GinDecodeBody(c, "application/x-www-form-urlencoded", &body); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 			return
 		}
 		req.Name = body.Name
 		req.Age = body.Age
-		resp, err := svc.OverrideBothMedia(r.Context(), req)
+		resp, err := svc.OverrideBothMedia(c.Request.Context(), req)
 		if err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
@@ -165,83 +166,82 @@ func NewHttpScopeMatrixServiceHandler(svc HttpScopeMatrixServiceService) http.Ha
 			Return:         resp.Return,
 			NormalizedName: resp.NormalizedName,
 		}
-		if err := xidlgohttp.EncodeBody(w, "application/msgpack", respBody); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		if err := xidlgohttp.GinEncodeBody(c, "application/msgpack", respBody); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
 		}
 	})
-	mux.HandleFunc("GET /v2/scope/deprecated/plain/{id}", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+	r.GET("/v2/scope/deprecated/plain/:id", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
 
 		req := &HttpScopeMatrixServiceDeprecatedPlainRequest{}
 
-		if value, err := xidlgohttp.PathString(r, "id"); err == nil {
+		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
 			req.Id = value
 		} else {
-			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 			return
 		}
-		resp, err := svc.DeprecatedPlain(r.Context(), req)
+		resp, err := svc.DeprecatedPlain(c.Request.Context(), req)
 		if err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
-		if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
 		}
 	})
-	mux.HandleFunc("GET /v2/scope/deprecated/since/{id}", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+	r.GET("/v2/scope/deprecated/since/:id", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
 
 		req := &HttpScopeMatrixServiceDeprecatedSinceOnlyRequest{}
 
-		if value, err := xidlgohttp.PathString(r, "id"); err == nil {
+		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
 			req.Id = value
 		} else {
-			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 			return
 		}
-		resp, err := svc.DeprecatedSinceOnly(r.Context(), req)
+		resp, err := svc.DeprecatedSinceOnly(c.Request.Context(), req)
 		if err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
-		if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
 		}
 	})
-	mux.HandleFunc("GET /v2/scope/deprecated/window/{id}", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+	r.GET("/v2/scope/deprecated/window/:id", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
 
 		req := &HttpScopeMatrixServiceDeprecatedWindowRequest{}
 
-		if value, err := xidlgohttp.PathString(r, "id"); err == nil {
+		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
 			req.Id = value
 		} else {
-			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 			return
 		}
-		resp, err := svc.DeprecatedWindow(r.Context(), req)
+		resp, err := svc.DeprecatedWindow(c.Request.Context(), req)
 		if err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
-		if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
 		}
 	})
-	return mux
 }
 
 type HttpScopeMatrixServiceClient struct {
@@ -728,163 +728,161 @@ type HttpSecurityMatrixServiceService interface {
 	PublicPing(ctx context.Context, req *HttpSecurityMatrixServicePublicPingRequest) (*HttpSecurityMatrixServicePublicPingResponse, error)
 }
 
-func NewHttpSecurityMatrixServiceHandler(svc HttpSecurityMatrixServiceService) http.Handler {
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /v2/security/inherited/{id}", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+func RegisterHttpSecurityMatrixServiceHandler(r gin.IRouter, svc HttpSecurityMatrixServiceService) {
+	r.GET("/v2/security/inherited/:id", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
-		ctx, err := xidlgohttp.RequireAuth(r, HttpSecurityMatrixServiceInheritedSecuritySecurityRequirements())
+		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityMatrixServiceInheritedSecuritySecurityRequirements())
 		if err != nil {
-			xidlgohttp.Unauthorized(w, HttpSecurityMatrixServiceInheritedSecuritySecurityRequirements())
+			xidlgohttp.Unauthorized(c.Writer, HttpSecurityMatrixServiceInheritedSecuritySecurityRequirements())
 			return
 		}
-		r = r.WithContext(ctx)
+		c.Request = c.Request.WithContext(ctx)
 
 		req := &HttpSecurityMatrixServiceInheritedSecurityRequest{}
 
-		if value, err := xidlgohttp.PathString(r, "id"); err == nil {
+		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
 			req.Id = value
 		} else {
-			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 			return
 		}
 
-		if value, err := xidlgohttp.HeaderString(r.Header, "x_trace_id"); err == nil {
+		if value, err := xidlgohttp.HeaderString(c.Request.Header, "x_trace_id"); err == nil {
 			req.XTraceId = value
 		} else {
-			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 			return
 		}
-		resp, err := svc.InheritedSecurity(r.Context(), req)
+		resp, err := svc.InheritedSecurity(c.Request.Context(), req)
 		if err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
-		if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
 		}
 	})
-	mux.HandleFunc("POST /v2/security/bearer-cookie", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+	r.POST("/v2/security/bearer-cookie", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
-		ctx, err := xidlgohttp.RequireAuth(r, HttpSecurityMatrixServiceBearerOrCookieSecuritySecurityRequirements())
+		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityMatrixServiceBearerOrCookieSecuritySecurityRequirements())
 		if err != nil {
-			xidlgohttp.Unauthorized(w, HttpSecurityMatrixServiceBearerOrCookieSecuritySecurityRequirements())
+			xidlgohttp.Unauthorized(c.Writer, HttpSecurityMatrixServiceBearerOrCookieSecuritySecurityRequirements())
 			return
 		}
-		r = r.WithContext(ctx)
-		if err := xidlgohttp.RequireContentType(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
+		c.Request = c.Request.WithContext(ctx)
+		if err := xidlgohttp.GinRequireContentType(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
 			return
 		}
 
 		req := &HttpSecurityMatrixServiceBearerOrCookieSecurityRequest{}
 		body := HttpSecurityMatrixServiceBearerOrCookieSecurityRequestBody{}
-		if err := xidlgohttp.DecodeBody(r, "application/json", &body); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+		if err := xidlgohttp.GinDecodeBody(c, "application/json", &body); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 			return
 		}
 		req.Action = body.Action
 		req.Note = body.Note
-		resp, err := svc.BearerOrCookieSecurity(r.Context(), req)
+		resp, err := svc.BearerOrCookieSecurity(c.Request.Context(), req)
 		if err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
-		if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
 		}
 	})
-	mux.HandleFunc("GET /v2/security/alternatives/{id}", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+	r.GET("/v2/security/alternatives/:id", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
-		ctx, err := xidlgohttp.RequireAuth(r, HttpSecurityMatrixServiceAlternativeSecuritySecurityRequirements())
+		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityMatrixServiceAlternativeSecuritySecurityRequirements())
 		if err != nil {
-			xidlgohttp.Unauthorized(w, HttpSecurityMatrixServiceAlternativeSecuritySecurityRequirements())
+			xidlgohttp.Unauthorized(c.Writer, HttpSecurityMatrixServiceAlternativeSecuritySecurityRequirements())
 			return
 		}
-		r = r.WithContext(ctx)
+		c.Request = c.Request.WithContext(ctx)
 
 		req := &HttpSecurityMatrixServiceAlternativeSecurityRequest{}
 
-		if value, err := xidlgohttp.PathString(r, "id"); err == nil {
+		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
 			req.Id = value
 		} else {
-			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 			return
 		}
 
-		req.Locale = xidlgohttp.QueryOptionalString(xidlgohttp.QueryString(r.URL.Query(), "locale"))
-		resp, err := svc.AlternativeSecurity(r.Context(), req)
+		req.Locale = xidlgohttp.QueryOptionalString(xidlgohttp.QueryString(c.Request.URL.Query(), "locale"))
+		resp, err := svc.AlternativeSecurity(c.Request.Context(), req)
 		if err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
-		if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
 		}
 	})
-	mux.HandleFunc("POST /v2/security/oauth-search", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+	r.POST("/v2/security/oauth-search", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
-		ctx, err := xidlgohttp.RequireAuth(r, HttpSecurityMatrixServiceOauthSecuritySecurityRequirements())
+		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityMatrixServiceOauthSecuritySecurityRequirements())
 		if err != nil {
-			xidlgohttp.Unauthorized(w, HttpSecurityMatrixServiceOauthSecuritySecurityRequirements())
+			xidlgohttp.Unauthorized(c.Writer, HttpSecurityMatrixServiceOauthSecuritySecurityRequirements())
 			return
 		}
-		r = r.WithContext(ctx)
-		if err := xidlgohttp.RequireContentType(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
+		c.Request = c.Request.WithContext(ctx)
+		if err := xidlgohttp.GinRequireContentType(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
 			return
 		}
 
 		req := &HttpSecurityMatrixServiceOauthSecurityRequest{}
 		body := HttpSecurityMatrixServiceOauthSecurityRequestBody{}
-		if err := xidlgohttp.DecodeBody(r, "application/json", &body); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+		if err := xidlgohttp.GinDecodeBody(c, "application/json", &body); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 			return
 		}
 		req.Keyword = body.Keyword
 		req.Page = body.Page
-		resp, err := svc.OauthSecurity(r.Context(), req)
+		resp, err := svc.OauthSecurity(c.Request.Context(), req)
 		if err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
-		if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
 		}
 	})
-	mux.HandleFunc("GET /v2/security/public/ping", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+	r.GET("/v2/security/public/ping", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
 
 		req := &HttpSecurityMatrixServicePublicPingRequest{}
-		resp, err := svc.PublicPing(r.Context(), req)
+		resp, err := svc.PublicPing(c.Request.Context(), req)
 		if err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
-		if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
 		}
 	})
-	return mux
 }
 
 type HttpSecurityMatrixServiceClient struct {

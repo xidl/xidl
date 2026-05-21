@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -162,6 +163,23 @@ func CookieString(r *http.Request, key string) (string, error) {
 
 func GinCookieString(c *gin.Context, key string) (string, error) {
 	return c.Cookie(key)
+}
+
+func CORSMiddleware(origins []string) gin.HandlerFunc {
+	config := cors.DefaultConfig()
+	if len(origins) == 1 && origins[0] == "*" {
+		config.AllowOriginFunc = func(origin string) bool {
+			return true
+		}
+	} else if len(origins) > 0 {
+		config.AllowOrigins = origins
+	} else {
+		config.AllowAllOrigins = true
+	}
+	config.AllowCredentials = true
+	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
+	config.AddAllowHeaders("Authorization", "Accept", "X-Trace-Id")
+	return cors.New(config)
 }
 
 func FormatString(value string) string {

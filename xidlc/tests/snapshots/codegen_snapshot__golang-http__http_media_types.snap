@@ -19,10 +19,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
 )
 
 var (
@@ -37,29 +39,28 @@ type RestMediaTypesApiService interface {
 	GetMsgpackUser(ctx context.Context, req *RestMediaTypesApiGetMsgpackUserRequest) (*RestMediaTypesApiGetMsgpackUserResponse, error)
 }
 
-func NewRestMediaTypesApiHandler(svc RestMediaTypesApiService) http.Handler {
-	mux := http.NewServeMux()
-	mux.HandleFunc("POST /v1/forms/profile", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+func RegisterRestMediaTypesApiHandler(r gin.IRouter, svc RestMediaTypesApiService) {
+	r.POST("/v1/forms/profile", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
-		if err := xidlgohttp.RequireContentType(r, "application/x-www-form-urlencoded"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
+		if err := xidlgohttp.GinRequireContentType(c, "application/x-www-form-urlencoded"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
 			return
 		}
 
 		req := &RestMediaTypesApiSubmitProfileRequest{}
 		body := RestMediaTypesApiSubmitProfileRequestBody{}
-		if err := xidlgohttp.DecodeBody(r, "application/x-www-form-urlencoded", &body); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+		if err := xidlgohttp.GinDecodeBody(c, "application/x-www-form-urlencoded", &body); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 			return
 		}
 		req.Name = body.Name
 		req.Age = body.Age
-		resp, err := svc.SubmitProfile(r.Context(), req)
+		resp, err := svc.SubmitProfile(c.Request.Context(), req)
 		if err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
@@ -67,27 +68,27 @@ func NewRestMediaTypesApiHandler(svc RestMediaTypesApiService) http.Handler {
 			Return:         resp.Return,
 			NormalizedName: resp.NormalizedName,
 		}
-		if err := xidlgohttp.EncodeBody(w, "application/json", respBody); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		if err := xidlgohttp.GinEncodeBody(c, "application/json", respBody); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
 		}
 	})
-	mux.HandleFunc("GET /v1/msgpack/users/{user_id}", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/msgpack"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+	r.GET("/v1/msgpack/users/:user_id", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/msgpack"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
 
 		req := &RestMediaTypesApiGetMsgpackUserRequest{}
 
-		if value, err := xidlgohttp.PathString(r, "user_id"); err == nil {
+		if value, err := xidlgohttp.GinPathString(c, "user_id"); err == nil {
 			req.UserId = value
 		} else {
-			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 			return
 		}
-		resp, err := svc.GetMsgpackUser(r.Context(), req)
+		resp, err := svc.GetMsgpackUser(c.Request.Context(), req)
 		if err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
@@ -95,11 +96,10 @@ func NewRestMediaTypesApiHandler(svc RestMediaTypesApiService) http.Handler {
 			Return: resp.Return,
 			Score:  resp.Score,
 		}
-		if err := xidlgohttp.EncodeBody(w, "application/msgpack", respBody); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		if err := xidlgohttp.GinEncodeBody(c, "application/msgpack", respBody); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
 		}
 	})
-	return mux
 }
 
 type RestMediaTypesApiClient struct {
