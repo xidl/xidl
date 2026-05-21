@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.67.0](https://github.com/xidl/xidl/compare/v0.66.0...v0.67.0) (2026-05-21)
+
+
+### Features
+
+* **go:** add support for [@cors](https://github.com/cors) annotation ([253ce87](https://github.com/xidl/xidl/commit/253ce874cd2aed65f2362e4d1c4fb6d0c0cd8d0e))
+* **go:** migrate go-rest generator from net/http to gin ([d682fc9](https://github.com/xidl/xidl/commit/d682fc9615d43f42a56e3abb8e5b9368bf487b5b))
+
 ## [0.66.0](https://github.com/xidl/xidl/compare/v0.65.0...v0.66.0) (2026-05-21)
 
 
