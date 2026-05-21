@@ -5,7 +5,9 @@ expression: output
 ===============
 module_dcl.rs
 ===============
+#[allow(non_snake_case)]
 pub mod A {}
+#[allow(non_snake_case)]
 pub mod B {
     #[allow(unused_imports)]
     #[allow(non_upper_case_globals)]

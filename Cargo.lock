@@ -3668,6 +3668,8 @@ name = "xidl-typeobject"
 version = "0.64.0"
 dependencies = [
  "md5",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

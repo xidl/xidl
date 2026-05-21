@@ -16,30 +16,42 @@ pub struct B {
 }
 union BData {}
 impl Drop for B {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
-        match self.tag {}
+        match self.tag {
+            _ => {}
+        }
     }
 }
 impl Clone for B {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
-        match self.tag {}
+        match self.tag {
+            _ => unreachable!(),
+        }
     }
 }
 impl core::fmt::Debug for B {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("B");
         d.field("tag", &self.tag);
-        match self.tag {}
+        match self.tag {
+            _ => {}
+        }
         d.finish()
     }
 }
 impl PartialEq for B {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
         }
-        match self.tag {}
+        match self.tag {
+            _ => false,
+        }
     }
 }
 impl B {
@@ -52,15 +64,19 @@ struct BSerdeRef<'__a> {
     tag: &'__a str,
     data: BSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum BSerdeRefData<'__a> {}
 impl serde::Serialize for B {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
     {
-        let helper = match self.tag {};
+        let helper = match self.tag {
+            _ => unreachable!(),
+        };
         helper.serialize(__serializer)
     }
 }
@@ -100,6 +116,7 @@ union CData {
     b: core::mem::ManuallyDrop<String>,
 }
 impl Drop for C {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             0 => {
@@ -112,19 +129,23 @@ impl Drop for C {
                     core::mem::ManuallyDrop::drop(&mut self.data.b);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for C {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             0 => Self::new_a(self.as_a().clone()),
             1 => Self::new_b(self.as_b().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for C {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("C");
         d.field("tag", &self.tag);
@@ -135,11 +156,13 @@ impl core::fmt::Debug for C {
             1 => {
                 d.field("b", self.as_b());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for C {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
@@ -147,6 +170,7 @@ impl PartialEq for C {
         match self.tag {
             0 => self.as_a() == other.as_a(),
             1 => self.as_b() == other.as_b(),
+            _ => false,
         }
     }
 }
@@ -162,10 +186,12 @@ impl C {
     pub fn is_a(&self) -> bool {
         matches!(self.tag, 0)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_a(&self) -> &i32 {
         debug_assert!(self.is_a());
         unsafe { &self.data.a }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_a_mut(&mut self) -> &mut i32 {
         debug_assert!(self.is_a());
         unsafe { &mut self.data.a }
@@ -188,10 +214,12 @@ impl C {
     pub fn is_b(&self) -> bool {
         matches!(self.tag, 1)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_b(&self) -> &String {
         debug_assert!(self.is_b());
         unsafe { &self.data.b }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_b_mut(&mut self) -> &mut String {
         debug_assert!(self.is_b());
         unsafe { &mut self.data.b }
@@ -222,6 +250,7 @@ struct CSerdeRef<'__a> {
     tag: &'__a str,
     data: CSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum CSerdeRefData<'__a> {
@@ -229,6 +258,7 @@ enum CSerdeRefData<'__a> {
     Case1(&'__a String),
 }
 impl serde::Serialize for C {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -248,6 +278,7 @@ impl serde::Serialize for C {
                     data: CSerdeRefData::Case1(self.as_b()),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }

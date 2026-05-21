@@ -202,6 +202,7 @@ union A_func1_ResultData {
     result: core::mem::ManuallyDrop<A_func1_Out>,
 }
 impl Drop for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -209,18 +210,22 @@ impl Drop for A_func1_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for A_func1_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_func1_Result");
         d.field("tag", &self.tag);
@@ -228,17 +233,20 @@ impl core::fmt::Debug for A_func1_Result {
             dds::RETCODE_OK => {
                 d.field("result", self.as_result());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
         }
         match self.tag {
             dds::RETCODE_OK => self.as_result() == other.as_result(),
+            _ => false,
         }
     }
 }
@@ -254,10 +262,12 @@ impl A_func1_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &A_func1_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut A_func1_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -288,12 +298,14 @@ struct A_func1_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: A_func1_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_func1_ResultSerdeRefData<'__a> {
     Case0(&'__a A_func1_Out),
 }
 impl serde::Serialize for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -306,6 +318,7 @@ impl serde::Serialize for A_func1_Result {
                     data: A_func1_ResultSerdeRefData::Case0(self.as_result()),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -385,6 +398,7 @@ union A_func1_ResultData {
     a_ex: core::mem::ManuallyDrop<A>,
 }
 impl Drop for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -397,19 +411,23 @@ impl Drop for A_func1_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.a_ex);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for A_func1_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
             A_Ex_Hash => Self::new_a_ex(self.as_a_ex().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_func1_Result");
         d.field("tag", &self.tag);
@@ -420,11 +438,13 @@ impl core::fmt::Debug for A_func1_Result {
             A_Ex_Hash => {
                 d.field("a_ex", self.as_a_ex());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
@@ -432,6 +452,7 @@ impl PartialEq for A_func1_Result {
         match self.tag {
             dds::RETCODE_OK => self.as_result() == other.as_result(),
             A_Ex_Hash => self.as_a_ex() == other.as_a_ex(),
+            _ => false,
         }
     }
 }
@@ -447,10 +468,12 @@ impl A_func1_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &A_func1_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut A_func1_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -473,10 +496,12 @@ impl A_func1_Result {
     pub fn is_a_ex(&self) -> bool {
         matches!(self.tag, A_Ex_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_a_ex(&self) -> &A {
         debug_assert!(self.is_a_ex());
         unsafe { &self.data.a_ex }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_a_ex_mut(&mut self) -> &mut A {
         debug_assert!(self.is_a_ex());
         unsafe { &mut self.data.a_ex }
@@ -507,6 +532,7 @@ struct A_func1_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: A_func1_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_func1_ResultSerdeRefData<'__a> {
@@ -514,6 +540,7 @@ enum A_func1_ResultSerdeRefData<'__a> {
     Case1(&'__a A),
 }
 impl serde::Serialize for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -533,6 +560,7 @@ impl serde::Serialize for A_func1_Result {
                     data: A_func1_ResultSerdeRefData::Case1(self.as_a_ex()),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -628,6 +656,7 @@ union A_func1_ResultData {
     c_ex: core::mem::ManuallyDrop<C>,
 }
 impl Drop for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -650,21 +679,25 @@ impl Drop for A_func1_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.c_ex);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for A_func1_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
             A_Ex_Hash => Self::new_a_ex(self.as_a_ex().clone()),
             B_Ex_Hash => Self::new_b_ex(self.as_b_ex().clone()),
             C_Ex_Hash => Self::new_c_ex(self.as_c_ex().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_func1_Result");
         d.field("tag", &self.tag);
@@ -681,11 +714,13 @@ impl core::fmt::Debug for A_func1_Result {
             C_Ex_Hash => {
                 d.field("c_ex", self.as_c_ex());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
@@ -695,6 +730,7 @@ impl PartialEq for A_func1_Result {
             A_Ex_Hash => self.as_a_ex() == other.as_a_ex(),
             B_Ex_Hash => self.as_b_ex() == other.as_b_ex(),
             C_Ex_Hash => self.as_c_ex() == other.as_c_ex(),
+            _ => false,
         }
     }
 }
@@ -710,10 +746,12 @@ impl A_func1_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &A_func1_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut A_func1_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -736,10 +774,12 @@ impl A_func1_Result {
     pub fn is_a_ex(&self) -> bool {
         matches!(self.tag, A_Ex_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_a_ex(&self) -> &A {
         debug_assert!(self.is_a_ex());
         unsafe { &self.data.a_ex }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_a_ex_mut(&mut self) -> &mut A {
         debug_assert!(self.is_a_ex());
         unsafe { &mut self.data.a_ex }
@@ -762,10 +802,12 @@ impl A_func1_Result {
     pub fn is_b_ex(&self) -> bool {
         matches!(self.tag, B_Ex_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_b_ex(&self) -> &B {
         debug_assert!(self.is_b_ex());
         unsafe { &self.data.b_ex }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_b_ex_mut(&mut self) -> &mut B {
         debug_assert!(self.is_b_ex());
         unsafe { &mut self.data.b_ex }
@@ -788,10 +830,12 @@ impl A_func1_Result {
     pub fn is_c_ex(&self) -> bool {
         matches!(self.tag, C_Ex_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_c_ex(&self) -> &C {
         debug_assert!(self.is_c_ex());
         unsafe { &self.data.c_ex }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_c_ex_mut(&mut self) -> &mut C {
         debug_assert!(self.is_c_ex());
         unsafe { &mut self.data.c_ex }
@@ -822,6 +866,7 @@ struct A_func1_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: A_func1_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_func1_ResultSerdeRefData<'__a> {
@@ -831,6 +876,7 @@ enum A_func1_ResultSerdeRefData<'__a> {
     Case3(&'__a C),
 }
 impl serde::Serialize for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -864,6 +910,7 @@ impl serde::Serialize for A_func1_Result {
                     data: A_func1_ResultSerdeRefData::Case3(self.as_c_ex()),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -984,6 +1031,7 @@ union A_func1_ResultData {
     result: core::mem::ManuallyDrop<A_func1_Out>,
 }
 impl Drop for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -991,18 +1039,22 @@ impl Drop for A_func1_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for A_func1_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_func1_Result");
         d.field("tag", &self.tag);
@@ -1010,17 +1062,20 @@ impl core::fmt::Debug for A_func1_Result {
             dds::RETCODE_OK => {
                 d.field("result", self.as_result());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
         }
         match self.tag {
             dds::RETCODE_OK => self.as_result() == other.as_result(),
+            _ => false,
         }
     }
 }
@@ -1036,10 +1091,12 @@ impl A_func1_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &A_func1_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut A_func1_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -1070,12 +1127,14 @@ struct A_func1_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: A_func1_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_func1_ResultSerdeRefData<'__a> {
     Case0(&'__a A_func1_Out),
 }
 impl serde::Serialize for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -1088,6 +1147,7 @@ impl serde::Serialize for A_func1_Result {
                     data: A_func1_ResultSerdeRefData::Case0(self.as_result()),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -1167,6 +1227,7 @@ union A_func1_ResultData {
     a_ex: core::mem::ManuallyDrop<A>,
 }
 impl Drop for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -1179,19 +1240,23 @@ impl Drop for A_func1_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.a_ex);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for A_func1_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
             A_Ex_Hash => Self::new_a_ex(self.as_a_ex().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_func1_Result");
         d.field("tag", &self.tag);
@@ -1202,11 +1267,13 @@ impl core::fmt::Debug for A_func1_Result {
             A_Ex_Hash => {
                 d.field("a_ex", self.as_a_ex());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
@@ -1214,6 +1281,7 @@ impl PartialEq for A_func1_Result {
         match self.tag {
             dds::RETCODE_OK => self.as_result() == other.as_result(),
             A_Ex_Hash => self.as_a_ex() == other.as_a_ex(),
+            _ => false,
         }
     }
 }
@@ -1229,10 +1297,12 @@ impl A_func1_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &A_func1_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut A_func1_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -1255,10 +1325,12 @@ impl A_func1_Result {
     pub fn is_a_ex(&self) -> bool {
         matches!(self.tag, A_Ex_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_a_ex(&self) -> &A {
         debug_assert!(self.is_a_ex());
         unsafe { &self.data.a_ex }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_a_ex_mut(&mut self) -> &mut A {
         debug_assert!(self.is_a_ex());
         unsafe { &mut self.data.a_ex }
@@ -1289,6 +1361,7 @@ struct A_func1_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: A_func1_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_func1_ResultSerdeRefData<'__a> {
@@ -1296,6 +1369,7 @@ enum A_func1_ResultSerdeRefData<'__a> {
     Case1(&'__a A),
 }
 impl serde::Serialize for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -1315,6 +1389,7 @@ impl serde::Serialize for A_func1_Result {
                     data: A_func1_ResultSerdeRefData::Case1(self.as_a_ex()),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -1410,6 +1485,7 @@ union A_func1_ResultData {
     c_ex: core::mem::ManuallyDrop<C>,
 }
 impl Drop for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -1432,21 +1508,25 @@ impl Drop for A_func1_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.c_ex);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for A_func1_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
             A_Ex_Hash => Self::new_a_ex(self.as_a_ex().clone()),
             B_Ex_Hash => Self::new_b_ex(self.as_b_ex().clone()),
             C_Ex_Hash => Self::new_c_ex(self.as_c_ex().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_func1_Result");
         d.field("tag", &self.tag);
@@ -1463,11 +1543,13 @@ impl core::fmt::Debug for A_func1_Result {
             C_Ex_Hash => {
                 d.field("c_ex", self.as_c_ex());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
@@ -1477,6 +1559,7 @@ impl PartialEq for A_func1_Result {
             A_Ex_Hash => self.as_a_ex() == other.as_a_ex(),
             B_Ex_Hash => self.as_b_ex() == other.as_b_ex(),
             C_Ex_Hash => self.as_c_ex() == other.as_c_ex(),
+            _ => false,
         }
     }
 }
@@ -1492,10 +1575,12 @@ impl A_func1_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &A_func1_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut A_func1_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -1518,10 +1603,12 @@ impl A_func1_Result {
     pub fn is_a_ex(&self) -> bool {
         matches!(self.tag, A_Ex_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_a_ex(&self) -> &A {
         debug_assert!(self.is_a_ex());
         unsafe { &self.data.a_ex }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_a_ex_mut(&mut self) -> &mut A {
         debug_assert!(self.is_a_ex());
         unsafe { &mut self.data.a_ex }
@@ -1544,10 +1631,12 @@ impl A_func1_Result {
     pub fn is_b_ex(&self) -> bool {
         matches!(self.tag, B_Ex_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_b_ex(&self) -> &B {
         debug_assert!(self.is_b_ex());
         unsafe { &self.data.b_ex }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_b_ex_mut(&mut self) -> &mut B {
         debug_assert!(self.is_b_ex());
         unsafe { &mut self.data.b_ex }
@@ -1570,10 +1659,12 @@ impl A_func1_Result {
     pub fn is_c_ex(&self) -> bool {
         matches!(self.tag, C_Ex_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_c_ex(&self) -> &C {
         debug_assert!(self.is_c_ex());
         unsafe { &self.data.c_ex }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_c_ex_mut(&mut self) -> &mut C {
         debug_assert!(self.is_c_ex());
         unsafe { &mut self.data.c_ex }
@@ -1604,6 +1695,7 @@ struct A_func1_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: A_func1_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_func1_ResultSerdeRefData<'__a> {
@@ -1613,6 +1705,7 @@ enum A_func1_ResultSerdeRefData<'__a> {
     Case3(&'__a C),
 }
 impl serde::Serialize for A_func1_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -1646,6 +1739,7 @@ impl serde::Serialize for A_func1_Result {
                     data: A_func1_ResultSerdeRefData::Case3(self.as_c_ex()),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -1766,6 +1860,7 @@ union A_get_attribute_attr1_ResultData {
     result: core::mem::ManuallyDrop<A_get_attribute_attr1_Out>,
 }
 impl Drop for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -1773,18 +1868,22 @@ impl Drop for A_get_attribute_attr1_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for A_get_attribute_attr1_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_get_attribute_attr1_Result");
         d.field("tag", &self.tag);
@@ -1792,17 +1891,20 @@ impl core::fmt::Debug for A_get_attribute_attr1_Result {
             dds::RETCODE_OK => {
                 d.field("result", self.as_result());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
         }
         match self.tag {
             dds::RETCODE_OK => self.as_result() == other.as_result(),
+            _ => false,
         }
     }
 }
@@ -1818,10 +1920,12 @@ impl A_get_attribute_attr1_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &A_get_attribute_attr1_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut A_get_attribute_attr1_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -1854,12 +1958,14 @@ struct A_get_attribute_attr1_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: A_get_attribute_attr1_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_get_attribute_attr1_ResultSerdeRefData<'__a> {
     Case0(&'__a A_get_attribute_attr1_Out),
 }
 impl serde::Serialize for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -1874,6 +1980,7 @@ impl serde::Serialize for A_get_attribute_attr1_Result {
                     ),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -1954,6 +2061,7 @@ union A_get_attribute_attr1_ResultData {
     result: core::mem::ManuallyDrop<A_get_attribute_attr1_Out>,
 }
 impl Drop for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -1961,18 +2069,22 @@ impl Drop for A_get_attribute_attr1_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for A_get_attribute_attr1_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_get_attribute_attr1_Result");
         d.field("tag", &self.tag);
@@ -1980,17 +2092,20 @@ impl core::fmt::Debug for A_get_attribute_attr1_Result {
             dds::RETCODE_OK => {
                 d.field("result", self.as_result());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
         }
         match self.tag {
             dds::RETCODE_OK => self.as_result() == other.as_result(),
+            _ => false,
         }
     }
 }
@@ -2006,10 +2121,12 @@ impl A_get_attribute_attr1_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &A_get_attribute_attr1_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut A_get_attribute_attr1_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -2042,12 +2159,14 @@ struct A_get_attribute_attr1_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: A_get_attribute_attr1_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_get_attribute_attr1_ResultSerdeRefData<'__a> {
     Case0(&'__a A_get_attribute_attr1_Out),
 }
 impl serde::Serialize for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -2062,6 +2181,7 @@ impl serde::Serialize for A_get_attribute_attr1_Result {
                     ),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -2142,6 +2262,7 @@ union A_get_attribute_attr1_ResultData {
     result: core::mem::ManuallyDrop<A_get_attribute_attr1_Out>,
 }
 impl Drop for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -2149,18 +2270,22 @@ impl Drop for A_get_attribute_attr1_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for A_get_attribute_attr1_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_get_attribute_attr1_Result");
         d.field("tag", &self.tag);
@@ -2168,17 +2293,20 @@ impl core::fmt::Debug for A_get_attribute_attr1_Result {
             dds::RETCODE_OK => {
                 d.field("result", self.as_result());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
         }
         match self.tag {
             dds::RETCODE_OK => self.as_result() == other.as_result(),
+            _ => false,
         }
     }
 }
@@ -2194,10 +2322,12 @@ impl A_get_attribute_attr1_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &A_get_attribute_attr1_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut A_get_attribute_attr1_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -2230,12 +2360,14 @@ struct A_get_attribute_attr1_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: A_get_attribute_attr1_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_get_attribute_attr1_ResultSerdeRefData<'__a> {
     Case0(&'__a A_get_attribute_attr1_Out),
 }
 impl serde::Serialize for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -2250,6 +2382,7 @@ impl serde::Serialize for A_get_attribute_attr1_Result {
                     ),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -2330,6 +2463,7 @@ union A_get_attribute_attr1_ResultData {
     result: core::mem::ManuallyDrop<A_get_attribute_attr1_Out>,
 }
 impl Drop for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -2337,18 +2471,22 @@ impl Drop for A_get_attribute_attr1_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for A_get_attribute_attr1_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_get_attribute_attr1_Result");
         d.field("tag", &self.tag);
@@ -2356,17 +2494,20 @@ impl core::fmt::Debug for A_get_attribute_attr1_Result {
             dds::RETCODE_OK => {
                 d.field("result", self.as_result());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
         }
         match self.tag {
             dds::RETCODE_OK => self.as_result() == other.as_result(),
+            _ => false,
         }
     }
 }
@@ -2382,10 +2523,12 @@ impl A_get_attribute_attr1_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &A_get_attribute_attr1_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut A_get_attribute_attr1_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -2418,12 +2561,14 @@ struct A_get_attribute_attr1_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: A_get_attribute_attr1_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_get_attribute_attr1_ResultSerdeRefData<'__a> {
     Case0(&'__a A_get_attribute_attr1_Out),
 }
 impl serde::Serialize for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -2438,6 +2583,7 @@ impl serde::Serialize for A_get_attribute_attr1_Result {
                     ),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -2518,6 +2664,7 @@ union A_set_attribute_attr1_ResultData {
     result: core::mem::ManuallyDrop<A_set_attribute_attr1_Out>,
 }
 impl Drop for A_set_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -2525,18 +2672,22 @@ impl Drop for A_set_attribute_attr1_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for A_set_attribute_attr1_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for A_set_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_set_attribute_attr1_Result");
         d.field("tag", &self.tag);
@@ -2544,17 +2695,20 @@ impl core::fmt::Debug for A_set_attribute_attr1_Result {
             dds::RETCODE_OK => {
                 d.field("result", self.as_result());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for A_set_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
         }
         match self.tag {
             dds::RETCODE_OK => self.as_result() == other.as_result(),
+            _ => false,
         }
     }
 }
@@ -2570,10 +2724,12 @@ impl A_set_attribute_attr1_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &A_set_attribute_attr1_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut A_set_attribute_attr1_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -2606,12 +2762,14 @@ struct A_set_attribute_attr1_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: A_set_attribute_attr1_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_set_attribute_attr1_ResultSerdeRefData<'__a> {
     Case0(&'__a A_set_attribute_attr1_Out),
 }
 impl serde::Serialize for A_set_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -2626,6 +2784,7 @@ impl serde::Serialize for A_set_attribute_attr1_Result {
                     ),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -2706,6 +2865,7 @@ union A_get_attribute_attr2_ResultData {
     result: core::mem::ManuallyDrop<A_get_attribute_attr2_Out>,
 }
 impl Drop for A_get_attribute_attr2_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -2713,18 +2873,22 @@ impl Drop for A_get_attribute_attr2_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for A_get_attribute_attr2_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for A_get_attribute_attr2_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_get_attribute_attr2_Result");
         d.field("tag", &self.tag);
@@ -2732,17 +2896,20 @@ impl core::fmt::Debug for A_get_attribute_attr2_Result {
             dds::RETCODE_OK => {
                 d.field("result", self.as_result());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for A_get_attribute_attr2_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
         }
         match self.tag {
             dds::RETCODE_OK => self.as_result() == other.as_result(),
+            _ => false,
         }
     }
 }
@@ -2758,10 +2925,12 @@ impl A_get_attribute_attr2_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &A_get_attribute_attr2_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut A_get_attribute_attr2_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -2794,12 +2963,14 @@ struct A_get_attribute_attr2_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: A_get_attribute_attr2_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_get_attribute_attr2_ResultSerdeRefData<'__a> {
     Case0(&'__a A_get_attribute_attr2_Out),
 }
 impl serde::Serialize for A_get_attribute_attr2_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -2814,6 +2985,7 @@ impl serde::Serialize for A_get_attribute_attr2_Result {
                     ),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -2894,6 +3066,7 @@ union A_set_attribute_attr2_ResultData {
     result: core::mem::ManuallyDrop<A_set_attribute_attr2_Out>,
 }
 impl Drop for A_set_attribute_attr2_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -2901,18 +3074,22 @@ impl Drop for A_set_attribute_attr2_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for A_set_attribute_attr2_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for A_set_attribute_attr2_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_set_attribute_attr2_Result");
         d.field("tag", &self.tag);
@@ -2920,17 +3097,20 @@ impl core::fmt::Debug for A_set_attribute_attr2_Result {
             dds::RETCODE_OK => {
                 d.field("result", self.as_result());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for A_set_attribute_attr2_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
         }
         match self.tag {
             dds::RETCODE_OK => self.as_result() == other.as_result(),
+            _ => false,
         }
     }
 }
@@ -2946,10 +3126,12 @@ impl A_set_attribute_attr2_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &A_set_attribute_attr2_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut A_set_attribute_attr2_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -2982,12 +3164,14 @@ struct A_set_attribute_attr2_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: A_set_attribute_attr2_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_set_attribute_attr2_ResultSerdeRefData<'__a> {
     Case0(&'__a A_set_attribute_attr2_Out),
 }
 impl serde::Serialize for A_set_attribute_attr2_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -3002,6 +3186,7 @@ impl serde::Serialize for A_set_attribute_attr2_Result {
                     ),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -3082,6 +3267,7 @@ union A_get_attribute_attr3_ResultData {
     result: core::mem::ManuallyDrop<A_get_attribute_attr3_Out>,
 }
 impl Drop for A_get_attribute_attr3_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -3089,18 +3275,22 @@ impl Drop for A_get_attribute_attr3_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for A_get_attribute_attr3_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for A_get_attribute_attr3_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_get_attribute_attr3_Result");
         d.field("tag", &self.tag);
@@ -3108,17 +3298,20 @@ impl core::fmt::Debug for A_get_attribute_attr3_Result {
             dds::RETCODE_OK => {
                 d.field("result", self.as_result());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for A_get_attribute_attr3_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
         }
         match self.tag {
             dds::RETCODE_OK => self.as_result() == other.as_result(),
+            _ => false,
         }
     }
 }
@@ -3134,10 +3327,12 @@ impl A_get_attribute_attr3_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &A_get_attribute_attr3_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut A_get_attribute_attr3_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -3170,12 +3365,14 @@ struct A_get_attribute_attr3_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: A_get_attribute_attr3_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_get_attribute_attr3_ResultSerdeRefData<'__a> {
     Case0(&'__a A_get_attribute_attr3_Out),
 }
 impl serde::Serialize for A_get_attribute_attr3_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -3190,6 +3387,7 @@ impl serde::Serialize for A_get_attribute_attr3_Result {
                     ),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -3270,6 +3468,7 @@ union A_set_attribute_attr3_ResultData {
     result: core::mem::ManuallyDrop<A_set_attribute_attr3_Out>,
 }
 impl Drop for A_set_attribute_attr3_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -3277,18 +3476,22 @@ impl Drop for A_set_attribute_attr3_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for A_set_attribute_attr3_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for A_set_attribute_attr3_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_set_attribute_attr3_Result");
         d.field("tag", &self.tag);
@@ -3296,17 +3499,20 @@ impl core::fmt::Debug for A_set_attribute_attr3_Result {
             dds::RETCODE_OK => {
                 d.field("result", self.as_result());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for A_set_attribute_attr3_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
         }
         match self.tag {
             dds::RETCODE_OK => self.as_result() == other.as_result(),
+            _ => false,
         }
     }
 }
@@ -3322,10 +3528,12 @@ impl A_set_attribute_attr3_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &A_set_attribute_attr3_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut A_set_attribute_attr3_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -3358,12 +3566,14 @@ struct A_set_attribute_attr3_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: A_set_attribute_attr3_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_set_attribute_attr3_ResultSerdeRefData<'__a> {
     Case0(&'__a A_set_attribute_attr3_Out),
 }
 impl serde::Serialize for A_set_attribute_attr3_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -3378,6 +3588,7 @@ impl serde::Serialize for A_set_attribute_attr3_Result {
                     ),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -3459,6 +3670,7 @@ union A_get_attribute_attr1_ResultData {
     a_ex: core::mem::ManuallyDrop<A>,
 }
 impl Drop for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -3471,19 +3683,23 @@ impl Drop for A_get_attribute_attr1_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.a_ex);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for A_get_attribute_attr1_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
             A_Ex_Hash => Self::new_a_ex(self.as_a_ex().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_get_attribute_attr1_Result");
         d.field("tag", &self.tag);
@@ -3494,11 +3710,13 @@ impl core::fmt::Debug for A_get_attribute_attr1_Result {
             A_Ex_Hash => {
                 d.field("a_ex", self.as_a_ex());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
@@ -3506,6 +3724,7 @@ impl PartialEq for A_get_attribute_attr1_Result {
         match self.tag {
             dds::RETCODE_OK => self.as_result() == other.as_result(),
             A_Ex_Hash => self.as_a_ex() == other.as_a_ex(),
+            _ => false,
         }
     }
 }
@@ -3521,10 +3740,12 @@ impl A_get_attribute_attr1_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &A_get_attribute_attr1_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut A_get_attribute_attr1_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -3547,10 +3768,12 @@ impl A_get_attribute_attr1_Result {
     pub fn is_a_ex(&self) -> bool {
         matches!(self.tag, A_Ex_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_a_ex(&self) -> &A {
         debug_assert!(self.is_a_ex());
         unsafe { &self.data.a_ex }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_a_ex_mut(&mut self) -> &mut A {
         debug_assert!(self.is_a_ex());
         unsafe { &mut self.data.a_ex }
@@ -3583,6 +3806,7 @@ struct A_get_attribute_attr1_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: A_get_attribute_attr1_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_get_attribute_attr1_ResultSerdeRefData<'__a> {
@@ -3590,6 +3814,7 @@ enum A_get_attribute_attr1_ResultSerdeRefData<'__a> {
     Case1(&'__a A),
 }
 impl serde::Serialize for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -3611,6 +3836,7 @@ impl serde::Serialize for A_get_attribute_attr1_Result {
                     data: A_get_attribute_attr1_ResultSerdeRefData::Case1(self.as_a_ex()),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -3705,6 +3931,7 @@ union A_set_attribute_attr1_ResultData {
     result: core::mem::ManuallyDrop<A_set_attribute_attr1_Out>,
 }
 impl Drop for A_set_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -3712,18 +3939,22 @@ impl Drop for A_set_attribute_attr1_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for A_set_attribute_attr1_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for A_set_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_set_attribute_attr1_Result");
         d.field("tag", &self.tag);
@@ -3731,17 +3962,20 @@ impl core::fmt::Debug for A_set_attribute_attr1_Result {
             dds::RETCODE_OK => {
                 d.field("result", self.as_result());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for A_set_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
         }
         match self.tag {
             dds::RETCODE_OK => self.as_result() == other.as_result(),
+            _ => false,
         }
     }
 }
@@ -3757,10 +3991,12 @@ impl A_set_attribute_attr1_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &A_set_attribute_attr1_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut A_set_attribute_attr1_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -3793,12 +4029,14 @@ struct A_set_attribute_attr1_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: A_set_attribute_attr1_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_set_attribute_attr1_ResultSerdeRefData<'__a> {
     Case0(&'__a A_set_attribute_attr1_Out),
 }
 impl serde::Serialize for A_set_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -3813,6 +4051,7 @@ impl serde::Serialize for A_set_attribute_attr1_Result {
                     ),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -3896,6 +4135,7 @@ union A_get_attribute_attr1_ResultData {
     c_ex: core::mem::ManuallyDrop<C>,
 }
 impl Drop for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -3918,21 +4158,25 @@ impl Drop for A_get_attribute_attr1_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.c_ex);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for A_get_attribute_attr1_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
             A_Ex_Hash => Self::new_a_ex(self.as_a_ex().clone()),
             B_Ex_Hash => Self::new_b_ex(self.as_b_ex().clone()),
             C_Ex_Hash => Self::new_c_ex(self.as_c_ex().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_get_attribute_attr1_Result");
         d.field("tag", &self.tag);
@@ -3949,11 +4193,13 @@ impl core::fmt::Debug for A_get_attribute_attr1_Result {
             C_Ex_Hash => {
                 d.field("c_ex", self.as_c_ex());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
@@ -3963,6 +4209,7 @@ impl PartialEq for A_get_attribute_attr1_Result {
             A_Ex_Hash => self.as_a_ex() == other.as_a_ex(),
             B_Ex_Hash => self.as_b_ex() == other.as_b_ex(),
             C_Ex_Hash => self.as_c_ex() == other.as_c_ex(),
+            _ => false,
         }
     }
 }
@@ -3978,10 +4225,12 @@ impl A_get_attribute_attr1_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &A_get_attribute_attr1_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut A_get_attribute_attr1_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -4004,10 +4253,12 @@ impl A_get_attribute_attr1_Result {
     pub fn is_a_ex(&self) -> bool {
         matches!(self.tag, A_Ex_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_a_ex(&self) -> &A {
         debug_assert!(self.is_a_ex());
         unsafe { &self.data.a_ex }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_a_ex_mut(&mut self) -> &mut A {
         debug_assert!(self.is_a_ex());
         unsafe { &mut self.data.a_ex }
@@ -4030,10 +4281,12 @@ impl A_get_attribute_attr1_Result {
     pub fn is_b_ex(&self) -> bool {
         matches!(self.tag, B_Ex_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_b_ex(&self) -> &B {
         debug_assert!(self.is_b_ex());
         unsafe { &self.data.b_ex }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_b_ex_mut(&mut self) -> &mut B {
         debug_assert!(self.is_b_ex());
         unsafe { &mut self.data.b_ex }
@@ -4056,10 +4309,12 @@ impl A_get_attribute_attr1_Result {
     pub fn is_c_ex(&self) -> bool {
         matches!(self.tag, C_Ex_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_c_ex(&self) -> &C {
         debug_assert!(self.is_c_ex());
         unsafe { &self.data.c_ex }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_c_ex_mut(&mut self) -> &mut C {
         debug_assert!(self.is_c_ex());
         unsafe { &mut self.data.c_ex }
@@ -4092,6 +4347,7 @@ struct A_get_attribute_attr1_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: A_get_attribute_attr1_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_get_attribute_attr1_ResultSerdeRefData<'__a> {
@@ -4101,6 +4357,7 @@ enum A_get_attribute_attr1_ResultSerdeRefData<'__a> {
     Case3(&'__a C),
 }
 impl serde::Serialize for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -4136,6 +4393,7 @@ impl serde::Serialize for A_get_attribute_attr1_Result {
                     data: A_get_attribute_attr1_ResultSerdeRefData::Case3(self.as_c_ex()),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -4259,6 +4517,7 @@ union A_set_attribute_attr1_ResultData {
     a_ex: core::mem::ManuallyDrop<A>,
 }
 impl Drop for A_set_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -4271,19 +4530,23 @@ impl Drop for A_set_attribute_attr1_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.a_ex);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for A_set_attribute_attr1_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
             A_Ex_Hash => Self::new_a_ex(self.as_a_ex().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for A_set_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_set_attribute_attr1_Result");
         d.field("tag", &self.tag);
@@ -4294,11 +4557,13 @@ impl core::fmt::Debug for A_set_attribute_attr1_Result {
             A_Ex_Hash => {
                 d.field("a_ex", self.as_a_ex());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for A_set_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
@@ -4306,6 +4571,7 @@ impl PartialEq for A_set_attribute_attr1_Result {
         match self.tag {
             dds::RETCODE_OK => self.as_result() == other.as_result(),
             A_Ex_Hash => self.as_a_ex() == other.as_a_ex(),
+            _ => false,
         }
     }
 }
@@ -4321,10 +4587,12 @@ impl A_set_attribute_attr1_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &A_set_attribute_attr1_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut A_set_attribute_attr1_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -4347,10 +4615,12 @@ impl A_set_attribute_attr1_Result {
     pub fn is_a_ex(&self) -> bool {
         matches!(self.tag, A_Ex_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_a_ex(&self) -> &A {
         debug_assert!(self.is_a_ex());
         unsafe { &self.data.a_ex }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_a_ex_mut(&mut self) -> &mut A {
         debug_assert!(self.is_a_ex());
         unsafe { &mut self.data.a_ex }
@@ -4383,6 +4653,7 @@ struct A_set_attribute_attr1_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: A_set_attribute_attr1_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_set_attribute_attr1_ResultSerdeRefData<'__a> {
@@ -4390,6 +4661,7 @@ enum A_set_attribute_attr1_ResultSerdeRefData<'__a> {
     Case1(&'__a A),
 }
 impl serde::Serialize for A_set_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -4411,6 +4683,7 @@ impl serde::Serialize for A_set_attribute_attr1_Result {
                     data: A_set_attribute_attr1_ResultSerdeRefData::Case1(self.as_a_ex()),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -4505,6 +4778,7 @@ union A_get_attribute_attr1_ResultData {
     result: core::mem::ManuallyDrop<A_get_attribute_attr1_Out>,
 }
 impl Drop for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -4512,18 +4786,22 @@ impl Drop for A_get_attribute_attr1_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for A_get_attribute_attr1_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_get_attribute_attr1_Result");
         d.field("tag", &self.tag);
@@ -4531,17 +4809,20 @@ impl core::fmt::Debug for A_get_attribute_attr1_Result {
             dds::RETCODE_OK => {
                 d.field("result", self.as_result());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
         }
         match self.tag {
             dds::RETCODE_OK => self.as_result() == other.as_result(),
+            _ => false,
         }
     }
 }
@@ -4557,10 +4838,12 @@ impl A_get_attribute_attr1_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &A_get_attribute_attr1_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut A_get_attribute_attr1_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -4593,12 +4876,14 @@ struct A_get_attribute_attr1_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: A_get_attribute_attr1_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_get_attribute_attr1_ResultSerdeRefData<'__a> {
     Case0(&'__a A_get_attribute_attr1_Out),
 }
 impl serde::Serialize for A_get_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -4613,6 +4898,7 @@ impl serde::Serialize for A_get_attribute_attr1_Result {
                     ),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -4694,6 +4980,7 @@ union A_set_attribute_attr1_ResultData {
     a_ex: core::mem::ManuallyDrop<A>,
 }
 impl Drop for A_set_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -4706,19 +4993,23 @@ impl Drop for A_set_attribute_attr1_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.a_ex);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for A_set_attribute_attr1_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
             A_Ex_Hash => Self::new_a_ex(self.as_a_ex().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for A_set_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_set_attribute_attr1_Result");
         d.field("tag", &self.tag);
@@ -4729,11 +5020,13 @@ impl core::fmt::Debug for A_set_attribute_attr1_Result {
             A_Ex_Hash => {
                 d.field("a_ex", self.as_a_ex());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for A_set_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
@@ -4741,6 +5034,7 @@ impl PartialEq for A_set_attribute_attr1_Result {
         match self.tag {
             dds::RETCODE_OK => self.as_result() == other.as_result(),
             A_Ex_Hash => self.as_a_ex() == other.as_a_ex(),
+            _ => false,
         }
     }
 }
@@ -4756,10 +5050,12 @@ impl A_set_attribute_attr1_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &A_set_attribute_attr1_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut A_set_attribute_attr1_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -4782,10 +5078,12 @@ impl A_set_attribute_attr1_Result {
     pub fn is_a_ex(&self) -> bool {
         matches!(self.tag, A_Ex_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_a_ex(&self) -> &A {
         debug_assert!(self.is_a_ex());
         unsafe { &self.data.a_ex }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_a_ex_mut(&mut self) -> &mut A {
         debug_assert!(self.is_a_ex());
         unsafe { &mut self.data.a_ex }
@@ -4818,6 +5116,7 @@ struct A_set_attribute_attr1_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: A_set_attribute_attr1_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_set_attribute_attr1_ResultSerdeRefData<'__a> {
@@ -4825,6 +5124,7 @@ enum A_set_attribute_attr1_ResultSerdeRefData<'__a> {
     Case1(&'__a A),
 }
 impl serde::Serialize for A_set_attribute_attr1_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -4846,6 +5146,7 @@ impl serde::Serialize for A_set_attribute_attr1_Result {
                     data: A_set_attribute_attr1_ResultSerdeRefData::Case1(self.as_a_ex()),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -4925,6 +5226,7 @@ union A_CallData {
     set_attribute_attr3: core::mem::ManuallyDrop<A_set_attribute_attr3_In>,
 }
 impl Drop for A_Call {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         if matches!(self.tag, A_func1_Hash) {
             unsafe {
@@ -5019,6 +5321,7 @@ impl Drop for A_Call {
 }
 impl Clone for A_Call {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         if matches!(self.tag, A_func1_Hash) {
             Self::new_func1(self.as_func1().clone())
@@ -5068,6 +5371,7 @@ impl Clone for A_Call {
     }
 }
 impl core::fmt::Debug for A_Call {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_Call");
         d.field("tag", &self.tag);
@@ -5120,6 +5424,7 @@ impl core::fmt::Debug for A_Call {
     }
 }
 impl PartialEq for A_Call {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
@@ -5183,10 +5488,12 @@ impl A_Call {
     pub fn is_unknownOp(&self) -> bool {
         matches!(self.tag, A_func1_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
         unsafe { &self.data.unknownOp }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_unknownOp_mut(&mut self) -> &mut dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
         unsafe { &mut self.data.unknownOp }
@@ -5209,10 +5516,12 @@ impl A_Call {
     pub fn is_func1(&self) -> bool {
         matches!(self.tag, A_func1_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_func1(&self) -> &A_func1_In {
         debug_assert!(self.is_func1());
         unsafe { &self.data.func1 }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_func1_mut(&mut self) -> &mut A_func1_In {
         debug_assert!(self.is_func1());
         unsafe { &mut self.data.func1 }
@@ -5235,10 +5544,12 @@ impl A_Call {
     pub fn is_get_attribute_attr1(&self) -> bool {
         matches!(self.tag, A_func1_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_get_attribute_attr1(&self) -> &A_get_attribute_attr1_In {
         debug_assert!(self.is_get_attribute_attr1());
         unsafe { &self.data.get_attribute_attr1 }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_get_attribute_attr1_mut(&mut self) -> &mut A_get_attribute_attr1_In {
         debug_assert!(self.is_get_attribute_attr1());
         unsafe { &mut self.data.get_attribute_attr1 }
@@ -5261,10 +5572,12 @@ impl A_Call {
     pub fn is_set_attribute_attr1(&self) -> bool {
         matches!(self.tag, A_func1_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_set_attribute_attr1(&self) -> &A_set_attribute_attr1_In {
         debug_assert!(self.is_set_attribute_attr1());
         unsafe { &self.data.set_attribute_attr1 }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_set_attribute_attr1_mut(&mut self) -> &mut A_set_attribute_attr1_In {
         debug_assert!(self.is_set_attribute_attr1());
         unsafe { &mut self.data.set_attribute_attr1 }
@@ -5287,10 +5600,12 @@ impl A_Call {
     pub fn is_get_attribute_attr2(&self) -> bool {
         matches!(self.tag, A_func1_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_get_attribute_attr2(&self) -> &A_get_attribute_attr2_In {
         debug_assert!(self.is_get_attribute_attr2());
         unsafe { &self.data.get_attribute_attr2 }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_get_attribute_attr2_mut(&mut self) -> &mut A_get_attribute_attr2_In {
         debug_assert!(self.is_get_attribute_attr2());
         unsafe { &mut self.data.get_attribute_attr2 }
@@ -5313,10 +5628,12 @@ impl A_Call {
     pub fn is_set_attribute_attr2(&self) -> bool {
         matches!(self.tag, A_func1_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_set_attribute_attr2(&self) -> &A_set_attribute_attr2_In {
         debug_assert!(self.is_set_attribute_attr2());
         unsafe { &self.data.set_attribute_attr2 }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_set_attribute_attr2_mut(&mut self) -> &mut A_set_attribute_attr2_In {
         debug_assert!(self.is_set_attribute_attr2());
         unsafe { &mut self.data.set_attribute_attr2 }
@@ -5339,10 +5656,12 @@ impl A_Call {
     pub fn is_get_attribute_attr3(&self) -> bool {
         matches!(self.tag, A_get_attribute_attr1_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_get_attribute_attr3(&self) -> &A_get_attribute_attr3_In {
         debug_assert!(self.is_get_attribute_attr3());
         unsafe { &self.data.get_attribute_attr3 }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_get_attribute_attr3_mut(&mut self) -> &mut A_get_attribute_attr3_In {
         debug_assert!(self.is_get_attribute_attr3());
         unsafe { &mut self.data.get_attribute_attr3 }
@@ -5365,10 +5684,12 @@ impl A_Call {
     pub fn is_set_attribute_attr3(&self) -> bool {
         matches!(self.tag, A_get_attribute_attr1_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_set_attribute_attr3(&self) -> &A_set_attribute_attr3_In {
         debug_assert!(self.is_set_attribute_attr3());
         unsafe { &self.data.set_attribute_attr3 }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_set_attribute_attr3_mut(&mut self) -> &mut A_set_attribute_attr3_In {
         debug_assert!(self.is_set_attribute_attr3());
         unsafe { &mut self.data.set_attribute_attr3 }
@@ -5401,6 +5722,7 @@ struct A_CallSerdeRef<'__a> {
     tag: &'__a str,
     data: A_CallSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_CallSerdeRefData<'__a> {
@@ -5428,6 +5750,7 @@ enum A_CallSerdeRefData<'__a> {
     Case0(&'__a dds::rpc::UnknownOperation),
 }
 impl serde::Serialize for A_Call {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -5964,6 +6287,7 @@ union A_ReturnData {
     set_attribute_attr3: core::mem::ManuallyDrop<A_set_attribute_attr3_Result>,
 }
 impl Drop for A_Return {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         if matches!(self.tag, A_func1_Hash) {
             unsafe {
@@ -6058,6 +6382,7 @@ impl Drop for A_Return {
 }
 impl Clone for A_Return {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         if matches!(self.tag, A_func1_Hash) {
             Self::new_func1(self.as_func1().clone())
@@ -6107,6 +6432,7 @@ impl Clone for A_Return {
     }
 }
 impl core::fmt::Debug for A_Return {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_Return");
         d.field("tag", &self.tag);
@@ -6159,6 +6485,7 @@ impl core::fmt::Debug for A_Return {
     }
 }
 impl PartialEq for A_Return {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
@@ -6222,10 +6549,12 @@ impl A_Return {
     pub fn is_unknownOp(&self) -> bool {
         matches!(self.tag, A_func1_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
         unsafe { &self.data.unknownOp }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_unknownOp_mut(&mut self) -> &mut dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
         unsafe { &mut self.data.unknownOp }
@@ -6248,10 +6577,12 @@ impl A_Return {
     pub fn is_func1(&self) -> bool {
         matches!(self.tag, A_func1_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_func1(&self) -> &A_func1_Result {
         debug_assert!(self.is_func1());
         unsafe { &self.data.func1 }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_func1_mut(&mut self) -> &mut A_func1_Result {
         debug_assert!(self.is_func1());
         unsafe { &mut self.data.func1 }
@@ -6274,10 +6605,12 @@ impl A_Return {
     pub fn is_get_attribute_attr1(&self) -> bool {
         matches!(self.tag, A_func1_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_get_attribute_attr1(&self) -> &A_get_attribute_attr1_Result {
         debug_assert!(self.is_get_attribute_attr1());
         unsafe { &self.data.get_attribute_attr1 }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_get_attribute_attr1_mut(&mut self) -> &mut A_get_attribute_attr1_Result {
         debug_assert!(self.is_get_attribute_attr1());
         unsafe { &mut self.data.get_attribute_attr1 }
@@ -6300,10 +6633,12 @@ impl A_Return {
     pub fn is_set_attribute_attr1(&self) -> bool {
         matches!(self.tag, A_func1_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_set_attribute_attr1(&self) -> &A_set_attribute_attr1_Result {
         debug_assert!(self.is_set_attribute_attr1());
         unsafe { &self.data.set_attribute_attr1 }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_set_attribute_attr1_mut(&mut self) -> &mut A_set_attribute_attr1_Result {
         debug_assert!(self.is_set_attribute_attr1());
         unsafe { &mut self.data.set_attribute_attr1 }
@@ -6326,10 +6661,12 @@ impl A_Return {
     pub fn is_get_attribute_attr2(&self) -> bool {
         matches!(self.tag, A_func1_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_get_attribute_attr2(&self) -> &A_get_attribute_attr2_Result {
         debug_assert!(self.is_get_attribute_attr2());
         unsafe { &self.data.get_attribute_attr2 }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_get_attribute_attr2_mut(&mut self) -> &mut A_get_attribute_attr2_Result {
         debug_assert!(self.is_get_attribute_attr2());
         unsafe { &mut self.data.get_attribute_attr2 }
@@ -6352,10 +6689,12 @@ impl A_Return {
     pub fn is_set_attribute_attr2(&self) -> bool {
         matches!(self.tag, A_func1_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_set_attribute_attr2(&self) -> &A_set_attribute_attr2_Result {
         debug_assert!(self.is_set_attribute_attr2());
         unsafe { &self.data.set_attribute_attr2 }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_set_attribute_attr2_mut(&mut self) -> &mut A_set_attribute_attr2_Result {
         debug_assert!(self.is_set_attribute_attr2());
         unsafe { &mut self.data.set_attribute_attr2 }
@@ -6378,10 +6717,12 @@ impl A_Return {
     pub fn is_get_attribute_attr3(&self) -> bool {
         matches!(self.tag, A_get_attribute_attr1_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_get_attribute_attr3(&self) -> &A_get_attribute_attr3_Result {
         debug_assert!(self.is_get_attribute_attr3());
         unsafe { &self.data.get_attribute_attr3 }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_get_attribute_attr3_mut(&mut self) -> &mut A_get_attribute_attr3_Result {
         debug_assert!(self.is_get_attribute_attr3());
         unsafe { &mut self.data.get_attribute_attr3 }
@@ -6404,10 +6745,12 @@ impl A_Return {
     pub fn is_set_attribute_attr3(&self) -> bool {
         matches!(self.tag, A_get_attribute_attr1_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_set_attribute_attr3(&self) -> &A_set_attribute_attr3_Result {
         debug_assert!(self.is_set_attribute_attr3());
         unsafe { &self.data.set_attribute_attr3 }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_set_attribute_attr3_mut(&mut self) -> &mut A_set_attribute_attr3_Result {
         debug_assert!(self.is_set_attribute_attr3());
         unsafe { &mut self.data.set_attribute_attr3 }
@@ -6440,6 +6783,7 @@ struct A_ReturnSerdeRef<'__a> {
     tag: &'__a str,
     data: A_ReturnSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_ReturnSerdeRefData<'__a> {
@@ -6467,6 +6811,7 @@ enum A_ReturnSerdeRefData<'__a> {
     Case0(&'__a dds::rpc::UnknownOperation),
 }
 impl serde::Serialize for A_Return {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -7052,6 +7397,7 @@ union A_opA_ResultData {
     result: core::mem::ManuallyDrop<A_opA_Out>,
 }
 impl Drop for A_opA_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -7059,18 +7405,22 @@ impl Drop for A_opA_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for A_opA_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for A_opA_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_opA_Result");
         d.field("tag", &self.tag);
@@ -7078,17 +7428,20 @@ impl core::fmt::Debug for A_opA_Result {
             dds::RETCODE_OK => {
                 d.field("result", self.as_result());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for A_opA_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
         }
         match self.tag {
             dds::RETCODE_OK => self.as_result() == other.as_result(),
+            _ => false,
         }
     }
 }
@@ -7104,10 +7457,12 @@ impl A_opA_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &A_opA_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut A_opA_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -7138,12 +7493,14 @@ struct A_opA_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: A_opA_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_opA_ResultSerdeRefData<'__a> {
     Case0(&'__a A_opA_Out),
 }
 impl serde::Serialize for A_opA_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -7156,6 +7513,7 @@ impl serde::Serialize for A_opA_Result {
                     data: A_opA_ResultSerdeRefData::Case0(self.as_result()),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -7213,6 +7571,7 @@ union A_CallData {
     opA: core::mem::ManuallyDrop<A_opA_In>,
 }
 impl Drop for A_Call {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         if matches!(self.tag, A_opA_Hash) {
             unsafe {
@@ -7227,6 +7586,7 @@ impl Drop for A_Call {
 }
 impl Clone for A_Call {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         if matches!(self.tag, A_opA_Hash) {
             Self::new_opA(self.as_opA().clone())
@@ -7236,6 +7596,7 @@ impl Clone for A_Call {
     }
 }
 impl core::fmt::Debug for A_Call {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_Call");
         d.field("tag", &self.tag);
@@ -7248,6 +7609,7 @@ impl core::fmt::Debug for A_Call {
     }
 }
 impl PartialEq for A_Call {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
@@ -7271,10 +7633,12 @@ impl A_Call {
     pub fn is_unknownOp(&self) -> bool {
         matches!(self.tag, A_opA_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
         unsafe { &self.data.unknownOp }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_unknownOp_mut(&mut self) -> &mut dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
         unsafe { &mut self.data.unknownOp }
@@ -7297,10 +7661,12 @@ impl A_Call {
     pub fn is_opA(&self) -> bool {
         matches!(self.tag, _)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_opA(&self) -> &A_opA_In {
         debug_assert!(self.is_opA());
         unsafe { &self.data.opA }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_opA_mut(&mut self) -> &mut A_opA_In {
         debug_assert!(self.is_opA());
         unsafe { &mut self.data.opA }
@@ -7333,6 +7699,7 @@ struct A_CallSerdeRef<'__a> {
     tag: &'__a str,
     data: A_CallSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_CallSerdeRefData<'__a> {
@@ -7340,6 +7707,7 @@ enum A_CallSerdeRefData<'__a> {
     Case0(&'__a dds::rpc::UnknownOperation),
 }
 impl serde::Serialize for A_Call {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -7440,6 +7808,7 @@ union A_ReturnData {
     opA: core::mem::ManuallyDrop<A_opA_Result>,
 }
 impl Drop for A_Return {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         if matches!(self.tag, A_opA_Hash) {
             unsafe {
@@ -7454,6 +7823,7 @@ impl Drop for A_Return {
 }
 impl Clone for A_Return {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         if matches!(self.tag, A_opA_Hash) {
             Self::new_opA(self.as_opA().clone())
@@ -7463,6 +7833,7 @@ impl Clone for A_Return {
     }
 }
 impl core::fmt::Debug for A_Return {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("A_Return");
         d.field("tag", &self.tag);
@@ -7475,6 +7846,7 @@ impl core::fmt::Debug for A_Return {
     }
 }
 impl PartialEq for A_Return {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
@@ -7498,10 +7870,12 @@ impl A_Return {
     pub fn is_unknownOp(&self) -> bool {
         matches!(self.tag, A_opA_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
         unsafe { &self.data.unknownOp }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_unknownOp_mut(&mut self) -> &mut dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
         unsafe { &mut self.data.unknownOp }
@@ -7524,10 +7898,12 @@ impl A_Return {
     pub fn is_opA(&self) -> bool {
         matches!(self.tag, _)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_opA(&self) -> &A_opA_Result {
         debug_assert!(self.is_opA());
         unsafe { &self.data.opA }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_opA_mut(&mut self) -> &mut A_opA_Result {
         debug_assert!(self.is_opA());
         unsafe { &mut self.data.opA }
@@ -7560,6 +7936,7 @@ struct A_ReturnSerdeRef<'__a> {
     tag: &'__a str,
     data: A_ReturnSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum A_ReturnSerdeRefData<'__a> {
@@ -7567,6 +7944,7 @@ enum A_ReturnSerdeRefData<'__a> {
     Case0(&'__a dds::rpc::UnknownOperation),
 }
 impl serde::Serialize for A_Return {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,

@@ -38,7 +38,7 @@ test-xidl-jsonrpc-coverage:
 fmt-jinja:
 	cargo r -p xidlc -F cli -F fmt -- fmt -l jinja $(JINJA_TEMPLATES) -i
 build-xtypes:
-	cargo r -p xidlc -F cli -F fmt -- gen --out-dir ./xidl-typeobject/src/ rust ./xidl-typeobject/idl/dds-xtypes_typeobject.idl
+	cargo r -p xidlc -F cli -F fmt -- gen --out-dir ./xidl-typeobject/src/ rust ./xidl-typeobject/idl/dds_xtypes_typeobject.idl
 
 docs-dev:
 	pnpm --dir docs start

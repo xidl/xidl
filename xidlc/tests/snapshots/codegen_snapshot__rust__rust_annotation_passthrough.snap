@@ -83,6 +83,7 @@ union Api_ping_ResultData {
     result: core::mem::ManuallyDrop<Api_ping_Out>,
 }
 impl Drop for Api_ping_Result {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
             dds::RETCODE_OK => {
@@ -90,18 +91,22 @@ impl Drop for Api_ping_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+            _ => {}
         }
     }
 }
 impl Clone for Api_ping_Result {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+            _ => unreachable!(),
         }
     }
 }
 impl core::fmt::Debug for Api_ping_Result {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("Api_ping_Result");
         d.field("tag", &self.tag);
@@ -109,17 +114,20 @@ impl core::fmt::Debug for Api_ping_Result {
             dds::RETCODE_OK => {
                 d.field("result", self.as_result());
             }
+            _ => {}
         }
         d.finish()
     }
 }
 impl PartialEq for Api_ping_Result {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
         }
         match self.tag {
             dds::RETCODE_OK => self.as_result() == other.as_result(),
+            _ => false,
         }
     }
 }
@@ -135,10 +143,12 @@ impl Api_ping_Result {
     pub fn is_result(&self) -> bool {
         matches!(self.tag, dds::RETCODE_OK)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result(&self) -> &Api_ping_Out {
         debug_assert!(self.is_result());
         unsafe { &self.data.result }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_result_mut(&mut self) -> &mut Api_ping_Out {
         debug_assert!(self.is_result());
         unsafe { &mut self.data.result }
@@ -169,12 +179,14 @@ struct Api_ping_ResultSerdeRef<'__a> {
     tag: &'__a str,
     data: Api_ping_ResultSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum Api_ping_ResultSerdeRefData<'__a> {
     Case0(&'__a Api_ping_Out),
 }
 impl serde::Serialize for Api_ping_Result {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -187,6 +199,7 @@ impl serde::Serialize for Api_ping_Result {
                     data: Api_ping_ResultSerdeRefData::Case0(self.as_result()),
                 }
             }
+            _ => unreachable!(),
         };
         helper.serialize(__serializer)
     }
@@ -244,6 +257,7 @@ union Api_CallData {
     ping: core::mem::ManuallyDrop<Api_ping_In>,
 }
 impl Drop for Api_Call {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         if matches!(self.tag, Api_ping_Hash) {
             unsafe {
@@ -258,6 +272,7 @@ impl Drop for Api_Call {
 }
 impl Clone for Api_Call {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         if matches!(self.tag, Api_ping_Hash) {
             Self::new_ping(self.as_ping().clone())
@@ -267,6 +282,7 @@ impl Clone for Api_Call {
     }
 }
 impl core::fmt::Debug for Api_Call {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("Api_Call");
         d.field("tag", &self.tag);
@@ -279,6 +295,7 @@ impl core::fmt::Debug for Api_Call {
     }
 }
 impl PartialEq for Api_Call {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
@@ -302,10 +319,12 @@ impl Api_Call {
     pub fn is_unknownOp(&self) -> bool {
         matches!(self.tag, Api_ping_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
         unsafe { &self.data.unknownOp }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_unknownOp_mut(&mut self) -> &mut dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
         unsafe { &mut self.data.unknownOp }
@@ -328,10 +347,12 @@ impl Api_Call {
     pub fn is_ping(&self) -> bool {
         matches!(self.tag, _)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_ping(&self) -> &Api_ping_In {
         debug_assert!(self.is_ping());
         unsafe { &self.data.ping }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_ping_mut(&mut self) -> &mut Api_ping_In {
         debug_assert!(self.is_ping());
         unsafe { &mut self.data.ping }
@@ -364,6 +385,7 @@ struct Api_CallSerdeRef<'__a> {
     tag: &'__a str,
     data: Api_CallSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum Api_CallSerdeRefData<'__a> {
@@ -371,6 +393,7 @@ enum Api_CallSerdeRefData<'__a> {
     Case0(&'__a dds::rpc::UnknownOperation),
 }
 impl serde::Serialize for Api_Call {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -471,6 +494,7 @@ union Api_ReturnData {
     ping: core::mem::ManuallyDrop<Api_ping_Result>,
 }
 impl Drop for Api_Return {
+    #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         if matches!(self.tag, Api_ping_Hash) {
             unsafe {
@@ -485,6 +509,7 @@ impl Drop for Api_Return {
 }
 impl Clone for Api_Return {
     #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         if matches!(self.tag, Api_ping_Hash) {
             Self::new_ping(self.as_ping().clone())
@@ -494,6 +519,7 @@ impl Clone for Api_Return {
     }
 }
 impl core::fmt::Debug for Api_Return {
+    #[allow(unreachable_patterns)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("Api_Return");
         d.field("tag", &self.tag);
@@ -506,6 +532,7 @@ impl core::fmt::Debug for Api_Return {
     }
 }
 impl PartialEq for Api_Return {
+    #[allow(unreachable_patterns)]
     fn eq(&self, other: &Self) -> bool {
         if self.tag != other.tag {
             return false;
@@ -529,10 +556,12 @@ impl Api_Return {
     pub fn is_unknownOp(&self) -> bool {
         matches!(self.tag, Api_ping_Hash)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
         unsafe { &self.data.unknownOp }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_unknownOp_mut(&mut self) -> &mut dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
         unsafe { &mut self.data.unknownOp }
@@ -555,10 +584,12 @@ impl Api_Return {
     pub fn is_ping(&self) -> bool {
         matches!(self.tag, _)
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_ping(&self) -> &Api_ping_Result {
         debug_assert!(self.is_ping());
         unsafe { &self.data.ping }
     }
+    #[allow(clippy::borrowed_box)]
     pub fn as_ping_mut(&mut self) -> &mut Api_ping_Result {
         debug_assert!(self.is_ping());
         unsafe { &mut self.data.ping }
@@ -591,6 +622,7 @@ struct Api_ReturnSerdeRef<'__a> {
     tag: &'__a str,
     data: Api_ReturnSerdeRefData<'__a>,
 }
+#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
 enum Api_ReturnSerdeRefData<'__a> {
@@ -598,6 +630,7 @@ enum Api_ReturnSerdeRefData<'__a> {
     Case0(&'__a dds::rpc::UnknownOperation),
 }
 impl serde::Serialize for Api_Return {
+    #[allow(unreachable_patterns)]
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
