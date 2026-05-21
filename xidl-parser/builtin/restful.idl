@@ -53,3 +53,7 @@
 @annotation Produces {
     string mime_type;
 };
+
+@annotation upgrade {
+    string protocol;
+};
