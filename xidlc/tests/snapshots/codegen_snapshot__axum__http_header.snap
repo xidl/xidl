@@ -700,11 +700,6 @@ http_header.rs
 ===============
 #[allow(non_snake_case)]
 pub mod test {
-    #[allow(unused_imports)]
-    #[allow(non_upper_case_globals)]
-    #[allow(non_snake_case)]
-    #[allow(unused_variables)]
-    #[allow(unreachable_patterns)]
     #[derive(
         Debug,
         Clone,
@@ -721,11 +716,6 @@ pub mod test {
         OK,
         FAILED,
     }
-    #[allow(unused_imports)]
-    #[allow(non_upper_case_globals)]
-    #[allow(non_snake_case)]
-    #[allow(unused_variables)]
-    #[allow(unreachable_patterns)]
     #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
     #[derive(Default)]
     pub struct User {

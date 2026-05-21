@@ -1162,11 +1162,6 @@ impl HttpServiceClient {
 ===============
 simple.rs
 ===============
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct HealthResponse {
@@ -1175,11 +1170,6 @@ pub struct HealthResponse {
     pub message: String,
 }
 impl HealthResponse {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct VersionResponse {
@@ -1187,11 +1177,6 @@ pub struct VersionResponse {
     pub long: String,
 }
 impl VersionResponse {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct MemoryResponse {
@@ -1199,11 +1184,6 @@ pub struct MemoryResponse {
     pub active: u64,
 }
 impl MemoryResponse {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct UdpStatsResponse {
@@ -1211,11 +1191,6 @@ pub struct UdpStatsResponse {
     pub rx: u64,
 }
 impl UdpStatsResponse {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct CreateTcpReverseRequest {
@@ -1223,11 +1198,6 @@ pub struct CreateTcpReverseRequest {
     pub remote_port: u16,
 }
 impl CreateTcpReverseRequest {}
-#[allow(unused_imports)]
-#[allow(non_upper_case_globals)]
-#[allow(non_snake_case)]
-#[allow(unused_variables)]
-#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct CreateSimpleResponse {
