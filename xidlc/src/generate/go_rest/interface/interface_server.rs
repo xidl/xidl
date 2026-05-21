@@ -1,5 +1,5 @@
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::go_rest::{MethodMeta, definition};
+use crate::generate::go_rest::{HttpMethod, MethodMeta, definition};
 use std::collections::HashMap;
 use std::fmt::Write;
 use xidl_parser::rest_hir::semantics::HttpStreamKind;
@@ -19,17 +19,15 @@ pub(super) fn render_server(
 ) -> IdlcResult<()> {
     writeln!(
         out,
-        "func New{interface_name}Handler(svc {interface_name}Service) http.Handler {{"
+        "func Register{interface_name}Handler(r gin.IRouter, svc {interface_name}Service) {{"
     )
     .unwrap();
-    writeln!(out, "\tmux := http.NewServeMux()").unwrap();
     let mut seen_routes = HashMap::<String, String>::new();
     for method in methods {
         for path in &method.paths {
             register_route(out, method, path, &mut seen_routes, renderer)?;
         }
     }
-    writeln!(out, "\treturn mux").unwrap();
     writeln!(out, "}}").unwrap();
     writeln!(out).unwrap();
     Ok(())
@@ -54,10 +52,20 @@ fn register_route(
         )));
     }
 
+    let gin_method = match method.http_method {
+        HttpMethod::Get => "GET",
+        HttpMethod::Post => "POST",
+        HttpMethod::Put => "PUT",
+        HttpMethod::Patch => "PATCH",
+        HttpMethod::Delete => "DELETE",
+        HttpMethod::Head => "HEAD",
+        HttpMethod::Options => "OPTIONS",
+    };
+
     writeln!(
         out,
-        "\tmux.HandleFunc(\"{} {}\", func(w http.ResponseWriter, r *http.Request) {{",
-        definition::http_method_name(method.http_method),
+        "\tr.{}(\"{}\", func(c *gin.Context) {{",
+        gin_method,
         definition::go_pattern_path(path)
     )
     .unwrap();

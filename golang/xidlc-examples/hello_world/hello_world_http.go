@@ -6,10 +6,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
 )
 
 var (
@@ -23,32 +25,30 @@ type HelloWorldService interface {
 	SayHello(ctx context.Context, req *HelloWorldSayHelloRequest) (*HelloWorldSayHelloResponse, error)
 }
 
-func NewHelloWorldHandler(svc HelloWorldService) http.Handler {
-	mux := http.NewServeMux()
-	mux.HandleFunc("POST /hello", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+func RegisterHelloWorldHandler(r gin.IRouter, svc HelloWorldService) {
+	r.POST("/hello", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
-		if err := xidlgohttp.RequireContentType(r, "application/json"); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
+		if err := xidlgohttp.GinRequireContentType(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
 			return
 		}
 
 		req := &HelloWorldSayHelloRequest{}
 		body := HelloWorldSayHelloRequestBody{}
-		if err := xidlgohttp.DecodeBody(r, "application/json", &body); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+		if err := xidlgohttp.GinDecodeBody(c, "application/json", &body); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 			return
 		}
 		req.Name = body.Name
-		if _, err := svc.SayHello(r.Context(), req); err != nil {
-			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
+		if _, err := svc.SayHello(c.Request.Context(), req); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
-		w.WriteHeader(http.StatusNoContent)
+		c.Status(http.StatusNoContent)
 	})
-	return mux
 }
 
 type HelloWorldClient struct {

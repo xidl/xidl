@@ -2,37 +2,37 @@
     {{ field }} = xidlgohttp.QueryOptionalString({{ call }})
 {%- elif ty == "string" %}
     if value, err := {{ call }}; err == nil { {{ field }} = value } else {
-        xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+        xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
         return
     }
 {%- elif ty == "uint32" %}
     if raw, err := {{ call }}; err == nil {
         if value, parseErr := xidlgohttp.ParseUint32(raw); parseErr == nil { {{ field }} = value } else {
-            xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", parseErr.Error())
+            xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", parseErr.Error())
             return
         }
     } else {
-        xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+        xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
         return
     }
 {%- elif ty == "int32" %}
     if raw, err := {{ call }}; err == nil {
         if value, parseErr := xidlgohttp.ParseInt32(raw); parseErr == nil { {{ field }} = value } else {
-            xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", parseErr.Error())
+            xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", parseErr.Error())
             return
         }
     } else {
-        xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+        xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
         return
     }
 {%- elif ty == "bool" %}
     if raw, err := {{ call }}; err == nil {
         if value, parseErr := xidlgohttp.ParseBool(raw); parseErr == nil { {{ field }} = value } else {
-            xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", parseErr.Error())
+            xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", parseErr.Error())
             return
         }
     } else {
-        xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+        xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
         return
     }
 {%- endif %}
