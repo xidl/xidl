@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.66.0](https://github.com/xidl/xidl/compare/v0.65.0...v0.66.0) (2026-05-21)
+
+
+### Features
+
+* add ugprade ([ea48027](https://github.com/xidl/xidl/commit/ea48027f36a34d1befe8f82c8666b07bfbfa35f4))
+* add upgrade annotation support ([b534408](https://github.com/xidl/xidl/commit/b5344084ccc9e4680c97a240b914b31330ee04cf))
+
 ## [0.65.0](https://github.com/xidl/xidl/compare/v0.64.0...v0.65.0) (2026-05-21)
 
 
