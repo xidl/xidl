@@ -84,6 +84,8 @@ pub(crate) struct MethodContext {
     pub(crate) request_content_type: String,
     pub(crate) response_content_type: String,
     pub(crate) response_status: String,
+    pub(crate) is_upgrade: bool,
+    pub(crate) upgrade_protocol: Option<String>,
 }
 
 #[derive(Serialize, Clone)]

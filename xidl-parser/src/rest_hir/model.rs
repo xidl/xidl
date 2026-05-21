@@ -82,6 +82,7 @@ pub struct HttpOperationMeta {
     pub security: Option<super::semantics::HttpSecurityProfile>,
     pub basic_auth_realm: Option<String>,
     pub deprecated: Option<super::semantics::DeprecatedInfo>,
+    pub upgrade_protocol: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -1,0 +1,8 @@
+interface HttpUpgradeService {
+    @upgrade(protocol="xidl-raw")
+    @path("/upgrade/raw{?token}")
+    void connect_raw(
+        @query @rename("token")
+        string token
+    );
+};

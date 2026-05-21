@@ -207,3 +207,56 @@ fn validates_route_bindings_request_shape_and_head_constraints() {
     assert_eq!(http_method_name(HttpMethod::Head), "HEAD");
     assert_eq!(http_method_name(HttpMethod::Options), "OPTIONS");
 }
+
+#[test]
+fn test_validate_upgrade_constraints() {
+    // 1. Not an upgrade method
+    assert!(validate_upgrade_constraints("op", false, None, HttpMethod::Get, &[], None).is_ok());
+
+    // 2. Protocol not supplied
+    let err =
+        validate_upgrade_constraints("op", true, None, HttpMethod::Get, &[], None).unwrap_err();
+    assert!(err.contains("requires a 'protocol' parameter"));
+
+    // 3. Protocol is empty
+    let err =
+        validate_upgrade_constraints("op", true, Some(""), HttpMethod::Get, &[], None).unwrap_err();
+    assert!(err.contains("cannot be empty"));
+
+    // 4. Returns non-void
+    let err = validate_upgrade_constraints(
+        "op",
+        true,
+        Some("xidl-raw"),
+        HttpMethod::Get,
+        &[],
+        Some(&TypeSpec::Boolean),
+    )
+    .unwrap_err();
+    assert!(err.contains("must return void"));
+
+    // 5. Has body parameter
+    let request_params = vec![param("payload", HttpParamKind::Body)];
+    let err = validate_upgrade_constraints(
+        "op",
+        true,
+        Some("xidl-raw"),
+        HttpMethod::Get,
+        &request_params,
+        None,
+    )
+    .unwrap_err();
+    assert!(err.contains("cannot have @body parameters"));
+
+    // 6. Uses non-GET method
+    let err =
+        validate_upgrade_constraints("op", true, Some("xidl-raw"), HttpMethod::Post, &[], None)
+            .unwrap_err();
+    assert!(err.contains("must use GET"));
+
+    // 7. Successful validation
+    assert!(
+        validate_upgrade_constraints("op", true, Some("xidl-raw"), HttpMethod::Get, &[], None)
+            .is_ok()
+    );
+}

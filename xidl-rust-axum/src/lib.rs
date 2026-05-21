@@ -39,6 +39,9 @@ pub mod stream;
 /// Authentication helpers shared by generated handlers and clients.
 pub mod auth;
 
+/// HTTP connection upgrade helpers.
+pub mod upgrade;
+
 /// Re-export of `axum` so generated code can depend on a single runtime crate.
 pub use axum;
 /// Re-export of `axum-extra` for typed header support.

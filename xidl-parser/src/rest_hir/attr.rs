@@ -286,6 +286,7 @@ fn base_attribute_operation(args: AttributeOperationArgs<'_>) -> HttpOperation {
             security,
             basic_auth_realm: None,
             deprecated,
+            upgrade_protocol: None,
         },
         signature,
         http,

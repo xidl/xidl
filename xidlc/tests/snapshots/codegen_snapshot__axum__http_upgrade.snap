@@ -1,0 +1,219 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+http_upgrade.rs
+===============
+#[allow(
+    non_snake_case,
+    unused_attributes,
+    unused_variables,
+    unused_mut,
+    unreachable_code,
+    clippy::let_unit_value
+)]
+#[async_trait::async_trait]
+pub trait HttpUpgradeService {
+    async fn connect_raw(
+        &self,
+        token: String,
+        upgrade: ::xidl_rust_axum::upgrade::Upgrade,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>;
+}
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_in_HttpUpgradeService {
+    use super::*;
+}
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_out_HttpUpgradeService {
+    use super::*;
+}
+#[derive(::serde::Serialize, ::core::default::Default)]
+struct HttpUpgradeServiceConnectRawRequestOutQuery {
+    #[serde(default)]
+    token: String,
+}
+#[derive(::serde::Deserialize, ::core::default::Default)]
+struct HttpUpgradeServiceConnectRawRequestInQuery {
+    #[serde(default)]
+    token: String,
+}
+pub struct HttpUpgradeServiceServer<T> {
+    inner: ::std::sync::Arc<T>,
+}
+#[allow(non_snake_case)]
+impl<T> HttpUpgradeServiceServer<T>
+where
+    T: HttpUpgradeService + Send + Sync + 'static,
+{
+    pub fn new(inner: T) -> Self {
+        Self {
+            inner: ::std::sync::Arc::new(inner),
+        }
+    }
+    pub fn from_arc(inner: ::std::sync::Arc<T>) -> Self {
+        Self { inner }
+    }
+    pub fn router(self) -> xidl_rust_axum::axum::Router {
+        let _svc = self.inner;
+        xidl_rust_axum::axum::Router::new()
+            .route("/upgrade/raw", xidl_rust_axum::axum::routing::get(Self::connect_raw))
+            .with_state(_svc)
+    }
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
+    async fn connect_raw(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        xidl_rust_axum::axum::extract::Query(
+            query,
+        ): xidl_rust_axum::axum::extract::Query<
+            HttpUpgradeServiceConnectRawRequestInQuery,
+        >,
+        req: ::xidl_rust_axum::axum::extract::Request,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let HttpUpgradeServiceConnectRawRequestInQuery { token } = query;
+        let mut resp = match svc
+            .connect_raw(
+                token,
+                ::xidl_rust_axum::upgrade::Upgrade::new(req, "xidl-raw".to_string()),
+            )
+            .await
+        {
+            Ok(resp_value) => {
+                let mut resp = resp_value;
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+}
+impl<T> xidl_rust_axum::Service for HttpUpgradeServiceServer<T>
+where
+    T: HttpUpgradeService + Send + Sync + 'static,
+{
+    fn into_router(self) -> xidl_rust_axum::axum::Router {
+        self.router()
+    }
+}
+pub struct HttpUpgradeServiceClient {
+    client: ::xidl_rust_axum::Client,
+}
+#[allow(non_snake_case)]
+impl HttpUpgradeServiceClient {
+    pub fn new(base_url: impl Into<String>) -> Self {
+        Self {
+            client: ::xidl_rust_axum::Client::new(base_url),
+        }
+    }
+    pub fn with_auth(
+        base_url: impl Into<String>,
+        auth: ::xidl_rust_axum::ClientAuth,
+    ) -> Self {
+        Self {
+            client: ::xidl_rust_axum::Client::with_auth(base_url, auth),
+        }
+    }
+    pub fn with_http(
+        base_url: impl Into<String>,
+        http: ::xidl_rust_axum::reqwest::Client,
+    ) -> Self {
+        Self {
+            client: ::xidl_rust_axum::Client::with_http(base_url, http),
+        }
+    }
+    pub fn with_http_and_auth(
+        base_url: impl Into<String>,
+        http: ::xidl_rust_axum::reqwest::Client,
+        auth: ::xidl_rust_axum::ClientAuth,
+    ) -> Self {
+        Self {
+            client: ::xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
+        }
+    }
+    pub fn with_auth_override(
+        &self,
+        auth: Option<::xidl_rust_axum::ClientAuth>,
+    ) -> Self {
+        Self {
+            client: self.client.with_auth_override(auth),
+        }
+    }
+}
+#[allow(non_snake_case)]
+impl HttpUpgradeServiceClient {
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
+    pub async fn connect_raw(
+        &self,
+        token: String,
+    ) -> Result<::xidl_rust_axum::reqwest::Upgraded, xidl_rust_axum::Error> {
+        let path = "/upgrade/raw".to_string();
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::UPGRADE,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("xidl-raw")
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::CONNECTION,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_static("upgrade"),
+            );
+        let query = HttpUpgradeServiceConnectRawRequestOutQuery {
+            token,
+        };
+        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if !query.is_empty() {
+            req.url_mut().set_query(Some(&query));
+        }
+        let auth_target = &self.client;
+        let _ = auth_target;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status() == xidl_rust_axum::reqwest::StatusCode::SWITCHING_PROTOCOLS {
+            resp.upgrade()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+}

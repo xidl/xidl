@@ -1,0 +1,22 @@
+interface HttpUpgradeService {
+    @upgrade(protocol = "xidl-raw")
+    @path("/upgrade/raw{?token}")
+    void connect_raw(
+        @query
+        @rename("token")
+        string token
+    );
+
+    @upgrade(protocol = "xidl-echo")
+    @path("/upgrade/echo")
+    void connect_echo();
+
+    @upgrade(protocol = "xidl-secure")
+    @path("/upgrade/secure")
+    void connect_secure(
+        @header
+        @rename("X-Secure-Key")
+        string key
+    );
+
+};

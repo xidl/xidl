@@ -21,9 +21,10 @@ pub trait {{ ident }} {
         {%- endif %}
         async fn {{ method.name }}(
         &self{% if method.is_server_stream or method.is_client_stream or method.is_bidi_stream %},
-        req: ::xidl_rust_axum::Request<{{ method.request_payload_ty }}>{% elif method.server_params | length > 0 %},
-        {{ method.server_params | join(", ") }}{% endif %}
-        ) -> ::xidl_rust_axum::Result<{% if method.is_server_stream %}xidl_rust_axum::stream::SseStream<{{ method.response_ty }}>{% elif method.is_bidi_stream %}(){% else %}{{ method.response_ty }}{% endif %}>;
+        req: ::xidl_rust_axum::Request<{{ method.request_payload_ty }}>{% else %}{% if method.server_params | length > 0 %},
+        {{ method.server_params | join(", ") }}{% endif %}{% if method.is_upgrade %},
+        upgrade: ::xidl_rust_axum::upgrade::Upgrade{% endif %}{% endif %}
+        ) -> ::xidl_rust_axum::Result<{% if method.is_server_stream %}xidl_rust_axum::stream::SseStream<{{ method.response_ty }}>{% elif method.is_bidi_stream %}(){% elif method.is_upgrade %}::xidl_rust_axum::axum::response::Response{% else %}{{ method.response_ty }}{% endif %}>;
     {% endfor %}
 }
 
@@ -117,7 +118,7 @@ pub trait {{ ident }} {
         }
 
     {% endif %}
-    {% if method.request_struct is defined and method.request_struct and not method.is_server_stream and not method.is_client_stream and not method.is_bidi_stream %}
+    {% if method.request_struct is defined and method.request_struct and not method.is_server_stream and not method.is_client_stream and not method.is_bidi_stream and not method.is_upgrade %}
         #[derive(::serde::Deserialize)]
         struct {{ method.request_struct }} {
             {% for param in method.request_params %}
