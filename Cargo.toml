@@ -8,7 +8,8 @@ members = [
   "xidl-rust-axum",
   "xidlc",
   "xidl-parser",
-  "xidl-typeobject", "apis/xidl-api-keycloak",
+  "xidl-typeobject",
+  "apis/xidl-api-keycloak",
 ]
 
 [workspace.package]
