@@ -31,7 +31,9 @@ pub(crate) fn emit_request_bind(
             field: &field,
             call: &call,
             ty: &param.ty,
-            optional_string: source_kind == "Query" && param.optional && param.ty == "string",
+            optional: param.optional,
+            wire_name: &param.wire_name,
+            source_kind,
         },
     )?);
     out.push('\n');
@@ -124,6 +126,7 @@ fn emit_encode(
             wire_name: &param.wire_name,
             field: &field,
             ty: &param.ty,
+            optional: param.optional,
         },
     )?);
     out.push('\n');

@@ -55,7 +55,7 @@ func RegisterReportApiHandler(r gin.IRouter, svc ReportApiService) {
 			return
 		}
 
-		req.Lang = xidlgohttp.QueryOptionalString(xidlgohttp.QueryString(c.Request.URL.Query(), "lang"))
+		req.Lang = xidlgohttp.QueryOptionalString(c.Request.URL.Query(), "lang")
 
 		if value, err := xidlgohttp.HeaderString(c.Request.Header, "X-Trace-Id"); err == nil {
 			req.TraceId = value
@@ -119,7 +119,9 @@ func (c *ReportApiClient) GetReport(ctx context.Context, req *ReportApiGetReport
 	requestURL := c.baseURL + formatReportApiGetReportPath(req)
 	query := url.Values{}
 
-	query.Set("lang", req.Lang)
+	if req.Lang != nil {
+		query.Set("lang", *req.Lang)
+	}
 	if encoded := query.Encode(); encoded != "" {
 		requestURL += "?" + encoded
 	}
@@ -166,9 +168,9 @@ func (c *ReportApiClient) WatchReport(ctx context.Context, req *ReportApiWatchRe
 }
 
 type ReportApiGetReportRequest struct {
-	Id      string `json:"id" form:"id"`
-	Lang    string `json:"lang" form:"lang"`
-	TraceId string `json:"trace_id" form:"trace_id"`
+	Id      string  `json:"id" form:"id"`
+	Lang    *string `json:"lang" form:"lang"`
+	TraceId string  `json:"trace_id" form:"trace_id"`
 }
 
 type ReportApiGetReportResponse struct {

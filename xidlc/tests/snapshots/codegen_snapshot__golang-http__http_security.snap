@@ -67,7 +67,7 @@ func RegisterHttpSecurityServiceHandler(r gin.IRouter, svc HttpSecurityServiceSe
 			return
 		}
 
-		req.Locale = xidlgohttp.QueryOptionalString(xidlgohttp.QueryString(c.Request.URL.Query(), "locale"))
+		req.Locale = xidlgohttp.QueryOptionalString(c.Request.URL.Query(), "locale")
 
 		if value, err := xidlgohttp.HeaderString(c.Request.Header, "X-Trace-Id"); err == nil {
 			req.TraceId = value
@@ -155,7 +155,9 @@ func (c *HttpSecurityServiceClient) GetUser(ctx context.Context, req *HttpSecuri
 	requestURL := c.baseURL + formatHttpSecurityServiceGetUserPath(req)
 	query := url.Values{}
 
-	query.Set("locale", req.Locale)
+	if req.Locale != nil {
+		query.Set("locale", *req.Locale)
+	}
 	if encoded := query.Encode(); encoded != "" {
 		requestURL += "?" + encoded
 	}
@@ -237,9 +239,9 @@ func (c *HttpSecurityServiceClient) Health(ctx context.Context, req *HttpSecurit
 }
 
 type HttpSecurityServiceGetUserRequest struct {
-	Id      uint32 `json:"id" form:"id"`
-	Locale  string `json:"locale" form:"locale"`
-	TraceId string `json:"trace_id" form:"trace_id"`
+	Id      uint32  `json:"id" form:"id"`
+	Locale  *string `json:"locale" form:"locale"`
+	TraceId string  `json:"trace_id" form:"trace_id"`
 }
 
 type HttpSecurityServiceGetUserResponse struct {
@@ -278,13 +280,13 @@ func decodeHttpSecurityServiceGetUserResponse(resp *http.Response) (HttpSecurity
 }
 
 type HttpSecurityServiceSearchUserRequest struct {
-	Keyword string `json:"keyword" form:"keyword"`
-	Page    uint32 `json:"page" form:"page"`
+	Keyword string  `json:"keyword" form:"keyword"`
+	Page    *uint32 `json:"page" form:"page"`
 }
 
 type HttpSecurityServiceSearchUserRequestBody struct {
-	Keyword string `json:"keyword" form:"keyword"`
-	Page    uint32 `json:"page" form:"page"`
+	Keyword string  `json:"keyword" form:"keyword"`
+	Page    *uint32 `json:"page" form:"page"`
 }
 
 type HttpSecurityServiceSearchUserResponse struct {

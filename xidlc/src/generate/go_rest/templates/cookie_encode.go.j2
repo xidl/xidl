@@ -1,3 +1,9 @@
-{%- if ty == "string" %}
-    httpReq.AddCookie(&http.Cookie{Name: "{{ wire_name }}", Value: {{ field }}})
+{%- if optional %}
+    {%- if ty == "string" %}
+        if {{ field }} != nil { httpReq.AddCookie(&http.Cookie{Name: "{{ wire_name }}", Value: *{{ field }}}) }
+    {%- endif %}
+{%- else %}
+    {%- if ty == "string" %}
+        httpReq.AddCookie(&http.Cookie{Name: "{{ wire_name }}", Value: {{ field }}})
+    {%- endif %}
 {%- endif %}

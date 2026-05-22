@@ -5,7 +5,9 @@ pub(super) struct RequestBindTemplate<'a> {
     pub(super) field: &'a str,
     pub(super) call: &'a str,
     pub(super) ty: &'a str,
-    pub(super) optional_string: bool,
+    pub(super) optional: bool,
+    pub(super) wire_name: &'a str,
+    pub(super) source_kind: &'a str,
 }
 
 #[derive(Serialize)]
@@ -13,6 +15,7 @@ pub(super) struct EncodeTemplate<'a> {
     pub(super) wire_name: &'a str,
     pub(super) field: &'a str,
     pub(super) ty: &'a str,
+    pub(super) optional: bool,
 }
 
 #[derive(Serialize)]
