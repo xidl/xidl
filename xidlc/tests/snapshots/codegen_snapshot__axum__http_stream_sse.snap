@@ -167,7 +167,9 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpStreamSseServiceWatchTopicPath { topic } = path;
+        let topic: String = topic;
         let HttpStreamSseServiceWatchTopicRequestInQuery { lang } = query;
+        let lang: String = lang;
         let data = HttpStreamSseServiceWatchTopicRequest {
             topic,
             lang,

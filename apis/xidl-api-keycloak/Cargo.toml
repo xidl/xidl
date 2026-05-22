@@ -1,0 +1,27 @@
+[package]
+name = "xidl-api-keycloak"
+version.workspace = true
+edition.workspace = true
+description.workspace = true
+license.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+repository.workspace = true
+
+[features]
+default = ["server"]
+server = []
+client = []
+
+[dependencies]
+async-trait.workspace = true
+serde.workspace = true
+xidl-rust-axum.workspace = true
+
+[build-dependencies]
+xidl-build = { workspace = true }
+
+
+[lints]
+workspace = true

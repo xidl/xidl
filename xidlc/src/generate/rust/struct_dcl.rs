@@ -67,7 +67,7 @@ pub(crate) fn render_struct_with_config(
             "members": members,
             "derive": derive.all,
             "enable_serde_attrs": derive.enable_serde_attrs(),
-            "serde_rename_all": serde_rename_all_from_annotations(&def.annotations),
+            "serde_rename_all": serde_rename_all_from_annotations(&def.annotations).map(|r| r.as_str()),
             "rust_attrs": rust_passthrough_attrs_from_annotations(&def.annotations),
         }),
         &doc_lines_from_annotations(&def.annotations),

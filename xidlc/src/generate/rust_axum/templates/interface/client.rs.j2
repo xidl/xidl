@@ -191,7 +191,7 @@ impl {{ ident }}Client {
             {% if method.query_params | length > 0 %}
                 let query = {{ method.struct_prefix }}RequestOutQuery {
                     {% for param in method.query_params %}
-                        {{ param.name }},
+                        {{ param.name }}{% if param.name != param.out_expr %}: {{ param.out_expr }}{% endif %},
                     {% endfor %}
                 };
                 let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
@@ -254,7 +254,7 @@ impl {{ ident }}Client {
                 {% if method.query_params | length > 0 %}
                     let query = {{ method.struct_prefix }}RequestOutQuery {
                         {% for param in method.query_params %}
-                            {{ param.name }},
+                            {{ param.name }}{% if param.name != param.out_expr %}: {{ param.out_expr }}{% endif %},
                         {% endfor %}
                     };
                     let query = xidl_rust_axum::serde_urlencoded::to_string(&query)

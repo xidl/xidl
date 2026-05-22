@@ -206,13 +206,23 @@ fn render_struct(
         for decl in &member.ident {
             let name = rust_ident(&declarator_name(decl));
             let ty = member_ty(member, decl, direction, module_name, registry)?;
+            #[rustfmt::skip]
+            let (enc, dec) = if member.is_optional() {
+                let e = encode_expr("value", &member.ty, registry)?;
+                let d = decode_expr("value", &member.ty, registry)?;
+                (if e == "value" { format!("value.{name}") } else { format!("value.{name}.map(|value| {e})") },
+                 if d == "value" { format!("value.{name}") } else { format!("value.{name}.map(|value| {d})") })
+            } else {
+                (encode_expr(&format!("value.{name}"), &member.ty, registry)?,
+                 decode_expr(&format!("value.{name}"), &member.ty, registry)?)
+            };
             fields.push(TransportFieldContext {
                 name: name.clone(),
                 ty,
                 serde_rename: rename.clone(),
                 optional: member.is_optional(),
-                encode_expr: encode_expr(&format!("value.{name}"), &member.ty, registry)?,
-                decode_expr: decode_expr(&format!("value.{name}"), &member.ty, registry)?,
+                encode_expr: enc,
+                decode_expr: dec,
             });
         }
     }
@@ -355,20 +365,14 @@ fn track_type(
     Ok(())
 }
 
-pub(crate) fn encode_expr(
-    expr: &str,
-    ty: &hir::TypeSpec,
-    registry: &TypeRegistry,
-) -> IdlcResult<String> {
-    convert_expr(expr, ty, registry)
+#[rustfmt::skip]
+pub(crate) fn encode_expr(expr: &str, ty: &hir::TypeSpec, r: &TypeRegistry) -> IdlcResult<String> {
+    convert_expr(expr, ty, r)
 }
 
-pub(crate) fn decode_expr(
-    expr: &str,
-    ty: &hir::TypeSpec,
-    registry: &TypeRegistry,
-) -> IdlcResult<String> {
-    convert_expr(expr, ty, registry)
+#[rustfmt::skip]
+pub(crate) fn decode_expr(expr: &str, ty: &hir::TypeSpec, r: &TypeRegistry) -> IdlcResult<String> {
+    convert_expr(expr, ty, r)
 }
 
 fn convert_expr(expr: &str, ty: &hir::TypeSpec, registry: &TypeRegistry) -> IdlcResult<String> {
@@ -411,29 +415,19 @@ fn convert_expr(expr: &str, ty: &hir::TypeSpec, registry: &TypeRegistry) -> Idlc
     })
 }
 
+#[rustfmt::skip]
 fn canonical_name(module_path: &[String], ident: &str) -> String {
-    if module_path.is_empty() {
-        ident.to_string()
-    } else {
-        format!("{}::{}", module_path.join("::"), ident)
-    }
+    if module_path.is_empty() { ident.to_string() } else { format!("{}::{}", module_path.join("::"), ident) }
 }
 
-fn scoped_key(value: &hir::ScopedName) -> String {
-    value.name.join("::")
-}
+#[rustfmt::skip]
+fn scoped_key(value: &hir::ScopedName) -> String { value.name.join("::") }
 
-fn transport_ident(value: &str) -> String {
-    value
-        .split("::")
-        .map(|part| part.to_string())
-        .collect::<Vec<_>>()
-        .join("_")
-}
+#[rustfmt::skip]
+fn transport_ident(value: &str) -> String { value.split("::").map(|part| part.to_string()).collect::<Vec<_>>().join("_") }
 
-fn transport_module(direction: &str, interface_ident: &str) -> String {
-    format!("__xidl_{direction}_{interface_ident}")
-}
+#[rustfmt::skip]
+fn transport_module(direction: &str, interface_ident: &str) -> String { format!("__xidl_{direction}_{interface_ident}") }
 
 fn public_path_from_canonical(value: &str, module_path: &[String]) -> String {
     let parts = value.split("::").map(rust_ident).collect::<Vec<_>>();
@@ -449,9 +443,8 @@ fn public_path_from_canonical(value: &str, module_path: &[String]) -> String {
     }
 }
 
-fn render_public_scoped(value: &hir::ScopedName) -> String {
-    rust_scoped_name(value)
-}
+#[rustfmt::skip]
+fn render_public_scoped(value: &hir::ScopedName) -> String { rust_scoped_name(value) }
 
 #[cfg(test)]
 mod tests;

@@ -180,6 +180,9 @@ T: {{ ident }} + Send + Sync + 'static,
                         {{ param.name }},
                     {% endfor %}
                 } = path;
+                {% for param in method.path_params %}
+                    let {{ param.name }}: {{ param.ty }} = {{ param.in_expr }};
+                {% endfor %}
             {% endif %}
             {% if method.query_params | length > 0 and (method.is_server_stream or method.is_client_stream or method.is_bidi_stream or method.is_upgrade) %}
                 let {{ method.struct_prefix }}RequestInQuery {
@@ -187,6 +190,9 @@ T: {{ ident }} + Send + Sync + 'static,
                         {{ param.name }},
                     {% endfor %}
                 } = query;
+                {% for param in method.query_params %}
+                    let {{ param.name }}: {{ param.ty }} = {{ param.in_expr }};
+                {% endfor %}
             {% endif %}
             {% if method.header_params | length > 0 and (method.is_server_stream or method.is_client_stream or method.is_bidi_stream or method.is_upgrade) %}
                 {% for param in method.header_params %}

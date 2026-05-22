@@ -13,8 +13,8 @@ test-go-codegen:
 	$(XIDLC_BIN) gen --out-dir "$$tmpdir/hello_world" go-rest xidlc-examples/api/http/hello_world.idl; \
 	diff -u "$$tmpdir/hello_world/hello_world_http.go" xidlc-examples/hello_world/hello_world_http.go; \
 	$(XIDLC_BIN) gen --out-dir "$$tmpdir/http_media_types" go-rest xidlc-examples/api/http/http_media_types.idl; \
-	diff -u "$$tmpdir/http_media_types/http_media_types.go" xidlc-examples/http_media_types/http_media_types.go; \
-	diff -u "$$tmpdir/http_media_types/http_media_types_http.go" xidlc-examples/http_media_types/http_media_types_http.go; \
+	diff -u "$$tmpdir/http_media_types/rest_media_types.go" xidlc-examples/http_media_types/rest_media_types.go; \
+	diff -u "$$tmpdir/http_media_types/rest_media_types_http.go" xidlc-examples/http_media_types/rest_media_types_http.go; \
 	$(XIDLC_BIN) gen --out-dir "$$tmpdir/http_stream" go-rest xidlc-examples/api/http/http_stream.idl; \
 	diff -u "$$tmpdir/http_stream/http_stream_http.go" xidlc-examples/http_stream/http_stream_http.go; \
 	$(XIDLC_BIN) gen --out-dir "$$tmpdir/http_security" go-rest xidlc-examples/api/http/http_security.idl; \

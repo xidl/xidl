@@ -88,6 +88,7 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpUpgradeServiceConnectRawRequestInQuery { token } = query;
+        let token: String = token;
         let mut resp = match svc
             .connect_raw(
                 token,

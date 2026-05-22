@@ -150,7 +150,9 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpStreamSseBindingsServiceWatchProjectPath { project_id } = path;
+        let project_id: String = project_id;
         let HttpStreamSseBindingsServiceWatchProjectRequestInQuery { cursor } = query;
+        let cursor: Option<String> = cursor;
         let trace_id: String = match headers.get("X-Trace-Id") {
             Some(header_value) => {
                 let header_str = header_value

@@ -50,7 +50,7 @@ impl RustRender for hir::EnumDcl {
                     "derive": derive.all,
                     "has_serde_serialize": derive.has_serde_serialize,
                     "has_serde_deserialize": derive.has_serde_deserialize,
-                    "serde_rename_all": serde_rename_all_from_annotations(&self.annotations),
+                    "serde_rename_all": serde_rename_all_from_annotations(&self.annotations).map(|r| r.as_str()),
                     "rust_attrs": rust_passthrough_attrs_from_annotations(&self.annotations),
                 }),
                 &self.ident,
