@@ -12,6 +12,10 @@ repository.workspace = true
 [features]
 default = ["client"]
 client = []
+docs-only = []
+
+[package.metadata.docs.rs]
+features = ["docs-only"]
 
 [dependencies]
 async-trait.workspace = true

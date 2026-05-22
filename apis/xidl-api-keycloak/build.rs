@@ -11,9 +11,12 @@ fn main() {
         .with_mock(false)
         .compile(&["./api/keycloak.idl"])
         .expect("failed to compile keycloak for rust-axum");
-    Builder::new()
-        .with_lang("openapi")
-        .with_out_dir("./api/")
-        .compile(&["./api/keycloak.idl"])
-        .expect("failed to compile keycloak openapi");
+
+    if cfg!(feature = "docs-only") {
+        Builder::new()
+            .with_lang("openapi")
+            .with_out_dir("./api/")
+            .compile(&["./api/keycloak.idl"])
+            .expect("failed to compile keycloak openapi");
+    }
 }
