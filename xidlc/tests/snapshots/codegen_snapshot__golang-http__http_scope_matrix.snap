@@ -476,13 +476,13 @@ func decodeHttpScopeMatrixServiceDefaultScopeResponse(resp *http.Response) (Http
 }
 
 type HttpScopeMatrixServiceOverrideConsumesOnlyRequest struct {
-	Name string `json:"name" form:"name"`
-	Age  uint32 `json:"age" form:"age"`
+	Name string  `json:"name" form:"name"`
+	Age  *uint32 `json:"age" form:"age"`
 }
 
 type HttpScopeMatrixServiceOverrideConsumesOnlyRequestBody struct {
-	Name string `json:"name" form:"name"`
-	Age  uint32 `json:"age" form:"age"`
+	Name string  `json:"name" form:"name"`
+	Age  *uint32 `json:"age" form:"age"`
 }
 
 type HttpScopeMatrixServiceOverrideConsumesOnlyResponse struct {
@@ -566,13 +566,13 @@ func decodeHttpScopeMatrixServiceOverrideProducesOnlyResponse(resp *http.Respons
 }
 
 type HttpScopeMatrixServiceOverrideBothMediaRequest struct {
-	Name string `json:"name" form:"name"`
-	Age  uint32 `json:"age" form:"age"`
+	Name string  `json:"name" form:"name"`
+	Age  *uint32 `json:"age" form:"age"`
 }
 
 type HttpScopeMatrixServiceOverrideBothMediaRequestBody struct {
-	Name string `json:"name" form:"name"`
-	Age  uint32 `json:"age" form:"age"`
+	Name string  `json:"name" form:"name"`
+	Age  *uint32 `json:"age" form:"age"`
 }
 
 type HttpScopeMatrixServiceOverrideBothMediaResponse struct {
@@ -821,7 +821,7 @@ func RegisterHttpSecurityMatrixServiceHandler(r gin.IRouter, svc HttpSecurityMat
 			return
 		}
 
-		req.Locale = xidlgohttp.QueryOptionalString(xidlgohttp.QueryString(c.Request.URL.Query(), "locale"))
+		req.Locale = xidlgohttp.QueryOptionalString(c.Request.URL.Query(), "locale")
 		resp, err := svc.AlternativeSecurity(c.Request.Context(), req)
 		if err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
@@ -959,7 +959,9 @@ func (c *HttpSecurityMatrixServiceClient) AlternativeSecurity(ctx context.Contex
 	requestURL := c.baseURL + formatHttpSecurityMatrixServiceAlternativeSecurityPath(req)
 	query := url.Values{}
 
-	query.Set("locale", req.Locale)
+	if req.Locale != nil {
+		query.Set("locale", *req.Locale)
+	}
 	if encoded := query.Encode(); encoded != "" {
 		requestURL += "?" + encoded
 	}
@@ -1077,13 +1079,13 @@ func decodeHttpSecurityMatrixServiceInheritedSecurityResponse(resp *http.Respons
 }
 
 type HttpSecurityMatrixServiceBearerOrCookieSecurityRequest struct {
-	Action string `json:"action" form:"action"`
-	Note   string `json:"note" form:"note"`
+	Action string  `json:"action" form:"action"`
+	Note   *string `json:"note" form:"note"`
 }
 
 type HttpSecurityMatrixServiceBearerOrCookieSecurityRequestBody struct {
-	Action string `json:"action" form:"action"`
-	Note   string `json:"note" form:"note"`
+	Action string  `json:"action" form:"action"`
+	Note   *string `json:"note" form:"note"`
 }
 
 type HttpSecurityMatrixServiceBearerOrCookieSecurityResponse struct {
@@ -1118,8 +1120,8 @@ func decodeHttpSecurityMatrixServiceBearerOrCookieSecurityResponse(resp *http.Re
 }
 
 type HttpSecurityMatrixServiceAlternativeSecurityRequest struct {
-	Id     string `json:"id" form:"id"`
-	Locale string `json:"locale" form:"locale"`
+	Id     string  `json:"id" form:"id"`
+	Locale *string `json:"locale" form:"locale"`
 }
 
 type HttpSecurityMatrixServiceAlternativeSecurityResponse struct {
@@ -1156,13 +1158,13 @@ func decodeHttpSecurityMatrixServiceAlternativeSecurityResponse(resp *http.Respo
 }
 
 type HttpSecurityMatrixServiceOauthSecurityRequest struct {
-	Keyword string `json:"keyword" form:"keyword"`
-	Page    uint32 `json:"page" form:"page"`
+	Keyword string  `json:"keyword" form:"keyword"`
+	Page    *uint32 `json:"page" form:"page"`
 }
 
 type HttpSecurityMatrixServiceOauthSecurityRequestBody struct {
-	Keyword string `json:"keyword" form:"keyword"`
-	Page    uint32 `json:"page" form:"page"`
+	Keyword string  `json:"keyword" form:"keyword"`
+	Page    *uint32 `json:"page" form:"page"`
 }
 
 type HttpSecurityMatrixServiceOauthSecurityResponse struct {

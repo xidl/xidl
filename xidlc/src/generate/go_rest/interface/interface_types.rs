@@ -24,10 +24,15 @@ pub(super) fn render_method_types(
 fn render_request_types(out: &mut String, method: &MethodMeta) {
     writeln!(out, "type {} struct {{", method.request_struct).unwrap();
     for param in &method.request_params {
+        let ty = if param.optional {
+            format!("*{}", param.ty)
+        } else {
+            param.ty.clone()
+        };
         writeln!(
             out,
             "\t{} {} `json:\"{}\" form:\"{}\"`",
-            param.field_name, param.ty, param.raw_name, param.raw_name
+            param.field_name, ty, param.raw_name, param.raw_name
         )
         .unwrap();
     }
@@ -37,10 +42,15 @@ fn render_request_types(out: &mut String, method: &MethodMeta) {
     if let Some(body_struct) = &method.request_body_struct {
         writeln!(out, "type {body_struct} struct {{").unwrap();
         for param in &method.body_params {
+            let ty = if param.optional {
+                format!("*{}", param.ty)
+            } else {
+                param.ty.clone()
+            };
             writeln!(
                 out,
                 "\t{} {} `json:\"{}\" form:\"{}\"`",
-                param.field_name, param.ty, param.wire_name, param.wire_name
+                param.field_name, ty, param.wire_name, param.wire_name
             )
             .unwrap();
         }
