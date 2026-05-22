@@ -107,6 +107,7 @@ where
             None => return Err(xidl_rust_axum::Error::unauthorized()),
         };
         let HttpSecurityStreamServiceWatchChannelPath { channel } = path;
+        let channel: String = channel;
         let data = HttpSecurityStreamServiceWatchChannelRequest {
             channel,
             xidl_auth,

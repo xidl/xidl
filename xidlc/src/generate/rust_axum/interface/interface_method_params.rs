@@ -1,15 +1,15 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::util::rust_ident;
-use crate::generate::rust_axum::interface::interface_annotations::serde_rename;
-use crate::generate::rust_axum::interface::interface_method_support::{
-    param_source_code, path_param_template_name, transport_param_type,
+use crate::generate::rust_axum::interface::{
+    ParamContext, ParamSource, RenderEnv,
+    interface_annotations::serde_rename,
+    interface_method_support::{param_source_code, path_param_template_name, transport_param_type},
+    interface_types::{
+        axum_type, cookie_is_multi, cookie_item_is_primitive, cookie_item_is_string,
+        cookie_item_ty, header_is_multi, header_item_is_primitive, header_item_is_string,
+        header_item_ty, render_param_type,
+    },
 };
-use crate::generate::rust_axum::interface::interface_types::{
-    axum_type, cookie_is_multi, cookie_item_is_primitive, cookie_item_is_string, cookie_item_ty,
-    header_is_multi, header_item_is_primitive, header_item_is_string, header_item_ty,
-    render_param_type,
-};
-use crate::generate::rust_axum::interface::{ParamContext, ParamSource, RenderEnv};
 use crate::generate::rust_axum::transport::{
     TransportDirection, TransportTracker, decode_expr, encode_expr,
 };
@@ -63,18 +63,15 @@ pub(crate) fn collect_method_params(
         let ty = render_param_type(&p.ty, optional);
 
         // Input
-        if matches!(
-            p.direction,
-            xidl_parser::rest_hir::HttpSignatureParamDirection::In
-                | xidl_parser::rest_hir::HttpSignatureParamDirection::InOut
-        ) {
+        use xidl_parser::rest_hir::HttpSignatureParamDirection as Dir;
+        if matches!(p.direction, Dir::In | Dir::InOut) {
             let (source, wire_name) = find_input_binding(http_op, &p.name, flatten);
             let source_enum = match source {
                 xidl_parser::rest_hir::HttpParamKind::Path => ParamSource::Path,
                 xidl_parser::rest_hir::HttpParamKind::Query => ParamSource::Query,
                 xidl_parser::rest_hir::HttpParamKind::Header => ParamSource::Header,
                 xidl_parser::rest_hir::HttpParamKind::Cookie => ParamSource::Cookie,
-                xidl_parser::rest_hir::HttpParamKind::Body => ParamSource::Body,
+                _ => ParamSource::Body,
             };
 
             params.params.push(format!("{name}: {ty}"));
@@ -83,7 +80,6 @@ pub(crate) fn collect_method_params(
             params.server_param_names.push(name.clone());
 
             let serde_name = if matches!(source_enum, ParamSource::Body) {
-                // In Axum we need the wire name for serde if it's in a struct
                 if wire_name.is_empty() {
                     None
                 } else {
@@ -119,11 +115,7 @@ pub(crate) fn collect_method_params(
         }
 
         // Output
-        if matches!(
-            p.direction,
-            xidl_parser::rest_hir::HttpSignatureParamDirection::Out
-                | xidl_parser::rest_hir::HttpSignatureParamDirection::InOut
-        ) {
+        if matches!(p.direction, Dir::Out | Dir::InOut) {
             let (source, wire_name) = find_output_binding(http_op, &p.name);
             let source_enum = match source {
                 xidl_parser::rest_hir::HttpParamKind::Header => ParamSource::Header,
@@ -163,11 +155,9 @@ pub(super) fn find_input_binding(
     name: &str,
     flatten: bool,
 ) -> (xidl_parser::rest_hir::HttpParamKind, String) {
+    use xidl_parser::rest_hir::HttpParamKind as Kind;
     if let Some(b) = op.http.request.path.iter().find(|b| b.source_param == name) {
-        return (
-            xidl_parser::rest_hir::HttpParamKind::Path,
-            b.wire_name.clone(),
-        );
+        return (Kind::Path, b.wire_name.clone());
     }
     if let Some(b) = op
         .http
@@ -176,10 +166,7 @@ pub(super) fn find_input_binding(
         .iter()
         .find(|b| b.source_param == name)
     {
-        return (
-            xidl_parser::rest_hir::HttpParamKind::Query,
-            b.wire_name.clone(),
-        );
+        return (Kind::Query, b.wire_name.clone());
     }
     if let Some(b) = op
         .http
@@ -188,10 +175,7 @@ pub(super) fn find_input_binding(
         .iter()
         .find(|b| b.source_param == name)
     {
-        return (
-            xidl_parser::rest_hir::HttpParamKind::Header,
-            b.wire_name.clone(),
-        );
+        return (Kind::Header, b.wire_name.clone());
     }
     if let Some(b) = op
         .http
@@ -200,10 +184,7 @@ pub(super) fn find_input_binding(
         .iter()
         .find(|b| b.source_param == name)
     {
-        return (
-            xidl_parser::rest_hir::HttpParamKind::Cookie,
-            b.wire_name.clone(),
-        );
+        return (Kind::Cookie, b.wire_name.clone());
     }
 
     match &op.http.request.body.shape {
@@ -212,21 +193,18 @@ pub(super) fn find_input_binding(
             flatten: f,
             ..
         } if source_param == name => (
-            xidl_parser::rest_hir::HttpParamKind::Body,
+            Kind::Body,
             if *f { "".to_string() } else { name.to_string() },
         ),
         HttpRequestBodyShape::Object { fields } => {
             if let Some(f) = fields.iter().find(|f| f.source_param == name) {
-                (
-                    xidl_parser::rest_hir::HttpParamKind::Body,
-                    f.field_name.clone(),
-                )
+                (Kind::Body, f.field_name.clone())
             } else {
-                (xidl_parser::rest_hir::HttpParamKind::Body, name.to_string())
+                (Kind::Body, name.to_string())
             }
         }
         _ => (
-            xidl_parser::rest_hir::HttpParamKind::Body,
+            Kind::Body,
             if flatten {
                 "".to_string()
             } else {
@@ -240,25 +218,32 @@ pub(super) fn find_output_binding(
     op: &HttpOperation,
     name: &str,
 ) -> (xidl_parser::rest_hir::HttpParamKind, String) {
-    if let Some(b) = op.http.response.header.iter().find(|b| match &b.source {
-        HttpOutputSource::Param { name: n } => n == name,
-        _ => false,
-    }) {
-        return (
-            xidl_parser::rest_hir::HttpParamKind::Header,
-            b.wire_name.clone(),
-        );
+    use xidl_parser::rest_hir::HttpParamKind as Kind;
+    let has_name =
+        |s: &HttpOutputSource| matches!(s, HttpOutputSource::Param { name: n } if n == name);
+    if let Some(b) = op.http.response.header.iter().find(|b| has_name(&b.source)) {
+        return (Kind::Header, b.wire_name.clone());
     }
-    if let Some(b) = op.http.response.cookie.iter().find(|b| match &b.source {
-        HttpOutputSource::Param { name: n } => n == name,
-        _ => false,
-    }) {
-        return (
-            xidl_parser::rest_hir::HttpParamKind::Cookie,
-            b.wire_name.clone(),
-        );
+    if let Some(b) = op.http.response.cookie.iter().find(|b| has_name(&b.source)) {
+        return (Kind::Cookie, b.wire_name.clone());
     }
-    (xidl_parser::rest_hir::HttpParamKind::Body, name.to_string())
+    (Kind::Body, name.to_string())
+}
+
+fn map_expr(
+    expr: &str,
+    is_opt: bool,
+    f: impl FnOnce(&str) -> IdlcResult<String>,
+) -> IdlcResult<String> {
+    if !is_opt {
+        return f(expr);
+    }
+    let v = f("value")?;
+    Ok(if v == "value" {
+        expr.to_string()
+    } else {
+        format!("{expr}.map(|value| {v})")
+    })
 }
 
 fn build_param_context(
@@ -299,17 +284,17 @@ fn build_param_context(
         optional: input.optional,
         inner_ty: input.inner_ty.to_string(),
         flatten: input.flatten,
-        in_expr: decode_expr(input.name, &input.sig_param.ty, env.registry)?,
-        out_expr: encode_expr(input.name, &input.sig_param.ty, env.registry)?,
-        field_in_expr: decode_expr(
-            &format!("value.{}", input.name),
-            &input.sig_param.ty,
-            env.registry,
-        )?,
-        field_out_expr: encode_expr(
-            &format!("value.{}", input.name),
-            &input.sig_param.ty,
-            env.registry,
-        )?,
+        in_expr: map_expr(input.name, input.optional, |e| {
+            decode_expr(e, &input.sig_param.ty, env.registry)
+        })?,
+        out_expr: map_expr(input.name, input.optional, |e| {
+            encode_expr(e, &input.sig_param.ty, env.registry)
+        })?,
+        field_in_expr: map_expr(&format!("value.{}", input.name), input.optional, |e| {
+            decode_expr(e, &input.sig_param.ty, env.registry)
+        })?,
+        field_out_expr: map_expr(&format!("value.{}", input.name), input.optional, |e| {
+            encode_expr(e, &input.sig_param.ty, env.registry)
+        })?,
     })
 }
