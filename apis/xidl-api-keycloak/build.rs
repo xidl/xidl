@@ -12,7 +12,7 @@ fn main() {
         .compile(&["./api/keycloak.idl"])
         .expect("failed to compile keycloak for rust-axum");
 
-    if cfg!(feature = "docs-only") {
+    if !cfg!(feature = "docs-only") {
         Builder::new()
             .with_lang("openapi")
             .with_out_dir("./api/")
