@@ -82,7 +82,9 @@ pub(crate) fn render_op_from_http(
 
     let method = http_method_from_hir(http_op.meta.method);
     let method_name = rust_ident(&op.ident);
-    let has_auth = security.has_basic_auth || security.has_bearer_auth;
+    let has_auth = security.has_basic_auth
+        || security.has_bearer_auth
+        || !security.api_key_requirements.is_empty();
     let auth_in_request_struct = has_auth && !(is_client_stream || is_bidi_stream);
     let auth_wrapper_struct = has_auth
         .then(|| {

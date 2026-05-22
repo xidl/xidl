@@ -152,6 +152,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         auth_header: Option<
             ::xidl_rust_axum::axum_extra::extract::TypedHeader<
                 ::xidl_rust_axum::auth::bearer::BearerHeader,
@@ -217,6 +218,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         auth_header: Option<
             ::xidl_rust_axum::axum_extra::extract::TypedHeader<
                 ::xidl_rust_axum::auth::bearer::BearerHeader,
@@ -276,10 +278,15 @@ impl ReportApiClient {
     }
     pub fn with_auth(
         base_url: impl Into<String>,
-        auth: ::xidl_rust_axum::ClientAuth,
+        auth: xidl_rust_axum::auth::bearer::BearerAuth,
     ) -> Self {
+        let client_auth = ::xidl_rust_axum::ClientAuth {
+            basic: None,
+            bearer: Some(auth.token),
+            api_keys: ::std::vec![],
+        };
         Self {
-            client: ::xidl_rust_axum::Client::with_auth(base_url, auth),
+            client: ::xidl_rust_axum::Client::with_auth(base_url, client_auth),
         }
     }
     pub fn with_http(
@@ -293,18 +300,33 @@ impl ReportApiClient {
     pub fn with_http_and_auth(
         base_url: impl Into<String>,
         http: ::xidl_rust_axum::reqwest::Client,
-        auth: ::xidl_rust_axum::ClientAuth,
+        auth: xidl_rust_axum::auth::bearer::BearerAuth,
     ) -> Self {
+        let client_auth = ::xidl_rust_axum::ClientAuth {
+            basic: None,
+            bearer: Some(auth.token),
+            api_keys: ::std::vec![],
+        };
         Self {
-            client: ::xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
+            client: ::xidl_rust_axum::Client::with_http_and_auth(
+                base_url,
+                http,
+                client_auth,
+            ),
         }
     }
     pub fn with_auth_override(
         &self,
-        auth: Option<::xidl_rust_axum::ClientAuth>,
+        auth: Option<xidl_rust_axum::auth::bearer::BearerAuth>,
     ) -> Self {
+        let client_auth = auth
+            .map(|a| ::xidl_rust_axum::ClientAuth {
+                basic: None,
+                bearer: Some(a.token),
+                api_keys: ::std::vec![],
+            });
         Self {
-            client: self.client.with_auth_override(auth),
+            client: self.client.with_auth_override(client_auth),
         }
     }
 }

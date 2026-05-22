@@ -52,6 +52,7 @@ impl SmartCityRestApi for SmartCityRestService {
         lot_id: String,
         _plate_number: String,
         _minutes: u32,
+        _xidl_auth: xidl_rust_axum::ApiKeyAuth,
     ) -> Result<SmartCityRestApiReserveLotResponse, xidl_rust_axum::Error> {
         Ok(SmartCityRestApiReserveLotResponse {
             r#return: format!("resv-{lot_id}"),

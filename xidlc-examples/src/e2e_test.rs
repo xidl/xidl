@@ -156,7 +156,7 @@ impl E2eHttpSecurity for LogicE2eHttpSecurity {
         user_id: String,
         locale: Option<String>,
         trace_id: String,
-        _xidl_auth: xidl_rust_axum::auth::basic::BasicAuth,
+        _xidl_auth: xidl_rust_axum::ClientAuth,
     ) -> Result<String, xidl_rust_axum::Error> {
         Ok(format!(
             "user:{user_id},lang:{:?},trace:{}",
@@ -567,7 +567,7 @@ impl E2eHttpSecurityMatrix for LogicE2eHttpSecurityMatrix {
         &self,
         resource_id: String,
         trace_id: String,
-        _xidl_auth: xidl_rust_axum::auth::basic::BasicAuth,
+        _xidl_auth: xidl_rust_axum::ClientAuth,
     ) -> Result<String, xidl_rust_axum::Error> {
         Ok(format!("{resource_id}:{trace_id}"))
     }
@@ -575,7 +575,7 @@ impl E2eHttpSecurityMatrix for LogicE2eHttpSecurityMatrix {
         &self,
         action: String,
         note: Option<String>,
-        _xidl_auth: xidl_rust_axum::auth::bearer::BearerAuth,
+        _xidl_auth: xidl_rust_axum::ClientAuth,
     ) -> Result<String, xidl_rust_axum::Error> {
         Ok(format!("{action}:{note:?}"))
     }
@@ -583,7 +583,7 @@ impl E2eHttpSecurityMatrix for LogicE2eHttpSecurityMatrix {
         &self,
         resource_id: String,
         locale: Option<String>,
-        _xidl_auth: xidl_rust_axum::auth::bearer::BearerAuth,
+        _xidl_auth: xidl_rust_axum::ClientAuth,
     ) -> Result<String, xidl_rust_axum::Error> {
         Ok(format!("{resource_id}:{locale:?}"))
     }

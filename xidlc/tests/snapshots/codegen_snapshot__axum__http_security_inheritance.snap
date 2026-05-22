@@ -18,7 +18,7 @@ pub trait HttpSecurityInheritanceService {
     async fn get_report(
         &self,
         id: String,
-        xidl_auth: xidl_rust_axum::auth::basic::BasicAuth,
+        xidl_auth: xidl_rust_axum::ClientAuth,
     ) -> ::xidl_rust_axum::Result<String>;
     async fn update_report(
         &self,
@@ -174,20 +174,30 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpSecurityInheritanceServiceGetReportRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let xidl_auth = match xidl_rust_axum::auth::basic::extract_basic_auth(&headers) {
-            Ok(auth) => auth,
-            Err(_) => {
-                let resp = xidl_rust_axum::auth::basic::unauthorized_response(
-                    "get_report",
-                );
-                return Ok(resp);
+        let basic = xidl_rust_axum::auth::basic::extract_basic_auth(&headers).ok();
+        let bearer = None;
+        let mut api_keys = ::std::vec![];
+        if let Some(header_val) = headers.get("X-Org-Key") {
+            if let Ok(value) = header_val.to_str() {
+                api_keys
+                    .push(::xidl_rust_axum::ApiKeyAuth {
+                        location: ::xidl_rust_axum::ClientApiKeyLocation::Header,
+                        name: "X-Org-Key".to_string(),
+                        value: value.to_string(),
+                    });
             }
+        }
+        let xidl_auth = ::xidl_rust_axum::ClientAuth {
+            basic,
+            bearer,
+            api_keys,
         };
         let HttpSecurityInheritanceServiceGetReportRequest { id } = request;
         let id: String = id;
@@ -235,6 +245,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpSecurityInheritanceServiceUpdateReportRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
@@ -288,6 +299,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
@@ -344,7 +356,7 @@ impl HttpSecurityInheritanceServiceClient {
     }
     pub fn with_auth(
         base_url: impl Into<String>,
-        auth: ::xidl_rust_axum::ClientAuth,
+        auth: xidl_rust_axum::ClientAuth,
     ) -> Self {
         Self {
             client: ::xidl_rust_axum::Client::with_auth(base_url, auth),
@@ -361,16 +373,13 @@ impl HttpSecurityInheritanceServiceClient {
     pub fn with_http_and_auth(
         base_url: impl Into<String>,
         http: ::xidl_rust_axum::reqwest::Client,
-        auth: ::xidl_rust_axum::ClientAuth,
+        auth: xidl_rust_axum::ClientAuth,
     ) -> Self {
         Self {
             client: ::xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
         }
     }
-    pub fn with_auth_override(
-        &self,
-        auth: Option<::xidl_rust_axum::ClientAuth>,
-    ) -> Self {
+    pub fn with_auth_override(&self, auth: Option<xidl_rust_axum::ClientAuth>) -> Self {
         Self {
             client: self.client.with_auth_override(auth),
         }

@@ -1,4 +1,5 @@
-use xidl_rust_axum::{ApiKeyAuth, ClientApiKeyLocation, ClientAuth};
+use xidl_rust_axum::auth::bearer::BearerAuth;
+use xidl_rust_axum::{ApiKeyAuth, ClientApiKeyLocation};
 use xidlc_examples::city_rest::SmartCityRestApiClient;
 use xidlc_examples::city_rest::SmartCityRestApiServer;
 use xidlc_examples::city_rest::SmartCityRestService;
@@ -25,14 +26,8 @@ async fn http_client_calls_all_endpoints() {
     let http = xidl_rust_axum::reqwest::Client::builder()
         .build()
         .expect("build reqwest client without proxy");
-    let auth = ClientAuth {
-        basic: None,
-        bearer: Some("test-token".to_string()),
-        api_keys: vec![ApiKeyAuth {
-            location: ClientApiKeyLocation::Header,
-            name: "X-Reserve-Key".to_string(),
-            value: "reserve-test".to_string(),
-        }],
+    let auth = BearerAuth {
+        token: "test-token".to_string(),
     };
     let client = SmartCityRestApiClient::with_http_and_auth(base, http, auth);
 
@@ -70,7 +65,16 @@ async fn http_client_calls_all_endpoints() {
         .expect("call probe_lot");
 
     let reserve = client
-        .reserve_lot("P1".to_string(), "A-12345".to_string(), 30)
+        .reserve_lot(
+            "P1".to_string(),
+            "A-12345".to_string(),
+            30,
+            ApiKeyAuth {
+                location: ClientApiKeyLocation::Header,
+                name: "X-Reserve-Key".to_string(),
+                value: "reserve-test".to_string(),
+            },
+        )
         .await
         .expect("call reserve_lot");
     assert_eq!(reserve.r#return, "resv-P1");
