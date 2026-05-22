@@ -3,6 +3,8 @@ use xidl_build::Builder;
 fn build_openapi(file_name: &str) {
     Builder::new()
         .with_lang("rust-axum")
+        .with_client(true)
+        .with_server(true)
         .with_mock(true)
         .compile(&[format!("./api/rest/{file_name}.idl")])
         .expect("failed to compile city http idl for rust-axum example");
