@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.69.0](https://github.com/xidl/xidl/compare/v0.68.0...v0.69.0) (2026-05-22)
+
+
+### Features
+
+* add keycloak ([47ca2e3](https://github.com/xidl/xidl/commit/47ca2e3f0752c834f021a113f92c6172b4e55555))
+* **xidl-api-keycloak:** build client ([8d95c39](https://github.com/xidl/xidl/commit/8d95c3921113ca079d20cbed9cad11f9915caa5d))
+
 ## [0.68.0](https://github.com/xidl/xidl/compare/v0.67.0...v0.68.0) (2026-05-22)
 
 
