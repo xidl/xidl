@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.69.2](https://github.com/xidl/xidl/compare/v0.69.1...v0.69.2) (2026-05-22)
+
+
+### Bug Fixes
+
+* fix build on docs.rs ([f591ba3](https://github.com/xidl/xidl/commit/f591ba3f856c2d7be49209617c055929bf7145b4))
+
 ## [0.69.1](https://github.com/xidl/xidl/compare/v0.69.0...v0.69.1) (2026-05-22)
 
 
