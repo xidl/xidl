@@ -10,8 +10,7 @@ categories.workspace = true
 repository.workspace = true
 
 [features]
-default = ["server"]
-server = []
+default = ["client"]
 client = []
 
 [dependencies]
