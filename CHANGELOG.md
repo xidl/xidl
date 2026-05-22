@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.68.0](https://github.com/xidl/xidl/compare/v0.67.0...v0.68.0) (2026-05-22)
+
+
+### Features
+
+* **xidlc:** generate typed authentication parameters and conditional constructors for Rust Axum ([3aae8f6](https://github.com/xidl/xidl/commit/3aae8f6f1f5269d4e26203c81fc06687ef6c86e7))
+
+
+### Bug Fixes
+
+* **xidlc:** generate pointer types and correct bindings for optional Go REST parameters ([a40c8b0](https://github.com/xidl/xidl/commit/a40c8b058f74308b88aaab78fbc6069165d77efc))
+
 ## [0.67.0](https://github.com/xidl/xidl/compare/v0.66.0...v0.67.0) (2026-05-21)
 
 
