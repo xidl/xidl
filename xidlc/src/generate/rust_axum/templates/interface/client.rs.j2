@@ -19,14 +19,27 @@ impl {{ ident }}Client {
         }
     }
 
-    pub fn with_auth(
-    base_url: impl Into<String>,
-    auth: ::xidl_rust_axum::ClientAuth,
-    ) -> Self {
-        Self {
-            client: ::xidl_rust_axum::Client::with_auth(base_url, auth),
+    {% if has_interface_security %}
+        pub fn with_auth(
+        base_url: impl Into<String>,
+        auth: {{ interface_auth_ty }},
+        ) -> Self {
+            {% if interface_auth_ty == "xidl_rust_axum::ClientAuth" %}
+                Self {
+                    client: ::xidl_rust_axum::Client::with_auth(base_url, auth),
+                }
+            {% else %}
+                let client_auth = ::xidl_rust_axum::ClientAuth {
+                    basic: {% if interface_auth_ty == "xidl_rust_axum::auth::basic::BasicAuth" %}Some(auth){% else %}None{% endif %},
+                    bearer: {% if interface_auth_ty == "xidl_rust_axum::auth::bearer::BearerAuth" %}Some(auth.token){% else %}None{% endif %},
+                    api_keys: {% if interface_auth_ty == "xidl_rust_axum::ApiKeyAuth" %}::std::vec![auth]{% else %}::std::vec![]{% endif %},
+                };
+                Self {
+                    client: ::xidl_rust_axum::Client::with_auth(base_url, client_auth),
+                }
+            {% endif %}
         }
-    }
+    {% endif %}
 
     pub fn with_http(
     base_url: impl Into<String>,
@@ -37,24 +50,48 @@ impl {{ ident }}Client {
         }
     }
 
-    pub fn with_http_and_auth(
-    base_url: impl Into<String>,
-    http: ::xidl_rust_axum::reqwest::Client,
-    auth: ::xidl_rust_axum::ClientAuth,
-    ) -> Self {
-        Self {
-            client: ::xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
+    {% if has_interface_security %}
+        pub fn with_http_and_auth(
+        base_url: impl Into<String>,
+        http: ::xidl_rust_axum::reqwest::Client,
+        auth: {{ interface_auth_ty }},
+        ) -> Self {
+            {% if interface_auth_ty == "xidl_rust_axum::ClientAuth" %}
+                Self {
+                    client: ::xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
+                }
+            {% else %}
+                let client_auth = ::xidl_rust_axum::ClientAuth {
+                    basic: {% if interface_auth_ty == "xidl_rust_axum::auth::basic::BasicAuth" %}Some(auth){% else %}None{% endif %},
+                    bearer: {% if interface_auth_ty == "xidl_rust_axum::auth::bearer::BearerAuth" %}Some(auth.token){% else %}None{% endif %},
+                    api_keys: {% if interface_auth_ty == "xidl_rust_axum::ApiKeyAuth" %}::std::vec![auth]{% else %}::std::vec![]{% endif %},
+                };
+                Self {
+                    client: ::xidl_rust_axum::Client::with_http_and_auth(base_url, http, client_auth),
+                }
+            {% endif %}
         }
-    }
 
-    pub fn with_auth_override(
-    &self,
-    auth: Option<::xidl_rust_axum::ClientAuth>,
-    ) -> Self {
-        Self {
-            client: self.client.with_auth_override(auth),
+        pub fn with_auth_override(
+        &self,
+        auth: Option<{{ interface_auth_ty }}>,
+        ) -> Self {
+            {% if interface_auth_ty == "xidl_rust_axum::ClientAuth" %}
+                Self {
+                    client: self.client.with_auth_override(auth),
+                }
+            {% else %}
+                let client_auth = auth.map(|a| ::xidl_rust_axum::ClientAuth {
+                    basic: {% if interface_auth_ty == "xidl_rust_axum::auth::basic::BasicAuth" %}Some(a){% else %}None{% endif %},
+                    bearer: {% if interface_auth_ty == "xidl_rust_axum::auth::bearer::BearerAuth" %}Some(a.token){% else %}None{% endif %},
+                    api_keys: {% if interface_auth_ty == "xidl_rust_axum::ApiKeyAuth" %}::std::vec![a]{% else %}::std::vec![]{% endif %},
+                });
+                Self {
+                    client: self.client.with_auth_override(client_auth),
+                }
+            {% endif %}
         }
-    }
+    {% endif %}
 }
 
 #[allow(non_snake_case)]
@@ -164,12 +201,16 @@ impl {{ ident }}Client {
                 }
             {% endif %}
             {% if method.auth_source_method and method.auth_param %}
-                let auth = xidl_rust_axum::ClientAuth {
-                    basic: {% if method.has_basic_auth %}Some({{ method.auth_param }}){% else %}None{% endif %},
-                    bearer: {% if method.has_bearer_auth %}Some({{ method.auth_param }}.token.clone()){% else %}None{% endif %},
-                    api_keys: vec![],
-                };
-                let auth_client = self.client.with_auth_override(Some(auth));
+                {% if method.auth_ty == "xidl_rust_axum::ClientAuth" %}
+                    let auth_client = self.client.with_auth_override(Some({{ method.auth_param }}));
+                {% else %}
+                    let auth = xidl_rust_axum::ClientAuth {
+                        basic: {% if method.auth_ty == "xidl_rust_axum::auth::basic::BasicAuth" %}Some({{ method.auth_param }}){% else %}None{% endif %},
+                        bearer: {% if method.auth_ty == "xidl_rust_axum::auth::bearer::BearerAuth" %}Some({{ method.auth_param }}.token.clone()){% else %}None{% endif %},
+                        api_keys: {% if method.auth_ty == "xidl_rust_axum::ApiKeyAuth" %}::std::vec![{{ method.auth_param }}]{% else %}::std::vec![]{% endif %},
+                    };
+                    let auth_client = self.client.with_auth_override(Some(auth));
+                {% endif %}
                 let auth_target = &auth_client;
             {% else %}
                 let auth_target = &self.client;

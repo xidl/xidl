@@ -130,10 +130,14 @@ pub(crate) fn security_context(profile: &Option<HttpSecurityProfile>) -> Securit
                 .collect::<Vec<_>>()
         })
         .unwrap_or_default();
-    let auth_ty = if has_basic_auth {
+    let auth_ty = if has_basic_auth && !has_bearer_auth && api_key_requirements.is_empty() {
         "xidl_rust_axum::auth::basic::BasicAuth".to_string()
-    } else if has_bearer_auth {
+    } else if has_bearer_auth && !has_basic_auth && api_key_requirements.is_empty() {
         "xidl_rust_axum::auth::bearer::BearerAuth".to_string()
+    } else if api_key_requirements.len() == 1 && !has_basic_auth && !has_bearer_auth {
+        "xidl_rust_axum::ApiKeyAuth".to_string()
+    } else if has_basic_auth || has_bearer_auth || !api_key_requirements.is_empty() {
+        "xidl_rust_axum::ClientAuth".to_string()
     } else {
         String::new()
     };

@@ -870,6 +870,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpDefaultsServiceGetNameRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
@@ -922,6 +923,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpDefaultsServiceListOrdersRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
@@ -976,6 +978,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpDefaultsServiceCreateUserRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
@@ -1028,6 +1031,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpDefaultsServiceCreateUserFlatRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
@@ -1080,6 +1084,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpDefaultsServiceSearchUserRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
@@ -1133,6 +1138,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpDefaultsServicePreviewUserRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
@@ -1185,6 +1191,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpDefaultsServiceGetUserRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
@@ -1238,6 +1245,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpDefaultsServiceGetUserAliasRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
@@ -1291,6 +1299,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpDefaultsServiceDeleteUserRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
@@ -1344,6 +1353,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpDefaultsServiceProbeUserRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
@@ -1383,6 +1393,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpDefaultsServiceUserOptionsRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
@@ -1422,6 +1433,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpDefaultsServiceReplaceUserRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
@@ -1476,6 +1488,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpDefaultsServicePatchUserRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
@@ -1535,37 +1548,12 @@ impl HttpDefaultsServiceClient {
             client: ::xidl_rust_axum::Client::new(base_url),
         }
     }
-    pub fn with_auth(
-        base_url: impl Into<String>,
-        auth: ::xidl_rust_axum::ClientAuth,
-    ) -> Self {
-        Self {
-            client: ::xidl_rust_axum::Client::with_auth(base_url, auth),
-        }
-    }
     pub fn with_http(
         base_url: impl Into<String>,
         http: ::xidl_rust_axum::reqwest::Client,
     ) -> Self {
         Self {
             client: ::xidl_rust_axum::Client::with_http(base_url, http),
-        }
-    }
-    pub fn with_http_and_auth(
-        base_url: impl Into<String>,
-        http: ::xidl_rust_axum::reqwest::Client,
-        auth: ::xidl_rust_axum::ClientAuth,
-    ) -> Self {
-        Self {
-            client: ::xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
-        }
-    }
-    pub fn with_auth_override(
-        &self,
-        auth: Option<::xidl_rust_axum::ClientAuth>,
-    ) -> Self {
-        Self {
-            client: self.client.with_auth_override(auth),
         }
     }
 }

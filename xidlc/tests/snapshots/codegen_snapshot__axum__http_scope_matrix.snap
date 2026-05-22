@@ -587,6 +587,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
@@ -654,6 +655,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
@@ -710,6 +712,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpScopeMatrixServiceDefaultScopeRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
@@ -780,6 +783,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpScopeMatrixServiceOverrideConsumesOnlyRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
@@ -852,6 +856,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpScopeMatrixServiceOverrideProducesOnlyRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
@@ -925,6 +930,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpScopeMatrixServiceOverrideBothMediaRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
@@ -999,6 +1005,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpScopeMatrixServiceDeprecatedPlainRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
@@ -1058,6 +1065,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpScopeMatrixServiceDeprecatedSinceOnlyRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
@@ -1128,6 +1136,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpScopeMatrixServiceDeprecatedWindowRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
@@ -1214,37 +1223,12 @@ impl HttpScopeMatrixServiceClient {
             client: ::xidl_rust_axum::Client::new(base_url),
         }
     }
-    pub fn with_auth(
-        base_url: impl Into<String>,
-        auth: ::xidl_rust_axum::ClientAuth,
-    ) -> Self {
-        Self {
-            client: ::xidl_rust_axum::Client::with_auth(base_url, auth),
-        }
-    }
     pub fn with_http(
         base_url: impl Into<String>,
         http: ::xidl_rust_axum::reqwest::Client,
     ) -> Self {
         Self {
             client: ::xidl_rust_axum::Client::with_http(base_url, http),
-        }
-    }
-    pub fn with_http_and_auth(
-        base_url: impl Into<String>,
-        http: ::xidl_rust_axum::reqwest::Client,
-        auth: ::xidl_rust_axum::ClientAuth,
-    ) -> Self {
-        Self {
-            client: ::xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
-        }
-    }
-    pub fn with_auth_override(
-        &self,
-        auth: Option<::xidl_rust_axum::ClientAuth>,
-    ) -> Self {
-        Self {
-            client: self.client.with_auth_override(auth),
         }
     }
 }
@@ -1719,19 +1703,19 @@ pub trait HttpSecurityMatrixService {
         &self,
         id: String,
         x_trace_id: String,
-        xidl_auth: xidl_rust_axum::auth::basic::BasicAuth,
+        xidl_auth: xidl_rust_axum::ClientAuth,
     ) -> ::xidl_rust_axum::Result<String>;
     async fn bearer_or_cookie_security(
         &self,
         action: String,
         note: Option<String>,
-        xidl_auth: xidl_rust_axum::auth::bearer::BearerAuth,
+        xidl_auth: xidl_rust_axum::ClientAuth,
     ) -> ::xidl_rust_axum::Result<String>;
     async fn alternative_security(
         &self,
         id: String,
         locale: Option<String>,
-        xidl_auth: xidl_rust_axum::auth::bearer::BearerAuth,
+        xidl_auth: xidl_rust_axum::ClientAuth,
     ) -> ::xidl_rust_axum::Result<String>;
     async fn oauth_security(
         &self,
@@ -2018,20 +2002,33 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpSecurityMatrixServiceInheritedSecurityRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let xidl_auth = match xidl_rust_axum::auth::basic::extract_basic_auth(&headers) {
-            Ok(auth) => auth,
-            Err(_) => {
-                let resp = xidl_rust_axum::auth::basic::unauthorized_response(
-                    "matrix realm",
-                );
-                return Ok(resp);
-            }
+        let basic = xidl_rust_axum::auth::basic::extract_basic_auth(&headers).ok();
+        let bearer = None;
+        let mut api_keys = ::std::vec![];
+        if let Some(value) = ::xidl_rust_axum::serde_urlencoded::from_str::<
+            ::std::collections::HashMap<String, String>,
+        >(uri.query().unwrap_or(""))
+            .ok()
+            .and_then(|map| map.get("org_key").cloned())
+        {
+            api_keys
+                .push(::xidl_rust_axum::ApiKeyAuth {
+                    location: ::xidl_rust_axum::ClientApiKeyLocation::Query,
+                    name: "org_key".to_string(),
+                    value,
+                });
+        }
+        let xidl_auth = ::xidl_rust_axum::ClientAuth {
+            basic,
+            bearer,
+            api_keys,
         };
         let HttpSecurityMatrixServiceInheritedSecurityRequest { id, x_trace_id } = request;
         let id: String = id;
@@ -2080,6 +2077,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         auth_header: Option<
             ::xidl_rust_axum::axum_extra::extract::TypedHeader<
                 ::xidl_rust_axum::auth::bearer::BearerHeader,
@@ -2091,11 +2089,38 @@ where
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let xidl_auth = match auth_header {
-            Some(::xidl_rust_axum::axum_extra::extract::TypedHeader(auth_header)) => {
-                xidl_rust_axum::auth::bearer::BearerAuth::from_header(auth_header)
+        let basic = xidl_rust_axum::auth::basic::extract_basic_auth(&headers).ok();
+        let bearer = auth_header
+            .as_ref()
+            .map(|::xidl_rust_axum::axum_extra::extract::TypedHeader(h)| {
+                xidl_rust_axum::auth::bearer::BearerAuth::from_header(h.clone()).token
+            });
+        let mut api_keys = ::std::vec![];
+        if let Some(cookie_header) = headers.get("cookie") {
+            if let Ok(cookie_str) = cookie_header.to_str() {
+                for part in cookie_str.split(';') {
+                    let part = part.trim();
+                    if !part.is_empty() {
+                        let mut iter = part.splitn(2, '=');
+                        let c_name = iter.next().unwrap_or("").trim();
+                        if c_name == "session_key" {
+                            let c_val = iter.next().unwrap_or("").trim().to_string();
+                            api_keys
+                                .push(::xidl_rust_axum::ApiKeyAuth {
+                                    location: ::xidl_rust_axum::ClientApiKeyLocation::Cookie,
+                                    name: "session_key".to_string(),
+                                    value: c_val,
+                                });
+                            break;
+                        }
+                    }
+                }
             }
-            None => return Err(xidl_rust_axum::Error::unauthorized()),
+        }
+        let xidl_auth = ::xidl_rust_axum::ClientAuth {
+            basic,
+            bearer,
+            api_keys,
         };
         let HttpSecurityMatrixServiceBearerOrCookieSecurityRequest { action, note } = request;
         let action: String = action;
@@ -2145,6 +2170,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         auth_header: Option<
             ::xidl_rust_axum::axum_extra::extract::TypedHeader<
                 ::xidl_rust_axum::auth::bearer::BearerHeader,
@@ -2156,11 +2182,27 @@ where
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let xidl_auth = match auth_header {
-            Some(::xidl_rust_axum::axum_extra::extract::TypedHeader(auth_header)) => {
-                xidl_rust_axum::auth::bearer::BearerAuth::from_header(auth_header)
+        let basic = xidl_rust_axum::auth::basic::extract_basic_auth(&headers).ok();
+        let bearer = auth_header
+            .as_ref()
+            .map(|::xidl_rust_axum::axum_extra::extract::TypedHeader(h)| {
+                xidl_rust_axum::auth::bearer::BearerAuth::from_header(h.clone()).token
+            });
+        let mut api_keys = ::std::vec![];
+        if let Some(header_val) = headers.get("X-Alt-Key") {
+            if let Ok(value) = header_val.to_str() {
+                api_keys
+                    .push(::xidl_rust_axum::ApiKeyAuth {
+                        location: ::xidl_rust_axum::ClientApiKeyLocation::Header,
+                        name: "X-Alt-Key".to_string(),
+                        value: value.to_string(),
+                    });
             }
-            None => return Err(xidl_rust_axum::Error::unauthorized()),
+        }
+        let xidl_auth = ::xidl_rust_axum::ClientAuth {
+            basic,
+            bearer,
+            api_keys,
         };
         let HttpSecurityMatrixServiceAlternativeSecurityRequest { id, locale } = request;
         let id: String = id;
@@ -2209,6 +2251,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
         request: HttpSecurityMatrixServiceOauthSecurityRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
@@ -2262,6 +2305,7 @@ where
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
@@ -2318,7 +2362,7 @@ impl HttpSecurityMatrixServiceClient {
     }
     pub fn with_auth(
         base_url: impl Into<String>,
-        auth: ::xidl_rust_axum::ClientAuth,
+        auth: xidl_rust_axum::ClientAuth,
     ) -> Self {
         Self {
             client: ::xidl_rust_axum::Client::with_auth(base_url, auth),
@@ -2335,16 +2379,13 @@ impl HttpSecurityMatrixServiceClient {
     pub fn with_http_and_auth(
         base_url: impl Into<String>,
         http: ::xidl_rust_axum::reqwest::Client,
-        auth: ::xidl_rust_axum::ClientAuth,
+        auth: xidl_rust_axum::ClientAuth,
     ) -> Self {
         Self {
             client: ::xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
         }
     }
-    pub fn with_auth_override(
-        &self,
-        auth: Option<::xidl_rust_axum::ClientAuth>,
-    ) -> Self {
+    pub fn with_auth_override(&self, auth: Option<xidl_rust_axum::ClientAuth>) -> Self {
         Self {
             client: self.client.with_auth_override(auth),
         }
@@ -2422,7 +2463,7 @@ impl HttpSecurityMatrixServiceClient {
         &self,
         action: String,
         note: Option<String>,
-        xidl_auth: xidl_rust_axum::auth::bearer::BearerAuth,
+        xidl_auth: xidl_rust_axum::ClientAuth,
     ) -> Result<String, xidl_rust_axum::Error> {
         let path = "/v2/security/bearer-cookie".to_string();
         let mut req = self
@@ -2439,12 +2480,7 @@ impl HttpSecurityMatrixServiceClient {
                     )
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
-        let auth = xidl_rust_axum::ClientAuth {
-            basic: None,
-            bearer: Some(xidl_auth.token.clone()),
-            api_keys: vec![],
-        };
-        let auth_client = self.client.with_auth_override(Some(auth));
+        let auth_client = self.client.with_auth_override(Some(xidl_auth));
         let auth_target = &auth_client;
         let _ = auth_target;
         auth_target.apply_auth(&mut req, xidl_rust_axum::ClientAuthRequirement::Bearer)?;
@@ -2498,7 +2534,7 @@ impl HttpSecurityMatrixServiceClient {
         &self,
         id: String,
         locale: Option<String>,
-        xidl_auth: xidl_rust_axum::auth::bearer::BearerAuth,
+        xidl_auth: xidl_rust_axum::ClientAuth,
     ) -> Result<String, xidl_rust_axum::Error> {
         let path = "/v2/security/alternatives/{id}".to_string();
         let path = path.replace("{id}", &id.to_string());
@@ -2524,12 +2560,7 @@ impl HttpSecurityMatrixServiceClient {
         if !query.is_empty() {
             req.url_mut().set_query(Some(&query));
         }
-        let auth = xidl_rust_axum::ClientAuth {
-            basic: None,
-            bearer: Some(xidl_auth.token.clone()),
-            api_keys: vec![],
-        };
-        let auth_client = self.client.with_auth_override(Some(auth));
+        let auth_client = self.client.with_auth_override(Some(xidl_auth));
         let auth_target = &auth_client;
         let _ = auth_target;
         auth_target.apply_auth(&mut req, xidl_rust_axum::ClientAuthRequirement::Bearer)?;

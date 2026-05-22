@@ -1,4 +1,3 @@
-use xidl_rust_axum::ClientAuth;
 use xidl_rust_axum::auth::basic::BasicAuth;
 use xidl_rust_axum::auth::bearer::BearerAuth;
 use xidlc_examples::city_rest_stream::CityRestStreamApiChatRequest;
@@ -29,13 +28,9 @@ async fn http_stream_client_calls_stream_endpoints() {
     let http = xidl_rust_axum::reqwest::Client::builder()
         .build()
         .expect("build reqwest client without proxy");
-    let auth = ClientAuth {
-        basic: Some(BasicAuth {
-            username: "test".to_string(),
-            password: Some("test".to_string()),
-        }),
-        bearer: Some("test-token".to_string()),
-        api_keys: Vec::new(),
+    let auth = BasicAuth {
+        username: "test".to_string(),
+        password: Some("test".to_string()),
     };
     let client = CityRestStreamApiClient::with_http_and_auth(base, http, auth);
 

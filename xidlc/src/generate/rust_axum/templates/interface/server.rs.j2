@@ -32,7 +32,8 @@ T: {{ ident }} + Send + Sync + 'static,
         #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion, unused_mut, unreachable_code, clippy::let_unit_value, unused_variables)]
         async fn {{ method.name }}(
         ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
-        headers: ::xidl_rust_axum::axum::http::HeaderMap{% if method.has_bearer_auth %},
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri{% if method.has_bearer_auth %},
         auth_header: Option<::xidl_rust_axum::axum_extra::extract::TypedHeader<::xidl_rust_axum::auth::bearer::BearerHeader>>{% endif %}{% if method.path_params | length > 0 and (method.is_server_stream or method.is_client_stream or method.is_bidi_stream or method.is_upgrade) %},
         ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<{{ method.struct_prefix }}Path>{% endif %}{% if method.query_params | length > 0 and (method.is_server_stream or method.is_client_stream or method.is_bidi_stream or method.is_upgrade) %},
         xidl_rust_axum::axum::extract::Query(query): xidl_rust_axum::axum::extract::Query<{{ method.struct_prefix }}RequestInQuery>{% endif %}{% if method.is_bidi_stream %},
@@ -45,7 +46,7 @@ T: {{ ident }} + Send + Sync + 'static,
             if !xidl_rust_axum::http::accepts_media_type(&headers, "{{ method.response_content_type }}") {
                 return Err(xidl_rust_axum::Error::not_acceptable());
             }
-            {% if method.has_basic_auth %}
+            {% if method.auth_ty == "xidl_rust_axum::auth::basic::BasicAuth" %}
                 let xidl_auth = match xidl_rust_axum::auth::basic::extract_basic_auth(&headers) {
                     Ok(auth) => auth,
                     Err(_) => {
@@ -53,13 +54,124 @@ T: {{ ident }} + Send + Sync + 'static,
                         return Ok(resp);
                     }
                 };
-            {% endif %}
-            {% if method.has_bearer_auth %}
+            {% elif method.auth_ty == "xidl_rust_axum::auth::bearer::BearerAuth" %}
                 let xidl_auth = match auth_header {
                     Some(::xidl_rust_axum::axum_extra::extract::TypedHeader(auth_header)) => {
                         xidl_rust_axum::auth::bearer::BearerAuth::from_header(auth_header)
                     }
                     None => return Err(xidl_rust_axum::Error::unauthorized()),
+                };
+            {% elif method.auth_ty == "xidl_rust_axum::ApiKeyAuth" %}
+                {% set api_key_req = method.api_key_requirements[0] %}
+                let xidl_auth = {
+                    {% if api_key_req.location == "Header" %}
+                        match headers.get("{{ api_key_req.name }}") {
+                            Some(header_val) => {
+                                let value = header_val.to_str().map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?.to_string();
+                                ::xidl_rust_axum::ApiKeyAuth {
+                                    location: ::xidl_rust_axum::ClientApiKeyLocation::Header,
+                                    name: "{{ api_key_req.name }}".to_string(),
+                                    value,
+                                }
+                            }
+                            None => return Err(::xidl_rust_axum::Error::unauthorized()),
+                        }
+                    {% elif api_key_req.location == "Query" %}
+                        match ::xidl_rust_axum::serde_urlencoded::from_str::<::std::collections::HashMap<String, String>>(uri.query().unwrap_or(""))
+                        .ok()
+                        .and_then(|map| map.get("{{ api_key_req.name }}").cloned()) {
+                            Some(value) => ::xidl_rust_axum::ApiKeyAuth {
+                                location: ::xidl_rust_axum::ClientApiKeyLocation::Query,
+                                name: "{{ api_key_req.name }}".to_string(),
+                                value,
+                            },
+                            None => return Err(::xidl_rust_axum::Error::unauthorized()),
+                        }
+                    {% elif api_key_req.location == "Cookie" %}
+                        let mut cookie_value = None;
+                        if let Some(cookie_header) = headers.get("cookie") {
+                            if let Ok(cookie_str) = cookie_header.to_str() {
+                                for part in cookie_str.split(';') {
+                                    let part = part.trim();
+                                    if !part.is_empty() {
+                                        let mut iter = part.splitn(2, '=');
+                                        let c_name = iter.next().unwrap_or("").trim();
+                                        if c_name == "{{ api_key_req.name }}" {
+                                            cookie_value = Some(iter.next().unwrap_or("").trim().to_string());
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        match cookie_value {
+                            Some(value) => ::xidl_rust_axum::ApiKeyAuth {
+                                location: ::xidl_rust_axum::ClientApiKeyLocation::Cookie,
+                                name: "{{ api_key_req.name }}".to_string(),
+                                value,
+                            },
+                            None => return Err(::xidl_rust_axum::Error::unauthorized()),
+                        }
+                    {% endif %}
+                };
+            {% elif method.auth_ty == "xidl_rust_axum::ClientAuth" %}
+                let basic = xidl_rust_axum::auth::basic::extract_basic_auth(&headers).ok();
+                let bearer = {% if method.has_bearer_auth %}
+                auth_header.as_ref().map(|::xidl_rust_axum::axum_extra::extract::TypedHeader(h)| {
+                    xidl_rust_axum::auth::bearer::BearerAuth::from_header(h.clone()).token
+                })
+            {% else %}
+                None
+                {% endif %};
+                let mut api_keys = ::std::vec![];
+                {% for api_key_req in method.api_key_requirements %}
+                    {% if api_key_req.location == "Header" %}
+                        if let Some(header_val) = headers.get("{{ api_key_req.name }}") {
+                            if let Ok(value) = header_val.to_str() {
+                                api_keys.push(::xidl_rust_axum::ApiKeyAuth {
+                                    location: ::xidl_rust_axum::ClientApiKeyLocation::Header,
+                                    name: "{{ api_key_req.name }}".to_string(),
+                                    value: value.to_string(),
+                                });
+                            }
+                        }
+                    {% elif api_key_req.location == "Query" %}
+                        if let Some(value) = ::xidl_rust_axum::serde_urlencoded::from_str::<::std::collections::HashMap<String, String>>(uri.query().unwrap_or(""))
+                        .ok()
+                        .and_then(|map| map.get("{{ api_key_req.name }}").cloned()) {
+                            api_keys.push(::xidl_rust_axum::ApiKeyAuth {
+                                location: ::xidl_rust_axum::ClientApiKeyLocation::Query,
+                                name: "{{ api_key_req.name }}".to_string(),
+                                value,
+                            });
+                        }
+                    {% elif api_key_req.location == "Cookie" %}
+                        if let Some(cookie_header) = headers.get("cookie") {
+                            if let Ok(cookie_str) = cookie_header.to_str() {
+                                for part in cookie_str.split(';') {
+                                    let part = part.trim();
+                                    if !part.is_empty() {
+                                        let mut iter = part.splitn(2, '=');
+                                        let c_name = iter.next().unwrap_or("").trim();
+                                        if c_name == "{{ api_key_req.name }}" {
+                                            let c_val = iter.next().unwrap_or("").trim().to_string();
+                                            api_keys.push(::xidl_rust_axum::ApiKeyAuth {
+                                                location: ::xidl_rust_axum::ClientApiKeyLocation::Cookie,
+                                                name: "{{ api_key_req.name }}".to_string(),
+                                                value: c_val,
+                                            });
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    {% endif %}
+                {% endfor %}
+                let xidl_auth = ::xidl_rust_axum::ClientAuth {
+                    basic,
+                    bearer,
+                    api_keys,
                 };
             {% endif %}
             {% if method.path_params | length > 0 and (method.is_server_stream or method.is_client_stream or method.is_bidi_stream or method.is_upgrade) %}
