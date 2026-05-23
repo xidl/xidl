@@ -148,16 +148,16 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
                 HttpDefaultsServiceGetNameRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpDefaultsServiceGetNameRequestInQuery { name } = query;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpDefaultsServiceGetNameRequestInQuery { name } = xidl_query;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { name })
         }
     }
@@ -202,24 +202,24 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+            let ::xidl_rust_axum::axum::extract::Path(xidl_path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpDefaultsServiceListOrdersPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpDefaultsServiceListOrdersPath { user_id } = path;
-            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+            let HttpDefaultsServiceListOrdersPath { user_id } = xidl_path;
+            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
                 HttpDefaultsServiceListOrdersRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpDefaultsServiceListOrdersRequestInQuery { page, size } = query;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpDefaultsServiceListOrdersRequestInQuery { page, size } = xidl_query;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { user_id, page, size })
         }
     }
@@ -252,22 +252,25 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let headers = &parts.headers;
-            let _ = headers;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             if !::xidl_rust_axum::http::content_type_matches(
-                headers,
+                xidl_headers,
                 "application/json",
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
+                    body,
+                    usize::MAX,
+                )
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-            let body: HttpDefaultsServiceCreateUserRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+            let xidl_body: HttpDefaultsServiceCreateUserRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
-                .from_slice(&body_bytes)?;
-            let HttpDefaultsServiceCreateUserRequestInBody { req } = body;
+                .from_slice(&xidl_body_bytes)?;
+            let HttpDefaultsServiceCreateUserRequestInBody { req } = xidl_body;
             Ok(Self { req })
         }
     }
@@ -293,22 +296,25 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let headers = &parts.headers;
-            let _ = headers;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             if !::xidl_rust_axum::http::content_type_matches(
-                headers,
+                xidl_headers,
                 "application/json",
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
+                    body,
+                    usize::MAX,
+                )
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-            let body: HttpDefaultsServiceCreateUserFlatRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+            let xidl_body: HttpDefaultsServiceCreateUserFlatRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
-                .from_slice(&body_bytes)?;
-            let req = body;
+                .from_slice(&xidl_body_bytes)?;
+            let req = xidl_body;
             Ok(Self { req })
         }
     }
@@ -345,22 +351,25 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let headers = &parts.headers;
-            let _ = headers;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             if !::xidl_rust_axum::http::content_type_matches(
-                headers,
+                xidl_headers,
                 "application/json",
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
+                    body,
+                    usize::MAX,
+                )
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-            let body: HttpDefaultsServiceSearchUserRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+            let xidl_body: HttpDefaultsServiceSearchUserRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
-                .from_slice(&body_bytes)?;
-            let HttpDefaultsServiceSearchUserRequestInBody { name, age } = body;
+                .from_slice(&xidl_body_bytes)?;
+            let HttpDefaultsServiceSearchUserRequestInBody { name, age } = xidl_body;
             Ok(Self { name, age })
         }
     }
@@ -393,22 +402,25 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let headers = &parts.headers;
-            let _ = headers;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             if !::xidl_rust_axum::http::content_type_matches(
-                headers,
+                xidl_headers,
                 "application/json",
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
+                    body,
+                    usize::MAX,
+                )
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-            let body: HttpDefaultsServicePreviewUserRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+            let xidl_body: HttpDefaultsServicePreviewUserRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
-                .from_slice(&body_bytes)?;
-            let HttpDefaultsServicePreviewUserRequestInBody { req } = body;
+                .from_slice(&xidl_body_bytes)?;
+            let HttpDefaultsServicePreviewUserRequestInBody { req } = xidl_body;
             Ok(Self { req })
         }
     }
@@ -447,24 +459,24 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+            let ::xidl_rust_axum::axum::extract::Path(xidl_path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpDefaultsServiceGetUserPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpDefaultsServiceGetUserPath { id } = path;
-            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+            let HttpDefaultsServiceGetUserPath { id } = xidl_path;
+            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
                 HttpDefaultsServiceGetUserRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpDefaultsServiceGetUserRequestInQuery { lang } = query;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpDefaultsServiceGetUserRequestInQuery { lang } = xidl_query;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { id, lang })
         }
     }
@@ -506,24 +518,24 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+            let ::xidl_rust_axum::axum::extract::Path(xidl_path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpDefaultsServiceGetUserAliasPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpDefaultsServiceGetUserAliasPath { user_id } = path;
-            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+            let HttpDefaultsServiceGetUserAliasPath { user_id } = xidl_path;
+            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
                 HttpDefaultsServiceGetUserAliasRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpDefaultsServiceGetUserAliasRequestInQuery { locale } = query;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpDefaultsServiceGetUserAliasRequestInQuery { locale } = xidl_query;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { user_id, locale })
         }
     }
@@ -562,16 +574,16 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
                 HttpDefaultsServiceDeleteUserRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpDefaultsServiceDeleteUserRequestInQuery { id, revision } = query;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpDefaultsServiceDeleteUserRequestInQuery { id, revision } = xidl_query;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { id, revision })
         }
     }
@@ -610,16 +622,16 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
                 HttpDefaultsServiceProbeUserRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpDefaultsServiceProbeUserRequestInQuery { id, revision } = query;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpDefaultsServiceProbeUserRequestInQuery { id, revision } = xidl_query;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { id, revision })
         }
     }
@@ -658,16 +670,16 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
                 HttpDefaultsServiceUserOptionsRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpDefaultsServiceUserOptionsRequestInQuery { id, revision } = query;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpDefaultsServiceUserOptionsRequestInQuery { id, revision } = xidl_query;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { id, revision })
         }
     }
@@ -710,30 +722,33 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+            let ::xidl_rust_axum::axum::extract::Path(xidl_path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpDefaultsServiceReplaceUserPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpDefaultsServiceReplaceUserPath { user_id } = path;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpDefaultsServiceReplaceUserPath { user_id } = xidl_path;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             if !::xidl_rust_axum::http::content_type_matches(
-                headers,
+                xidl_headers,
                 "application/json",
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
+                    body,
+                    usize::MAX,
+                )
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-            let body: HttpDefaultsServiceReplaceUserRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+            let xidl_body: HttpDefaultsServiceReplaceUserRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
-                .from_slice(&body_bytes)?;
-            let HttpDefaultsServiceReplaceUserRequestInBody { name, age } = body;
+                .from_slice(&xidl_body_bytes)?;
+            let HttpDefaultsServiceReplaceUserRequestInBody { name, age } = xidl_body;
             Ok(Self { user_id, name, age })
         }
     }
@@ -776,30 +791,33 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+            let ::xidl_rust_axum::axum::extract::Path(xidl_path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpDefaultsServicePatchUserPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpDefaultsServicePatchUserPath { user_id } = path;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpDefaultsServicePatchUserPath { user_id } = xidl_path;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             if !::xidl_rust_axum::http::content_type_matches(
-                headers,
+                xidl_headers,
                 "application/json",
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
+                    body,
+                    usize::MAX,
+                )
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-            let body: HttpDefaultsServicePatchUserRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+            let xidl_body: HttpDefaultsServicePatchUserRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
-                .from_slice(&body_bytes)?;
-            let HttpDefaultsServicePatchUserRequestInBody { name, age } = body;
+                .from_slice(&xidl_body_bytes)?;
+            let HttpDefaultsServicePatchUserRequestInBody { name, age } = xidl_body;
             Ok(Self { user_id, name, age })
         }
     }

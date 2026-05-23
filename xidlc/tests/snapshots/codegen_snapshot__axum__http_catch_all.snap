@@ -54,16 +54,16 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+            let ::xidl_rust_axum::axum::extract::Path(xidl_path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpCatchAllServiceReadFilePath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpCatchAllServiceReadFilePath { rel_path } = path;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpCatchAllServiceReadFilePath { rel_path } = xidl_path;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { rel_path })
         }
     }
@@ -104,24 +104,24 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+            let ::xidl_rust_axum::axum::extract::Path(xidl_path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpCatchAllServiceReadAssetPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpCatchAllServiceReadAssetPath { key } = path;
-            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+            let HttpCatchAllServiceReadAssetPath { key } = xidl_path;
+            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
                 HttpCatchAllServiceReadAssetRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpCatchAllServiceReadAssetRequestInQuery { version } = query;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpCatchAllServiceReadAssetRequestInQuery { version } = xidl_query;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { key, version })
         }
     }

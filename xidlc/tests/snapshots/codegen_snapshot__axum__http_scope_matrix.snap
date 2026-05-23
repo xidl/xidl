@@ -140,22 +140,25 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let headers = &parts.headers;
-            let _ = headers;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             if !::xidl_rust_axum::http::content_type_matches(
-                headers,
+                xidl_headers,
                 "application/json",
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
+                    body,
+                    usize::MAX,
+                )
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-            let body: HttpScopeMatrixServiceDefaultScopeRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+            let xidl_body: HttpScopeMatrixServiceDefaultScopeRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
-                .from_slice(&body_bytes)?;
-            let HttpScopeMatrixServiceDefaultScopeRequestInBody { req } = body;
+                .from_slice(&xidl_body_bytes)?;
+            let HttpScopeMatrixServiceDefaultScopeRequestInBody { req } = xidl_body;
             Ok(Self { req })
         }
     }
@@ -193,22 +196,25 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let headers = &parts.headers;
-            let _ = headers;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             if !::xidl_rust_axum::http::content_type_matches(
-                headers,
+                xidl_headers,
                 "application/x-www-form-urlencoded",
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
+                    body,
+                    usize::MAX,
+                )
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-            let body: HttpScopeMatrixServiceOverrideConsumesOnlyRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+            let xidl_body: HttpScopeMatrixServiceOverrideConsumesOnlyRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/x-www-form-urlencoded",
                 )
-                .from_slice(&body_bytes)?;
-            let HttpScopeMatrixServiceOverrideConsumesOnlyRequestInBody { name, age } = body;
+                .from_slice(&xidl_body_bytes)?;
+            let HttpScopeMatrixServiceOverrideConsumesOnlyRequestInBody { name, age } = xidl_body;
             Ok(Self { name, age })
         }
     }
@@ -270,16 +276,16 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+            let ::xidl_rust_axum::axum::extract::Path(xidl_path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpScopeMatrixServiceOverrideProducesOnlyPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpScopeMatrixServiceOverrideProducesOnlyPath { id } = path;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpScopeMatrixServiceOverrideProducesOnlyPath { id } = xidl_path;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { id })
         }
     }
@@ -351,22 +357,25 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let headers = &parts.headers;
-            let _ = headers;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             if !::xidl_rust_axum::http::content_type_matches(
-                headers,
+                xidl_headers,
                 "application/x-www-form-urlencoded",
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
+                    body,
+                    usize::MAX,
+                )
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-            let body: HttpScopeMatrixServiceOverrideBothMediaRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+            let xidl_body: HttpScopeMatrixServiceOverrideBothMediaRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/x-www-form-urlencoded",
                 )
-                .from_slice(&body_bytes)?;
-            let HttpScopeMatrixServiceOverrideBothMediaRequestInBody { name, age } = body;
+                .from_slice(&xidl_body_bytes)?;
+            let HttpScopeMatrixServiceOverrideBothMediaRequestInBody { name, age } = xidl_body;
             Ok(Self { name, age })
         }
     }
@@ -428,16 +437,16 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+            let ::xidl_rust_axum::axum::extract::Path(xidl_path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpScopeMatrixServiceDeprecatedPlainPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpScopeMatrixServiceDeprecatedPlainPath { id } = path;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpScopeMatrixServiceDeprecatedPlainPath { id } = xidl_path;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { id })
         }
     }
@@ -465,16 +474,16 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+            let ::xidl_rust_axum::axum::extract::Path(xidl_path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpScopeMatrixServiceDeprecatedSinceOnlyPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpScopeMatrixServiceDeprecatedSinceOnlyPath { id } = path;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpScopeMatrixServiceDeprecatedSinceOnlyPath { id } = xidl_path;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { id })
         }
     }
@@ -502,16 +511,16 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+            let ::xidl_rust_axum::axum::extract::Path(xidl_path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpScopeMatrixServiceDeprecatedWindowPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpScopeMatrixServiceDeprecatedWindowPath { id } = path;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpScopeMatrixServiceDeprecatedWindowPath { id } = xidl_path;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { id })
         }
     }
@@ -1756,17 +1765,17 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+            let ::xidl_rust_axum::axum::extract::Path(xidl_path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpSecurityMatrixServiceInheritedSecurityPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpSecurityMatrixServiceInheritedSecurityPath { id } = path;
-            let headers = &parts.headers;
-            let _ = headers;
-            let x_trace_id: String = match headers.get("x_trace_id") {
+            let HttpSecurityMatrixServiceInheritedSecurityPath { id } = xidl_path;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
+            let x_trace_id: String = match xidl_headers.get("x_trace_id") {
                 Some(header_value) => {
                     let header_str = header_value
                         .to_str()
@@ -1815,25 +1824,28 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let headers = &parts.headers;
-            let _ = headers;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             if !::xidl_rust_axum::http::content_type_matches(
-                headers,
+                xidl_headers,
                 "application/json",
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
+                    body,
+                    usize::MAX,
+                )
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-            let body: HttpSecurityMatrixServiceBearerOrCookieSecurityRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+            let xidl_body: HttpSecurityMatrixServiceBearerOrCookieSecurityRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
-                .from_slice(&body_bytes)?;
+                .from_slice(&xidl_body_bytes)?;
             let HttpSecurityMatrixServiceBearerOrCookieSecurityRequestInBody {
                 action,
                 note,
-            } = body;
+            } = xidl_body;
             Ok(Self { action, note })
         }
     }
@@ -1872,24 +1884,24 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+            let ::xidl_rust_axum::axum::extract::Path(xidl_path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpSecurityMatrixServiceAlternativeSecurityPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpSecurityMatrixServiceAlternativeSecurityPath { id } = path;
-            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+            let HttpSecurityMatrixServiceAlternativeSecurityPath { id } = xidl_path;
+            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
                 HttpSecurityMatrixServiceAlternativeSecurityRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpSecurityMatrixServiceAlternativeSecurityRequestInQuery { locale } = query;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpSecurityMatrixServiceAlternativeSecurityRequestInQuery { locale } = xidl_query;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { id, locale })
         }
     }
@@ -1927,22 +1939,25 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let headers = &parts.headers;
-            let _ = headers;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             if !::xidl_rust_axum::http::content_type_matches(
-                headers,
+                xidl_headers,
                 "application/json",
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
+                    body,
+                    usize::MAX,
+                )
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-            let body: HttpSecurityMatrixServiceOauthSecurityRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+            let xidl_body: HttpSecurityMatrixServiceOauthSecurityRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
-                .from_slice(&body_bytes)?;
-            let HttpSecurityMatrixServiceOauthSecurityRequestInBody { keyword, page } = body;
+                .from_slice(&xidl_body_bytes)?;
+            let HttpSecurityMatrixServiceOauthSecurityRequestInBody { keyword, page } = xidl_body;
             Ok(Self { keyword, page })
         }
     }

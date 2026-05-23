@@ -68,17 +68,17 @@ pub mod test {
                 let (mut parts, body) = req.into_parts();
                 let _ = &body;
                 let _ = state;
-                let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+                let ::xidl_rust_axum::axum::extract::Path(xidl_path) = <::xidl_rust_axum::axum::extract::Path<
                     HeaderServiceGetUserPath,
                 > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                     S,
                 >>::from_request_parts(&mut parts, state)
                     .await
                     .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-                let HeaderServiceGetUserPath { id } = path;
-                let headers = &parts.headers;
-                let _ = headers;
-                let req_id: String = match headers.get("X-Req-Id") {
+                let HeaderServiceGetUserPath { id } = xidl_path;
+                let xidl_headers = &parts.headers;
+                let _ = xidl_headers;
+                let req_id: String = match xidl_headers.get("X-Req-Id") {
                     Some(header_value) => {
                         let header_str = header_value
                             .to_str()
@@ -91,7 +91,7 @@ pub mod test {
                     None => ::core::default::Default::default(),
                 };
                 let mut flags: Vec<String> = Vec::new();
-                for header_value in headers.get_all("X-Flags").iter() {
+                for header_value in xidl_headers.get_all("X-Flags").iter() {
                     let header_str = header_value
                         .to_str()
                         .map_err(|err| ::xidl_rust_axum::Error::new(
@@ -106,7 +106,7 @@ pub mod test {
                 } else {
                     flags
                 };
-                let age: u32 = match headers.get("X-Age") {
+                let age: u32 = match xidl_headers.get("X-Age") {
                     Some(header_value) => {
                         let header_str = header_value
                             .to_str()
@@ -124,7 +124,7 @@ pub mod test {
                     None => ::core::default::Default::default(),
                 };
                 let mut cookie_map: ::std::collections::HashMap<String, Vec<String>> = ::std::collections::HashMap::new();
-                for header_value in headers.get_all("cookie").iter() {
+                for header_value in xidl_headers.get_all("cookie").iter() {
                     let cookie_str = header_value
                         .to_str()
                         .map_err(|err| ::xidl_rust_axum::Error::new(
@@ -205,9 +205,9 @@ pub mod test {
                 let (mut parts, body) = req.into_parts();
                 let _ = &body;
                 let _ = state;
-                let headers = &parts.headers;
-                let _ = headers;
-                let token: String = match headers.get("X-Token") {
+                let xidl_headers = &parts.headers;
+                let _ = xidl_headers;
+                let token: String = match xidl_headers.get("X-Token") {
                     Some(header_value) => {
                         let header_str = header_value
                             .to_str()
@@ -220,7 +220,7 @@ pub mod test {
                     None => ::core::default::Default::default(),
                 };
                 let mut cookie_map: ::std::collections::HashMap<String, Vec<String>> = ::std::collections::HashMap::new();
-                for header_value in headers.get_all("cookie").iter() {
+                for header_value in xidl_headers.get_all("cookie").iter() {
                     let cookie_str = header_value
                         .to_str()
                         .map_err(|err| ::xidl_rust_axum::Error::new(
@@ -249,22 +249,25 @@ pub mod test {
                     None => ::core::default::Default::default(),
                 };
                 if !::xidl_rust_axum::http::content_type_matches(
-                    headers,
+                    xidl_headers,
                     "application/json",
                 ) {
                     return Err(::xidl_rust_axum::Error::unsupported_media_type());
                 }
-                let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+                let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
+                        body,
+                        usize::MAX,
+                    )
                     .await
                     .map_err(|err| ::xidl_rust_axum::Error::new(
                         400,
                         format!("{err:?}"),
                     ))?;
-                let body: HeaderServiceCreateUserRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+                let xidl_body: HeaderServiceCreateUserRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                         "application/json",
                     )
-                    .from_slice(&body_bytes)?;
-                let HeaderServiceCreateUserRequestInBody { name } = body;
+                    .from_slice(&xidl_body_bytes)?;
+                let HeaderServiceCreateUserRequestInBody { name } = xidl_body;
                 Ok(Self { token, session_id, name })
             }
         }
@@ -667,35 +670,4 @@ pub mod test {
             }
         }
     }
-}
-===============
-http_header.rs
-===============
-#[allow(non_snake_case)]
-pub mod test {
-    #[derive(
-        Debug,
-        Clone,
-        PartialEq,
-        ::serde::Serialize,
-        ::serde::Deserialize,
-        Copy,
-        Eq,
-        Default,
-    )]
-    pub enum Status {
-        #[serde(rename = "ok")]
-        #[default]
-        OK,
-        FAILED,
-    }
-    #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
-    #[derive(Default)]
-    pub struct User {
-        pub id: u32,
-        #[serde(rename = "full_name")]
-        pub name: String,
-        pub status: Status,
-    }
-    impl User {}
 }
