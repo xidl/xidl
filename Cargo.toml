@@ -10,6 +10,7 @@ members = [
   "xidl-parser",
   "xidl-typeobject",
   "apis/xidl-api-keycloak",
+  "apis/xidl-api-discord",
 ]
 
 [workspace.package]

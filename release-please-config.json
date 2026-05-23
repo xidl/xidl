@@ -95,6 +95,11 @@
           "jsonpath": "$.package[?(@.name.value=='xidl-api-keycloak')].version",
           "path": "Cargo.lock",
           "type": "toml"
+        },
+        {
+          "jsonpath": "$.package[?(@.name.value=='xidl-api-discord')].version",
+          "path": "Cargo.lock",
+          "type": "toml"
         }
       ],
       "release-type": "simple"
