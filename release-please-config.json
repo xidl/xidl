@@ -90,6 +90,11 @@
           "jsonpath": "$.package[?(@.name.value=='xidl-typeobject')].version",
           "path": "Cargo.lock",
           "type": "toml"
+        },
+        {
+          "jsonpath": "$.package[?(@.name.value=='xidl-api-keycloak')].version",
+          "path": "Cargo.lock",
+          "type": "toml"
         }
       ],
       "release-type": "simple"

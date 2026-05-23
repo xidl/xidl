@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Keycloak Admin REST API",
-    "version": "v0.0.1"
+    "version": "v1.0.0"
   },
   "servers": [
     {

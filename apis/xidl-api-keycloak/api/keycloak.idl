@@ -1,5 +1,5 @@
 #pragma xidlc package Keycloak Admin REST API
-#pragma xidlc version v0.0.1
+#pragma xidlc version v1.0.0
 #pragma xidlc service http://127.0.0.1:8080 dev server
 
 @rename_all("camelCase")
