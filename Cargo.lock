@@ -3604,6 +3604,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "xidl-api-reddit"
+version = "0.69.2"
+dependencies = [
+ "async-trait",
+ "serde",
+ "serde_json",
+ "xidl-build",
+ "xidl-rust-axum",
+]
+
+[[package]]
 name = "xidl-build"
 version = "0.69.2"
 dependencies = [

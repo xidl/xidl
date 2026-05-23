@@ -11,6 +11,7 @@ members = [
   "xidl-typeobject",
   "apis/xidl-api-keycloak",
   "apis/xidl-api-discord",
+  "apis/xidl-api-reddit",
 ]
 
 [workspace.package]

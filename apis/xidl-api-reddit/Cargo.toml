@@ -1,0 +1,30 @@
+[package]
+name = "xidl-api-reddit"
+version.workspace = true
+edition.workspace = true
+description.workspace = true
+license.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+repository.workspace = true
+
+[features]
+default = ["client"]
+client = []
+docs-only = []
+
+[package.metadata.docs.rs]
+features = ["docs-only"]
+
+[dependencies]
+async-trait.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+xidl-rust-axum.workspace = true
+
+[build-dependencies]
+xidl-build = { workspace = true }
+
+[lints]
+workspace = true
