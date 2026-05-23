@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.71.0](https://github.com/xidl/xidl/compare/v0.70.0...v0.71.0) (2026-05-23)
+
+
+### Features
+
+* add xidl-api-github and openapi importer ([d0475ba](https://github.com/xidl/xidl/commit/d0475bae7ef5a5bfa1eaee26fd749647ef6a18b4))
+* **rust-axum:** implement reachability analysis and conditional generation ([d22c08d](https://github.com/xidl/xidl/commit/d22c08dfe10c5455a13fa92726339a79bba938e9))
+
+
+### Bug Fixes
+
+* **xidlc:** address clippy warnings in generator and importer ([bb5bb01](https://github.com/xidl/xidl/commit/bb5bb01e099bbf6c5a64745dab12c1e49c84e9ed))
+
 ## [0.70.0](https://github.com/xidl/xidl/compare/v0.69.2...v0.70.0) (2026-05-23)
 
 
