@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.70.0](https://github.com/xidl/xidl/compare/v0.69.2...v0.70.0) (2026-05-23)
+
+
+### Features
+
+* add xidl-api-discord ([c4cb195](https://github.com/xidl/xidl/commit/c4cb195486619caf54d21f73277934394ff93916))
+* add xidl-apis-reddit ([5274a9c](https://github.com/xidl/xidl/commit/5274a9cf1c506c8f249e0d759f4fa7423424750f))
+* **keycloak:** update keycloak metadata ([795e85d](https://github.com/xidl/xidl/commit/795e85d5a21857da6b7e519d8826258348e29618))
+
 ## [0.69.2](https://github.com/xidl/xidl/compare/v0.69.1...v0.69.2) (2026-05-22)
 
 
