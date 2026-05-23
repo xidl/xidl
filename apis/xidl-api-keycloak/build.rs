@@ -7,7 +7,7 @@ fn main() {
     Builder::new()
         .with_lang("rust-axum")
         .with_client(cfg!(feature = "client"))
-        .with_server(true)
+        .with_server(cfg!(feature = "server"))
         .with_mock(false)
         .compile(&["./api/keycloak.idl"])
         .expect("failed to compile keycloak for rust-axum");

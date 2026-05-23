@@ -12,6 +12,7 @@ repository.workspace = true
 [features]
 default = ["client"]
 client = []
+server = []
 docs-only = []
 
 [package.metadata.docs.rs]
