@@ -321,6 +321,7 @@ mod tests {
                 _ => panic!("expected rust lang"),
             },
             Command::Fmt(_) => panic!("expected gen command"),
+            Command::Import(_) => panic!("expected gen command"),
         }
     }
 }
