@@ -20,6 +20,22 @@ enum Command {
     Gen(ArgsGen),
     #[command(alias = "format")]
     Fmt(fmt::ArgsFormat),
+    #[command(name = "import")]
+    Import(ArgsImport),
+}
+
+#[derive(Debug, Args)]
+struct ArgsImport {
+    #[arg(long = "out-dir", short = 'o', default_value = ".")]
+    out_dir: String,
+    #[command(subcommand)]
+    lang: ImportLang,
+}
+
+#[derive(Debug, Subcommand)]
+enum ImportLang {
+    #[command(name = "openapi")]
+    Openapi(FilesArgs),
 }
 
 #[derive(Debug, Args)]
@@ -270,6 +286,20 @@ impl Cli {
                 driver::Driver::run_with_props(args, extra_props).await
             }
             Command::Fmt(args) => args.execute(),
+            Command::Import(args) => {
+                let out_dir = PathBuf::from(&args.out_dir);
+                if !out_dir.exists() {
+                    std::fs::create_dir_all(&out_dir)?;
+                }
+                match args.lang {
+                    ImportLang::Openapi(files_args) => {
+                        for file in files_args.files {
+                            crate::import::openapi::import_openapi(&file, &out_dir)?;
+                        }
+                    }
+                }
+                Ok(())
+            }
         }
     }
 }

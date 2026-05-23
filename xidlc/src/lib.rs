@@ -5,6 +5,7 @@ pub mod driver;
 pub mod error;
 pub mod fmt;
 pub mod generate;
+pub mod import;
 pub mod jsonrpc;
 pub mod macros;
 pub mod openapi;

@@ -156,7 +156,7 @@
                     let _ = &body;
                     let _ = state;
                     {% if method.path_params | length > 0 %}
-                        let ::xidl_rust_axum::axum::extract::Path(path) =
+                        let ::xidl_rust_axum::axum::extract::Path(xidl_path) =
                         <::xidl_rust_axum::axum::extract::Path<{{ method.struct_prefix }}Path> as ::xidl_rust_axum::axum::extract::FromRequestParts<S>>::from_request_parts(&mut parts, state)
                         .await
                         .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
@@ -164,10 +164,10 @@
                             {% for param in method.path_params %}
                                 {{ param.name }},
                             {% endfor %}
-                        } = path;
+                        } = xidl_path;
                     {% endif %}
                     {% if method.query_params | length > 0 %}
-                        let ::xidl_rust_axum::axum::extract::Query(query) =
+                        let ::xidl_rust_axum::axum::extract::Query(xidl_query) =
                         <::xidl_rust_axum::axum::extract::Query<{{ method.struct_prefix }}RequestInQuery> as ::xidl_rust_axum::axum::extract::FromRequestParts<S>>::from_request_parts(&mut parts, state)
                         .await
                         .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
@@ -175,16 +175,16 @@
                             {% for param in method.query_params %}
                                 {{ param.name }},
                             {% endfor %}
-                        } = query;
+                        } = xidl_query;
                     {% endif %}
-                    let headers = &parts.headers;
-                    let _ = headers;
+                    let xidl_headers = &parts.headers;
+                    let _ = xidl_headers;
 
                     {% if method.header_params | length > 0 %}
                         {% for param in method.header_params %}
                             {% if param.header_is_multi %}
                                 let mut {{ param.name }}: Vec<{{ param.header_item_ty }}> = Vec::new();
-                                for header_value in headers.get_all("{{ param.wire_name }}").iter() {
+                                for header_value in xidl_headers.get_all("{{ param.wire_name }}").iter() {
                                     let header_str = header_value
                                     .to_str()
                                     .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
@@ -198,7 +198,7 @@
                                 {% endif %}
                             {% else %}
                                 {% if param.optional %}
-                                    let {{ param.name }}: {{ param.ty }} = match headers.get("{{ param.wire_name }}") {
+                                    let {{ param.name }}: {{ param.ty }} = match xidl_headers.get("{{ param.wire_name }}") {
                                         Some(header_value) => {
                                             let header_str = header_value
                                             .to_str()
@@ -208,7 +208,7 @@
                                         None => None,
                                     };
                                 {% else %}
-                                    let {{ param.name }}: {{ param.ty }} = match headers.get("{{ param.wire_name }}") {
+                                    let {{ param.name }}: {{ param.ty }} = match xidl_headers.get("{{ param.wire_name }}") {
                                         Some(header_value) => {
                                             let header_str = header_value
                                             .to_str()
@@ -223,7 +223,7 @@
                         {% endif %}
                         {% if method.cookie_params | length > 0 %}
                             let mut cookie_map: ::std::collections::HashMap<String, Vec<String>> = ::std::collections::HashMap::new();
-                            for header_value in headers.get_all("cookie").iter() {
+                            for header_value in xidl_headers.get_all("cookie").iter() {
                                 let cookie_str = header_value
                                 .to_str()
                                 .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
@@ -258,7 +258,7 @@
                                 {% else %}
                                     {% if param.optional %}
                                         let {{ param.name }}: {{ param.ty }} = match cookie_map.get("{{ param.wire_name }}").and_then(|values| values.first()) {
-                                            Some(value) => Some({% if param.cookie_item_is_string %}value.to_string(){% elif param.cookie_item_is_primitive %}value.parse().map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% else %}::xidl_rust_axum::serde_json::from_str(value).map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}),
+                                            Some(value) => Some({% if param.cookie_item_is_string %}value.to_string(){% elif param.cookie_item_is_primitive %}value.parse().map_err(|err| ::xidl_rust_ax_um::Error::new(400, format!("{err:?}")))?{% else %}::xidl_rust_axum::serde_json::from_str(value).map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}),
                                             None => None,
                                         };
                                     {% else %}
@@ -271,22 +271,22 @@
                             {% endfor %}
                         {% endif %}
                         {% if method.body_params | length > 0 %}
-                            if !::xidl_rust_axum::http::content_type_matches(headers, "{{ method.request_content_type }}") {
+                            if !::xidl_rust_axum::http::content_type_matches(xidl_headers, "{{ method.request_content_type }}") {
                                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
                             }
-                            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+                            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
                             .await
                             .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-                            let body: {{ method.struct_prefix }}RequestInBody = ::xidl_rust_axum::DeserializeFactory::new("{{ method.request_content_type }}")
-                            .from_slice(&body_bytes)?;
+                            let xidl_body: {{ method.struct_prefix }}RequestInBody = ::xidl_rust_axum::DeserializeFactory::new("{{ method.request_content_type }}")
+                            .from_slice(&xidl_body_bytes)?;
                             {% if method.request_body_flatten %}
-                                let {{ method.body_params[0].name }} = body;
+                                let {{ method.body_params[0].name }} = xidl_body;
                             {% else %}
                                 let {{ method.struct_prefix }}RequestInBody {
                                     {% for param in method.body_params %}
                                         {{ param.name }},
                                     {% endfor %}
-                                } = body;
+                                } = xidl_body;
                             {% endif %}
                         {% endif %}
                         Ok(Self {
