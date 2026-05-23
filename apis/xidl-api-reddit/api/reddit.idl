@@ -1,0 +1,1210 @@
+#pragma xidlc package Reddit API
+#pragma xidlc version 1.0.0
+#pragma xidlc service https://oauth.reddit.com reddit
+
+interface RedditApi {
+    @get(path = "/api/v1/me")
+    any get_me(
+
+    );
+
+    @get(path = "/api/v1/me/karma")
+    any get_me_karma(
+
+    );
+
+    @get(path = "/api/v1/me/prefs")
+    any get_me_prefs(
+        @query in string fields
+    );
+
+    @patch(path = "/api/v1/me/prefs")
+    any patch_me_prefs(
+
+    );
+
+    @get(path = "/api/v1/me/trophies")
+    any get_me_trophies(
+
+    );
+
+    @get(path = "/prefs/{where}")
+    any get_prefs_where(
+        @path in string where,
+        @query in string after,
+        @query in string before,
+        @query in int64 count,
+        @query in string limit,
+        @query in string show,
+        @query in string sr_detail
+    );
+
+    @get(path = "/api/announcements/v1")
+    any get_announcements_v1(
+        @query in string after,
+        @query in string before,
+        @query in int64 limit
+    );
+
+    @post(path = "/api/announcements/v1/hide")
+    any post_announcements_v1_hide(
+        @body in any body
+    );
+
+    @post(path = "/api/announcements/v1/read")
+    any post_announcements_v1_read(
+        @body in any body
+    );
+
+    @post(path = "/api/announcements/v1/read/all")
+    any post_announcements_v1_read_all(
+
+    );
+
+    @get(path = "/api/needs/captcha")
+    any get_needs_captcha(
+
+    );
+
+    @post(path = "/api/v1/{subreddit}/emoji.json")
+    any post_subreddit_emoji_json(
+        @path in string subreddit,
+        @body in any body
+    );
+
+    @delete(path = "/api/v1/{subreddit}/emoji/{emoji_name}")
+    any delete_subreddit_emoji_emoji_name(
+        @path in string subreddit,
+        @path in string emoji_name
+    );
+
+    @post(path = "/api/v1/{subreddit}/emoji/asset/upload/s3.json")
+    any post_subreddit_emoji_asset_upload_s3_json(
+        @path in string subreddit,
+        @body in any body
+    );
+
+    @post(path = "/api/v1/{subreddit}/emoji/custom/size")
+    any post_subreddit_emoji_custom_size(
+        @path in string subreddit,
+        @body in any body
+    );
+
+    @get(path = "/api/v1/{subreddit}/emojis/all")
+    any get_subreddit_emojis_all(
+        @path in string subreddit
+    );
+
+    @post(path = "/api/clearflairtemplates")
+    any post_clearflairtemplates(
+        @body in any body
+    );
+
+    @post(path = "/api/deleteflair")
+    any post_deleteflair(
+        @body in any body
+    );
+
+    @post(path = "/api/deleteflairtemplate")
+    any post_deleteflairtemplate(
+        @body in any body
+    );
+
+    @post(path = "/api/flair")
+    any post_flair(
+        @body in any body
+    );
+
+    @patch(path = "/api/flair/template/order")
+    any patch_flair_template_order(
+        @body in any body
+    );
+
+    @post(path = "/api/flairconfig")
+    any post_flairconfig(
+        @body in any body
+    );
+
+    @post(path = "/api/flaircsv")
+    any post_flaircsv(
+        @body in any body
+    );
+
+    @get(path = "/api/flairlist")
+    any get_flairlist(
+        @query in string after,
+        @query in string before,
+        @query in int64 count,
+        @query in string limit,
+        @query in string name,
+        @query in string show,
+        @query in string sr_detail
+    );
+
+    @post(path = "/api/flairselector")
+    any post_flairselector(
+        @body in any body
+    );
+
+    @post(path = "/api/flairtemplate")
+    any post_flairtemplate(
+        @body in any body
+    );
+
+    @post(path = "/api/flairtemplate/v2")
+    any post_flairtemplate_v2(
+        @body in any body
+    );
+
+    @get(path = "/api/link/flair")
+    any get_link_flair(
+
+    );
+
+    @get(path = "/api/link/flair/v2")
+    any get_link_flair_v2(
+
+    );
+
+    @post(path = "/api/selectflair")
+    any post_selectflair(
+        @body in any body
+    );
+
+    @post(path = "/api/setflairenabled")
+    any post_setflairenabled(
+        @body in any body
+    );
+
+    @get(path = "/api/user/flair")
+    any get_user_flair(
+
+    );
+
+    @get(path = "/api/user/flair/v2")
+    any get_user_flair_v2(
+
+    );
+
+    @post(path = "/api/comment")
+    any post_comment(
+        @body in any body
+    );
+
+    @post(path = "/api/del")
+    any post_del(
+        @body in any body
+    );
+
+    @post(path = "/api/editusertext")
+    any post_editusertext(
+        @body in any body
+    );
+
+    @post(path = "/api/follow/post")
+    any post_follow_post(
+        @body in any body
+    );
+
+    @post(path = "/api/hide")
+    any post_hide(
+        @body in any body
+    );
+
+    @get(path = "/api/info")
+    any get_info(
+        @query in string id,
+        @query in string sr_name,
+        @query in string url
+    );
+
+    @post(path = "/api/lock")
+    any post_lock(
+        @body in any body
+    );
+
+    @post(path = "/api/marknsfw")
+    any post_marknsfw(
+        @body in any body
+    );
+
+    @get(path = "/api/morechildren")
+    any get_morechildren(
+        @query in string api_type,
+        @query in string children,
+        @query in int64 depth,
+        @query in string id,
+        @query in boolean limit_children,
+        @query in string link_id,
+        @query in string sort
+    );
+
+    @post(path = "/api/report")
+    any post_report(
+        @body in any body
+    );
+
+    @post(path = "/api/save")
+    any post_save(
+        @body in any body
+    );
+
+    @get(path = "/api/saved/categories")
+    any get_saved_categories(
+
+    );
+
+    @post(path = "/api/sendreplies")
+    any post_sendreplies(
+        @body in any body
+    );
+
+    @post(path = "/api/set/contest/mode")
+    any post_set_contest_mode(
+        @body in any body
+    );
+
+    @post(path = "/api/set/subreddit/sticky")
+    any post_set_subreddit_sticky(
+        @body in any body
+    );
+
+    @post(path = "/api/set/suggested/sort")
+    any post_set_suggested_sort(
+        @body in any body
+    );
+
+    @post(path = "/api/spoiler")
+    any post_spoiler(
+        @body in any body
+    );
+
+    @post(path = "/api/store/visits")
+    any post_store_visits(
+        @body in any body
+    );
+
+    @post(path = "/api/submit")
+    any post_submit(
+        @body in any body
+    );
+
+    @post(path = "/api/unhide")
+    any post_unhide(
+        @body in any body
+    );
+
+    @post(path = "/api/unlock")
+    any post_unlock(
+        @body in any body
+    );
+
+    @post(path = "/api/unmarknsfw")
+    any post_unmarknsfw(
+        @body in any body
+    );
+
+    @post(path = "/api/unsave")
+    any post_unsave(
+        @body in any body
+    );
+
+    @post(path = "/api/unspoiler")
+    any post_unspoiler(
+        @body in any body
+    );
+
+    @post(path = "/api/vote")
+    any post_vote(
+        @body in any body
+    );
+
+    @get(path = "/best")
+    any get_best(
+
+    );
+
+    @get(path = "/by/id/{names}")
+    any get_by_id_names(
+        @path in string names
+    );
+
+    @get(path = "/comments/{article}")
+    any get_comments_article(
+        @path in string article,
+        @query in string comment,
+        @query in int64 context,
+        @query in int64 depth,
+        @query in int64 limit,
+        @query in boolean showedits,
+        @query in boolean showmedia,
+        @query in boolean showmore,
+        @query in boolean showtitle,
+        @query in string sort,
+        @query in string sr_detail,
+        @query in string theme,
+        @query in boolean threaded,
+        @query in int64 truncate
+    );
+
+    @get(path = "/duplicates/{article}")
+    any get_duplicates_article(
+        @path in string article,
+        @query in string after,
+        @query in string before,
+        @query in int64 count,
+        @query in boolean crossposts_only,
+        @query in string limit,
+        @query in string show,
+        @query in string sort,
+        @query in string sr,
+        @query in string sr_detail
+    );
+
+    @get(path = "/hot")
+    any get_hot(
+        @query in string g
+    );
+
+    @get(path = "/new")
+    any get_new(
+
+    );
+
+    @get(path = "/rising")
+    any get_rising(
+
+    );
+
+    @get(path = "/{sort}")
+    any get_sort(
+        @path in string sort,
+        @query in string t
+    );
+
+    @get(path = "/api/live/by/id/{names}")
+    any get_live_by_id_names(
+        @path in string names
+    );
+
+    @post(path = "/api/live/create")
+    any post_live_create(
+        @body in any body
+    );
+
+    @get(path = "/api/live/happening/now")
+    any get_live_happening_now(
+        @query in boolean show_announcements
+    );
+
+    @post(path = "/api/live/{thread}/accept/contributor/invite")
+    any post_live_thread_accept_contributor_invite(
+        @path in string thread,
+        @body in any body
+    );
+
+    @post(path = "/api/live/{thread}/close/thread")
+    any post_live_thread_close_thread(
+        @path in string thread,
+        @body in any body
+    );
+
+    @post(path = "/api/live/{thread}/delete/update")
+    any post_live_thread_delete_update(
+        @path in string thread,
+        @body in any body
+    );
+
+    @post(path = "/api/live/{thread}/edit")
+    any post_live_thread_edit(
+        @path in string thread,
+        @body in any body
+    );
+
+    @post(path = "/api/live/{thread}/hide/discussion")
+    any post_live_thread_hide_discussion(
+        @path in string thread,
+        @body in any body
+    );
+
+    @post(path = "/api/live/{thread}/invite/contributor")
+    any post_live_thread_invite_contributor(
+        @path in string thread,
+        @body in any body
+    );
+
+    @post(path = "/api/live/{thread}/leave/contributor")
+    any post_live_thread_leave_contributor(
+        @path in string thread,
+        @body in any body
+    );
+
+    @post(path = "/api/live/{thread}/report")
+    any post_live_thread_report(
+        @path in string thread,
+        @body in any body
+    );
+
+    @post(path = "/api/live/{thread}/rm/contributor")
+    any post_live_thread_rm_contributor(
+        @path in string thread,
+        @body in any body
+    );
+
+    @post(path = "/api/live/{thread}/rm/contributor/invite")
+    any post_live_thread_rm_contributor_invite(
+        @path in string thread,
+        @body in any body
+    );
+
+    @post(path = "/api/live/{thread}/set/contributor/permissions")
+    any post_live_thread_set_contributor_permissions(
+        @path in string thread,
+        @body in any body
+    );
+
+    @post(path = "/api/live/{thread}/strike/update")
+    any post_live_thread_strike_update(
+        @path in string thread,
+        @body in any body
+    );
+
+    @post(path = "/api/live/{thread}/unhide/discussion")
+    any post_live_thread_unhide_discussion(
+        @path in string thread,
+        @body in any body
+    );
+
+    @post(path = "/api/live/{thread}/update")
+    any post_live_thread_update(
+        @path in string thread,
+        @body in any body
+    );
+
+    @get(path = "/live/{thread}")
+    any get_live_thread(
+        @path in string thread,
+        @query in string after,
+        @query in string before,
+        @query in int64 count,
+        @query in string is_embed,
+        @query in string limit,
+        @query in string stylesr
+    );
+
+    @get(path = "/live/{thread}/about")
+    any get_live_thread_about(
+        @path in string thread
+    );
+
+    @get(path = "/live/{thread}/contributors")
+    any get_live_thread_contributors(
+        @path in string thread
+    );
+
+    @get(path = "/live/{thread}/discussions")
+    any get_live_thread_discussions(
+        @path in string thread,
+        @query in string after,
+        @query in string before,
+        @query in int64 count,
+        @query in string limit,
+        @query in string show,
+        @query in string sr_detail
+    );
+
+    @get(path = "/live/{thread}/updates/{update_id}")
+    any get_live_thread_updates_update_id(
+        @path in string thread,
+        @path in string update_id
+    );
+
+    @post(path = "/api/compose")
+    any post_compose(
+        @body in any body
+    );
+
+    @post(path = "/api/del/msg")
+    any post_del_msg(
+        @body in any body
+    );
+
+    @post(path = "/api/read/all/messages")
+    any post_read_all_messages(
+        @body in any body
+    );
+
+    @post(path = "/api/read/message")
+    any post_read_message(
+        @body in any body
+    );
+
+    @get(path = "/message/{where}")
+    any get_message_where(
+        @path in string where,
+        @query in string mark,
+        @query in string max_replies,
+        @query in string mid
+    );
+
+    @get(path = "/api/v1/scopes")
+    any get_scopes(
+        @query in string scopes
+    );
+
+    @get(path = "/about/log")
+    any get_about_log(
+        @query in string after,
+        @query in string before,
+        @query in int64 count,
+        @query in string limit,
+        @query in string mod,
+        @query in string show,
+        @query in string sr_detail,
+        @query in string type
+    );
+
+    @get(path = "/about/{location}")
+    any get_about_location(
+        @path in string location,
+        @query in string after,
+        @query in string before,
+        @query in int64 count,
+        @query in string limit,
+        @query in string only,
+        @query in string show,
+        @query in string sr_detail
+    );
+
+    @post(path = "/api/accept/moderator/invite")
+    any post_accept_moderator_invite(
+        @body in any body
+    );
+
+    @post(path = "/api/approve")
+    any post_approve(
+        @body in any body
+    );
+
+    @post(path = "/api/distinguish")
+    any post_distinguish(
+        @body in any body
+    );
+
+    @post(path = "/api/ignore/reports")
+    any post_ignore_reports(
+        @body in any body
+    );
+
+    @post(path = "/api/leavecontributor")
+    any post_leavecontributor(
+        @body in any body
+    );
+
+    @post(path = "/api/leavemoderator")
+    any post_leavemoderator(
+        @body in any body
+    );
+
+    @post(path = "/api/remove")
+    any post_remove(
+        @body in any body
+    );
+
+    @post(path = "/api/show/comment")
+    any post_show_comment(
+        @body in any body
+    );
+
+    @post(path = "/api/snooze/reports")
+    any post_snooze_reports(
+        @body in any body
+    );
+
+    @post(path = "/api/unignore/reports")
+    any post_unignore_reports(
+        @body in any body
+    );
+
+    @post(path = "/api/unsnooze/reports")
+    any post_unsnooze_reports(
+        @body in any body
+    );
+
+    @post(path = "/api/update/crowd/control/level")
+    any post_update_crowd_control_level(
+        @body in any body
+    );
+
+    @get(path = "/stylesheet")
+    any get_stylesheet(
+
+    );
+
+    @post(path = "/api/mod/bulk/read")
+    any post_mod_bulk_read(
+        @body in any body
+    );
+
+    @get(path = "/api/mod/conversations")
+    any get_mod_conversations(
+        @query in string after,
+        @query in string entity,
+        @query in int64 limit,
+        @query in string sort,
+        @query in string state
+    );
+
+    @post(path = "/api/mod/conversations")
+    any post_mod_conversations(
+        @body in any body
+    );
+
+    @get(path = "/api/mod/conversations/:conversation/id")
+    any get_mod_conversations_conversation_id(
+        @query in string conversation_id,
+        @query in boolean markRead
+    );
+
+    @post(path = "/api/mod/conversations/:conversation/id")
+    any post_mod_conversations_conversation_id(
+        @body in any body
+    );
+
+    @post(path = "/api/mod/conversations/:conversation/id/approve")
+    any post_mod_conversations_conversation_id_approve(
+        @body in any body
+    );
+
+    @post(path = "/api/mod/conversations/:conversation/id/archive")
+    any post_mod_conversations_conversation_id_archive(
+        @body in any body
+    );
+
+    @post(path = "/api/mod/conversations/:conversation/id/disapprove")
+    any post_mod_conversations_conversation_id_disapprove(
+        @body in any body
+    );
+
+    @delete(path = "/api/mod/conversations/:conversation/id/highlight")
+    any delete_mod_conversations_conversation_id_highlight(
+        @query in string conversation_id
+    );
+
+    @post(path = "/api/mod/conversations/:conversation/id/highlight")
+    any post_mod_conversations_conversation_id_highlight(
+        @body in any body
+    );
+
+    @post(path = "/api/mod/conversations/:conversation/id/mute")
+    any post_mod_conversations_conversation_id_mute(
+        @body in any body
+    );
+
+    @post(path = "/api/mod/conversations/:conversation/id/temp/ban")
+    any post_mod_conversations_conversation_id_temp_ban(
+        @body in any body
+    );
+
+    @post(path = "/api/mod/conversations/:conversation/id/unarchive")
+    any post_mod_conversations_conversation_id_unarchive(
+        @body in any body
+    );
+
+    @post(path = "/api/mod/conversations/:conversation/id/unban")
+    any post_mod_conversations_conversation_id_unban(
+        @body in any body
+    );
+
+    @post(path = "/api/mod/conversations/:conversation/id/unmute")
+    any post_mod_conversations_conversation_id_unmute(
+        @body in any body
+    );
+
+    @post(path = "/api/mod/conversations/read")
+    any post_mod_conversations_read(
+        @body in any body
+    );
+
+    @get(path = "/api/mod/conversations/subreddits")
+    any get_mod_conversations_subreddits(
+
+    );
+
+    @post(path = "/api/mod/conversations/unread")
+    any post_mod_conversations_unread(
+        @body in any body
+    );
+
+    @get(path = "/api/mod/conversations/unread/count")
+    any get_mod_conversations_unread_count(
+
+    );
+
+    @delete(path = "/api/mod/notes")
+    any delete_mod_notes(
+        @query in string note_id,
+        @query in string subreddit,
+        @query in string user
+    );
+
+    @get(path = "/api/mod/notes")
+    any get_mod_notes(
+        @query in string before,
+        @query in string filter,
+        @query in string limit,
+        @query in string subreddit,
+        @query in string user
+    );
+
+    @post(path = "/api/mod/notes")
+    any post_mod_notes(
+        @body in any body
+    );
+
+    @get(path = "/api/mod/notes/recent")
+    any get_mod_notes_recent(
+        @query in string subreddits,
+        @query in string users
+    );
+
+    @post(path = "/api/multi/copy")
+    any post_multi_copy(
+        @body in any body
+    );
+
+    @get(path = "/api/multi/mine")
+    any get_multi_mine(
+        @query in boolean expand_srs
+    );
+
+    @get(path = "/api/multi/user/{username}")
+    any get_multi_user_username(
+        @path in string username,
+        @query in boolean expand_srs
+    );
+
+    @delete(path = "/api/multi/{multipath}")
+    any delete_multi_multipath(
+        @path in string multipath,
+        @query in string uh_X_Modhash_header
+    );
+
+    @get(path = "/api/multi/{multipath}")
+    any get_multi_multipath(
+        @path in string multipath,
+        @query in boolean expand_srs
+    );
+
+    @post(path = "/api/multi/{multipath}")
+    any post_multi_multipath(
+        @path in string multipath,
+        @body in any body
+    );
+
+    @put(path = "/api/multi/{multipath}")
+    any put_multi_multipath(
+        @path in string multipath,
+        @body in any body
+    );
+
+    @get(path = "/api/multi/{multipath}/description")
+    any get_multi_multipath_description(
+        @path in string multipath
+    );
+
+    @put(path = "/api/multi/{multipath}/description")
+    any put_multi_multipath_description(
+        @path in string multipath,
+        @body in any body
+    );
+
+    @delete(path = "/api/multi/{multipath}/r/{srname}")
+    any delete_multi_multipath_r_srname(
+        @path in string multipath,
+        @path in string srname,
+        @query in string uh_X_Modhash_header
+    );
+
+    @get(path = "/api/multi/{multipath}/r/{srname}")
+    any get_multi_multipath_r_srname(
+        @path in string multipath,
+        @path in string srname
+    );
+
+    @put(path = "/api/multi/{multipath}/r/{srname}")
+    any put_multi_multipath_r_srname(
+        @path in string multipath,
+        @path in string srname,
+        @body in any body
+    );
+
+    @get(path = "/search")
+    any get_search(
+        @query in string after,
+        @query in string before,
+        @query in string category,
+        @query in int64 count,
+        @query in boolean include_facets,
+        @query in string limit,
+        @query in string q,
+        @query in boolean restrict_sr,
+        @query in string show,
+        @query in string sort,
+        @query in string sr_detail,
+        @query in string t,
+        @query in string type
+    );
+
+    @get(path = "/about/{where}")
+    any get_about_where(
+        @path in string where,
+        @query in string after,
+        @query in string before,
+        @query in int64 count,
+        @query in string limit,
+        @query in string show,
+        @query in string sr_detail,
+        @query in string user
+    );
+
+    @post(path = "/api/delete/sr/banner")
+    any post_delete_sr_banner(
+        @body in any body
+    );
+
+    @post(path = "/api/delete/sr/header")
+    any post_delete_sr_header(
+        @body in any body
+    );
+
+    @post(path = "/api/delete/sr/icon")
+    any post_delete_sr_icon(
+        @body in any body
+    );
+
+    @post(path = "/api/delete/sr/img")
+    any post_delete_sr_img(
+        @body in any body
+    );
+
+    @get(path = "/api/recommend/sr/{srnames}")
+    any get_recommend_sr_srnames(
+        @path in string srnames,
+        @query in string omit,
+        @query in boolean over_18
+    );
+
+    @get(path = "/api/search/reddit/names")
+    any get_search_reddit_names(
+        @query in boolean exact,
+        @query in boolean include_over_18,
+        @query in boolean include_unadvertisable,
+        @query in string query,
+        @query in string search_query_id,
+        @query in boolean typeahead_active
+    );
+
+    @post(path = "/api/search/reddit/names")
+    any post_search_reddit_names(
+        @body in any body
+    );
+
+    @post(path = "/api/search/subreddits")
+    any post_search_subreddits(
+        @body in any body
+    );
+
+    @post(path = "/api/site/admin")
+    any post_site_admin(
+        @body in any body
+    );
+
+    @get(path = "/api/submit/text")
+    any get_submit_text(
+
+    );
+
+    @get(path = "/api/subreddit/autocomplete")
+    any get_subreddit_autocomplete(
+        @query in boolean include_over_18,
+        @query in boolean include_profiles,
+        @query in string query
+    );
+
+    @get(path = "/api/subreddit/autocomplete/v2")
+    any get_subreddit_autocomplete_v2(
+        @query in boolean include_over_18,
+        @query in boolean include_profiles,
+        @query in int64 limit,
+        @query in string query,
+        @query in string search_query_id,
+        @query in boolean typeahead_active
+    );
+
+    @post(path = "/api/subreddit/stylesheet")
+    any post_subreddit_stylesheet(
+        @body in any body
+    );
+
+    @post(path = "/api/subscribe")
+    any post_subscribe(
+        @body in any body
+    );
+
+    @post(path = "/api/upload/sr/img")
+    any post_upload_sr_img(
+        @body in any body
+    );
+
+    @get(path = "/api/v1/{subreddit}/post/requirements")
+    any get_subreddit_post_requirements(
+        @path in string subreddit
+    );
+
+    @get(path = "/r/{subreddit}/about")
+    any get_r_subreddit_about(
+        @path in string subreddit
+    );
+
+    @get(path = "/r/{subreddit}/about/edit")
+    any get_r_subreddit_about_edit(
+        @path in string subreddit,
+        @query in string created,
+        @query in string location
+    );
+
+    @get(path = "/r/{subreddit}/about/rules")
+    any get_r_subreddit_about_rules(
+        @path in string subreddit
+    );
+
+    @get(path = "/r/{subreddit}/about/traffic")
+    any get_r_subreddit_about_traffic(
+        @path in string subreddit
+    );
+
+    @get(path = "/sidebar")
+    any get_sidebar(
+
+    );
+
+    @get(path = "/sticky")
+    any get_sticky(
+        @query in int64 num
+    );
+
+    @get(path = "/subreddits/mine/{where}")
+    any get_subreddits_mine_where(
+        @path in string where
+    );
+
+    @get(path = "/subreddits/search")
+    any get_subreddits_search(
+        @query in string after,
+        @query in string before,
+        @query in int64 count,
+        @query in string limit,
+        @query in string q,
+        @query in string search_query_id,
+        @query in string show,
+        @query in boolean show_users,
+        @query in string sort,
+        @query in string sr_detail,
+        @query in boolean typeahead_active
+    );
+
+    @get(path = "/subreddits/{where}")
+    any get_subreddits_where(
+        @path in string where
+    );
+
+    @get(path = "/users/search")
+    any get_users_search(
+        @query in string after,
+        @query in string before,
+        @query in int64 count,
+        @query in string limit,
+        @query in string q,
+        @query in string search_query_id,
+        @query in string show,
+        @query in string sort,
+        @query in string sr_detail,
+        @query in boolean typeahead_active
+    );
+
+    @get(path = "/users/{where}")
+    any get_users_where(
+        @path in string where
+    );
+
+    @post(path = "/api/block/user")
+    any post_block_user(
+        @body in any body
+    );
+
+    @post(path = "/api/friend")
+    any post_friend(
+        @body in any body
+    );
+
+    @post(path = "/api/report/user")
+    any post_report_user(
+        @body in any body
+    );
+
+    @post(path = "/api/setpermissions")
+    any post_setpermissions(
+        @body in any body
+    );
+
+    @post(path = "/api/unfriend")
+    any post_unfriend(
+        @body in any body
+    );
+
+    @get(path = "/api/user/data/by/account/ids")
+    any get_user_data_by_account_ids(
+        @query in string ids
+    );
+
+    @get(path = "/api/username/available")
+    any get_username_available(
+        @query in string user
+    );
+
+    @delete(path = "/api/v1/me/friends/{username}")
+    any delete_me_friends_username(
+        @path in string username,
+        @query in string id
+    );
+
+    @put(path = "/api/v1/me/friends/{username}")
+    any put_me_friends_username(
+        @path in string username
+    );
+
+    @get(path = "/api/v1/user/{username}/trophies")
+    any get_user_username_trophies(
+        @path in string username,
+        @query in string id
+    );
+
+    @get(path = "/user/{username}/about")
+    any get_user_username_about(
+        @path in string username
+    );
+
+    @get(path = "/user/{username}/{where}")
+    any get_user_username_where(
+        @path in string username,
+        @path in string where,
+        @query in int64 context,
+        @query in string show,
+        @query in string sort,
+        @query in string t,
+        @query in string type
+    );
+
+    @post(path = "/api/widget")
+    any post_widget(
+        @body in any body
+    );
+
+    @delete(path = "/api/widget/{widget_id}")
+    any delete_widget_widget_id(
+        @path in string widget_id
+    );
+
+    @put(path = "/api/widget/{widget_id}")
+    any put_widget_widget_id(
+        @path in string widget_id,
+        @body in any body
+    );
+
+    @post(path = "/api/widget/image/upload/s3")
+    any post_widget_image_upload_s3(
+        @body in any body
+    );
+
+    @patch(path = "/api/widget/order/{section}")
+    any patch_widget_order_section(
+        @path in string section,
+        @body in any body
+    );
+
+    @get(path = "/api/widgets")
+    any get_widgets(
+        @query in boolean progressive_images
+    );
+
+    @post(path = "/api/wiki/alloweditor/{act}")
+    any post_wiki_alloweditor_act(
+        @path in string act,
+        @body in any body
+    );
+
+    @post(path = "/api/wiki/edit")
+    any post_wiki_edit(
+        @body in any body
+    );
+
+    @post(path = "/api/wiki/hide")
+    any post_wiki_hide(
+        @body in any body
+    );
+
+    @post(path = "/api/wiki/revert")
+    any post_wiki_revert(
+        @body in any body
+    );
+
+    @get(path = "/wiki/discussions/{page}")
+    any get_wiki_discussions_page(
+        @path in string page,
+        @query in string after,
+        @query in string before,
+        @query in int64 count,
+        @query in string limit,
+        @query in string show,
+        @query in string sr_detail
+    );
+
+    @get(path = "/wiki/pages")
+    any get_wiki_pages(
+
+    );
+
+    @get(path = "/wiki/revisions")
+    any get_wiki_revisions(
+        @query in string after,
+        @query in string before,
+        @query in int64 count,
+        @query in string limit,
+        @query in string show,
+        @query in string sr_detail
+    );
+
+    @get(path = "/wiki/revisions/{page}")
+    any get_wiki_revisions_page(
+        @path in string page,
+        @query in string after,
+        @query in string before,
+        @query in int64 count,
+        @query in string limit,
+        @query in string show,
+        @query in string sr_detail
+    );
+
+    @get(path = "/wiki/settings/{page}")
+    any get_wiki_settings_page(
+        @path in string page
+    );
+
+    @post(path = "/wiki/settings/{page}")
+    any post_wiki_settings_page(
+        @path in string page,
+        @body in any body
+    );
+
+};
