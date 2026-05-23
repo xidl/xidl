@@ -221,10 +221,11 @@ fn mark_reachable_from_def(
             hir::TypeDcl::ConstrTypeDcl(c) => {
                 mark_reachable_from_constr(c, reachable, registry);
             }
-            hir::TypeDcl::TypedefDcl(t) => match &t.ty {
-                hir::TypedefType::TypeSpec(ty) => mark_reachable(ty, reachable, registry),
-                _ => {}
-            },
+            hir::TypeDcl::TypedefDcl(t) => {
+                if let hir::TypedefType::TypeSpec(ty) = &t.ty {
+                    mark_reachable(ty, reachable, registry)
+                }
+            }
             _ => {}
         },
         hir::Definition::ConstDcl(c) => mark_reachable_const(&c.ty, reachable, registry),

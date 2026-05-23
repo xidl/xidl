@@ -101,7 +101,7 @@ impl ImportCtx {
 
     fn resolve_param<'a>(&'a self, param: &'a Value) -> &'a Value {
         if let Some(ref_val) = param.get("$ref").and_then(|v| v.as_str()) {
-            let name = ref_val.split('/').last().unwrap();
+            let name = ref_val.split('/').next_back().unwrap();
             return self.parameters.get(name).unwrap_or(param);
         }
         param
@@ -109,7 +109,7 @@ impl ImportCtx {
 
     fn resolve_body<'a>(&'a self, body: &'a Value) -> &'a Value {
         if let Some(ref_val) = body.get("$ref").and_then(|v| v.as_str()) {
-            let name = ref_val.split('/').last().unwrap();
+            let name = ref_val.split('/').next_back().unwrap();
             return self.request_bodies.get(name).unwrap_or(body);
         }
         body
@@ -165,7 +165,7 @@ fn render_schema_definition(name: &str, schema: &Value, ctx: &ImportCtx) -> Stri
     out
 }
 
-fn render_type(schema: &Value, ctx: &ImportCtx) -> String {
+fn render_type(schema: &Value, _ctx: &ImportCtx) -> String {
     if let Some(ref_val) = schema.get("$ref").and_then(|v| v.as_str()) {
         return resolve_ref_name(ref_val);
     }
@@ -179,13 +179,13 @@ fn render_type(schema: &Value, ctx: &ImportCtx) -> String {
                 "boolean" => return "boolean".to_string(),
                 "array" => {
                     if let Some(items) = obj.get("items") {
-                        return format!("sequence<{}>", render_type(items, ctx));
+                        return format!("sequence<{}>", render_type(items, _ctx));
                     }
                     return "sequence<string>".to_string();
                 }
                 "object" => {
                     if let Some(additional) = obj.get("additionalProperties") {
-                        return format!("map<string, {}>", render_type(additional, ctx));
+                        return format!("map<string, {}>", render_type(additional, _ctx));
                     }
                 }
                 _ => {}
@@ -196,7 +196,7 @@ fn render_type(schema: &Value, ctx: &ImportCtx) -> String {
 }
 
 fn resolve_ref_name(ref_val: &str) -> String {
-    to_camel_case(ref_val.split('/').last().unwrap())
+    to_camel_case(ref_val.split('/').next_back().unwrap())
 }
 
 fn render_operation(method: &str, path: &str, op: &Value, ctx: &ImportCtx) -> String {
@@ -277,14 +277,9 @@ fn render_operation(method: &str, path: &str, op: &Value, ctx: &ImportCtx) -> St
 
 fn fix_ident(s: &str) -> String {
     let s = s
-        .replace('-', "_")
-        .replace('.', "_")
-        .replace(' ', "_")
-        .replace('/', "_")
-        .replace('{', "")
-        .replace('}', "")
-        .replace('+', "_")
-        .replace(':', "_");
+        .replace(['-', '.', ' ', '/'], "_")
+        .replace(['{', '}'], "")
+        .replace(['+', ':'], "_");
     if s.is_empty() {
         return "empty".to_string();
     }
@@ -309,14 +304,9 @@ fn fix_ident(s: &str) -> String {
 
 fn to_camel_case(s: &str) -> String {
     let s = s
-        .replace('-', "_")
-        .replace('.', "_")
-        .replace(' ', "_")
-        .replace('/', "_")
-        .replace('{', "")
-        .replace('}', "")
-        .replace('+', "_")
-        .replace(':', "_");
+        .replace(['-', '.', ' ', '/'], "_")
+        .replace(['{', '}'], "")
+        .replace(['+', ':'], "_");
     let mut out = String::new();
     let mut capitalize = true;
     for c in s.chars() {
