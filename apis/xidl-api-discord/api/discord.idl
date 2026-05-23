@@ -1,0 +1,6898 @@
+#pragma xidlc package Discord HTTP API (Preview)
+#pragma xidlc version 10
+#pragma xidlc service https://discord.com/api/v10 discord
+
+struct AccountResponse {
+    string id;
+    string name;
+};
+
+struct ActionRowComponentForMessageRequest {
+    int64 type;
+    @optional
+    int64 id;
+    sequence<string> components;
+};
+
+struct ActionRowComponentForModalRequest {
+    int64 type;
+    @optional
+    int64 id;
+    sequence<TextInputComponentForModalRequest> components;
+};
+
+struct ActionRowComponentResponse {
+    int64 type;
+    int64 id;
+    sequence<string> components;
+};
+
+typedef string ActionTypes;
+
+struct ActivitiesAttachmentResponse {
+    AttachmentResponse attachment;
+};
+
+typedef int64 ActivityActionTypes;
+
+typedef int64 AfkTimeouts;
+
+typedef string AllowedMentionTypes;
+
+struct ApplicationCommandAttachmentOption {
+    int64 type;
+    string name;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    boolean required;
+};
+
+struct ApplicationCommandAttachmentOptionResponse {
+    int64 type;
+    string name;
+    @optional
+    string name_localized;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    string description_localized;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    boolean required;
+};
+
+struct ApplicationCommandAutocompleteCallbackRequest {
+    int64 type;
+    string data;
+};
+
+struct ApplicationCommandBooleanOption {
+    int64 type;
+    string name;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    boolean required;
+};
+
+struct ApplicationCommandBooleanOptionResponse {
+    int64 type;
+    string name;
+    @optional
+    string name_localized;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    string description_localized;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    boolean required;
+};
+
+struct ApplicationCommandChannelOption {
+    int64 type;
+    string name;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    boolean required;
+    @optional
+    sequence<ChannelTypes> channel_types;
+};
+
+struct ApplicationCommandChannelOptionResponse {
+    int64 type;
+    string name;
+    @optional
+    string name_localized;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    string description_localized;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    boolean required;
+    @optional
+    sequence<ChannelTypes> channel_types;
+};
+
+struct ApplicationCommandCreateRequest {
+    string name;
+    @optional
+    map<string, string> name_localizations;
+    @optional
+    string description;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    sequence<string> options;
+    @optional
+    int64 default_member_permissions;
+    @optional
+    boolean dm_permission;
+    @optional
+    sequence<InteractionContextType> contexts;
+    @optional
+    sequence<ApplicationIntegrationType> integration_types;
+    @optional
+    string handler;
+    @optional
+    string type;
+};
+
+typedef int64 ApplicationCommandHandler;
+
+struct ApplicationCommandIntegerOption {
+    int64 type;
+    string name;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    boolean required;
+    @optional
+    boolean autocomplete;
+    @optional
+    sequence<ApplicationCommandOptionIntegerChoice> choices;
+    @optional
+    string min_value;
+    @optional
+    string max_value;
+};
+
+struct ApplicationCommandIntegerOptionResponse {
+    int64 type;
+    string name;
+    @optional
+    string name_localized;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    string description_localized;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    boolean required;
+    @optional
+    boolean autocomplete;
+    @optional
+    sequence<ApplicationCommandOptionIntegerChoiceResponse> choices;
+    @optional
+    Int53Type min_value;
+    @optional
+    Int53Type max_value;
+};
+
+struct ApplicationCommandInteractionMetadataResponse {
+    SnowflakeType id;
+    int64 type;
+    @optional
+    UserResponse user;
+    map<string, SnowflakeType> authorizing_integration_owners;
+    @optional
+    SnowflakeType original_response_message_id;
+    @optional
+    UserResponse target_user;
+    @optional
+    SnowflakeType target_message_id;
+};
+
+struct ApplicationCommandMentionableOption {
+    int64 type;
+    string name;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    boolean required;
+};
+
+struct ApplicationCommandMentionableOptionResponse {
+    int64 type;
+    string name;
+    @optional
+    string name_localized;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    string description_localized;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    boolean required;
+};
+
+struct ApplicationCommandNumberOption {
+    int64 type;
+    string name;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    boolean required;
+    @optional
+    boolean autocomplete;
+    @optional
+    sequence<ApplicationCommandOptionNumberChoice> choices;
+    @optional
+    double min_value;
+    @optional
+    double max_value;
+};
+
+struct ApplicationCommandNumberOptionResponse {
+    int64 type;
+    string name;
+    @optional
+    string name_localized;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    string description_localized;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    boolean required;
+    @optional
+    boolean autocomplete;
+    @optional
+    sequence<ApplicationCommandOptionNumberChoiceResponse> choices;
+    @optional
+    double min_value;
+    @optional
+    double max_value;
+};
+
+struct ApplicationCommandOptionIntegerChoice {
+    string name;
+    @optional
+    map<string, string> name_localizations;
+    Int53Type value;
+};
+
+struct ApplicationCommandOptionIntegerChoiceResponse {
+    string name;
+    @optional
+    string name_localized;
+    @optional
+    map<string, string> name_localizations;
+    Int53Type value;
+};
+
+struct ApplicationCommandOptionNumberChoice {
+    string name;
+    @optional
+    map<string, string> name_localizations;
+    double value;
+};
+
+struct ApplicationCommandOptionNumberChoiceResponse {
+    string name;
+    @optional
+    string name_localized;
+    @optional
+    map<string, string> name_localizations;
+    double value;
+};
+
+struct ApplicationCommandOptionStringChoice {
+    string name;
+    @optional
+    map<string, string> name_localizations;
+    string value;
+};
+
+struct ApplicationCommandOptionStringChoiceResponse {
+    string name;
+    @optional
+    string name_localized;
+    @optional
+    map<string, string> name_localizations;
+    string value;
+};
+
+typedef int64 ApplicationCommandOptionType;
+
+struct ApplicationCommandPatchRequestPartial {
+    @optional
+    string name;
+    @optional
+    map<string, string> name_localizations;
+    @optional
+    string description;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    sequence<string> options;
+    @optional
+    int64 default_member_permissions;
+    @optional
+    boolean dm_permission;
+    @optional
+    sequence<InteractionContextType> contexts;
+    @optional
+    sequence<ApplicationIntegrationType> integration_types;
+    @optional
+    string handler;
+};
+
+struct ApplicationCommandPermission {
+    SnowflakeType id;
+    ApplicationCommandPermissionType type;
+    boolean permission;
+};
+
+typedef int64 ApplicationCommandPermissionType;
+
+struct ApplicationCommandResponse {
+    SnowflakeType id;
+    SnowflakeType application_id;
+    SnowflakeType version;
+    string default_member_permissions;
+    ApplicationCommandType type;
+    string name;
+    @optional
+    string name_localized;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    string description_localized;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    SnowflakeType guild_id;
+    @optional
+    boolean dm_permission;
+    @optional
+    sequence<InteractionContextType> contexts;
+    @optional
+    sequence<ApplicationIntegrationType> integration_types;
+    @optional
+    sequence<string> options;
+    @optional
+    boolean nsfw;
+};
+
+struct ApplicationCommandRoleOption {
+    int64 type;
+    string name;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    boolean required;
+};
+
+struct ApplicationCommandRoleOptionResponse {
+    int64 type;
+    string name;
+    @optional
+    string name_localized;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    string description_localized;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    boolean required;
+};
+
+struct ApplicationCommandStringOption {
+    int64 type;
+    string name;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    boolean required;
+    @optional
+    boolean autocomplete;
+    @optional
+    int64 min_length;
+    @optional
+    int64 max_length;
+    @optional
+    sequence<ApplicationCommandOptionStringChoice> choices;
+};
+
+struct ApplicationCommandStringOptionResponse {
+    int64 type;
+    string name;
+    @optional
+    string name_localized;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    string description_localized;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    boolean required;
+    @optional
+    boolean autocomplete;
+    @optional
+    sequence<ApplicationCommandOptionStringChoiceResponse> choices;
+    @optional
+    int64 min_length;
+    @optional
+    int64 max_length;
+};
+
+struct ApplicationCommandSubcommandGroupOption {
+    int64 type;
+    string name;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    boolean required;
+    @optional
+    sequence<ApplicationCommandSubcommandOption> options;
+};
+
+struct ApplicationCommandSubcommandGroupOptionResponse {
+    int64 type;
+    string name;
+    @optional
+    string name_localized;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    string description_localized;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    boolean required;
+    @optional
+    sequence<ApplicationCommandSubcommandOptionResponse> options;
+};
+
+struct ApplicationCommandSubcommandOption {
+    int64 type;
+    string name;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    boolean required;
+    @optional
+    sequence<string> options;
+};
+
+struct ApplicationCommandSubcommandOptionResponse {
+    int64 type;
+    string name;
+    @optional
+    string name_localized;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    string description_localized;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    boolean required;
+    @optional
+    sequence<string> options;
+};
+
+typedef int64 ApplicationCommandType;
+
+struct ApplicationCommandUpdateRequest {
+    string name;
+    @optional
+    map<string, string> name_localizations;
+    @optional
+    string description;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    sequence<string> options;
+    @optional
+    int64 default_member_permissions;
+    @optional
+    boolean dm_permission;
+    @optional
+    sequence<InteractionContextType> contexts;
+    @optional
+    sequence<ApplicationIntegrationType> integration_types;
+    @optional
+    string handler;
+    @optional
+    string type;
+    @optional
+    string id;
+};
+
+struct ApplicationCommandUserOption {
+    int64 type;
+    string name;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    boolean required;
+};
+
+struct ApplicationCommandUserOptionResponse {
+    int64 type;
+    string name;
+    @optional
+    string name_localized;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    string description_localized;
+    @optional
+    map<string, string> description_localizations;
+    @optional
+    boolean required;
+};
+
+typedef int64 ApplicationEventWebhooksStatus;
+
+typedef int64 ApplicationExplicitContentFilterTypes;
+
+struct ApplicationFormPartial {
+    @optional
+    any description;
+    @optional
+    string icon;
+    @optional
+    string cover_image;
+    @optional
+    string team_id;
+    @optional
+    int64 flags;
+    @optional
+    string interactions_endpoint_url;
+    @optional
+    string explicit_content_filter;
+    @optional
+    int64 max_participants;
+    @optional
+    string type;
+    @optional
+    sequence<string> tags;
+    @optional
+    string custom_install_url;
+    @optional
+    string install_params;
+    @optional
+    string role_connections_verification_url;
+    @optional
+    map<string, string> integration_types_config;
+    @optional
+    string event_webhooks_status;
+    @optional
+    string event_webhooks_url;
+    @optional
+    sequence<string> event_webhooks_types;
+};
+
+typedef string ApplicationIdentityProviderAuthType;
+
+struct ApplicationIncomingWebhookResponse {
+    string application_id;
+    string avatar;
+    string channel_id;
+    @optional
+    string guild_id;
+    SnowflakeType id;
+    string name;
+    int64 type;
+    @optional
+    UserResponse user;
+};
+
+typedef int64 ApplicationIntegrationType;
+
+struct ApplicationIntegrationTypeConfiguration {
+    @optional
+    string oauth2_install_params;
+};
+
+struct ApplicationIntegrationTypeConfigurationResponse {
+    @optional
+    ApplicationOAuth2InstallParamsResponse oauth2_install_params;
+};
+
+struct ApplicationOAuth2InstallParams {
+    @optional
+    sequence<string> scopes;
+    @optional
+    int64 permissions;
+};
+
+struct ApplicationOAuth2InstallParamsResponse {
+    sequence<string> scopes;
+    string permissions;
+};
+
+struct ApplicationResponse {
+    SnowflakeType id;
+    string name;
+    string icon;
+    string description;
+    string type;
+    @optional
+    string cover_image;
+    @optional
+    SnowflakeType primary_sku_id;
+    @optional
+    UserResponse bot;
+    @optional
+    string slug;
+    @optional
+    SnowflakeType guild_id;
+    @optional
+    sequence<string> rpc_origins;
+    @optional
+    boolean bot_public;
+    @optional
+    boolean bot_require_code_grant;
+    @optional
+    string terms_of_service_url;
+    @optional
+    string privacy_policy_url;
+    @optional
+    string custom_install_url;
+    @optional
+    ApplicationOAuth2InstallParamsResponse install_params;
+    @optional
+    map<string, ApplicationIntegrationTypeConfigurationResponse> integration_types_config;
+    string verify_key;
+    int64 flags;
+    string flags_new;
+    @optional
+    int64 max_participants;
+    @optional
+    sequence<string> tags;
+};
+
+struct ApplicationRoleConnectionsMetadataItemRequest {
+    MetadataItemTypes type;
+    string key;
+    string name;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    map<string, string> description_localizations;
+};
+
+struct ApplicationRoleConnectionsMetadataItemResponse {
+    MetadataItemTypes type;
+    string key;
+    string name;
+    @optional
+    map<string, string> name_localizations;
+    string description;
+    @optional
+    map<string, string> description_localizations;
+};
+
+typedef int64 ApplicationTypes;
+
+struct ApplicationUserRoleConnectionResponse {
+    @optional
+    string platform_name;
+    @optional
+    string platform_username;
+    @optional
+    map<string, string> metadata;
+};
+
+struct AttachmentResponse {
+    SnowflakeType id;
+    string filename;
+    int64 size;
+    string url;
+    string proxy_url;
+    @optional
+    int64 width;
+    @optional
+    int64 height;
+    @optional
+    double duration_secs;
+    @optional
+    string waveform;
+    @optional
+    string description;
+    @optional
+    string content_type;
+    @optional
+    boolean ephemeral;
+    @optional
+    int64 flags;
+    @optional
+    string placeholder;
+    @optional
+    int64 placeholder_version;
+    @optional
+    string title;
+    @optional
+    ApplicationResponse application;
+    @optional
+    string clip_created_at;
+    @optional
+    sequence<UserResponse> clip_participants;
+};
+
+typedef int64 AuditLogActionTypes;
+
+struct AuditLogEntryResponse {
+    SnowflakeType id;
+    AuditLogActionTypes action_type;
+    string user_id;
+    string target_id;
+    @optional
+    sequence<AuditLogObjectChangeResponse> changes;
+    @optional
+    map<string, string> options;
+    @optional
+    string reason;
+};
+
+struct AuditLogObjectChangeResponse {
+    string key;
+    @optional
+    string new_value;
+    @optional
+    string old_value;
+};
+
+typedef string AuthorType;
+
+typedef int64 AutomodActionType;
+
+typedef int64 AutomodEventType;
+
+typedef int64 AutomodKeywordPresetType;
+
+typedef int64 AutomodTriggerType;
+
+typedef string AvailableLocalesEnum;
+
+struct BanUserFromGuildRequest {
+    @optional
+    int64 delete_message_seconds;
+    @optional
+    int64 delete_message_days;
+};
+
+struct BaseCreateMessageCreateRequest {
+    @optional
+    string content;
+    @optional
+    sequence<RichEmbed> embeds;
+    @optional
+    string allowed_mentions;
+    @optional
+    sequence<SnowflakeType> sticker_ids;
+    @optional
+    sequence<string> components;
+    @optional
+    int64 flags;
+    @optional
+    sequence<MessageAttachmentRequest> attachments;
+    @optional
+    string poll;
+    @optional
+    string shared_client_theme;
+};
+
+struct BasicApplicationResponse {
+    SnowflakeType id;
+    string name;
+    string icon;
+    string description;
+    string type;
+    @optional
+    string cover_image;
+    @optional
+    SnowflakeType primary_sku_id;
+    @optional
+    UserResponse bot;
+};
+
+struct BasicGuildMemberResponse {
+    string avatar;
+    @optional
+    string avatar_decoration_data;
+    string banner;
+    string communication_disabled_until;
+    int64 flags;
+    string joined_at;
+    string nick;
+    boolean pending;
+    string premium_since;
+    sequence<SnowflakeType> roles;
+    @optional
+    string collectibles;
+};
+
+struct BasicMessageResponse {
+    MessageType type;
+    string content;
+    sequence<UserResponse> mentions;
+    sequence<SnowflakeType> mention_roles;
+    sequence<MessageAttachmentResponse> attachments;
+    sequence<MessageEmbedResponse> embeds;
+    string timestamp;
+    string edited_timestamp;
+    int64 flags;
+    sequence<string> components;
+    @optional
+    sequence<string> stickers;
+    @optional
+    sequence<MessageStickerItemResponse> sticker_items;
+    SnowflakeType id;
+    SnowflakeType channel_id;
+    UserResponse author;
+    boolean pinned;
+    boolean mention_everyone;
+    boolean tts;
+    @optional
+    MessageCallResponse call;
+    @optional
+    MessageActivityResponse activity;
+    @optional
+    BasicApplicationResponse application;
+    @optional
+    SnowflakeType application_id;
+    @optional
+    MessageInteractionResponse interaction;
+    @optional
+    string nonce;
+    @optional
+    SnowflakeType webhook_id;
+    @optional
+    MessageReferenceResponse message_reference;
+    @optional
+    ThreadResponse thread;
+    @optional
+    sequence<MessageMentionChannelResponse> mention_channels;
+    @optional
+    MessageRoleSubscriptionDataResponse role_subscription_data;
+    @optional
+    PurchaseNotificationResponse purchase_notification;
+    @optional
+    int64 position;
+    @optional
+    ResolvedObjectsResponse resolved;
+    @optional
+    PollResponse poll;
+    @optional
+    CustomClientThemeResponse shared_client_theme;
+    @optional
+    string interaction_metadata;
+    @optional
+    sequence<MessageSnapshotResponse> message_snapshots;
+};
+
+struct BlockMessageAction {
+    int64 type;
+    @optional
+    string metadata;
+};
+
+struct BlockMessageActionMetadata {
+    @optional
+    string custom_message;
+};
+
+struct BlockMessageActionMetadataResponse {
+    @optional
+    string custom_message;
+};
+
+struct BlockMessageActionResponse {
+    int64 type;
+    BlockMessageActionMetadataResponse metadata;
+};
+
+struct BotAccountPatchRequest {
+    string username;
+    @optional
+    string avatar;
+    @optional
+    string banner;
+};
+
+struct BotAddGuildMemberRequest {
+    @optional
+    string nick;
+    @optional
+    sequence<SnowflakeType> roles;
+    @optional
+    boolean mute;
+    @optional
+    boolean deaf;
+    string access_token;
+    @optional
+    int64 flags;
+};
+
+struct BulkBanUsersRequest {
+    sequence<SnowflakeType> user_ids;
+    @optional
+    int64 delete_message_seconds;
+};
+
+struct BulkBanUsersResponse {
+    sequence<SnowflakeType> banned_users;
+    sequence<SnowflakeType> failed_users;
+};
+
+struct BulkLobbyMemberRequest {
+    SnowflakeType id;
+    @optional
+    map<string, string> metadata;
+    @optional
+    string flags;
+    @optional
+    boolean remove_member;
+};
+
+struct ButtonComponentForMessageRequest {
+    int64 type;
+    @optional
+    int64 id;
+    @optional
+    string custom_id;
+    ButtonStyleTypes style;
+    @optional
+    string label;
+    @optional
+    boolean disabled;
+    @optional
+    string url;
+    @optional
+    string sku_id;
+    @optional
+    string emoji;
+};
+
+struct ButtonComponentResponse {
+    int64 type;
+    int64 id;
+    @optional
+    string custom_id;
+    ButtonStyleTypes style;
+    @optional
+    string label;
+    @optional
+    boolean disabled;
+    @optional
+    ComponentEmojiResponse emoji;
+    @optional
+    string url;
+    @optional
+    SnowflakeType sku_id;
+};
+
+typedef int64 ButtonStyleTypes;
+
+struct ChannelFollowerResponse {
+    SnowflakeType channel_id;
+    SnowflakeType webhook_id;
+};
+
+struct ChannelFollowerWebhookResponse {
+    string application_id;
+    string avatar;
+    string channel_id;
+    @optional
+    string guild_id;
+    SnowflakeType id;
+    string name;
+    int64 type;
+    @optional
+    UserResponse user;
+    @optional
+    WebhookSourceGuildResponse source_guild;
+    @optional
+    WebhookSourceChannelResponse source_channel;
+};
+
+struct ChannelPermissionOverwriteRequest {
+    SnowflakeType id;
+    @optional
+    string type;
+    @optional
+    int64 allow;
+    @optional
+    int64 deny;
+};
+
+struct ChannelPermissionOverwriteResponse {
+    SnowflakeType id;
+    ChannelPermissionOverwrites type;
+    string allow;
+    string deny;
+};
+
+typedef int64 ChannelPermissionOverwrites;
+
+struct ChannelSelectComponentForMessageRequest {
+    int64 type;
+    @optional
+    int64 id;
+    string custom_id;
+    @optional
+    string placeholder;
+    @optional
+    int64 min_values;
+    @optional
+    int64 max_values;
+    @optional
+    boolean disabled;
+    @optional
+    boolean required;
+    @optional
+    sequence<ChannelSelectDefaultValue> default_values;
+    @optional
+    sequence<ChannelTypes> channel_types;
+};
+
+struct ChannelSelectComponentForModalRequest {
+    int64 type;
+    @optional
+    int64 id;
+    string custom_id;
+    @optional
+    string placeholder;
+    @optional
+    int64 min_values;
+    @optional
+    int64 max_values;
+    @optional
+    boolean disabled;
+    @optional
+    boolean required;
+    @optional
+    sequence<ChannelSelectDefaultValue> default_values;
+    @optional
+    sequence<ChannelTypes> channel_types;
+};
+
+struct ChannelSelectComponentResponse {
+    int64 type;
+    int64 id;
+    string custom_id;
+    @optional
+    string placeholder;
+    int64 min_values;
+    int64 max_values;
+    @optional
+    boolean disabled;
+    @optional
+    sequence<ChannelTypes> channel_types;
+    @optional
+    sequence<ChannelSelectDefaultValueResponse> default_values;
+};
+
+struct ChannelSelectDefaultValue {
+    string type;
+    SnowflakeType id;
+};
+
+struct ChannelSelectDefaultValueResponse {
+    string type;
+    SnowflakeType id;
+};
+
+typedef int64 ChannelTypes;
+
+struct CheckboxComponentForModalRequest {
+    int64 type;
+    @optional
+    int64 id;
+    string custom_id;
+    @optional
+    boolean default;
+};
+
+struct CheckboxGroupComponentForModalRequest {
+    int64 type;
+    @optional
+    int64 id;
+    string custom_id;
+    @optional
+    int64 min_values;
+    @optional
+    int64 max_values;
+    @optional
+    boolean required;
+    sequence<CheckboxGroupOptionForRequest> options;
+};
+
+struct CheckboxGroupOptionForRequest {
+    string label;
+    string value;
+    @optional
+    string description;
+    @optional
+    boolean default;
+};
+
+struct CommandPermissionResponse {
+    SnowflakeType id;
+    ApplicationCommandPermissionType type;
+    boolean permission;
+};
+
+struct CommandPermissionsResponse {
+    SnowflakeType id;
+    SnowflakeType application_id;
+    SnowflakeType guild_id;
+    sequence<CommandPermissionResponse> permissions;
+};
+
+struct ComponentEmojiForRequest {
+    @optional
+    string id;
+    string name;
+};
+
+struct ComponentEmojiResponse {
+    @optional
+    SnowflakeType id;
+    string name;
+    @optional
+    boolean animated;
+};
+
+struct ConnectedAccountGuildResponse {
+    SnowflakeType id;
+    string name;
+    string icon;
+};
+
+struct ConnectedAccountIntegrationResponse {
+    string id;
+    IntegrationTypes type;
+    AccountResponse account;
+    ConnectedAccountGuildResponse guild;
+};
+
+typedef string ConnectedAccountProviders;
+
+struct ConnectedAccountResponse {
+    string id;
+    string name;
+    ConnectedAccountProviders type;
+    boolean friend_sync;
+    @optional
+    sequence<ConnectedAccountIntegrationResponse> integrations;
+    boolean show_activity;
+    boolean two_way_link;
+    boolean verified;
+    ConnectedAccountVisibility visibility;
+    @optional
+    boolean revoked;
+};
+
+typedef int64 ConnectedAccountVisibility;
+
+struct ContainerComponentForMessageRequest {
+    int64 type;
+    @optional
+    int64 id;
+    @optional
+    int64 accent_color;
+    sequence<string> components;
+    @optional
+    boolean spoiler;
+};
+
+struct ContainerComponentResponse {
+    int64 type;
+    int64 id;
+    int64 accent_color;
+    sequence<string> components;
+    boolean spoiler;
+};
+
+struct CreateEntitlementRequestData {
+    SnowflakeType sku_id;
+    SnowflakeType owner_id;
+    EntitlementOwnerTypes owner_type;
+};
+
+struct CreateForumThreadRequest {
+    string name;
+    @optional
+    string auto_archive_duration;
+    @optional
+    int64 rate_limit_per_user;
+    @optional
+    sequence<SnowflakeType> applied_tags;
+    BaseCreateMessageCreateRequest message;
+};
+
+struct CreateGroupDMInviteRequest {
+    @optional
+    int64 max_age;
+};
+
+struct CreateGuildChannelRequest {
+    @optional
+    string type;
+    string name;
+    @optional
+    int64 position;
+    @optional
+    string topic;
+    @optional
+    int64 bitrate;
+    @optional
+    int64 user_limit;
+    @optional
+    boolean nsfw;
+    @optional
+    int64 rate_limit_per_user;
+    @optional
+    string parent_id;
+    @optional
+    sequence<ChannelPermissionOverwriteRequest> permission_overwrites;
+    @optional
+    string rtc_region;
+    @optional
+    string video_quality_mode;
+    @optional
+    string default_auto_archive_duration;
+    @optional
+    string default_reaction_emoji;
+    @optional
+    int64 default_thread_rate_limit_per_user;
+    @optional
+    string default_sort_order;
+    @optional
+    string default_forum_layout;
+    @optional
+    string default_tag_setting;
+    @optional
+    sequence<string> available_tags;
+};
+
+struct CreateGuildInviteRequest {
+    @optional
+    int64 max_age;
+    @optional
+    boolean temporary;
+    @optional
+    int64 max_uses;
+    @optional
+    boolean unique;
+    @optional
+    string target_user_id;
+    @optional
+    string target_application_id;
+    @optional
+    string target_type;
+};
+
+struct CreateMessageInteractionCallbackRequest {
+    int64 type;
+    @optional
+    string data;
+};
+
+struct CreateMessageInteractionCallbackResponse {
+    int64 type;
+    MessageResponse message;
+};
+
+struct CreateOrUpdateThreadTagRequest {
+    string name;
+    @optional
+    string emoji_id;
+    @optional
+    string emoji_name;
+    @optional
+    boolean moderated;
+};
+
+struct CreatePrivateChannelRequest {
+    @optional
+    string recipient_id;
+    @optional
+    sequence<string> access_tokens;
+    @optional
+    map<string, string> nicks;
+};
+
+struct CreateRoleRequest {
+    @optional
+    string name;
+    @optional
+    int64 permissions;
+    @optional
+    int64 color;
+    @optional
+    string colors;
+    @optional
+    boolean hoist;
+    @optional
+    boolean mentionable;
+    @optional
+    string icon;
+    @optional
+    string unicode_emoji;
+};
+
+struct CreateTextThreadWithMessageRequest {
+    string name;
+    @optional
+    string auto_archive_duration;
+    @optional
+    int64 rate_limit_per_user;
+};
+
+struct CreateTextThreadWithoutMessageRequest {
+    string name;
+    @optional
+    string auto_archive_duration;
+    @optional
+    int64 rate_limit_per_user;
+    @optional
+    string type;
+    @optional
+    boolean invitable;
+};
+
+struct CreatedThreadResponse {
+    SnowflakeType id;
+    int64 type;
+    @optional
+    string last_message_id;
+    int64 flags;
+    @optional
+    string last_pin_timestamp;
+    SnowflakeType guild_id;
+    string name;
+    @optional
+    string parent_id;
+    @optional
+    int64 rate_limit_per_user;
+    @optional
+    int64 bitrate;
+    @optional
+    int64 user_limit;
+    @optional
+    string rtc_region;
+    @optional
+    VideoQualityModes video_quality_mode;
+    @optional
+    string permissions;
+    SnowflakeType owner_id;
+    ThreadMetadataResponse thread_metadata;
+    int64 message_count;
+    int64 member_count;
+    int64 total_message_sent;
+    @optional
+    sequence<SnowflakeType> applied_tags;
+    @optional
+    ThreadMemberResponse member;
+};
+
+struct CustomClientThemeResponse {
+    sequence<string> colors;
+    int64 gradient_angle;
+    int64 base_mix;
+    MessageShareCustomUserThemeBaseTheme base_theme;
+};
+
+struct CustomClientThemeShareRequest {
+    sequence<string> colors;
+    int64 gradient_angle;
+    int64 base_mix;
+    @optional
+    string base_theme;
+};
+
+struct DefaultKeywordListTriggerMetadata {
+    @optional
+    sequence<string> allow_list;
+    @optional
+    sequence<AutomodKeywordPresetType> presets;
+};
+
+struct DefaultKeywordListTriggerMetadataResponse {
+    sequence<string> allow_list;
+    sequence<AutomodKeywordPresetType> presets;
+};
+
+struct DefaultKeywordListUpsertRequest {
+    string name;
+    AutomodEventType event_type;
+    @optional
+    sequence<string> actions;
+    @optional
+    boolean enabled;
+    @optional
+    sequence<SnowflakeType> exempt_roles;
+    @optional
+    sequence<SnowflakeType> exempt_channels;
+    int64 trigger_type;
+    DefaultKeywordListTriggerMetadata trigger_metadata;
+};
+
+struct DefaultKeywordListUpsertRequestPartial {
+    @optional
+    string name;
+    @optional
+    AutomodEventType event_type;
+    @optional
+    sequence<string> actions;
+    @optional
+    boolean enabled;
+    @optional
+    sequence<SnowflakeType> exempt_roles;
+    @optional
+    sequence<SnowflakeType> exempt_channels;
+    @optional
+    int64 trigger_type;
+    @optional
+    DefaultKeywordListTriggerMetadata trigger_metadata;
+};
+
+struct DefaultKeywordRuleResponse {
+    SnowflakeType id;
+    SnowflakeType guild_id;
+    SnowflakeType creator_id;
+    string name;
+    AutomodEventType event_type;
+    sequence<string> actions;
+    int64 trigger_type;
+    boolean enabled;
+    sequence<SnowflakeType> exempt_roles;
+    sequence<SnowflakeType> exempt_channels;
+    DefaultKeywordListTriggerMetadataResponse trigger_metadata;
+};
+
+struct DefaultReactionEmojiResponse {
+    string emoji_id;
+    string emoji_name;
+};
+
+struct DiscordIntegrationResponse {
+    string type;
+    string name;
+    AccountResponse account;
+    boolean enabled;
+    SnowflakeType id;
+    IntegrationApplicationResponse application;
+    sequence<string> scopes;
+    @optional
+    UserResponse user;
+};
+
+struct EmbeddedActivityInstance {
+    SnowflakeType application_id;
+    string instance_id;
+    string launch_id;
+    string location;
+    sequence<SnowflakeType> users;
+};
+
+typedef string EmbeddedActivityLocationKind;
+
+struct EmojiResponse {
+    SnowflakeType id;
+    string name;
+    @optional
+    UserResponse user;
+    sequence<SnowflakeType> roles;
+    boolean require_colons;
+    boolean managed;
+    boolean animated;
+    boolean available;
+};
+
+typedef int64 EntitlementOwnerTypes;
+
+struct EntitlementResponse {
+    SnowflakeType id;
+    SnowflakeType sku_id;
+    SnowflakeType application_id;
+    SnowflakeType user_id;
+    @optional
+    string guild_id;
+    boolean deleted;
+    string starts_at;
+    string ends_at;
+    EntitlementTypes type;
+    @optional
+    string fulfilled_at;
+    @optional
+    string fulfillment_status;
+    @optional
+    boolean consumed;
+    @optional
+    string gifter_user_id;
+    @optional
+    string parent_id;
+};
+
+typedef int64 EntitlementTenantFulfillmentStatusResponse;
+
+typedef int64 EntitlementTypes;
+
+struct EntityMetadataExternal {
+    string location;
+};
+
+struct EntityMetadataExternalResponse {
+    string location;
+};
+
+struct EntityMetadataStageInstance {
+};
+
+struct EntityMetadataStageInstanceResponse {
+};
+
+struct EntityMetadataVoice {
+};
+
+struct EntityMetadataVoiceResponse {
+};
+
+struct ExternalConnectionIntegrationResponse {
+    string type;
+    string name;
+    AccountResponse account;
+    boolean enabled;
+    string id;
+    UserResponse user;
+    @optional
+    boolean revoked;
+    @optional
+    IntegrationExpireBehaviorTypes expire_behavior;
+    @optional
+    IntegrationExpireGracePeriodTypes expire_grace_period;
+    @optional
+    int64 subscriber_count;
+    @optional
+    string synced_at;
+    @optional
+    string role_id;
+    @optional
+    boolean syncing;
+    @optional
+    boolean enable_emoticons;
+};
+
+struct ExternalScheduledEventCreateRequest {
+    string name;
+    @optional
+    string description;
+    @optional
+    string image;
+    string scheduled_start_time;
+    @optional
+    string scheduled_end_time;
+    GuildScheduledEventPrivacyLevels privacy_level;
+    int64 entity_type;
+    @optional
+    string channel_id;
+    EntityMetadataExternal entity_metadata;
+};
+
+struct ExternalScheduledEventPatchRequestPartial {
+    @optional
+    string status;
+    @optional
+    string name;
+    @optional
+    string description;
+    @optional
+    string image;
+    @optional
+    string scheduled_start_time;
+    @optional
+    string scheduled_end_time;
+    @optional
+    string entity_type;
+    @optional
+    GuildScheduledEventPrivacyLevels privacy_level;
+    @optional
+    string channel_id;
+    @optional
+    EntityMetadataExternal entity_metadata;
+};
+
+struct ExternalScheduledEventResponse {
+    SnowflakeType id;
+    SnowflakeType guild_id;
+    string name;
+    string description;
+    string channel_id;
+    string creator_id;
+    @optional
+    UserResponse creator;
+    string image;
+    string scheduled_start_time;
+    string scheduled_end_time;
+    GuildScheduledEventStatuses status;
+    int64 entity_type;
+    string entity_id;
+    @optional
+    int64 user_count;
+    GuildScheduledEventPrivacyLevels privacy_level;
+    @optional
+    string user_rsvp;
+    EntityMetadataExternalResponse entity_metadata;
+};
+
+struct FileComponentForMessageRequest {
+    int64 type;
+    @optional
+    int64 id;
+    @optional
+    boolean spoiler;
+    UnfurledMediaRequestWithAttachmentReferenceRequired file;
+};
+
+struct FileComponentResponse {
+    int64 type;
+    int64 id;
+    UnfurledMediaResponse file;
+    string name;
+    int64 size;
+    boolean spoiler;
+};
+
+struct FileUploadComponentForModalRequest {
+    int64 type;
+    @optional
+    int64 id;
+    string custom_id;
+    @optional
+    int64 min_values;
+    @optional
+    int64 max_values;
+    @optional
+    boolean required;
+};
+
+struct FlagToChannelAction {
+    int64 type;
+    FlagToChannelActionMetadata metadata;
+};
+
+struct FlagToChannelActionMetadata {
+    SnowflakeType channel_id;
+};
+
+struct FlagToChannelActionMetadataResponse {
+    SnowflakeType channel_id;
+};
+
+struct FlagToChannelActionResponse {
+    int64 type;
+    FlagToChannelActionMetadataResponse metadata;
+};
+
+typedef int64 ForumLayout;
+
+struct ForumTagResponse {
+    SnowflakeType id;
+    string name;
+    boolean moderated;
+    string emoji_id;
+    string emoji_name;
+};
+
+struct FriendInviteResponse {
+    int64 type;
+    string code;
+    @optional
+    UserResponse inviter;
+    @optional
+    int64 max_age;
+    @optional
+    string created_at;
+    string expires_at;
+    @optional
+    int64 friends_count;
+    string channel;
+    @optional
+    boolean is_contact;
+    @optional
+    int64 uses;
+    @optional
+    int64 max_uses;
+    @optional
+    int64 flags;
+};
+
+struct GatewayBotResponse {
+    string url;
+    GatewayBotSessionStartLimitResponse session_start_limit;
+    int64 shards;
+};
+
+struct GatewayBotSessionStartLimitResponse {
+    int64 max_concurrency;
+    int64 remaining;
+    int64 reset_after;
+    int64 total;
+};
+
+struct GatewayResponse {
+    string url;
+};
+
+struct GithubAuthor {
+    @optional
+    string username;
+    string name;
+};
+
+struct GithubCheckApp {
+    string name;
+};
+
+struct GithubCheckPullRequest {
+    int64 number;
+};
+
+struct GithubCheckRun {
+    @optional
+    string conclusion;
+    string name;
+    string html_url;
+    GithubCheckSuite check_suite;
+    @optional
+    string details_url;
+    @optional
+    string output;
+    @optional
+    sequence<GithubCheckPullRequest> pull_requests;
+};
+
+struct GithubCheckRunOutput {
+    @optional
+    string title;
+    @optional
+    string summary;
+};
+
+struct GithubCheckSuite {
+    @optional
+    string conclusion;
+    @optional
+    string head_branch;
+    string head_sha;
+    @optional
+    sequence<GithubCheckPullRequest> pull_requests;
+    GithubCheckApp app;
+};
+
+struct GithubComment {
+    int64 id;
+    string html_url;
+    GithubUser user;
+    @optional
+    string commit_id;
+    string body;
+};
+
+struct GithubCommit {
+    string id;
+    string url;
+    string message;
+    GithubAuthor author;
+};
+
+struct GithubDiscussion {
+    string title;
+    int64 number;
+    string html_url;
+    @optional
+    string answer_html_url;
+    @optional
+    string body;
+    GithubUser user;
+};
+
+struct GithubIssue {
+    int64 id;
+    int64 number;
+    string html_url;
+    GithubUser user;
+    string title;
+    @optional
+    string body;
+    @optional
+    string pull_request;
+};
+
+struct GithubRelease {
+    int64 id;
+    string tag_name;
+    string html_url;
+    GithubUser author;
+};
+
+struct GithubRepository {
+    int64 id;
+    string html_url;
+    string name;
+    string full_name;
+};
+
+struct GithubReview {
+    GithubUser user;
+    @optional
+    string body;
+    string html_url;
+    string state;
+};
+
+struct GithubUser {
+    int64 id;
+    string login;
+    string html_url;
+    string avatar_url;
+};
+
+struct GithubWebhook {
+    @optional
+    string action;
+    @optional
+    string ref;
+    @optional
+    string ref_type;
+    @optional
+    string comment;
+    @optional
+    string issue;
+    @optional
+    string pull_request;
+    @optional
+    string repository;
+    @optional
+    string forkee;
+    GithubUser sender;
+    @optional
+    string member;
+    @optional
+    string release;
+    @optional
+    string head_commit;
+    @optional
+    sequence<GithubCommit> commits;
+    @optional
+    boolean forced;
+    @optional
+    string compare;
+    @optional
+    string review;
+    @optional
+    string check_run;
+    @optional
+    string check_suite;
+    @optional
+    string discussion;
+    @optional
+    string answer;
+};
+
+struct GroupDMInviteResponse {
+    int64 type;
+    string code;
+    @optional
+    UserResponse inviter;
+    @optional
+    int64 max_age;
+    @optional
+    string created_at;
+    string expires_at;
+    InviteChannelResponse channel;
+    @optional
+    int64 approximate_member_count;
+};
+
+struct GuildAuditLogResponse {
+    sequence<AuditLogEntryResponse> audit_log_entries;
+    sequence<UserResponse> users;
+    sequence<string> integrations;
+    sequence<string> webhooks;
+    sequence<string> guild_scheduled_events;
+    sequence<ThreadResponse> threads;
+    sequence<ApplicationCommandResponse> application_commands;
+    sequence<string> auto_moderation_rules;
+};
+
+struct GuildBanResponse {
+    UserResponse user;
+    string reason;
+};
+
+struct GuildChannelLocation {
+    string id;
+    string kind;
+    SnowflakeType channel_id;
+    SnowflakeType guild_id;
+};
+
+struct GuildChannelResponse {
+    SnowflakeType id;
+    int64 type;
+    @optional
+    string last_message_id;
+    int64 flags;
+    @optional
+    string last_pin_timestamp;
+    SnowflakeType guild_id;
+    string name;
+    @optional
+    string parent_id;
+    @optional
+    int64 rate_limit_per_user;
+    @optional
+    int64 bitrate;
+    @optional
+    int64 user_limit;
+    @optional
+    string rtc_region;
+    @optional
+    VideoQualityModes video_quality_mode;
+    @optional
+    string permissions;
+    @optional
+    string topic;
+    @optional
+    ThreadAutoArchiveDuration default_auto_archive_duration;
+    @optional
+    int64 default_thread_rate_limit_per_user;
+    int64 position;
+    @optional
+    sequence<ChannelPermissionOverwriteResponse> permission_overwrites;
+    @optional
+    boolean nsfw;
+    @optional
+    sequence<ForumTagResponse> available_tags;
+    @optional
+    string default_reaction_emoji;
+    @optional
+    string default_sort_order;
+    @optional
+    ForumLayout default_forum_layout;
+    @optional
+    string default_tag_setting;
+    @optional
+    string hd_streaming_until;
+    @optional
+    SnowflakeType hd_streaming_buyer_id;
+};
+
+typedef int64 GuildExplicitContentFilterTypes;
+
+typedef string GuildFeatures;
+
+struct GuildHomeSettingsResponse {
+    SnowflakeType guild_id;
+    boolean enabled;
+    @optional
+    WelcomeMessageResponse welcome_message;
+    sequence<NewMemberActionResponse> new_member_actions;
+    sequence<ResourceChannelResponse> resource_channels;
+};
+
+struct GuildIncidentsDataResponse {
+    string invites_disabled_until;
+    string dms_disabled_until;
+};
+
+struct GuildIncomingWebhookResponse {
+    string application_id;
+    string avatar;
+    string channel_id;
+    @optional
+    string guild_id;
+    SnowflakeType id;
+    string name;
+    int64 type;
+    @optional
+    UserResponse user;
+    @optional
+    string token;
+    @optional
+    string url;
+};
+
+struct GuildInviteResponse {
+    int64 type;
+    string code;
+    @optional
+    UserResponse inviter;
+    @optional
+    int64 max_age;
+    @optional
+    string created_at;
+    string expires_at;
+    @optional
+    boolean is_contact;
+    @optional
+    int64 flags;
+    InviteGuildResponse guild;
+    SnowflakeType guild_id;
+    InviteChannelResponse channel;
+    @optional
+    InviteTargetTypes target_type;
+    @optional
+    UserResponse target_user;
+    @optional
+    InviteApplicationResponse target_application;
+    @optional
+    ScheduledEventResponse guild_scheduled_event;
+    @optional
+    int64 uses;
+    @optional
+    int64 max_uses;
+    @optional
+    boolean temporary;
+    @optional
+    int64 approximate_member_count;
+    @optional
+    int64 approximate_presence_count;
+    @optional
+    boolean is_nickname_changeable;
+    @optional
+    sequence<InviteGuildRoleResponse> roles;
+};
+
+typedef string GuildJoinRequestApplicationStatus;
+
+struct GuildJoinRequestResponse {
+    SnowflakeType id;
+    string created_at;
+    string reviewed_at;
+    string application_status;
+    string rejection_reason;
+    SnowflakeType guild_id;
+    SnowflakeType user_id;
+    @optional
+    string user;
+    @optional
+    sequence<string> form_responses;
+    @optional
+    string actioned_by_user;
+};
+
+struct GuildJoinRequestsListResponse {
+    @optional
+    int64 total;
+    @optional
+    sequence<GuildJoinRequestResponse> guild_join_requests;
+};
+
+typedef int64 GuildMFALevel;
+
+struct GuildMemberResponse {
+    string avatar;
+    @optional
+    string avatar_decoration_data;
+    string banner;
+    string communication_disabled_until;
+    int64 flags;
+    string joined_at;
+    string nick;
+    boolean pending;
+    string premium_since;
+    sequence<SnowflakeType> roles;
+    @optional
+    string collectibles;
+    UserResponse user;
+    boolean mute;
+    boolean deaf;
+};
+
+typedef string GuildMemberVerificationFormFieldType;
+
+typedef int64 GuildNSFWContentLevel;
+
+typedef int64 GuildOnboardingMode;
+
+struct GuildOnboardingResponse {
+    SnowflakeType guild_id;
+    sequence<OnboardingPromptResponse> prompts;
+    sequence<SnowflakeType> default_channel_ids;
+    boolean enabled;
+    GuildOnboardingMode mode;
+};
+
+struct GuildPatchRequestPartial {
+    @optional
+    string name;
+    @optional
+    string description;
+    @optional
+    string region;
+    @optional
+    string icon;
+    @optional
+    string verification_level;
+    @optional
+    string default_message_notifications;
+    @optional
+    string explicit_content_filter;
+    @optional
+    string preferred_locale;
+    @optional
+    string afk_timeout;
+    @optional
+    string afk_channel_id;
+    @optional
+    string system_channel_id;
+    @optional
+    string splash;
+    @optional
+    string banner;
+    @optional
+    int64 system_channel_flags;
+    @optional
+    sequence<string> features;
+    @optional
+    string discovery_splash;
+    @optional
+    string home_header;
+    @optional
+    string rules_channel_id;
+    @optional
+    string safety_alerts_channel_id;
+    @optional
+    string public_updates_channel_id;
+    @optional
+    boolean premium_progress_bar_enabled;
+};
+
+struct GuildPreviewResponse {
+    SnowflakeType id;
+    string name;
+    string icon;
+    string description;
+    string home_header;
+    string splash;
+    string discovery_splash;
+    sequence<GuildFeatures> features;
+    int64 approximate_member_count;
+    int64 approximate_presence_count;
+    sequence<EmojiResponse> emojis;
+    sequence<GuildStickerResponse> stickers;
+};
+
+struct GuildProductPurchaseResponse {
+    SnowflakeType listing_id;
+    string product_name;
+};
+
+struct GuildPruneResponse {
+    int64 pruned;
+};
+
+struct GuildResponse {
+    SnowflakeType id;
+    string name;
+    string icon;
+    string description;
+    string home_header;
+    string splash;
+    string discovery_splash;
+    sequence<GuildFeatures> features;
+    string banner;
+    SnowflakeType owner_id;
+    string application_id;
+    string region;
+    string afk_channel_id;
+    AfkTimeouts afk_timeout;
+    string system_channel_id;
+    int64 system_channel_flags;
+    boolean widget_enabled;
+    string widget_channel_id;
+    VerificationLevels verification_level;
+    sequence<GuildRoleResponse> roles;
+    UserNotificationSettings default_message_notifications;
+    GuildMFALevel mfa_level;
+    GuildExplicitContentFilterTypes explicit_content_filter;
+    int64 max_presences;
+    int64 max_members;
+    int64 max_stage_video_channel_users;
+    int64 max_video_channel_users;
+    string vanity_url_code;
+    PremiumGuildTiers premium_tier;
+    int64 premium_subscription_count;
+    AvailableLocalesEnum preferred_locale;
+    string rules_channel_id;
+    string safety_alerts_channel_id;
+    string public_updates_channel_id;
+    boolean premium_progress_bar_enabled;
+    @optional
+    string premium_progress_bar_enabled_user_updated_at;
+    boolean nsfw;
+    GuildNSFWContentLevel nsfw_level;
+    sequence<EmojiResponse> emojis;
+    sequence<GuildStickerResponse> stickers;
+    string incidents_data;
+};
+
+struct GuildRoleColorsResponse {
+    int64 primary_color;
+    int64 secondary_color;
+    int64 tertiary_color;
+};
+
+struct GuildRoleResponse {
+    SnowflakeType id;
+    string name;
+    string description;
+    string permissions;
+    int64 position;
+    int64 color;
+    GuildRoleColorsResponse colors;
+    boolean hoist;
+    boolean managed;
+    boolean mentionable;
+    string icon;
+    string unicode_emoji;
+    @optional
+    GuildRoleTagsResponse tags;
+    int64 flags;
+};
+
+struct GuildRoleTagsResponse {
+    @optional
+    string premium_subscriber;
+    @optional
+    SnowflakeType bot_id;
+    @optional
+    SnowflakeType integration_id;
+    @optional
+    SnowflakeType subscription_listing_id;
+    @optional
+    string available_for_purchase;
+    @optional
+    string guild_connections;
+};
+
+typedef int64 GuildScheduledEventEntityTypes;
+
+typedef int64 GuildScheduledEventPrivacyLevels;
+
+typedef int64 GuildScheduledEventStatuses;
+
+struct GuildSearchResponse {
+    sequence<sequence<SearchMessageResponse>> messages;
+    boolean doing_deep_historical_index;
+    int64 total_results;
+    @optional
+    sequence<ThreadResponse> threads;
+    @optional
+    sequence<ThreadMemberResponse> members;
+    @optional
+    int64 documents_indexed;
+};
+
+struct GuildStickerResponse {
+    SnowflakeType id;
+    string name;
+    string tags;
+    int64 type;
+    string format_type;
+    string description;
+    boolean available;
+    SnowflakeType guild_id;
+    @optional
+    UserResponse user;
+};
+
+struct GuildSubscriptionIntegrationResponse {
+    string type;
+    string name;
+    AccountResponse account;
+    boolean enabled;
+    SnowflakeType id;
+};
+
+struct GuildTemplateChannelResponse {
+    int64 id;
+    int64 type;
+    string name;
+    int64 position;
+    string topic;
+    int64 bitrate;
+    int64 user_limit;
+    boolean nsfw;
+    int64 rate_limit_per_user;
+    string parent_id;
+    string default_auto_archive_duration;
+    sequence<ChannelPermissionOverwriteResponse> permission_overwrites;
+    sequence<GuildTemplateChannelTags> available_tags;
+    string template;
+    string default_reaction_emoji;
+    int64 default_thread_rate_limit_per_user;
+    string default_sort_order;
+    string default_forum_layout;
+    string default_tag_setting;
+    string icon_emoji;
+    int64 theme_color;
+};
+
+struct GuildTemplateChannelTags {
+    int64 id;
+    string name;
+    string emoji_id;
+    string emoji_name;
+    boolean moderated;
+};
+
+struct GuildTemplateResponse {
+    string code;
+    string name;
+    string description;
+    int64 usage_count;
+    SnowflakeType creator_id;
+    string creator;
+    string created_at;
+    string updated_at;
+    SnowflakeType source_guild_id;
+    GuildTemplateSnapshotResponse serialized_source_guild;
+    boolean is_dirty;
+};
+
+struct GuildTemplateRoleColorsResponse {
+    int64 primary_color;
+    int64 secondary_color;
+    int64 tertiary_color;
+};
+
+struct GuildTemplateRoleResponse {
+    int64 id;
+    string name;
+    string permissions;
+    int64 color;
+    string colors;
+    boolean hoist;
+    boolean mentionable;
+    string icon;
+    string unicode_emoji;
+};
+
+struct GuildTemplateSnapshotResponse {
+    string name;
+    string description;
+    string region;
+    VerificationLevels verification_level;
+    UserNotificationSettings default_message_notifications;
+    GuildExplicitContentFilterTypes explicit_content_filter;
+    AvailableLocalesEnum preferred_locale;
+    string afk_channel_id;
+    AfkTimeouts afk_timeout;
+    string system_channel_id;
+    int64 system_channel_flags;
+    sequence<GuildTemplateRoleResponse> roles;
+    sequence<GuildTemplateChannelResponse> channels;
+};
+
+struct GuildWelcomeChannel {
+    SnowflakeType channel_id;
+    string description;
+    @optional
+    string emoji_id;
+    @optional
+    string emoji_name;
+};
+
+struct GuildWelcomeScreenChannelResponse {
+    SnowflakeType channel_id;
+    string description;
+    string emoji_id;
+    string emoji_name;
+};
+
+struct GuildWelcomeScreenResponse {
+    string description;
+    sequence<GuildWelcomeScreenChannelResponse> welcome_channels;
+};
+
+struct GuildWithCountsResponse {
+    SnowflakeType id;
+    string name;
+    string icon;
+    string description;
+    string home_header;
+    string splash;
+    string discovery_splash;
+    sequence<GuildFeatures> features;
+    string banner;
+    SnowflakeType owner_id;
+    string application_id;
+    string region;
+    string afk_channel_id;
+    AfkTimeouts afk_timeout;
+    string system_channel_id;
+    int64 system_channel_flags;
+    boolean widget_enabled;
+    string widget_channel_id;
+    VerificationLevels verification_level;
+    sequence<GuildRoleResponse> roles;
+    UserNotificationSettings default_message_notifications;
+    GuildMFALevel mfa_level;
+    GuildExplicitContentFilterTypes explicit_content_filter;
+    int64 max_presences;
+    int64 max_members;
+    int64 max_stage_video_channel_users;
+    int64 max_video_channel_users;
+    string vanity_url_code;
+    PremiumGuildTiers premium_tier;
+    int64 premium_subscription_count;
+    AvailableLocalesEnum preferred_locale;
+    string rules_channel_id;
+    string safety_alerts_channel_id;
+    string public_updates_channel_id;
+    boolean premium_progress_bar_enabled;
+    @optional
+    string premium_progress_bar_enabled_user_updated_at;
+    boolean nsfw;
+    GuildNSFWContentLevel nsfw_level;
+    sequence<EmojiResponse> emojis;
+    sequence<GuildStickerResponse> stickers;
+    string incidents_data;
+    @optional
+    int64 approximate_member_count;
+    @optional
+    int64 approximate_presence_count;
+};
+
+typedef string HasOption;
+
+struct IconEmojiResponse {
+};
+
+struct IncomingWebhookInteractionRequest {
+    @optional
+    string content;
+    @optional
+    sequence<RichEmbed> embeds;
+    @optional
+    string allowed_mentions;
+    @optional
+    sequence<string> components;
+    @optional
+    sequence<MessageAttachmentRequest> attachments;
+    @optional
+    string poll;
+    @optional
+    boolean tts;
+    @optional
+    int64 flags;
+};
+
+struct IncomingWebhookRequestPartial {
+    @optional
+    string content;
+    @optional
+    sequence<RichEmbed> embeds;
+    @optional
+    string allowed_mentions;
+    @optional
+    sequence<string> components;
+    @optional
+    sequence<MessageAttachmentRequest> attachments;
+    @optional
+    string poll;
+    @optional
+    boolean tts;
+    @optional
+    int64 flags;
+    @optional
+    string username;
+    @optional
+    string avatar_url;
+    @optional
+    string thread_name;
+    @optional
+    sequence<SnowflakeType> applied_tags;
+};
+
+struct IncomingWebhookUpdateForInteractionCallbackRequestPartial {
+    @optional
+    string content;
+    @optional
+    sequence<RichEmbed> embeds;
+    @optional
+    string allowed_mentions;
+    @optional
+    sequence<string> components;
+    @optional
+    sequence<MessageAttachmentRequest> attachments;
+    @optional
+    int64 flags;
+};
+
+struct IncomingWebhookUpdateRequestPartial {
+    @optional
+    string content;
+    @optional
+    sequence<RichEmbed> embeds;
+    @optional
+    string allowed_mentions;
+    @optional
+    sequence<string> components;
+    @optional
+    sequence<MessageAttachmentRequest> attachments;
+    @optional
+    string poll;
+    @optional
+    int64 flags;
+};
+
+typedef int64 Int53Type;
+
+struct IntegrationApplicationResponse {
+    SnowflakeType id;
+    string name;
+    string icon;
+    string description;
+    string type;
+    @optional
+    string cover_image;
+    @optional
+    SnowflakeType primary_sku_id;
+    @optional
+    UserResponse bot;
+};
+
+typedef int64 IntegrationExpireBehaviorTypes;
+
+typedef int64 IntegrationExpireGracePeriodTypes;
+
+typedef string IntegrationTypes;
+
+struct InteractionApplicationCommandAutocompleteCallbackIntegerData {
+    @optional
+    sequence<string> choices;
+};
+
+struct InteractionApplicationCommandAutocompleteCallbackNumberData {
+    @optional
+    sequence<string> choices;
+};
+
+struct InteractionApplicationCommandAutocompleteCallbackStringData {
+    @optional
+    sequence<string> choices;
+};
+
+struct InteractionCallbackResponse {
+    InteractionResponse interaction;
+    @optional
+    string resource;
+};
+
+typedef int64 InteractionCallbackTypes;
+
+typedef int64 InteractionContextType;
+
+struct InteractionResponse {
+    SnowflakeType id;
+    InteractionTypes type;
+    @optional
+    SnowflakeType response_message_id;
+    @optional
+    boolean response_message_loading;
+    @optional
+    boolean response_message_ephemeral;
+    @optional
+    SnowflakeType channel_id;
+    @optional
+    SnowflakeType guild_id;
+};
+
+typedef int64 InteractionTypes;
+
+struct InviteApplicationResponse {
+    SnowflakeType id;
+    string name;
+    string icon;
+    string description;
+    string type;
+    @optional
+    string cover_image;
+    @optional
+    SnowflakeType primary_sku_id;
+    @optional
+    UserResponse bot;
+    @optional
+    string slug;
+    @optional
+    SnowflakeType guild_id;
+    @optional
+    sequence<string> rpc_origins;
+    @optional
+    boolean bot_public;
+    @optional
+    boolean bot_require_code_grant;
+    @optional
+    string terms_of_service_url;
+    @optional
+    string privacy_policy_url;
+    @optional
+    string custom_install_url;
+    @optional
+    ApplicationOAuth2InstallParamsResponse install_params;
+    @optional
+    map<string, ApplicationIntegrationTypeConfigurationResponse> integration_types_config;
+    string verify_key;
+    int64 flags;
+    string flags_new;
+    @optional
+    int64 max_participants;
+    @optional
+    sequence<string> tags;
+};
+
+struct InviteChannelRecipientResponse {
+    string username;
+};
+
+struct InviteChannelResponse {
+    SnowflakeType id;
+    ChannelTypes type;
+    string name;
+    @optional
+    string icon;
+    @optional
+    sequence<InviteChannelRecipientResponse> recipients;
+};
+
+struct InviteGuildResponse {
+    SnowflakeType id;
+    string name;
+    string splash;
+    string banner;
+    string description;
+    string icon;
+    sequence<GuildFeatures> features;
+    string verification_level;
+    string vanity_url_code;
+    string nsfw_level;
+    boolean nsfw;
+    int64 premium_subscription_count;
+};
+
+struct InviteGuildRoleResponse {
+    SnowflakeType id;
+    string name;
+    int64 position;
+    int64 color;
+    GuildRoleColorsResponse colors;
+    string icon;
+    string unicode_emoji;
+    @optional
+    string permissions;
+};
+
+typedef int64 InviteTargetTypes;
+
+typedef int64 InviteTypes;
+
+struct KeywordRuleResponse {
+    SnowflakeType id;
+    SnowflakeType guild_id;
+    SnowflakeType creator_id;
+    string name;
+    AutomodEventType event_type;
+    sequence<string> actions;
+    int64 trigger_type;
+    boolean enabled;
+    sequence<SnowflakeType> exempt_roles;
+    sequence<SnowflakeType> exempt_channels;
+    KeywordTriggerMetadataResponse trigger_metadata;
+};
+
+struct KeywordTriggerMetadata {
+    @optional
+    sequence<string> keyword_filter;
+    @optional
+    sequence<string> regex_patterns;
+    @optional
+    sequence<string> allow_list;
+};
+
+struct KeywordTriggerMetadataResponse {
+    sequence<string> keyword_filter;
+    sequence<string> regex_patterns;
+    sequence<string> allow_list;
+};
+
+struct KeywordUpsertRequest {
+    string name;
+    AutomodEventType event_type;
+    @optional
+    sequence<string> actions;
+    @optional
+    boolean enabled;
+    @optional
+    sequence<SnowflakeType> exempt_roles;
+    @optional
+    sequence<SnowflakeType> exempt_channels;
+    int64 trigger_type;
+    @optional
+    string trigger_metadata;
+};
+
+struct KeywordUpsertRequestPartial {
+    @optional
+    string name;
+    @optional
+    AutomodEventType event_type;
+    @optional
+    sequence<string> actions;
+    @optional
+    boolean enabled;
+    @optional
+    sequence<SnowflakeType> exempt_roles;
+    @optional
+    sequence<SnowflakeType> exempt_channels;
+    @optional
+    int64 trigger_type;
+    @optional
+    string trigger_metadata;
+};
+
+struct LabelComponentForModalRequest {
+    int64 type;
+    @optional
+    int64 id;
+    string label;
+    @optional
+    string description;
+    string component;
+};
+
+struct LaunchActivityInteractionCallbackRequest {
+    int64 type;
+};
+
+struct LaunchActivityInteractionCallbackResponse {
+    int64 type;
+};
+
+struct ListApplicationEmojisResponse {
+    sequence<EmojiResponse> items;
+};
+
+struct ListGuildSoundboardSoundsResponse {
+    sequence<SoundboardSoundResponse> items;
+};
+
+struct LobbyGuildInviteResponse {
+    string code;
+};
+
+struct LobbyMemberRequest {
+    SnowflakeType id;
+    @optional
+    map<string, string> metadata;
+    @optional
+    string flags;
+};
+
+struct LobbyMemberResponse {
+    SnowflakeType id;
+    map<string, string> metadata;
+    int64 flags;
+};
+
+struct LobbyMessageResponse {
+    SnowflakeType id;
+    MessageType type;
+    string content;
+    SnowflakeType lobby_id;
+    SnowflakeType channel_id;
+    UserResponse author;
+    @optional
+    map<string, string> metadata;
+    @optional
+    map<string, string> moderation_metadata;
+    int64 flags;
+    @optional
+    SnowflakeType application_id;
+};
+
+struct LobbyResponse {
+    SnowflakeType id;
+    SnowflakeType application_id;
+    map<string, string> metadata;
+    sequence<LobbyMemberResponse> members;
+    @optional
+    GuildChannelResponse linked_channel;
+    UInt32Type flags;
+    @optional
+    string override_event_webhooks_url;
+};
+
+struct MLSpamRuleResponse {
+    SnowflakeType id;
+    SnowflakeType guild_id;
+    SnowflakeType creator_id;
+    string name;
+    AutomodEventType event_type;
+    sequence<string> actions;
+    int64 trigger_type;
+    boolean enabled;
+    sequence<SnowflakeType> exempt_roles;
+    sequence<SnowflakeType> exempt_channels;
+    MLSpamTriggerMetadataResponse trigger_metadata;
+};
+
+struct MLSpamTriggerMetadata {
+};
+
+struct MLSpamTriggerMetadataResponse {
+};
+
+struct MLSpamUpsertRequest {
+    string name;
+    AutomodEventType event_type;
+    @optional
+    sequence<string> actions;
+    @optional
+    boolean enabled;
+    @optional
+    sequence<SnowflakeType> exempt_roles;
+    @optional
+    sequence<SnowflakeType> exempt_channels;
+    int64 trigger_type;
+    @optional
+    string trigger_metadata;
+};
+
+struct MLSpamUpsertRequestPartial {
+    @optional
+    string name;
+    @optional
+    AutomodEventType event_type;
+    @optional
+    sequence<string> actions;
+    @optional
+    boolean enabled;
+    @optional
+    sequence<SnowflakeType> exempt_roles;
+    @optional
+    sequence<SnowflakeType> exempt_channels;
+    @optional
+    int64 trigger_type;
+    @optional
+    string trigger_metadata;
+};
+
+struct MediaGalleryComponentForMessageRequest {
+    int64 type;
+    @optional
+    int64 id;
+    sequence<MediaGalleryItemRequest> items;
+};
+
+struct MediaGalleryComponentResponse {
+    int64 type;
+    int64 id;
+    sequence<MediaGalleryItemResponse> items;
+};
+
+struct MediaGalleryItemRequest {
+    @optional
+    string description;
+    @optional
+    boolean spoiler;
+    UnfurledMediaRequest media;
+};
+
+struct MediaGalleryItemResponse {
+    UnfurledMediaResponse media;
+    string description;
+    boolean spoiler;
+};
+
+struct MentionSpamRuleResponse {
+    SnowflakeType id;
+    SnowflakeType guild_id;
+    SnowflakeType creator_id;
+    string name;
+    AutomodEventType event_type;
+    sequence<string> actions;
+    int64 trigger_type;
+    boolean enabled;
+    sequence<SnowflakeType> exempt_roles;
+    sequence<SnowflakeType> exempt_channels;
+    MentionSpamTriggerMetadataResponse trigger_metadata;
+};
+
+struct MentionSpamTriggerMetadata {
+    @optional
+    int64 mention_total_limit;
+    @optional
+    boolean mention_raid_protection_enabled;
+};
+
+struct MentionSpamTriggerMetadataResponse {
+    int64 mention_total_limit;
+    boolean mention_raid_protection_enabled;
+};
+
+struct MentionSpamUpsertRequest {
+    string name;
+    AutomodEventType event_type;
+    @optional
+    sequence<string> actions;
+    @optional
+    boolean enabled;
+    @optional
+    sequence<SnowflakeType> exempt_roles;
+    @optional
+    sequence<SnowflakeType> exempt_channels;
+    int64 trigger_type;
+    @optional
+    string trigger_metadata;
+};
+
+struct MentionSpamUpsertRequestPartial {
+    @optional
+    string name;
+    @optional
+    AutomodEventType event_type;
+    @optional
+    sequence<string> actions;
+    @optional
+    boolean enabled;
+    @optional
+    sequence<SnowflakeType> exempt_roles;
+    @optional
+    sequence<SnowflakeType> exempt_channels;
+    @optional
+    int64 trigger_type;
+    @optional
+    string trigger_metadata;
+};
+
+struct MentionableSelectComponentForMessageRequest {
+    int64 type;
+    @optional
+    int64 id;
+    string custom_id;
+    @optional
+    string placeholder;
+    @optional
+    int64 min_values;
+    @optional
+    int64 max_values;
+    @optional
+    boolean disabled;
+    @optional
+    boolean required;
+    @optional
+    sequence<string> default_values;
+};
+
+struct MentionableSelectComponentForModalRequest {
+    int64 type;
+    @optional
+    int64 id;
+    string custom_id;
+    @optional
+    string placeholder;
+    @optional
+    int64 min_values;
+    @optional
+    int64 max_values;
+    @optional
+    boolean disabled;
+    @optional
+    boolean required;
+    @optional
+    sequence<string> default_values;
+};
+
+struct MentionableSelectComponentResponse {
+    int64 type;
+    int64 id;
+    string custom_id;
+    @optional
+    string placeholder;
+    int64 min_values;
+    int64 max_values;
+    @optional
+    boolean disabled;
+    @optional
+    sequence<string> default_values;
+};
+
+struct MessageActivityResponse {
+    ActivityActionTypes type;
+    @optional
+    string party_id;
+};
+
+struct MessageAllowedMentionsRequest {
+    @optional
+    sequence<string> parse;
+    @optional
+    sequence<string> users;
+    @optional
+    sequence<string> roles;
+    @optional
+    boolean replied_user;
+};
+
+struct MessageAttachmentRequest {
+    SnowflakeType id;
+    @optional
+    string filename;
+    @optional
+    string description;
+    @optional
+    double duration_secs;
+    @optional
+    string waveform;
+    @optional
+    string title;
+    @optional
+    boolean is_remix;
+};
+
+struct MessageAttachmentResponse {
+    SnowflakeType id;
+    string filename;
+    int64 size;
+    string url;
+    string proxy_url;
+    @optional
+    int64 width;
+    @optional
+    int64 height;
+    @optional
+    double duration_secs;
+    @optional
+    string waveform;
+    @optional
+    string description;
+    @optional
+    string content_type;
+    @optional
+    boolean ephemeral;
+    @optional
+    int64 flags;
+    @optional
+    string placeholder;
+    @optional
+    int64 placeholder_version;
+    @optional
+    string title;
+    @optional
+    ApplicationResponse application;
+    @optional
+    string clip_created_at;
+    @optional
+    sequence<UserResponse> clip_participants;
+};
+
+struct MessageCallResponse {
+    @optional
+    string ended_timestamp;
+    sequence<SnowflakeType> participants;
+};
+
+struct MessageComponentInteractionMetadataResponse {
+    SnowflakeType id;
+    int64 type;
+    @optional
+    UserResponse user;
+    map<string, SnowflakeType> authorizing_integration_owners;
+    @optional
+    SnowflakeType original_response_message_id;
+    SnowflakeType interacted_message_id;
+};
+
+typedef int64 MessageComponentSeparatorSpacingSize;
+
+typedef int64 MessageComponentTypes;
+
+struct MessageCreateRequest {
+    @optional
+    string content;
+    @optional
+    sequence<RichEmbed> embeds;
+    @optional
+    string allowed_mentions;
+    @optional
+    sequence<SnowflakeType> sticker_ids;
+    @optional
+    sequence<string> components;
+    @optional
+    int64 flags;
+    @optional
+    sequence<MessageAttachmentRequest> attachments;
+    @optional
+    string poll;
+    @optional
+    string shared_client_theme;
+    @optional
+    string message_reference;
+    @optional
+    string nonce;
+    @optional
+    boolean enforce_nonce;
+    @optional
+    boolean tts;
+};
+
+struct MessageEditRequestPartial {
+    @optional
+    string content;
+    @optional
+    sequence<RichEmbed> embeds;
+    @optional
+    int64 flags;
+    @optional
+    string allowed_mentions;
+    @optional
+    sequence<SnowflakeType> sticker_ids;
+    @optional
+    sequence<string> components;
+    @optional
+    sequence<MessageAttachmentRequest> attachments;
+};
+
+struct MessageEmbedAuthorResponse {
+    string name;
+    @optional
+    string url;
+    @optional
+    string icon_url;
+    @optional
+    string proxy_icon_url;
+};
+
+struct MessageEmbedFieldResponse {
+    string name;
+    string value;
+    boolean inline;
+};
+
+struct MessageEmbedFooterResponse {
+    string text;
+    @optional
+    string icon_url;
+    @optional
+    string proxy_icon_url;
+};
+
+struct MessageEmbedImageResponse {
+    @optional
+    string url;
+    @optional
+    string proxy_url;
+    @optional
+    UInt32Type width;
+    @optional
+    UInt32Type height;
+    @optional
+    string content_type;
+    @optional
+    string placeholder;
+    @optional
+    UInt32Type placeholder_version;
+    @optional
+    string description;
+    @optional
+    UInt32Type flags;
+};
+
+struct MessageEmbedProviderResponse {
+    string name;
+    @optional
+    string url;
+};
+
+struct MessageEmbedResponse {
+    string type;
+    @optional
+    string url;
+    @optional
+    string title;
+    @optional
+    string description;
+    @optional
+    int64 color;
+    @optional
+    string timestamp;
+    @optional
+    sequence<MessageEmbedFieldResponse> fields;
+    @optional
+    MessageEmbedAuthorResponse author;
+    @optional
+    MessageEmbedProviderResponse provider;
+    @optional
+    MessageEmbedImageResponse image;
+    @optional
+    MessageEmbedImageResponse thumbnail;
+    @optional
+    MessageEmbedVideoResponse video;
+    @optional
+    MessageEmbedFooterResponse footer;
+    @optional
+    int64 flags;
+    @optional
+    sequence<ContainerComponentResponse> components;
+};
+
+struct MessageEmbedVideoResponse {
+    @optional
+    string url;
+    @optional
+    string proxy_url;
+    @optional
+    UInt32Type width;
+    @optional
+    UInt32Type height;
+    @optional
+    string content_type;
+    @optional
+    string placeholder;
+    @optional
+    UInt32Type placeholder_version;
+    @optional
+    string description;
+    @optional
+    UInt32Type flags;
+};
+
+struct MessageInteractionResponse {
+    SnowflakeType id;
+    InteractionTypes type;
+    string name;
+    @optional
+    UserResponse user;
+    @optional
+    string name_localized;
+};
+
+struct MessageMentionChannelResponse {
+    SnowflakeType id;
+    string name;
+    ChannelTypes type;
+    SnowflakeType guild_id;
+};
+
+struct MessageReactionCountDetailsResponse {
+    int64 burst;
+    int64 normal;
+};
+
+struct MessageReactionEmojiResponse {
+    string id;
+    string name;
+    @optional
+    boolean animated;
+};
+
+struct MessageReactionResponse {
+    MessageReactionEmojiResponse emoji;
+    int64 count;
+    MessageReactionCountDetailsResponse count_details;
+    sequence<string> burst_colors;
+    boolean me_burst;
+    boolean me;
+};
+
+struct MessageReferenceRequest {
+    @optional
+    string guild_id;
+    @optional
+    string channel_id;
+    SnowflakeType message_id;
+    @optional
+    boolean fail_if_not_exists;
+    @optional
+    string type;
+};
+
+struct MessageReferenceResponse {
+    MessageReferenceType type;
+    SnowflakeType channel_id;
+    @optional
+    SnowflakeType message_id;
+    @optional
+    SnowflakeType guild_id;
+};
+
+typedef int64 MessageReferenceType;
+
+struct MessageResponse {
+    MessageType type;
+    string content;
+    sequence<UserResponse> mentions;
+    sequence<SnowflakeType> mention_roles;
+    sequence<MessageAttachmentResponse> attachments;
+    sequence<MessageEmbedResponse> embeds;
+    string timestamp;
+    string edited_timestamp;
+    int64 flags;
+    sequence<string> components;
+    @optional
+    sequence<string> stickers;
+    @optional
+    sequence<MessageStickerItemResponse> sticker_items;
+    SnowflakeType id;
+    SnowflakeType channel_id;
+    UserResponse author;
+    boolean pinned;
+    boolean mention_everyone;
+    boolean tts;
+    @optional
+    MessageCallResponse call;
+    @optional
+    MessageActivityResponse activity;
+    @optional
+    BasicApplicationResponse application;
+    @optional
+    SnowflakeType application_id;
+    @optional
+    MessageInteractionResponse interaction;
+    @optional
+    string nonce;
+    @optional
+    SnowflakeType webhook_id;
+    @optional
+    MessageReferenceResponse message_reference;
+    @optional
+    ThreadResponse thread;
+    @optional
+    sequence<MessageMentionChannelResponse> mention_channels;
+    @optional
+    MessageRoleSubscriptionDataResponse role_subscription_data;
+    @optional
+    PurchaseNotificationResponse purchase_notification;
+    @optional
+    int64 position;
+    @optional
+    ResolvedObjectsResponse resolved;
+    @optional
+    PollResponse poll;
+    @optional
+    CustomClientThemeResponse shared_client_theme;
+    @optional
+    string interaction_metadata;
+    @optional
+    sequence<MessageSnapshotResponse> message_snapshots;
+    @optional
+    sequence<MessageReactionResponse> reactions;
+    @optional
+    string referenced_message;
+};
+
+struct MessageRoleSubscriptionDataResponse {
+    SnowflakeType role_subscription_listing_id;
+    string tier_name;
+    int64 total_months_subscribed;
+    boolean is_renewal;
+};
+
+typedef int64 MessageShareCustomUserThemeBaseTheme;
+
+struct MessageSnapshotResponse {
+    MinimalContentMessageResponse message;
+};
+
+struct MessageStickerItemResponse {
+    SnowflakeType id;
+    string name;
+    StickerFormatTypes format_type;
+};
+
+typedef int64 MessageType;
+
+typedef int64 MetadataItemTypes;
+
+struct MinimalContentMessageResponse {
+    MessageType type;
+    string content;
+    sequence<UserResponse> mentions;
+    sequence<SnowflakeType> mention_roles;
+    sequence<MessageAttachmentResponse> attachments;
+    sequence<MessageEmbedResponse> embeds;
+    string timestamp;
+    string edited_timestamp;
+    int64 flags;
+    sequence<string> components;
+    @optional
+    sequence<string> stickers;
+    @optional
+    sequence<MessageStickerItemResponse> sticker_items;
+};
+
+struct ModalInteractionCallbackRequest {
+    int64 type;
+    ModalInteractionCallbackRequestData data;
+};
+
+struct ModalInteractionCallbackRequestData {
+    string custom_id;
+    string title;
+    sequence<string> components;
+};
+
+struct ModalSubmitInteractionMetadataResponse {
+    SnowflakeType id;
+    int64 type;
+    @optional
+    UserResponse user;
+    map<string, SnowflakeType> authorizing_integration_owners;
+    @optional
+    SnowflakeType original_response_message_id;
+    string triggering_interaction_metadata;
+};
+
+struct MultipleChoiceFormFieldResponse {
+    string field_type;
+    @optional
+    string label;
+    @optional
+    string description;
+    @optional
+    boolean required;
+    sequence<string> choices;
+    @optional
+    int64 response;
+};
+
+struct MyGuildResponse {
+    SnowflakeType id;
+    string name;
+    string icon;
+    string banner;
+    boolean owner;
+    string permissions;
+    sequence<GuildFeatures> features;
+    @optional
+    int64 approximate_member_count;
+    @optional
+    int64 approximate_presence_count;
+};
+
+typedef string NameplatePalette;
+
+struct NewMemberActionResponse {
+    SnowflakeType channel_id;
+    NewMemberActionType action_type;
+    string title;
+    string description;
+    @optional
+    SettingsEmojiResponse emoji;
+    @optional
+    string icon;
+};
+
+typedef int64 NewMemberActionType;
+
+struct OAuth2GetAuthorizationResponse {
+    ApplicationResponse application;
+    string expires;
+    sequence<OAuth2Scopes> scopes;
+    @optional
+    UserResponse user;
+};
+
+struct OAuth2GetKeys {
+    sequence<OAuth2Key> keys;
+};
+
+struct OAuth2GetOpenIDConnectUserInfoResponse {
+    string sub;
+    @optional
+    string email;
+    @optional
+    boolean email_verified;
+    @optional
+    string preferred_username;
+    @optional
+    string nickname;
+    @optional
+    string picture;
+    @optional
+    string locale;
+};
+
+struct OAuth2Key {
+    string kty;
+    string use;
+    string kid;
+    string n;
+    string e;
+    string alg;
+};
+
+typedef string OAuth2Scopes;
+
+struct OnboardingPromptOptionRequest {
+    @optional
+    string id;
+    string title;
+    @optional
+    string description;
+    @optional
+    string emoji_id;
+    @optional
+    string emoji_name;
+    @optional
+    boolean emoji_animated;
+    @optional
+    sequence<SnowflakeType> role_ids;
+    @optional
+    sequence<SnowflakeType> channel_ids;
+};
+
+struct OnboardingPromptOptionResponse {
+    SnowflakeType id;
+    string title;
+    string description;
+    SettingsEmojiResponse emoji;
+    sequence<SnowflakeType> role_ids;
+    sequence<SnowflakeType> channel_ids;
+};
+
+struct OnboardingPromptResponse {
+    SnowflakeType id;
+    string title;
+    sequence<OnboardingPromptOptionResponse> options;
+    boolean single_select;
+    boolean required;
+    boolean in_onboarding;
+    OnboardingPromptType type;
+};
+
+typedef int64 OnboardingPromptType;
+
+struct ParagraphFormFieldResponse {
+    string field_type;
+    @optional
+    string label;
+    @optional
+    string description;
+    @optional
+    boolean required;
+    @optional
+    string placeholder;
+    @optional
+    string response;
+};
+
+struct PartialDiscordIntegrationResponse {
+    SnowflakeType id;
+    string type;
+    string name;
+    AccountResponse account;
+    SnowflakeType application_id;
+};
+
+struct PartialExternalConnectionIntegrationResponse {
+    SnowflakeType id;
+    string type;
+    string name;
+    AccountResponse account;
+};
+
+struct PartialGuildSubscriptionIntegrationResponse {
+    SnowflakeType id;
+    string type;
+    string name;
+    AccountResponse account;
+};
+
+struct PinnedMessageResponse {
+    string pinned_at;
+    MessageResponse message;
+};
+
+struct PinnedMessagesResponse {
+    sequence<PinnedMessageResponse> items;
+    boolean has_more;
+};
+
+struct PollAnswerCreateRequest {
+    PollMediaCreateRequest poll_media;
+};
+
+struct PollAnswerDetailsResponse {
+    sequence<UserResponse> users;
+};
+
+struct PollAnswerResponse {
+    int64 answer_id;
+    PollMediaResponse poll_media;
+};
+
+struct PollCreateRequest {
+    PollMedia question;
+    sequence<PollAnswerCreateRequest> answers;
+    @optional
+    boolean allow_multiselect;
+    @optional
+    string layout_type;
+    @optional
+    int64 duration;
+};
+
+struct PollEmoji {
+    @optional
+    string id;
+    @optional
+    string name;
+    @optional
+    boolean animated;
+};
+
+struct PollEmojiCreateRequest {
+    @optional
+    string id;
+    @optional
+    string name;
+    @optional
+    boolean animated;
+};
+
+typedef int64 PollLayoutTypes;
+
+struct PollMedia {
+    @optional
+    string text;
+    @optional
+    string emoji;
+};
+
+struct PollMediaCreateRequest {
+    @optional
+    string text;
+    @optional
+    string emoji;
+};
+
+struct PollMediaResponse {
+    @optional
+    string text;
+    @optional
+    MessageReactionEmojiResponse emoji;
+};
+
+struct PollResponse {
+    PollMediaResponse question;
+    sequence<PollAnswerResponse> answers;
+    string expiry;
+    boolean allow_multiselect;
+    PollLayoutTypes layout_type;
+    PollResultsResponse results;
+};
+
+struct PollResultsEntryResponse {
+    int64 id;
+    int64 count;
+    boolean me_voted;
+};
+
+struct PollResultsResponse {
+    sequence<PollResultsEntryResponse> answer_counts;
+    boolean is_finalized;
+};
+
+struct PongInteractionCallbackRequest {
+    int64 type;
+};
+
+typedef int64 PremiumGuildTiers;
+
+typedef int64 PremiumTypes;
+
+struct PrivateApplicationResponse {
+    SnowflakeType id;
+    string name;
+    string icon;
+    string description;
+    string type;
+    @optional
+    string cover_image;
+    @optional
+    SnowflakeType primary_sku_id;
+    @optional
+    UserResponse bot;
+    @optional
+    string slug;
+    @optional
+    SnowflakeType guild_id;
+    @optional
+    sequence<string> rpc_origins;
+    @optional
+    boolean bot_public;
+    @optional
+    boolean bot_require_code_grant;
+    @optional
+    string terms_of_service_url;
+    @optional
+    string privacy_policy_url;
+    @optional
+    string custom_install_url;
+    @optional
+    ApplicationOAuth2InstallParamsResponse install_params;
+    @optional
+    map<string, ApplicationIntegrationTypeConfigurationResponse> integration_types_config;
+    string verify_key;
+    int64 flags;
+    string flags_new;
+    @optional
+    int64 max_participants;
+    @optional
+    sequence<string> tags;
+    sequence<string> redirect_uris;
+    string interactions_endpoint_url;
+    string role_connections_verification_url;
+    UserResponse owner;
+    int64 approximate_guild_count;
+    int64 approximate_user_install_count;
+    int64 approximate_user_authorization_count;
+    @optional
+    string event_webhooks_url;
+    @optional
+    ApplicationEventWebhooksStatus event_webhooks_status;
+    @optional
+    sequence<string> event_webhooks_types;
+    ApplicationExplicitContentFilterTypes explicit_content_filter;
+    string team;
+};
+
+struct PrivateChannelLocation {
+    string id;
+    string kind;
+    SnowflakeType channel_id;
+};
+
+struct PrivateChannelResponse {
+    SnowflakeType id;
+    int64 type;
+    @optional
+    string last_message_id;
+    int64 flags;
+    @optional
+    string last_pin_timestamp;
+    sequence<UserResponse> recipients;
+};
+
+struct PrivateGroupChannelResponse {
+    SnowflakeType id;
+    int64 type;
+    @optional
+    string last_message_id;
+    int64 flags;
+    @optional
+    string last_pin_timestamp;
+    sequence<UserResponse> recipients;
+    string name;
+    string icon;
+    SnowflakeType owner_id;
+    @optional
+    boolean managed;
+    @optional
+    SnowflakeType application_id;
+};
+
+struct PrivateGuildMemberResponse {
+    string avatar;
+    @optional
+    string avatar_decoration_data;
+    string banner;
+    string communication_disabled_until;
+    int64 flags;
+    string joined_at;
+    string nick;
+    boolean pending;
+    string premium_since;
+    sequence<SnowflakeType> roles;
+    @optional
+    string collectibles;
+    UserResponse user;
+    boolean mute;
+    boolean deaf;
+    @optional
+    string permissions;
+};
+
+struct ProvisionalTokenResponse {
+    string token_type;
+    string access_token;
+    int64 expires_in;
+    string scope;
+    string id_token;
+    @optional
+    string refresh_token;
+    @optional
+    sequence<string> scopes;
+    @optional
+    int64 expires_at_s;
+};
+
+struct PruneGuildRequest {
+    @optional
+    int64 days;
+    @optional
+    boolean compute_prune_count;
+    @optional
+    string include_roles;
+};
+
+struct PurchaseNotificationResponse {
+    PurchaseType type;
+    @optional
+    GuildProductPurchaseResponse guild_product_purchase;
+};
+
+typedef int64 PurchaseType;
+
+struct QuarantineUserAction {
+    int64 type;
+    @optional
+    string metadata;
+};
+
+struct QuarantineUserActionMetadata {
+};
+
+struct QuarantineUserActionMetadataResponse {
+};
+
+struct QuarantineUserActionResponse {
+    int64 type;
+    QuarantineUserActionMetadataResponse metadata;
+};
+
+struct RadioGroupComponentForModalRequest {
+    int64 type;
+    @optional
+    int64 id;
+    string custom_id;
+    @optional
+    boolean required;
+    sequence<RadioGroupOptionForRequest> options;
+};
+
+struct RadioGroupOptionForRequest {
+    string label;
+    string value;
+    @optional
+    string description;
+    @optional
+    boolean default;
+};
+
+typedef int64 ReactionTypes;
+
+struct ResolvedObjectsResponse {
+    @optional
+    map<string, UserResponse> users;
+    @optional
+    map<string, BasicGuildMemberResponse> members;
+    @optional
+    map<string, string> channels;
+    @optional
+    map<string, GuildRoleResponse> roles;
+};
+
+struct ResourceChannelResponse {
+    SnowflakeType channel_id;
+    string title;
+    @optional
+    SettingsEmojiResponse emoji;
+    @optional
+    string icon;
+    string description;
+};
+
+struct RichEmbed {
+    @optional
+    string type;
+    @optional
+    string url;
+    @optional
+    string title;
+    @optional
+    int64 color;
+    @optional
+    string timestamp;
+    @optional
+    string description;
+    @optional
+    string author;
+    @optional
+    string image;
+    @optional
+    string thumbnail;
+    @optional
+    string footer;
+    @optional
+    sequence<RichEmbedField> fields;
+    @optional
+    string provider;
+    @optional
+    string video;
+};
+
+struct RichEmbedAuthor {
+    @optional
+    string name;
+    @optional
+    string url;
+    @optional
+    string icon_url;
+};
+
+struct RichEmbedField {
+    string name;
+    string value;
+    @optional
+    boolean inline;
+};
+
+struct RichEmbedFooter {
+    @optional
+    string text;
+    @optional
+    string icon_url;
+};
+
+struct RichEmbedImage {
+    @optional
+    string url;
+    @optional
+    int64 width;
+    @optional
+    int64 height;
+    @optional
+    string placeholder;
+    @optional
+    int64 placeholder_version;
+    @optional
+    boolean is_animated;
+    @optional
+    string description;
+};
+
+struct RichEmbedProvider {
+    @optional
+    string name;
+    @optional
+    string url;
+};
+
+struct RichEmbedThumbnail {
+    @optional
+    string url;
+    @optional
+    int64 width;
+    @optional
+    int64 height;
+    @optional
+    string placeholder;
+    @optional
+    int64 placeholder_version;
+    @optional
+    boolean is_animated;
+    @optional
+    string description;
+};
+
+struct RichEmbedVideo {
+    @optional
+    string url;
+    @optional
+    int64 width;
+    @optional
+    int64 height;
+    @optional
+    string placeholder;
+    @optional
+    int64 placeholder_version;
+    @optional
+    boolean is_animated;
+    @optional
+    string description;
+};
+
+struct RoleColors {
+    @optional
+    int64 primary_color;
+    @optional
+    int64 secondary_color;
+    @optional
+    int64 tertiary_color;
+};
+
+struct RoleSelectComponentForMessageRequest {
+    int64 type;
+    @optional
+    int64 id;
+    string custom_id;
+    @optional
+    string placeholder;
+    @optional
+    int64 min_values;
+    @optional
+    int64 max_values;
+    @optional
+    boolean disabled;
+    @optional
+    boolean required;
+    @optional
+    sequence<RoleSelectDefaultValue> default_values;
+};
+
+struct RoleSelectComponentForModalRequest {
+    int64 type;
+    @optional
+    int64 id;
+    string custom_id;
+    @optional
+    string placeholder;
+    @optional
+    int64 min_values;
+    @optional
+    int64 max_values;
+    @optional
+    boolean disabled;
+    @optional
+    boolean required;
+    @optional
+    sequence<RoleSelectDefaultValue> default_values;
+};
+
+struct RoleSelectComponentResponse {
+    int64 type;
+    int64 id;
+    string custom_id;
+    @optional
+    string placeholder;
+    int64 min_values;
+    int64 max_values;
+    @optional
+    boolean disabled;
+    @optional
+    sequence<RoleSelectDefaultValueResponse> default_values;
+};
+
+struct RoleSelectDefaultValue {
+    string type;
+    SnowflakeType id;
+};
+
+struct RoleSelectDefaultValueResponse {
+    string type;
+    SnowflakeType id;
+};
+
+struct SDKMessageRequest {
+    @optional
+    string content;
+    @optional
+    sequence<RichEmbed> embeds;
+    @optional
+    string allowed_mentions;
+    @optional
+    sequence<SnowflakeType> sticker_ids;
+    @optional
+    sequence<string> components;
+    @optional
+    int64 flags;
+    @optional
+    sequence<MessageAttachmentRequest> attachments;
+    @optional
+    string poll;
+    @optional
+    string shared_client_theme;
+    @optional
+    string message_reference;
+    @optional
+    string nonce;
+    @optional
+    boolean enforce_nonce;
+    @optional
+    boolean tts;
+};
+
+typedef int64 SKUIneligibilityReason;
+
+struct ScheduledEventResponse {
+    SnowflakeType id;
+    SnowflakeType guild_id;
+    string name;
+    string description;
+    string channel_id;
+    string creator_id;
+    @optional
+    UserResponse creator;
+    string image;
+    string scheduled_start_time;
+    string scheduled_end_time;
+    GuildScheduledEventStatuses status;
+    GuildScheduledEventEntityTypes entity_type;
+    string entity_id;
+    @optional
+    int64 user_count;
+    GuildScheduledEventPrivacyLevels privacy_level;
+    @optional
+    string user_rsvp;
+};
+
+struct ScheduledEventUserResponse {
+    SnowflakeType guild_scheduled_event_id;
+    SnowflakeType user_id;
+    @optional
+    UserResponse user;
+    @optional
+    GuildMemberResponse member;
+};
+
+struct SearchIndexNotReadyResponse {
+    string message;
+    int64 code;
+    int64 documents_indexed;
+    int64 retry_after;
+};
+
+struct SearchMessageResponse {
+    MessageType type;
+    string content;
+    sequence<UserResponse> mentions;
+    sequence<SnowflakeType> mention_roles;
+    sequence<MessageAttachmentResponse> attachments;
+    sequence<MessageEmbedResponse> embeds;
+    string timestamp;
+    string edited_timestamp;
+    int64 flags;
+    sequence<string> components;
+    @optional
+    sequence<string> stickers;
+    @optional
+    sequence<MessageStickerItemResponse> sticker_items;
+    SnowflakeType id;
+    SnowflakeType channel_id;
+    UserResponse author;
+    boolean pinned;
+    boolean mention_everyone;
+    boolean tts;
+    @optional
+    MessageCallResponse call;
+    @optional
+    MessageActivityResponse activity;
+    @optional
+    BasicApplicationResponse application;
+    @optional
+    SnowflakeType application_id;
+    @optional
+    MessageInteractionResponse interaction;
+    @optional
+    string nonce;
+    @optional
+    SnowflakeType webhook_id;
+    @optional
+    MessageReferenceResponse message_reference;
+    @optional
+    ThreadResponse thread;
+    @optional
+    sequence<MessageMentionChannelResponse> mention_channels;
+    @optional
+    MessageRoleSubscriptionDataResponse role_subscription_data;
+    @optional
+    PurchaseNotificationResponse purchase_notification;
+    @optional
+    int64 position;
+    @optional
+    ResolvedObjectsResponse resolved;
+    @optional
+    PollResponse poll;
+    @optional
+    CustomClientThemeResponse shared_client_theme;
+    @optional
+    string interaction_metadata;
+    @optional
+    sequence<MessageSnapshotResponse> message_snapshots;
+    @optional
+    sequence<MessageReactionResponse> reactions;
+    @optional
+    string referenced_message;
+    boolean hit;
+};
+
+typedef string SearchableEmbedType;
+
+struct SectionComponentForMessageRequest {
+    int64 type;
+    @optional
+    int64 id;
+    sequence<TextDisplayComponentForMessageRequest> components;
+    string accessory;
+};
+
+struct SectionComponentResponse {
+    int64 type;
+    int64 id;
+    sequence<TextDisplayComponentResponse> components;
+    string accessory;
+};
+
+struct SeparatorComponentForMessageRequest {
+    int64 type;
+    @optional
+    int64 id;
+    @optional
+    string spacing;
+    @optional
+    boolean divider;
+};
+
+struct SeparatorComponentResponse {
+    int64 type;
+    int64 id;
+    MessageComponentSeparatorSpacingSize spacing;
+    boolean divider;
+};
+
+struct SettingsEmojiResponse {
+    string id;
+    string name;
+    boolean animated;
+};
+
+struct SlackWebhook {
+    @optional
+    string text;
+    @optional
+    string username;
+    @optional
+    string icon_url;
+    @optional
+    sequence<WebhookSlackEmbed> attachments;
+};
+
+typedef string SnowflakeSelectDefaultValueTypes;
+
+typedef string SnowflakeType;
+
+struct SocialLayerSKUPurchaseEligibilityCallbackData {
+    boolean eligible;
+    @optional
+    string ineligible_reason;
+    @optional
+    string ineligible_reason_description;
+};
+
+struct SocialLayerSKUPurchaseEligibilityInteractionCallbackRequest {
+    int64 type;
+    SocialLayerSKUPurchaseEligibilityCallbackData data;
+};
+
+typedef string SortingMode;
+
+typedef string SortingOrder;
+
+struct SoundboardCreateRequest {
+    string name;
+    @optional
+    double volume;
+    @optional
+    string emoji_id;
+    @optional
+    string emoji_name;
+    string sound;
+};
+
+struct SoundboardPatchRequestPartial {
+    @optional
+    string name;
+    @optional
+    double volume;
+    @optional
+    string emoji_id;
+    @optional
+    string emoji_name;
+};
+
+struct SoundboardSoundResponse {
+    string name;
+    SnowflakeType sound_id;
+    double volume;
+    string emoji_id;
+    string emoji_name;
+    @optional
+    SnowflakeType guild_id;
+    boolean available;
+    @optional
+    UserResponse user;
+};
+
+struct SoundboardSoundSendRequest {
+    SnowflakeType sound_id;
+    @optional
+    string source_guild_id;
+};
+
+struct SpamLinkRuleResponse {
+    SnowflakeType id;
+    SnowflakeType guild_id;
+    SnowflakeType creator_id;
+    string name;
+    AutomodEventType event_type;
+    sequence<string> actions;
+    int64 trigger_type;
+    boolean enabled;
+    sequence<SnowflakeType> exempt_roles;
+    sequence<SnowflakeType> exempt_channels;
+    SpamLinkTriggerMetadataResponse trigger_metadata;
+};
+
+struct SpamLinkTriggerMetadataResponse {
+};
+
+struct StageInstanceResponse {
+    SnowflakeType guild_id;
+    SnowflakeType channel_id;
+    string topic;
+    StageInstancesPrivacyLevels privacy_level;
+    SnowflakeType id;
+    boolean discoverable_disabled;
+    string guild_scheduled_event_id;
+};
+
+typedef int64 StageInstancesPrivacyLevels;
+
+struct StageScheduledEventCreateRequest {
+    string name;
+    @optional
+    string description;
+    @optional
+    string image;
+    string scheduled_start_time;
+    @optional
+    string scheduled_end_time;
+    GuildScheduledEventPrivacyLevels privacy_level;
+    int64 entity_type;
+    @optional
+    string channel_id;
+    @optional
+    string entity_metadata;
+};
+
+struct StageScheduledEventPatchRequestPartial {
+    @optional
+    string status;
+    @optional
+    string name;
+    @optional
+    string description;
+    @optional
+    string image;
+    @optional
+    string scheduled_start_time;
+    @optional
+    string scheduled_end_time;
+    @optional
+    string entity_type;
+    @optional
+    GuildScheduledEventPrivacyLevels privacy_level;
+    @optional
+    string channel_id;
+    @optional
+    string entity_metadata;
+};
+
+struct StageScheduledEventResponse {
+    SnowflakeType id;
+    SnowflakeType guild_id;
+    string name;
+    string description;
+    string channel_id;
+    string creator_id;
+    @optional
+    UserResponse creator;
+    string image;
+    string scheduled_start_time;
+    string scheduled_end_time;
+    GuildScheduledEventStatuses status;
+    int64 entity_type;
+    string entity_id;
+    @optional
+    int64 user_count;
+    GuildScheduledEventPrivacyLevels privacy_level;
+    @optional
+    string user_rsvp;
+    string entity_metadata;
+};
+
+struct StandardStickerResponse {
+    SnowflakeType id;
+    string name;
+    string tags;
+    int64 type;
+    string format_type;
+    string description;
+    SnowflakeType pack_id;
+    int64 sort_value;
+};
+
+typedef int64 StickerFormatTypes;
+
+struct StickerPackCollectionResponse {
+    sequence<StickerPackResponse> sticker_packs;
+};
+
+struct StickerPackResponse {
+    SnowflakeType id;
+    SnowflakeType sku_id;
+    string name;
+    string description;
+    sequence<StandardStickerResponse> stickers;
+    @optional
+    SnowflakeType cover_sticker_id;
+    @optional
+    SnowflakeType banner_asset_id;
+};
+
+typedef int64 StickerTypes;
+
+struct StringSelectComponentForMessageRequest {
+    int64 type;
+    @optional
+    int64 id;
+    string custom_id;
+    @optional
+    string placeholder;
+    @optional
+    int64 min_values;
+    @optional
+    int64 max_values;
+    @optional
+    boolean disabled;
+    @optional
+    boolean required;
+    sequence<StringSelectOptionForRequest> options;
+};
+
+struct StringSelectComponentForModalRequest {
+    int64 type;
+    @optional
+    int64 id;
+    string custom_id;
+    @optional
+    string placeholder;
+    @optional
+    int64 min_values;
+    @optional
+    int64 max_values;
+    @optional
+    boolean disabled;
+    @optional
+    boolean required;
+    sequence<StringSelectOptionForRequest> options;
+};
+
+struct StringSelectComponentResponse {
+    int64 type;
+    int64 id;
+    string custom_id;
+    @optional
+    string placeholder;
+    int64 min_values;
+    int64 max_values;
+    @optional
+    boolean disabled;
+    sequence<StringSelectOptionResponse> options;
+};
+
+struct StringSelectOptionForRequest {
+    string label;
+    string value;
+    @optional
+    string description;
+    @optional
+    boolean default;
+    @optional
+    string emoji;
+};
+
+struct StringSelectOptionResponse {
+    string label;
+    string value;
+    @optional
+    string description;
+    @optional
+    ComponentEmojiResponse emoji;
+    @optional
+    boolean default;
+};
+
+struct TargetUsersJobStatusResponse {
+    TargetUsersJobStatusTypes status;
+    UInt32Type total_users;
+    UInt32Type processed_users;
+    string created_at;
+    string completed_at;
+    string error_message;
+};
+
+typedef int64 TargetUsersJobStatusTypes;
+
+struct TeamMemberResponse {
+    UserResponse user;
+    SnowflakeType team_id;
+    TeamMembershipStates membership_state;
+    TeamMemberRoles role;
+    sequence<string> permissions;
+};
+
+typedef string TeamMemberRoles;
+
+typedef int64 TeamMembershipStates;
+
+struct TeamResponse {
+    SnowflakeType id;
+    string icon;
+    string name;
+    SnowflakeType owner_user_id;
+    sequence<TeamMemberResponse> members;
+};
+
+struct TermsFormFieldResponse {
+    string field_type;
+    @optional
+    string label;
+    @optional
+    string description;
+    @optional
+    boolean required;
+    sequence<string> values;
+    @optional
+    boolean response;
+};
+
+struct TextDisplayComponentForMessageRequest {
+    int64 type;
+    @optional
+    int64 id;
+    string content;
+};
+
+struct TextDisplayComponentForModalRequest {
+    int64 type;
+    @optional
+    int64 id;
+    string content;
+};
+
+struct TextDisplayComponentResponse {
+    int64 type;
+    int64 id;
+    string content;
+};
+
+struct TextInputComponentForModalRequest {
+    int64 type;
+    @optional
+    int64 id;
+    string custom_id;
+    TextInputStyleTypes style;
+    @optional
+    string label;
+    @optional
+    string value;
+    @optional
+    string placeholder;
+    @optional
+    boolean required;
+    @optional
+    int64 min_length;
+    @optional
+    int64 max_length;
+};
+
+struct TextInputComponentResponse {
+    int64 type;
+    int64 id;
+    string custom_id;
+    TextInputStyleTypes style;
+    string label;
+    @optional
+    string value;
+    @optional
+    string placeholder;
+    @optional
+    boolean required;
+    int64 min_length;
+    int64 max_length;
+};
+
+struct TextInputFormFieldResponse {
+    string field_type;
+    @optional
+    string label;
+    @optional
+    string description;
+    @optional
+    boolean required;
+    @optional
+    string placeholder;
+    @optional
+    string response;
+};
+
+typedef int64 TextInputStyleTypes;
+
+typedef int64 ThreadAutoArchiveDuration;
+
+struct ThreadMemberResponse {
+    SnowflakeType id;
+    SnowflakeType user_id;
+    string join_timestamp;
+    int64 flags;
+    @optional
+    GuildMemberResponse member;
+};
+
+struct ThreadMetadataResponse {
+    boolean archived;
+    string archive_timestamp;
+    ThreadAutoArchiveDuration auto_archive_duration;
+    boolean locked;
+    @optional
+    string create_timestamp;
+    @optional
+    boolean invitable;
+};
+
+struct ThreadResponse {
+    SnowflakeType id;
+    int64 type;
+    @optional
+    string last_message_id;
+    int64 flags;
+    @optional
+    string last_pin_timestamp;
+    SnowflakeType guild_id;
+    string name;
+    @optional
+    string parent_id;
+    @optional
+    int64 rate_limit_per_user;
+    @optional
+    int64 bitrate;
+    @optional
+    int64 user_limit;
+    @optional
+    string rtc_region;
+    @optional
+    VideoQualityModes video_quality_mode;
+    @optional
+    string permissions;
+    SnowflakeType owner_id;
+    ThreadMetadataResponse thread_metadata;
+    int64 message_count;
+    int64 member_count;
+    int64 total_message_sent;
+    @optional
+    sequence<SnowflakeType> applied_tags;
+    @optional
+    ThreadMemberResponse member;
+};
+
+struct ThreadSearchResponse {
+    sequence<ThreadResponse> threads;
+    sequence<ThreadMemberResponse> members;
+    boolean has_more;
+    @optional
+    sequence<MessageResponse> first_messages;
+    int64 total_results;
+};
+
+typedef string ThreadSearchTagSetting;
+
+typedef int64 ThreadSortOrder;
+
+typedef string ThreadSortingMode;
+
+struct ThreadsResponse {
+    sequence<ThreadResponse> threads;
+    sequence<ThreadMemberResponse> members;
+    boolean has_more;
+    @optional
+    sequence<MessageResponse> first_messages;
+};
+
+struct ThumbnailComponentForMessageRequest {
+    int64 type;
+    @optional
+    int64 id;
+    @optional
+    string description;
+    @optional
+    boolean spoiler;
+    UnfurledMediaRequest media;
+};
+
+struct ThumbnailComponentResponse {
+    int64 type;
+    int64 id;
+    UnfurledMediaResponse media;
+    string description;
+    boolean spoiler;
+};
+
+struct TypingIndicatorResponse {
+};
+
+typedef int64 UInt32Type;
+
+struct UnbanUserFromGuildRequest {
+};
+
+struct UnfurledMediaRequest {
+    string url;
+};
+
+struct UnfurledMediaRequestWithAttachmentReferenceRequired {
+    string url;
+};
+
+struct UnfurledMediaResponse {
+    SnowflakeType id;
+    string url;
+    string proxy_url;
+    @optional
+    int64 width;
+    @optional
+    int64 height;
+    @optional
+    string content_type;
+    @optional
+    SnowflakeType attachment_id;
+};
+
+struct UpdateApplicationUserRoleConnectionRequest {
+    @optional
+    string platform_name;
+    @optional
+    string platform_username;
+    @optional
+    map<string, string> metadata;
+};
+
+struct UpdateDMRequestPartial {
+    @optional
+    string name;
+};
+
+struct UpdateDefaultReactionEmojiRequest {
+    @optional
+    string emoji_id;
+    @optional
+    string emoji_name;
+};
+
+struct UpdateGroupDMRequestPartial {
+    @optional
+    string name;
+    @optional
+    string icon;
+};
+
+struct UpdateGuildChannelRequestPartial {
+    @optional
+    string type;
+    @optional
+    string name;
+    @optional
+    int64 position;
+    @optional
+    string topic;
+    @optional
+    int64 bitrate;
+    @optional
+    int64 user_limit;
+    @optional
+    boolean nsfw;
+    @optional
+    int64 rate_limit_per_user;
+    @optional
+    string parent_id;
+    @optional
+    sequence<ChannelPermissionOverwriteRequest> permission_overwrites;
+    @optional
+    string rtc_region;
+    @optional
+    string video_quality_mode;
+    @optional
+    string default_auto_archive_duration;
+    @optional
+    string default_reaction_emoji;
+    @optional
+    int64 default_thread_rate_limit_per_user;
+    @optional
+    string default_sort_order;
+    @optional
+    string default_forum_layout;
+    @optional
+    string default_tag_setting;
+    @optional
+    int64 flags;
+    @optional
+    sequence<UpdateThreadTagRequest> available_tags;
+};
+
+struct UpdateGuildOnboardingRequest {
+    @optional
+    sequence<UpdateOnboardingPromptRequest> prompts;
+    @optional
+    boolean enabled;
+    @optional
+    sequence<SnowflakeType> default_channel_ids;
+    @optional
+    string mode;
+};
+
+struct UpdateMessageInteractionCallbackRequest {
+    int64 type;
+    @optional
+    string data;
+};
+
+struct UpdateMessageInteractionCallbackResponse {
+    int64 type;
+    MessageResponse message;
+};
+
+struct UpdateOnboardingPromptRequest {
+    string title;
+    sequence<OnboardingPromptOptionRequest> options;
+    @optional
+    boolean single_select;
+    @optional
+    boolean required;
+    @optional
+    boolean in_onboarding;
+    @optional
+    string type;
+    SnowflakeType id;
+};
+
+struct UpdateRolePositionsRequest {
+    @optional
+    string id;
+    @optional
+    int64 position;
+};
+
+struct UpdateRoleRequestPartial {
+    @optional
+    string name;
+    @optional
+    int64 permissions;
+    @optional
+    int64 color;
+    @optional
+    string colors;
+    @optional
+    boolean hoist;
+    @optional
+    boolean mentionable;
+    @optional
+    string icon;
+    @optional
+    string unicode_emoji;
+};
+
+struct UpdateSelfVoiceStateRequestPartial {
+    @optional
+    string request_to_speak_timestamp;
+    @optional
+    boolean suppress;
+    @optional
+    string channel_id;
+};
+
+struct UpdateThreadRequestPartial {
+    @optional
+    string name;
+    @optional
+    boolean archived;
+    @optional
+    boolean locked;
+    @optional
+    boolean invitable;
+    @optional
+    string auto_archive_duration;
+    @optional
+    int64 rate_limit_per_user;
+    @optional
+    int64 flags;
+    @optional
+    sequence<SnowflakeType> applied_tags;
+    @optional
+    int64 bitrate;
+    @optional
+    int64 user_limit;
+    @optional
+    string rtc_region;
+    @optional
+    string video_quality_mode;
+};
+
+struct UpdateThreadTagRequest {
+    string name;
+    @optional
+    string emoji_id;
+    @optional
+    string emoji_name;
+    @optional
+    boolean moderated;
+    @optional
+    string id;
+};
+
+struct UpdateVoiceStateRequestPartial {
+    @optional
+    boolean suppress;
+    @optional
+    string channel_id;
+};
+
+struct UserAvatarDecorationResponse {
+    string asset;
+    string sku_id;
+};
+
+struct UserCollectiblesResponse {
+    string nameplate;
+};
+
+struct UserCommunicationDisabledAction {
+    int64 type;
+    UserCommunicationDisabledActionMetadata metadata;
+};
+
+struct UserCommunicationDisabledActionMetadata {
+    @optional
+    int64 duration_seconds;
+};
+
+struct UserCommunicationDisabledActionMetadataResponse {
+    int64 duration_seconds;
+};
+
+struct UserCommunicationDisabledActionResponse {
+    int64 type;
+    UserCommunicationDisabledActionMetadataResponse metadata;
+};
+
+struct UserGuildOnboardingResponse {
+    SnowflakeType guild_id;
+    sequence<OnboardingPromptResponse> prompts;
+    sequence<SnowflakeType> default_channel_ids;
+    boolean enabled;
+    GuildOnboardingMode mode;
+};
+
+struct UserNameplateResponse {
+    string sku_id;
+    string asset;
+    string label;
+    NameplatePalette palette;
+};
+
+typedef int64 UserNotificationSettings;
+
+struct UserPIIResponse {
+    SnowflakeType id;
+    string username;
+    string avatar;
+    string discriminator;
+    int64 public_flags;
+    Int53Type flags;
+    @optional
+    boolean bot;
+    @optional
+    boolean system;
+    @optional
+    string banner;
+    @optional
+    int64 accent_color;
+    string global_name;
+    @optional
+    string avatar_decoration_data;
+    @optional
+    string collectibles;
+    @optional
+    string primary_guild;
+    boolean mfa_enabled;
+    AvailableLocalesEnum locale;
+    @optional
+    PremiumTypes premium_type;
+    @optional
+    string email;
+    @optional
+    boolean verified;
+};
+
+struct UserPrimaryGuildResponse {
+    string identity_guild_id;
+    boolean identity_enabled;
+    string tag;
+    string badge;
+};
+
+struct UserResponse {
+    SnowflakeType id;
+    string username;
+    string avatar;
+    string discriminator;
+    int64 public_flags;
+    Int53Type flags;
+    @optional
+    boolean bot;
+    @optional
+    boolean system;
+    @optional
+    string banner;
+    @optional
+    int64 accent_color;
+    string global_name;
+    @optional
+    string avatar_decoration_data;
+    @optional
+    string collectibles;
+    string primary_guild;
+};
+
+struct UserSelectComponentForMessageRequest {
+    int64 type;
+    @optional
+    int64 id;
+    string custom_id;
+    @optional
+    string placeholder;
+    @optional
+    int64 min_values;
+    @optional
+    int64 max_values;
+    @optional
+    boolean disabled;
+    @optional
+    boolean required;
+    @optional
+    sequence<UserSelectDefaultValue> default_values;
+};
+
+struct UserSelectComponentForModalRequest {
+    int64 type;
+    @optional
+    int64 id;
+    string custom_id;
+    @optional
+    string placeholder;
+    @optional
+    int64 min_values;
+    @optional
+    int64 max_values;
+    @optional
+    boolean disabled;
+    @optional
+    boolean required;
+    @optional
+    sequence<UserSelectDefaultValue> default_values;
+};
+
+struct UserSelectComponentResponse {
+    int64 type;
+    int64 id;
+    string custom_id;
+    @optional
+    string placeholder;
+    int64 min_values;
+    int64 max_values;
+    @optional
+    boolean disabled;
+    @optional
+    sequence<UserSelectDefaultValueResponse> default_values;
+};
+
+struct UserSelectDefaultValue {
+    string type;
+    SnowflakeType id;
+};
+
+struct UserSelectDefaultValueResponse {
+    string type;
+    SnowflakeType id;
+};
+
+struct VanityURLErrorResponse {
+    string message;
+    int64 code;
+};
+
+struct VanityURLResponse {
+    string code;
+    int64 uses;
+    @optional
+    string error;
+};
+
+typedef int64 VerificationLevels;
+
+typedef int64 VideoQualityModes;
+
+struct VoiceRegionResponse {
+    string id;
+    string name;
+    boolean custom;
+    boolean deprecated;
+    boolean optimal;
+};
+
+struct VoiceScheduledEventCreateRequest {
+    string name;
+    @optional
+    string description;
+    @optional
+    string image;
+    string scheduled_start_time;
+    @optional
+    string scheduled_end_time;
+    GuildScheduledEventPrivacyLevels privacy_level;
+    int64 entity_type;
+    @optional
+    string channel_id;
+    @optional
+    string entity_metadata;
+};
+
+struct VoiceScheduledEventPatchRequestPartial {
+    @optional
+    string status;
+    @optional
+    string name;
+    @optional
+    string description;
+    @optional
+    string image;
+    @optional
+    string scheduled_start_time;
+    @optional
+    string scheduled_end_time;
+    @optional
+    string entity_type;
+    @optional
+    GuildScheduledEventPrivacyLevels privacy_level;
+    @optional
+    string channel_id;
+    @optional
+    string entity_metadata;
+};
+
+struct VoiceScheduledEventResponse {
+    SnowflakeType id;
+    SnowflakeType guild_id;
+    string name;
+    string description;
+    string channel_id;
+    string creator_id;
+    @optional
+    UserResponse creator;
+    string image;
+    string scheduled_start_time;
+    string scheduled_end_time;
+    GuildScheduledEventStatuses status;
+    int64 entity_type;
+    string entity_id;
+    @optional
+    int64 user_count;
+    GuildScheduledEventPrivacyLevels privacy_level;
+    @optional
+    string user_rsvp;
+    string entity_metadata;
+};
+
+struct VoiceStateResponse {
+    string channel_id;
+    boolean deaf;
+    string guild_id;
+    @optional
+    GuildMemberResponse member;
+    boolean mute;
+    string request_to_speak_timestamp;
+    boolean suppress;
+    boolean self_stream;
+    boolean self_deaf;
+    boolean self_mute;
+    boolean self_video;
+    string session_id;
+    SnowflakeType user_id;
+};
+
+struct WebhookSlackEmbed {
+    @optional
+    string title;
+    @optional
+    string title_link;
+    @optional
+    string text;
+    @optional
+    string color;
+    @optional
+    int64 ts;
+    @optional
+    string pretext;
+    @optional
+    string footer;
+    @optional
+    string footer_icon;
+    @optional
+    string author_name;
+    @optional
+    string author_link;
+    @optional
+    string author_icon;
+    @optional
+    string image_url;
+    @optional
+    string thumb_url;
+    @optional
+    sequence<WebhookSlackEmbedField> fields;
+};
+
+struct WebhookSlackEmbedField {
+    @optional
+    string name;
+    @optional
+    string value;
+    @optional
+    boolean inline;
+};
+
+struct WebhookSourceChannelResponse {
+    SnowflakeType id;
+    string name;
+};
+
+struct WebhookSourceGuildResponse {
+    SnowflakeType id;
+    string icon;
+    string name;
+};
+
+typedef int64 WebhookTypes;
+
+struct WelcomeMessageResponse {
+    sequence<SnowflakeType> author_ids;
+    string message;
+};
+
+struct WelcomeScreenPatchRequestPartial {
+    @optional
+    string description;
+    @optional
+    sequence<GuildWelcomeChannel> welcome_channels;
+    @optional
+    boolean enabled;
+};
+
+struct WidgetActivity {
+    string name;
+};
+
+struct WidgetChannel {
+    SnowflakeType id;
+    string name;
+    int64 position;
+};
+
+typedef string WidgetImageStyles;
+
+struct WidgetMember {
+    string id;
+    string username;
+    WidgetUserDiscriminator discriminator;
+    string avatar;
+    string status;
+    string avatar_url;
+    @optional
+    WidgetActivity activity;
+    @optional
+    boolean deaf;
+    @optional
+    boolean mute;
+    @optional
+    boolean self_deaf;
+    @optional
+    boolean self_mute;
+    @optional
+    boolean suppress;
+    @optional
+    SnowflakeType channel_id;
+};
+
+struct WidgetResponse {
+    SnowflakeType id;
+    string name;
+    string instant_invite;
+    sequence<WidgetChannel> channels;
+    sequence<WidgetMember> members;
+    int64 presence_count;
+};
+
+struct WidgetSettingsResponse {
+    boolean enabled;
+    string channel_id;
+};
+
+typedef string WidgetUserDiscriminator;
+
+struct Error {
+    int64 code;
+    string message;
+};
+
+struct InnerErrors {
+    sequence<Error> _errors;
+};
+
+typedef string ErrorDetails;
+
+struct ErrorResponse {
+};
+
+struct RatelimitedResponse {
+};
+
+interface DiscordApi {
+    @get(path = "/applications/@me")
+    PrivateApplicationResponse get_my_application(
+
+    );
+
+    @patch(path = "/applications/@me")
+    PrivateApplicationResponse update_my_application(
+        @body in ApplicationFormPartial body
+    );
+
+    @get(path = "/applications/{application_id}")
+    PrivateApplicationResponse get_application(
+        @path in SnowflakeType application_id
+    );
+
+    @patch(path = "/applications/{application_id}")
+    PrivateApplicationResponse update_application(
+        @path in SnowflakeType application_id,
+        @body in ApplicationFormPartial body
+    );
+
+    @get(path = "/applications/{application_id}/activity-instances/{instance_id}")
+    EmbeddedActivityInstance applications_get_activity_instance(
+        @path in SnowflakeType application_id,
+        @path in string instance_id
+    );
+
+    @post(path = "/applications/{application_id}/attachment")
+    ActivitiesAttachmentResponse upload_application_attachment(
+        @path in SnowflakeType application_id
+    );
+
+    @get(path = "/applications/{application_id}/commands")
+    sequence<ApplicationCommandResponse> list_application_commands(
+        @query in boolean with_localizations,
+        @path in SnowflakeType application_id
+    );
+
+    @put(path = "/applications/{application_id}/commands")
+    sequence<ApplicationCommandResponse> bulk_set_application_commands(
+        @path in SnowflakeType application_id,
+        @body in sequence<ApplicationCommandUpdateRequest> body
+    );
+
+    @post(path = "/applications/{application_id}/commands")
+    ApplicationCommandResponse create_application_command(
+        @path in SnowflakeType application_id,
+        @body in ApplicationCommandCreateRequest body
+    );
+
+    @get(path = "/applications/{application_id}/commands/{command_id}")
+    ApplicationCommandResponse get_application_command(
+        @path in SnowflakeType application_id,
+        @path in SnowflakeType command_id
+    );
+
+    @delete(path = "/applications/{application_id}/commands/{command_id}")
+    void delete_application_command(
+        @path in SnowflakeType application_id,
+        @path in SnowflakeType command_id
+    );
+
+    @patch(path = "/applications/{application_id}/commands/{command_id}")
+    ApplicationCommandResponse update_application_command(
+        @path in SnowflakeType application_id,
+        @path in SnowflakeType command_id,
+        @body in ApplicationCommandPatchRequestPartial body
+    );
+
+    @get(path = "/applications/{application_id}/emojis")
+    ListApplicationEmojisResponse list_application_emojis(
+        @path in SnowflakeType application_id
+    );
+
+    @post(path = "/applications/{application_id}/emojis")
+    EmojiResponse create_application_emoji(
+        @path in SnowflakeType application_id,
+        @body in any body
+    );
+
+    @get(path = "/applications/{application_id}/emojis/{emoji_id}")
+    EmojiResponse get_application_emoji(
+        @path in SnowflakeType application_id,
+        @path in SnowflakeType emoji_id
+    );
+
+    @delete(path = "/applications/{application_id}/emojis/{emoji_id}")
+    void delete_application_emoji(
+        @path in SnowflakeType application_id,
+        @path in SnowflakeType emoji_id
+    );
+
+    @patch(path = "/applications/{application_id}/emojis/{emoji_id}")
+    EmojiResponse update_application_emoji(
+        @path in SnowflakeType application_id,
+        @path in SnowflakeType emoji_id,
+        @body in any body
+    );
+
+    @get(path = "/applications/{application_id}/entitlements")
+    sequence<EntitlementResponse> get_entitlements(
+        @query in SnowflakeType user_id,
+        @query in string sku_ids,
+        @query in SnowflakeType guild_id,
+        @query in SnowflakeType before,
+        @query in SnowflakeType after,
+        @query in int64 limit,
+        @query in boolean exclude_ended,
+        @query in boolean exclude_deleted,
+        @query in boolean only_active,
+        @path in SnowflakeType application_id
+    );
+
+    @post(path = "/applications/{application_id}/entitlements")
+    EntitlementResponse create_entitlement(
+        @path in SnowflakeType application_id,
+        @body in CreateEntitlementRequestData body
+    );
+
+    @get(path = "/applications/{application_id}/entitlements/{entitlement_id}")
+    EntitlementResponse get_entitlement(
+        @path in SnowflakeType application_id,
+        @path in SnowflakeType entitlement_id
+    );
+
+    @delete(path = "/applications/{application_id}/entitlements/{entitlement_id}")
+    void delete_entitlement(
+        @path in SnowflakeType application_id,
+        @path in SnowflakeType entitlement_id
+    );
+
+    @post(path = "/applications/{application_id}/entitlements/{entitlement_id}/consume")
+    void consume_entitlement(
+        @path in SnowflakeType application_id,
+        @path in SnowflakeType entitlement_id
+    );
+
+    @get(path = "/applications/{application_id}/guilds/{guild_id}/commands")
+    sequence<ApplicationCommandResponse> list_guild_application_commands(
+        @query in boolean with_localizations,
+        @path in SnowflakeType application_id,
+        @path in SnowflakeType guild_id
+    );
+
+    @put(path = "/applications/{application_id}/guilds/{guild_id}/commands")
+    sequence<ApplicationCommandResponse> bulk_set_guild_application_commands(
+        @path in SnowflakeType application_id,
+        @path in SnowflakeType guild_id,
+        @body in sequence<ApplicationCommandUpdateRequest> body
+    );
+
+    @post(path = "/applications/{application_id}/guilds/{guild_id}/commands")
+    ApplicationCommandResponse create_guild_application_command(
+        @path in SnowflakeType application_id,
+        @path in SnowflakeType guild_id,
+        @body in ApplicationCommandCreateRequest body
+    );
+
+    @get(path = "/applications/{application_id}/guilds/{guild_id}/commands/permissions")
+    sequence<CommandPermissionsResponse> list_guild_application_command_permissions(
+        @path in SnowflakeType application_id,
+        @path in SnowflakeType guild_id
+    );
+
+    @get(path = "/applications/{application_id}/guilds/{guild_id}/commands/{command_id}")
+    ApplicationCommandResponse get_guild_application_command(
+        @path in SnowflakeType application_id,
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType command_id
+    );
+
+    @delete(path = "/applications/{application_id}/guilds/{guild_id}/commands/{command_id}")
+    void delete_guild_application_command(
+        @path in SnowflakeType application_id,
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType command_id
+    );
+
+    @patch(path = "/applications/{application_id}/guilds/{guild_id}/commands/{command_id}")
+    ApplicationCommandResponse update_guild_application_command(
+        @path in SnowflakeType application_id,
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType command_id,
+        @body in ApplicationCommandPatchRequestPartial body
+    );
+
+    @get(path = "/applications/{application_id}/guilds/{guild_id}/commands/{command_id}/permissions")
+    CommandPermissionsResponse get_guild_application_command_permissions(
+        @path in SnowflakeType application_id,
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType command_id
+    );
+
+    @put(path = "/applications/{application_id}/guilds/{guild_id}/commands/{command_id}/permissions")
+    CommandPermissionsResponse set_guild_application_command_permissions(
+        @path in SnowflakeType application_id,
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType command_id,
+        @body in any body
+    );
+
+    @get(path = "/applications/{application_id}/role-connections/metadata")
+    sequence<ApplicationRoleConnectionsMetadataItemResponse> get_application_role_connections_metadata(
+        @path in SnowflakeType application_id
+    );
+
+    @put(path = "/applications/{application_id}/role-connections/metadata")
+    sequence<ApplicationRoleConnectionsMetadataItemResponse> update_application_role_connections_metadata(
+        @path in SnowflakeType application_id,
+        @body in sequence<ApplicationRoleConnectionsMetadataItemRequest> body
+    );
+
+    @get(path = "/channels/{channel_id}")
+    string get_channel(
+        @path in SnowflakeType channel_id
+    );
+
+    @delete(path = "/channels/{channel_id}")
+    string delete_channel(
+        @path in SnowflakeType channel_id
+    );
+
+    @patch(path = "/channels/{channel_id}")
+    string update_channel(
+        @path in SnowflakeType channel_id,
+        @body in string body
+    );
+
+    @post(path = "/channels/{channel_id}/followers")
+    ChannelFollowerResponse follow_channel(
+        @path in SnowflakeType channel_id,
+        @body in any body
+    );
+
+    @get(path = "/channels/{channel_id}/invites")
+    sequence<string> list_channel_invites(
+        @path in SnowflakeType channel_id
+    );
+
+    @post(path = "/channels/{channel_id}/invites")
+    string create_channel_invite(
+        @path in SnowflakeType channel_id,
+        @body in string body
+    );
+
+    @get(path = "/channels/{channel_id}/messages")
+    sequence<MessageResponse> list_messages(
+        @query in SnowflakeType around,
+        @query in SnowflakeType before,
+        @query in SnowflakeType after,
+        @query in int64 limit,
+        @path in SnowflakeType channel_id
+    );
+
+    @post(path = "/channels/{channel_id}/messages")
+    MessageResponse create_message(
+        @path in SnowflakeType channel_id,
+        @body in MessageCreateRequest body
+    );
+
+    @post(path = "/channels/{channel_id}/messages/bulk-delete")
+    void bulk_delete_messages(
+        @path in SnowflakeType channel_id,
+        @body in any body
+    );
+
+    @get(path = "/channels/{channel_id}/messages/pins")
+    PinnedMessagesResponse list_pins(
+        @query in string before,
+        @query in int64 limit,
+        @path in SnowflakeType channel_id
+    );
+
+    @put(path = "/channels/{channel_id}/messages/pins/{message_id}")
+    void create_pin(
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType message_id
+    );
+
+    @delete(path = "/channels/{channel_id}/messages/pins/{message_id}")
+    void delete_pin(
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType message_id
+    );
+
+    @get(path = "/channels/{channel_id}/messages/{message_id}")
+    MessageResponse get_message(
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType message_id
+    );
+
+    @delete(path = "/channels/{channel_id}/messages/{message_id}")
+    void delete_message(
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType message_id
+    );
+
+    @patch(path = "/channels/{channel_id}/messages/{message_id}")
+    MessageResponse update_message(
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType message_id,
+        @body in MessageEditRequestPartial body
+    );
+
+    @post(path = "/channels/{channel_id}/messages/{message_id}/crosspost")
+    MessageResponse crosspost_message(
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType message_id
+    );
+
+    @delete(path = "/channels/{channel_id}/messages/{message_id}/reactions")
+    void delete_all_message_reactions(
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType message_id
+    );
+
+    @get(path = "/channels/{channel_id}/messages/{message_id}/reactions/{emoji_name}")
+    sequence<UserResponse> list_message_reactions_by_emoji(
+        @query in SnowflakeType after,
+        @query in int64 limit,
+        @query in ReactionTypes type,
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType message_id,
+        @path in string emoji_name
+    );
+
+    @delete(path = "/channels/{channel_id}/messages/{message_id}/reactions/{emoji_name}")
+    void delete_all_message_reactions_by_emoji(
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType message_id,
+        @path in string emoji_name
+    );
+
+    @put(path = "/channels/{channel_id}/messages/{message_id}/reactions/{emoji_name}/@me")
+    void add_my_message_reaction(
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType message_id,
+        @path in string emoji_name
+    );
+
+    @delete(path = "/channels/{channel_id}/messages/{message_id}/reactions/{emoji_name}/@me")
+    void delete_my_message_reaction(
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType message_id,
+        @path in string emoji_name
+    );
+
+    @delete(path = "/channels/{channel_id}/messages/{message_id}/reactions/{emoji_name}/{user_id}")
+    void delete_user_message_reaction(
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType message_id,
+        @path in string emoji_name,
+        @path in SnowflakeType user_id
+    );
+
+    @post(path = "/channels/{channel_id}/messages/{message_id}/threads")
+    ThreadResponse create_thread_from_message(
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType message_id,
+        @body in CreateTextThreadWithMessageRequest body
+    );
+
+    @put(path = "/channels/{channel_id}/permissions/{overwrite_id}")
+    void set_channel_permission_overwrite(
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType overwrite_id,
+        @body in any body
+    );
+
+    @delete(path = "/channels/{channel_id}/permissions/{overwrite_id}")
+    void delete_channel_permission_overwrite(
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType overwrite_id
+    );
+
+    @get(path = "/channels/{channel_id}/pins")
+    sequence<MessageResponse> deprecated_list_pins(
+        @path in SnowflakeType channel_id
+    );
+
+    @put(path = "/channels/{channel_id}/pins/{message_id}")
+    void deprecated_create_pin(
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType message_id
+    );
+
+    @delete(path = "/channels/{channel_id}/pins/{message_id}")
+    void deprecated_delete_pin(
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType message_id
+    );
+
+    @get(path = "/channels/{channel_id}/polls/{message_id}/answers/{answer_id}")
+    PollAnswerDetailsResponse get_answer_voters(
+        @query in SnowflakeType after,
+        @query in int64 limit,
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType message_id,
+        @path in int64 answer_id
+    );
+
+    @post(path = "/channels/{channel_id}/polls/{message_id}/expire")
+    MessageResponse poll_expire(
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType message_id
+    );
+
+    @put(path = "/channels/{channel_id}/recipients/{user_id}")
+    string add_group_dm_user(
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType user_id,
+        @body in any body
+    );
+
+    @delete(path = "/channels/{channel_id}/recipients/{user_id}")
+    void delete_group_dm_user(
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType user_id
+    );
+
+    @post(path = "/channels/{channel_id}/send-soundboard-sound")
+    void send_soundboard_sound(
+        @path in SnowflakeType channel_id,
+        @body in SoundboardSoundSendRequest body
+    );
+
+    @get(path = "/channels/{channel_id}/thread-members")
+    sequence<ThreadMemberResponse> list_thread_members(
+        @query in boolean with_member,
+        @query in int64 limit,
+        @query in SnowflakeType after,
+        @path in SnowflakeType channel_id
+    );
+
+    @put(path = "/channels/{channel_id}/thread-members/@me")
+    void join_thread(
+        @path in SnowflakeType channel_id
+    );
+
+    @delete(path = "/channels/{channel_id}/thread-members/@me")
+    void leave_thread(
+        @path in SnowflakeType channel_id
+    );
+
+    @get(path = "/channels/{channel_id}/thread-members/{user_id}")
+    ThreadMemberResponse get_thread_member(
+        @query in boolean with_member,
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType user_id
+    );
+
+    @put(path = "/channels/{channel_id}/thread-members/{user_id}")
+    void add_thread_member(
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType user_id
+    );
+
+    @delete(path = "/channels/{channel_id}/thread-members/{user_id}")
+    void delete_thread_member(
+        @path in SnowflakeType channel_id,
+        @path in SnowflakeType user_id
+    );
+
+    @post(path = "/channels/{channel_id}/threads")
+    CreatedThreadResponse create_thread(
+        @path in SnowflakeType channel_id,
+        @body in string body
+    );
+
+    @get(path = "/channels/{channel_id}/threads/archived/private")
+    ThreadsResponse list_private_archived_threads(
+        @query in string before,
+        @query in int64 limit,
+        @path in SnowflakeType channel_id
+    );
+
+    @get(path = "/channels/{channel_id}/threads/archived/public")
+    ThreadsResponse list_public_archived_threads(
+        @query in string before,
+        @query in int64 limit,
+        @path in SnowflakeType channel_id
+    );
+
+    @get(path = "/channels/{channel_id}/threads/search")
+    ThreadSearchResponse thread_search(
+        @query in string name,
+        @query in int64 slop,
+        @query in SnowflakeType min_id,
+        @query in SnowflakeType max_id,
+        @query in string tag,
+        @query in ThreadSearchTagSetting tag_setting,
+        @query in boolean archived,
+        @query in ThreadSortingMode sort_by,
+        @query in SortingOrder sort_order,
+        @query in int64 limit,
+        @query in int64 offset,
+        @path in SnowflakeType channel_id
+    );
+
+    @post(path = "/channels/{channel_id}/typing")
+    TypingIndicatorResponse trigger_typing_indicator(
+        @path in SnowflakeType channel_id
+    );
+
+    @get(path = "/channels/{channel_id}/users/@me/threads/archived/private")
+    ThreadsResponse list_my_private_archived_threads(
+        @query in SnowflakeType before,
+        @query in int64 limit,
+        @path in SnowflakeType channel_id
+    );
+
+    @put(path = "/channels/{channel_id}/voice-status")
+    void update_voice_channel_status(
+        @path in SnowflakeType channel_id,
+        @body in any body
+    );
+
+    @get(path = "/channels/{channel_id}/webhooks")
+    sequence<string> list_channel_webhooks(
+        @path in SnowflakeType channel_id
+    );
+
+    @post(path = "/channels/{channel_id}/webhooks")
+    GuildIncomingWebhookResponse create_webhook(
+        @path in SnowflakeType channel_id,
+        @body in any body
+    );
+
+    @get(path = "/gateway")
+    GatewayResponse get_gateway(
+
+    );
+
+    @get(path = "/gateway/bot")
+    GatewayBotResponse get_bot_gateway(
+
+    );
+
+    @get(path = "/guilds/templates/{code}")
+    GuildTemplateResponse get_guild_template(
+        @path in string code
+    );
+
+    @get(path = "/guilds/{guild_id}")
+    GuildWithCountsResponse get_guild(
+        @query in boolean with_counts,
+        @path in SnowflakeType guild_id
+    );
+
+    @patch(path = "/guilds/{guild_id}")
+    GuildResponse update_guild(
+        @path in SnowflakeType guild_id,
+        @body in GuildPatchRequestPartial body
+    );
+
+    @get(path = "/guilds/{guild_id}/audit-logs")
+    GuildAuditLogResponse list_guild_audit_log_entries(
+        @query in SnowflakeType user_id,
+        @query in SnowflakeType target_id,
+        @query in AuditLogActionTypes action_type,
+        @query in SnowflakeType before,
+        @query in SnowflakeType after,
+        @query in int64 limit,
+        @path in SnowflakeType guild_id
+    );
+
+    @get(path = "/guilds/{guild_id}/auto-moderation/rules")
+    sequence<string> list_auto_moderation_rules(
+        @path in SnowflakeType guild_id
+    );
+
+    @post(path = "/guilds/{guild_id}/auto-moderation/rules")
+    string create_auto_moderation_rule(
+        @path in SnowflakeType guild_id,
+        @body in string body
+    );
+
+    @get(path = "/guilds/{guild_id}/auto-moderation/rules/{rule_id}")
+    string get_auto_moderation_rule(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType rule_id
+    );
+
+    @delete(path = "/guilds/{guild_id}/auto-moderation/rules/{rule_id}")
+    void delete_auto_moderation_rule(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType rule_id
+    );
+
+    @patch(path = "/guilds/{guild_id}/auto-moderation/rules/{rule_id}")
+    string update_auto_moderation_rule(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType rule_id,
+        @body in string body
+    );
+
+    @get(path = "/guilds/{guild_id}/bans")
+    sequence<GuildBanResponse> list_guild_bans(
+        @query in int64 limit,
+        @query in SnowflakeType before,
+        @query in SnowflakeType after,
+        @path in SnowflakeType guild_id
+    );
+
+    @get(path = "/guilds/{guild_id}/bans/{user_id}")
+    GuildBanResponse get_guild_ban(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType user_id
+    );
+
+    @put(path = "/guilds/{guild_id}/bans/{user_id}")
+    void ban_user_from_guild(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType user_id,
+        @body in BanUserFromGuildRequest body
+    );
+
+    @delete(path = "/guilds/{guild_id}/bans/{user_id}")
+    void unban_user_from_guild(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType user_id,
+        @body in UnbanUserFromGuildRequest body
+    );
+
+    @post(path = "/guilds/{guild_id}/bulk-ban")
+    BulkBanUsersResponse bulk_ban_users_from_guild(
+        @path in SnowflakeType guild_id,
+        @body in BulkBanUsersRequest body
+    );
+
+    @get(path = "/guilds/{guild_id}/channels")
+    sequence<string> list_guild_channels(
+        @path in SnowflakeType guild_id
+    );
+
+    @post(path = "/guilds/{guild_id}/channels")
+    GuildChannelResponse create_guild_channel(
+        @path in SnowflakeType guild_id,
+        @body in CreateGuildChannelRequest body
+    );
+
+    @patch(path = "/guilds/{guild_id}/channels")
+    void bulk_update_guild_channels(
+        @path in SnowflakeType guild_id,
+        @body in sequence<any> body
+    );
+
+    @get(path = "/guilds/{guild_id}/emojis")
+    sequence<EmojiResponse> list_guild_emojis(
+        @path in SnowflakeType guild_id
+    );
+
+    @post(path = "/guilds/{guild_id}/emojis")
+    EmojiResponse create_guild_emoji(
+        @path in SnowflakeType guild_id,
+        @body in any body
+    );
+
+    @get(path = "/guilds/{guild_id}/emojis/{emoji_id}")
+    EmojiResponse get_guild_emoji(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType emoji_id
+    );
+
+    @delete(path = "/guilds/{guild_id}/emojis/{emoji_id}")
+    void delete_guild_emoji(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType emoji_id
+    );
+
+    @patch(path = "/guilds/{guild_id}/emojis/{emoji_id}")
+    EmojiResponse update_guild_emoji(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType emoji_id,
+        @body in any body
+    );
+
+    @get(path = "/guilds/{guild_id}/integrations")
+    sequence<string> list_guild_integrations(
+        @path in SnowflakeType guild_id
+    );
+
+    @delete(path = "/guilds/{guild_id}/integrations/{integration_id}")
+    void delete_guild_integration(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType integration_id
+    );
+
+    @get(path = "/guilds/{guild_id}/invites")
+    sequence<string> list_guild_invites(
+        @path in SnowflakeType guild_id
+    );
+
+    @get(path = "/guilds/{guild_id}/members")
+    sequence<GuildMemberResponse> list_guild_members(
+        @query in int64 limit,
+        @query in int64 after,
+        @path in SnowflakeType guild_id
+    );
+
+    @patch(path = "/guilds/{guild_id}/members/@me")
+    PrivateGuildMemberResponse update_my_guild_member(
+        @path in SnowflakeType guild_id,
+        @body in any body
+    );
+
+    @get(path = "/guilds/{guild_id}/members/search")
+    sequence<GuildMemberResponse> search_guild_members(
+        @query in int64 limit,
+        @query in string query,
+        @path in SnowflakeType guild_id
+    );
+
+    @get(path = "/guilds/{guild_id}/members/{user_id}")
+    GuildMemberResponse get_guild_member(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType user_id
+    );
+
+    @put(path = "/guilds/{guild_id}/members/{user_id}")
+    GuildMemberResponse add_guild_member(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType user_id,
+        @body in BotAddGuildMemberRequest body
+    );
+
+    @delete(path = "/guilds/{guild_id}/members/{user_id}")
+    void delete_guild_member(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType user_id
+    );
+
+    @patch(path = "/guilds/{guild_id}/members/{user_id}")
+    GuildMemberResponse update_guild_member(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType user_id,
+        @body in any body
+    );
+
+    @put(path = "/guilds/{guild_id}/members/{user_id}/roles/{role_id}")
+    void add_guild_member_role(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType user_id,
+        @path in SnowflakeType role_id
+    );
+
+    @delete(path = "/guilds/{guild_id}/members/{user_id}/roles/{role_id}")
+    void delete_guild_member_role(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType user_id,
+        @path in SnowflakeType role_id
+    );
+
+    @get(path = "/guilds/{guild_id}/messages/search")
+    GuildSearchResponse guild_search(
+        @query in SortingMode sort_by,
+        @query in SortingOrder sort_order,
+        @query in string content,
+        @query in int64 slop,
+        @query in sequence<SnowflakeType> author_id,
+        @query in sequence<AuthorType> author_type,
+        @query in sequence<SnowflakeType> mentions,
+        @query in sequence<SnowflakeType> mentions_role_id,
+        @query in sequence<SnowflakeType> replied_to_user_id,
+        @query in sequence<SnowflakeType> replied_to_message_id,
+        @query in boolean mention_everyone,
+        @query in SnowflakeType min_id,
+        @query in SnowflakeType max_id,
+        @query in int64 limit,
+        @query in int64 offset,
+        @query in sequence<HasOption> has,
+        @query in sequence<string> link_hostname,
+        @query in sequence<string> embed_provider,
+        @query in sequence<SearchableEmbedType> embed_type,
+        @query in sequence<string> attachment_extension,
+        @query in sequence<string> attachment_filename,
+        @query in boolean pinned,
+        @query in boolean include_nsfw,
+        @query in sequence<SnowflakeType> channel_id,
+        @path in SnowflakeType guild_id
+    );
+
+    @get(path = "/guilds/{guild_id}/new-member-welcome")
+    GuildHomeSettingsResponse get_guild_new_member_welcome(
+        @path in SnowflakeType guild_id
+    );
+
+    @get(path = "/guilds/{guild_id}/onboarding")
+    UserGuildOnboardingResponse get_guilds_onboarding(
+        @path in SnowflakeType guild_id
+    );
+
+    @put(path = "/guilds/{guild_id}/onboarding")
+    GuildOnboardingResponse put_guilds_onboarding(
+        @path in SnowflakeType guild_id,
+        @body in UpdateGuildOnboardingRequest body
+    );
+
+    @get(path = "/guilds/{guild_id}/preview")
+    GuildPreviewResponse get_guild_preview(
+        @path in SnowflakeType guild_id
+    );
+
+    @get(path = "/guilds/{guild_id}/prune")
+    GuildPruneResponse preview_prune_guild(
+        @query in int64 days,
+        @query in string include_roles,
+        @path in SnowflakeType guild_id
+    );
+
+    @post(path = "/guilds/{guild_id}/prune")
+    GuildPruneResponse prune_guild(
+        @path in SnowflakeType guild_id,
+        @body in PruneGuildRequest body
+    );
+
+    @get(path = "/guilds/{guild_id}/regions")
+    sequence<VoiceRegionResponse> list_guild_voice_regions(
+        @path in SnowflakeType guild_id
+    );
+
+    @get(path = "/guilds/{guild_id}/requests")
+    GuildJoinRequestsListResponse get_guild_join_requests(
+        @query in string status,
+        @query in int64 limit,
+        @query in SnowflakeType before,
+        @query in SnowflakeType after,
+        @path in SnowflakeType guild_id
+    );
+
+    @patch(path = "/guilds/{guild_id}/requests/{request_id}")
+    GuildJoinRequestResponse action_guild_join_request(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType request_id,
+        @body in any body
+    );
+
+    @get(path = "/guilds/{guild_id}/roles")
+    sequence<GuildRoleResponse> list_guild_roles(
+        @path in SnowflakeType guild_id
+    );
+
+    @post(path = "/guilds/{guild_id}/roles")
+    GuildRoleResponse create_guild_role(
+        @path in SnowflakeType guild_id,
+        @body in CreateRoleRequest body
+    );
+
+    @patch(path = "/guilds/{guild_id}/roles")
+    sequence<GuildRoleResponse> bulk_update_guild_roles(
+        @path in SnowflakeType guild_id,
+        @body in sequence<UpdateRolePositionsRequest> body
+    );
+
+    @get(path = "/guilds/{guild_id}/roles/member-counts")
+    map<string, int64> guild_role_member_counts(
+        @path in SnowflakeType guild_id
+    );
+
+    @get(path = "/guilds/{guild_id}/roles/{role_id}")
+    GuildRoleResponse get_guild_role(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType role_id
+    );
+
+    @delete(path = "/guilds/{guild_id}/roles/{role_id}")
+    void delete_guild_role(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType role_id
+    );
+
+    @patch(path = "/guilds/{guild_id}/roles/{role_id}")
+    GuildRoleResponse update_guild_role(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType role_id,
+        @body in UpdateRoleRequestPartial body
+    );
+
+    @get(path = "/guilds/{guild_id}/scheduled-events")
+    sequence<string> list_guild_scheduled_events(
+        @query in boolean with_user_count,
+        @path in SnowflakeType guild_id
+    );
+
+    @post(path = "/guilds/{guild_id}/scheduled-events")
+    string create_guild_scheduled_event(
+        @path in SnowflakeType guild_id,
+        @body in string body
+    );
+
+    @get(path = "/guilds/{guild_id}/scheduled-events/{guild_scheduled_event_id}")
+    string get_guild_scheduled_event(
+        @query in boolean with_user_count,
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType guild_scheduled_event_id
+    );
+
+    @delete(path = "/guilds/{guild_id}/scheduled-events/{guild_scheduled_event_id}")
+    void delete_guild_scheduled_event(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType guild_scheduled_event_id
+    );
+
+    @patch(path = "/guilds/{guild_id}/scheduled-events/{guild_scheduled_event_id}")
+    string update_guild_scheduled_event(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType guild_scheduled_event_id,
+        @body in string body
+    );
+
+    @get(path = "/guilds/{guild_id}/scheduled-events/{guild_scheduled_event_id}/users")
+    sequence<ScheduledEventUserResponse> list_guild_scheduled_event_users(
+        @query in boolean with_member,
+        @query in int64 limit,
+        @query in SnowflakeType before,
+        @query in SnowflakeType after,
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType guild_scheduled_event_id
+    );
+
+    @get(path = "/guilds/{guild_id}/soundboard-sounds")
+    ListGuildSoundboardSoundsResponse list_guild_soundboard_sounds(
+        @path in SnowflakeType guild_id
+    );
+
+    @post(path = "/guilds/{guild_id}/soundboard-sounds")
+    SoundboardSoundResponse create_guild_soundboard_sound(
+        @path in SnowflakeType guild_id,
+        @body in SoundboardCreateRequest body
+    );
+
+    @get(path = "/guilds/{guild_id}/soundboard-sounds/{sound_id}")
+    SoundboardSoundResponse get_guild_soundboard_sound(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType sound_id
+    );
+
+    @delete(path = "/guilds/{guild_id}/soundboard-sounds/{sound_id}")
+    void delete_guild_soundboard_sound(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType sound_id
+    );
+
+    @patch(path = "/guilds/{guild_id}/soundboard-sounds/{sound_id}")
+    SoundboardSoundResponse update_guild_soundboard_sound(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType sound_id,
+        @body in SoundboardPatchRequestPartial body
+    );
+
+    @get(path = "/guilds/{guild_id}/stickers")
+    sequence<GuildStickerResponse> list_guild_stickers(
+        @path in SnowflakeType guild_id
+    );
+
+    @post(path = "/guilds/{guild_id}/stickers")
+    GuildStickerResponse create_guild_sticker(
+        @path in SnowflakeType guild_id
+    );
+
+    @get(path = "/guilds/{guild_id}/stickers/{sticker_id}")
+    GuildStickerResponse get_guild_sticker(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType sticker_id
+    );
+
+    @delete(path = "/guilds/{guild_id}/stickers/{sticker_id}")
+    void delete_guild_sticker(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType sticker_id
+    );
+
+    @patch(path = "/guilds/{guild_id}/stickers/{sticker_id}")
+    GuildStickerResponse update_guild_sticker(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType sticker_id,
+        @body in any body
+    );
+
+    @get(path = "/guilds/{guild_id}/templates")
+    sequence<GuildTemplateResponse> list_guild_templates(
+        @path in SnowflakeType guild_id
+    );
+
+    @post(path = "/guilds/{guild_id}/templates")
+    GuildTemplateResponse create_guild_template(
+        @path in SnowflakeType guild_id,
+        @body in any body
+    );
+
+    @put(path = "/guilds/{guild_id}/templates/{code}")
+    GuildTemplateResponse sync_guild_template(
+        @path in SnowflakeType guild_id,
+        @path in string code
+    );
+
+    @delete(path = "/guilds/{guild_id}/templates/{code}")
+    GuildTemplateResponse delete_guild_template(
+        @path in SnowflakeType guild_id,
+        @path in string code
+    );
+
+    @patch(path = "/guilds/{guild_id}/templates/{code}")
+    GuildTemplateResponse update_guild_template(
+        @path in SnowflakeType guild_id,
+        @path in string code,
+        @body in any body
+    );
+
+    @get(path = "/guilds/{guild_id}/threads/active")
+    ThreadsResponse get_active_guild_threads(
+        @path in SnowflakeType guild_id
+    );
+
+    @get(path = "/guilds/{guild_id}/vanity-url")
+    VanityURLResponse get_guild_vanity_url(
+        @path in SnowflakeType guild_id
+    );
+
+    @get(path = "/guilds/{guild_id}/voice-states/@me")
+    VoiceStateResponse get_self_voice_state(
+        @path in SnowflakeType guild_id
+    );
+
+    @patch(path = "/guilds/{guild_id}/voice-states/@me")
+    void update_self_voice_state(
+        @path in SnowflakeType guild_id,
+        @body in UpdateSelfVoiceStateRequestPartial body
+    );
+
+    @get(path = "/guilds/{guild_id}/voice-states/{user_id}")
+    VoiceStateResponse get_voice_state(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType user_id
+    );
+
+    @patch(path = "/guilds/{guild_id}/voice-states/{user_id}")
+    void update_voice_state(
+        @path in SnowflakeType guild_id,
+        @path in SnowflakeType user_id,
+        @body in UpdateVoiceStateRequestPartial body
+    );
+
+    @get(path = "/guilds/{guild_id}/webhooks")
+    sequence<string> get_guild_webhooks(
+        @path in SnowflakeType guild_id
+    );
+
+    @get(path = "/guilds/{guild_id}/welcome-screen")
+    GuildWelcomeScreenResponse get_guild_welcome_screen(
+        @path in SnowflakeType guild_id
+    );
+
+    @patch(path = "/guilds/{guild_id}/welcome-screen")
+    GuildWelcomeScreenResponse update_guild_welcome_screen(
+        @path in SnowflakeType guild_id,
+        @body in WelcomeScreenPatchRequestPartial body
+    );
+
+    @get(path = "/guilds/{guild_id}/widget")
+    WidgetSettingsResponse get_guild_widget_settings(
+        @path in SnowflakeType guild_id
+    );
+
+    @patch(path = "/guilds/{guild_id}/widget")
+    WidgetSettingsResponse update_guild_widget_settings(
+        @path in SnowflakeType guild_id,
+        @body in any body
+    );
+
+    @get(path = "/guilds/{guild_id}/widget.json")
+    WidgetResponse get_guild_widget(
+        @path in SnowflakeType guild_id
+    );
+
+    @get(path = "/guilds/{guild_id}/widget.png")
+    void get_guild_widget_png(
+        @query in WidgetImageStyles style,
+        @path in SnowflakeType guild_id
+    );
+
+    @post(path = "/interactions/{interaction_id}/{interaction_token}/callback")
+    InteractionCallbackResponse create_interaction_response(
+        @query in boolean with_response,
+        @path in SnowflakeType interaction_id,
+        @path in string interaction_token,
+        @body in string body
+    );
+
+    @get(path = "/invites/{code}")
+    string invite_resolve(
+        @query in boolean with_counts,
+        @query in SnowflakeType guild_scheduled_event_id,
+        @path in string code
+    );
+
+    @delete(path = "/invites/{code}")
+    string invite_revoke(
+        @path in string code
+    );
+
+    @get(path = "/invites/{code}/target-users")
+    void get_invite_target_users(
+        @path in string code
+    );
+
+    @put(path = "/invites/{code}/target-users")
+    void update_invite_target_users(
+        @path in string code
+    );
+
+    @get(path = "/invites/{code}/target-users/job-status")
+    TargetUsersJobStatusResponse get_invite_target_users_job_status(
+        @path in string code
+    );
+
+    @put(path = "/lobbies")
+    LobbyResponse create_or_join_lobby(
+        @body in any body
+    );
+
+    @post(path = "/lobbies")
+    LobbyResponse create_lobby(
+        @body in any body
+    );
+
+    @get(path = "/lobbies/{lobby_id}")
+    LobbyResponse get_lobby(
+        @path in SnowflakeType lobby_id
+    );
+
+    @patch(path = "/lobbies/{lobby_id}")
+    LobbyResponse edit_lobby(
+        @path in SnowflakeType lobby_id,
+        @body in any body
+    );
+
+    @patch(path = "/lobbies/{lobby_id}/channel-linking")
+    LobbyResponse edit_lobby_channel_link(
+        @path in SnowflakeType lobby_id,
+        @body in any body
+    );
+
+    @delete(path = "/lobbies/{lobby_id}/members/@me")
+    void leave_lobby(
+        @path in SnowflakeType lobby_id
+    );
+
+    @post(path = "/lobbies/{lobby_id}/members/@me/invites")
+    LobbyGuildInviteResponse create_linked_lobby_guild_invite_for_self(
+        @path in SnowflakeType lobby_id
+    );
+
+    @post(path = "/lobbies/{lobby_id}/members/bulk")
+    sequence<LobbyMemberResponse> bulk_update_lobby_members(
+        @path in SnowflakeType lobby_id,
+        @body in sequence<BulkLobbyMemberRequest> body
+    );
+
+    @put(path = "/lobbies/{lobby_id}/members/{user_id}")
+    LobbyMemberResponse add_lobby_member(
+        @path in SnowflakeType lobby_id,
+        @path in SnowflakeType user_id,
+        @body in any body
+    );
+
+    @delete(path = "/lobbies/{lobby_id}/members/{user_id}")
+    void delete_lobby_member(
+        @path in SnowflakeType lobby_id,
+        @path in SnowflakeType user_id
+    );
+
+    @post(path = "/lobbies/{lobby_id}/members/{user_id}/invites")
+    LobbyGuildInviteResponse create_linked_lobby_guild_invite_for_user(
+        @path in SnowflakeType lobby_id,
+        @path in SnowflakeType user_id
+    );
+
+    @get(path = "/lobbies/{lobby_id}/messages")
+    sequence<LobbyMessageResponse> get_lobby_messages(
+        @query in int64 limit,
+        @path in SnowflakeType lobby_id
+    );
+
+    @post(path = "/lobbies/{lobby_id}/messages")
+    LobbyMessageResponse create_lobby_message(
+        @path in SnowflakeType lobby_id,
+        @body in SDKMessageRequest body
+    );
+
+    @put(path = "/lobbies/{lobby_id}/messages/{message_id}/moderation-metadata")
+    void update_lobby_message_external_moderation_metadata(
+        @path in SnowflakeType lobby_id,
+        @path in SnowflakeType message_id,
+        @body in map<string, string> body
+    );
+
+    @get(path = "/oauth2/@me")
+    OAuth2GetAuthorizationResponse get_my_oauth2_authorization(
+
+    );
+
+    @get(path = "/oauth2/applications/@me")
+    PrivateApplicationResponse get_my_oauth2_application(
+
+    );
+
+    @get(path = "/oauth2/keys")
+    OAuth2GetKeys get_public_keys(
+
+    );
+
+    @get(path = "/oauth2/userinfo")
+    OAuth2GetOpenIDConnectUserInfoResponse get_openid_connect_userinfo(
+
+    );
+
+    @put(path = "/partner-sdk/dms/{user_id_1}/{user_id_2}/messages/{message_id}/moderation-metadata")
+    void update_user_message_external_moderation_metadata(
+        @path in SnowflakeType user_id_1,
+        @path in SnowflakeType user_id_2,
+        @path in SnowflakeType message_id,
+        @body in map<string, string> body
+    );
+
+    @post(path = "/partner-sdk/provisional-accounts/unmerge")
+    void partner_sdk_unmerge_provisional_account(
+        @body in any body
+    );
+
+    @post(path = "/partner-sdk/provisional-accounts/unmerge/bot")
+    void bot_partner_sdk_unmerge_provisional_account(
+        @body in any body
+    );
+
+    @post(path = "/partner-sdk/token")
+    ProvisionalTokenResponse partner_sdk_token(
+        @body in any body
+    );
+
+    @post(path = "/partner-sdk/token/bot")
+    ProvisionalTokenResponse bot_partner_sdk_token(
+        @body in any body
+    );
+
+    @get(path = "/soundboard-default-sounds")
+    sequence<SoundboardSoundResponse> get_soundboard_default_sounds(
+
+    );
+
+    @post(path = "/stage-instances")
+    StageInstanceResponse create_stage_instance(
+        @body in any body
+    );
+
+    @get(path = "/stage-instances/{channel_id}")
+    StageInstanceResponse get_stage_instance(
+        @path in SnowflakeType channel_id
+    );
+
+    @delete(path = "/stage-instances/{channel_id}")
+    void delete_stage_instance(
+        @path in SnowflakeType channel_id
+    );
+
+    @patch(path = "/stage-instances/{channel_id}")
+    StageInstanceResponse update_stage_instance(
+        @path in SnowflakeType channel_id,
+        @body in any body
+    );
+
+    @get(path = "/sticker-packs")
+    StickerPackCollectionResponse list_sticker_packs(
+
+    );
+
+    @get(path = "/sticker-packs/{pack_id}")
+    StickerPackResponse get_sticker_pack(
+        @path in SnowflakeType pack_id
+    );
+
+    @get(path = "/stickers/{sticker_id}")
+    string get_sticker(
+        @path in SnowflakeType sticker_id
+    );
+
+    @get(path = "/users/@me")
+    UserPIIResponse get_my_user(
+
+    );
+
+    @patch(path = "/users/@me")
+    UserPIIResponse update_my_user(
+        @body in BotAccountPatchRequest body
+    );
+
+    @get(path = "/users/@me/applications/{application_id}/entitlements")
+    sequence<EntitlementResponse> get_current_user_application_entitlements(
+        @query in string sku_ids,
+        @query in boolean exclude_consumed,
+        @path in SnowflakeType application_id
+    );
+
+    @get(path = "/users/@me/applications/{application_id}/role-connection")
+    ApplicationUserRoleConnectionResponse get_application_user_role_connection(
+        @path in SnowflakeType application_id
+    );
+
+    @put(path = "/users/@me/applications/{application_id}/role-connection")
+    ApplicationUserRoleConnectionResponse update_application_user_role_connection(
+        @path in SnowflakeType application_id,
+        @body in UpdateApplicationUserRoleConnectionRequest body
+    );
+
+    @delete(path = "/users/@me/applications/{application_id}/role-connection")
+    void delete_application_user_role_connection(
+        @path in SnowflakeType application_id
+    );
+
+    @post(path = "/users/@me/channels")
+    string create_dm(
+        @body in CreatePrivateChannelRequest body
+    );
+
+    @get(path = "/users/@me/connections")
+    sequence<ConnectedAccountResponse> list_my_connections(
+
+    );
+
+    @get(path = "/users/@me/guilds")
+    sequence<MyGuildResponse> list_my_guilds(
+        @query in SnowflakeType before,
+        @query in SnowflakeType after,
+        @query in int64 limit,
+        @query in boolean with_counts
+    );
+
+    @delete(path = "/users/@me/guilds/{guild_id}")
+    void leave_guild(
+        @path in SnowflakeType guild_id
+    );
+
+    @get(path = "/users/@me/guilds/{guild_id}/member")
+    PrivateGuildMemberResponse get_my_guild_member(
+        @path in SnowflakeType guild_id
+    );
+
+    @get(path = "/users/{user_id}")
+    UserResponse get_user(
+        @path in SnowflakeType user_id
+    );
+
+    @get(path = "/voice/regions")
+    sequence<VoiceRegionResponse> list_voice_regions(
+
+    );
+
+    @get(path = "/webhooks/{webhook_id}")
+    string get_webhook(
+        @path in SnowflakeType webhook_id
+    );
+
+    @delete(path = "/webhooks/{webhook_id}")
+    void delete_webhook(
+        @path in SnowflakeType webhook_id
+    );
+
+    @patch(path = "/webhooks/{webhook_id}")
+    string update_webhook(
+        @path in SnowflakeType webhook_id,
+        @body in any body
+    );
+
+    @get(path = "/webhooks/{webhook_id}/{webhook_token}")
+    string get_webhook_by_token(
+        @path in SnowflakeType webhook_id,
+        @path in string webhook_token
+    );
+
+    @post(path = "/webhooks/{webhook_id}/{webhook_token}")
+    MessageResponse execute_webhook(
+        @query in boolean wait,
+        @query in SnowflakeType thread_id,
+        @query in boolean with_components,
+        @path in SnowflakeType webhook_id,
+        @path in string webhook_token,
+        @body in string body
+    );
+
+    @delete(path = "/webhooks/{webhook_id}/{webhook_token}")
+    void delete_webhook_by_token(
+        @path in SnowflakeType webhook_id,
+        @path in string webhook_token
+    );
+
+    @patch(path = "/webhooks/{webhook_id}/{webhook_token}")
+    string update_webhook_by_token(
+        @path in SnowflakeType webhook_id,
+        @path in string webhook_token,
+        @body in any body
+    );
+
+    @post(path = "/webhooks/{webhook_id}/{webhook_token}/github")
+    void execute_github_compatible_webhook(
+        @query in boolean wait,
+        @query in SnowflakeType thread_id,
+        @path in SnowflakeType webhook_id,
+        @path in string webhook_token,
+        @body in GithubWebhook body
+    );
+
+    @get(path = "/webhooks/{webhook_id}/{webhook_token}/messages/@original")
+    MessageResponse get_original_webhook_message(
+        @query in SnowflakeType thread_id,
+        @path in SnowflakeType webhook_id,
+        @path in string webhook_token
+    );
+
+    @delete(path = "/webhooks/{webhook_id}/{webhook_token}/messages/@original")
+    void delete_original_webhook_message(
+        @query in SnowflakeType thread_id,
+        @path in SnowflakeType webhook_id,
+        @path in string webhook_token
+    );
+
+    @patch(path = "/webhooks/{webhook_id}/{webhook_token}/messages/@original")
+    MessageResponse update_original_webhook_message(
+        @query in SnowflakeType thread_id,
+        @query in boolean with_components,
+        @path in SnowflakeType webhook_id,
+        @path in string webhook_token,
+        @body in IncomingWebhookUpdateRequestPartial body
+    );
+
+    @get(path = "/webhooks/{webhook_id}/{webhook_token}/messages/{message_id}")
+    MessageResponse get_webhook_message(
+        @query in SnowflakeType thread_id,
+        @path in SnowflakeType webhook_id,
+        @path in string webhook_token,
+        @path in SnowflakeType message_id
+    );
+
+    @delete(path = "/webhooks/{webhook_id}/{webhook_token}/messages/{message_id}")
+    void delete_webhook_message(
+        @query in SnowflakeType thread_id,
+        @path in SnowflakeType webhook_id,
+        @path in string webhook_token,
+        @path in SnowflakeType message_id
+    );
+
+    @patch(path = "/webhooks/{webhook_id}/{webhook_token}/messages/{message_id}")
+    MessageResponse update_webhook_message(
+        @query in SnowflakeType thread_id,
+        @query in boolean with_components,
+        @path in SnowflakeType webhook_id,
+        @path in string webhook_token,
+        @path in SnowflakeType message_id,
+        @body in IncomingWebhookUpdateRequestPartial body
+    );
+
+    @post(path = "/webhooks/{webhook_id}/{webhook_token}/slack")
+    string execute_slack_compatible_webhook(
+        @query in boolean wait,
+        @query in SnowflakeType thread_id,
+        @path in SnowflakeType webhook_id,
+        @path in string webhook_token,
+        @body in SlackWebhook body
+    );
+
+};
