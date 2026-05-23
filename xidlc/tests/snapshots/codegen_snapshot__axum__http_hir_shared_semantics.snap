@@ -69,25 +69,25 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+            let ::xidl_rust_axum::axum::extract::Path(xidl_path) = <::xidl_rust_axum::axum::extract::Path<
                 ReportApiGetReportPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let ReportApiGetReportPath { id } = path;
-            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+            let ReportApiGetReportPath { id } = xidl_path;
+            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
                 ReportApiGetReportRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let ReportApiGetReportRequestInQuery { lang } = query;
-            let headers = &parts.headers;
-            let _ = headers;
-            let trace_id: String = match headers.get("X-Trace-Id") {
+            let ReportApiGetReportRequestInQuery { lang } = xidl_query;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
+            let trace_id: String = match xidl_headers.get("X-Trace-Id") {
                 Some(header_value) => {
                     let header_str = header_value
                         .to_str()

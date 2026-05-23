@@ -72,16 +72,16 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
                 HttpEdgeCasesServiceHealthRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpEdgeCasesServiceHealthRequestInQuery { trace } = query;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpEdgeCasesServiceHealthRequestInQuery { trace } = xidl_query;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { trace })
         }
     }
@@ -123,24 +123,24 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+            let ::xidl_rust_axum::axum::extract::Path(xidl_path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpEdgeCasesServiceGetUserPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpEdgeCasesServiceGetUserPath { uid } = path;
-            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+            let HttpEdgeCasesServiceGetUserPath { uid } = xidl_path;
+            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
                 HttpEdgeCasesServiceGetUserRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpEdgeCasesServiceGetUserRequestInQuery { locale } = query;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpEdgeCasesServiceGetUserRequestInQuery { locale } = xidl_query;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { uid, locale })
         }
     }
@@ -168,16 +168,16 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+            let ::xidl_rust_axum::axum::extract::Path(xidl_path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpEdgeCasesServiceDedupUserPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpEdgeCasesServiceDedupUserPath { id } = path;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpEdgeCasesServiceDedupUserPath { id } = xidl_path;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { id })
         }
     }
@@ -207,16 +207,16 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+            let ::xidl_rust_axum::axum::extract::Path(xidl_path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpEdgeCasesServiceGetItemPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpEdgeCasesServiceGetItemPath { order_id, item_id } = path;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpEdgeCasesServiceGetItemPath { order_id, item_id } = xidl_path;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { order_id, item_id })
         }
     }
@@ -257,16 +257,16 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
                 HttpEdgeCasesServiceLookupRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpEdgeCasesServiceLookupRequestInQuery { keyword, page_size } = query;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpEdgeCasesServiceLookupRequestInQuery { keyword, page_size } = xidl_query;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { keyword, page_size })
         }
     }

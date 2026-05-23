@@ -81,22 +81,25 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let headers = &parts.headers;
-            let _ = headers;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             if !::xidl_rust_axum::http::content_type_matches(
-                headers,
+                xidl_headers,
                 "application/json",
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
+                    body,
+                    usize::MAX,
+                )
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-            let body: HttpStreamSseServiceSetAttributeOnlineRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+            let xidl_body: HttpStreamSseServiceSetAttributeOnlineRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
-                .from_slice(&body_bytes)?;
-            let HttpStreamSseServiceSetAttributeOnlineRequestInBody { online } = body;
+                .from_slice(&xidl_body_bytes)?;
+            let HttpStreamSseServiceSetAttributeOnlineRequestInBody { online } = xidl_body;
             Ok(Self { online })
         }
     }

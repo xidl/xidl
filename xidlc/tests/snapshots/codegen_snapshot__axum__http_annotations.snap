@@ -87,24 +87,24 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+            let ::xidl_rust_axum::axum::extract::Path(xidl_path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpAnnoServiceGetUserPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpAnnoServiceGetUserPath { id } = path;
-            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+            let HttpAnnoServiceGetUserPath { id } = xidl_path;
+            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
                 HttpAnnoServiceGetUserRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpAnnoServiceGetUserRequestInQuery { lang } = query;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpAnnoServiceGetUserRequestInQuery { lang } = xidl_query;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { id, lang })
         }
     }
@@ -141,22 +141,25 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let headers = &parts.headers;
-            let _ = headers;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             if !::xidl_rust_axum::http::content_type_matches(
-                headers,
+                xidl_headers,
                 "application/json",
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
+                    body,
+                    usize::MAX,
+                )
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-            let body: HttpAnnoServiceCreateUserRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+            let xidl_body: HttpAnnoServiceCreateUserRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
-                .from_slice(&body_bytes)?;
-            let HttpAnnoServiceCreateUserRequestInBody { name, age } = body;
+                .from_slice(&xidl_body_bytes)?;
+            let HttpAnnoServiceCreateUserRequestInBody { name, age } = xidl_body;
             Ok(Self { name, age })
         }
     }
@@ -189,16 +192,16 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
                 HttpAnnoServiceGetNameRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpAnnoServiceGetNameRequestInQuery { name } = query;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpAnnoServiceGetNameRequestInQuery { name } = xidl_query;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { name })
         }
     }
@@ -237,16 +240,16 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
                 HttpAnnoServiceSearchUserRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpAnnoServiceSearchUserRequestInQuery { keyword, page } = query;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpAnnoServiceSearchUserRequestInQuery { keyword, page } = xidl_query;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { keyword, page })
         }
     }
@@ -288,24 +291,24 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+            let ::xidl_rust_axum::axum::extract::Path(xidl_path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpAnnoServiceGetUserAliasPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpAnnoServiceGetUserAliasPath { user_id } = path;
-            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+            let HttpAnnoServiceGetUserAliasPath { user_id } = xidl_path;
+            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
                 HttpAnnoServiceGetUserAliasRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
             >>::from_request_parts(&mut parts, state)
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let HttpAnnoServiceGetUserAliasRequestInQuery { locale } = query;
-            let headers = &parts.headers;
-            let _ = headers;
+            let HttpAnnoServiceGetUserAliasRequestInQuery { locale } = xidl_query;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             Ok(Self { user_id, locale })
         }
     }
@@ -341,22 +344,25 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let headers = &parts.headers;
-            let _ = headers;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             if !::xidl_rust_axum::http::content_type_matches(
-                headers,
+                xidl_headers,
                 "application/json",
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
+                    body,
+                    usize::MAX,
+                )
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-            let body: HttpAnnoServiceAddRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+            let xidl_body: HttpAnnoServiceAddRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
-                .from_slice(&body_bytes)?;
-            let HttpAnnoServiceAddRequestInBody { a, b } = body;
+                .from_slice(&xidl_body_bytes)?;
+            let HttpAnnoServiceAddRequestInBody { a, b } = xidl_body;
             Ok(Self { a, b })
         }
     }
@@ -420,22 +426,25 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let headers = &parts.headers;
-            let _ = headers;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
             if !::xidl_rust_axum::http::content_type_matches(
-                headers,
+                xidl_headers,
                 "application/json",
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
+                    body,
+                    usize::MAX,
+                )
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-            let body: HttpAnnoServiceBumpRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+            let xidl_body: HttpAnnoServiceBumpRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
-                .from_slice(&body_bytes)?;
-            let HttpAnnoServiceBumpRequestInBody { value } = body;
+                .from_slice(&xidl_body_bytes)?;
+            let HttpAnnoServiceBumpRequestInBody { value } = xidl_body;
             Ok(Self { value })
         }
     }
