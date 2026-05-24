@@ -2,9 +2,9 @@ pub mod doc;
 pub mod filter;
 
 pub use doc::doc_lines_from_annotations;
+pub use filter::rust_format_filter;
 #[cfg(feature = "gen-typescript")]
 pub use filter::typescript_format_filter;
-pub use filter::{format_timestamp_filter, rust_format_filter};
 
 use convert_case::{Case, Casing};
 

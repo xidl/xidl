@@ -23,9 +23,10 @@ struct PythonSpecTemplate {
 pub(crate) fn render_spec(
     spec: &hir::Specification,
     module_name: &str,
-    _properties: &ParserProperties,
+    properties: &ParserProperties,
 ) -> IdlcResult<String> {
-    let renderer = PythonRenderer::new()?;
+    let mut renderer = PythonRenderer::new()?;
+    renderer.extend(properties);
     let mut blocks = Vec::new();
     for def in &spec.0 {
         render_definition(&mut blocks, def, &[])?;

@@ -12,7 +12,7 @@ pub(crate) fn render_spec(
     let mut ctx = GoRenderContext::new(package_name.to_string(), properties.clone());
     let blocks = definition::render_spec(&mut ctx, spec)?;
     let output = ctx.finish(blocks);
-    let renderer = GoRenderer::new()?;
+    let renderer = GoRenderer::new(properties)?;
     renderer.render_spec(&output)
 }
 

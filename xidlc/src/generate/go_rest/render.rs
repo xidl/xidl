@@ -48,7 +48,7 @@ fn load_template(name: &str) -> std::result::Result<String, Error> {
     })
 }
 
-fn format_go_source(source: &str) -> IdlcResult<String> {
+pub(crate) fn format_go_source(source: &str) -> IdlcResult<String> {
     let Ok(mut child) = Command::new("gofmt")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())

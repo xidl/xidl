@@ -14,7 +14,7 @@ pub use render::PythonRestRenderer;
 pub fn generate(
     rest_hir: xidl_parser::rest_hir::RestHirDocument,
     input_path: &Path,
-    _props: ParserProperties,
+    props: ParserProperties,
 ) -> IdlcResult<Vec<Artifact>> {
     let spec = rest_hir.spec.clone();
     let stem = input_path
@@ -27,17 +27,22 @@ pub fn generate(
         .package
         .clone()
         .unwrap_or_else(|| stem.to_case(Case::Snake).replace('-', "_"));
-    let content = spec::render_spec(&spec, &module_name, &rest_hir)?;
+    let content = spec::render_spec(&spec, &module_name, &rest_hir, &props)?;
 
     let mut artifacts = vec![Artifact::new_file(ArtifactFile {
         path: filename,
         content,
     })];
 
+    let enable_metadata = props
+        .get("enable_metadata")
+        .cloned()
+        .unwrap_or_else(|| serde_json::Value::from(true));
+
     let non_interface = strip_interfaces(spec);
     if !non_interface.0.is_empty() {
         let props = hashmap! {
-            "enable_metadata" => serde_json::Value::from(false),
+            "enable_metadata" => enable_metadata,
             "package" => serde_json::Value::from(module_name)
         };
         artifacts.push(Artifact::new_hir(ArtifactHir {

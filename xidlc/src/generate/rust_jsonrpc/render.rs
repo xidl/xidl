@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::utils::{format_timestamp_filter, rust_format_filter};
+use crate::generate::utils::rust_format_filter;
 use include_dir::{Dir, include_dir};
 use minijinja::{Environment, Error, ErrorKind};
 use serde::Serialize;
@@ -27,7 +27,6 @@ impl JsonRpcRenderer {
         env.set_loader(|name| load_template(name).map(Some));
         env.add_filter("rust", rust_format_filter);
         env.add_filter("rustfmt", rust_format_filter);
-        env.add_filter("fmt_timestamp", format_timestamp_filter);
         Ok(Self { env })
     }
 

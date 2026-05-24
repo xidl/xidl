@@ -16,7 +16,7 @@ use xidl_parser::hir::ParserProperties;
 pub fn generate(
     rest_hir: xidl_parser::rest_hir::RestHirDocument,
     input_path: &Path,
-    _props: HashMap<String, serde_json::Value>,
+    props: HashMap<String, serde_json::Value>,
 ) -> IdlcResult<Vec<Artifact>> {
     let spec = rest_hir.spec.clone();
     let stem = input_path
@@ -30,19 +30,24 @@ pub fn generate(
         .map(go_package_name)
         .unwrap_or_else(|| go_package_name(stem));
     let filename = format!("{}_http.go", package);
-    let content = spec::render_spec(&spec, &package, &rest_hir)?;
+    let content = spec::render_spec(&spec, &package, &rest_hir, &props)?;
 
     let mut artifacts = vec![Artifact::new_file(ArtifactFile {
         path: filename,
         content,
     })];
 
+    let enable_metadata = props
+        .get("enable_metadata")
+        .cloned()
+        .unwrap_or_else(|| serde_json::Value::from(true));
+
     let non_interface = definition::strip_interfaces(spec);
     if !non_interface.0.is_empty() {
         let props = hashmap! {
             "enable_interfaces" => false,
             "enable_render_header" => false,
-            "enable_metadata" => false,
+            "enable_metadata" => enable_metadata,
             "package" => serde_json::Value::from(package)
         };
         artifacts.push(Artifact::new_hir(ArtifactHir {

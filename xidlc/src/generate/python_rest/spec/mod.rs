@@ -33,8 +33,10 @@ pub(crate) fn render_spec(
     spec: &hir::Specification,
     module_name: &str,
     rest_hir: &RestHirDocument,
+    properties: &xidl_parser::hir::ParserProperties,
 ) -> IdlcResult<String> {
-    let renderer = PythonRestRenderer::new()?;
+    let mut renderer = PythonRestRenderer::new()?;
+    renderer.extend(properties);
     let mut blocks = Vec::new();
     let mut imports = PythonRestImports {
         read_json_value: false,
