@@ -6,7 +6,6 @@ use crate::jsonrpc::{Artifact, ArtifactKind, Codegen, CodegenInput};
 use crate::macros::hashmap;
 use std::collections::HashMap;
 use std::path::Path;
-use std::time::{SystemTime, UNIX_EPOCH};
 
 pub struct Generator {
     lang: String,
@@ -26,16 +25,8 @@ impl Generator {
         tracing::info!("generate for idl");
         DiagnosticRunner::new_idl().run(source, path.to_string_lossy().as_ref())?;
 
-        let ts = if cfg!(test) {
-            0
-        } else {
-            SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap_or_default()
-                .as_secs()
-        };
         let mut target_props = self.get_properties_for_lang().await?;
-        target_props.extend(self.metadata(source, props, ts));
+        target_props.extend(self.metadata(source, props));
 
         let empty = xidl_parser::hir::Specification(vec![]);
         self.generate_for_lang("hir", CodegenInput::new_rpc_hir(empty), path, target_props)
@@ -46,13 +37,12 @@ impl Generator {
         &self,
         source: &str,
         props: HashMap<String, serde_json::Value>,
-        ts: u64,
     ) -> HashMap<String, serde_json::Value> {
         let mut metadata = hashmap! {
             "idl" => source,
             "target_lang" => self.lang.clone(),
             "xidlc_version" => env!("CARGO_PKG_VERSION"),
-            "xidlc_timestamp" => ts
+            "xidlc_shorthash" => option_env!("XIDLC_GIT_HASH").unwrap_or("unknown")
         };
         metadata.extend(props);
         metadata

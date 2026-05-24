@@ -1,6 +1,7 @@
 use crate::error::{IdlcError, IdlcResult};
 use include_dir::{Dir, include_dir};
 use minijinja::{Environment, Error, ErrorKind};
+use xidl_parser::hir::ParserProperties;
 
 use super::GoRenderOutput;
 
@@ -11,9 +12,10 @@ pub struct GoRenderer {
 }
 
 impl GoRenderer {
-    pub fn new() -> IdlcResult<Self> {
+    pub fn new(properties: &ParserProperties) -> IdlcResult<Self> {
         let mut env = Environment::new();
         env.set_loader(|name| load_template(name).map(Some));
+        env.add_global("opt", minijinja::Value::from_serialize(properties));
         Ok(Self { env })
     }
 

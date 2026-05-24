@@ -16,6 +16,11 @@ impl PythonRenderer {
         Ok(Self { env })
     }
 
+    pub fn extend(&mut self, props: &xidl_parser::hir::ParserProperties) {
+        self.env
+            .add_global("opt", minijinja::Value::from_serialize(props));
+    }
+
     pub fn render_template<S: Serialize>(&self, name: &str, ctx: &S) -> IdlcResult<String> {
         self.env
             .get_template(name)

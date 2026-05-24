@@ -2,12 +2,13 @@ use crate::error::IdlcResult;
 use xidl_parser::hir;
 use xidl_parser::rest_hir::RestHirDocument;
 
-use super::{GoRestRenderOutput, GoRestRenderer};
+use super::GoRestRenderer;
 
 pub(crate) fn render_spec(
     spec: &hir::Specification,
     package_name: &str,
     rest_hir: &RestHirDocument,
+    properties: &xidl_parser::hir::ParserProperties,
 ) -> IdlcResult<String> {
     let renderer = GoRestRenderer::new()?;
     let mut blocks = Vec::new();
@@ -18,10 +19,16 @@ pub(crate) fn render_spec(
             blocks.push(block);
         }
     }
-    renderer.render_spec(&GoRestRenderOutput {
-        package_name: package_name.to_string(),
-        blocks,
-    })
+    renderer
+        .render_template(
+            "spec.go.j2",
+            &serde_json::json!({
+                "package_name": package_name,
+                "blocks": blocks,
+                "opt": properties,
+            }),
+        )
+        .and_then(|rendered| super::render::format_go_source(&rendered))
 }
 
 fn render_definition(

@@ -1,5 +1,5 @@
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::utils::{format_timestamp_filter, rust_format_filter};
+use crate::generate::utils::rust_format_filter;
 use convert_case::Casing;
 use include_dir::{Dir, include_dir};
 use minijinja::{Environment, Error, ErrorKind};
@@ -27,7 +27,6 @@ impl RustAxumRenderer {
         let mut env = Environment::new();
         env.set_loader(|name| load_template(name).map(Some));
         env.add_filter("rustfmt", rust_format_filter);
-        env.add_filter("fmt_timestamp", format_timestamp_filter);
         env.add_filter("to_case", to_case);
         Ok(Self {
             env,

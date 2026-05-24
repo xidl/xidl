@@ -87,7 +87,8 @@ impl crate::jsonrpc::Codegen for TypescriptRestCodegen {
             "expand_interface" => false,
             "hir_kind" => "http",
             "enable_client" => true,
-            "enable_server" => true
+            "enable_server" => true,
+            "enable_metadata" => true
         })
     }
 

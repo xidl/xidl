@@ -24,5 +24,5 @@ pub mod typed_ast_gen;
 pub mod typescript;
 #[cfg(feature = "gen-typescript-rest")]
 pub mod typescript_rest;
-mod utils;
+pub(crate) mod utils;
 pub use const_expr::render_const_expr;

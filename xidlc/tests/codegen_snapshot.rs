@@ -72,7 +72,13 @@ fn render_output(files: Vec<xidlc::driver::File>) -> String {
 
 fn case_props(folder: &str, case_name: &str) -> HashMap<String, serde_json::Value> {
     let _ = (folder, case_name);
-    HashMap::from([(String::from("enable_metadata"), false.into())])
+    HashMap::from([
+        (String::from("enable_metadata"), true.into()),
+        (
+            String::from("xidlc_shorthash"),
+            serde_json::Value::from("snapshot"),
+        ),
+    ])
 }
 
 #[tokio::test(flavor = "current_thread")]

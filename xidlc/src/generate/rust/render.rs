@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::utils::filter::is_upper_case;
-use crate::generate::utils::{format_timestamp_filter, rust_format_filter};
+use crate::generate::utils::rust_format_filter;
 use include_dir::{Dir, include_dir};
 use minijinja::{Environment, Error, ErrorKind};
 use serde::Serialize;
@@ -57,7 +57,6 @@ impl RustRenderer {
         env.add_function("name_hash", |value: String| md5_prefix(value.as_bytes(), 4));
         env.add_function("is_upper", is_upper_case);
         env.add_filter("rustfmt", rust_format_filter);
-        env.add_filter("fmt_timestamp", format_timestamp_filter);
         env.add_global("opt", minijinja::Value::from_serialize(&attribute));
         Ok(Self { env })
     }
