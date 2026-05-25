@@ -1,13 +1,15 @@
 GO_CACHE ?= /tmp/xidl-go-cache
 GO_PATH ?= /tmp/xidl-go-path
 XIDLC_BIN ?= ../target/debug/xidlc
+XIDLC_SNAPSHOT_VERSION ?= 0.0.1
+XIDLC_SNAPSHOT_HASH ?= snapshot
 
 .PHONY: test test-go-codegen test-go-runtime
 
 test: test-go-codegen test-go-runtime
 
 test-go-codegen:
-	XIDLC_GIT_HASH=snapshot XIDLC_TIMESTAMP=0 RUSTC_WRAPPER= cargo build --bin xidlc -F cli,fmt
+	XIDLC_VERSION=$(XIDLC_SNAPSHOT_VERSION) XIDLC_GIT_HASH=$(XIDLC_SNAPSHOT_HASH) RUSTC_WRAPPER= cargo build --bin xidlc -F cli,fmt
 	tmpdir=$$(mktemp -d); \
 	trap 'rm -rf "$$tmpdir"' EXIT; \
 	$(XIDLC_BIN) gen --out-dir "$$tmpdir/hello_world" go-rest xidlc-examples/api/http/hello_world.idl; \

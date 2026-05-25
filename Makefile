@@ -1,13 +1,15 @@
 GO_CACHE ?= /tmp/xidl-go-cache
 GO_PATH ?= /tmp/xidl-go-path
 JINJA_TEMPLATES := $(shell find xidlc -type f -name '*.j2' | sort)
+XIDLC_SNAPSHOT_VERSION ?= 0.0.1
+XIDLC_SNAPSHOT_HASH ?= snapshot
 
 .PHONY: test test-rust test-go test-go-codegen test-go-runtime test-update test-coverage test-xidl-parser-coverage test-xidl-jsonrpc-coverage test-xidl-rust-axum-coverage build-xtypes docs-dev docs-build
 
 test: test-rust test-go
 
 test-rust: init
-	cargo test --all -F transport-all -F fmt
+	XIDLC_VERSION=$(XIDLC_SNAPSHOT_VERSION) XIDLC_GIT_HASH=$(XIDLC_SNAPSHOT_HASH) cargo test --all -F transport-all -F fmt
 
 test-go: test-go-codegen test-go-runtime
 
@@ -18,7 +20,7 @@ test-go-runtime:
 	$(MAKE) -C golang test-go-runtime GO_CACHE=$(GO_CACHE) GO_PATH=$(GO_PATH)
 
 test-update:
-	INSTA_UPDATE=always make test-rust
+	INSTA_UPDATE=always XIDLC_VERSION=$(XIDLC_SNAPSHOT_VERSION) XIDLC_GIT_HASH=$(XIDLC_SNAPSHOT_HASH) make test-rust
 
 test-coverage:
 	cargo test -p xidl-parser -p xidl-jsonrpc -p xidl-rust-axum --all-features
