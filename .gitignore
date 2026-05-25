@@ -6,3 +6,4 @@ xidl-playground/public/wasm
 website/dist
 website/.astro
 website/.netlify
+node_modules

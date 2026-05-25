@@ -16,13 +16,13 @@ Each `*.idl` file under a language folder is treated as one snapshot case.
 ## Run tests
 
 ```bash
-cargo test -p xidlc --test codegen_snapshot
+XIDLC_VERSION=0.0.1 XIDLC_GIT_HASH=snapshot cargo test -p xidlc --test codegen_snapshot
 ```
 
 ## Update snapshots
 
 ```bash
-INSTA_UPDATE=always cargo test -p xidlc --test codegen_snapshot
+INSTA_UPDATE=always XIDLC_VERSION=0.0.1 XIDLC_GIT_HASH=snapshot cargo test -p xidlc --test codegen_snapshot
 ```
 
 Use `INSTA_UPDATE=new` if you only want to accept newly-added snapshots.

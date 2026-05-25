@@ -4,7 +4,6 @@ use crate::driver;
 use crate::driver::ArgsGenerate;
 use crate::error::{IdlcError, IdlcResult};
 use clap::{Args, CommandFactory, Parser, Subcommand};
-use std::collections::HashMap;
 use std::ffi::OsString;
 use std::path::PathBuf;
 
@@ -137,13 +136,12 @@ struct SharedGenArgs {
 }
 
 impl ArgsGen {
-    fn into_driver_args(self) -> IdlcResult<(ArgsGenerate, HashMap<String, serde_json::Value>)> {
+    fn into_driver_args(self) -> IdlcResult<ArgsGenerate> {
         let shared = SharedGenArgs {
             out_dir: self.out_dir,
             dry_run: self.dry_run,
         };
-        let args = self.lang.into_driver_args(shared)?;
-        Ok((args, HashMap::new()))
+        self.lang.into_driver_args(shared)
     }
 }
 
@@ -277,13 +275,13 @@ impl Cli {
         match self.command {
             Command::Gen(args) => {
                 let help_command = args.lang.help_command();
-                let (args, extra_props) = args.into_driver_args()?;
+                let args = args.into_driver_args()?;
                 if args.files.is_empty() {
-                    help_command.clone().print_help().unwrap();
+                    help_command.clone().print_help()?;
                     println!();
                     return Ok(());
                 }
-                driver::Driver::run_with_props(args, extra_props).await
+                driver::Driver::run(args).await
             }
             Command::Fmt(args) => args.execute(),
             Command::Import(args) => {

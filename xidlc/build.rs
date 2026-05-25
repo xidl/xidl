@@ -4,6 +4,7 @@ use std::process::Command;
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rerun-if-env-changed=XIDLC_VERSION");
     println!("cargo:rerun-if-env-changed=XIDLC_GIT_HASH");
 
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into()));

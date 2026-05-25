@@ -41,7 +41,7 @@ impl Generator {
         let mut metadata = hashmap! {
             "idl" => source,
             "target_lang" => self.lang.clone(),
-            "xidlc_version" => env!("CARGO_PKG_VERSION"),
+            "xidlc_version" => option_env!("XIDLC_VERSION").unwrap_or(env!("CARGO_PKG_VERSION")),
             "xidlc_shorthash" => option_env!("XIDLC_GIT_HASH").unwrap_or("unknown")
         };
         metadata.extend(props);
