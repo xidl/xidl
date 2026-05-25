@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.71.1](https://github.com/xidl/xidl/compare/v0.71.0...v0.71.1) (2026-05-25)
+
+
+### Bug Fixes
+
+* **xidlc:** add version and git hash to generated headers ([dbfce97](https://github.com/xidl/xidl/commit/dbfce977bf363d6c7c17d4a2b1c10a07234ebdca))
+
 ## [0.71.0](https://github.com/xidl/xidl/compare/v0.70.0...v0.71.0) (2026-05-23)
 
 
