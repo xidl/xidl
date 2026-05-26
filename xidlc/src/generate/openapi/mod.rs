@@ -35,14 +35,20 @@ impl crate::jsonrpc::Codegen for OpenApiCodegen {
     async fn generate(
         &self,
         input_hir: crate::jsonrpc::CodegenInput,
-        _path: String,
+        input: String,
         _props: ParserProperties,
     ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
         let rest_hir = input_hir.into_rest_hir();
         let openapi = render_openapi_json(&rest_hir.spec, &rest_hir)?;
         let content = serde_json::to_string_pretty(&openapi)?;
+
+        let stem = std::path::Path::new(&input)
+            .file_stem()
+            .and_then(|value| value.to_str())
+            .unwrap_or("openapi");
+
         Ok(vec![Artifact::new_file(ArtifactFile {
-            path: "openapi.json".to_string(),
+            path: format!("openapi_{stem}.json"),
             content,
         })])
     }

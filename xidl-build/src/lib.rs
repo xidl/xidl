@@ -110,7 +110,7 @@ impl Builder {
     /// Renames the generated single-file artifact after generation.
     ///
     /// This currently only works for generators that emit exactly one known file:
-    /// `openapi` (`openapi.json`) and `openrpc` (`openrpc.json`).
+    /// `openapi` (`openapi_{filename}.json`) and `openrpc` (`openrpc.json`).
     ///
     /// Relative paths are resolved against the final output directory. Absolute
     /// paths are used as-is.
@@ -156,10 +156,11 @@ impl Builder {
                     .map_err(|err| IdlcError::fmt(format!("OUT_DIR is not set: {err}")))?,
             ),
         };
+        let inputs_paths: Vec<PathBuf> = inputs.iter().map(|p| p.as_ref().to_path_buf()).collect();
         let args = xidlc::driver::ArgsGenerate {
             lang: self.lang.clone(),
             out_dir: out_dir.to_string_lossy().to_string(),
-            files: inputs.iter().map(|p| p.as_ref().to_path_buf()).collect(),
+            files: inputs_paths.clone(),
             client: self.client,
             server: self.server,
             mock: self.mock,
@@ -173,25 +174,43 @@ impl Builder {
             .block_on(async { xidlc::driver::Driver::run(args).await })?;
 
         if let Some(custom_name) = &self.output_filename {
-            self.apply_output_filename(&out_dir, custom_name)?;
+            self.apply_output_filename(&out_dir, custom_name, &inputs_paths)?;
         }
 
         Ok(())
     }
 
-    fn apply_output_filename(&self, out_dir: &Path, custom_name: &Path) -> Result<(), IdlcError> {
+    fn apply_output_filename(
+        &self,
+        out_dir: &Path,
+        custom_name: &Path,
+        inputs: &[PathBuf],
+    ) -> Result<(), IdlcError> {
         if out_dir == Path::new("-") {
             return Err(IdlcError::fmt(
                 "with_output_filename is not supported when out_dir is '-'",
             ));
         }
-        let Some(default_name) = default_single_artifact_name(&self.lang) else {
-            return Err(IdlcError::fmt(format!(
-                "with_output_filename is only supported for openapi/openrpc generators, got '{}'",
-                self.lang
-            )));
+
+        let default_name = match self.lang.as_str() {
+            "openapi" => {
+                let stem = inputs
+                    .first()
+                    .and_then(|p| p.file_stem())
+                    .and_then(|s| s.to_str())
+                    .unwrap_or("openapi");
+                format!("openapi_{}.json", stem)
+            }
+            "openrpc" | "open-rpc" => "openrpc.json".to_string(),
+            _ => {
+                return Err(IdlcError::fmt(format!(
+                    "with_output_filename is only supported for openapi/openrpc generators, got '{}'",
+                    self.lang
+                )));
+            }
         };
-        let src = out_dir.join(default_name);
+
+        let src = out_dir.join(&default_name);
         if !src.exists() {
             return Err(IdlcError::fmt(format!(
                 "generated file '{}' does not exist in '{}'",
@@ -213,14 +232,5 @@ impl Builder {
         }
         fs::rename(src, dst)?;
         Ok(())
-    }
-}
-
-fn default_single_artifact_name(lang: &str) -> Option<&'static str> {
-    let lang = lang.trim().to_ascii_lowercase();
-    match lang.as_str() {
-        "openapi" => Some("openapi.json"),
-        "openrpc" | "open-rpc" => Some("openrpc.json"),
-        _ => None,
     }
 }
