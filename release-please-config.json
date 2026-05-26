@@ -105,6 +105,11 @@
           "jsonpath": "$.package[?(@.name.value=='xidl-api-reddit')].version",
           "path": "Cargo.lock",
           "type": "toml"
+        },
+        {
+          "jsonpath": "$.package[?(@.name.value=='xidl-api-github')].version",
+          "path": "Cargo.lock",
+          "type": "toml"
         }
       ],
       "release-type": "simple"
