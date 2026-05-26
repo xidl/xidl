@@ -3,7 +3,7 @@ source: xidlc/tests/codegen_snapshot.rs
 expression: output
 ---
 ===============
-openapi.json
+openapi_http_catch_all.json
 ===============
 {
   "components": {
