@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.72.0](https://github.com/xidl/xidl/compare/v0.71.1...v0.72.0) (2026-05-26)
+
+
+### Features
+
+* **gen:** change default openapi filename to openapi_{filename}.json ([10c95c3](https://github.com/xidl/xidl/commit/10c95c30eae3e75a3d28e36d5a0f4ddeb7fb2895))
+
 ## [0.71.1](https://github.com/xidl/xidl/compare/v0.71.0...v0.71.1) (2026-05-25)
 
 
