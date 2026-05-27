@@ -6,11 +6,11 @@ description: "XIDL 序列化和反序列化"
 xidl 支持通过注解来修改序列化和反序列化的行为。
 
 
-| 注解                                  | 作用                     | 作用范围             |
-| ---                                   | ---                      | ---                  |
-| @rename("new_name")                   | 重命名参数或字段         | 方法参数、结构体字段 |
-| @rename_all("rule")                   | 批量重命名参数或字段     | 方法参数、结构体字段 |
-| @skip                                 | 跳过序列化和反序列化字段 | 结构体字段           |
+| 注解                  | 作用                     | 作用范围             |
+| ---                   | ---                      | ---                  |
+| `@rename("new_name")` | 重命名参数或字段         | 方法参数、结构体字段 |
+| `@rename_all("rule")` | 批量重命名参数或字段     | 方法参数、结构体字段 |
+| `@skip`               | 跳过序列化和反序列化字段 | 结构体字段           |
 
 ## 重命名所有字段
 
@@ -25,3 +25,21 @@ xidl 支持通过注解来修改序列化和反序列化的行为。
 - SCREAMINGSNAKECASE
 - kebab-case
 - SCREAMING-KEBAB-CASE
+
+## 参数编码方式
+
+### 多参数入参编码方式
+
+![参数编码方式](./serialize/parameter.svg)
+
+### 单参数入参展开编码方式
+
+![展平编码方式](./serialize/flatten.svg)
+
+### 返回值编码方式
+
+![返回值编码方式](./serialize/return_value.svg)
+
+### 多返回值编码方式
+
+![多返回值编码方式](./serialize/multi-return.svg)
