@@ -31,7 +31,24 @@ pub fn import_openapi(input: &Path, out_dir: &Path) -> IdlcResult<()> {
     idl.push('\n');
 
     let mut ctx = ImportCtx::new();
+
+    fn collect_schemas(val: &Value, ctx: &mut ImportCtx) {
+        if let Some(defs) = val.get("$defs").and_then(|v| v.as_object()) {
+            for (name, schema) in defs {
+                ctx.schemas.insert(name.clone(), schema.clone());
+            }
+        }
+        if let Some(defs) = val.get("definitions").and_then(|v| v.as_object()) {
+            for (name, schema) in defs {
+                ctx.schemas.insert(name.clone(), schema.clone());
+            }
+        }
+    }
+
+    collect_schemas(&openapi, &mut ctx);
+
     if let Some(components) = openapi.get("components") {
+        collect_schemas(components, &mut ctx);
         if let Some(schemas) = components.get("schemas").and_then(|v| v.as_object()) {
             for (name, schema) in schemas {
                 ctx.schemas.insert(name.clone(), schema.clone());
@@ -46,6 +63,21 @@ pub fn import_openapi(input: &Path, out_dir: &Path) -> IdlcResult<()> {
             for (name, body) in bodies {
                 ctx.request_bodies.insert(name.clone(), body.clone());
             }
+        }
+    }
+
+    if openapi.get("type").is_some()
+        || openapi.get("properties").is_some()
+        || openapi.get("oneOf").is_some()
+        || openapi.get("anyOf").is_some()
+        || openapi.get("allOf").is_some()
+    {
+        let name = openapi
+            .get("title")
+            .and_then(|v| v.as_str())
+            .unwrap_or("Root");
+        if !ctx.schemas.contains_key(name) {
+            ctx.schemas.insert(name.to_string(), openapi.clone());
         }
     }
 
@@ -119,6 +151,12 @@ impl ImportCtx {
 fn render_schema_definition(name: &str, schema: &Value, ctx: &ImportCtx) -> String {
     let mut out = String::new();
 
+    if let Some(desc) = schema.get("description").and_then(|v| v.as_str()) {
+        for line in desc.lines() {
+            out.push_str(&format!("/// {}\n", line));
+        }
+    }
+
     if let Some(ref_val) = schema.get("$ref").and_then(|v| v.as_str()) {
         out.push_str(&format!(
             "typedef {} {};\n",
@@ -126,15 +164,49 @@ fn render_schema_definition(name: &str, schema: &Value, ctx: &ImportCtx) -> Stri
             name
         ));
     } else if let Some(obj) = schema.as_object() {
-        let ty = obj.get("type").and_then(|v| v.as_str()).unwrap_or("object");
-        if ty == "object" {
+        if let Some(enum_vals) = obj.get("enum").and_then(|v| v.as_array()) {
+            out.push_str(&format!("enum {} {{\n", name));
+            for val in enum_vals {
+                if let Some(s) = val.as_str() {
+                    out.push_str(&format!("    {},\n", fix_ident(s)));
+                } else if let Some(n) = val.as_i64() {
+                    out.push_str(&format!("    ENUM_{},\n", n));
+                }
+            }
+            out.push_str("};\n");
+            return out;
+        }
+
+        let ty_val = obj.get("type");
+        let ty = if let Some(s) = ty_val.and_then(|v| v.as_str()) {
+            Some(s)
+        } else if let Some(arr) = ty_val.and_then(|v| v.as_array()) {
+            arr.iter().find_map(|v| v.as_str().filter(|&s| s != "null"))
+        } else {
+            None
+        };
+
+        if ty == Some("object") || ty.is_none() {
             if let Some(props) = obj.get("properties").and_then(|v| v.as_object()) {
                 out.push_str(&format!("struct {} {{\n", name));
                 let required = obj.get("required").and_then(|v| v.as_array());
                 for (prop_name, prop_schema) in props {
-                    let is_required = required
+                    if let Some(desc) = prop_schema.get("description").and_then(|v| v.as_str()) {
+                        for line in desc.lines() {
+                            out.push_str(&format!("    /// {}\n", line));
+                        }
+                    }
+                    let mut is_required = required
                         .map(|r| r.iter().any(|v| v.as_str() == Some(prop_name)))
                         .unwrap_or(false);
+
+                    // Check if null is in type array
+                    if let Some(arr) = prop_schema.get("type").and_then(|v| v.as_array()) {
+                        if arr.iter().any(|v| v.as_str() == Some("null")) {
+                            is_required = false;
+                        }
+                    }
+
                     if !is_required {
                         out.push_str("    @optional\n");
                     }
@@ -155,6 +227,11 @@ fn render_schema_definition(name: &str, schema: &Value, ctx: &ImportCtx) -> Stri
                     render_type(additional, ctx),
                     name
                 ));
+            } else if obj.contains_key("oneOf")
+                || obj.contains_key("anyOf")
+                || obj.contains_key("allOf")
+            {
+                out.push_str(&format!("typedef any {};\n", name));
             } else {
                 out.push_str(&format!("typedef string {};\n", name)); // Fallback
             }
@@ -171,10 +248,31 @@ fn render_type(schema: &Value, _ctx: &ImportCtx) -> String {
     }
 
     if let Some(obj) = schema.as_object() {
-        if let Some(ty) = obj.get("type").and_then(|v| v.as_str()) {
+        let ty_val = obj.get("type");
+        let ty = if let Some(s) = ty_val.and_then(|v| v.as_str()) {
+            Some(s)
+        } else if let Some(arr) = ty_val.and_then(|v| v.as_array()) {
+            arr.iter().find_map(|v| v.as_str().filter(|&s| s != "null"))
+        } else {
+            None
+        };
+
+        if let Some(ty) = ty {
             match ty {
                 "string" => return "string".to_string(),
-                "integer" => return "int64".to_string(),
+                "integer" => {
+                    if let Some(format) = obj.get("format").and_then(|v| v.as_str()) {
+                        match format {
+                            "int32" => return "int32".to_string(),
+                            "int64" => return "int64".to_string(),
+                            "uint32" => return "uint32".to_string(),
+                            "uint64" => return "uint64".to_string(),
+                            "uint8" => return "uint8".to_string(),
+                            _ => {}
+                        }
+                    }
+                    return "int64".to_string();
+                }
                 "number" => return "double".to_string(),
                 "boolean" => return "boolean".to_string(),
                 "array" => {
@@ -321,4 +419,53 @@ fn to_camel_case(s: &str) -> String {
     }
     // Still check for keywords after camel casing (though unlikely)
     fix_ident(&out)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_import_json_schema() {
+        let mut dir = std::env::temp_dir();
+        dir.push(format!("xidl_test_{}", std::process::id()));
+        if dir.exists() {
+            fs::remove_dir_all(&dir).unwrap();
+        }
+        fs::create_dir_all(&dir).unwrap();
+
+        let input_path = dir.join("schema.json");
+        let schema = serde_json::json!({
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "title": "TestSchema",
+            "type": "object",
+            "properties": {
+                "id": { "type": "integer", "format": "int64" },
+                "name": { "type": "string", "description": "The name" }
+            },
+            "required": ["id"],
+            "$defs": {
+                "Status": {
+                    "type": "string",
+                    "enum": ["active", "inactive"]
+                }
+            }
+        });
+        fs::write(&input_path, serde_json::to_string(&schema).unwrap()).unwrap();
+
+        import_openapi(&input_path, &dir).unwrap();
+
+        let idl_path = dir.join("schema.idl");
+        let idl = fs::read_to_string(idl_path).unwrap();
+
+        assert!(idl.contains("enum Status"));
+        assert!(idl.contains("active,"));
+        assert!(idl.contains("struct TestSchema"));
+        assert!(idl.contains("int64 id;"));
+        assert!(idl.contains("/// The name"));
+        assert!(idl.contains("@optional"));
+        assert!(idl.contains("string name;"));
+
+        fs::remove_dir_all(&dir).unwrap();
+    }
 }
