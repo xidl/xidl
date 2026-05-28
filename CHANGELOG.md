@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.72.2](https://github.com/xidl/xidl/compare/v0.72.1...v0.72.2) (2026-05-28)
+
+
+### Bug Fixes
+
+* **xidl-parser:** support positional path in HTTP verb annotations ([45f1356](https://github.com/xidl/xidl/commit/45f13560f1615ceb8ca47e73c74ef58de013c16a))
+
 ## [0.72.1](https://github.com/xidl/xidl/compare/v0.72.0...v0.72.1) (2026-05-28)
 
 
