@@ -65,7 +65,12 @@ pub(super) fn route_from_annotations(
             method = Some(current);
             if let Some(path) = annotation_params(annotation)
                 .map(normalize_annotation_params)
-                .and_then(|params| params.get("path").cloned())
+                .and_then(|params| {
+                    params
+                        .get("value")
+                        .cloned()
+                        .or_else(|| params.get("path").cloned())
+                })
             {
                 paths.push(normalize_path(&path));
             }
