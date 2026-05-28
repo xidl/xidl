@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.72.1](https://github.com/xidl/xidl/compare/v0.72.0...v0.72.1) (2026-05-28)
+
+
+### Bug Fixes
+
+* **xidlc:** support standalone JSON Schema and  in openapi import ([6ea0946](https://github.com/xidl/xidl/commit/6ea0946b975371611fdae9873ba88bd1b04271b1))
+
 ## [0.72.0](https://github.com/xidl/xidl/compare/v0.71.1...v0.72.0) (2026-05-26)
 
 
