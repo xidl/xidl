@@ -24,6 +24,16 @@ export default defineConfig({
           langs: [idlLanguage],
         },
       },
+      head: [
+        {
+          attrs: {
+            'data-library': '/xidl/xidl',
+            defer: true,
+            src: 'https://context7.com/widget.js',
+          },
+          tag: 'script',
+        },
+      ],
       locales: {
         root: {
           label: 'English',
