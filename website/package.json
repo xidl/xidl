@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@astrojs/check": "^0.9.9",
     "@astrojs/netlify": "^7.0.8",
     "@astrojs/starlight": "^0.38.0",
     "@astrojs/starlight-tailwind": "^5.0.0",
