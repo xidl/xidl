@@ -1,4 +1,17 @@
 {
+  "$schema": "https://context7.com/schema/context7.json",
+  "branch": "master",
+  "description": "XIDL is an IDL-first contract platform that generates APIs, SDKs, specs, and tooling from a single interface definition for HTTP, JSON-RPC, and streaming protocols.",
+  "excludeFolders": ["./.agents"],
+  "folders": [
+    "./website/src/content/docs/",
+    "./xidlc-examples/api/",
+    "./skills",
+    "./README.md",
+    "./ARCHITECTURE.md"
+  ],
+  "projectTitle": "XIDL",
+
   "public_key": "pk_5CYvHCwITU7SpD8ypIgeY",
   "url": "https://context7.com/xidl/xidl"
 }
