@@ -98,7 +98,11 @@ pub(super) fn render_endpoint_helper(
         .iter()
         .any(|param| matches!(param.source, ParamSource::Body))
     {
-        writeln!(out, "    body = read_json_body(request)").unwrap();
+        if method.request_content_type == "application/x-www-form-urlencoded" {
+            writeln!(out, "    body = read_form_body(request)").unwrap();
+        } else {
+            writeln!(out, "    body = read_json_body(request)").unwrap();
+        }
     }
     render_request_value(out, method);
     writeln!(

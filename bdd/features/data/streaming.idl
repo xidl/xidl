@@ -1,0 +1,6 @@
+@http_resource("/stream")
+interface StreamingService {
+    @server_stream
+    @get(path = "/ticks")
+    int32 ticks(in int32 count);
+};

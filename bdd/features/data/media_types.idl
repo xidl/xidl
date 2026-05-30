@@ -1,0 +1,5 @@
+interface FormService {
+    @post(path = "/submit")
+    @Consumes("application/x-www-form-urlencoded")
+    string submit(in string name, in int32 age);
+};
