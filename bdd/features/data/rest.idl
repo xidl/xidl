@@ -1,0 +1,7 @@
+interface HelloWorld {
+    @get(path = "/")
+    string hello();
+
+    @post(path = "/echo")
+    string echo(in string msg);
+};

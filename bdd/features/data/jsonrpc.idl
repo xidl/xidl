@@ -1,0 +1,4 @@
+interface Calculator {
+    int32 add(in int32 a, in int32 b);
+    int32 subtract(in int32 a, in int32 b);
+};

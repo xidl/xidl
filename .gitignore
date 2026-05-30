@@ -7,3 +7,5 @@ website/dist
 website/.astro
 website/.netlify
 node_modules
+/bdd/gen/
+/bdd/.temp/

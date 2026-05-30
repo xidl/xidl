@@ -7,6 +7,7 @@ from .http import (
     HttpError,
     MountedRoute,
     Request,
+    Response,
     Route,
     RouteAdapter,
     encode_error,
@@ -18,7 +19,10 @@ from .http import (
 )
 
 
-async def request_from_fastapi(request: Any, path_params: Optional[dict[str, str]] = None) -> Request:
+from fastapi import Request as FastAPIRequest, Response as FastAPIResponse
+from fastapi.responses import JSONResponse, Response as RawResponse
+
+async def request_from_fastapi(request: FastAPIRequest, path_params: Optional[dict[str, str]] = None) -> Request:
     url = getattr(request, "url", None)
     body = await request.body() if hasattr(request, "body") else None
     return Request(
@@ -32,12 +36,36 @@ async def request_from_fastapi(request: Any, path_params: Optional[dict[str, str
     )
 
 
-async def invoke_fastapi_route(route: Route, request: Any, **path_params: str) -> Any:
+async def invoke_fastapi_route(route: Route, request: FastAPIRequest) -> Any:
     try:
-        runtime_request = await request_from_fastapi(request, path_params or None)
-        return materialize_result(await execute_route(route, runtime_request))
+        runtime_request = await request_from_fastapi(request)
+        result = await execute_route(route, runtime_request)
+        if isinstance(result, Response):
+            if isinstance(result.body, (dict, list)):
+                return JSONResponse(
+                    content=result.body,
+                    status_code=result.status_code,
+                    headers=result.headers,
+                )
+            return RawResponse(
+                content=result.body,
+                status_code=result.status_code,
+                headers=result.headers,
+            )
+        # Handle ServerStreamResponse
+        response = materialize_result(result)
+        return RawResponse(
+            content=response.body,
+            status_code=response.status_code,
+            headers=response.headers,
+        )
     except HttpError as error:
-        return encode_error(error)
+        err_resp = encode_error(error)
+        return JSONResponse(
+            content=err_resp.body,
+            status_code=err_resp.status_code,
+            headers=err_resp.headers,
+        )
 
 
 @dataclass
@@ -49,8 +77,14 @@ class FastAPIAdapter(RouteAdapter):
         for path in route.paths:
             normalized_path = framework_path(path, "fastapi")
 
-            async def endpoint(request: Any, _route: Route = route, **path_params: str) -> Any:
-                return await invoke_fastapi_route(_route, request, **path_params)
+            # Capture route in a closure. We only need the request object
+            # as it contains all necessary information including path parameters.
+            def create_endpoint(r: Route):
+                async def endpoint(request: FastAPIRequest) -> Any:
+                    return await invoke_fastapi_route(r, request)
+                return endpoint
+
+            endpoint = create_endpoint(route)
 
             mounted = MountedRoute(
                 path=normalized_path,

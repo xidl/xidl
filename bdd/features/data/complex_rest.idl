@@ -1,0 +1,24 @@
+struct User {
+    uint32 id;
+    string name;
+    sequence<string> roles;
+};
+
+interface UserService {
+    @get(path = "/{id}")
+    User get_user(
+        @path
+        uint32 id
+    );
+
+    @post(path = "/")
+    User create_user(
+        in User user
+    );
+
+    @get(path = "/{?filter}")
+    sequence<User> list_users(
+        @query
+        string filter
+    );
+};
