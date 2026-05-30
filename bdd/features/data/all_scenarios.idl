@@ -1,0 +1,53 @@
+enum Status {
+    ACTIVE,
+    INACTIVE,
+    PENDING
+};
+
+union Payload switch (Status) {
+    case Status::ACTIVE:
+        string message;
+    case Status::INACTIVE:
+        int32 code;
+    default:
+        boolean retry;
+};
+
+struct Metadata {
+    string key;
+    string value;
+};
+
+@http_resource("/api/v1")
+interface AllScenariosService {
+    // Basic CRUD with various param bindings
+    @get(path = "/items/{id}")
+    string get_item(
+        @path uint32 id,
+        @query string filter,
+        @header @rename("X-Trace-Id") string trace_id
+    );
+
+    @post(path = "/items")
+    uint32 create_item(in string name, in Payload payload);
+
+    @put(path = "/items/{id}")
+    void update_item(@path uint32 id, in sequence<Metadata> metadata);
+
+    @delete(path = "/items/{id}")
+    void delete_item(@path uint32 id);
+
+    // Attributes
+    attribute Status system_status;
+    readonly attribute string version;
+
+    // Media Types
+    @post(path = "/upload")
+    @Consumes("application/x-www-form-urlencoded")
+    void upload_form(string key, string value);
+
+    // Security (per-method override)
+    @get(path = "/secure")
+    @http_bearer
+    string secure_data();
+};
