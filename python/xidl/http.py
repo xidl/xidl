@@ -232,6 +232,19 @@ def read_json_body(request: Request) -> Any:
         raise HttpError(400, "INVALID_ARGUMENT", "invalid JSON body") from exc
 
 
+def read_form_body(request: Request) -> Any:
+    body = request.body or b""
+    if not body:
+        return {}
+    try:
+        from urllib.parse import parse_qs
+
+        parsed = parse_qs(body.decode("utf-8"))
+        return {k: v[0] for k, v in parsed.items()}
+    except Exception as exc:
+        raise HttpError(400, "INVALID_ARGUMENT", "invalid form body") from exc
+
+
 def read_json_field(
     body: Any,
     name: str,

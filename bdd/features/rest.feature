@@ -41,12 +41,23 @@ Feature: REST API Generation and Communication
       | lang |
       | rust |
 
-  Scenario Outline: REST with Headers and Path Params
-    Given a REST IDL file "bdd/features/data/all_scenarios.idl"
+  Scenario Outline: REST Streaming (Rust Only)
+    Given a REST IDL file "bdd/features/data/streaming.idl"
+    When I generate rust code for the IDL
+    Then the generated rust code should be valid
+    And I can run the generated rust server and client
+    And the client can receive 5 ticks from the stream
+
+    Examples:
+      | lang |
+      | rust |
+
+  Scenario Outline: REST Form-urlencoded
+    Given a REST IDL file "bdd/features/data/media_types.idl"
     When I generate <lang> code for the IDL
     Then the generated <lang> code should be valid
     And I can run the generated <lang> server and client
-    And the client can get item 42 with filter "search" and trace id "uuid-123"
+    And the client can submit a form with name "Alice" and age 30
 
     Examples:
       | lang   |
