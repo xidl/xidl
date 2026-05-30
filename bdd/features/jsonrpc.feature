@@ -24,3 +24,15 @@ Feature: JSON-RPC API Generation and Communication
     Examples:
       | lang |
       | rust |
+
+  Scenario Outline: JSON-RPC with Multiple Interfaces
+    Given a JSON-RPC IDL file "bdd/features/data/multi_interface.idl"
+    When I generate <lang> code for the IDL
+    Then the generated <lang> code should be valid
+    And I can run the generated <lang> server and client
+    And the client can call math.add(10, 20) to get 30
+    And the client can save "hello" to store and get it back
+
+    Examples:
+      | lang |
+      | rust |
