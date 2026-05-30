@@ -68,7 +68,15 @@ jobs:
 
       - name: Cargo test
         run: |
-          make test
+          make test-rust
+
+      - name: Go test
+        run: |
+          make test-go
+
+      - name: BDD test
+        run: |
+          make test-bdd
 
       - name: Python test
         run: |

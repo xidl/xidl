@@ -1,0 +1,18 @@
+struct AddRequest {
+    int32 a;
+    int32 b;
+};
+
+struct AddResponse {
+    int32 result;
+};
+
+enum Operation {
+    ADD,
+    SUBTRACT
+};
+
+interface Calculator {
+    AddResponse calculate(in AddRequest req, in Operation op);
+    sequence<int32> get_history();
+};

@@ -6,12 +6,16 @@ XIDLC_SNAPSHOT_HASH ?= snapshot
 
 .PHONY: test test-rust test-go test-go-codegen test-go-runtime test-update test-coverage test-xidl-parser-coverage test-xidl-jsonrpc-coverage test-xidl-rust-axum-coverage build-xtypes docs-dev docs-build
 
-test: test-rust test-go
+test: test-rust test-go test-bdd
 
 test-rust: init
 	XIDLC_VERSION=$(XIDLC_SNAPSHOT_VERSION) XIDLC_GIT_HASH=$(XIDLC_SNAPSHOT_HASH) cargo test --all -F transport-all -F fmt
 
 test-go: test-go-codegen test-go-runtime
+
+test-bdd:
+	pip install -r bdd/requirements.txt
+	behave bdd/features
 
 test-go-codegen:
 	$(MAKE) -C golang test-go-codegen GO_CACHE=$(GO_CACHE) GO_PATH=$(GO_PATH)
