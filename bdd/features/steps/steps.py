@@ -49,7 +49,7 @@ def step_impl(context, lang):
     elif lang == "rust" and context.protocol == "jsonrpc": cmd_lang = "rust-jsonrpc"
     elif lang == "go": cmd_lang = "go-rest"
     elif lang == "python": cmd_lang = "python-rest"
-    
+
     cmd = ["cargo", "run", "-p", "xidlc", "--features", "cli,fmt", "--", "gen", "-o", context.lang_dir, cmd_lang, "--client", "--server", context.idl_file]
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=os.getcwd())
     if result.returncode != 0:
@@ -110,13 +110,89 @@ def step_impl(context, lang):
         new_python_path = os.pathsep.join([os.path.abspath("python"), context.lang_dir, python_path])
         context.env = os.environ.copy(); context.env["PYTHONPATH"] = new_python_path
         if "complex_rest" in context.idl_file:
-            server_code = f"import asyncio, logging\nfrom {module_name} import User\nfrom {module_name}_http import *\nfrom xidl.http import register_routes\nfrom xidl.fastapi import FastAPIAdapter\nfrom fastapi import FastAPI\nimport uvicorn\nclass MyUserService(UserServiceService):\n    def __init__(self): self.users = {{}}\n    async def get_user(self, request): return UserServiceGetUserResponse(value=self.users.get(request.id))\n    async def create_user(self, request):\n        user_id = request.user.id if hasattr(request.user, 'id') else request.user['id']\n        self.users[user_id] = request.user\n        return UserServiceCreateUserResponse(value=request.user)\n    async def list_users(self, request): return UserServiceListUsersResponse(value=list(self.users.values()))\napp = FastAPI(); adapter = FastAPIAdapter(app=app); register_routes(adapter, user_service_routes(MyUserService()))\nif __name__ == '__main__': logging.basicConfig(level=logging.INFO); uvicorn.run(app, host='127.0.0.1', port={context.port}, log_level='info')"
+            server_code = f"""
+import asyncio, logging
+from {module_name} import User
+from {module_name}_http import *
+from xidl.http import register_routes
+from xidl.fastapi import FastAPIAdapter
+from fastapi import FastAPI
+import uvicorn
+class MyUserService(UserServiceService):
+    def __init__(self): self.users = {{}}
+    async def get_user(self, request): return UserServiceGetUserResponse(value=self.users.get(request.id))
+    async def create_user(self, request):
+        user_id = request.user.id if hasattr(request.user, 'id') else request.user['id']
+        self.users[user_id] = request.user
+        return UserServiceCreateUserResponse(value=request.user)
+    async def list_users(self, request): return UserServiceListUsersResponse(value=list(self.users.values()))
+app = FastAPI(); adapter = FastAPIAdapter(app=app); register_routes(adapter, user_service_routes(MyUserService()))
+if __name__ == '__main__': logging.basicConfig(level=logging.INFO); uvicorn.run(app, host='127.0.0.1', port={context.port}, log_level='info')
+"""
         elif "all_scenarios" in context.idl_file:
-            server_code = f"import asyncio, logging\nfrom {module_name} import Status, Payload, Metadata\nfrom {module_name}_http import *\nfrom xidl.http import register_routes\nfrom xidl.fastapi import FastAPIAdapter\nfrom fastapi import FastAPI\nimport uvicorn\nclass MyAllScenarios(AllScenariosServiceService):\n    def __init__(self): self.status = Status.ACTIVE; self.items = {{}}\n    async def get_item(self, request): return AllScenariosServiceGetItemResponse(value=f'Item {{request.id}} with {{request.filter}} and {{request.trace_id}}')\n    async def create_item(self, request): self.items[len(self.items)] = request.name; return AllScenariosServiceCreateItemResponse(value=42)\n    async def update_item(self, request): return AllScenariosServiceUpdateItemResponse()\n    async def delete_item(self, request): return AllScenariosServiceDeleteItemResponse()\n    async def get_attribute_system_status(self, request): return AllScenariosServiceGetSystemStatusResponse(value=self.status)\n    async def set_attribute_system_status(self, request): self.status = request.value; return AllScenariosServiceSetSystemStatusResponse()\n    async def get_attribute_version(self, request): return AllScenariosServiceGetVersionResponse(value='1.0.0')\n    async def upload_form(self, request): return AllScenariosServiceUploadFormResponse()\n    async def secure_data(self, request, xidl_auth=None): return AllScenariosServiceSecureDataResponse(value='Secret')\napp = FastAPI(); adapter = FastAPIAdapter(app=app); register_routes(adapter, all_scenarios_service_routes(MyAllScenarios()))\nif __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port})"
+            server_code = f"""
+import asyncio, logging
+from {module_name} import Status, Payload, Metadata
+from {module_name}_http import *
+from xidl.http import register_routes
+from xidl.fastapi import FastAPIAdapter
+from fastapi import FastAPI
+import uvicorn
+
+class MyAllScenarios(AllScenariosServiceService):
+    def __init__(self):
+        self.status = Status.ACTIVE
+        self.items = {{}}
+
+    async def get_item(self, request):
+        return AllScenariosServiceGetItemResponse(value=f"Item {{request.id}} with {{request.filter}} and {{request.trace_id}}")
+
+    async def create_item(self, request):
+        self.items[len(self.items)] = request.name
+        return AllScenariosServiceCreateItemResponse(value=42)
+
+    async def update_item(self, request): return AllScenariosServiceUpdateItemResponse()
+    async def delete_item(self, request): return AllScenariosServiceDeleteItemResponse()
+    async def get_attribute_system_status(self, request): return AllScenariosServiceGetSystemStatusResponse(value=self.status)
+    async def set_attribute_system_status(self, request):
+        self.status = request.value
+        return AllScenariosServiceSetSystemStatusResponse()
+    async def get_attribute_version(self, request): return AllScenariosServiceGetVersionResponse(value="1.0.0")
+    async def upload_form(self, request): return AllScenariosServiceUploadFormResponse()
+    async def secure_data(self, request, xidl_auth=None): return AllScenariosServiceSecureDataResponse(value="Secret")
+
+app = FastAPI()
+adapter = FastAPIAdapter(app=app)
+register_routes(adapter, all_scenarios_service_routes(MyAllScenarios()))
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port={context.port})
+"""
         elif "media_types" in context.idl_file:
-            server_code = f"import asyncio, logging\nfrom {module_name}_http import *\nfrom xidl.http import register_routes\nfrom xidl.fastapi import FastAPIAdapter\nfrom fastapi import FastAPI\nimport uvicorn\nclass MyForm(FormServiceService):\n    async def submit(self, request): return FormServiceSubmitResponse(value=f'Received {{request.name}} age {{request.age}}')\napp = FastAPI(); adapter = FastAPIAdapter(app=app); register_routes(adapter, form_service_routes(MyForm()))\nif __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port})"
+            server_code = f"""
+import asyncio, logging
+from {module_name}_http import *
+from xidl.http import register_routes
+from xidl.fastapi import FastAPIAdapter
+from fastapi import FastAPI
+import uvicorn
+class MyForm(FormServiceService):
+    async def submit(self, request): return FormServiceSubmitResponse(value=f'Received {{request.name}} age {{request.age}}')
+app = FastAPI(); adapter = FastAPIAdapter(app=app); register_routes(adapter, form_service_routes(MyForm()))
+if __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port})
+"""
         else:
-            server_code = f"from {module_name}_http import *\nfrom xidl.http import register_routes\nfrom xidl.fastapi import FastAPIAdapter\nfrom fastapi import FastAPI\nimport uvicorn\nclass MyHelloWorld(HelloWorldService):\n    async def hello(self, request): return HelloWorldHelloResponse(value='Hello BDD')\n    async def echo(self, request): return HelloWorldEchoResponse(value=request.msg)\napp = FastAPI(); adapter = FastAPIAdapter(app=app); register_routes(adapter, hello_world_routes(MyHelloWorld()))\nif __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port})"
+            server_code = f"""
+from {module_name}_http import *
+from xidl.http import register_routes
+from xidl.fastapi import FastAPIAdapter
+from fastapi import FastAPI
+import uvicorn
+class MyHelloWorld(HelloWorldService):
+    async def hello(self, request): return HelloWorldHelloResponse(value='Hello BDD')
+    async def echo(self, request): return HelloWorldEchoResponse(value=request.msg)
+app = FastAPI(); adapter = FastAPIAdapter(app=app); register_routes(adapter, hello_world_routes(MyHelloWorld()))
+if __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port})
+"""
         context.server_file = os.path.join(context.temp_dir, "server.py")
         with open(context.server_file, "w") as f: f.write(server_code)
         context.server_process = subprocess.Popen(["python3", "-u", context.server_file], env=context.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
@@ -168,15 +244,40 @@ def step_impl(context, lang):
             with open(os.path.join(context.lang_dir, "Cargo.toml"), "w") as f: f.write(cargo_toml)
             os.makedirs(os.path.join(context.lang_dir, "src"), exist_ok=True)
             if "city_jsonrpc" in context.idl_file:
-                server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MySmartCity;\n#[async_trait]\nimpl gen::SmartCityRpcApi for MySmartCity {{\n    async fn quote_trip<\'a>(&\'a self, _rider_id: String, _zone_id: String) -> Result<gen::SmartCityRpcApiquoteTripResult, xidl_jsonrpc::Error> {{ Ok(gen::SmartCityRpcApiquoteTripResult {{ amount_cents: 100, currency: "USD".into(), r#return: "quote-1".into() }}) }}\n    async fn create_invoice<\'a>(&\'a self, _rider_id: String, _amount_cents: i64, _currency: String) -> Result<gen::SmartCityRpcApicreateInvoiceResult, xidl_jsonrpc::Error> {{ Ok(gen::SmartCityRpcApicreateInvoiceResult {{ invoice_id: "inv-1".into(), payment_url: "http://pay".into() }}) }}\n    async fn mark_paid<\'a>(&\'a self, _invoice_id: String) -> Result<(), xidl_jsonrpc::Error> {{ Ok(()) }}\n    async fn heartbeat<\'a>(&\'a self) -> Result<(), xidl_jsonrpc::Error> {{ Ok(()) }}\n    async fn rotate_session<\'a>(&\'a self, _session_token: String) -> Result<gen::SmartCityRpcApirotateSessionResult, xidl_jsonrpc::Error> {{ Ok(gen::SmartCityRpcApirotateSessionResult {{ session_token: "new-tok".into(), expires_at_epoch_sec: 3600, r#return: 0 }}) }}\n    async fn dispatch<\'a>(&\'a self, _vehicle_id: String, _pickup_stop: String) -> Result<gen::SmartCityRpcApidispatchResult, xidl_jsonrpc::Error> {{ Ok(gen::SmartCityRpcApidispatchResult {{ job_id: "job-1".into(), r#return: 42 }}) }}\n    async fn report_trip<\'a>(&\'a self, _order_id: String, _rider_id: String, _status: String) -> Result<(), xidl_jsonrpc::Error> {{ Ok(()) }}\n    async fn summarize<\'a>(&\'a self, _day: String) -> Result<gen::SmartCityRpcApisummarizeResult, xidl_jsonrpc::Error> {{ Ok(gen::SmartCityRpcApisummarizeResult {{ trip_count: 10, gross_revenue_cents: 1000 }}) }}\n    async fn get_attribute_region<\'a>(&\'a self) -> Result<String, xidl_jsonrpc::Error> {{ Ok("us-east".into()) }}\n    async fn get_attribute_firmware_channel<\'a>(&\'a self) -> Result<String, xidl_jsonrpc::Error> {{ Ok("stable".into()) }}\n    async fn set_attribute_firmware_channel<\'a>(&\'a self, _value: String) -> Result<(), xidl_jsonrpc::Error> {{ Ok(()) }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let server = xidl_jsonrpc::Server::builder().with_service(gen::SmartCityRpcApiServer::new(MySmartCity)).with_endpoint("tcp://127.0.0.1:{context.port}").build().await?;\n    server.serve().await?; Ok(())\n}}'
+                server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MySmartCity;\n#[async_trait]\nimpl gen::SmartCityRpcApi for MySmartCity {{\n    async fn quote_trip<\'a>(&\'a self, _rider_id: String, _zone_id: String) -> Result<gen::SmartCityRpcApiquoteTripResult, xidl_jsonrpc::Error> {{ Ok(gen::SmartCityRpcApiquoteTripResult {{ amount_cents: 100, currency: "USD".into(), r#return: "quote-1".into() }}) }}\n    async fn create_invoice<\'a>(&\'a self, _rider_id: String, _amount_cents: i32, _currency: String) -> Result<gen::SmartCityRpcApicreateInvoiceResult, xidl_jsonrpc::Error> {{ Ok(gen::SmartCityRpcApicreateInvoiceResult {{ invoice_id: "inv-1".into(), payment_url: "http://pay".into(), r#return: "inv-1".into() }}) }}\n    async fn mark_paid<\'a>(&\'a self, _invoice_id: String) -> Result<(), xidl_jsonrpc::Error> {{ Ok(()) }}\n    async fn heartbeat<\'a>(&\'a self) -> Result<(), xidl_jsonrpc::Error> {{ Ok(()) }}\n    async fn rotate_session<\'a>(&\'a self, _session_token: String) -> Result<gen::SmartCityRpcApirotateSessionResult, xidl_jsonrpc::Error> {{ Ok(gen::SmartCityRpcApirotateSessionResult {{ session_token: "new-tok".into(), expires_at_epoch_sec: 3600 }}) }}\n    async fn dispatch<\'a>(&\'a self, _vehicle_id: String, _pickup_stop: String) -> Result<gen::SmartCityRpcApidispatchResult, xidl_jsonrpc::Error> {{ Ok(gen::SmartCityRpcApidispatchResult {{ job_id: "job-1".into(), r#return: 42 }}) }}\n    async fn report_trip<\'a>(&\'a self, _order_id: String, _rider_id: String, _status: String) -> Result<(), xidl_jsonrpc::Error> {{ Ok(()) }}\n    async fn summarize<\'a>(&\'a self, _day: String) -> Result<gen::SmartCityRpcApisummarizeResult, xidl_jsonrpc::Error> {{ Ok(gen::SmartCityRpcApisummarizeResult {{ trip_count: 10, gross_revenue_cents: 1000 }}) }}\n    async fn get_attribute_region<\'a>(&\'a self) -> Result<String, xidl_jsonrpc::Error> {{ Ok("us-east".into()) }}\n    async fn get_attribute_firmware_channel<\'a>(&\'a self) -> Result<String, xidl_jsonrpc::Error> {{ Ok("stable".into()) }}\n    async fn set_attribute_firmware_channel<\'a>(&\'a self, _value: String) -> Result<(), xidl_jsonrpc::Error> {{ Ok(()) }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let server = xidl_jsonrpc::Server::builder().with_service(gen::SmartCityRpcApiServer::new(MySmartCity)).with_endpoint("tcp://127.0.0.1:{context.port}").build().await?;\n    server.serve().await?; Ok(())\n}}'
+            elif "multi_interface" in context.idl_file:
+                server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MyMath;\n#[async_trait] impl gen::Math for MyMath {{ async fn add<\'a>(&\'a self, a: i32, b: i32) -> Result<i32, xidl_jsonrpc::Error> {{ Ok(a + b) }} }}\nstruct MyStore {{ last: std::sync::Mutex<String> }}\n#[async_trait] impl gen::Store for MyStore {{ async fn save<\'a>(&\'a self, value: String) -> Result<(), xidl_jsonrpc::Error> {{ *self.last.lock().unwrap() = value; Ok(()) }} async fn last_value<\'a>(&\'a self) -> Result<String, xidl_jsonrpc::Error> {{ Ok(self.last.lock().unwrap().clone()) }} }}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let server = xidl_jsonrpc::Server::builder()\n        .with_service(gen::MathServer::new(MyMath))\n        .with_service(gen::StoreServer::new(MyStore {{ last: std::sync::Mutex::new("".into()) }}))\n        .with_endpoint("tcp://127.0.0.1:{context.port}")\n        .build().await?;\n    server.serve().await?; Ok(())\n}}'
             elif "complex" in context.idl_file:
                 server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MyCalculator;\n#[async_trait]\nimpl gen::Calculator for MyCalculator {{\n    async fn calculate<\'a>(&\'a self, req: gen::AddRequest, op: gen::Operation) -> Result<gen::AddResponse, xidl_jsonrpc::Error> {{\n        let result = match op {{ gen::Operation::ADD => req.a + req.b, gen::Operation::SUBTRACT => req.a - req.b }};\n        Ok(gen::AddResponse {{ result }})\n    }}\n    async fn get_history<\'a>(&\'a self) -> Result<Vec<i32>, xidl_jsonrpc::Error> {{ Ok(vec![]) }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let server = xidl_jsonrpc::Server::builder().with_service(gen::CalculatorServer::new(MyCalculator)).with_endpoint("tcp://127.0.0.1:{context.port}").build().await?;\n    server.serve().await?; Ok(())\n}}'
             else:
                 server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MyCalculator;\n#[async_trait]\nimpl gen::Calculator for MyCalculator {{\n    async fn add<\'a>(&\'a self, a: i32, b: i32) -> Result<i32, xidl_jsonrpc::Error> {{ Ok(a + b) }}\n    async fn subtract<\'a>(&\'a self, a: i32, b: i32) -> Result<i32, xidl_jsonrpc::Error> {{ Ok(a - b) }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let server = xidl_jsonrpc::Server::builder().with_service(gen::CalculatorServer::new(MyCalculator)).with_endpoint("tcp://127.0.0.1:{context.port}").build().await?;\n    server.serve().await?; Ok(())\n}}'
-            with open(os.path.join(context.lang_dir, "src", "main.rs"), "w") as f: f.write(server_code)
-            context.server_process = subprocess.Popen(["cargo", "run", "--offline"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            t = threading.Thread(target=run_server_logging, args=(context.server_process, "RUST-JSONRPC")); t.daemon = True; t.start()
-            time.sleep(40)
+        with open(os.path.join(context.lang_dir, "src", "main.rs"), "w") as f: f.write(server_code)
+        context.server_process = subprocess.Popen(["cargo", "run", "--offline"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        t = threading.Thread(target=run_server_logging, args=(context.server_process, "RUST-JSONRPC")); t.daemon = True; t.start()
+        time.sleep(40)
+
+@then('the client can call math.add({a:d}, {b:d}) to get {expected:d}')
+def step_impl(context, a, b, expected):
+    import socket, json
+    def call_rpc(method, params):
+        s = socket.create_connection(("127.0.0.1", context.port))
+        s.sendall((json.dumps({"jsonrpc": "2.0", "method": method, "params": params, "id": 1}) + "\n").encode())
+        res = s.recv(4096).decode(); s.close(); return json.loads(res)
+    res = call_rpc("Math.add", {"a": a, "b": b})
+    val = res["result"].get("value") or res["result"].get("return") or res["result"]
+    assert val == expected
+
+@then('the client can save "{value}" to store and get it back')
+def step_impl(context, value):
+    import socket, json
+    def call_rpc(method, params):
+        s = socket.create_connection(("127.0.0.1", context.port))
+        s.sendall((json.dumps({"jsonrpc": "2.0", "method": method, "params": params, "id": 1}) + "\n").encode())
+        res = s.recv(4096).decode(); s.close(); return json.loads(res)
+    call_rpc("Store.save", {"value": value})
+    res = call_rpc("Store.last_value", {})
+    val = res["result"].get("value") or res["result"].get("return") or res["result"]
+    assert val == value
 
 @then('the client can create a user with name "{name}" and id {user_id:d}')
 def step_impl(context, name, user_id):
@@ -256,7 +357,7 @@ def step_impl(context, count):
     assert resp.status_code == 200, f"Got {resp.status_code}: {resp.text}"
     received = 0
     for line in resp.iter_lines():
-        if line: 
+        if line:
             raw = line.decode()
             if raw.startswith('data:'):
                 received += 1

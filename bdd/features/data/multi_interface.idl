@@ -1,0 +1,8 @@
+interface Math {
+    int32 add(int32 a, int32 b);
+};
+
+interface Store {
+    void save(string value);
+    string last_value();
+};

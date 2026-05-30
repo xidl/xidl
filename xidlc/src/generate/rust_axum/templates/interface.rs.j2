@@ -258,7 +258,7 @@
                                 {% else %}
                                     {% if param.optional %}
                                         let {{ param.name }}: {{ param.ty }} = match cookie_map.get("{{ param.wire_name }}").and_then(|values| values.first()) {
-                                            Some(value) => Some({% if param.cookie_item_is_string %}value.to_string(){% elif param.cookie_item_is_primitive %}value.parse().map_err(|err| ::xidl_rust_ax_um::Error::new(400, format!("{err:?}")))?{% else %}::xidl_rust_axum::serde_json::from_str(value).map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}),
+                                            Some(value) => Some({% if param.cookie_item_is_string %}value.to_string(){% elif param.cookie_item_is_primitive %}value.parse().map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% else %}::xidl_rust_axum::serde_json::from_str(value).map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}),
                                             None => None,
                                         };
                                     {% else %}
