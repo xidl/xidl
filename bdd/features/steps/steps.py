@@ -88,6 +88,16 @@ def step_impl(context, lang):
             if "trait Calculator" in content: found_interface = True
     assert found_struct, f"AddRequest struct not found in {files}"; assert found_interface, f"Calculator interface not found in {files}"
 
+def wait_for_port(port, timeout=60):
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        try:
+            with socket.create_connection(("127.0.0.1", port), timeout=1):
+                return True
+        except (socket.error, ConnectionRefusedError):
+            time.sleep(0.5)
+    return False
+
 def run_server_logging(process, prefix):
     for line in iter(process.stderr.readline, ''):
         if not line: break
@@ -197,7 +207,7 @@ if __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port
         with open(context.server_file, "w") as f: f.write(server_code)
         context.server_process = subprocess.Popen(["python3", "-u", context.server_file], env=context.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
         t = threading.Thread(target=run_server_logging, args=(context.server_process, "PYTHON")); t.daemon = True; t.start()
-        time.sleep(3)
+        wait_for_port(context.port)
     elif lang == "go":
         go_mod = f"module test\ngo 1.25\nreplace github.com/xidl/xidl/golang/xidl-go-rest => {os.path.abspath('golang/xidl-go-rest')}\nreplace github.com/xidl/xidl/golang/xidl-go => {os.path.abspath('golang/xidl-go')}\nrequire github.com/xidl/xidl/golang/xidl-go-rest v0.0.0\nrequire github.com/gin-gonic/gin v1.12.0\n"
         with open(os.path.join(context.lang_dir, "go.mod"), "w") as f: f.write(go_mod)
@@ -218,13 +228,11 @@ if __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port
         subprocess.run(["go", "mod", "tidy"], cwd=context.lang_dir, check=True)
         context.server_process = subprocess.Popen(["go", "run", "."], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         t = threading.Thread(target=run_server_logging, args=(context.server_process, "GO")); t.daemon = True; t.start()
-        time.sleep(10)
+        wait_for_port(context.port)
     elif lang == "rust":
         root_dir = os.path.abspath(".")
         if context.protocol == "rest":
             cargo_toml = f'[package]\nname = "test-rust-rest"\nversion = "0.1.0"\nedition = "2021"\n[workspace]\n[dependencies]\nxidl-rust-axum = {{ path = "{os.path.join(root_dir, "xidl-rust-axum")}", features = ["stream"] }}\ntokio = {{ version = "1", features = ["full"] }}\nasync-trait = "0.1"\nserde = {{ version = "1", features = ["derive"] }}\nserde_json = "1"\naxum = "0.8"\nfutures-util = "0.3"\n'
-            with open(os.path.join(context.lang_dir, "Cargo.toml"), "w") as f: f.write(cargo_toml)
-            os.makedirs(os.path.join(context.lang_dir, "src"), exist_ok=True)
             if "complex_rest" in context.idl_file:
                 server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MyUserService {{ users: std::sync::Arc<std::sync::Mutex<std::collections::HashMap<u32, gen::User>>>, }}\n#[async_trait]\nimpl gen::UserService for MyUserService {{\n    async fn get_user<\'a>(&\'a self, id: u32) -> Result<gen::User, xidl_rust_axum::Error> {{\n        let users = self.users.lock().unwrap(); users.get(&id).cloned().ok_or(xidl_rust_axum::Error::not_found())\n    }}\n    async fn create_user<\'a>(&\'a self, user: gen::User) -> Result<gen::User, xidl_rust_axum::Error> {{\n        let mut users = self.users.lock().unwrap(); users.insert(user.id, user.clone()); Ok(user)\n    }}\n    async fn list_users<\'a>(&\'a self, _filter: String) -> Result<Vec<gen::User>, xidl_rust_axum::Error> {{\n        let users = self.users.lock().unwrap(); Ok(users.values().cloned().collect())\n    }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let svc = gen::UserServiceServer::new(MyUserService {{ users: std::sync::Arc::new(std::sync::Mutex::new(std::collections::HashMap::new())), }});\n    xidl_rust_axum::Server::builder().with_service(svc).serve("127.0.0.1:{context.port}").await?; Ok(())\n}}'
             elif "all_scenarios" in context.idl_file:
@@ -235,14 +243,9 @@ if __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port
                 server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MyForm;\n#[async_trait]\nimpl gen::FormService for MyForm {{\n    async fn submit<\'a>(&\'a self, name: String, age: i32) -> Result<String, xidl_rust_axum::Error> {{ Ok(format!("Received {{name}} age {{age}}")) }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let svc = gen::FormServiceServer::new(MyForm);\n    xidl_rust_axum::Server::builder().with_service(svc).serve("127.0.0.1:{context.port}").await?; Ok(())\n}}'
             else:
                 server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MyHelloWorld;\n#[async_trait] impl gen::HelloWorldService for MyHelloWorld {{ async fn hello<\'a>(&\'a self) -> Result<String, xidl_rust_axum::Error> {{ Ok("Hello BDD".into()) }} async fn echo<\'a>(&\'a self, msg: String) -> Result<String, xidl_rust_axum::Error> {{ Ok(msg) }} }}\n#[tokio::main] async fn main() -> Result<(), Box<dyn std::error::Error>> {{ let svc = gen::HelloWorldServer::new(MyHelloWorld); xidl_rust_axum::Server::builder().with_service(svc).serve("127.0.0.1:{context.port}").await?; Ok(()) }}'
-            with open(os.path.join(context.lang_dir, "src", "main.rs"), "w") as f: f.write(server_code)
-            context.server_process = subprocess.Popen(["cargo", "run", "--offline"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            t = threading.Thread(target=run_server_logging, args=(context.server_process, "RUST-REST")); t.daemon = True; t.start()
-            time.sleep(40)
+            prefix = "RUST-REST"
         elif context.protocol == "jsonrpc":
             cargo_toml = f'[package]\nname = "test-rust-jsonrpc"\nversion = "0.1.0"\nedition = "2021"\n[workspace]\n[dependencies]\nxidl-jsonrpc = {{ path = "{os.path.join(root_dir, "xidl-jsonrpc")}", features = ["transport-tcp"] }}\ntokio = {{ version = "1", features = ["full"] }}\nasync-trait = "0.1"\nserde = {{ version = "1", features = ["derive"] }}\nserde_json = "1"\n'
-            with open(os.path.join(context.lang_dir, "Cargo.toml"), "w") as f: f.write(cargo_toml)
-            os.makedirs(os.path.join(context.lang_dir, "src"), exist_ok=True)
             if "city_jsonrpc" in context.idl_file:
                 server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MySmartCity;\n#[async_trait]\nimpl gen::SmartCityRpcApi for MySmartCity {{\n    async fn quote_trip<\'a>(&\'a self, _rider_id: String, _zone_id: String) -> Result<gen::SmartCityRpcApiquoteTripResult, xidl_jsonrpc::Error> {{ Ok(gen::SmartCityRpcApiquoteTripResult {{ amount_cents: 100, currency: "USD".into(), r#return: "quote-1".into() }}) }}\n    async fn create_invoice<\'a>(&\'a self, _rider_id: String, _amount_cents: i32, _currency: String) -> Result<gen::SmartCityRpcApicreateInvoiceResult, xidl_jsonrpc::Error> {{ Ok(gen::SmartCityRpcApicreateInvoiceResult {{ invoice_id: "inv-1".into(), payment_url: "http://pay".into(), r#return: "inv-1".into() }}) }}\n    async fn mark_paid<\'a>(&\'a self, _invoice_id: String) -> Result<(), xidl_jsonrpc::Error> {{ Ok(()) }}\n    async fn heartbeat<\'a>(&\'a self) -> Result<(), xidl_jsonrpc::Error> {{ Ok(()) }}\n    async fn rotate_session<\'a>(&\'a self, _session_token: String) -> Result<gen::SmartCityRpcApirotateSessionResult, xidl_jsonrpc::Error> {{ Ok(gen::SmartCityRpcApirotateSessionResult {{ session_token: "new-tok".into(), expires_at_epoch_sec: 3600 }}) }}\n    async fn dispatch<\'a>(&\'a self, _vehicle_id: String, _pickup_stop: String) -> Result<gen::SmartCityRpcApidispatchResult, xidl_jsonrpc::Error> {{ Ok(gen::SmartCityRpcApidispatchResult {{ job_id: "job-1".into(), r#return: 42 }}) }}\n    async fn report_trip<\'a>(&\'a self, _order_id: String, _rider_id: String, _status: String) -> Result<(), xidl_jsonrpc::Error> {{ Ok(()) }}\n    async fn summarize<\'a>(&\'a self, _day: String) -> Result<gen::SmartCityRpcApisummarizeResult, xidl_jsonrpc::Error> {{ Ok(gen::SmartCityRpcApisummarizeResult {{ trip_count: 10, gross_revenue_cents: 1000 }}) }}\n    async fn get_attribute_region<\'a>(&\'a self) -> Result<String, xidl_jsonrpc::Error> {{ Ok("us-east".into()) }}\n    async fn get_attribute_firmware_channel<\'a>(&\'a self) -> Result<String, xidl_jsonrpc::Error> {{ Ok("stable".into()) }}\n    async fn set_attribute_firmware_channel<\'a>(&\'a self, _value: String) -> Result<(), xidl_jsonrpc::Error> {{ Ok(()) }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let server = xidl_jsonrpc::Server::builder().with_service(gen::SmartCityRpcApiServer::new(MySmartCity)).with_endpoint("tcp://127.0.0.1:{context.port}").build().await?;\n    server.serve().await?; Ok(())\n}}'
             elif "multi_interface" in context.idl_file:
@@ -251,10 +254,21 @@ if __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port
                 server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MyCalculator;\n#[async_trait]\nimpl gen::Calculator for MyCalculator {{\n    async fn calculate<\'a>(&\'a self, req: gen::AddRequest, op: gen::Operation) -> Result<gen::AddResponse, xidl_jsonrpc::Error> {{\n        let result = match op {{ gen::Operation::ADD => req.a + req.b, gen::Operation::SUBTRACT => req.a - req.b }};\n        Ok(gen::AddResponse {{ result }})\n    }}\n    async fn get_history<\'a>(&\'a self) -> Result<Vec<i32>, xidl_jsonrpc::Error> {{ Ok(vec![]) }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let server = xidl_jsonrpc::Server::builder().with_service(gen::CalculatorServer::new(MyCalculator)).with_endpoint("tcp://127.0.0.1:{context.port}").build().await?;\n    server.serve().await?; Ok(())\n}}'
             else:
                 server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MyCalculator;\n#[async_trait]\nimpl gen::Calculator for MyCalculator {{\n    async fn add<\'a>(&\'a self, a: i32, b: i32) -> Result<i32, xidl_jsonrpc::Error> {{ Ok(a + b) }}\n    async fn subtract<\'a>(&\'a self, a: i32, b: i32) -> Result<i32, xidl_jsonrpc::Error> {{ Ok(a - b) }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let server = xidl_jsonrpc::Server::builder().with_service(gen::CalculatorServer::new(MyCalculator)).with_endpoint("tcp://127.0.0.1:{context.port}").build().await?;\n    server.serve().await?; Ok(())\n}}'
+            prefix = "RUST-JSONRPC"
+
+        with open(os.path.join(context.lang_dir, "Cargo.toml"), "w") as f: f.write(cargo_toml)
+        os.makedirs(os.path.join(context.lang_dir, "src"), exist_ok=True)
         with open(os.path.join(context.lang_dir, "src", "main.rs"), "w") as f: f.write(server_code)
-        context.server_process = subprocess.Popen(["cargo", "run", "--offline"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        t = threading.Thread(target=run_server_logging, args=(context.server_process, "RUST-JSONRPC")); t.daemon = True; t.start()
-        time.sleep(40)
+
+        env = os.environ.copy()
+        env["CARGO_TARGET_DIR"] = os.path.join(root_dir, "bdd", ".temp", "rust_target")
+        context.server_process = subprocess.Popen(["cargo", "run", "--offline"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+        t = threading.Thread(target=run_server_logging, args=(context.server_process, prefix)); t.daemon = True; t.start()
+        if not wait_for_port(context.port):
+            if context.server_process.poll() is not None:
+                stdout, stderr = context.server_process.communicate()
+                assert False, f"Server failed to start:\n{stderr}"
+            assert False, f"Timed out waiting for port {context.port}"
 
 @then('the client can call math.add({a:d}, {b:d}) to get {expected:d}')
 def step_impl(context, a, b, expected):
