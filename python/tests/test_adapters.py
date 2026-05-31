@@ -61,13 +61,14 @@ class FakeURL:
 
 
 class FakeFastAPIRequest:
-    def __init__(self, *, method, path, query=None, headers=None, body=b"", cookies=None):
+    def __init__(self, *, method, path, query=None, headers=None, body=b"", cookies=None, path_params=None):
         self.method = method
         self.url = FakeURL(path)
         self.query_params = query or {}
         self.headers = headers or {}
         self._body = body
         self.cookies = cookies or {}
+        self.path_params = path_params or {}
 
     async def body(self):
         return self._body
@@ -155,8 +156,8 @@ class AdapterTests(unittest.IsolatedAsyncioTestCase):
                     "accept": "text/event-stream",
                     "authorization": basic_auth("demo", "secret"),
                 },
-            ),
-            district="north",
+                path_params={"district": "north"},
+            )
         )
         self.assertEqual(200, response.status_code)
         self.assertEqual("text/event-stream", response.headers["Content-Type"])
@@ -185,7 +186,7 @@ class AdapterTests(unittest.IsolatedAsyncioTestCase):
             )
         )
         self.assertEqual(200, response.status_code)
-        self.assertEqual({"value": "alice"}, response.body)
+        self.assertEqual({"value": "alice"}, json.loads(response.body))
         self.assertEqual("application/json", response.headers["Content-Type"])
 
     async def test_fastapi_registered_unary_endpoint_rejects_invalid_content_type(self):
@@ -207,7 +208,8 @@ class AdapterTests(unittest.IsolatedAsyncioTestCase):
             )
         )
         self.assertEqual(415, response.status_code)
-        self.assertEqual("UNSUPPORTED_MEDIA_TYPE", response.body["code"])
+        body = json.loads(response.body)
+        self.assertEqual("UNSUPPORTED_MEDIA_TYPE", body["code"])
         self.assertEqual("application/json", response.headers["Content-Type"])
 
 
