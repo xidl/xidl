@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import inspect
 from dataclasses import dataclass, field
 from typing import Any, Optional
+
+import fastapi
+from fastapi.responses import JSONResponse, Response as RawResponse
 
 from .http import (
     HttpError,
@@ -19,10 +23,7 @@ from .http import (
 )
 
 
-from fastapi import Request as FastAPIRequest, Response as FastAPIResponse
-from fastapi.responses import JSONResponse, Response as RawResponse
-
-async def request_from_fastapi(request: FastAPIRequest, path_params: Optional[dict[str, str]] = None) -> Request:
+async def request_from_fastapi(request: fastapi.Request, path_params: Optional[dict[str, str]] = None) -> Request:
     url = getattr(request, "url", None)
     body = await request.body() if hasattr(request, "body") else None
     return Request(
@@ -36,8 +37,10 @@ async def request_from_fastapi(request: FastAPIRequest, path_params: Optional[di
     )
 
 
-async def invoke_fastapi_route(route: Route, request: FastAPIRequest) -> Any:
+async def invoke_fastapi_route(route: Route, request: fastapi.Request) -> Any:
     try:
+        # FastAPI passes path parameters as kwargs to the endpoint,
+        # but we can also extract them directly from the request object.
         runtime_request = await request_from_fastapi(request)
         result = await execute_route(route, runtime_request)
         if isinstance(result, Response):
@@ -79,9 +82,18 @@ class FastAPIAdapter(RouteAdapter):
 
             # Capture route in a closure. We only need the request object
             # as it contains all necessary information including path parameters.
+            # We use **kwargs to catch path parameters injected by FastAPI,
+            # but we override the signature so FastAPI doesn't try to validate them.
             def create_endpoint(r: Route):
-                async def endpoint(request: FastAPIRequest) -> Any:
+                async def endpoint(request: fastapi.Request, **kwargs) -> Any:
                     return await invoke_fastapi_route(r, request)
+
+                # Override the signature to hide **kwargs from FastAPI's validation.
+                # FastAPI will still pass path parameters as keyword arguments,
+                # and Python will accept them because of **kwargs.
+                endpoint.__signature__ = inspect.Signature([
+                    inspect.Parameter("request", inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=fastapi.Request)
+                ])
                 return endpoint
 
             endpoint = create_endpoint(route)
