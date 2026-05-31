@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.72.3](https://github.com/xidl/xidl/compare/v0.72.2...v0.72.3) (2026-05-31)
+
+
+### Bug Fixes
+
+* **python:** fix FastAPI adapter path parameter handling and unit tests ([dd9a562](https://github.com/xidl/xidl/commit/dd9a562d549355255cd985f6da50ab65127aed17))
+* **python:** resolve FastAPI 422 error by overriding endpoint signature ([b075934](https://github.com/xidl/xidl/commit/b075934b39cfec31d0b38c265011bd147351e470))
+
 ## [0.72.2](https://github.com/xidl/xidl/compare/v0.72.1...v0.72.2) (2026-05-28)
 
 
