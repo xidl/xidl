@@ -6,11 +6,11 @@ fn lang_and_codegen(folder: &str) -> Option<&'static str> {
     match folder {
         "rust" => Some("rs"),
         "ts" => Some("ts"),
-        "ts-rest" => Some("typescript-rest"),
+        "ts-http" => Some("typescript-rest"),
         "golang" => Some("go"),
         "golang-http" => Some("go-rest"),
         "python" => Some("python"),
-        "python-rest" => Some("python-rest"),
+        "python-http" => Some("python-rest"),
         "axum" => Some("axum"),
         "openapi" => Some("openapi"),
         "openrpc" => Some("openrpc"),
