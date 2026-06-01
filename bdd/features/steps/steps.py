@@ -73,9 +73,9 @@ def step_impl(context, lang):
         assert any(f.endswith(".ts") for f in files)
         with open(os.path.join(context.lang_dir, "package.json"), "w") as f:
             f.write('{"name": "test-ts-gen", "version": "1.0.0", "type": "module"}')
-        subprocess.run(["npm", "install", "--no-audit", "--no-fund", "zod", "typescript"], cwd=context.lang_dir, check=True, capture_output=True)
+        subprocess.run(["pnpm", "add", "zod", "typescript"], cwd=context.lang_dir, check=True, capture_output=True)
         ts_files = [f for f in files if f.endswith(".ts")]
-        result = subprocess.run(["npx", "tsc", "--noEmit"] + ts_files, cwd=context.lang_dir, capture_output=True, text=True)
+        result = subprocess.run(["pnpm", "exec", "tsc", "--noEmit"] + ts_files, cwd=context.lang_dir, capture_output=True, text=True)
         if result.returncode != 0:
             print(f"tsc stdout: {result.stdout}")
             print(f"tsc stderr: {result.stderr}")
