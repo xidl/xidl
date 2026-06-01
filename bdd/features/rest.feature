@@ -64,3 +64,9 @@ Feature: REST API Generation and Communication
       | rust   |
       | go     |
       | python |
+
+  Scenario: TypeScript REST Schema Imports
+    Given a REST IDL file "bdd/features/data/complex_rest.idl"
+    When I generate ts code for the IDL
+    Then the generated ts code should be valid
+    And the generated ts iface zod file should import the model schemas
