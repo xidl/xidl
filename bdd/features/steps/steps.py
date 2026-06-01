@@ -49,8 +49,14 @@ def step_impl(context, lang):
     elif lang == "rust" and context.protocol == "jsonrpc": cmd_lang = "rust-jsonrpc"
     elif lang == "go": cmd_lang = "go-rest"
     elif lang == "python": cmd_lang = "python-rest"
+    elif lang == "ts": cmd_lang = "typescript-rest"
 
-    cmd = ["cargo", "run", "-p", "xidlc", "--features", "cli,fmt", "--", "gen", "-o", context.lang_dir, cmd_lang, "--client", "--server", context.idl_file]
+    cmd = ["cargo", "run", "-p", "xidlc", "--features", "cli,fmt", "--", "gen", "-o", context.lang_dir, cmd_lang]
+    if lang == "ts":
+        cmd.append("--client")
+    else:
+        cmd.extend(["--client", "--server"])
+    cmd.append(context.idl_file)
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=os.getcwd())
     if result.returncode != 0:
         print(f"Gen stdout: {result.stdout}")
@@ -63,6 +69,28 @@ def step_impl(context, lang):
     if lang == "go": assert any(f.endswith(".go") for f in files)
     elif lang == "python": assert any(f.endswith(".py") for f in files)
     elif lang == "rust": assert any(f.endswith(".rs") for f in files)
+    elif lang == "ts":
+        assert any(f.endswith(".ts") for f in files)
+        with open(os.path.join(context.lang_dir, "package.json"), "w") as f:
+            f.write('{"name": "test-ts-gen", "version": "1.0.0", "type": "module"}')
+        subprocess.run(["npm", "install", "--no-audit", "--no-fund", "zod", "typescript"], cwd=context.lang_dir, check=True, capture_output=True)
+        ts_files = [f for f in files if f.endswith(".ts")]
+        result = subprocess.run(["npx", "tsc", "--noEmit"] + ts_files, cwd=context.lang_dir, capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"tsc stdout: {result.stdout}")
+            print(f"tsc stderr: {result.stderr}")
+        assert result.returncode == 0
+
+@then('the generated {lang} iface zod file should import the model schemas')
+def step_impl(context, lang):
+    files = os.listdir(context.lang_dir)
+    found_iface_zod = False
+    for f in files:
+        if f.endswith(".iface.zod.ts"):
+            found_iface_zod = True
+            content = open(os.path.join(context.lang_dir, f)).read()
+            assert re.search(r"import\s*\{[^}]+\}\s*from\s*[\"']\./", content) is not None
+    assert found_iface_zod, f"iface.zod.ts file not found in {files}"
 
 @then('the generated {lang} code should contain correct User struct and UserService interface')
 def step_impl(context, lang):

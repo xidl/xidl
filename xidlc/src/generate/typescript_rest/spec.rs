@@ -9,6 +9,8 @@ use super::model::TsHttpBlocks;
 
 #[derive(Serialize)]
 struct TypesFileContext {
+    file_stem: String,
+    imports: Vec<String>,
     blocks: Vec<String>,
 }
 
@@ -54,20 +56,38 @@ pub(crate) fn render_spec(
 ) -> IdlcResult<TsHttpOutput> {
     let blocks = render_defs(&spec.0, &[], renderer, rest_hir)?;
     let model_exports = ZodImportCollector::collect_exported_names(spec);
-    let mut imports = Vec::new();
+    let mut zod_imports = Vec::new();
+    let mut type_imports = Vec::new();
     for name in model_exports {
-        if blocks
+        let schema_name = format!("{name}Schema");
+        let has_schema = blocks
             .zod
+            .iter()
+            .any(|block| ZodImportCollector::is_word_in_text(&schema_name, block));
+        let has_mod_zod = blocks
+            .zod
+            .iter()
+            .any(|block| ZodImportCollector::is_word_in_text(&name, block));
+        if has_schema {
+            zod_imports.push(schema_name);
+        } else if has_mod_zod {
+            zod_imports.push(name.clone());
+        }
+
+        if blocks
+            .types
             .iter()
             .any(|block| ZodImportCollector::is_word_in_text(&name, block))
         {
-            imports.push(name);
+            type_imports.push(name);
         }
     }
     Ok(TsHttpOutput {
         types: renderer.render_template(
             "http/types.d.ts.j2",
             &TypesFileContext {
+                file_stem: file_stem.to_string(),
+                imports: type_imports,
                 blocks: blocks.types,
             },
         )?,
@@ -75,7 +95,7 @@ pub(crate) fn render_spec(
             "http/zod.ts.j2",
             &ZodFileContext {
                 file_stem: file_stem.to_string(),
-                imports,
+                imports: zod_imports,
                 blocks: blocks.zod,
             },
         )?,
@@ -174,20 +194,20 @@ impl ZodImportCollector {
                                     decl,
                                 ),
                             );
-                            names.insert(format!("{name}Schema"));
+                            names.insert(name);
                         }
                     }
                     hir::TypeDcl::NativeDcl(native) => {
                         let name = crate::generate::typescript::definition::names::ts_ident(
                             &native.decl.0,
                         );
-                        names.insert(format!("{name}Schema"));
+                        names.insert(name);
                     }
                 },
                 hir::Definition::ExceptDcl(except) => {
                     let name =
                         crate::generate::typescript::definition::names::ts_ident(&except.ident);
-                    names.insert(format!("{name}Schema"));
+                    names.insert(name);
                 }
                 _ => {}
             }
@@ -202,23 +222,23 @@ impl ZodImportCollector {
         match constr {
             hir::ConstrTypeDcl::StructDcl(def) => {
                 let name = crate::generate::typescript::definition::names::ts_ident(&def.ident);
-                names.insert(format!("{name}Schema"));
+                names.insert(name);
             }
             hir::ConstrTypeDcl::EnumDcl(def) => {
                 let name = crate::generate::typescript::definition::names::ts_ident(&def.ident);
-                names.insert(format!("{name}Schema"));
+                names.insert(name);
             }
             hir::ConstrTypeDcl::UnionDef(def) => {
                 let name = crate::generate::typescript::definition::names::ts_ident(&def.ident);
-                names.insert(format!("{name}Schema"));
+                names.insert(name);
             }
             hir::ConstrTypeDcl::BitsetDcl(def) => {
                 let name = crate::generate::typescript::definition::names::ts_ident(&def.ident);
-                names.insert(format!("{name}Schema"));
+                names.insert(name);
             }
             hir::ConstrTypeDcl::BitmaskDcl(def) => {
                 let name = crate::generate::typescript::definition::names::ts_ident(&def.ident);
-                names.insert(format!("{name}Schema"));
+                names.insert(name);
             }
             _ => {}
         }
