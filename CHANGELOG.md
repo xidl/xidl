@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.73.0](https://github.com/xidl/xidl/compare/v0.72.3...v0.73.0) (2026-06-01)
+
+
+### Features
+
+* **website:** add Google Analytics integration via environment variable ([f850c8e](https://github.com/xidl/xidl/commit/f850c8e9029bbef6c7b82e291f65dcb6dc765ed2))
+
+
+### Bug Fixes
+
+* **xidlc:** import referenced model schemas in iface.zod.ts (close [#172](https://github.com/xidl/xidl/issues/172)) ([6b1caa0](https://github.com/xidl/xidl/commit/6b1caa06054032d1ed2e38c76a50d49b1a5d7592))
+
 ## [0.72.3](https://github.com/xidl/xidl/compare/v0.72.2...v0.72.3) (2026-05-31)
 
 
