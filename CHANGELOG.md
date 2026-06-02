@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.76.0](https://github.com/xidl/xidl/compare/v0.75.0...v0.76.0) (2026-06-02)
+
+
+### Features
+
+* **typescript:** migrate to xidl-typescript-codec for metadata-aware serialization ([#178](https://github.com/xidl/xidl/issues/178)) ([3c7b082](https://github.com/xidl/xidl/commit/3c7b082af74cd2ef296e0ab75d814b070711498a))
+
 ## [0.75.0](https://github.com/xidl/xidl/compare/v0.74.0...v0.75.0) (2026-06-02)
 
 
