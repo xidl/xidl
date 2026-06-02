@@ -1,0 +1,282 @@
+package json
+
+import (
+	"errors"
+	"reflect"
+	"testing"
+)
+
+func TestMarshalBasic(t *testing.T) {
+	tests := []struct {
+		val  any
+		want string
+	}{
+		{nil, "null"},
+		{true, "true"},
+		{false, "false"},
+		{123, "123"},
+		{-456, "-456"},
+		{uint(789), "789"},
+		{3.14, "3.14"},
+		{"hello", `"hello"`},
+		{"hello <world> & \"co\"", `"hello \u003cworld\u003e \u0026 \"co\""`},
+		{[]int{1, 2, 3}, "[1,2,3]"},
+		{[2]string{"a", "b"}, `["a","b"]`},
+		{map[string]int{"b": 2, "a": 1}, `{"a":1,"b":2}`},
+		{[]byte("base64"), `"YmFzZTY0"`},
+	}
+
+	for _, tc := range tests {
+		got, err := Marshal(tc.val)
+		if err != nil {
+			t.Errorf("Marshal(%v) failed: %v", tc.val, err)
+			continue
+		}
+		if string(got) != tc.want {
+			t.Errorf("Marshal(%v) = %s, want %s", tc.val, got, tc.want)
+		}
+	}
+}
+
+type SimpleStruct struct {
+	A int    `json:"a"`
+	B string `json:"b,omitempty"`
+	C bool   `json:"-"`
+	D int    `json:",string"`
+}
+
+type EmbeddedStruct struct {
+	SimpleStruct
+	E float64 `json:"e"`
+}
+
+type ConflictOuter struct {
+	SimpleStruct
+	A string `json:"a"` // shadows SimpleStruct.A
+}
+
+func TestMarshalStruct(t *testing.T) {
+	s := SimpleStruct{A: 10, B: "", C: true, D: 42}
+	got, err := Marshal(s)
+	if err != nil {
+		t.Fatalf("Marshal failed: %v", err)
+	}
+	want := `{"a":10,"D":"42"}` // B is omitempty and empty, C is skipped, D is string option
+	if string(got) != want {
+		t.Errorf("Marshal(SimpleStruct) = %s, want %s", got, want)
+	}
+
+	emb := EmbeddedStruct{
+		SimpleStruct: SimpleStruct{A: 1, B: "test", D: 2},
+		E:            5.5,
+	}
+	got, err = Marshal(emb)
+	if err != nil {
+		t.Fatalf("Marshal failed: %v", err)
+	}
+	want = `{"a":1,"b":"test","D":"2","e":5.5}`
+	if string(got) != want {
+		t.Errorf("Marshal(EmbeddedStruct) = %s, want %s", got, want)
+	}
+
+	co := ConflictOuter{
+		SimpleStruct: SimpleStruct{A: 1},
+		A:            "shadow",
+	}
+	got, err = Marshal(co)
+	if err != nil {
+		t.Fatalf("Marshal failed: %v", err)
+	}
+	want = `{"D":"0","a":"shadow"}`
+	if string(got) != want {
+		t.Errorf("Marshal(ConflictOuter) = %s, want %s", got, want)
+	}
+}
+
+func TestUnmarshalBasic(t *testing.T) {
+	t.Run("bool", func(t *testing.T) {
+		var v bool
+		if err := Unmarshal([]byte("true"), &v); err != nil || !v {
+			t.Errorf("Unmarshal(true) = %v, %v", v, err)
+		}
+	})
+
+	t.Run("int", func(t *testing.T) {
+		var v int
+		if err := Unmarshal([]byte("-123"), &v); err != nil || v != -123 {
+			t.Errorf("Unmarshal(-123) = %v, %v", v, err)
+		}
+	})
+
+	t.Run("uint", func(t *testing.T) {
+		var v uint
+		if err := Unmarshal([]byte("456"), &v); err != nil || v != 456 {
+			t.Errorf("Unmarshal(456) = %v, %v", v, err)
+		}
+	})
+
+	t.Run("float", func(t *testing.T) {
+		var v float64
+		if err := Unmarshal([]byte("123.45"), &v); err != nil || v != 123.45 {
+			t.Errorf("Unmarshal(123.45) = %v, %v", v, err)
+		}
+	})
+
+	t.Run("string", func(t *testing.T) {
+		var v string
+		if err := Unmarshal([]byte(`"hello\nworld"`), &v); err != nil || v != "hello\nworld" {
+			t.Errorf("Unmarshal(string) = %q, %v", v, err)
+		}
+	})
+
+	t.Run("slice", func(t *testing.T) {
+		var v []int
+		if err := Unmarshal([]byte("[1,2,3]"), &v); err != nil || !reflect.DeepEqual(v, []int{1, 2, 3}) {
+			t.Errorf("Unmarshal(slice) = %v, %v", v, err)
+		}
+	})
+
+	t.Run("map", func(t *testing.T) {
+		var v map[string]int
+		if err := Unmarshal([]byte(`{"a":1,"b":2}`), &v); err != nil || v["a"] != 1 || v["b"] != 2 {
+			t.Errorf("Unmarshal(map) = %v, %v", v, err)
+		}
+	})
+
+	t.Run("interface", func(t *testing.T) {
+		var v any
+		if err := Unmarshal([]byte(`{"a":1,"b":[true, "hello"]}`), &v); err != nil {
+			t.Fatalf("Unmarshal to interface failed: %v", err)
+		}
+		m, ok := v.(map[string]any)
+		if !ok {
+			t.Fatalf("Expected map[string]any, got %T", v)
+		}
+		if m["a"].(float64) != 1 {
+			t.Errorf("Expected m[a] = 1, got %v", m["a"])
+		}
+		arr := m["b"].([]any)
+		if !arr[0].(bool) || arr[1].(string) != "hello" {
+			t.Errorf("Unexpected array elements: %v", arr)
+		}
+	})
+
+	t.Run("null pointer", func(t *testing.T) {
+		var v *SimpleStruct = &SimpleStruct{A: 99}
+		if err := Unmarshal([]byte("null"), &v); err != nil || v != nil {
+			t.Errorf("Unmarshal(null) = %v, %v", v, err)
+		}
+	})
+
+	t.Run("nested pointer allocation", func(t *testing.T) {
+		var v **SimpleStruct
+		if err := Unmarshal([]byte(`{"a":5}`), &v); err != nil || v == nil || *v == nil || (*v).A != 5 {
+			t.Errorf("Unmarshal into nested pointer failed: %v, %v", v, err)
+		}
+	})
+}
+
+func TestUnmarshalStruct(t *testing.T) {
+	data := []byte(`{"a":100,"b":"yes","d":"200"}`)
+	var s SimpleStruct
+	if err := Unmarshal(data, &s); err != nil {
+		t.Fatalf("Unmarshal failed: %v", err)
+	}
+	if s.A != 100 || s.B != "yes" || s.D != 200 {
+		t.Errorf("Unmarshal got %+v", s)
+	}
+
+	// Test case insensitive match
+	data2 := []byte(`{"A":101,"B":"ok"}`)
+	var s2 SimpleStruct
+	if err := Unmarshal(data2, &s2); err != nil {
+		t.Fatalf("Unmarshal failed: %v", err)
+	}
+	if s2.A != 101 || s2.B != "ok" {
+		t.Errorf("Case insensitive match got %+v", s2)
+	}
+}
+
+type customTextMarshaler struct {
+	val string
+}
+
+func (c customTextMarshaler) MarshalText() ([]byte, error) {
+	return []byte("custom:" + c.val), nil
+}
+
+func (c *customTextMarshaler) UnmarshalText(text []byte) error {
+	s := string(text)
+	if !reflect.ValueOf(s).IsValid() || len(s) < 7 || s[:7] != "custom:" {
+		return errors.New("invalid format")
+	}
+	c.val = s[7:]
+	return nil
+}
+
+func TestCustomMarshalers(t *testing.T) {
+	t.Run("RawMessage", func(t *testing.T) {
+		type Msg struct {
+			Raw RawMessage `json:"raw"`
+		}
+		m := Msg{Raw: RawMessage(`{"nested":true}`)}
+		got, err := Marshal(m)
+		if err != nil {
+			t.Fatalf("Marshal with RawMessage failed: %v", err)
+		}
+		want := `{"raw":{"nested":true}}`
+		if string(got) != want {
+			t.Errorf("Marshal(RawMessage) = %s, want %s", got, want)
+		}
+
+		var m2 Msg
+		if err := Unmarshal(got, &m2); err != nil {
+			t.Fatalf("Unmarshal with RawMessage failed: %v", err)
+		}
+		if string(m2.Raw) != `{"nested":true}` {
+			t.Errorf("Unmarshal(RawMessage) got %s", m2.Raw)
+		}
+	})
+
+	t.Run("TextMarshaler", func(t *testing.T) {
+		c := customTextMarshaler{val: "foobar"}
+		got, err := Marshal(c)
+		if err != nil {
+			t.Fatalf("Marshal TextMarshaler failed: %v", err)
+		}
+		if string(got) != `"custom:foobar"` {
+			t.Errorf("Marshal TextMarshaler got %s", got)
+		}
+
+		var c2 customTextMarshaler
+		if err := Unmarshal(got, &c2); err != nil {
+			t.Fatalf("Unmarshal TextUnmarshaler failed: %v", err)
+		}
+		if c2.val != "foobar" {
+			t.Errorf("Unmarshal TextUnmarshaler got %s", c2.val)
+		}
+	})
+}
+
+func TestMarshalIndent(t *testing.T) {
+	v := map[string]any{
+		"a": 1,
+		"b": []any{2, 3},
+	}
+	got, err := MarshalIndent(v, "", "  ")
+	if err != nil {
+		t.Fatalf("MarshalIndent failed: %v", err)
+	}
+
+	want := "{\n" +
+		"  \"a\": 1,\n" +
+		"  \"b\": [\n" +
+		"    2,\n" +
+		"    3\n" +
+		"  ]\n" +
+		"}"
+
+	if string(got) != want {
+		t.Errorf("MarshalIndent got:\n%s\nwant:\n%s", got, want)
+	}
+}
