@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.74.0](https://github.com/xidl/xidl/compare/v0.73.0...v0.74.0) (2026-06-02)
+
+
+### Features
+
+* **golang:** add xidl-go-json reflection-based library ([c8df2b2](https://github.com/xidl/xidl/commit/c8df2b2d66eb96e0490a45a750ba07b3e6b36f5c))
+* **golang:** support catch-all map and any flatten fields in xidl-go-json ([1fa0619](https://github.com/xidl/xidl/commit/1fa0619831475deb8bd6cabbeafe4af7477e3f72))
+* **golang:** support flatten tag in xidl-go-json ([d8f428d](https://github.com/xidl/xidl/commit/d8f428d3a5ab45673fd4c68527341a6fbdafa7dc))
+* **golang:** use xidl-go-json codec in go-rest and emit xjson tags in xidlc ([772f7ff](https://github.com/xidl/xidl/commit/772f7ffb1916975d5d896fd36ca0c033cb51a2d4))
+* **xidl-go-json:** add more complex flatten rule ([0c0385b](https://github.com/xidl/xidl/commit/0c0385beca9b4ff9555b17ddd982492285f92d92))
+
 ## [0.73.0](https://github.com/xidl/xidl/compare/v0.72.3...v0.73.0) (2026-06-01)
 
 
