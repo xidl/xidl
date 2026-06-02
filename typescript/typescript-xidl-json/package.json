@@ -1,0 +1,19 @@
+{
+  "dependencies": {
+    "zod": "^3.23.0"
+  },
+  "description": "Zod-based JSON serializer and deserializer with metadata support (rename, flatten, omitempty, ignore)",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  },
+  "main": "dist/index.js",
+  "name": "typescript-xidl-json",
+  "scripts": {
+    "build": "tsc",
+    "test": "node --import tsx --test tests/**/*.test.ts"
+  },
+  "types": "dist/index.d.ts",
+  "version": "1.0.0"
+}
