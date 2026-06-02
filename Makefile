@@ -13,7 +13,7 @@ test-rust: init
 
 test-go: test-go-codegen test-go-runtime
 
-test-bdd:
+test-bdd: init
 	pip install -r bdd/requirements.txt
 	behave bdd/features
 
@@ -54,3 +54,4 @@ docs-build:
 
 init:
 	cd ./xidlc-examples && pnpm install
+	cd ./typescript/xidl-typescript-codec && pnpm install && pnpm build
