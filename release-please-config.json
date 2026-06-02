@@ -110,6 +110,11 @@
           "jsonpath": "$.package[?(@.name.value=='xidl-api-github')].version",
           "path": "Cargo.lock",
           "type": "toml"
+        },
+        {
+          "jsonpath": "$.version",
+          "path": "typescript/xidl-typescript-codec/package.json",
+          "type": "json"
         }
       ],
       "release-type": "simple"

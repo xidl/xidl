@@ -6,7 +6,7 @@ require (
 	github.com/gin-contrib/cors v1.7.7
 	github.com/gin-gonic/gin v1.12.0
 	github.com/vmihailenco/msgpack/v5 v5.4.1
-	github.com/xidl/xidl/golang/xidl-go-json v0.0.0
+	github.com/xidl/xidl/golang/xidl-go-codec v0.0.0
 )
 
 require (
@@ -42,4 +42,4 @@ require (
 	google.golang.org/protobuf v1.36.10 // indirect
 )
 
-replace github.com/xidl/xidl/golang/xidl-go-json => ../xidl-go-json
+replace github.com/xidl/xidl/golang/xidl-go-codec => ../xidl-go-codec

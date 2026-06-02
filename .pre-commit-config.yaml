@@ -41,11 +41,11 @@ repos:
         entry: bash -lc 'cd golang/xidl-go-http && go vet ./...'
         files: ^golang/xidl-go-http/.+\.go$
         pass_filenames: false
-      - id: go-vet-json
-        name: go vet xidl-go-json
+      - id: go-vet-codec
+        name: go vet xidl-go-codec
         language: system
-        entry: bash -lc 'cd golang/xidl-go-json && go vet ./...'
-        files: ^golang/xidl-go-json/.+\.go$
+        entry: bash -lc 'cd golang/xidl-go-codec && go vet ./...'
+        files: ^golang/xidl-go-codec/.+\.go$
         pass_filenames: false
       - id: go-vet-examples
         name: go vet xidlc-examples

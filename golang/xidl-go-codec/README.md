@@ -1,4 +1,4 @@
-# xidl-go-json
+# xidl-go-codec
 
 A reflection-based JSON encoder/decoder for Go. It uses the `xjson` struct tag
 and is wire-compatible with `encoding/json`.

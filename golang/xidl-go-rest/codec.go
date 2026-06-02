@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/vmihailenco/msgpack/v5"
-	json "github.com/xidl/xidl/golang/xidl-go-json"
+	json "github.com/xidl/xidl/golang/xidl-go-codec"
 )
 
 type Codec interface {

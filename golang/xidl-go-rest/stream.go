@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 
-	json "github.com/xidl/xidl/golang/xidl-go-json"
+	json "github.com/xidl/xidl/golang/xidl-go-codec"
 )
 
 type StreamFrame[T any] struct {
