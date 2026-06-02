@@ -2,7 +2,7 @@
 import { z } from 'zod';
 
 export interface XidlJsonMeta {
-  jsonKey?: string;
+  name?: string;
   flatten?: boolean;
   ignore?: boolean;
   omitempty?: boolean;
@@ -123,7 +123,7 @@ export function serializeZodObject(obj: any, schema: z.ZodObject<any>): any {
         catchAllFields.push({ fieldSchema, key });
       }
     } else {
-      const outKey = meta.jsonKey || key;
+      const outKey = meta.name || key;
       // Normal field serialization
       if (value !== undefined) {
         result[outKey] = serialize(value, fieldSchema);
@@ -211,7 +211,7 @@ export function deserializeZodObject(
         catchAllFields.push({ fieldSchema, key });
       }
     } else {
-      const inKey = meta.jsonKey || key;
+      const inKey = meta.name || key;
       const value = jsonObj[inKey];
       if (value !== undefined) {
         result[key] = deserialize(value, fieldSchema);
@@ -274,7 +274,7 @@ function getExpectedJsonKeys(schema: z.ZodObject<any>): Set<string> {
         }
       }
     } else {
-      keys.add(meta.jsonKey || key);
+      keys.add(meta.name || key);
     }
   }
   return keys;

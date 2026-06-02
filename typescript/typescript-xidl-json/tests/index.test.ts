@@ -12,8 +12,8 @@ import {
 
 test('rename and ignore functionality', () => {
   const schema = z.object({
-    age: xjson(z.number(), { jsonKey: 'user_age' }),
-    name: xjson(z.string(), { jsonKey: 'full_name' }),
+    age: xjson(z.number(), { name: 'user_age' }),
+    name: xjson(z.string(), { name: 'full_name' }),
     secret: xjson(z.string(), { ignore: true }),
   });
 
@@ -39,14 +39,14 @@ test('rename and ignore functionality', () => {
 
 test('struct flatten functionality', () => {
   const addressSchema = z.object({
-    city: xjson(z.string(), { jsonKey: 'city_name' }),
-    state: xjson(z.string(), { jsonKey: 'state_name' }),
+    city: xjson(z.string(), { name: 'city_name' }),
+    state: xjson(z.string(), { name: 'state_name' }),
   });
 
   const userSchema = z.object({
     address: xjson(addressSchema, { flatten: true }),
-    age: xjson(z.number(), { jsonKey: 'user_age' }),
-    name: xjson(z.string(), { jsonKey: 'full_name' }),
+    age: xjson(z.number(), { name: 'user_age' }),
+    name: xjson(z.string(), { name: 'full_name' }),
   });
 
   const user = {
@@ -76,7 +76,7 @@ test('struct flatten functionality', () => {
 test('catch-all map/any flatten functionality', () => {
   const eventSchema = z.object({
     extra: xjson(z.any(), { flatten: true }),
-    type: xjson(z.string(), { jsonKey: 'event_type' }),
+    type: xjson(z.string(), { name: 'event_type' }),
   });
 
   const original = {
