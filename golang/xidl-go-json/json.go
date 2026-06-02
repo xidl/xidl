@@ -240,7 +240,7 @@ func typeFields(t reflect.Type) []field {
 				}
 			}
 
-			tag := f.Tag.Get("json")
+			tag := f.Tag.Get("xjson")
 			if tag == "-" {
 				continue
 			}
