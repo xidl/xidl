@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"math"
@@ -1831,4 +1832,44 @@ func indirectTextUnmarshaler(v reflect.Value) (encoding.TextUnmarshaler, bool) {
 	}
 
 	return nil, false
+}
+
+// An Encoder writes JSON values to an output stream.
+type Encoder struct {
+	w io.Writer
+}
+
+// NewEncoder returns a new encoder that writes to w.
+func NewEncoder(w io.Writer) *Encoder {
+	return &Encoder{w: w}
+}
+
+// Encode writes the JSON encoding of v to the stream.
+func (enc *Encoder) Encode(v any) error {
+	b, err := Marshal(v)
+	if err != nil {
+		return err
+	}
+	b = append(b, '\n')
+	_, err = enc.w.Write(b)
+	return err
+}
+
+// A Decoder reads and decodes JSON values from an input stream.
+type Decoder struct {
+	dec *json.Decoder
+}
+
+// NewDecoder returns a new decoder that reads from r.
+func NewDecoder(r io.Reader) *Decoder {
+	return &Decoder{dec: json.NewDecoder(r)}
+}
+
+// Decode reads the next JSON-encoded value from its input and stores it in the value pointed to by v.
+func (dec *Decoder) Decode(v any) error {
+	var raw json.RawMessage
+	if err := dec.dec.Decode(&raw); err != nil {
+		return err
+	}
+	return Unmarshal(raw, v)
 }

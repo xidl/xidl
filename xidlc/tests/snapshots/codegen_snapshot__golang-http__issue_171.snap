@@ -9,7 +9,7 @@ issue_171.go
 
 package issue_171
 type Issue171StructWithAny struct {
-	Field any `json:"field"`
+	Field any `xjson:"field"`
 }
 
 ===============
@@ -162,7 +162,7 @@ func (c *Issue171ReproServiceClient) FlattenStructWithAny(ctx context.Context, r
 }
 
 type Issue171ReproServiceFlattenAnyRequest struct {
-	Payload any `json:"payload" form:"payload"`
+	Payload any `xjson:"payload" form:"payload"`
 }
 
 type Issue171ReproServiceFlattenAnyResponse struct {
@@ -188,7 +188,7 @@ func decodeIssue171ReproServiceFlattenAnyResponse(resp *http.Response) (Issue171
 }
 
 type Issue171ReproServiceFlattenStructWithAnyRequest struct {
-	Payload Issue171StructWithAny `json:"payload" form:"payload"`
+	Payload Issue171StructWithAny `xjson:"payload" form:"payload"`
 }
 
 type Issue171ReproServiceFlattenStructWithAnyResponse struct {

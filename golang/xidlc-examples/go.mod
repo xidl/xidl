@@ -33,6 +33,7 @@ require (
 	github.com/ugorji/go/codec v1.3.1 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
+	github.com/xidl/xidl/golang/xidl-go-json v0.0.0 // indirect
 	go.mongodb.org/mongo-driver/v2 v2.5.0 // indirect
 	golang.org/x/arch v0.23.0 // indirect
 	golang.org/x/crypto v0.48.0 // indirect
@@ -45,3 +46,5 @@ require (
 replace github.com/xidl/xidl/golang/xidl-go => ../xidl-go
 
 replace github.com/xidl/xidl/golang/xidl-go-rest => ../xidl-go-rest
+
+replace github.com/xidl/xidl/golang/xidl-go-json => ../xidl-go-json

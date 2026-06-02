@@ -95,7 +95,7 @@ fn render_operation_types(
         };
         writeln!(
             &mut ctx.body,
-            "\t{field} {} `json:\"{wire_name}\"`",
+            "\t{field} {} `xjson:\"{wire_name}\"`",
             go_type(&param.ty),
         )
         .unwrap();
@@ -105,7 +105,7 @@ fn render_operation_types(
 
     writeln!(&mut ctx.body, "type {response_name} struct {{").unwrap();
     if let hir::OpTypeSpec::TypeSpec(ty) = &op.ty {
-        writeln!(&mut ctx.body, "\tReturn {} `json:\"return\"`", go_type(ty)).unwrap();
+        writeln!(&mut ctx.body, "\tReturn {} `xjson:\"return\"`", go_type(ty)).unwrap();
     }
     for param in operation_params(op).iter().filter(|param| {
         matches!(
@@ -122,7 +122,7 @@ fn render_operation_types(
         };
         writeln!(
             &mut ctx.body,
-            "\t{field} {} `json:\"{wire_name}\"`",
+            "\t{field} {} `xjson:\"{wire_name}\"`",
             go_type(&param.ty),
         )
         .unwrap();

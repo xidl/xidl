@@ -9,8 +9,8 @@ xidlc.go
 
 package xidlc
 type CreateUserRequest struct {
-	Name string `json:"name"`
-	Age uint32 `json:"age"`
+	Name string `xjson:"name"`
+	Age uint32 `xjson:"age"`
 }
 
 ===============
@@ -444,11 +444,11 @@ func (c *HttpDefaultsServiceClient) GetUserAlias(ctx context.Context, req *HttpD
 }
 
 type HttpDefaultsServiceGetNameRequest struct {
-	Name string `json:"name" form:"name"`
+	Name string `xjson:"name" form:"name"`
 }
 
 type HttpDefaultsServiceGetNameResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpDefaultsServiceGetNameSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -476,13 +476,13 @@ func decodeHttpDefaultsServiceGetNameResponse(resp *http.Response) (HttpDefaults
 }
 
 type HttpDefaultsServiceListOrdersRequest struct {
-	UserId uint32 `json:"user_id" form:"user_id"`
-	Page   uint32 `json:"page" form:"page"`
-	Size   uint32 `json:"size" form:"size"`
+	UserId uint32 `xjson:"user_id" form:"user_id"`
+	Page   uint32 `xjson:"page" form:"page"`
+	Size   uint32 `xjson:"size" form:"size"`
 }
 
 type HttpDefaultsServiceListOrdersResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpDefaultsServiceListOrdersSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -512,15 +512,15 @@ func decodeHttpDefaultsServiceListOrdersResponse(resp *http.Response) (HttpDefau
 }
 
 type HttpDefaultsServiceCreateUserRequest struct {
-	Req CreateUserRequest `json:"req" form:"req"`
+	Req CreateUserRequest `xjson:"req" form:"req"`
 }
 
 type HttpDefaultsServiceCreateUserRequestBody struct {
-	Req CreateUserRequest `json:"req" form:"req"`
+	Req CreateUserRequest `xjson:"req" form:"req"`
 }
 
 type HttpDefaultsServiceCreateUserResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpDefaultsServiceCreateUserSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -548,17 +548,17 @@ func decodeHttpDefaultsServiceCreateUserResponse(resp *http.Response) (HttpDefau
 }
 
 type HttpDefaultsServiceSearchUserRequest struct {
-	Name string `json:"name" form:"name"`
-	Age  uint32 `json:"age" form:"age"`
+	Name string `xjson:"name" form:"name"`
+	Age  uint32 `xjson:"age" form:"age"`
 }
 
 type HttpDefaultsServiceSearchUserRequestBody struct {
-	Name string `json:"name" form:"name"`
-	Age  uint32 `json:"age" form:"age"`
+	Name string `xjson:"name" form:"name"`
+	Age  uint32 `xjson:"age" form:"age"`
 }
 
 type HttpDefaultsServiceSearchUserResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpDefaultsServiceSearchUserSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -586,12 +586,12 @@ func decodeHttpDefaultsServiceSearchUserResponse(resp *http.Response) (HttpDefau
 }
 
 type HttpDefaultsServiceGetUserRequest struct {
-	Id   uint32 `json:"id" form:"id"`
-	Lang string `json:"lang" form:"lang"`
+	Id   uint32 `xjson:"id" form:"id"`
+	Lang string `xjson:"lang" form:"lang"`
 }
 
 type HttpDefaultsServiceGetUserResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpDefaultsServiceGetUserSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -621,12 +621,12 @@ func decodeHttpDefaultsServiceGetUserResponse(resp *http.Response) (HttpDefaults
 }
 
 type HttpDefaultsServiceGetUserAliasRequest struct {
-	UserId uint32 `json:"user_id" form:"user_id"`
-	Locale string `json:"locale" form:"locale"`
+	UserId uint32 `xjson:"user_id" form:"user_id"`
+	Locale string `xjson:"locale" form:"locale"`
 }
 
 type HttpDefaultsServiceGetUserAliasResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpDefaultsServiceGetUserAliasSecurityRequirements() []xidlgohttp.SecurityRequirement {

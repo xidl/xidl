@@ -161,11 +161,11 @@ func (c *HttpCatchAllServiceClient) ReadAsset(ctx context.Context, req *HttpCatc
 }
 
 type HttpCatchAllServiceReadFileRequest struct {
-	RelPath string `json:"rel_path" form:"rel_path"`
+	RelPath string `xjson:"rel_path" form:"rel_path"`
 }
 
 type HttpCatchAllServiceReadFileResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpCatchAllServiceReadFileSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -195,12 +195,12 @@ func decodeHttpCatchAllServiceReadFileResponse(resp *http.Response) (HttpCatchAl
 }
 
 type HttpCatchAllServiceReadAssetRequest struct {
-	Key     string `json:"key" form:"key"`
-	Version string `json:"version" form:"version"`
+	Key     string `xjson:"key" form:"key"`
+	Version string `xjson:"version" form:"version"`
 }
 
 type HttpCatchAllServiceReadAssetResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpCatchAllServiceReadAssetSecurityRequirements() []xidlgohttp.SecurityRequirement {

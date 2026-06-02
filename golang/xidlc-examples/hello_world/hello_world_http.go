@@ -133,11 +133,11 @@ func (c *HelloWorldClient) Trusted(ctx context.Context, req *HelloWorldTrustedRe
 }
 
 type HelloWorldSayHelloRequest struct {
-	Name string `json:"name" form:"name"`
+	Name string `xjson:"name" form:"name"`
 }
 
 type HelloWorldSayHelloRequestBody struct {
-	Name string `json:"name" form:"name"`
+	Name string `xjson:"name" form:"name"`
 }
 
 type HelloWorldSayHelloResponse struct {

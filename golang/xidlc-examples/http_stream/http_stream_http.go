@@ -135,11 +135,11 @@ func (c *HttpStreamApiClient) UploadAsset(ctx context.Context) (*xidlgohttp.Clie
 }
 
 type HttpStreamApiAlertsRequest struct {
-	District string `json:"district" form:"district"`
+	District string `xjson:"district" form:"district"`
 }
 
 type HttpStreamApiAlertsResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpStreamApiAlertsSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -166,12 +166,12 @@ func decodeHttpStreamApiAlertsResponse(resp *http.Response) (HttpStreamApiAlerts
 }
 
 type HttpStreamApiUploadAssetRequest struct {
-	AssetId string  `json:"asset_id" form:"asset_id"`
-	Chunk   []uint8 `json:"chunk" form:"chunk"`
+	AssetId string  `xjson:"asset_id" form:"asset_id"`
+	Chunk   []uint8 `xjson:"chunk" form:"chunk"`
 }
 
 type HttpStreamApiUploadAssetResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpStreamApiUploadAssetSecurityRequirements() []xidlgohttp.SecurityRequirement {

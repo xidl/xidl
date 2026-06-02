@@ -199,13 +199,13 @@ func (c *HttpQueryTemplateServiceClient) Search(ctx context.Context, req *HttpQu
 }
 
 type HttpQueryTemplateServiceGetUserRequest struct {
-	Id     uint32 `json:"id" form:"id"`
-	Lang   string `json:"lang" form:"lang"`
-	Region string `json:"region" form:"region"`
+	Id     uint32 `xjson:"id" form:"id"`
+	Lang   string `xjson:"lang" form:"lang"`
+	Region string `xjson:"region" form:"region"`
 }
 
 type HttpQueryTemplateServiceGetUserResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpQueryTemplateServiceGetUserSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -235,16 +235,16 @@ func decodeHttpQueryTemplateServiceGetUserResponse(resp *http.Response) (HttpQue
 }
 
 type HttpQueryTemplateServiceSearchRequest struct {
-	Keyword string `json:"keyword" form:"keyword"`
-	Payload string `json:"payload" form:"payload"`
+	Keyword string `xjson:"keyword" form:"keyword"`
+	Payload string `xjson:"payload" form:"payload"`
 }
 
 type HttpQueryTemplateServiceSearchRequestBody struct {
-	Payload string `json:"payload" form:"payload"`
+	Payload string `xjson:"payload" form:"payload"`
 }
 
 type HttpQueryTemplateServiceSearchResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpQueryTemplateServiceSearchSecurityRequirements() []xidlgohttp.SecurityRequirement {

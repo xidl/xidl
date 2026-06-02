@@ -145,7 +145,7 @@ fn render_simple_struct(
 ) -> IdlcResult<()> {
     writeln!(&mut ctx.body, "type {name} struct {{").unwrap();
     for (field, ty, tag) in fields {
-        writeln!(&mut ctx.body, "\t{field} {ty} `json:\"{tag}\"`").unwrap();
+        writeln!(&mut ctx.body, "\t{field} {ty} `xjson:\"{tag}\"`").unwrap();
     }
     writeln!(&mut ctx.body, "}}").unwrap();
     writeln!(&mut ctx.body).unwrap();
@@ -174,7 +174,7 @@ fn render_field_struct(
             } else {
                 effective_wire_name(raw_name, &member.annotations, container_annotations)
             };
-            writeln!(&mut ctx.body, "\t{field} {ty} `json:\"{wire_name}\"`").unwrap();
+            writeln!(&mut ctx.body, "\t{field} {ty} `xjson:\"{wire_name}\"`").unwrap();
         }
     }
     writeln!(&mut ctx.body, "}}").unwrap();

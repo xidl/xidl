@@ -3,18 +3,19 @@ package xidlgohttp
 import (
 	"bufio"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
+
+	json "github.com/xidl/xidl/golang/xidl-go-json"
 )
 
 type StreamFrame[T any] struct {
-	Type  string `json:"t"`
-	Seq   uint64 `json:"seq,omitempty"`
-	Data  T      `json:"data,omitempty"`
-	Error any    `json:"error,omitempty"`
+	Type  string `json:"t" xjson:"t"`
+	Seq   uint64 `json:"seq,omitempty" xjson:"seq,omitempty"`
+	Data  T      `json:"data,omitempty" xjson:"data,omitempty"`
+	Error any    `json:"error,omitempty" xjson:"error,omitempty"`
 }
 
 type ServerStreamWriter[T any] interface {

@@ -168,13 +168,13 @@ func (c *ReportApiClient) WatchReport(ctx context.Context, req *ReportApiWatchRe
 }
 
 type ReportApiGetReportRequest struct {
-	Id      string  `json:"id" form:"id"`
-	Lang    *string `json:"lang" form:"lang"`
-	TraceId string  `json:"trace_id" form:"trace_id"`
+	Id      string  `xjson:"id" form:"id"`
+	Lang    *string `xjson:"lang" form:"lang"`
+	TraceId string  `xjson:"trace_id" form:"trace_id"`
 }
 
 type ReportApiGetReportResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func ReportApiGetReportSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -206,11 +206,11 @@ func decodeReportApiGetReportResponse(resp *http.Response) (ReportApiGetReportRe
 }
 
 type ReportApiWatchReportRequest struct {
-	Id string `json:"id" form:"id"`
+	Id string `xjson:"id" form:"id"`
 }
 
 type ReportApiWatchReportResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func ReportApiWatchReportSecurityRequirements() []xidlgohttp.SecurityRequirement {

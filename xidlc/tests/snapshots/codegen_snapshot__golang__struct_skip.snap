@@ -9,7 +9,7 @@ struct_skip.go
 
 package struct_skip
 type SkipStruct struct {
-	A int32 `json:"a"`
-	B int32 `json:"-"`
-	C int32 `json:"c"`
+	A int32 `xjson:"a"`
+	B int32 `xjson:"-"`
+	C int32 `xjson:"c"`
 }

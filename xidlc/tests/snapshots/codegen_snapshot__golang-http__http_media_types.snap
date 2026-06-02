@@ -169,23 +169,23 @@ func (c *RestMediaTypesApiClient) GetMsgpackUser(ctx context.Context, req *RestM
 }
 
 type RestMediaTypesApiSubmitProfileRequest struct {
-	Name string `json:"name" form:"name"`
-	Age  uint32 `json:"age" form:"age"`
+	Name string `xjson:"name" form:"name"`
+	Age  uint32 `xjson:"age" form:"age"`
 }
 
 type RestMediaTypesApiSubmitProfileRequestBody struct {
-	Name string `json:"name" form:"name"`
-	Age  uint32 `json:"age" form:"age"`
+	Name string `xjson:"name" form:"name"`
+	Age  uint32 `xjson:"age" form:"age"`
 }
 
 type RestMediaTypesApiSubmitProfileResponse struct {
-	Return         string `json:"return"`
-	NormalizedName string `json:"normalized_name"`
+	Return         string `xjson:"return"`
+	NormalizedName string `xjson:"normalized_name"`
 }
 
 type RestMediaTypesApiSubmitProfileResponseBody struct {
-	Return         string `json:"return"`
-	NormalizedName string `json:"normalized_name"`
+	Return         string `xjson:"return"`
+	NormalizedName string `xjson:"normalized_name"`
 }
 
 func RestMediaTypesApiSubmitProfileSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -214,17 +214,17 @@ func decodeRestMediaTypesApiSubmitProfileResponse(resp *http.Response) (RestMedi
 }
 
 type RestMediaTypesApiGetMsgpackUserRequest struct {
-	UserId string `json:"user_id" form:"user_id"`
+	UserId string `xjson:"user_id" form:"user_id"`
 }
 
 type RestMediaTypesApiGetMsgpackUserResponse struct {
-	Return string `json:"return"`
-	Score  uint32 `json:"score"`
+	Return string `xjson:"return"`
+	Score  uint32 `xjson:"score"`
 }
 
 type RestMediaTypesApiGetMsgpackUserResponseBody struct {
-	Return string `json:"return"`
-	Score  uint32 `json:"score"`
+	Return string `xjson:"return"`
+	Score  uint32 `xjson:"score"`
 }
 
 func RestMediaTypesApiGetMsgpackUserSecurityRequirements() []xidlgohttp.SecurityRequirement {
