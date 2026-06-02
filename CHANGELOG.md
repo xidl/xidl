@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.75.0](https://github.com/xidl/xidl/compare/v0.74.0...v0.75.0) (2026-06-02)
+
+
+### Features
+
+* **rename:** rename typescript-json to typescript-codec and go-json to go-codec ([adb9880](https://github.com/xidl/xidl/commit/adb988056ddfd81472d2272c0c9f4893538ce719))
+* **typescript:** add typescript-xidl-json library for metadata-driven serialization ([48f0327](https://github.com/xidl/xidl/commit/48f0327804fea46d11a80d16a9dd7c2388a10dbf))
+* **typescript:** rename package to xidl-typescript-json ([9ed12ff](https://github.com/xidl/xidl/commit/9ed12ff89de3e1a379d7d42a417df447a8a6428e))
+
 ## [0.74.0](https://github.com/xidl/xidl/compare/v0.73.0...v0.74.0) (2026-06-02)
 
 
