@@ -39,20 +39,20 @@ func TestMarshalBasic(t *testing.T) {
 }
 
 type SimpleStruct struct {
-	A int    `json:"a"`
-	B string `json:"b,omitempty"`
-	C bool   `json:"-"`
-	D int    `json:",string"`
+	A int    `xjson:"a"`
+	B string `xjson:"b,omitempty"`
+	C bool   `xjson:"-"`
+	D int    `xjson:",string"`
 }
 
 type EmbeddedStruct struct {
 	SimpleStruct
-	E float64 `json:"e"`
+	E float64 `xjson:"e"`
 }
 
 type ConflictOuter struct {
 	SimpleStruct
-	A string `json:"a"` // shadows SimpleStruct.A
+	A string `xjson:"a"` // shadows SimpleStruct.A
 }
 
 func TestMarshalStruct(t *testing.T) {
@@ -217,7 +217,7 @@ func (c *customTextMarshaler) UnmarshalText(text []byte) error {
 func TestCustomMarshalers(t *testing.T) {
 	t.Run("RawMessage", func(t *testing.T) {
 		type Msg struct {
-			Raw RawMessage `json:"raw"`
+			Raw RawMessage `xjson:"raw"`
 		}
 		m := Msg{Raw: RawMessage(`{"nested":true}`)}
 		got, err := Marshal(m)
@@ -282,18 +282,18 @@ func TestMarshalIndent(t *testing.T) {
 }
 
 type Profile struct {
-	Age  int    `json:"age"`
-	City string `json:"city,omitempty"`
+	Age  int    `xjson:"age"`
+	City string `xjson:"city,omitempty"`
 }
 
 type Address struct {
-	Street string `json:"street"`
+	Street string `xjson:"street"`
 }
 
 type User struct {
-	Name    string   `json:"name"`
-	Profile Profile  `json:"profile,flatten"`
-	Address *Address `json:"address,flatten,omitempty"`
+	Name    string   `xjson:"name"`
+	Profile Profile  `xjson:"profile,flatten"`
+	Address *Address `xjson:"address,flatten,omitempty"`
 }
 
 func TestFlattenTag(t *testing.T) {
