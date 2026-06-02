@@ -365,3 +365,331 @@ func TestFlattenTag(t *testing.T) {
 		}
 	})
 }
+
+type MapCatchAll struct {
+	Type  string         `xjson:"type"`
+	Extra map[string]any `xjson:",flatten"`
+}
+
+type MapCatchAllInt struct {
+	Type  string         `xjson:"type"`
+	Extra map[string]int `xjson:",flatten"`
+}
+
+type InterfaceCatchAll struct {
+	Type  string `xjson:"type"`
+	Extra any    `xjson:",flatten"`
+}
+
+type InvalidMapCatchAll struct {
+	Type  string      `xjson:"type"`
+	Extra map[int]any `xjson:",flatten"`
+}
+
+type MultipleCatchAll struct {
+	Type   string         `xjson:"type"`
+	Extra1 map[string]any `xjson:",flatten"`
+	Extra2 map[string]any `xjson:",flatten"`
+}
+
+type StructAndCatchAll struct {
+	Name    string         `xjson:"name"`
+	Profile Profile        `xjson:"profile,flatten"`
+	Extra   map[string]any `xjson:",flatten"`
+}
+
+type ConflictingStructs struct {
+	Age1  AgeStruct1     `xjson:",flatten"`
+	Age2  AgeStruct2     `xjson:",flatten"`
+	Extra map[string]any `xjson:",flatten"`
+}
+
+type AgeStruct1 struct {
+	Age int `xjson:"age"`
+}
+
+type AgeStruct2 struct {
+	Age int `xjson:"age"`
+}
+
+func TestCatchAllFlatten(t *testing.T) {
+	t.Run("map[string]any flatten marshal/unmarshal", func(t *testing.T) {
+		// Marshal non-nil map
+		m := MapCatchAll{
+			Type: "click",
+			Extra: map[string]any{
+				"x": 10,
+				"y": "twenty",
+			},
+		}
+		got, err := Marshal(m)
+		if err != nil {
+			t.Fatalf("Marshal failed: %v", err)
+		}
+		want := `{"type":"click","x":10,"y":"twenty"}`
+		if string(got) != want {
+			t.Errorf("Marshal got %s, want %s", got, want)
+		}
+
+		// Marshal nil map
+		mNil := MapCatchAll{
+			Type:  "click",
+			Extra: nil,
+		}
+		gotNil, err := Marshal(mNil)
+		if err != nil {
+			t.Fatalf("Marshal failed: %v", err)
+		}
+		wantNil := `{"type":"click"}`
+		if string(gotNil) != wantNil {
+			t.Errorf("Marshal got %s, want %s", gotNil, wantNil)
+		}
+
+		// Unmarshal
+		var u MapCatchAll
+		data := []byte(`{"type":"click","x":10,"y":"twenty"}`)
+		if err := Unmarshal(data, &u); err != nil {
+			t.Fatalf("Unmarshal failed: %v", err)
+		}
+		if u.Type != "click" {
+			t.Errorf("got Type %q, want click", u.Type)
+		}
+		if len(u.Extra) != 2 || u.Extra["x"] != 10.0 || u.Extra["y"] != "twenty" {
+			t.Errorf("got Extra %+v, want x=10, y=twenty", u.Extra)
+		}
+	})
+
+	t.Run("map[string]int flatten marshal/unmarshal", func(t *testing.T) {
+		m := MapCatchAllInt{
+			Type: "count",
+			Extra: map[string]int{
+				"apples":  5,
+				"oranges": 12,
+			},
+		}
+		got, err := Marshal(m)
+		if err != nil {
+			t.Fatalf("Marshal failed: %v", err)
+		}
+		want := `{"apples":5,"oranges":12,"type":"count"}`
+		if string(got) != want {
+			t.Errorf("Marshal got %s, want %s", got, want)
+		}
+
+		var u MapCatchAllInt
+		data := []byte(`{"apples":5,"oranges":12,"type":"count"}`)
+		if err := Unmarshal(data, &u); err != nil {
+			t.Fatalf("Unmarshal failed: %v", err)
+		}
+		if u.Type != "count" || len(u.Extra) != 2 || u.Extra["apples"] != 5 || u.Extra["oranges"] != 12 {
+			t.Errorf("got %+v", u)
+		}
+	})
+
+	t.Run("invalid map key type", func(t *testing.T) {
+		m := InvalidMapCatchAll{
+			Type:  "invalid",
+			Extra: map[int]any{1: "one"},
+		}
+		_, err := Marshal(m)
+		if err == nil {
+			t.Error("expected error for invalid map key type, got nil")
+		}
+
+		var u InvalidMapCatchAll
+		data := []byte(`{"type":"invalid","1":"one"}`)
+		err = Unmarshal(data, &u)
+		if err == nil {
+			t.Error("expected error for invalid map key type, got nil")
+		}
+	})
+
+	t.Run("multiple catch-all fields", func(t *testing.T) {
+		m := MultipleCatchAll{
+			Type:   "multi",
+			Extra1: map[string]any{"a": 1},
+			Extra2: map[string]any{"b": 2},
+		}
+		_, err := Marshal(m)
+		if err == nil {
+			t.Error("expected error for multiple catch-all fields, got nil")
+		}
+
+		var u MultipleCatchAll
+		data := []byte(`{"type":"multi","a":1,"b":2}`)
+		err = Unmarshal(data, &u)
+		if err == nil {
+			t.Error("expected error for multiple catch-all fields, got nil")
+		}
+	})
+
+	t.Run("named fields priority", func(t *testing.T) {
+		// Marshal: "type" key in map should be ignored because Type is a named field
+		m := MapCatchAll{
+			Type: "click",
+			Extra: map[string]any{
+				"type": "ignored",
+				"x":    10,
+			},
+		}
+		got, err := Marshal(m)
+		if err != nil {
+			t.Fatalf("Marshal failed: %v", err)
+		}
+		want := `{"type":"click","x":10}`
+		if string(got) != want {
+			t.Errorf("Marshal got %s, want %s", got, want)
+		}
+
+		// Unmarshal: "type" key should go to Type field, and not to Extra
+		var u MapCatchAll
+		data := []byte(`{"type":"click","x":10}`)
+		if err := Unmarshal(data, &u); err != nil {
+			t.Fatalf("Unmarshal failed: %v", err)
+		}
+		if u.Type != "click" {
+			t.Errorf("got Type %q, want click", u.Type)
+		}
+		if _, ok := u.Extra["type"]; ok {
+			t.Errorf("Extra contains 'type' key which should have gone to named field")
+		}
+		if u.Extra["x"] != 10.0 {
+			t.Errorf("got Extra['x'] %v, want 10", u.Extra["x"])
+		}
+	})
+
+	t.Run("any flatten marshal values", func(t *testing.T) {
+		// nil value
+		mNil := InterfaceCatchAll{Type: "nil", Extra: nil}
+		gotNil, err := Marshal(mNil)
+		if err != nil {
+			t.Fatalf("Marshal failed: %v", err)
+		}
+		if string(gotNil) != `{"type":"nil"}` {
+			t.Errorf("Marshal got %s", gotNil)
+		}
+
+		// map value
+		mMap := InterfaceCatchAll{Type: "map", Extra: map[string]any{"x": 10}}
+		gotMap, err := Marshal(mMap)
+		if err != nil {
+			t.Fatalf("Marshal failed: %v", err)
+		}
+		if string(gotMap) != `{"type":"map","x":10}` {
+			t.Errorf("Marshal got %s", gotMap)
+		}
+
+		// struct value
+		mStruct := InterfaceCatchAll{Type: "struct", Extra: Profile{Age: 30, City: "Paris"}}
+		gotStruct, err := Marshal(mStruct)
+		if err != nil {
+			t.Fatalf("Marshal failed: %v", err)
+		}
+		if string(gotStruct) != `{"age":30,"city":"Paris","type":"struct"}` {
+			t.Errorf("Marshal got %s", gotStruct)
+		}
+
+		// struct pointer value
+		mStructPtr := InterfaceCatchAll{Type: "struct", Extra: &Profile{Age: 30, City: "Paris"}}
+		gotStructPtr, err := Marshal(mStructPtr)
+		if err != nil {
+			t.Fatalf("Marshal failed: %v", err)
+		}
+		if string(gotStructPtr) != `{"age":30,"city":"Paris","type":"struct"}` {
+			t.Errorf("Marshal got %s", gotStructPtr)
+		}
+
+		// invalid value (string)
+		mInvalid := InterfaceCatchAll{Type: "invalid", Extra: "hello"}
+		_, err = Marshal(mInvalid)
+		if err == nil {
+			t.Error("expected error for non-map/non-struct any flatten value, got nil")
+		}
+	})
+
+	t.Run("any flatten unmarshal", func(t *testing.T) {
+		var u InterfaceCatchAll
+		data := []byte(`{"type":"click","x":10,"y":"twenty"}`)
+		if err := Unmarshal(data, &u); err != nil {
+			t.Fatalf("Unmarshal failed: %v", err)
+		}
+		if u.Type != "click" {
+			t.Errorf("got Type %q", u.Type)
+		}
+		extraMap, ok := u.Extra.(map[string]any)
+		if !ok {
+			t.Fatalf("expected Extra to be map[string]any, got %T", u.Extra)
+		}
+		if len(extraMap) != 2 || extraMap["x"] != 10.0 || extraMap["y"] != "twenty" {
+			t.Errorf("got Extra map %+v", extraMap)
+		}
+	})
+
+	t.Run("struct-flatten and catch-all together", func(t *testing.T) {
+		m := StructAndCatchAll{
+			Name: "Alice",
+			Profile: Profile{
+				Age:  30,
+				City: "Boston",
+			},
+			Extra: map[string]any{
+				"city": "ignored", // should be ignored as City is a promoted named field
+				"x":    10,
+			},
+		}
+		got, err := Marshal(m)
+		if err != nil {
+			t.Fatalf("Marshal failed: %v", err)
+		}
+		want := `{"age":30,"city":"Boston","name":"Alice","x":10}`
+		if string(got) != want {
+			t.Errorf("Marshal got %s, want %s", got, want)
+		}
+
+		var u StructAndCatchAll
+		data := []byte(`{"name":"Alice","age":30,"city":"Boston","x":10}`)
+		if err := Unmarshal(data, &u); err != nil {
+			t.Fatalf("Unmarshal failed: %v", err)
+		}
+		if u.Name != "Alice" || u.Profile.Age != 30 || u.Profile.City != "Boston" {
+			t.Errorf("got %+v", u)
+		}
+		if _, ok := u.Extra["city"]; ok {
+			t.Error("Extra should not contain 'city'")
+		}
+		if u.Extra["x"] != 10.0 {
+			t.Errorf("got Extra %+v", u.Extra)
+		}
+	})
+
+	t.Run("conflicting structs and catch-all", func(t *testing.T) {
+		// age is defined in both Age1 and Age2, so it's a conflict and dropped.
+		// Therefore, during Marshal, only Extra's "age" is printed.
+		// During Unmarshal, "age" in JSON goes into Extra.
+		m := ConflictingStructs{
+			Age1:  AgeStruct1{Age: 10},
+			Age2:  AgeStruct2{Age: 20},
+			Extra: map[string]any{"age": 30},
+		}
+		got, err := Marshal(m)
+		if err != nil {
+			t.Fatalf("Marshal failed: %v", err)
+		}
+		want := `{"age":30}`
+		if string(got) != want {
+			t.Errorf("Marshal got %s, want %s", got, want)
+		}
+
+		var u ConflictingStructs
+		data := []byte(`{"age":30}`)
+		if err := Unmarshal(data, &u); err != nil {
+			t.Fatalf("Unmarshal failed: %v", err)
+		}
+		if u.Age1.Age != 0 || u.Age2.Age != 0 {
+			t.Errorf("expected Age1 and Age2 to be 0 due to conflict, got Age1=%d, Age2=%d", u.Age1.Age, u.Age2.Age)
+		}
+		if u.Extra["age"] != 30.0 {
+			t.Errorf("expected Extra to capture conflicting 'age' key, got %+v", u.Extra)
+		}
+	})
+}
