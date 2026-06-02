@@ -280,3 +280,88 @@ func TestMarshalIndent(t *testing.T) {
 		t.Errorf("MarshalIndent got:\n%s\nwant:\n%s", got, want)
 	}
 }
+
+type Profile struct {
+	Age  int    `json:"age"`
+	City string `json:"city,omitempty"`
+}
+
+type Address struct {
+	Street string `json:"street"`
+}
+
+type User struct {
+	Name    string   `json:"name"`
+	Profile Profile  `json:"profile,flatten"`
+	Address *Address `json:"address,flatten,omitempty"`
+}
+
+func TestFlattenTag(t *testing.T) {
+	t.Run("marshal non-nil", func(t *testing.T) {
+		u := User{
+			Name: "Alice",
+			Profile: Profile{
+				Age:  30,
+				City: "New York",
+			},
+			Address: &Address{
+				Street: "123 Main St",
+			},
+		}
+
+		got, err := Marshal(u)
+		if err != nil {
+			t.Fatalf("Marshal failed: %v", err)
+		}
+
+		want := `{"name":"Alice","age":30,"city":"New York","street":"123 Main St"}`
+		if string(got) != want {
+			t.Errorf("Marshal(User) = %s, want %s", got, want)
+		}
+	})
+
+	t.Run("marshal nil pointer", func(t *testing.T) {
+		u := User{
+			Name: "Bob",
+			Profile: Profile{
+				Age:  25,
+				City: "Boston",
+			},
+			Address: nil,
+		}
+
+		got, err := Marshal(u)
+		if err != nil {
+			t.Fatalf("Marshal failed: %v", err)
+		}
+
+		want := `{"name":"Bob","age":25,"city":"Boston"}`
+		if string(got) != want {
+			t.Errorf("Marshal(User with nil Address) = %s, want %s", got, want)
+		}
+	})
+
+	t.Run("unmarshal non-nil", func(t *testing.T) {
+		data := []byte(`{"name":"Alice","age":30,"city":"New York","street":"123 Main St"}`)
+		var u User
+		if err := Unmarshal(data, &u); err != nil {
+			t.Fatalf("Unmarshal failed: %v", err)
+		}
+
+		if u.Name != "Alice" || u.Profile.Age != 30 || u.Profile.City != "New York" || u.Address == nil || u.Address.Street != "123 Main St" {
+			t.Errorf("Unmarshal(User) got: %+v, Address: %+v", u, u.Address)
+		}
+	})
+
+	t.Run("unmarshal nil pointer", func(t *testing.T) {
+		data := []byte(`{"name":"Bob","age":25,"city":"Boston"}`)
+		var u User
+		if err := Unmarshal(data, &u); err != nil {
+			t.Fatalf("Unmarshal failed: %v", err)
+		}
+
+		if u.Name != "Bob" || u.Profile.Age != 25 || u.Profile.City != "Boston" || u.Address != nil {
+			t.Errorf("Unmarshal(User with missing Address) got: %+v, Address: %+v", u, u.Address)
+		}
+	})
+}
