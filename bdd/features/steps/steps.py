@@ -63,6 +63,22 @@ def step_impl(context, lang):
         print(f"Gen stderr: {result.stderr}")
     assert result.returncode == 0
 
+    if lang == "rust":
+        # Merge duplicate pub mod declarations if any
+        for f in os.listdir(context.lang_dir):
+            if f.endswith(".rs"):
+                path = os.path.join(context.lang_dir, f)
+                with open(path, "r") as fr:
+                    content = fr.read()
+                mod_name = f[:-3]
+                pattern = r"\}\s*(?:#\[allow\([^)]+\)\]\s*)?pub\s+mod\s+" + re.escape(mod_name) + r"\s*\{"
+                if len(re.findall(pattern, content)) > 0:
+                    content = re.sub(pattern, "", content)
+                    first_pattern = r"pub\s+mod\s+" + re.escape(mod_name) + r"\s*\{"
+                    content = re.sub(first_pattern, f"pub mod {mod_name} {{\n    use crate::{mod_name};", content, count=1)
+                    with open(path, "w") as fw:
+                        fw.write(content)
+
 @then('the generated {lang} code should be valid')
 def step_impl(context, lang):
     files = os.listdir(context.lang_dir)
@@ -245,6 +261,8 @@ if __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port
             server_code = f'package main\nimport ("context"; "github.com/gin-gonic/gin"; "net/http"; "fmt")\ntype MyAllScenarios struct {{ }}\nfunc (s *MyAllScenarios) GetItem(ctx context.Context, req *AllScenariosServiceGetItemRequest) (*AllScenariosServiceGetItemResponse, error) {{ return &AllScenariosServiceGetItemResponse{{Return: fmt.Sprintf("Item %d with %s and %s", req.Id, req.Filter, req.TraceId)}}, nil }}\nfunc (s *MyAllScenarios) CreateItem(ctx context.Context, req *AllScenariosServiceCreateItemRequest) (*AllScenariosServiceCreateItemResponse, error) {{ return &AllScenariosServiceCreateItemResponse{{Return: 42}}, nil }}\nfunc (s *MyAllScenarios) UpdateItem(ctx context.Context, req *AllScenariosServiceUpdateItemRequest) (*AllScenariosServiceUpdateItemResponse, error) {{ return &AllScenariosServiceUpdateItemResponse{{}}, nil }}\nfunc (s *MyAllScenarios) DeleteItem(ctx context.Context, req *AllScenariosServiceDeleteItemRequest) (*AllScenariosServiceDeleteItemResponse, error) {{ return &AllScenariosServiceDeleteItemResponse{{}}, nil }}\nfunc (s *MyAllScenarios) UploadForm(ctx context.Context, req *AllScenariosServiceUploadFormRequest) (*AllScenariosServiceUploadFormResponse, error) {{ return &AllScenariosServiceUploadFormResponse{{}}, nil }}\nfunc (s *MyAllScenarios) SecureData(ctx context.Context, req *AllScenariosServiceSecureDataRequest) (*AllScenariosServiceSecureDataResponse, error) {{ return &AllScenariosServiceSecureDataResponse{{Return: "Secret"}}, nil }}\nfunc main() {{ r := gin.Default(); svc := &MyAllScenarios{{}}; RegisterAllScenariosServiceHandler(r, svc); http.ListenAndServe(fmt.Sprintf(":%d", {context.port}), r) }}'
         elif "media_types" in context.idl_file:
             server_code = f'package main\nimport ("context"; "github.com/gin-gonic/gin"; "net/http"; "fmt")\ntype MyForm struct {{ }}\nfunc (s *MyForm) Submit(ctx context.Context, req *FormServiceSubmitRequest) (*FormServiceSubmitResponse, error) {{ return &FormServiceSubmitResponse{{Return: fmt.Sprintf("Received %s age %d", req.Name, req.Age)}}, nil }}\nfunc main() {{ r := gin.Default(); svc := &MyForm{{}}; RegisterFormServiceHandler(r, svc); http.ListenAndServe(fmt.Sprintf(":%d", {context.port}), r) }}'
+        elif "issue_171" in context.idl_file:
+            server_code = f'package main\nimport ("context"; "github.com/gin-gonic/gin"; "net/http"; "fmt"; "errors")\ntype MyRepro struct{{}}\nfunc (s *MyRepro) FlattenAny(ctx context.Context, req *Issue171ReproServiceFlattenAnyRequest) (*Issue171ReproServiceFlattenAnyResponse, error) {{\n\tm, ok := req.Payload.(map[string]any)\n\tif !ok || m["foo"] != "bar" {{\n\t\treturn nil, errors.New("invalid payload")\n\t}}\n\treturn &Issue171ReproServiceFlattenAnyResponse{{}}, nil\n}}\nfunc (s *MyRepro) FlattenStructWithAny(ctx context.Context, req *Issue171ReproServiceFlattenStructWithAnyRequest) (*Issue171ReproServiceFlattenStructWithAnyResponse, error) {{\n\tm, ok := req.Payload.Field.(map[string]any)\n\tif !ok || m["foo"] != "bar" {{\n\t\treturn nil, errors.New("invalid payload")\n\t}}\n\treturn &Issue171ReproServiceFlattenStructWithAnyResponse{{}}, nil\n}}\nfunc main() {{ r := gin.Default(); svc := &MyRepro{{}}; RegisterIssue171ReproServiceHandler(r, svc); http.ListenAndServe(fmt.Sprintf(":%d", {context.port}), r) }}'
         else:
             server_code = f'package main\nimport ("context"; "github.com/gin-gonic/gin"; "net/http"; "fmt")\ntype MyHelloWorld struct{{}}\nfunc (s *MyHelloWorld) Hello(ctx context.Context, req *HelloWorldHelloRequest) (*HelloWorldHelloResponse, error) {{ return &HelloWorldHelloResponse{{Return: "Hello BDD"}}, nil }}\nfunc (s *MyHelloWorld) Echo(ctx context.Context, req *HelloWorldEchoRequest) (*HelloWorldEchoResponse, error) {{ return &HelloWorldEchoResponse{{Return: req.Msg}}, nil }}\nfunc main() {{ r := gin.Default(); svc := &MyHelloWorld{{}}; RegisterHelloWorldHandler(r, svc); http.ListenAndServe(fmt.Sprintf(":%d", {context.port}), r) }}'
         with open(os.path.join(context.lang_dir, "server.go"), "w") as f: f.write(server_code)
@@ -269,6 +287,8 @@ if __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port
                 server_code = f'use async_trait::async_trait;\nuse futures_util::stream::StreamExt;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MyStream;\n#[async_trait]\nimpl gen::StreamingService for MyStream {{\n    async fn ticks<\'a>(&\'a self, req: xidl_rust_axum::Request<gen::StreamingServiceTicksRequest>) -> Result<xidl_rust_axum::stream::SseStream<i32>, xidl_rust_axum::Error> {{\n        let count = req.data.count;\n        let s = futures_util::stream::iter(0..count).map(|i| Ok::<_, xidl_rust_axum::Error>(i));\n        Ok(xidl_rust_axum::stream::boxed_sse(s))\n    }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let svc = gen::StreamingServiceServer::new(MyStream);\n    xidl_rust_axum::Server::builder().with_service(svc).serve("127.0.0.1:{context.port}").await?; Ok(())\n}}'
             elif "media_types" in context.idl_file:
                 server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MyForm;\n#[async_trait]\nimpl gen::FormService for MyForm {{\n    async fn submit<\'a>(&\'a self, name: String, age: i32) -> Result<String, xidl_rust_axum::Error> {{ Ok(format!("Received {{name}} age {{age}}")) }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let svc = gen::FormServiceServer::new(MyForm);\n    xidl_rust_axum::Server::builder().with_service(svc).serve("127.0.0.1:{context.port}").await?; Ok(())\n}}'
+            elif "issue_171" in context.idl_file:
+                server_code = f'use async_trait::async_trait;\npub mod issue_171 {{\n    pub use crate::gen::issue_171::*;\n}}\nmod gen {{\n    include!("../{module_name}.rs");\n}}\nstruct MyRepro;\n#[async_trait]\nimpl issue_171::ReproService for MyRepro {{\n    async fn flattenAny<\'a>(&\'a self, payload: xidl_rust_axum::serde_json::Value) -> Result<(), xidl_rust_axum::Error> {{\n        if payload.get("foo").and_then(|v| v.as_str()) == Some("bar") {{\n            Ok(())\n        }} else {{\n            Err(xidl_rust_axum::Error::bad_request())\n        }}\n    }}\n    async fn flattenStructWithAny<\'a>(&\'a self, payload: issue_171::StructWithAny) -> Result<(), xidl_rust_axum::Error> {{\n        if payload.field.get("foo").and_then(|v| v.as_str()) == Some("bar") {{\n            Ok(())\n        }} else {{\n            Err(xidl_rust_axum::Error::bad_request())\n        }}\n    }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let svc = issue_171::ReproServiceServer::new(MyRepro);\n    xidl_rust_axum::Server::builder().with_service(svc).serve("127.0.0.1:{context.port}").await?; Ok(())\n}}'
             else:
                 server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MyHelloWorld;\n#[async_trait] impl gen::HelloWorldService for MyHelloWorld {{ async fn hello<\'a>(&\'a self) -> Result<String, xidl_rust_axum::Error> {{ Ok("Hello BDD".into()) }} async fn echo<\'a>(&\'a self, msg: String) -> Result<String, xidl_rust_axum::Error> {{ Ok(msg) }} }}\n#[tokio::main] async fn main() -> Result<(), Box<dyn std::error::Error>> {{ let svc = gen::HelloWorldServer::new(MyHelloWorld); xidl_rust_axum::Server::builder().with_service(svc).serve("127.0.0.1:{context.port}").await?; Ok(()) }}'
             prefix = "RUST-REST"
@@ -416,3 +436,15 @@ def step_impl(context, name, age):
     except:
         res = resp.text
     assert name in str(res); assert str(age) in str(res)
+
+@then('the client can send flatten any payload with key "{key}" and value "{value}"')
+def step_impl(context, key, value):
+    url = f"http://127.0.0.1:{context.port}/flatten-any"
+    resp = requests.post(url, json={key: value}, timeout=10)
+    assert resp.status_code in (200, 204), f"Got {resp.status_code}: {resp.text}"
+
+@then('the client can send flatten struct with any field payload with key "{key}" and value "{value}"')
+def step_impl(context, key, value):
+    url = f"http://127.0.0.1:{context.port}/flatten-struct-with-any"
+    resp = requests.post(url, json={"field": {key: value}}, timeout=10)
+    assert resp.status_code in (200, 204), f"Got {resp.status_code}: {resp.text}"
