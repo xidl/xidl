@@ -11,13 +11,13 @@ type Example struct {
 }
 ```
 
-| Option      | Description                                                  |
-|-------------|--------------------------------------------------------------|
-| `name`      | Override the JSON key name.                                  |
-| `omitempty`  | Omit the field when it holds its zero value.                 |
-| `string`    | Encode/decode a numeric or boolean value as a JSON string.   |
-| `flatten`   | Promote child fields into the enclosing JSON object.         |
-| `-`         | Skip the field unconditionally.                              |
+| Option      | Description                                                |
+| ----------- | ---------------------------------------------------------- |
+| `name`      | Override the JSON key name.                                |
+| `omitempty` | Omit the field when it holds its zero value.               |
+| `string`    | Encode/decode a numeric or boolean value as a JSON string. |
+| `flatten`   | Promote child fields into the enclosing JSON object.       |
+| `-`         | Skip the field unconditionally.                            |
 
 ## Flatten
 
@@ -25,11 +25,11 @@ The `flatten` option inlines a field's contents into the parent JSON object
 instead of nesting them under a separate key. Three categories of types may
 carry the option:
 
-| Field type          | Category       | Allowed count per struct |
-|---------------------|----------------|--------------------------|
-| struct / \*struct    | struct flatten  | unlimited                |
-| map[string]T        | catch-all       | at most **one**          |
-| any (interface{})   | catch-all       | at most **one**          |
+| Field type        | Category       | Allowed count per struct |
+| ----------------- | -------------- | ------------------------ |
+| struct / \*struct | struct flatten | unlimited                |
+| map[string]T      | catch-all      | at most **one**          |
+| any (interface{}) | catch-all      | at most **one**          |
 
 A struct may contain any number of struct-flatten fields **plus** at most one
 catch-all flatten field. If more than one catch-all flatten field is declared,
@@ -92,8 +92,8 @@ type Event struct {
 3. **Map key type must be `string`.** A flatten field of type `map[int]any` or
    any other non-string-keyed map is an error.
 
-4. **`any` flatten — marshal behaviour.** The concrete value stored in the
-   `any` field is inspected at runtime:
+4. **`any` flatten — marshal behaviour.** The concrete value stored in the `any`
+   field is inspected at runtime:
    - `nil` — no extra keys are emitted.
    - `map[string]T` — treated as a map catch-all (same as above).
    - struct — treated as a struct flatten.
@@ -108,9 +108,9 @@ type Event struct {
 
 ### Conflict resolution summary
 
-| Scenario                         | Marshal                                 | Unmarshal                              |
-|----------------------------------|-----------------------------------------|----------------------------------------|
-| Named field vs catch-all key     | Named field wins; map key skipped       | Named field wins; key not collected    |
-| Two struct-flatten, same key     | Both dropped (same depth)               | Both dropped; key goes to catch-all   |
-| Multiple catch-all flatten       | Error                                   | Error                                 |
-| `any` flatten holds non-map/struct | Error                                 | N/A (always becomes `map[string]any`) |
+| Scenario                           | Marshal                           | Unmarshal                             |
+| ---------------------------------- | --------------------------------- | ------------------------------------- |
+| Named field vs catch-all key       | Named field wins; map key skipped | Named field wins; key not collected   |
+| Two struct-flatten, same key       | Both dropped (same depth)         | Both dropped; key goes to catch-all   |
+| Multiple catch-all flatten         | Error                             | Error                                 |
+| `any` flatten holds non-map/struct | Error                             | N/A (always becomes `map[string]any`) |

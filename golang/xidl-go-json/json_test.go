@@ -471,13 +471,13 @@ func TestCatchAllFlatten(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Marshal failed: %v", err)
 		}
-		want := `{"apples":5,"oranges":12,"type":"count"}`
+		want := `{"type":"count","apples":5,"oranges":12}`
 		if string(got) != want {
 			t.Errorf("Marshal got %s, want %s", got, want)
 		}
 
 		var u MapCatchAllInt
-		data := []byte(`{"apples":5,"oranges":12,"type":"count"}`)
+		data := []byte(`{"type":"count","apples":5,"oranges":12}`)
 		if err := Unmarshal(data, &u); err != nil {
 			t.Fatalf("Unmarshal failed: %v", err)
 		}
@@ -585,7 +585,7 @@ func TestCatchAllFlatten(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Marshal failed: %v", err)
 		}
-		if string(gotStruct) != `{"age":30,"city":"Paris","type":"struct"}` {
+		if string(gotStruct) != `{"type":"struct","age":30,"city":"Paris"}` {
 			t.Errorf("Marshal got %s", gotStruct)
 		}
 
@@ -595,7 +595,7 @@ func TestCatchAllFlatten(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Marshal failed: %v", err)
 		}
-		if string(gotStructPtr) != `{"age":30,"city":"Paris","type":"struct"}` {
+		if string(gotStructPtr) != `{"type":"struct","age":30,"city":"Paris"}` {
 			t.Errorf("Marshal got %s", gotStructPtr)
 		}
 
@@ -641,7 +641,7 @@ func TestCatchAllFlatten(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Marshal failed: %v", err)
 		}
-		want := `{"age":30,"city":"Boston","name":"Alice","x":10}`
+		want := `{"name":"Alice","age":30,"city":"Boston","x":10}`
 		if string(got) != want {
 			t.Errorf("Marshal got %s, want %s", got, want)
 		}
