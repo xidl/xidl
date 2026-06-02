@@ -256,7 +256,8 @@ func typeFields(t reflect.Type) []field {
 				ft = ft.Elem()
 			}
 
-			if f.Anonymous && tagName == "" {
+			isFlatten := opts.Contains("flatten")
+			if (f.Anonymous && tagName == "") || isFlatten {
 				if ft.Kind() == reflect.Struct {
 					queue = append(queue, queueEntry{typ: ft, index: index})
 					continue
