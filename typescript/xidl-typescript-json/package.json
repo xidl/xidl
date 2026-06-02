@@ -9,7 +9,7 @@
     "typescript": "^5.0.0"
   },
   "main": "dist/index.js",
-  "name": "typescript-xidl-json",
+  "name": "xidl-typescript-json",
   "scripts": {
     "build": "tsc",
     "test": "node --import tsx --test tests/**/*.test.ts"
