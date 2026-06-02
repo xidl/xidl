@@ -187,12 +187,18 @@ type field struct {
 	asString  bool
 }
 
+type structFields struct {
+	list        []field
+	catchAll    *field
+	catchAllErr error
+}
+
 var (
 	fieldCacheMu sync.RWMutex
-	fieldCache   = make(map[reflect.Type][]field)
+	fieldCache   = make(map[reflect.Type]structFields)
 )
 
-func getFields(t reflect.Type) []field {
+func getFields(t reflect.Type) structFields {
 	fieldCacheMu.RLock()
 	fields, ok := fieldCache[t]
 	fieldCacheMu.RUnlock()
@@ -209,7 +215,7 @@ func getFields(t reflect.Type) []field {
 	return fields
 }
 
-func typeFields(t reflect.Type) []field {
+func typeFields(t reflect.Type) structFields {
 	type queueEntry struct {
 		typ   reflect.Type
 		index []int
@@ -223,6 +229,7 @@ func typeFields(t reflect.Type) []field {
 	}
 
 	fieldsByName := make(map[string]foundField)
+	var catchAlls []field
 
 	for len(queue) > 0 {
 		entry := queue[0]
@@ -260,6 +267,19 @@ func typeFields(t reflect.Type) []field {
 			if (f.Anonymous && tagName == "") || isFlatten {
 				if ft.Kind() == reflect.Struct {
 					queue = append(queue, queueEntry{typ: ft, index: index})
+					continue
+				}
+				if ft.Kind() == reflect.Map || ft.Kind() == reflect.Interface {
+					curr := field{
+						name:      f.Name,
+						index:     index,
+						typ:       f.Type,
+						tag:       tag != "",
+						tagged:    tagName,
+						omitempty: opts.Contains("omitempty"),
+						asString:  opts.Contains("string"),
+					}
+					catchAlls = append(catchAlls, curr)
 					continue
 				}
 			}
@@ -324,7 +344,39 @@ func typeFields(t reflect.Type) []field {
 		return len(idx1) < len(idx2)
 	})
 
-	return list
+	if len(catchAlls) > 1 {
+		return structFields{
+			list:        list,
+			catchAllErr: fmt.Errorf("json: multiple catch-all flatten fields in %s", t),
+		}
+	}
+
+	var ca *field
+	if len(catchAlls) == 1 {
+		c := catchAlls[0]
+		ct := c.typ
+		if ct.Kind() == reflect.Ptr {
+			ct = ct.Elem()
+		}
+		if ct.Kind() == reflect.Map {
+			if ct.Key().Kind() != reflect.String {
+				return structFields{
+					list: list,
+					catchAllErr: fmt.Errorf(
+						"json: catch-all flatten map key type must be string in %s, got %s",
+						t,
+						ct.Key(),
+					),
+				}
+			}
+		}
+		ca = &c
+	}
+
+	return structFields{
+		list:     list,
+		catchAll: ca,
+	}
 }
 
 func marshalValue(val reflect.Value, buf *bytes.Buffer) error {
@@ -410,7 +462,12 @@ func marshalValue(val reflect.Value, buf *bytes.Buffer) error {
 		buf.WriteString(strconv.FormatInt(val.Int(), 10))
 		return nil
 
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+	case reflect.Uint,
+		reflect.Uint8,
+		reflect.Uint16,
+		reflect.Uint32,
+		reflect.Uint64,
+		reflect.Uintptr:
 		buf.WriteString(strconv.FormatUint(val.Uint(), 10))
 		return nil
 
@@ -472,7 +529,12 @@ func marshalValue(val reflect.Value, buf *bytes.Buffer) error {
 				s = k.String()
 			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 				s = strconv.FormatInt(k.Int(), 10)
-			case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+			case reflect.Uint,
+				reflect.Uint8,
+				reflect.Uint16,
+				reflect.Uint32,
+				reflect.Uint64,
+				reflect.Uintptr:
 				s = strconv.FormatUint(k.Uint(), 10)
 			default:
 				if k.CanInterface() {
@@ -519,10 +581,19 @@ func marshalValue(val reflect.Value, buf *bytes.Buffer) error {
 		return nil
 
 	case reflect.Struct:
+		sFields := getFields(val.Type())
+		if sFields.catchAllErr != nil {
+			return sFields.catchAllErr
+		}
+
 		buf.WriteByte('{')
-		fields := getFields(val.Type())
 		first := true
-		for _, f := range fields {
+		namedKeys := make(map[string]bool)
+		for _, f := range sFields.list {
+			namedKeys[f.name] = true
+		}
+
+		for _, f := range sFields.list {
 			fVal := val
 			for _, idx := range f.index {
 				if fVal.Kind() == reflect.Ptr {
@@ -563,11 +634,169 @@ func marshalValue(val reflect.Value, buf *bytes.Buffer) error {
 				}
 			}
 		}
+
+		if sFields.catchAll != nil {
+			f := sFields.catchAll
+			fVal := val
+			for _, idx := range f.index {
+				if fVal.Kind() == reflect.Ptr {
+					if fVal.IsNil() {
+						fVal = reflect.Value{}
+						break
+					}
+					fVal = fVal.Elem()
+				}
+				fVal = fVal.Field(idx)
+			}
+
+			if fVal.IsValid() {
+				if err := marshalCatchAll(fVal, namedKeys, &first, buf); err != nil {
+					return err
+				}
+			}
+		}
+
 		buf.WriteByte('}')
 		return nil
 
 	default:
 		return fmt.Errorf("json: unsupported type: %s", val.Type())
+	}
+}
+
+func marshalCatchAll(
+	v reflect.Value,
+	namedKeys map[string]bool,
+	first *bool,
+	buf *bytes.Buffer,
+) error {
+	for v.Kind() == reflect.Interface || v.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return nil
+		}
+		v = v.Elem()
+	}
+
+	if !v.IsValid() {
+		return nil
+	}
+
+	switch v.Kind() {
+	case reflect.Map:
+		if v.IsNil() {
+			return nil
+		}
+		if v.Type().Key().Kind() != reflect.String {
+			return fmt.Errorf(
+				"json: catch-all flatten map key type must be string, got %s",
+				v.Type().Key(),
+			)
+		}
+
+		keys := v.MapKeys()
+		type keyStr struct {
+			key reflect.Value
+			str string
+		}
+		kStrs := make([]keyStr, 0, len(keys))
+		for _, k := range keys {
+			s := k.String()
+			if namedKeys[s] {
+				continue
+			}
+			kStrs = append(kStrs, keyStr{key: k, str: s})
+		}
+		sort.Slice(kStrs, func(i, j int) bool {
+			return kStrs[i].str < kStrs[j].str
+		})
+
+		for _, kStr := range kStrs {
+			if !*first {
+				buf.WriteByte(',')
+			}
+			*first = false
+
+			writeString(kStr.str, buf)
+			buf.WriteByte(':')
+			if err := marshalValue(v.MapIndex(kStr.key), buf); err != nil {
+				return err
+			}
+		}
+		return nil
+
+	case reflect.Struct:
+		sFields := getFields(v.Type())
+		if sFields.catchAllErr != nil {
+			return sFields.catchAllErr
+		}
+		for _, f := range sFields.list {
+			if namedKeys[f.name] {
+				continue
+			}
+			fVal := v
+			for _, idx := range f.index {
+				if fVal.Kind() == reflect.Ptr {
+					if fVal.IsNil() {
+						fVal = reflect.Value{}
+						break
+					}
+					fVal = fVal.Elem()
+				}
+				fVal = fVal.Field(idx)
+			}
+
+			if !fVal.IsValid() {
+				continue
+			}
+
+			if f.omitempty && isEmptyValue(fVal) {
+				continue
+			}
+
+			if !*first {
+				buf.WriteByte(',')
+			}
+			*first = false
+
+			writeString(f.name, buf)
+			buf.WriteByte(':')
+
+			if f.asString {
+				var strBuf bytes.Buffer
+				if err := marshalValue(fVal, &strBuf); err != nil {
+					return err
+				}
+				writeString(strBuf.String(), buf)
+			} else {
+				if err := marshalValue(fVal, buf); err != nil {
+					return err
+				}
+			}
+		}
+
+		if sFields.catchAll != nil {
+			f := sFields.catchAll
+			fVal := v
+			for _, idx := range f.index {
+				if fVal.Kind() == reflect.Ptr {
+					if fVal.IsNil() {
+						fVal = reflect.Value{}
+						break
+					}
+					fVal = fVal.Elem()
+				}
+				fVal = fVal.Field(idx)
+			}
+			if fVal.IsValid() {
+				if err := marshalCatchAll(fVal, namedKeys, first, buf); err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+
+	default:
+		return fmt.Errorf("json: unsupported catch-all flatten type: %s", v.Type())
 	}
 }
 
@@ -582,7 +811,12 @@ func isEmptyValue(v reflect.Value) bool {
 		return !v.Bool()
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return v.Int() == 0
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+	case reflect.Uint,
+		reflect.Uint8,
+		reflect.Uint16,
+		reflect.Uint32,
+		reflect.Uint64,
+		reflect.Uintptr:
 		return v.Uint() == 0
 	case reflect.Float32, reflect.Float64:
 		return v.Float() == 0
@@ -826,7 +1060,12 @@ func (d *decoder) value(v reflect.Value) error {
 		v.SetInt(i)
 		return nil
 
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+	case reflect.Uint,
+		reflect.Uint8,
+		reflect.Uint16,
+		reflect.Uint32,
+		reflect.Uint64,
+		reflect.Uintptr:
 		u, err := d.parseUint()
 		if err != nil {
 			return err
@@ -1036,11 +1275,17 @@ func (d *decoder) value(v reflect.Value) error {
 		}
 		d.idx++
 
-		fields := getFields(v.Type())
+		sFields := getFields(v.Type())
+		if sFields.catchAllErr != nil {
+			return sFields.catchAllErr
+		}
+
 		fieldsMap := make(map[string]field)
-		for _, f := range fields {
+		for _, f := range sFields.list {
 			fieldsMap[f.name] = f
 		}
+
+		var catchAllMap reflect.Value
 
 		for {
 			d.skipSpace()
@@ -1069,7 +1314,7 @@ func (d *decoder) value(v reflect.Value) error {
 			f, ok := fieldsMap[key]
 			if !ok {
 				lowerKey := strings.ToLower(key)
-				for _, fd := range fields {
+				for _, fd := range sFields.list {
 					if strings.ToLower(fd.name) == lowerKey {
 						f = fd
 						ok = true
@@ -1115,8 +1360,57 @@ func (d *decoder) value(v reflect.Value) error {
 					}
 				}
 			} else {
-				if err := d.skipValue(); err != nil {
-					return err
+				if sFields.catchAll != nil {
+					if !catchAllMap.IsValid() {
+						f := sFields.catchAll
+						catchAllVal := v
+						for _, idx := range f.index {
+							if catchAllVal.Kind() == reflect.Ptr {
+								if catchAllVal.IsNil() {
+									if !catchAllVal.CanSet() {
+										return fmt.Errorf("json: cannot set embedded pointer field")
+									}
+									catchAllVal.Set(reflect.New(catchAllVal.Type().Elem()))
+								}
+								catchAllVal = catchAllVal.Elem()
+							}
+							catchAllVal = catchAllVal.Field(idx)
+						}
+
+						realCatchAll := catchAllVal
+						for realCatchAll.Kind() == reflect.Ptr {
+							if realCatchAll.IsNil() {
+								realCatchAll.Set(reflect.New(realCatchAll.Type().Elem()))
+							}
+							realCatchAll = realCatchAll.Elem()
+						}
+
+						if realCatchAll.Kind() == reflect.Map {
+							if realCatchAll.IsNil() {
+								realCatchAll.Set(reflect.MakeMap(realCatchAll.Type()))
+							}
+							catchAllMap = realCatchAll
+						} else if realCatchAll.Kind() == reflect.Interface {
+							if realCatchAll.IsNil() || realCatchAll.Elem().Kind() != reflect.Map {
+								m := make(map[string]any)
+								realCatchAll.Set(reflect.ValueOf(m))
+							}
+							catchAllMap = realCatchAll.Elem()
+						} else {
+							return fmt.Errorf("json: unsupported catch-all type: %s", realCatchAll.Type())
+						}
+					}
+
+					valType := catchAllMap.Type().Elem()
+					mapVal := reflect.New(valType).Elem()
+					if err := d.value(mapVal); err != nil {
+						return err
+					}
+					catchAllMap.SetMapIndex(reflect.ValueOf(key), mapVal)
+				} else {
+					if err := d.skipValue(); err != nil {
+						return err
+					}
 				}
 			}
 
@@ -1353,7 +1647,8 @@ func (d *decoder) parseInt() (int64, error) {
 		return 0, fmt.Errorf("json: expected integer at offset %d", start)
 	}
 	numStr := string(d.data[start:d.idx])
-	if d.idx < len(d.data) && (d.data[d.idx] == '.' || d.data[d.idx] == 'e' || d.data[d.idx] == 'E') {
+	if d.idx < len(d.data) &&
+		(d.data[d.idx] == '.' || d.data[d.idx] == 'e' || d.data[d.idx] == 'E') {
 		d.idx = start
 		f, err := d.parseFloat()
 		if err != nil {
@@ -1378,7 +1673,8 @@ func (d *decoder) parseUint() (uint64, error) {
 		return 0, fmt.Errorf("json: expected integer at offset %d", start)
 	}
 	numStr := string(d.data[start:d.idx])
-	if d.idx < len(d.data) && (d.data[d.idx] == '.' || d.data[d.idx] == 'e' || d.data[d.idx] == 'E') {
+	if d.idx < len(d.data) &&
+		(d.data[d.idx] == '.' || d.data[d.idx] == 'e' || d.data[d.idx] == 'E') {
 		d.idx = start
 		f, err := d.parseFloat()
 		if err != nil {
