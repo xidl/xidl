@@ -128,3 +128,42 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.ref_type == 'tag' && github.ref || 'refs/tags/nightly' }}
           features: fmt,cli
+
+  publish-typescript-codec:
+    needs:
+      - ensure-managed-release
+    name: Publish TypeScript Codec to GitHub Packages
+    if: github.ref_type == 'tag'
+    permissions:
+      contents: read
+      packages: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: latest
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@xidl'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: typescript/xidl-typescript-codec
+
+      - name: Build package
+        run: pnpm run build
+        working-directory: typescript/xidl-typescript-codec
+
+      - name: Publish to GitHub Packages
+        run: pnpm publish --no-git-checks
+        working-directory: typescript/xidl-typescript-codec
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

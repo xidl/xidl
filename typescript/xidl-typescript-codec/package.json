@@ -9,11 +9,14 @@
     "typescript": "^5.0.0"
   },
   "main": "dist/index.js",
-  "name": "xidl-typescript-json",
+  "name": "@xidl/xidl-typescript-codec",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
     "build": "tsc",
     "test": "node --import tsx --test tests/**/*.test.ts"
   },
   "types": "dist/index.d.ts",
-  "version": "1.0.0"
+  "version": "0.74.0"
 }
