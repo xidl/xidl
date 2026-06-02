@@ -1,0 +1,18 @@
+#pragma xidlc package issue_171
+#pragma xidlc version v0.0.1
+
+module issue_171 {
+    struct StructWithAny {
+        any field;
+    };
+
+    interface ReproService {
+        @post
+        @path("/flatten-any")
+        void flattenAny(@flatten any payload);
+
+        @post
+        @path("/flatten-struct-with-any")
+        void flattenStructWithAny(@flatten issue_171::StructWithAny payload);
+    };
+};

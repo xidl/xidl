@@ -70,3 +70,16 @@ Feature: REST API Generation and Communication
     When I generate ts code for the IDL
     Then the generated ts code should be valid
     And the generated ts iface zod file should import the model schemas
+
+  Scenario Outline: REST Flatten Any and StructWithAny (Issue 171)
+    Given a REST IDL file "bdd/features/data/issue_171.idl"
+    When I generate <lang> code for the IDL
+    Then the generated <lang> code should be valid
+    And I can run the generated <lang> server and client
+    And the client can send flatten any payload with key "foo" and value "bar"
+    And the client can send flatten struct with any field payload with key "foo" and value "bar"
+
+    Examples:
+      | lang |
+      | rust |
+      | go   |
