@@ -9,9 +9,9 @@ xidlc.go
 
 package xidlc
 type MatrixBody struct {
-	Name string `json:"name"`
-	Alias *string `json:"alias"`
-	Tags []string `json:"tags"`
+	Name string `xjson:"name"`
+	Alias *string `xjson:"alias"`
+	Tags []string `xjson:"tags"`
 }
 
 ===============
@@ -438,15 +438,15 @@ func (c *HttpScopeMatrixServiceClient) DeprecatedWindow(ctx context.Context, req
 }
 
 type HttpScopeMatrixServiceDefaultScopeRequest struct {
-	Req MatrixBody `json:"req" form:"req"`
+	Req MatrixBody `xjson:"req" form:"req"`
 }
 
 type HttpScopeMatrixServiceDefaultScopeRequestBody struct {
-	Req MatrixBody `json:"req" form:"req"`
+	Req MatrixBody `xjson:"req" form:"req"`
 }
 
 type HttpScopeMatrixServiceDefaultScopeResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpScopeMatrixServiceDefaultScopeSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -476,23 +476,23 @@ func decodeHttpScopeMatrixServiceDefaultScopeResponse(resp *http.Response) (Http
 }
 
 type HttpScopeMatrixServiceOverrideConsumesOnlyRequest struct {
-	Name string  `json:"name" form:"name"`
-	Age  *uint32 `json:"age" form:"age"`
+	Name string  `xjson:"name" form:"name"`
+	Age  *uint32 `xjson:"age" form:"age"`
 }
 
 type HttpScopeMatrixServiceOverrideConsumesOnlyRequestBody struct {
-	Name string  `json:"name" form:"name"`
-	Age  *uint32 `json:"age" form:"age"`
+	Name string  `xjson:"name" form:"name"`
+	Age  *uint32 `xjson:"age" form:"age"`
 }
 
 type HttpScopeMatrixServiceOverrideConsumesOnlyResponse struct {
-	Return         string `json:"return"`
-	NormalizedName string `json:"normalized_name"`
+	Return         string `xjson:"return"`
+	NormalizedName string `xjson:"normalized_name"`
 }
 
 type HttpScopeMatrixServiceOverrideConsumesOnlyResponseBody struct {
-	Return         string `json:"return"`
-	NormalizedName string `json:"normalized_name"`
+	Return         string `xjson:"return"`
+	NormalizedName string `xjson:"normalized_name"`
 }
 
 func HttpScopeMatrixServiceOverrideConsumesOnlySecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -523,17 +523,17 @@ func decodeHttpScopeMatrixServiceOverrideConsumesOnlyResponse(resp *http.Respons
 }
 
 type HttpScopeMatrixServiceOverrideProducesOnlyRequest struct {
-	Id string `json:"id" form:"id"`
+	Id string `xjson:"id" form:"id"`
 }
 
 type HttpScopeMatrixServiceOverrideProducesOnlyResponse struct {
-	Return   MatrixBody `json:"return"`
-	Revision uint32     `json:"revision"`
+	Return   MatrixBody `xjson:"return"`
+	Revision uint32     `xjson:"revision"`
 }
 
 type HttpScopeMatrixServiceOverrideProducesOnlyResponseBody struct {
-	Return   MatrixBody `json:"return"`
-	Revision uint32     `json:"revision"`
+	Return   MatrixBody `xjson:"return"`
+	Revision uint32     `xjson:"revision"`
 }
 
 func HttpScopeMatrixServiceOverrideProducesOnlySecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -566,23 +566,23 @@ func decodeHttpScopeMatrixServiceOverrideProducesOnlyResponse(resp *http.Respons
 }
 
 type HttpScopeMatrixServiceOverrideBothMediaRequest struct {
-	Name string  `json:"name" form:"name"`
-	Age  *uint32 `json:"age" form:"age"`
+	Name string  `xjson:"name" form:"name"`
+	Age  *uint32 `xjson:"age" form:"age"`
 }
 
 type HttpScopeMatrixServiceOverrideBothMediaRequestBody struct {
-	Name string  `json:"name" form:"name"`
-	Age  *uint32 `json:"age" form:"age"`
+	Name string  `xjson:"name" form:"name"`
+	Age  *uint32 `xjson:"age" form:"age"`
 }
 
 type HttpScopeMatrixServiceOverrideBothMediaResponse struct {
-	Return         MatrixBody `json:"return"`
-	NormalizedName string     `json:"normalized_name"`
+	Return         MatrixBody `xjson:"return"`
+	NormalizedName string     `xjson:"normalized_name"`
 }
 
 type HttpScopeMatrixServiceOverrideBothMediaResponseBody struct {
-	Return         MatrixBody `json:"return"`
-	NormalizedName string     `json:"normalized_name"`
+	Return         MatrixBody `xjson:"return"`
+	NormalizedName string     `xjson:"normalized_name"`
 }
 
 func HttpScopeMatrixServiceOverrideBothMediaSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -613,11 +613,11 @@ func decodeHttpScopeMatrixServiceOverrideBothMediaResponse(resp *http.Response) 
 }
 
 type HttpScopeMatrixServiceDeprecatedPlainRequest struct {
-	Id string `json:"id" form:"id"`
+	Id string `xjson:"id" form:"id"`
 }
 
 type HttpScopeMatrixServiceDeprecatedPlainResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpScopeMatrixServiceDeprecatedPlainSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -648,11 +648,11 @@ func decodeHttpScopeMatrixServiceDeprecatedPlainResponse(resp *http.Response) (H
 }
 
 type HttpScopeMatrixServiceDeprecatedSinceOnlyRequest struct {
-	Id string `json:"id" form:"id"`
+	Id string `xjson:"id" form:"id"`
 }
 
 type HttpScopeMatrixServiceDeprecatedSinceOnlyResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpScopeMatrixServiceDeprecatedSinceOnlySecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -684,11 +684,11 @@ func decodeHttpScopeMatrixServiceDeprecatedSinceOnlyResponse(resp *http.Response
 }
 
 type HttpScopeMatrixServiceDeprecatedWindowRequest struct {
-	Id string `json:"id" form:"id"`
+	Id string `xjson:"id" form:"id"`
 }
 
 type HttpScopeMatrixServiceDeprecatedWindowResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpScopeMatrixServiceDeprecatedWindowSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -1041,12 +1041,12 @@ func (c *HttpSecurityMatrixServiceClient) PublicPing(ctx context.Context, req *H
 }
 
 type HttpSecurityMatrixServiceInheritedSecurityRequest struct {
-	Id       string `json:"id" form:"id"`
-	XTraceId string `json:"x_trace_id" form:"x_trace_id"`
+	Id       string `xjson:"id" form:"id"`
+	XTraceId string `xjson:"x_trace_id" form:"x_trace_id"`
 }
 
 type HttpSecurityMatrixServiceInheritedSecurityResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpSecurityMatrixServiceInheritedSecuritySecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -1079,17 +1079,17 @@ func decodeHttpSecurityMatrixServiceInheritedSecurityResponse(resp *http.Respons
 }
 
 type HttpSecurityMatrixServiceBearerOrCookieSecurityRequest struct {
-	Action string  `json:"action" form:"action"`
-	Note   *string `json:"note" form:"note"`
+	Action string  `xjson:"action" form:"action"`
+	Note   *string `xjson:"note" form:"note"`
 }
 
 type HttpSecurityMatrixServiceBearerOrCookieSecurityRequestBody struct {
-	Action string  `json:"action" form:"action"`
-	Note   *string `json:"note" form:"note"`
+	Action string  `xjson:"action" form:"action"`
+	Note   *string `xjson:"note" form:"note"`
 }
 
 type HttpSecurityMatrixServiceBearerOrCookieSecurityResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpSecurityMatrixServiceBearerOrCookieSecuritySecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -1120,12 +1120,12 @@ func decodeHttpSecurityMatrixServiceBearerOrCookieSecurityResponse(resp *http.Re
 }
 
 type HttpSecurityMatrixServiceAlternativeSecurityRequest struct {
-	Id     string  `json:"id" form:"id"`
-	Locale *string `json:"locale" form:"locale"`
+	Id     string  `xjson:"id" form:"id"`
+	Locale *string `xjson:"locale" form:"locale"`
 }
 
 type HttpSecurityMatrixServiceAlternativeSecurityResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpSecurityMatrixServiceAlternativeSecuritySecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -1158,17 +1158,17 @@ func decodeHttpSecurityMatrixServiceAlternativeSecurityResponse(resp *http.Respo
 }
 
 type HttpSecurityMatrixServiceOauthSecurityRequest struct {
-	Keyword string  `json:"keyword" form:"keyword"`
-	Page    *uint32 `json:"page" form:"page"`
+	Keyword string  `xjson:"keyword" form:"keyword"`
+	Page    *uint32 `xjson:"page" form:"page"`
 }
 
 type HttpSecurityMatrixServiceOauthSecurityRequestBody struct {
-	Keyword string  `json:"keyword" form:"keyword"`
-	Page    *uint32 `json:"page" form:"page"`
+	Keyword string  `xjson:"keyword" form:"keyword"`
+	Page    *uint32 `xjson:"page" form:"page"`
 }
 
 type HttpSecurityMatrixServiceOauthSecurityResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpSecurityMatrixServiceOauthSecuritySecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -1201,7 +1201,7 @@ type HttpSecurityMatrixServicePublicPingRequest struct {
 }
 
 type HttpSecurityMatrixServicePublicPingResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpSecurityMatrixServicePublicPingSecurityRequirements() []xidlgohttp.SecurityRequirement {

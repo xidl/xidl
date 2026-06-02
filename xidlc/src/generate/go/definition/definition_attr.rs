@@ -50,7 +50,7 @@ fn push_get_attr(
     writeln!(&mut ctx.body, "type {request_name} struct {{}}").unwrap();
     writeln!(&mut ctx.body).unwrap();
     writeln!(&mut ctx.body, "type {response_name} struct {{").unwrap();
-    writeln!(&mut ctx.body, "\tReturn {} `json:\"return\"`", go_type(ty)).unwrap();
+    writeln!(&mut ctx.body, "\tReturn {} `xjson:\"return\"`", go_type(ty)).unwrap();
     writeln!(&mut ctx.body, "}}").unwrap();
     writeln!(&mut ctx.body).unwrap();
     out.push((
@@ -78,7 +78,7 @@ fn push_set_attr(
         raw.to_case(Case::Pascal)
     );
     writeln!(&mut ctx.body, "type {request_name} struct {{").unwrap();
-    writeln!(&mut ctx.body, "\tValue {} `json:\"value\"`", go_type(ty)).unwrap();
+    writeln!(&mut ctx.body, "\tValue {} `xjson:\"value\"`", go_type(ty)).unwrap();
     writeln!(&mut ctx.body, "}}").unwrap();
     writeln!(&mut ctx.body).unwrap();
     writeln!(&mut ctx.body, "type {response_name} struct {{}}").unwrap();

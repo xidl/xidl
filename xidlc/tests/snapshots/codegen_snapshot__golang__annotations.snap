@@ -10,14 +10,14 @@ annotations.go
 package annotations
     import "context"
 type User struct {
-	UserId string `json:"userId"`
-	Name string `json:"user_name"`
-	Email string `json:"user_email"`
+	UserId string `xjson:"userId"`
+	Name string `xjson:"user_name"`
+	Email string `xjson:"user_email"`
 }
 
 type Settings struct {
-	FontSize string `json:"fontSize"`
-	EnableNotifications bool `json:"enableNotifications"`
+	FontSize string `xjson:"fontSize"`
+	EnableNotifications bool `xjson:"enableNotifications"`
 }
 
 type Color string
@@ -29,8 +29,8 @@ const (
 )
 
 type ApiDoSomethingRequest struct {
-	Value string `json:"val"`
-	SomeLongerName string `json:"someLongerName"`
+	Value string `xjson:"val"`
+	SomeLongerName string `xjson:"someLongerName"`
 }
 
 type ApiDoSomethingResponse struct {

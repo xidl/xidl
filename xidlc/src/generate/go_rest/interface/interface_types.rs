@@ -31,7 +31,7 @@ fn render_request_types(out: &mut String, method: &MethodMeta) {
         };
         writeln!(
             out,
-            "\t{} {} `json:\"{}\" form:\"{}\"`",
+            "\t{} {} `xjson:\"{}\" form:\"{}\"`",
             param.field_name, ty, param.raw_name, param.raw_name
         )
         .unwrap();
@@ -49,7 +49,7 @@ fn render_request_types(out: &mut String, method: &MethodMeta) {
             };
             writeln!(
                 out,
-                "\t{} {} `json:\"{}\" form:\"{}\"`",
+                "\t{} {} `xjson:\"{}\" form:\"{}\"`",
                 param.field_name, ty, param.wire_name, param.wire_name
             )
             .unwrap();
@@ -62,12 +62,12 @@ fn render_request_types(out: &mut String, method: &MethodMeta) {
 fn render_response_types(out: &mut String, method: &MethodMeta) {
     writeln!(out, "type {} struct {{", method.response_struct).unwrap();
     if let Some(return_ty) = &method.return_ty {
-        writeln!(out, "\tReturn {return_ty} `json:\"return\"`").unwrap();
+        writeln!(out, "\tReturn {return_ty} `xjson:\"return\"`").unwrap();
     }
     for param in response_params(method) {
         writeln!(
             out,
-            "\t{} {} `json:\"{}\"`",
+            "\t{} {} `xjson:\"{}\"`",
             param.field_name, param.ty, param.raw_name
         )
         .unwrap();
@@ -78,12 +78,12 @@ fn render_response_types(out: &mut String, method: &MethodMeta) {
     if let Some(body_struct) = &method.response_body_struct {
         writeln!(out, "type {body_struct} struct {{").unwrap();
         if let Some(return_ty) = &method.return_ty {
-            writeln!(out, "\tReturn {return_ty} `json:\"return\"`").unwrap();
+            writeln!(out, "\tReturn {return_ty} `xjson:\"return\"`").unwrap();
         }
         for param in &method.response_body_params {
             writeln!(
                 out,
-                "\t{} {} `json:\"{}\"`",
+                "\t{} {} `xjson:\"{}\"`",
                 param.field_name, param.ty, param.raw_name
             )
             .unwrap();

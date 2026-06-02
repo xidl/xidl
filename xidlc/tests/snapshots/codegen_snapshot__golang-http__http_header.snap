@@ -16,9 +16,9 @@ const (
 )
 
 type TestUser struct {
-	Id uint32 `json:"id"`
-	Name string `json:"full_name"`
-	Status Status `json:"status"`
+	Id uint32 `xjson:"id"`
+	Name string `xjson:"full_name"`
+	Status Status `xjson:"status"`
 }
 
 ===============
@@ -223,16 +223,16 @@ func (c *TestHeaderServiceClient) CreateUser(ctx context.Context, req *TestHeade
 }
 
 type TestHeaderServiceGetUserRequest struct {
-	Id        uint32   `json:"id" form:"id"`
-	ReqId     string   `json:"req_id" form:"req_id"`
-	Flags     []string `json:"flags" form:"flags"`
-	Age       uint32   `json:"age" form:"age"`
-	SessionId string   `json:"session_id" form:"session_id"`
-	Prefs     []string `json:"prefs" form:"prefs"`
+	Id        uint32   `xjson:"id" form:"id"`
+	ReqId     string   `xjson:"req_id" form:"req_id"`
+	Flags     []string `xjson:"flags" form:"flags"`
+	Age       uint32   `xjson:"age" form:"age"`
+	SessionId string   `xjson:"session_id" form:"session_id"`
+	Prefs     []string `xjson:"prefs" form:"prefs"`
 }
 
 type TestHeaderServiceGetUserResponse struct {
-	Return User `json:"return"`
+	Return User `xjson:"return"`
 }
 
 func TestHeaderServiceGetUserSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -262,13 +262,13 @@ func decodeTestHeaderServiceGetUserResponse(resp *http.Response) (TestHeaderServ
 }
 
 type TestHeaderServiceCreateUserRequest struct {
-	Token     string `json:"token" form:"token"`
-	SessionId string `json:"session_id" form:"session_id"`
-	Name      string `json:"name" form:"name"`
+	Token     string `xjson:"token" form:"token"`
+	SessionId string `xjson:"session_id" form:"session_id"`
+	Name      string `xjson:"name" form:"name"`
 }
 
 type TestHeaderServiceCreateUserRequestBody struct {
-	Name string `json:"name" form:"name"`
+	Name string `xjson:"name" form:"name"`
 }
 
 type TestHeaderServiceCreateUserResponse struct {

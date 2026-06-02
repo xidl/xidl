@@ -10,7 +10,7 @@ hello_world.go
 package hello_world
     import "context"
 type HelloWorldSayHelloRequest struct {
-	Name string `json:"name"`
+	Name string `xjson:"name"`
 }
 
 type HelloWorldSayHelloResponse struct {

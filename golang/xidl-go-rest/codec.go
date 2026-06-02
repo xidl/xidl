@@ -1,7 +1,6 @@
 package xidlgohttp
 
 import (
-	"encoding/json"
 	"errors"
 	"io"
 	"net/url"
@@ -10,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/vmihailenco/msgpack/v5"
+	json "github.com/xidl/xidl/golang/xidl-go-json"
 )
 
 type Codec interface {

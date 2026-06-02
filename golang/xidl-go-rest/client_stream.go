@@ -2,9 +2,10 @@ package xidlgohttp
 
 import (
 	"context"
-	"encoding/json"
 	"io"
 	"net/http"
+
+	json "github.com/xidl/xidl/golang/xidl-go-json"
 )
 
 type ClientStreamWriter[TReq any, TResp any] struct {

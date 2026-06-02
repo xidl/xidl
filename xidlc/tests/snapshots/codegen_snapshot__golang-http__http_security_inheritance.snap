@@ -220,11 +220,11 @@ func (c *HttpSecurityInheritanceServiceClient) Health(ctx context.Context, req *
 }
 
 type HttpSecurityInheritanceServiceGetReportRequest struct {
-	Id string `json:"id" form:"id"`
+	Id string `xjson:"id" form:"id"`
 }
 
 type HttpSecurityInheritanceServiceGetReportResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpSecurityInheritanceServiceGetReportSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -257,16 +257,16 @@ func decodeHttpSecurityInheritanceServiceGetReportResponse(resp *http.Response) 
 }
 
 type HttpSecurityInheritanceServiceUpdateReportRequest struct {
-	Id   string `json:"id" form:"id"`
-	Body string `json:"body" form:"body"`
+	Id   string `xjson:"id" form:"id"`
+	Body string `xjson:"body" form:"body"`
 }
 
 type HttpSecurityInheritanceServiceUpdateReportRequestBody struct {
-	Body string `json:"body" form:"body"`
+	Body string `xjson:"body" form:"body"`
 }
 
 type HttpSecurityInheritanceServiceUpdateReportResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpSecurityInheritanceServiceUpdateReportSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -301,7 +301,7 @@ type HttpSecurityInheritanceServiceHealthRequest struct {
 }
 
 type HttpSecurityInheritanceServiceHealthResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpSecurityInheritanceServiceHealthSecurityRequirements() []xidlgohttp.SecurityRequirement {

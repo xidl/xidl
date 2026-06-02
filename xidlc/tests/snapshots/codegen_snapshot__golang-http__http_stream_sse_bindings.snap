@@ -121,13 +121,13 @@ func (c *HttpStreamSseBindingsServiceClient) TailFile(ctx context.Context, req *
 }
 
 type HttpStreamSseBindingsServiceTailFileRequest struct {
-	Path   string `json:"path" form:"path"`
-	Lang   string `json:"lang" form:"lang"`
-	Follow bool   `json:"follow" form:"follow"`
+	Path   string `xjson:"path" form:"path"`
+	Lang   string `xjson:"lang" form:"lang"`
+	Follow bool   `xjson:"follow" form:"follow"`
 }
 
 type HttpStreamSseBindingsServiceTailFileResponse struct {
-	Return []string `json:"return"`
+	Return []string `xjson:"return"`
 }
 
 func HttpStreamSseBindingsServiceTailFileSecurityRequirements() []xidlgohttp.SecurityRequirement {

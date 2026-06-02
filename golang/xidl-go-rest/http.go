@@ -1,7 +1,6 @@
 package xidlgohttp
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	json "github.com/xidl/xidl/golang/xidl-go-json"
 )
 
 type DeprecatedInfo struct {

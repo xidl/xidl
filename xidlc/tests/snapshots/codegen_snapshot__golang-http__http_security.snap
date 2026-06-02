@@ -239,13 +239,13 @@ func (c *HttpSecurityServiceClient) Health(ctx context.Context, req *HttpSecurit
 }
 
 type HttpSecurityServiceGetUserRequest struct {
-	Id      uint32  `json:"id" form:"id"`
-	Locale  *string `json:"locale" form:"locale"`
-	TraceId string  `json:"trace_id" form:"trace_id"`
+	Id      uint32  `xjson:"id" form:"id"`
+	Locale  *string `xjson:"locale" form:"locale"`
+	TraceId string  `xjson:"trace_id" form:"trace_id"`
 }
 
 type HttpSecurityServiceGetUserResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpSecurityServiceGetUserSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -280,17 +280,17 @@ func decodeHttpSecurityServiceGetUserResponse(resp *http.Response) (HttpSecurity
 }
 
 type HttpSecurityServiceSearchUserRequest struct {
-	Keyword string  `json:"keyword" form:"keyword"`
-	Page    *uint32 `json:"page" form:"page"`
+	Keyword string  `xjson:"keyword" form:"keyword"`
+	Page    *uint32 `xjson:"page" form:"page"`
 }
 
 type HttpSecurityServiceSearchUserRequestBody struct {
-	Keyword string  `json:"keyword" form:"keyword"`
-	Page    *uint32 `json:"page" form:"page"`
+	Keyword string  `xjson:"keyword" form:"keyword"`
+	Page    *uint32 `xjson:"page" form:"page"`
 }
 
 type HttpSecurityServiceSearchUserResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpSecurityServiceSearchUserSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -323,7 +323,7 @@ type HttpSecurityServiceHealthRequest struct {
 }
 
 type HttpSecurityServiceHealthResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpSecurityServiceHealthSecurityRequirements() []xidlgohttp.SecurityRequirement {

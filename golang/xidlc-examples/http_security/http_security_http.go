@@ -216,12 +216,12 @@ func (c *HttpSecurityApiClient) Health(ctx context.Context, req *HttpSecurityApi
 }
 
 type HttpSecurityApiGetReportRequest struct {
-	Id      string `json:"id" form:"id"`
-	TraceId string `json:"trace_id" form:"trace_id"`
+	Id      string `xjson:"id" form:"id"`
+	TraceId string `xjson:"trace_id" form:"trace_id"`
 }
 
 type HttpSecurityApiGetReportResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpSecurityApiGetReportSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -254,16 +254,16 @@ func decodeHttpSecurityApiGetReportResponse(resp *http.Response) (HttpSecurityAp
 }
 
 type HttpSecurityApiUpdateReportRequest struct {
-	Id   string `json:"id" form:"id"`
-	Body string `json:"body" form:"body"`
+	Id   string `xjson:"id" form:"id"`
+	Body string `xjson:"body" form:"body"`
 }
 
 type HttpSecurityApiUpdateReportRequestBody struct {
-	Body string `json:"body" form:"body"`
+	Body string `xjson:"body" form:"body"`
 }
 
 type HttpSecurityApiUpdateReportResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpSecurityApiUpdateReportSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -298,7 +298,7 @@ type HttpSecurityApiHealthRequest struct {
 }
 
 type HttpSecurityApiHealthResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpSecurityApiHealthSecurityRequirements() []xidlgohttp.SecurityRequirement {

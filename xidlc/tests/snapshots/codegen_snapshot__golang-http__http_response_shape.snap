@@ -299,7 +299,7 @@ type HttpResponseShapeServiceHelloRequest struct {
 }
 
 type HttpResponseShapeServiceHelloResponse struct {
-	Return string `json:"return"`
+	Return string `xjson:"return"`
 }
 
 func HttpResponseShapeServiceHelloSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -330,7 +330,7 @@ type HttpResponseShapeServiceGetCountRequest struct {
 }
 
 type HttpResponseShapeServiceGetCountResponse struct {
-	Count int32 `json:"count"`
+	Count int32 `xjson:"count"`
 }
 
 func HttpResponseShapeServiceGetCountSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -358,23 +358,23 @@ func decodeHttpResponseShapeServiceGetCountResponse(resp *http.Response) (HttpRe
 }
 
 type HttpResponseShapeServiceAddRequest struct {
-	A int32 `json:"a" form:"a"`
-	B int32 `json:"b" form:"b"`
+	A int32 `xjson:"a" form:"a"`
+	B int32 `xjson:"b" form:"b"`
 }
 
 type HttpResponseShapeServiceAddRequestBody struct {
-	A int32 `json:"a" form:"a"`
-	B int32 `json:"b" form:"b"`
+	A int32 `xjson:"a" form:"a"`
+	B int32 `xjson:"b" form:"b"`
 }
 
 type HttpResponseShapeServiceAddResponse struct {
-	Return int32 `json:"return"`
-	Sum    int32 `json:"sum"`
+	Return int32 `xjson:"return"`
+	Sum    int32 `xjson:"sum"`
 }
 
 type HttpResponseShapeServiceAddResponseBody struct {
-	Return int32 `json:"return"`
-	Sum    int32 `json:"sum"`
+	Return int32 `xjson:"return"`
+	Sum    int32 `xjson:"sum"`
 }
 
 func HttpResponseShapeServiceAddSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -403,21 +403,21 @@ func decodeHttpResponseShapeServiceAddResponse(resp *http.Response) (HttpRespons
 }
 
 type HttpResponseShapeServiceBumpRequest struct {
-	Value int32 `json:"value" form:"value"`
+	Value int32 `xjson:"value" form:"value"`
 }
 
 type HttpResponseShapeServiceBumpRequestBody struct {
-	Value int32 `json:"value" form:"value"`
+	Value int32 `xjson:"value" form:"value"`
 }
 
 type HttpResponseShapeServiceBumpResponse struct {
-	Return int32 `json:"return"`
-	Value  int32 `json:"value"`
+	Return int32 `xjson:"return"`
+	Value  int32 `xjson:"value"`
 }
 
 type HttpResponseShapeServiceBumpResponseBody struct {
-	Return int32 `json:"return"`
-	Value  int32 `json:"value"`
+	Return int32 `xjson:"return"`
+	Value  int32 `xjson:"value"`
 }
 
 func HttpResponseShapeServiceBumpSecurityRequirements() []xidlgohttp.SecurityRequirement {
