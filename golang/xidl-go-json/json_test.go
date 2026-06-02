@@ -692,4 +692,50 @@ func TestCatchAllFlatten(t *testing.T) {
 			t.Errorf("expected Extra to capture conflicting 'age' key, got %+v", u.Extra)
 		}
 	})
+
+	t.Run("flatten a struct with normal any fields", func(t *testing.T) {
+		type TaskPackage struct {
+			Type       string `xjson:"type"`
+			Version    string `xjson:"version"`
+			ExportedAt int64  `xjson:"exported_at"`
+			Deploy     any    `xjson:"deploy,omitempty"`
+			Destroy    any    `xjson:"destroy,omitempty"`
+			AgentSync  any    `xjson:"agent_sync,omitempty"`
+		}
+
+		type A struct {
+			Field TaskPackage `xjson:"field,flatten"`
+		}
+
+		// Marshal A
+		a := A{
+			Field: TaskPackage{
+				Type:       "pkg",
+				Version:    "1.0",
+				ExportedAt: 100,
+				Deploy:     map[string]any{"cmd": "run"},
+			},
+		}
+		got, err := Marshal(a)
+		if err != nil {
+			t.Fatalf("Marshal failed: %v", err)
+		}
+		want := `{"type":"pkg","version":"1.0","exported_at":100,"deploy":{"cmd":"run"}}`
+		if string(got) != want {
+			t.Errorf("Marshal got %s, want %s", got, want)
+		}
+
+		// Unmarshal into A
+		var gotA A
+		if err := Unmarshal([]byte(want), &gotA); err != nil {
+			t.Fatalf("Unmarshal failed: %v", err)
+		}
+		if gotA.Field.Type != "pkg" || gotA.Field.Version != "1.0" || gotA.Field.ExportedAt != 100 {
+			t.Errorf("unmarshal basic fields incorrect: %+v", gotA.Field)
+		}
+		depMap, ok := gotA.Field.Deploy.(map[string]any)
+		if !ok || depMap["cmd"] != "run" {
+			t.Errorf("unmarshal Deploy field incorrect: %+v", gotA.Field.Deploy)
+		}
+	})
 }
