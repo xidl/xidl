@@ -54,6 +54,7 @@ pub(crate) fn render_interface(
                         params: method.params.clone(),
                         request_name: method.request_name.clone(),
                         request_schema_ref: method.request_schema_ref.clone(),
+                        body_schema_ref: method.body_schema_ref.clone(),
                         request_payload: method.request_payload.clone(),
                         response_name: method.response_name.clone(),
                         response_schema_ref: method.response_schema_ref.clone(),
@@ -73,6 +74,7 @@ pub(crate) fn render_interface(
                         response_body_mode: method.response_body_mode.clone(),
                         response_body_entries: method.response_body_entries.clone(),
                         stream_item_ty: method.stream_item_ty.clone(),
+                        stream_item_schema_ref: method.stream_item_schema_ref.clone(),
                         client_stream_item_ty: method.client_stream_item_ty.clone(),
                         is_server_stream: method.is_server_stream,
                         is_client_stream: method.is_client_stream,
@@ -252,11 +254,45 @@ fn build_method_model(
         }
     };
 
+    let body_schema_ref = match &op.http.request.body.shape {
+        HttpRequestBodyShape::Empty => None,
+        HttpRequestBodyShape::SingleValue { ty, .. } => {
+            let schema = zod_schema_for_type_spec(ty, module_path);
+            if !schema.starts_with("z.") && !schema.starts_with("ifaceSchemas.") {
+                Some(format!("ifaceSchemas.{schema}"))
+            } else {
+                Some(schema)
+            }
+        }
+        HttpRequestBodyShape::Object { .. } => request_schema_ref.clone(),
+        HttpRequestBodyShape::Stream { item_ty, .. } => {
+            let schema = zod_schema_for_type_spec(item_ty, module_path);
+            if !schema.starts_with("z.") && !schema.starts_with("ifaceSchemas.") {
+                Some(format!("ifaceSchemas.{schema}"))
+            } else {
+                Some(schema)
+            }
+        }
+    };
+
+    let stream_item_schema_ref =
+        if let HttpResponseBodyShape::Stream { item_ty, .. } = &op.http.response.body.shape {
+            let schema = zod_schema_for_type_spec(item_ty, module_path);
+            if !schema.starts_with("z.") && !schema.starts_with("ifaceSchemas.") {
+                Some(format!("ifaceSchemas.{schema}"))
+            } else {
+                Some(schema)
+            }
+        } else {
+            None
+        };
+
     Ok(MethodModel {
         name: ts_ident(&op.meta.name),
         params: build_client_params(op, module_path, &request_name),
         request_name,
         request_schema_ref,
+        body_schema_ref,
         request_payload,
         response_name,
         response_schema_ref,
@@ -296,6 +332,7 @@ fn build_method_model(
         response_body_mode: build_response_body_mode(op).to_string(),
         response_body_entries,
         stream_item_ty: build_server_stream_ty(op, module_path),
+        stream_item_schema_ref,
         client_stream_item_ty,
         is_server_stream: matches!(op.meta.stream.kind, Some(HttpStreamKind::Server)),
         is_client_stream: matches!(op.meta.stream.kind, Some(HttpStreamKind::Client)),

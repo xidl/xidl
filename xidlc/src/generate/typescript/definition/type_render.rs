@@ -158,6 +158,7 @@ fn render_struct(
                     prop: field.prop,
                     schema: field.schema,
                     optional: field.optional,
+                    xjson_meta: field.xjson_meta,
                 })
                 .collect(),
         },

@@ -1,8 +1,11 @@
+import { serialize, deserialize } from "@xidl/xidl-typescript-codec";
+import type { z } from "zod";
+
 export type FetchLike = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 
 export interface HttpCodec {
-    encode?: (value: unknown) => BodyInit | null;
-    decode?: <T>(resp: Response) => Promise<T>;
+    encode?: (value: unknown, schema?: z.ZodTypeAny) => BodyInit | null;
+    decode?: <T>(resp: Response, schema?: z.ZodTypeAny) => Promise<T>;
 }
 
 export type ClientAuth =
@@ -193,14 +196,16 @@ function encodeRequestBody(
 value: unknown,
 contentType: string,
 codecs: Record<string, HttpCodec>,
+schema?: z.ZodTypeAny,
 ): BodyInit | null {
     const mime = normalizeMime(contentType);
     const custom = codecs[mime]?.encode;
     if (custom) {
-        return custom(value);
+        return custom(value, schema);
     }
     if (mime === "application/json" || mime.endsWith("+json")) {
-        return JSON.stringify(value);
+        const serialized = schema ? serialize(value, schema) : value;
+        return JSON.stringify(serialized);
     }
     if (mime === "application/x-www-form-urlencoded") {
         const query = new URLSearchParams();
@@ -218,14 +223,16 @@ async function decodeResponseBody<T>(
 resp: Response,
 contentType: string,
 codecs: Record<string, HttpCodec>,
+schema?: z.ZodTypeAny,
 ): Promise<T> {
     const mime = normalizeMime(contentType || resp.headers.get("Content-Type") || "application/json");
     const custom = codecs[mime]?.decode;
     if (custom) {
-        return custom<T>(resp);
+        return custom<T>(resp, schema);
     }
     if (mime === "application/json" || mime.endsWith("+json")) {
-        return (await resp.json()) as T;
+        const data = await resp.json();
+        return (schema ? (deserialize(data, schema) as T) : (data as T));
     }
     if (mime.startsWith("text/")) {
         return (await resp.text()) as T;
@@ -237,6 +244,7 @@ async function decodeOptionalResponseBody(
 resp: Response,
 contentType: string,
 codecs: Record<string, HttpCodec>,
+schema?: z.ZodTypeAny,
 ): Promise<unknown> {
     if (resp.status === 204 || resp.status === 205 || !resp.body) {
         return undefined;
@@ -245,7 +253,7 @@ codecs: Record<string, HttpCodec>,
     if (length === "0") {
         return undefined;
     }
-    return decodeResponseBody(resp, contentType, codecs);
+    return decodeResponseBody(resp, contentType, codecs, schema);
 }
 
 type ResponseValueSpec = {
@@ -357,6 +365,7 @@ async function* sseJsonStream<T>(
 fetchImpl: FetchLike,
 url: string,
 options: RequestInit,
+schema?: z.ZodTypeAny,
 ): AsyncIterable<T> {
     const resp = await fetchImpl(url, options);
     if (!resp.ok) {
@@ -382,7 +391,9 @@ options: RequestInit,
             return { done: true };
         }
         if (current === "next" || current === "message") {
-            return { done: false, value: JSON.parse(payload) as T };
+            const data = JSON.parse(payload);
+            const value = schema ? (deserialize(data, schema) as T) : (data as T);
+            return { done: false, value };
         }
         if (current === "error") {
             throw new XidlClientError(payload || "stream error", 500, resp.status);
@@ -422,7 +433,7 @@ options: RequestInit,
     }
 }
 
-function ndjsonBody<T>(source: AsyncIterable<T>): ReadableStream<Uint8Array> {
+function ndjsonBody<T>(source: AsyncIterable<T>, schema?: z.ZodTypeAny): ReadableStream<Uint8Array> {
     const encoder = new TextEncoder();
     const iterator = source[Symbol.asyncIterator]();
     return new ReadableStream<Uint8Array>({
@@ -432,7 +443,8 @@ function ndjsonBody<T>(source: AsyncIterable<T>): ReadableStream<Uint8Array> {
                 controller.close();
                 return;
             }
-            controller.enqueue(encoder.encode(`${JSON.stringify(next.value)}\n`));
+            const serialized = schema ? serialize(next.value, schema) : next.value;
+            controller.enqueue(encoder.encode(`${JSON.stringify(serialized)}\n`));
         },
     });
 }

@@ -7,7 +7,7 @@ use super::contexts::{
 use super::http::is_sequence_type;
 use super::names::scoped_name;
 use super::route_template::path_param_is_catch_all;
-use super::type_expr::ts_type_for_type_spec;
+use super::type_expr::{ts_type_for_type_spec, zod_schema_for_type_spec};
 
 #[derive(Clone)]
 pub(crate) struct ParamInfo {
@@ -52,9 +52,11 @@ impl MethodInfo {
             } else {
                 return_payload_ty
             },
+            return_schema_ref: self.return_schema_ref(module_path),
             stream_item_ty: self.server_stream_item_ty(module_path),
             client_stream_item_ty: self.client_stream_item_ty(module_path),
             request_schema_ref: self.request_schema_ref.clone(),
+            body_schema_ref: self.body_schema_ref(module_path),
             request_payload: self.request_payload(),
             path: self.path.clone(),
             http_method: self.http_method.clone(),
@@ -67,6 +69,29 @@ impl MethodInfo {
             is_server_stream: self.is_server_stream,
             is_client_stream: self.is_client_stream,
             doc: self.doc.clone(),
+        }
+    }
+
+    fn return_schema_ref(&self, module_path: &[String]) -> Option<String> {
+        if let Some(response_name) = &self.response_name {
+            let full = scoped_name(module_path, response_name);
+            Some(format!("zodSchemas.{full}Schema"))
+        } else if self.ret.is_void {
+            None
+        } else {
+            let spec = self.ret.ty.as_ref().expect("return type");
+            Some(zod_schema_for_type_spec(spec, module_path))
+        }
+    }
+
+    fn body_schema_ref(&self, module_path: &[String]) -> Option<String> {
+        if let Some(request_name) = &self.request_name {
+            let full = scoped_name(module_path, request_name);
+            Some(format!("zodSchemas.{full}Schema"))
+        } else {
+            self.body_params
+                .first()
+                .map(|param| zod_schema_for_type_spec(&param.ty, module_path))
         }
     }
 

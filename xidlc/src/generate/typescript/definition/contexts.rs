@@ -27,10 +27,21 @@ pub(crate) struct FieldTypeContext {
 }
 
 #[derive(Serialize)]
+pub(crate) struct XjsonMeta {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) flatten: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) omitempty: Option<bool>,
+}
+
+#[derive(Serialize)]
 pub(crate) struct FieldZodContext {
     pub(crate) prop: String,
     pub(crate) schema: String,
     pub(crate) optional: bool,
+    pub(crate) xjson_meta: Option<XjsonMeta>,
 }
 
 #[derive(Serialize)]
@@ -124,9 +135,11 @@ pub(crate) struct ClientMethodContext {
     pub(crate) name: String,
     pub(crate) params: Vec<ClientParamContext>,
     pub(crate) return_ty: String,
+    pub(crate) return_schema_ref: Option<String>,
     pub(crate) stream_item_ty: Option<String>,
     pub(crate) client_stream_item_ty: Option<String>,
     pub(crate) request_schema_ref: Option<String>,
+    pub(crate) body_schema_ref: Option<String>,
     pub(crate) request_payload: Vec<RequestPayloadEntry>,
     pub(crate) path: String,
     pub(crate) http_method: String,

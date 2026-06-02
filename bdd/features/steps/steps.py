@@ -89,9 +89,16 @@ def step_impl(context, lang):
         assert any(f.endswith(".ts") for f in files)
         with open(os.path.join(context.lang_dir, "package.json"), "w") as f:
             f.write('{"name": "test-ts-gen", "version": "1.0.0", "type": "module"}')
-        subprocess.run(["pnpm", "add", "zod", "typescript"], cwd=context.lang_dir, check=True, capture_output=True)
-        ts_files = [f for f in files if f.endswith(".ts")]
-        result = subprocess.run(["pnpm", "exec", "tsc", "--noEmit"] + ts_files, cwd=context.lang_dir, capture_output=True, text=True)
+        with open(os.path.join(context.lang_dir, "tsconfig.json"), "w") as f:
+            f.write('{"compilerOptions": {"target": "ESNext", "module": "ESNext", "moduleResolution": "node", "ignoreDeprecations": "6.0", "skipLibCheck": true, "strict": true}}')
+
+        codec_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../typescript/xidl-typescript-codec"))
+        if not os.path.exists(os.path.join(codec_path, "dist")):
+            subprocess.run(["pnpm", "install"], cwd=codec_path, check=True, capture_output=True)
+            subprocess.run(["pnpm", "build"], cwd=codec_path, check=True, capture_output=True)
+        subprocess.run(["npm", "install", "zod@^3.23.0", "typescript", codec_path], cwd=context.lang_dir, check=True, capture_output=True)
+
+        result = subprocess.run(["npx", "tsc", "--noEmit", "-p", "."], cwd=context.lang_dir, capture_output=True, text=True)
         if result.returncode != 0:
             print(f"tsc stdout: {result.stdout}")
             print(f"tsc stderr: {result.stderr}")

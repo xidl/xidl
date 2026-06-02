@@ -30,16 +30,16 @@ export class {{ client_name }} {
                 path = `${path}?${queryString}`;
             }
             const url = joinUrl(this.baseUrl, path);
-            {% if method.is_server_stream %}return sseJsonStream<{{ method.stream_item_ty }}>(this.fetchImpl, url, { method: "{{ method.http_method }}", headers });
+            {% if method.is_server_stream %}return sseJsonStream<{{ method.stream_item_ty }}>(this.fetchImpl, url, { method: "{{ method.http_method }}", headers }, {{ method.stream_item_schema_ref or "undefined" }});
             {% elif method.is_client_stream %}headers.set("Content-Type", "{{ method.request_content_type }}");
             headers.set("Accept", "{{ method.response_content_type }}");
-            const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers, body: ndjsonBody(stream) });
+            const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers, body: ndjsonBody(stream, {{ method.request_schema_ref or "undefined" }}) });
             if (!resp.ok) {
                 throw await parseXidlError(resp);
             }
-            {% if method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs);
+            {% if method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs, {{ method.response_schema_ref }});
             const responsePayload = buildResponsePayload(responseBody, resp, "{{ method.response_body_mode }}", [{% for param in method.response_header_params %}{ name: "{{ param.raw_name }}", key: {{ param.access }}, optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], [{% for param in method.response_cookie_params %}{ name: "{{ param.raw_name }}", key: {{ param.access }}, optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}]);
-            return {{ method.response_schema_ref }}.parse(responsePayload);
+            return deserialize(responsePayload, {{ method.response_schema_ref }}) as {{ method.return_ty }};
             {% elif method.return_ty == "void" %}return;
             {% else %}return await decodeResponseBody<{{ method.return_ty }}>(resp, "{{ method.response_content_type }}", this.codecs);
         {% endif %}
@@ -47,13 +47,13 @@ export class {{ client_name }} {
         {% elif method.body_entries | length > 0 %}const body = { {% for entry in method.body_entries %}"{{ entry.raw_name }}": {% if method.request_schema_ref %}parsed["{{ entry.raw_name }}"]{% else %}{{ entry.access }}{% endif %}{% if not loop.last %}, {% endif %}{% endfor %} };
         {% endif %}{% if method.body_single or method.body_entries | length > 0 %}headers.set("Content-Type", "{{ method.request_content_type }}");
         {% endif %}headers.set("Accept", "{{ method.response_content_type }}");
-        const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers{% if method.body_single or method.body_entries | length > 0 %}, body: encodeRequestBody(body, "{{ method.request_content_type }}", this.codecs){% endif %} });
+        const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers{% if method.body_single or method.body_entries | length > 0 %}, body: encodeRequestBody(body, "{{ method.request_content_type }}", this.codecs, {{ method.body_schema_ref or "undefined" }}){% endif %} });
         if (!resp.ok) {
             throw await parseXidlError(resp);
         }
-        {% if method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs);
+        {% if method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs, {{ method.response_schema_ref }});
         const responsePayload = buildResponsePayload(responseBody, resp, "{{ method.response_body_mode }}", [{% for param in method.response_header_params %}{ name: "{{ param.raw_name }}", key: {{ param.access }}, optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], [{% for param in method.response_cookie_params %}{ name: "{{ param.raw_name }}", key: {{ param.access }}, optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}]);
-        return {{ method.response_schema_ref }}.parse(responsePayload);
+        return deserialize(responsePayload, {{ method.response_schema_ref }}) as {{ method.return_ty }};
         {% elif method.return_ty == "void" %}return;
         {% else %}return await decodeResponseBody<{{ method.return_ty }}>(resp, "{{ method.response_content_type }}", this.codecs);
         {% endif %}{% endif %}
