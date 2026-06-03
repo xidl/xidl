@@ -37,28 +37,19 @@ export const SSchema = z.object(
 
     ).optional(
 
-    ),
+    )
 }
 );
-export type S = z.infer<
-typeof SSchema
->;
 export const ESchema = z.enum(
 [
 "A", "B"
 ]
 );
-export type E = z.infer<
-typeof ESchema
->;
 export const BMSchema = z.number(
 
 ).int(
 
 );
-export type BM = z.infer<
-typeof BMSchema
->;
 export const USchema = z.union(
 [
 z.object(
@@ -80,6 +71,3 @@ z.object(
 )
 ]
 );
-export type U = z.infer<
-typeof USchema
->;

@@ -883,7 +883,7 @@ export class HttpStreamSseBindingsServiceClient{
         >(
         this.fetchImpl, url, {
             method : "GET", headers
-        }, ifaceSchemas.ProjectEventSchema
+        }, ifaceSchemas.FIXMESchema
         );
     }
 }
@@ -1802,7 +1802,7 @@ service : HttpStreamSseBindingsService, options : ServerOptions = {
             payload as ifaceTypes.HttpStreamSseBindingsServiceWatchProjectRequest
             );
             return sseResponse(
-            result, options
+            result, options, ifaceSchemas.FIXMESchema
             );
 
         },
@@ -1823,9 +1823,6 @@ export const ProjectEventSchema = z.object(
 
     ), payload : z.coerce.string(
 
-    ),
+    )
 }
 );
-export type ProjectEvent = z.infer<
-typeof ProjectEventSchema
->;

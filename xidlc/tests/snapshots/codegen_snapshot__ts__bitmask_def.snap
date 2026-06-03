@@ -23,22 +23,13 @@ export const EmptyBitmaskSchema = z.number(
 ).int(
 
 );
-export type EmptyBitmask = z.infer<
-typeof EmptyBitmaskSchema
->;
 export const SimpleBitmaskSchema = z.number(
 
 ).int(
 
 );
-export type SimpleBitmask = z.infer<
-typeof SimpleBitmaskSchema
->;
 export const PositionedBitmaskSchema = z.number(
 
 ).int(
 
 );
-export type PositionedBitmask = z.infer<
-typeof PositionedBitmaskSchema
->;

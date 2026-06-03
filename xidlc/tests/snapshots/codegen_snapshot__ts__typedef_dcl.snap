@@ -22,24 +22,12 @@ typedef_dcl.zod.ts
 import{z}from"zod";
 import{xjson}from"@xidl/xidl-typescript-codec";
 export const FooSeqSchema = z.array(
-FooSchema
+Foo
 );
-export type FooSeq = z.infer<
-typeof FooSeqSchema
->;
-export const uint8_tSchema = u8Schema;
-export type uint8_t = z.infer<
-typeof uint8_tSchema
->;
+export const uint8_tSchema = u8;
 export const u8stringSchema = z.coerce.string(
 
 );
-export type u8string = z.infer<
-typeof u8stringSchema
->;
 export const u16stringSchema = z.coerce.string(
 
 );
-export type u16string = z.infer<
-typeof u16stringSchema
->;

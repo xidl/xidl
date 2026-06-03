@@ -1153,7 +1153,7 @@ export class HttpAnnoServiceClient{
     async add(
     a : number, b : number
     ) : Promise<
-    ifaceTypes.HttpAnnoServiceAddResponse
+    HttpAnnoServiceAddResponse
     >{
         const parsed = ifaceSchemas.HttpAnnoServiceAddRequestSchema.parse(
         {
@@ -1220,13 +1220,13 @@ export class HttpAnnoServiceClient{
         );
         return deserialize(
         responsePayload, ifaceSchemas.HttpAnnoServiceAddResponseSchema
-        )as ifaceTypes.HttpAnnoServiceAddResponse;
+        )as HttpAnnoServiceAddResponse;
     }
 
     async bump(
     value : number
     ) : Promise<
-    ifaceTypes.HttpAnnoServiceBumpResponse
+    HttpAnnoServiceBumpResponse
     >{
         const parsed = ifaceSchemas.HttpAnnoServiceBumpRequestSchema.parse(
         {
@@ -1272,11 +1272,7 @@ export class HttpAnnoServiceClient{
         const resp = await this.fetchImpl(
         url, {
             method : "POST", headers, body : encodeRequestBody(
-            body, "application/json", this.codecs, z.coerce.number(
-
-            ).int(
-
-            )
+            body, "application/json", this.codecs, ifaceSchemas.FIXMESchema
             )
         }
         );
@@ -1297,13 +1293,13 @@ export class HttpAnnoServiceClient{
         );
         return deserialize(
         responsePayload, ifaceSchemas.HttpAnnoServiceBumpResponseSchema
-        )as ifaceTypes.HttpAnnoServiceBumpResponse;
+        )as HttpAnnoServiceBumpResponse;
     }
 
     async get_count(
 
     ) : Promise<
-    ifaceTypes.HttpAnnoServiceGetCountResponse
+    HttpAnnoServiceGetCountResponse
     >{
         let path = "/get_count";
         const query = new URLSearchParams(
@@ -1357,7 +1353,7 @@ export class HttpAnnoServiceClient{
         );
         return deserialize(
         responsePayload, ifaceSchemas.HttpAnnoServiceGetCountResponseSchema
-        )as ifaceTypes.HttpAnnoServiceGetCountResponse;
+        )as HttpAnnoServiceGetCountResponse;
     }
 
     async ping(
@@ -2474,17 +2470,17 @@ export interface HttpAnnoService{
     add(
     req : ifaceTypes.HttpAnnoServiceAddRequest
     ) : Awaitable<
-    ifaceTypes.HttpAnnoServiceAddResponse
+    HttpAnnoServiceAddResponse
     >;
     bump(
     req : ifaceTypes.HttpAnnoServiceBumpRequest
     ) : Awaitable<
-    ifaceTypes.HttpAnnoServiceBumpResponse
+    HttpAnnoServiceBumpResponse
     >;
     get_count(
 
     ) : Awaitable<
-    ifaceTypes.HttpAnnoServiceGetCountResponse
+    HttpAnnoServiceGetCountResponse
     >;
     ping(
 

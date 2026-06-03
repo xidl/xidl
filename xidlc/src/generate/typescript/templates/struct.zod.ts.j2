@@ -1,6 +1,6 @@
 {% from "macros.j2" import render_zod %}
 export const {{ schema_name }}Schema = z.object({
-{% for field in fields %}
-    {{ field.prop }}: {{ render_zod(field.schema) }}{% if field.optional %}.optional(){% endif %}{% if not loop.last %},{% endif %}
-{% endfor %}
+    {% for field in fields %}
+        {{ field.prop }}: {{ render_zod(field.schema) }}{% if field.optional %}.optional(){% endif %}{% if not loop.last %},{% endif %}
+    {% endfor %}
 });

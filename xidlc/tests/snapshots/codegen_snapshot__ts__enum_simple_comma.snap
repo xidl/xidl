@@ -21,6 +21,3 @@ export const ASchema = z.enum(
 "B", "C"
 ]
 );
-export type A = z.infer<
-typeof ASchema
->;

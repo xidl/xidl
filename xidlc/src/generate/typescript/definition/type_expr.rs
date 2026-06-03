@@ -220,15 +220,19 @@ pub(crate) fn ts_type_for_type_spec(
         hir::TypeSpec::ScopedName(value) => {
             TsType::ScopedName(ts_scoped_name(value, module_path, target))
         }
-        hir::TypeSpec::SequenceType(seq) => {
-            TsType::Sequence(Box::new(ts_type_for_type_spec(&seq.ty, module_path, target)))
-        }
+        hir::TypeSpec::SequenceType(seq) => TsType::Sequence(Box::new(ts_type_for_type_spec(
+            &seq.ty,
+            module_path,
+            target,
+        ))),
         hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => {
             TsType::Primitive("string".to_string())
         }
-        hir::TypeSpec::MapType(map) => {
-            TsType::Map(Box::new(ts_type_for_type_spec(&map.value, module_path, target)))
-        }
+        hir::TypeSpec::MapType(map) => TsType::Map(Box::new(ts_type_for_type_spec(
+            &map.value,
+            module_path,
+            target,
+        ))),
         hir::TypeSpec::TemplateType(value) => ts_template_type(value, module_path, target),
     }
 }
@@ -244,7 +248,9 @@ pub(crate) fn zod_schema_for_type_spec(ty: &hir::TypeSpec, module_path: &[String
         hir::TypeSpec::AnyType | hir::TypeSpec::ObjectType | hir::TypeSpec::ValueBaseType => {
             ZodSchema::Any
         }
-        hir::TypeSpec::ScopedName(value) => ZodSchema::ScopedName(zod_schema_ref(value, module_path)),
+        hir::TypeSpec::ScopedName(value) => {
+            ZodSchema::ScopedName(zod_schema_ref(value, module_path))
+        }
         hir::TypeSpec::SequenceType(seq) => ZodSchema::Array {
             element: Box::new(zod_schema_for_type_spec(&seq.ty, module_path)),
             length: seq

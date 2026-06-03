@@ -985,9 +985,7 @@ export class HttpAttributeServiceClient{
         const resp = await this.fetchImpl(
         url, {
             method : "POST", headers, body : encodeRequestBody(
-            body, "application/json", this.codecs, z.coerce.string(
-
-            )
+            body, "application/json", this.codecs, ifaceSchemas.FIXMESchema
             )
         }
         );

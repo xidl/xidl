@@ -10,7 +10,7 @@ http_client_stream_report.client.ts
 import type*as types from"./http_client_stream_report";
 import type*as ifaceTypes from"./http_client_stream_report.iface";
 import*as ifaceSchemas from"./http_client_stream_report.iface.zod";
-import{UploadChunkSchema}from"./http_client_stream_report.iface.zod";
+import{UploadChunk}from"./http_client_stream_report.iface.zod";
 import{serialize, deserialize}from"@xidl/xidl-typescript-codec";
 import{z}from"zod";
 export type FetchLike = (
@@ -928,11 +928,11 @@ http_client_stream_report.iface.zod.ts
 
 import{z}from"zod";
 import{xjson}from"@xidl/xidl-typescript-codec";
-import{UploadChunkSchema}from"./http_client_stream_report.zod";
-export{UploadChunkSchema};
+import{UploadChunk}from"./http_client_stream_report.zod";
+export{UploadChunk};
 export const HttpClientStreamReportServiceUploadPartsRequestSchema = z.object(
 {
-    chunk : UploadChunkSchema,
+    chunk : UploadChunk,
 }
 );
 export type HttpClientStreamReportServiceUploadPartsRequest = z.infer<
@@ -946,7 +946,7 @@ http_client_stream_report.server.ts
 import type*as types from"./http_client_stream_report";
 import type*as ifaceTypes from"./http_client_stream_report.iface";
 import*as ifaceSchemas from"./http_client_stream_report.iface.zod";
-import{UploadChunkSchema}from"./http_client_stream_report.iface.zod";
+import{UploadChunk}from"./http_client_stream_report.iface.zod";
 import{serialize, deserialize}from"@xidl/xidl-typescript-codec";
 import{z}from"zod";
 type Awaitable<T> = T | Promise<
@@ -1834,12 +1834,9 @@ export const UploadChunkSchema = z.object(
     ).nonnegative(
 
     )
-    ),
+    )
 }
 );
-export type UploadChunk = z.infer<
-typeof UploadChunkSchema
->;
 export const UploadSummarySchema = z.object(
 {
     upload_id : z.coerce.string(
@@ -1850,9 +1847,6 @@ export const UploadSummarySchema = z.object(
 
     ).nonnegative(
 
-    ),
+    )
 }
 );
-export type UploadSummary = z.infer<
-typeof UploadSummarySchema
->;

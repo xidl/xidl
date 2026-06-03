@@ -30,9 +30,6 @@ export const SkipStructSchema = z.object(
 
     ).int(
 
-    ),
+    )
 }
 );
-export type SkipStruct = z.infer<
-typeof SkipStructSchema
->;

@@ -887,7 +887,7 @@ export class HttpResponseShapeServiceClient{
     async get_count(
 
     ) : Promise<
-    ifaceTypes.HttpResponseShapeServiceGetCountResponse
+    HttpResponseShapeServiceGetCountResponse
     >{
         let path = "/get_count";
         const query = new URLSearchParams(
@@ -941,13 +941,13 @@ export class HttpResponseShapeServiceClient{
         );
         return deserialize(
         responsePayload, ifaceSchemas.HttpResponseShapeServiceGetCountResponseSchema
-        )as ifaceTypes.HttpResponseShapeServiceGetCountResponse;
+        )as HttpResponseShapeServiceGetCountResponse;
     }
 
     async add(
     a : number, b : number
     ) : Promise<
-    ifaceTypes.HttpResponseShapeServiceAddResponse
+    HttpResponseShapeServiceAddResponse
     >{
         const parsed = ifaceSchemas.HttpResponseShapeServiceAddRequestSchema.parse(
         {
@@ -1014,13 +1014,13 @@ export class HttpResponseShapeServiceClient{
         );
         return deserialize(
         responsePayload, ifaceSchemas.HttpResponseShapeServiceAddResponseSchema
-        )as ifaceTypes.HttpResponseShapeServiceAddResponse;
+        )as HttpResponseShapeServiceAddResponse;
     }
 
     async bump(
     value : number
     ) : Promise<
-    ifaceTypes.HttpResponseShapeServiceBumpResponse
+    HttpResponseShapeServiceBumpResponse
     >{
         const parsed = ifaceSchemas.HttpResponseShapeServiceBumpRequestSchema.parse(
         {
@@ -1066,11 +1066,7 @@ export class HttpResponseShapeServiceClient{
         const resp = await this.fetchImpl(
         url, {
             method : "POST", headers, body : encodeRequestBody(
-            body, "application/json", this.codecs, z.coerce.number(
-
-            ).int(
-
-            )
+            body, "application/json", this.codecs, ifaceSchemas.FIXMESchema
             )
         }
         );
@@ -1091,7 +1087,7 @@ export class HttpResponseShapeServiceClient{
         );
         return deserialize(
         responsePayload, ifaceSchemas.HttpResponseShapeServiceBumpResponseSchema
-        )as ifaceTypes.HttpResponseShapeServiceBumpResponse;
+        )as HttpResponseShapeServiceBumpResponse;
     }
 
     async ping(
@@ -2090,17 +2086,17 @@ export interface HttpResponseShapeService{
     get_count(
 
     ) : Awaitable<
-    ifaceTypes.HttpResponseShapeServiceGetCountResponse
+    HttpResponseShapeServiceGetCountResponse
     >;
     add(
     req : ifaceTypes.HttpResponseShapeServiceAddRequest
     ) : Awaitable<
-    ifaceTypes.HttpResponseShapeServiceAddResponse
+    HttpResponseShapeServiceAddResponse
     >;
     bump(
     req : ifaceTypes.HttpResponseShapeServiceBumpRequest
     ) : Awaitable<
-    ifaceTypes.HttpResponseShapeServiceBumpResponse
+    HttpResponseShapeServiceBumpResponse
     >;
     ping(
 
