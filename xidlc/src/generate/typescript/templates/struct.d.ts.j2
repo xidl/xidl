@@ -1,14 +1,15 @@
+{% from "macros.j2" import render_type %}
 {% if doc and doc | length > 0 %}
     /**
     {% for line in doc %} * {{ line }}
     {% endfor %} */
 {% endif %}
-{% if extends %}export interface {{ ident }} extends {{ extends }} {
+{% if extends %}export interface {{ ident }} extends {% for base in extends %}{{ render_type(base) }}{% if not loop.last %}, {% endif %}{% endfor %} {
     {% else %}export interface {{ ident }} {
         {% endif %}
         {% for field in fields %}{% if field.doc and field.doc | length > 0 %}
             /**
             {% for line in field.doc %}     * {{ line }}
             {% endfor %}     */
-            {% endif %}    {{ field.prop }}{% if field.optional %}?{% endif %}: {{ field.ty }};
+            {% endif %}    {{ field.prop }}{% if field.optional %}?{% endif %}: {{ render_type(field.ty) }};
             {% endfor %}}

@@ -1,3 +1,4 @@
+{% from "macros.j2" import render_type %}
 {% if doc and doc | length > 0 %}
     /**
     {% for line in doc %} * {{ line }}
@@ -8,5 +9,5 @@ export interface {{ name }} {
         /**
         {% for line in param.doc %}     * {{ line }}
         {% endfor %}     */
-        {% endif %}    {{ param.prop }}{% if param.optional %}?{% endif %}: {{ param.ty }};
+        {% endif %}    {{ param.prop }}{% if param.optional %}?{% endif %}: {{ render_type(param.ty) }};
         {% endfor %}}

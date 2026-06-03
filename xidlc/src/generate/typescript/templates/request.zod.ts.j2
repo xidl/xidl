@@ -1,4 +1,5 @@
-export const {{ schema_name }} = z.object({
-    {% for param in params %}    {{ param.prop }}: {{ param.schema }}{% if param.optional %}.optional(){% endif %},
+{% from "macros.j2" import render_zod %}
+export const {{ schema_name }}Schema = z.object({
+    {% for param in params %}    {{ param.prop }}: {{ render_zod(param.schema) }}{% if param.optional %}.optional(){% endif %},
     {% endfor %}});
-export type {{ name }} = z.infer<typeof {{ schema_name }}>;
+export type {{ name }} = z.infer<typeof {{ schema_name }}Schema>;

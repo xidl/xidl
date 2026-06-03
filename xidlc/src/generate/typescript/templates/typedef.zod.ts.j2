@@ -1,2 +1,2 @@
-export const {{ schema_name }} = {{ schema_expr }};
-export type {{ name }} = z.infer<typeof {{ schema_name }}>;
+{% from "macros.j2" import render_zod %}
+export const {{ schema_name }}Schema = {{ render_zod(schema_expr) }};

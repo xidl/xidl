@@ -168,8 +168,7 @@ fn setter(
         method_struct_prefix(interface_name, &setter_raw)
     ));
     let request_schema_ref = request_name.as_ref().map(|name| {
-        let full = scoped_name(module_path, name);
-        format!("zodSchemas.{full}Schema")
+        scoped_name(module_path, name)
     });
     MethodInfo {
         name: ts_ident(&setter_raw),

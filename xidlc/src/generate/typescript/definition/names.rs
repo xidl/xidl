@@ -24,27 +24,26 @@ pub(crate) fn ts_scoped_name(
 }
 
 pub(crate) fn zod_schema_ref(value: &hir::ScopedName, _module_path: &[String]) -> String {
-    let mut parts = value
+    let parts = value
         .name
         .iter()
         .map(|part| ts_ident(part))
         .collect::<Vec<_>>();
     if parts.is_empty() {
-        return "z.unknown()".to_string();
+        return "unknown()".to_string(); // Fallback
     }
-    let last = parts.pop().unwrap();
-    parts.push(format!("{last}Schema"));
+    // We return the base name, the template will add .Schema
     parts.join(".")
 }
 
-pub(crate) fn integer_schema(value: &hir::IntegerType) -> String {
+pub(crate) fn integer_schema_primitive(value: &hir::IntegerType) -> String {
     match value {
         hir::IntegerType::U64
         | hir::IntegerType::U32
         | hir::IntegerType::U16
         | hir::IntegerType::U8
-        | hir::IntegerType::UChar => "z.coerce.number().int().nonnegative()".to_string(),
-        _ => "z.coerce.number().int()".to_string(),
+        | hir::IntegerType::UChar => "coerce.number().int().nonnegative()".to_string(),
+        _ => "coerce.number().int()".to_string(),
     }
 }
 

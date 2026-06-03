@@ -1,4 +1,5 @@
-export class {{ client_name }} {
+{% from "macros.j2" import render_type, render_zod %}
+export class {{ client_name }}Client {
     private readonly baseUrl: string;
     private readonly fetchImpl: FetchLike;
     private readonly defaultHeaders: Record<string, string>;
@@ -14,9 +15,9 @@ export class {{ client_name }} {
             {% for line in method.doc %} * {{ line }}
             {% endfor %} */
         {% endif %}
-        {% if method.is_server_stream %}{{ method.name }}{% else %}async {{ method.name }}{% endif %}({% for param in method.params %}{{ param.name }}: {{ param.ty }}{% if not loop.last %}, {% endif %}{% endfor %}): {% if method.is_server_stream %}{{ method.return_ty }}{% else %}Promise<{{ method.return_ty }}>{% endif %} {
+        {% if method.is_server_stream %}{{ method.name }}{% else %}async {{ method.name }}{% endif %}({% for param in method.params %}{{ param.name }}: {{ render_type(param.ty) }}{% if not loop.last %}, {% endif %}{% endfor %}): {% if method.is_server_stream %}{{ render_type(method.return_ty) }}{% else %}Promise<{{ render_type(method.return_ty) }}>{% endif %} {
             {% if method.request_schema_ref and not method.is_client_stream %}        const payload = { {% for entry in method.request_payload %}"{{ entry.raw_name }}": {{ entry.name }}{% if not loop.last %}, {% endif %}{% endfor %} };
-            const parsed = {{ method.request_schema_ref }}.parse(payload);
+            const parsed = zodSchemas.{{ method.request_schema_ref }}Schema.parse(payload);
             {% endif %}        let path = "{{ method.path }}";
             {% for param in method.path_params %}        path = path.replace("{" + "{{ param.template_name }}" + "}", {% if param.catch_all %}encodePathCatchAll{% else %}encodePathSegment{% endif %}({{ param.access }}));
         {% endfor %}{% if method.query_params | length > 0 %}
@@ -54,37 +55,37 @@ export class {{ client_name }} {
         {% endif %}
         {% if method.body_params | length > 0 %}
             headers.set("Content-Type", "application/json");
-            const serializedBody = serialize(body, {{ method.body_schema_ref }});
+            const serializedBody = serialize(body, zodSchemas.{{ method.body_schema_ref }}Schema);
             const options = { method: "{{ method.http_method }}", headers, body: JSON.stringify(serializedBody) };
         {% else %}
             const options = { method: "{{ method.http_method }}", headers };
         {% endif %}
         const url = joinUrl(this.baseUrl, path);
         {% if method.is_server_stream %}
-            const itemSchema = {{ method.return_schema_ref }};
-            return sseJsonStream<{{ method.stream_item_ty }}>(this.fetchImpl, url, options, itemSchema);
+            const itemSchema = zodSchemas.{{ method.return_schema_ref }}Schema;
+            return sseJsonStream<{{ render_type(method.stream_item_ty) }}>(this.fetchImpl, url, options, itemSchema);
         {% elif method.is_client_stream %}
             headers.set("Content-Type", "application/x-ndjson");
-            const itemSchema = {{ method.request_schema_ref }};
-            const streamBody = ndjsonBody<{{ method.client_stream_item_ty }}>(stream, itemSchema);
+            const itemSchema = zodSchemas.{{ method.request_schema_ref }}Schema;
+            const streamBody = ndjsonBody<{{ render_type(method.client_stream_item_ty) }}>(stream, itemSchema);
             const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers, body: streamBody });
             if (!resp.ok) {
                 throw await parseXidlError(resp);
             }
-            {% if method.return_ty == "void" %}        return;
+            {% if method.return_ty.kind == "Void" %}        return;
             {% else %}        const data = await resp.json();
-            {% if method.return_schema_ref %}        return deserialize(data, {{ method.return_schema_ref }}) as {{ method.return_ty }};
-            {% else %}        return data as {{ method.return_ty }};
+            {% if method.return_schema_ref %}        return deserialize(data, zodSchemas.{{ method.return_schema_ref }}Schema) as {{ render_type(method.return_ty) }};
+            {% else %}        return data as {{ render_type(method.return_ty) }};
         {% endif %}        {% endif %}
         {% else %}
             const resp = await this.fetchImpl(url, options);
             if (!resp.ok) {
                 throw await parseXidlError(resp);
             }
-            {% if method.return_ty == "void" %}        return;
+            {% if method.return_ty.kind == "Void" %}        return;
             {% else %}        const data = await resp.json();
-            {% if method.return_schema_ref %}        return deserialize(data, {{ method.return_schema_ref }}) as {{ method.return_ty }};
-            {% else %}        return data as {{ method.return_ty }};
+            {% if method.return_schema_ref %}        return deserialize(data, zodSchemas.{{ method.return_schema_ref }}Schema) as {{ render_type(method.return_ty) }};
+            {% else %}        return data as {{ render_type(method.return_ty) }};
         {% endif %}        {% endif %}
         {% endif %}    }
     {% endfor %}}

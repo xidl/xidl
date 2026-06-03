@@ -1,4 +1,5 @@
-export class {{ client_name }} {
+{% from "macros.j2" import render_type, render_zod %}
+export class {{ client_name }}Client {
     private readonly baseUrl: string;
     private readonly fetchImpl: FetchLike;
     private readonly defaultHeaders: Record<string, string>;
@@ -13,8 +14,8 @@ export class {{ client_name }} {
         this.codecs = options.codecs ?? {};
     }
     {% for method in methods %}
-        {% if method.is_server_stream %}{{ method.name }}{% else %}async {{ method.name }}{% endif %}({% for param in method.params %}{{ param.name }}: {{ param.ty }}{% if not loop.last %}, {% endif %}{% endfor %}): {% if method.is_server_stream %}{{ method.return_ty }}{% else %}Promise<{{ method.return_ty }}>{% endif %} {
-            {% if method.request_schema_ref %}const parsed = {{ method.request_schema_ref }}.parse({ {% for entry in method.request_payload %}"{{ entry.raw_name }}": {{ entry.access }}{% if not loop.last %}, {% endif %}{% endfor %} });
+        {% if method.is_server_stream %}{{ method.name }}{% else %}async {{ method.name }}{% endif %}({% for param in method.params %}{{ param.name }}: {{ render_type(param.ty) }}{% if not loop.last %}, {% endif %}{% endfor %}): {% if method.is_server_stream %}{{ render_type(method.return_ty) }}{% else %}Promise<{{ render_type(method.return_ty) }}>{% endif %} {
+            {% if method.request_schema_ref %}const parsed = ifaceSchemas.{{ method.request_schema_ref }}Schema.parse({ {% for entry in method.request_payload %}"{{ entry.raw_name }}": {{ entry.access }}{% if not loop.last %}, {% endif %}{% endfor %} });
             {% endif %}let path = "{{ method.path }}";
             {% for param in method.path_params %}path = path.replace("{" + "{% if param.catch_all %}*{% endif %}{{ param.template_name }}" + "}", {% if param.catch_all %}encodePathCatchAll{% else %}encodePathSegment{% endif %}({{ param.access }}));
             {% endfor %}const query = new URLSearchParams();
@@ -30,32 +31,32 @@ export class {{ client_name }} {
                 path = `${path}?${queryString}`;
             }
             const url = joinUrl(this.baseUrl, path);
-            {% if method.is_server_stream %}return sseJsonStream<{{ method.stream_item_ty }}>(this.fetchImpl, url, { method: "{{ method.http_method }}", headers }, {{ method.stream_item_schema_ref or "undefined" }});
+            {% if method.is_server_stream %}return sseJsonStream<{{ render_type(method.stream_item_ty) }}>(this.fetchImpl, url, { method: "{{ method.http_method }}", headers }, {% if method.stream_item_schema_ref %}ifaceSchemas.{{ method.stream_item_schema_ref }}Schema{% else %}undefined{% endif %});
             {% elif method.is_client_stream %}headers.set("Content-Type", "{{ method.request_content_type }}");
             headers.set("Accept", "{{ method.response_content_type }}");
-            const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers, body: ndjsonBody(stream, {{ method.request_schema_ref or "undefined" }}) });
+            const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers, body: ndjsonBody(stream, {% if method.request_schema_ref %}ifaceSchemas.{{ method.request_schema_ref }}Schema{% else %}undefined{% endif %}) });
             if (!resp.ok) {
                 throw await parseXidlError(resp);
             }
-            {% if method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs, {{ method.response_schema_ref }});
+            {% if method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs, ifaceSchemas.{{ method.response_schema_ref }}Schema);
             const responsePayload = buildResponsePayload(responseBody, resp, "{{ method.response_body_mode }}", [{% for param in method.response_header_params %}{ name: "{{ param.raw_name }}", key: "{{ param.access }}", optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], [{% for param in method.response_cookie_params %}{ name: "{{ param.raw_name }}", key: "{{ param.access }}", optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}]);
-            return deserialize(responsePayload, {{ method.response_schema_ref }}) as {{ method.return_ty }};
-            {% elif method.return_ty == "void" %}return;
-            {% else %}return await decodeResponseBody<{{ method.return_ty }}>(resp, "{{ method.response_content_type }}", this.codecs);
+            return deserialize(responsePayload, ifaceSchemas.{{ method.response_schema_ref }}Schema) as {{ render_type(method.return_ty) }};
+            {% elif method.return_ty.kind == "Void" %}return;
+            {% else %}return await decodeResponseBody<{{ render_type(method.return_ty) }}>(resp, "{{ method.response_content_type }}", this.codecs);
         {% endif %}
         {% else %}{% if method.body_single %}const body = {% if method.request_schema_ref %}parsed{% else %}{{ method.body_single }}{% endif %};
         {% elif method.body_entries | length > 0 %}const body = { {% for entry in method.body_entries %}"{{ entry.raw_name }}": {% if method.request_schema_ref %}parsed["{{ entry.raw_name }}"]{% else %}{{ entry.access }}{% endif %}{% if not loop.last %}, {% endif %}{% endfor %} };
         {% endif %}{% if method.body_single or method.body_entries | length > 0 %}headers.set("Content-Type", "{{ method.request_content_type }}");
         {% endif %}headers.set("Accept", "{{ method.response_content_type }}");
-        const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers{% if method.body_single or method.body_entries | length > 0 %}, body: encodeRequestBody(body, "{{ method.request_content_type }}", this.codecs, {{ method.body_schema_ref or "undefined" }}){% endif %} });
+        const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers{% if method.body_single or method.body_entries | length > 0 %}, body: encodeRequestBody(body, "{{ method.request_content_type }}", this.codecs, {% if method.body_schema_ref %}ifaceSchemas.{{ method.body_schema_ref }}Schema{% else %}undefined{% endif %}){% endif %} });
         if (!resp.ok) {
             throw await parseXidlError(resp);
         }
-        {% if method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs, {{ method.response_schema_ref }});
+        {% if method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs, ifaceSchemas.{{ method.response_schema_ref }}Schema);
         const responsePayload = buildResponsePayload(responseBody, resp, "{{ method.response_body_mode }}", [{% for param in method.response_header_params %}{ name: "{{ param.raw_name }}", key: "{{ param.access }}", optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], [{% for param in method.response_cookie_params %}{ name: "{{ param.raw_name }}", key: "{{ param.access }}", optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}]);
-        return deserialize(responsePayload, {{ method.response_schema_ref }}) as {{ method.return_ty }};
-        {% elif method.return_ty == "void" %}return;
-        {% else %}return await decodeResponseBody<{{ method.return_ty }}>(resp, "{{ method.response_content_type }}", this.codecs);
+        return deserialize(responsePayload, ifaceSchemas.{{ method.response_schema_ref }}Schema) as {{ render_type(method.return_ty) }};
+        {% elif method.return_ty.kind == "Void" %}return;
+        {% else %}return await decodeResponseBody<{{ render_type(method.return_ty) }}>(resp, "{{ method.response_content_type }}", this.codecs);
         {% endif %}{% endif %}
     }
     {% endfor %}}

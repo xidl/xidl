@@ -2,7 +2,7 @@ use crate::generate::typescript::definition::annotations::has_annotation;
 use crate::generate::utils::doc_lines_from_annotations;
 use xidl_parser::hir;
 
-use super::contexts::XjsonMeta;
+use super::contexts::{TsType, XjsonMeta, ZodSchema};
 use super::method::TypeRefTarget;
 use super::names::{declarator_name, ts_prop_name};
 use super::type_expr::{ts_type_for_decl, zod_schema_for_decl};
@@ -61,8 +61,8 @@ pub(crate) fn struct_fields(
 
 pub(crate) struct FieldDecl {
     pub(crate) prop: String,
-    pub(crate) ty: String,
-    pub(crate) schema: String,
+    pub(crate) ty: TsType,
+    pub(crate) schema: ZodSchema,
     pub(crate) optional: bool,
     pub(crate) xjson_meta: Option<XjsonMeta>,
     pub(crate) doc: Vec<String>,
