@@ -39,10 +39,13 @@ pub(crate) fn strip_interfaces(spec: hir::Specification) -> hir::Specification {
 
 fn path_param_expr(param: &ParamMeta) -> String {
     let field = format!("req.{}", param.field_name);
-    if param.ty == "uint32" {
-        format!("xidlgohttp.FormatUint32({field})")
-    } else {
-        field
+    match param.ty.as_str() {
+        "uint32" => format!("xidlgohttp.FormatUint32({field})"),
+        "int32" => format!("xidlgohttp.FormatInt32({field})"),
+        "uint64" => format!("xidlgohttp.FormatUint64({field})"),
+        "int64" => format!("xidlgohttp.FormatInt64({field})"),
+        "bool" => format!("xidlgohttp.FormatBool({field})"),
+        _ => field,
     }
 }
 

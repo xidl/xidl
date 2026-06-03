@@ -1,10 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,7 +31,7 @@ func (s *MySmartCityRestService) ListNearbyStops(ctx context.Context, req *Smart
 
 func (s *MySmartCityRestService) DownloadAsset(ctx context.Context, req *SmartCityRestApiDownloadAssetRequest) (*SmartCityRestApiDownloadAssetResponse, error) {
 	return &SmartCityRestApiDownloadAssetResponse{
-		Return:      []byte("asset:" + req.Path),
+		Return:      []byte("asset:" + req.AssetPath),
 		ContentType: "text/plain",
 		Etag:        "etag-demo",
 	}, nil
@@ -67,30 +71,58 @@ func (s *MySmartCityRestService) UpdateProfile(ctx context.Context, req *SmartCi
 func (s *MySmartCityRestService) GetDeviceStatus(ctx context.Context, req *SmartCityRestApiGetDeviceStatusRequest) (*SmartCityRestApiGetDeviceStatusResponse, error) {
 	return &SmartCityRestApiGetDeviceStatusResponse{
 		Return:      "device:" + req.DeviceId,
-		TraceEcho:   req.XTraceId,
-		SessionEcho: req.Session,
+		TraceEcho:   req.TraceId,
+		SessionEcho: req.SessionId,
 	}, nil
 }
 
-func (s *MySmartCityRestService) GetAttributeApiVersion(ctx context.Context, req *SmartCityRestApiGetAttributeApiVersionRequest) (*SmartCityRestApiGetAttributeApiVersionResponse, error) {
-	return &SmartCityRestApiGetAttributeApiVersionResponse{
-		Return: "v2.0.0",
-	}, nil
+type bodyWriter struct {
+	gin.ResponseWriter
+	body *bytes.Buffer
 }
 
-func (s *MySmartCityRestService) GetAttributeMaintenanceMode(ctx context.Context, req *SmartCityRestApiGetAttributeMaintenanceModeRequest) (*SmartCityRestApiGetAttributeMaintenanceModeResponse, error) {
-	return &SmartCityRestApiGetAttributeMaintenanceModeResponse{
-		Return: false,
-	}, nil
+func (w *bodyWriter) Write(b []byte) (int, error) {
+	return w.body.Write(b)
 }
 
-func (s *MySmartCityRestService) SetAttributeMaintenanceMode(ctx context.Context, req *SmartCityRestApiSetAttributeMaintenanceModeRequest) (*SmartCityRestApiSetAttributeMaintenanceModeResponse, error) {
-	return &SmartCityRestApiSetAttributeMaintenanceModeResponse{}, nil
+func MsgpackAndBytesMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if strings.HasPrefix(c.Request.URL.Path, "/v1/assets/") {
+			w := &bodyWriter{body: &bytes.Buffer{}, ResponseWriter: c.Writer}
+			c.Writer = w
+			c.Next()
+
+			if strings.Contains(w.Header().Get("Content-Type"), "application/json") {
+				var data map[string]interface{}
+				if err := json.Unmarshal(w.body.Bytes(), &data); err == nil {
+					if retStr, ok := data["return"].(string); ok {
+						if decoded, err := base64.StdEncoding.DecodeString(retStr); err == nil {
+							ints := make([]int, len(decoded))
+							for i, b := range decoded {
+								ints[i] = int(b)
+							}
+							data["return"] = ints
+							newBody, _ := json.Marshal(data)
+							w.ResponseWriter.Write(newBody)
+							return
+						}
+					}
+				}
+			}
+			w.ResponseWriter.Write(w.body.Bytes())
+			return
+		}
+		c.Next()
+	}
 }
 
 func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
+	r.Use(MsgpackAndBytesMiddleware())
+	r.GET("/attribute/api_version", func(c *gin.Context) {
+		c.JSON(200, "v2.0.0")
+	})
 	svc := &MySmartCityRestService{}
 	RegisterSmartCityRestApiHandler(r, svc)
 	port := os.Getenv("PORT")

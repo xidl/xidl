@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,192 +24,185 @@ func formatOptInt(v *uint32) string {
 	return fmt.Sprintf("Some(%d)", *v)
 }
 
-type MyE2ePathSever struct{}
+type MyE2EPathSever struct{}
 
-func (s *MyE2ePathSever) OpWithPath(ctx context.Context, req *E2ePathSeverOpWithPathRequest) (*E2ePathSeverOpWithPathResponse, error) {
-	return &E2ePathSeverOpWithPathResponse{Return: []string{req.Param1}}, nil
+func (s *MyE2EPathSever) OpWithPath(ctx context.Context, req *E2EPathSeverOpWithPathRequest) (*E2EPathSeverOpWithPathResponse, error) {
+	return &E2EPathSeverOpWithPathResponse{Return: []string{req.Param1}}, nil
 }
 
-func (s *MyE2ePathSever) OpWithQuery(ctx context.Context, req *E2ePathSeverOpWithQueryRequest) (*E2ePathSeverOpWithQueryResponse, error) {
-	return &E2ePathSeverOpWithQueryResponse{Return: []string{req.Param1, req.Q}}, nil
+func (s *MyE2EPathSever) OpWithQuery(ctx context.Context, req *E2EPathSeverOpWithQueryRequest) (*E2EPathSeverOpWithQueryResponse, error) {
+	return &E2EPathSeverOpWithQueryResponse{Return: []string{req.Param1, req.Q}}, nil
 }
 
-func (s *MyE2ePathSever) OpWithParams(ctx context.Context, req *E2ePathSeverOpWithParamsRequest) (*E2ePathSeverOpWithParamsResponse, error) {
+func (s *MyE2EPathSever) OpWithParams(ctx context.Context, req *E2EPathSeverOpWithParamsRequest) (*E2EPathSeverOpWithParamsResponse, error) {
 	// Format body and a map to match the test assertion
 	res := []string{req.PathName}
 	res = append(res, req.Q...)
 	res = append(res, fmt.Sprintf("%v", req.B))
 	res = append(res, fmt.Sprintf("%v", req.A))
-	return &E2ePathSeverOpWithParamsResponse{Return: res}, nil
+	return &E2EPathSeverOpWithParamsResponse{Return: res}, nil
 }
 
-func (s *MyE2ePathSever) OpWithQuery2(ctx context.Context, req *E2ePathSeverOpWithQuery2Request) (*E2ePathSeverOpWithQuery2Response, error) {
-	return &E2ePathSeverOpWithQuery2Response{Return: req.All + ":" + req.Word + ":" + req.Q}, nil
+func (s *MyE2EPathSever) OpWithQuery2(ctx context.Context, req *E2EPathSeverOpWithQuery2Request) (*E2EPathSeverOpWithQuery2Response, error) {
+	return &E2EPathSeverOpWithQuery2Response{Return: req.All + ":" + req.Word + ":" + req.Q}, nil
 }
 
-type MyE2eHttpRouteAndBody struct{}
+type MyE2EHttpRouteAndBody struct{}
 
-func (s *MyE2eHttpRouteAndBody) GetResource(ctx context.Context, req *E2eHttpRouteAndBodyGetResourceRequest) (*E2eHttpRouteAndBodyGetResourceResponse, error) {
-	return &E2eHttpRouteAndBodyGetResourceResponse{Return: fmt.Sprintf("id:%s,lang:%s,trace:%s", req.ResourceId, formatOpt(req.Locale), req.XTraceId)}, nil
+func (s *MyE2EHttpRouteAndBody) GetResource(ctx context.Context, req *E2EHttpRouteAndBodyGetResourceRequest) (*E2EHttpRouteAndBodyGetResourceResponse, error) {
+	return &E2EHttpRouteAndBodyGetResourceResponse{Return: fmt.Sprintf("id:%s,lang:%s,trace:%s", req.ResourceId, formatOpt(req.Locale), req.TraceId)}, nil
 }
 
-func (s *MyE2eHttpRouteAndBody) GetFile(ctx context.Context, req *E2eHttpRouteAndBodyGetFileRequest) (*E2eHttpRouteAndBodyGetFileResponse, error) {
-	return &E2eHttpRouteAndBodyGetFileResponse{Return: fmt.Sprintf("file:%s,download:%t,version:%s", req.FilePath, req.Download, formatOpt(req.Version))}, nil
+func (s *MyE2EHttpRouteAndBody) GetFile(ctx context.Context, req *E2EHttpRouteAndBodyGetFileRequest) (*E2EHttpRouteAndBodyGetFileResponse, error) {
+	filePath := req.FilePath
+	if strings.HasPrefix(filePath, "/") {
+		filePath = filePath[1:]
+	}
+	return &E2EHttpRouteAndBodyGetFileResponse{Return: fmt.Sprintf("file:%s,download:%t,version:%s", filePath, req.Download, formatOpt(req.Version))}, nil
 }
 
-func (s *MyE2eHttpRouteAndBody) CreateResource(ctx context.Context, req *E2eHttpRouteAndBodyCreateResourceRequest) (*E2eHttpRouteAndBodyCreateResourceResponse, error) {
-	return &E2eHttpRouteAndBodyCreateResourceResponse{Return: req.ResourceBody}, nil
+func (s *MyE2EHttpRouteAndBody) CreateResource(ctx context.Context, req *E2EHttpRouteAndBodyCreateResourceRequest) (*E2EHttpRouteAndBodyCreateResourceResponse, error) {
+	return &E2EHttpRouteAndBodyCreateResourceResponse{Return: req.ResourceBody}, nil
 }
 
-func (s *MyE2eHttpRouteAndBody) ReplaceResource(ctx context.Context, req *E2eHttpRouteAndBodyReplaceResourceRequest) (*E2eHttpRouteAndBodyReplaceResourceResponse, error) {
-	return &E2eHttpRouteAndBodyReplaceResourceResponse{}, nil
+func (s *MyE2EHttpRouteAndBody) ReplaceResource(ctx context.Context, req *E2EHttpRouteAndBodyReplaceResourceRequest) (*E2EHttpRouteAndBodyReplaceResourceResponse, error) {
+	return &E2EHttpRouteAndBodyReplaceResourceResponse{}, nil
 }
 
-func (s *MyE2eHttpRouteAndBody) PatchResource(ctx context.Context, req *E2eHttpRouteAndBodyPatchResourceRequest) (*E2eHttpRouteAndBodyPatchResourceResponse, error) {
-	return &E2eHttpRouteAndBodyPatchResourceResponse{Return: req.Changes}, nil
+func (s *MyE2EHttpRouteAndBody) PatchResource(ctx context.Context, req *E2EHttpRouteAndBodyPatchResourceRequest) (*E2EHttpRouteAndBodyPatchResourceResponse, error) {
+	return &E2EHttpRouteAndBodyPatchResourceResponse{Return: req.Changes}, nil
 }
 
-func (s *MyE2eHttpRouteAndBody) DeleteResource(ctx context.Context, req *E2eHttpRouteAndBodyDeleteResourceRequest) (*E2eHttpRouteAndBodyDeleteResourceResponse, error) {
-	return &E2eHttpRouteAndBodyDeleteResourceResponse{}, nil
+func (s *MyE2EHttpRouteAndBody) DeleteResource(ctx context.Context, req *E2EHttpRouteAndBodyDeleteResourceRequest) (*E2EHttpRouteAndBodyDeleteResourceResponse, error) {
+	return &E2EHttpRouteAndBodyDeleteResourceResponse{}, nil
 }
 
-func (s *MyE2eHttpRouteAndBody) ProbeResource(ctx context.Context, req *E2eHttpRouteAndBodyProbeResourceRequest) (*E2eHttpRouteAndBodyProbeResourceResponse, error) {
-	return &E2eHttpRouteAndBodyProbeResourceResponse{}, nil
+func (s *MyE2EHttpRouteAndBody) ProbeResource(ctx context.Context, req *E2EHttpRouteAndBodyProbeResourceRequest) (*E2EHttpRouteAndBodyProbeResourceResponse, error) {
+	return &E2EHttpRouteAndBodyProbeResourceResponse{}, nil
 }
 
-func (s *MyE2eHttpRouteAndBody) ResourceOptions(ctx context.Context, req *E2eHttpRouteAndBodyResourceOptionsRequest) (*E2eHttpRouteAndBodyResourceOptionsResponse, error) {
-	return &E2eHttpRouteAndBodyResourceOptionsResponse{}, nil
+func (s *MyE2EHttpRouteAndBody) ResourceOptions(ctx context.Context, req *E2EHttpRouteAndBodyResourceOptionsRequest) (*E2EHttpRouteAndBodyResourceOptionsResponse, error) {
+	return &E2EHttpRouteAndBodyResourceOptionsResponse{}, nil
 }
 
-func (s *MyE2eHttpRouteAndBody) GetMsgpackResource(ctx context.Context, req *E2eHttpRouteAndBodyGetMsgpackResourceRequest) (*E2eHttpRouteAndBodyGetMsgpackResourceResponse, error) {
-	return &E2eHttpRouteAndBodyGetMsgpackResourceResponse{Return: StructHttpBody{Name: "msgpack"}, Revision: 1}, nil
+func (s *MyE2EHttpRouteAndBody) GetMsgpackResource(ctx context.Context, req *E2EHttpRouteAndBodyGetMsgpackResourceRequest) (*E2EHttpRouteAndBodyGetMsgpackResourceResponse, error) {
+	return &E2EHttpRouteAndBodyGetMsgpackResourceResponse{Return: StructHttpBody{Name: "msgpack"}, Revision: 1}, nil
 }
 
-func (s *MyE2eHttpRouteAndBody) DedupResource(ctx context.Context, req *E2eHttpRouteAndBodyDedupResourceRequest) (*E2eHttpRouteAndBodyDedupResourceResponse, error) {
-	return &E2eHttpRouteAndBodyDedupResourceResponse{Return: req.Id + ":" + req.XTraceId}, nil
+func (s *MyE2EHttpRouteAndBody) DedupResource(ctx context.Context, req *E2EHttpRouteAndBodyDedupResourceRequest) (*E2EHttpRouteAndBodyDedupResourceResponse, error) {
+	return &E2EHttpRouteAndBodyDedupResourceResponse{Return: req.Id + ":" + req.XTraceId}, nil
 }
 
-func (s *MyE2eHttpRouteAndBody) PreviewResource(ctx context.Context, req *E2eHttpRouteAndBodyPreviewResourceRequest) (*E2eHttpRouteAndBodyPreviewResourceResponse, error) {
-	return &E2eHttpRouteAndBodyPreviewResourceResponse{Return: req.Resource}, nil
+func (s *MyE2EHttpRouteAndBody) PreviewResource(ctx context.Context, req *E2EHttpRouteAndBodyPreviewResourceRequest) (*E2EHttpRouteAndBodyPreviewResourceResponse, error) {
+	return &E2EHttpRouteAndBodyPreviewResourceResponse{Return: req.Resource}, nil
 }
 
-type MyE2eHttpSecurity struct{}
+type MyE2EHttpSecurity struct{}
 
-func (s *MyE2eHttpSecurity) GetSecureUser(ctx context.Context, req *E2eHttpSecurityGetSecureUserRequest) (*E2eHttpSecurityGetSecureUserResponse, error) {
-	return &E2eHttpSecurityGetSecureUserResponse{Return: fmt.Sprintf("user:%s,lang:%s,trace:%s", req.UserId, formatOpt(req.Locale), req.XTraceId)}, nil
+func (s *MyE2EHttpSecurity) GetSecureUser(ctx context.Context, req *E2EHttpSecurityGetSecureUserRequest) (*E2EHttpSecurityGetSecureUserResponse, error) {
+	return &E2EHttpSecurityGetSecureUserResponse{Return: fmt.Sprintf("user:%s,lang:%s,trace:%s", req.UserId, formatOpt(req.Locale), req.TraceId)}, nil
 }
 
-func (s *MyE2eHttpSecurity) SearchSecureUser(ctx context.Context, req *E2eHttpSecuritySearchSecureUserRequest) (*E2eHttpSecuritySearchSecureUserResponse, error) {
-	return &E2eHttpSecuritySearchSecureUserResponse{Return: fmt.Sprintf("keyword:%s,page:%s", req.Keyword, formatOptInt(req.Page))}, nil
+func (s *MyE2EHttpSecurity) SearchSecureUser(ctx context.Context, req *E2EHttpSecuritySearchSecureUserRequest) (*E2EHttpSecuritySearchSecureUserResponse, error) {
+	return &E2EHttpSecuritySearchSecureUserResponse{Return: fmt.Sprintf("keyword:%s,page:%s", req.Keyword, formatOptInt(req.Page))}, nil
 }
 
-func (s *MyE2eHttpSecurity) Healthz(ctx context.Context, req *E2eHttpSecurityHealthzRequest) (*E2eHttpSecurityHealthzResponse, error) {
-	return &E2eHttpSecurityHealthzResponse{Return: "ok"}, nil
+func (s *MyE2EHttpSecurity) Healthz(ctx context.Context, req *E2EHttpSecurityHealthzRequest) (*E2EHttpSecurityHealthzResponse, error) {
+	return &E2EHttpSecurityHealthzResponse{Return: "ok"}, nil
 }
 
-type MyE2eTypeServer struct {
+type MyE2ETypeServer struct {
 	attr1 string
 	attr2 []string
 }
 
-func (s *MyE2eTypeServer) GetAttributeTypeAttr1(ctx context.Context, req *E2eTypeServerGetAttributeTypeAttr1Request) (*E2eTypeServerGetAttributeTypeAttr1Response, error) {
-	return &E2eTypeServerGetAttributeTypeAttr1Response{Return: s.attr1}, nil
+
+
+func (s *MyE2ETypeServer) SimpleOp(ctx context.Context, req *E2ETypeServerSimpleOpRequest) (*E2ETypeServerSimpleOpResponse, error) {
+	return &E2ETypeServerSimpleOpResponse{}, nil
 }
 
-func (s *MyE2eTypeServer) SetAttributeTypeAttr1(ctx context.Context, req *E2eTypeServerSetAttributeTypeAttr1Request) (*E2eTypeServerSetAttributeTypeAttr1Response, error) {
-	s.attr1 = req.Value
-	return &E2eTypeServerSetAttributeTypeAttr1Response{}, nil
+func (s *MyE2ETypeServer) SimpleOpWithReturn1(ctx context.Context, req *E2ETypeServerSimpleOpWithReturn1Request) (*E2ETypeServerSimpleOpWithReturn1Response, error) {
+	return &E2ETypeServerSimpleOpWithReturn1Response{Return: "simple_op_with_return1"}, nil
 }
 
-func (s *MyE2eTypeServer) GetAttributeTypeAttr2(ctx context.Context, req *E2eTypeServerGetAttributeTypeAttr2Request) (*E2eTypeServerGetAttributeTypeAttr2Response, error) {
-	return &E2eTypeServerGetAttributeTypeAttr2Response{Return: s.attr2}, nil
+func (s *MyE2ETypeServer) SimpleOpWithReturn2(ctx context.Context, req *E2ETypeServerSimpleOpWithReturn2Request) (*E2ETypeServerSimpleOpWithReturn2Response, error) {
+	return &E2ETypeServerSimpleOpWithReturn2Response{}, nil
 }
 
-func (s *MyE2eTypeServer) SimpleOp(ctx context.Context, req *E2eTypeServerSimpleOpRequest) (*E2eTypeServerSimpleOpResponse, error) {
-	return &E2eTypeServerSimpleOpResponse{}, nil
+func (s *MyE2ETypeServer) SimpleOpWithReturn3(ctx context.Context, req *E2ETypeServerSimpleOpWithReturn3Request) (*E2ETypeServerSimpleOpWithReturn3Response, error) {
+	return &E2ETypeServerSimpleOpWithReturn3Response{Return: EnumSimple1V1}, nil
 }
 
-func (s *MyE2eTypeServer) SimpleOpWithReturn1(ctx context.Context, req *E2eTypeServerSimpleOpWithReturn1Request) (*E2eTypeServerSimpleOpWithReturn1Response, error) {
-	return &E2eTypeServerSimpleOpWithReturn1Response{Return: "simple_op_with_return1"}, nil
+func (s *MyE2ETypeServer) SimpleOpWithReturn4(ctx context.Context, req *E2ETypeServerSimpleOpWithReturn4Request) (*E2ETypeServerSimpleOpWithReturn4Response, error) {
+	return &E2ETypeServerSimpleOpWithReturn4Response{Return: StructEmpty{}}, nil
 }
 
-func (s *MyE2eTypeServer) SimpleOpWithReturn2(ctx context.Context, req *E2eTypeServerSimpleOpWithReturn2Request) (*E2eTypeServerSimpleOpWithReturn2Response, error) {
-	return &E2eTypeServerSimpleOpWithReturn2Response{}, nil
+func (s *MyE2ETypeServer) SimpleOpWithReturn5(ctx context.Context, req *E2ETypeServerSimpleOpWithReturn5Request) (*E2ETypeServerSimpleOpWithReturn5Response, error) {
+	return &E2ETypeServerSimpleOpWithReturn5Response{}, nil
 }
 
-func (s *MyE2eTypeServer) SimpleOpWithReturn3(ctx context.Context, req *E2eTypeServerSimpleOpWithReturn3Request) (*E2eTypeServerSimpleOpWithReturn3Response, error) {
-	return &E2eTypeServerSimpleOpWithReturn3Response{Return: EnumSimple1V1}, nil
+func (s *MyE2ETypeServer) ReturnWithSequence1(ctx context.Context, req *E2ETypeServerReturnWithSequence1Request) (*E2ETypeServerReturnWithSequence1Response, error) {
+	return &E2ETypeServerReturnWithSequence1Response{Return: []string{"s1", "s2"}}, nil
 }
 
-func (s *MyE2eTypeServer) SimpleOpWithReturn4(ctx context.Context, req *E2eTypeServerSimpleOpWithReturn4Request) (*E2eTypeServerSimpleOpWithReturn4Response, error) {
-	return &E2eTypeServerSimpleOpWithReturn4Response{Return: StructEmpty{}}, nil
+func (s *MyE2ETypeServer) ReturnWithSequence2(ctx context.Context, req *E2ETypeServerReturnWithSequence2Request) (*E2ETypeServerReturnWithSequence2Response, error) {
+	return &E2ETypeServerReturnWithSequence2Response{}, nil
 }
 
-func (s *MyE2eTypeServer) SimpleOpWithReturn5(ctx context.Context, req *E2eTypeServerSimpleOpWithReturn5Request) (*E2eTypeServerSimpleOpWithReturn5Response, error) {
-	return &E2eTypeServerSimpleOpWithReturn5Response{}, nil
+func (s *MyE2ETypeServer) ReturnWithSequence3(ctx context.Context, req *E2ETypeServerReturnWithSequence3Request) (*E2ETypeServerReturnWithSequence3Response, error) {
+	return &E2ETypeServerReturnWithSequence3Response{Return: []EnumSimple1{EnumSimple1V1, EnumSimple1V2}}, nil
 }
 
-func (s *MyE2eTypeServer) ReturnWithSequence1(ctx context.Context, req *E2eTypeServerReturnWithSequence1Request) (*E2eTypeServerReturnWithSequence1Response, error) {
-	return &E2eTypeServerReturnWithSequence1Response{Return: []string{"s1", "s2"}}, nil
+func (s *MyE2ETypeServer) ReturnWithSequence4(ctx context.Context, req *E2ETypeServerReturnWithSequence4Request) (*E2ETypeServerReturnWithSequence4Response, error) {
+	return &E2ETypeServerReturnWithSequence4Response{Return: []StructEmpty{{}}}, nil
 }
 
-func (s *MyE2eTypeServer) ReturnWithSequence2(ctx context.Context, req *E2eTypeServerReturnWithSequence2Request) (*E2eTypeServerReturnWithSequence2Response, error) {
-	return &E2eTypeServerReturnWithSequence2Response{}, nil
+func (s *MyE2ETypeServer) ReturnWithSequence5(ctx context.Context, req *E2ETypeServerReturnWithSequence5Request) (*E2ETypeServerReturnWithSequence5Response, error) {
+	return &E2ETypeServerReturnWithSequence5Response{}, nil
 }
 
-func (s *MyE2eTypeServer) ReturnWithSequence3(ctx context.Context, req *E2eTypeServerReturnWithSequence3Request) (*E2eTypeServerReturnWithSequence3Response, error) {
-	return &E2eTypeServerReturnWithSequence3Response{Return: []EnumSimple1{EnumSimple1V1, EnumSimple1V2}}, nil
+func (s *MyE2ETypeServer) ReturnWithMap(ctx context.Context, req *E2ETypeServerReturnWithMapRequest) (*E2ETypeServerReturnWithMapResponse, error) {
+	return &E2ETypeServerReturnWithMapResponse{Return: map[string]uint8{"k1": 1}}, nil
 }
 
-func (s *MyE2eTypeServer) ReturnWithSequence4(ctx context.Context, req *E2eTypeServerReturnWithSequence4Request) (*E2eTypeServerReturnWithSequence4Response, error) {
-	return &E2eTypeServerReturnWithSequence4Response{Return: []StructEmpty{{}}}, nil
+func (s *MyE2ETypeServer) ReturnWithAny(ctx context.Context, req *E2ETypeServerReturnWithAnyRequest) (*E2ETypeServerReturnWithAnyResponse, error) {
+	return &E2ETypeServerReturnWithAnyResponse{Return: map[string]any{"any": "value"}}, nil
 }
 
-func (s *MyE2eTypeServer) ReturnWithSequence5(ctx context.Context, req *E2eTypeServerReturnWithSequence5Request) (*E2eTypeServerReturnWithSequence5Response, error) {
-	return &E2eTypeServerReturnWithSequence5Response{}, nil
+func (s *MyE2ETypeServer) ReturnWithAnySequence(ctx context.Context, req *E2ETypeServerReturnWithAnySequenceRequest) (*E2ETypeServerReturnWithAnySequenceResponse, error) {
+	return &E2ETypeServerReturnWithAnySequenceResponse{Return: []any{1, "two"}}, nil
 }
 
-func (s *MyE2eTypeServer) ReturnWithMap(ctx context.Context, req *E2eTypeServerReturnWithMapRequest) (*E2eTypeServerReturnWithMapResponse, error) {
-	return &E2eTypeServerReturnWithMapResponse{Return: map[string]uint8{"k1": 1}}, nil
+func (s *MyE2ETypeServer) ReturnWithAnyMap(ctx context.Context, req *E2ETypeServerReturnWithAnyMapRequest) (*E2ETypeServerReturnWithAnyMapResponse, error) {
+	return &E2ETypeServerReturnWithAnyMapResponse{Return: map[string]any{"k1": 1}}, nil
 }
 
-func (s *MyE2eTypeServer) ReturnWithAny(ctx context.Context, req *E2eTypeServerReturnWithAnyRequest) (*E2eTypeServerReturnWithAnyResponse, error) {
-	return &E2eTypeServerReturnWithAnyResponse{Return: map[string]any{"any": "value"}}, nil
+func (s *MyE2ETypeServer) ParameterOp(ctx context.Context, req *E2ETypeServerParameterOpRequest) (*E2ETypeServerParameterOpResponse, error) {
+	return &E2ETypeServerParameterOpResponse{}, nil
 }
 
-func (s *MyE2eTypeServer) ReturnWithAnySequence(ctx context.Context, req *E2eTypeServerReturnWithAnySequenceRequest) (*E2eTypeServerReturnWithAnySequenceResponse, error) {
-	return &E2eTypeServerReturnWithAnySequenceResponse{Return: []any{1, "two"}}, nil
+func (s *MyE2ETypeServer) ParameterOp2(ctx context.Context, req *E2ETypeServerParameterOp2Request) (*E2ETypeServerParameterOp2Response, error) {
+	return &E2ETypeServerParameterOp2Response{}, nil
 }
 
-func (s *MyE2eTypeServer) ReturnWithAnyMap(ctx context.Context, req *E2eTypeServerReturnWithAnyMapRequest) (*E2eTypeServerReturnWithAnyMapResponse, error) {
-	return &E2eTypeServerReturnWithAnyMapResponse{Return: map[string]any{"k1": 1}}, nil
+func (s *MyE2ETypeServer) ParameterOp3(ctx context.Context, req *E2ETypeServerParameterOp3Request) (*E2ETypeServerParameterOp3Response, error) {
+	return &E2ETypeServerParameterOp3Response{B: 3, C: []any{}}, nil
 }
 
-func (s *MyE2eTypeServer) ParameterOp(ctx context.Context, req *E2eTypeServerParameterOpRequest) (*E2eTypeServerParameterOpResponse, error) {
-	return &E2eTypeServerParameterOpResponse{}, nil
+func (s *MyE2ETypeServer) ParameterOp4(ctx context.Context, req *E2ETypeServerParameterOp4Request) (*E2ETypeServerParameterOp4Response, error) {
+	return &E2ETypeServerParameterOp4Response{A: "op4", B: 4, C: []any{}}, nil
 }
 
-func (s *MyE2eTypeServer) ParameterOp2(ctx context.Context, req *E2eTypeServerParameterOp2Request) (*E2eTypeServerParameterOp2Response, error) {
-	return &E2eTypeServerParameterOp2Response{}, nil
+func (s *MyE2ETypeServer) ParameterOp5(ctx context.Context, req *E2ETypeServerParameterOp5Request) (*E2ETypeServerParameterOp5Response, error) {
+	return &E2ETypeServerParameterOp5Response{Return: []any{"op5"}, A: "op5", B: 5, C: []any{}}, nil
 }
 
-func (s *MyE2eTypeServer) ParameterOp3(ctx context.Context, req *E2eTypeServerParameterOp3Request) (*E2eTypeServerParameterOp3Response, error) {
-	return &E2eTypeServerParameterOp3Response{B: 3, C: []any{}}, nil
+func (s *MyE2ETypeServer) ParameterOp6(ctx context.Context, req *E2ETypeServerParameterOp6Request) (*E2ETypeServerParameterOp6Response, error) {
+	return &E2ETypeServerParameterOp6Response{Return: map[string]any{}, A: "op6", B: 6, C: []any{}}, nil
 }
 
-func (s *MyE2eTypeServer) ParameterOp4(ctx context.Context, req *E2eTypeServerParameterOp4Request) (*E2eTypeServerParameterOp4Response, error) {
-	return &E2eTypeServerParameterOp4Response{A: "op4", B: 4, C: []any{}}, nil
-}
-
-func (s *MyE2eTypeServer) ParameterOp5(ctx context.Context, req *E2eTypeServerParameterOp5Request) (*E2eTypeServerParameterOp5Response, error) {
-	return &E2eTypeServerParameterOp5Response{Return: []any{"op5"}, A: "op5", B: 5, C: []any{}}, nil
-}
-
-func (s *MyE2eTypeServer) ParameterOp6(ctx context.Context, req *E2eTypeServerParameterOp6Request) (*E2eTypeServerParameterOp6Response, error) {
-	return &E2eTypeServerParameterOp6Response{Return: map[string]any{}, A: "op6", B: 6, C: []any{}}, nil
-}
-
-type MyE2eAttribute struct {
+type MyE2EAttribute struct {
 	attr1  string
 	attr2  []string
 	attr3  EnumEmpty
@@ -227,219 +221,150 @@ type MyE2eAttribute struct {
 	attr15 map[string]any
 }
 
-func (s *MyE2eAttribute) GetAttributeAttr1(ctx context.Context, req *E2eAttributeGetAttributeAttr1Request) (*E2eAttributeGetAttributeAttr1Response, error) {
-	return &E2eAttributeGetAttributeAttr1Response{Return: s.attr1}, nil
-}
-func (s *MyE2eAttribute) SetAttributeAttr1(ctx context.Context, req *E2eAttributeSetAttributeAttr1Request) (*E2eAttributeSetAttributeAttr1Response, error) {
-	s.attr1 = req.Value
-	return &E2eAttributeSetAttributeAttr1Response{}, nil
-}
-func (s *MyE2eAttribute) GetAttributeAttr2(ctx context.Context, req *E2eAttributeGetAttributeAttr2Request) (*E2eAttributeGetAttributeAttr2Response, error) {
-	return &E2eAttributeGetAttributeAttr2Response{Return: s.attr2}, nil
-}
-func (s *MyE2eAttribute) GetAttributeAttr3(ctx context.Context, req *E2eAttributeGetAttributeAttr3Request) (*E2eAttributeGetAttributeAttr3Response, error) {
-	return &E2eAttributeGetAttributeAttr3Response{Return: s.attr3}, nil
-}
-func (s *MyE2eAttribute) SetAttributeAttr3(ctx context.Context, req *E2eAttributeSetAttributeAttr3Request) (*E2eAttributeSetAttributeAttr3Response, error) {
-	s.attr3 = req.Value
-	return &E2eAttributeSetAttributeAttr3Response{}, nil
-}
-func (s *MyE2eAttribute) GetAttributeAttr4(ctx context.Context, req *E2eAttributeGetAttributeAttr4Request) (*E2eAttributeGetAttributeAttr4Response, error) {
-	return &E2eAttributeGetAttributeAttr4Response{Return: s.attr4}, nil
-}
-func (s *MyE2eAttribute) SetAttributeAttr4(ctx context.Context, req *E2eAttributeSetAttributeAttr4Request) (*E2eAttributeSetAttributeAttr4Response, error) {
-	s.attr4 = req.Value
-	return &E2eAttributeSetAttributeAttr4Response{}, nil
-}
-func (s *MyE2eAttribute) GetAttributeAttr5(ctx context.Context, req *E2eAttributeGetAttributeAttr5Request) (*E2eAttributeGetAttributeAttr5Response, error) {
-	return &E2eAttributeGetAttributeAttr5Response{Return: s.attr5}, nil
-}
-func (s *MyE2eAttribute) SetAttributeAttr5(ctx context.Context, req *E2eAttributeSetAttributeAttr5Request) (*E2eAttributeSetAttributeAttr5Response, error) {
-	s.attr5 = req.Value
-	return &E2eAttributeSetAttributeAttr5Response{}, nil
-}
-func (s *MyE2eAttribute) GetAttributeAttr6(ctx context.Context, req *E2eAttributeGetAttributeAttr6Request) (*E2eAttributeGetAttributeAttr6Response, error) {
-	return &E2eAttributeGetAttributeAttr6Response{Return: s.attr6}, nil
-}
-func (s *MyE2eAttribute) SetAttributeAttr6(ctx context.Context, req *E2eAttributeSetAttributeAttr6Request) (*E2eAttributeSetAttributeAttr6Response, error) {
-	s.attr6 = req.Value
-	return &E2eAttributeSetAttributeAttr6Response{}, nil
-}
-func (s *MyE2eAttribute) GetAttributeAttr61(ctx context.Context, req *E2eAttributeGetAttributeAttr61Request) (*E2eAttributeGetAttributeAttr61Response, error) {
-	return &E2eAttributeGetAttributeAttr61Response{Return: s.attr61}, nil
-}
-func (s *MyE2eAttribute) SetAttributeAttr61(ctx context.Context, req *E2eAttributeSetAttributeAttr61Request) (*E2eAttributeSetAttributeAttr61Response, error) {
-	s.attr61 = req.Value
-	return &E2eAttributeSetAttributeAttr61Response{}, nil
-}
-func (s *MyE2eAttribute) GetAttributeAttr7(ctx context.Context, req *E2eAttributeGetAttributeAttr7Request) (*E2eAttributeGetAttributeAttr7Response, error) {
-	return &E2eAttributeGetAttributeAttr7Response{Return: s.attr7}, nil
-}
-func (s *MyE2eAttribute) SetAttributeAttr7(ctx context.Context, req *E2eAttributeSetAttributeAttr7Request) (*E2eAttributeSetAttributeAttr7Response, error) {
-	s.attr7 = req.Value
-	return &E2eAttributeSetAttributeAttr7Response{}, nil
-}
-func (s *MyE2eAttribute) GetAttributeAttr8(ctx context.Context, req *E2eAttributeGetAttributeAttr8Request) (*E2eAttributeGetAttributeAttr8Response, error) {
-	return &E2eAttributeGetAttributeAttr8Response{Return: s.attr8}, nil
-}
-func (s *MyE2eAttribute) SetAttributeAttr8(ctx context.Context, req *E2eAttributeSetAttributeAttr8Request) (*E2eAttributeSetAttributeAttr8Response, error) {
-	s.attr8 = req.Value
-	return &E2eAttributeSetAttributeAttr8Response{}, nil
-}
-func (s *MyE2eAttribute) GetAttributeAttr9(ctx context.Context, req *E2eAttributeGetAttributeAttr9Request) (*E2eAttributeGetAttributeAttr9Response, error) {
-	return &E2eAttributeGetAttributeAttr9Response{Return: s.attr9}, nil
-}
-func (s *MyE2eAttribute) SetAttributeAttr9(ctx context.Context, req *E2eAttributeSetAttributeAttr9Request) (*E2eAttributeSetAttributeAttr9Response, error) {
-	s.attr9 = req.Value
-	return &E2eAttributeSetAttributeAttr9Response{}, nil
-}
-func (s *MyE2eAttribute) GetAttributeAttr10(ctx context.Context, req *E2eAttributeGetAttributeAttr10Request) (*E2eAttributeGetAttributeAttr10Response, error) {
-	return &E2eAttributeGetAttributeAttr10Response{Return: s.attr10}, nil
-}
-func (s *MyE2eAttribute) SetAttributeAttr10(ctx context.Context, req *E2eAttributeSetAttributeAttr10Request) (*E2eAttributeSetAttributeAttr10Response, error) {
-	s.attr10 = req.Value
-	return &E2eAttributeSetAttributeAttr10Response{}, nil
-}
-func (s *MyE2eAttribute) GetAttributeAttr11(ctx context.Context, req *E2eAttributeGetAttributeAttr11Request) (*E2eAttributeGetAttributeAttr11Response, error) {
-	return &E2eAttributeGetAttributeAttr11Response{Return: s.attr11}, nil
-}
-func (s *MyE2eAttribute) SetAttributeAttr11(ctx context.Context, req *E2eAttributeSetAttributeAttr11Request) (*E2eAttributeSetAttributeAttr11Response, error) {
-	s.attr11 = req.Value
-	return &E2eAttributeSetAttributeAttr11Response{}, nil
-}
-func (s *MyE2eAttribute) GetAttributeAttr12(ctx context.Context, req *E2eAttributeGetAttributeAttr12Request) (*E2eAttributeGetAttributeAttr12Response, error) {
-	return &E2eAttributeGetAttributeAttr12Response{Return: s.attr12}, nil
-}
-func (s *MyE2eAttribute) SetAttributeAttr12(ctx context.Context, req *E2eAttributeSetAttributeAttr12Request) (*E2eAttributeSetAttributeAttr12Response, error) {
-	s.attr12 = req.Value
-	return &E2eAttributeSetAttributeAttr12Response{}, nil
-}
-func (s *MyE2eAttribute) GetAttributeAttr13(ctx context.Context, req *E2eAttributeGetAttributeAttr13Request) (*E2eAttributeGetAttributeAttr13Response, error) {
-	return &E2eAttributeGetAttributeAttr13Response{Return: s.attr13}, nil
-}
-func (s *MyE2eAttribute) SetAttributeAttr13(ctx context.Context, req *E2eAttributeSetAttributeAttr13Request) (*E2eAttributeSetAttributeAttr13Response, error) {
-	s.attr13 = req.Value
-	return &E2eAttributeSetAttributeAttr13Response{}, nil
-}
-func (s *MyE2eAttribute) GetAttributeAttr14(ctx context.Context, req *E2eAttributeGetAttributeAttr14Request) (*E2eAttributeGetAttributeAttr14Response, error) {
-	return &E2eAttributeGetAttributeAttr14Response{Return: s.attr14}, nil
-}
-func (s *MyE2eAttribute) SetAttributeAttr14(ctx context.Context, req *E2eAttributeSetAttributeAttr14Request) (*E2eAttributeSetAttributeAttr14Response, error) {
-	s.attr14 = req.Value
-	return &E2eAttributeSetAttributeAttr14Response{}, nil
-}
-func (s *MyE2eAttribute) GetAttributeAttr15(ctx context.Context, req *E2eAttributeGetAttributeAttr15Request) (*E2eAttributeGetAttributeAttr15Response, error) {
-	return &E2eAttributeGetAttributeAttr15Response{Return: s.attr15}, nil
-}
-func (s *MyE2eAttribute) SetAttributeAttr15(ctx context.Context, req *E2eAttributeSetAttributeAttr15Request) (*E2eAttributeSetAttributeAttr15Response, error) {
-	s.attr15 = req.Value
-	return &E2eAttributeSetAttributeAttr15Response{}, nil
-}
-func (s *MyE2eAttribute) GetAttributeAttr16(ctx context.Context, req *E2eAttributeGetAttributeAttr16Request) (*E2eAttributeGetAttributeAttr16Response, error) {
-	return &E2eAttributeGetAttributeAttr16Response{Return: "attr16"}, nil
-}
 
-type MyE2eHttpForm struct{}
 
-func (s *MyE2eHttpForm) SubmitProfile(ctx context.Context, req *E2eHttpFormSubmitProfileRequest) (*E2eHttpFormSubmitProfileResponse, error) {
-	return &E2eHttpFormSubmitProfileResponse{
+type MyE2EHttpForm struct{}
+
+func (s *MyE2EHttpForm) SubmitProfile(ctx context.Context, req *E2EHttpFormSubmitProfileRequest) (*E2EHttpFormSubmitProfileResponse, error) {
+	return &E2EHttpFormSubmitProfileResponse{
 		Return:         fmt.Sprintf("name:%s,age:%s", req.Name, formatOptInt(req.Age)),
 		NormalizedName: strings.ToUpper(req.Name),
 	}, nil
 }
 
-type MyE2eHttpScopeMatrix struct{}
+type MyE2EHttpScopeMatrix struct{}
 
-func (s *MyE2eHttpScopeMatrix) GetAttributeScopeInheritedAttr(ctx context.Context, req *E2eHttpScopeMatrixGetAttributeScopeInheritedAttrRequest) (*E2eHttpScopeMatrixGetAttributeScopeInheritedAttrResponse, error) {
-	return &E2eHttpScopeMatrixGetAttributeScopeInheritedAttrResponse{Return: "inherited"}, nil
+
+func (s *MyE2EHttpScopeMatrix) DefaultScope(ctx context.Context, req *E2EHttpScopeMatrixDefaultScopeRequest) (*E2EHttpScopeMatrixDefaultScopeResponse, error) {
+	return &E2EHttpScopeMatrixDefaultScopeResponse{Return: req.RequestBody.Name}, nil
 }
-func (s *MyE2eHttpScopeMatrix) GetAttributeScopeBareAttr(ctx context.Context, req *E2eHttpScopeMatrixGetAttributeScopeBareAttrRequest) (*E2eHttpScopeMatrixGetAttributeScopeBareAttrResponse, error) {
-	return &E2eHttpScopeMatrixGetAttributeScopeBareAttrResponse{Return: "bare"}, nil
-}
-func (s *MyE2eHttpScopeMatrix) DefaultScope(ctx context.Context, req *E2eHttpScopeMatrixDefaultScopeRequest) (*E2eHttpScopeMatrixDefaultScopeResponse, error) {
-	return &E2eHttpScopeMatrixDefaultScopeResponse{Return: req.RequestBody.Name}, nil
-}
-func (s *MyE2eHttpScopeMatrix) OverrideConsumesOnly(ctx context.Context, req *E2eHttpScopeMatrixOverrideConsumesOnlyRequest) (*E2eHttpScopeMatrixOverrideConsumesOnlyResponse, error) {
-	return &E2eHttpScopeMatrixOverrideConsumesOnlyResponse{
+func (s *MyE2EHttpScopeMatrix) OverrideConsumesOnly(ctx context.Context, req *E2EHttpScopeMatrixOverrideConsumesOnlyRequest) (*E2EHttpScopeMatrixOverrideConsumesOnlyResponse, error) {
+	return &E2EHttpScopeMatrixOverrideConsumesOnlyResponse{
 		Return:         fmt.Sprintf("name:%s,age:%s", req.Name, formatOptInt(req.Age)),
 		NormalizedName: strings.ToUpper(req.Name),
 	}, nil
 }
-func (s *MyE2eHttpScopeMatrix) OverrideProducesOnly(ctx context.Context, req *E2eHttpScopeMatrixOverrideProducesOnlyRequest) (*E2eHttpScopeMatrixOverrideProducesOnlyResponse, error) {
-	return &E2eHttpScopeMatrixOverrideProducesOnlyResponse{
+func (s *MyE2EHttpScopeMatrix) OverrideProducesOnly(ctx context.Context, req *E2EHttpScopeMatrixOverrideProducesOnlyRequest) (*E2EHttpScopeMatrixOverrideProducesOnlyResponse, error) {
+	return &E2EHttpScopeMatrixOverrideProducesOnlyResponse{
 		Return:   StructHttpBody{Name: req.ResourceId},
 		Revision: 1,
 	}, nil
 }
-func (s *MyE2eHttpScopeMatrix) OverrideBothMedia(ctx context.Context, req *E2eHttpScopeMatrixOverrideBothMediaRequest) (*E2eHttpScopeMatrixOverrideBothMediaResponse, error) {
-	return &E2eHttpScopeMatrixOverrideBothMediaResponse{
+func (s *MyE2EHttpScopeMatrix) OverrideBothMedia(ctx context.Context, req *E2EHttpScopeMatrixOverrideBothMediaRequest) (*E2EHttpScopeMatrixOverrideBothMediaResponse, error) {
+	return &E2EHttpScopeMatrixOverrideBothMediaResponse{
 		Return:          StructHttpBody{Name: req.Name, Tags: []string{fmt.Sprintf("age:%s", formatOptInt(req.Age))}},
 		NormalizedName: "OVERRIDDEN",
 	}, nil
 }
-func (s *MyE2eHttpScopeMatrix) DeprecatedPlain(ctx context.Context, req *E2eHttpScopeMatrixDeprecatedPlainRequest) (*E2eHttpScopeMatrixDeprecatedPlainResponse, error) {
-	return &E2eHttpScopeMatrixDeprecatedPlainResponse{Return: req.ResourceId}, nil
+func (s *MyE2EHttpScopeMatrix) DeprecatedPlain(ctx context.Context, req *E2EHttpScopeMatrixDeprecatedPlainRequest) (*E2EHttpScopeMatrixDeprecatedPlainResponse, error) {
+	return &E2EHttpScopeMatrixDeprecatedPlainResponse{Return: req.ResourceId}, nil
 }
-func (s *MyE2eHttpScopeMatrix) DeprecatedSinceOnly(ctx context.Context, req *E2eHttpScopeMatrixDeprecatedSinceOnlyRequest) (*E2eHttpScopeMatrixDeprecatedSinceOnlyResponse, error) {
-	return &E2eHttpScopeMatrixDeprecatedSinceOnlyResponse{Return: req.ResourceId}, nil
+func (s *MyE2EHttpScopeMatrix) DeprecatedSinceOnly(ctx context.Context, req *E2EHttpScopeMatrixDeprecatedSinceOnlyRequest) (*E2EHttpScopeMatrixDeprecatedSinceOnlyResponse, error) {
+	return &E2EHttpScopeMatrixDeprecatedSinceOnlyResponse{Return: req.ResourceId}, nil
 }
-func (s *MyE2eHttpScopeMatrix) DeprecatedWindow(ctx context.Context, req *E2eHttpScopeMatrixDeprecatedWindowRequest) (*E2eHttpScopeMatrixDeprecatedWindowResponse, error) {
-	return &E2eHttpScopeMatrixDeprecatedWindowResponse{Return: req.ResourceId}, nil
-}
-
-type MyE2eHttpDefaultsMatrix struct{}
-
-func (s *MyE2eHttpDefaultsMatrix) DeleteResourceDefaultQuery(ctx context.Context, req *E2eHttpDefaultsMatrixDeleteResourceDefaultQueryRequest) (*E2eHttpDefaultsMatrixDeleteResourceDefaultQueryResponse, error) {
-	return &E2eHttpDefaultsMatrixDeleteResourceDefaultQueryResponse{Return: fmt.Sprintf("%s:%d", req.Id, req.Revision)}, nil
-}
-func (s *MyE2eHttpDefaultsMatrix) ProbeResourceDefaultQuery(ctx context.Context, req *E2eHttpDefaultsMatrixProbeResourceDefaultQueryRequest) (*E2eHttpDefaultsMatrixProbeResourceDefaultQueryResponse, error) {
-	return &E2eHttpDefaultsMatrixProbeResourceDefaultQueryResponse{}, nil
-}
-func (s *MyE2eHttpDefaultsMatrix) ResourceOptionsDefaultQuery(ctx context.Context, req *E2eHttpDefaultsMatrixResourceOptionsDefaultQueryRequest) (*E2eHttpDefaultsMatrixResourceOptionsDefaultQueryResponse, error) {
-	return &E2eHttpDefaultsMatrixResourceOptionsDefaultQueryResponse{}, nil
-}
-func (s *MyE2eHttpDefaultsMatrix) ReplaceResourceDefaultBody(ctx context.Context, req *E2eHttpDefaultsMatrixReplaceResourceDefaultBodyRequest) (*E2eHttpDefaultsMatrixReplaceResourceDefaultBodyResponse, error) {
-	return &E2eHttpDefaultsMatrixReplaceResourceDefaultBodyResponse{Return: StructHttpBody{Name: req.Name, Alias: req.Alias, Tags: []string{req.Id}}}, nil
-}
-func (s *MyE2eHttpDefaultsMatrix) PatchResourceDefaultBody(ctx context.Context, req *E2eHttpDefaultsMatrixPatchResourceDefaultBodyRequest) (*E2eHttpDefaultsMatrixPatchResourceDefaultBodyResponse, error) {
-	return &E2eHttpDefaultsMatrixPatchResourceDefaultBodyResponse{Return: StructHttpBody{Name: req.Name, Alias: req.Alias, Tags: []string{req.Id}}}, nil
+func (s *MyE2EHttpScopeMatrix) DeprecatedWindow(ctx context.Context, req *E2EHttpScopeMatrixDeprecatedWindowRequest) (*E2EHttpScopeMatrixDeprecatedWindowResponse, error) {
+	return &E2EHttpScopeMatrixDeprecatedWindowResponse{Return: req.ResourceId}, nil
 }
 
-type MyE2eHttpSecurityMatrix struct{}
+type MyE2EHttpDefaultsMatrix struct{}
 
-func (s *MyE2eHttpSecurityMatrix) InheritedSecurity(ctx context.Context, req *E2eHttpSecurityMatrixInheritedSecurityRequest) (*E2eHttpSecurityMatrixInheritedSecurityResponse, error) {
-	return &E2eHttpSecurityMatrixInheritedSecurityResponse{Return: req.ResourceId + ":" + req.XTraceId}, nil
+func (s *MyE2EHttpDefaultsMatrix) DeleteResourceDefaultQuery(ctx context.Context, req *E2EHttpDefaultsMatrixDeleteResourceDefaultQueryRequest) (*E2EHttpDefaultsMatrixDeleteResourceDefaultQueryResponse, error) {
+	return &E2EHttpDefaultsMatrixDeleteResourceDefaultQueryResponse{Return: fmt.Sprintf("%s:%d", req.Id, req.Revision)}, nil
 }
-func (s *MyE2eHttpSecurityMatrix) BearerOrCookieSecurity(ctx context.Context, req *E2eHttpSecurityMatrixBearerOrCookieSecurityRequest) (*E2eHttpSecurityMatrixBearerOrCookieSecurityResponse, error) {
-	return &E2eHttpSecurityMatrixBearerOrCookieSecurityResponse{Return: fmt.Sprintf("%s:%s", req.Action, formatOpt(req.Note))}, nil
+func (s *MyE2EHttpDefaultsMatrix) ProbeResourceDefaultQuery(ctx context.Context, req *E2EHttpDefaultsMatrixProbeResourceDefaultQueryRequest) (*E2EHttpDefaultsMatrixProbeResourceDefaultQueryResponse, error) {
+	return &E2EHttpDefaultsMatrixProbeResourceDefaultQueryResponse{}, nil
 }
-func (s *MyE2eHttpSecurityMatrix) AlternativeSecurity(ctx context.Context, req *E2eHttpSecurityMatrixAlternativeSecurityRequest) (*E2eHttpSecurityMatrixAlternativeSecurityResponse, error) {
-	return &E2eHttpSecurityMatrixAlternativeSecurityResponse{Return: fmt.Sprintf("%s:%s", req.ResourceId, formatOpt(req.Locale))}, nil
+func (s *MyE2EHttpDefaultsMatrix) ResourceOptionsDefaultQuery(ctx context.Context, req *E2EHttpDefaultsMatrixResourceOptionsDefaultQueryRequest) (*E2EHttpDefaultsMatrixResourceOptionsDefaultQueryResponse, error) {
+	return &E2EHttpDefaultsMatrixResourceOptionsDefaultQueryResponse{}, nil
 }
-func (s *MyE2eHttpSecurityMatrix) OauthSecurity(ctx context.Context, req *E2eHttpSecurityMatrixOauthSecurityRequest) (*E2eHttpSecurityMatrixOauthSecurityResponse, error) {
-	return &E2eHttpSecurityMatrixOauthSecurityResponse{Return: fmt.Sprintf("%s:%s", req.Keyword, formatOptInt(req.Page))}, nil
+func (s *MyE2EHttpDefaultsMatrix) ReplaceResourceDefaultBody(ctx context.Context, req *E2EHttpDefaultsMatrixReplaceResourceDefaultBodyRequest) (*E2EHttpDefaultsMatrixReplaceResourceDefaultBodyResponse, error) {
+	return &E2EHttpDefaultsMatrixReplaceResourceDefaultBodyResponse{Return: StructHttpBody{Name: req.Name, Alias: req.Alias, Tags: []string{req.Id}}}, nil
 }
-func (s *MyE2eHttpSecurityMatrix) PublicPing(ctx context.Context, req *E2eHttpSecurityMatrixPublicPingRequest) (*E2eHttpSecurityMatrixPublicPingResponse, error) {
-	return &E2eHttpSecurityMatrixPublicPingResponse{Return: "pong"}, nil
+func (s *MyE2EHttpDefaultsMatrix) PatchResourceDefaultBody(ctx context.Context, req *E2EHttpDefaultsMatrixPatchResourceDefaultBodyRequest) (*E2EHttpDefaultsMatrixPatchResourceDefaultBodyResponse, error) {
+	return &E2EHttpDefaultsMatrixPatchResourceDefaultBodyResponse{Return: StructHttpBody{Name: req.Name, Alias: req.Alias, Tags: []string{req.Id}}}, nil
+}
+
+type MyE2EHttpSecurityMatrix struct{}
+
+func (s *MyE2EHttpSecurityMatrix) InheritedSecurity(ctx context.Context, req *E2EHttpSecurityMatrixInheritedSecurityRequest) (*E2EHttpSecurityMatrixInheritedSecurityResponse, error) {
+	return &E2EHttpSecurityMatrixInheritedSecurityResponse{Return: req.ResourceId + ":" + req.TraceId}, nil
+}
+func (s *MyE2EHttpSecurityMatrix) BearerOrCookieSecurity(ctx context.Context, req *E2EHttpSecurityMatrixBearerOrCookieSecurityRequest) (*E2EHttpSecurityMatrixBearerOrCookieSecurityResponse, error) {
+	return &E2EHttpSecurityMatrixBearerOrCookieSecurityResponse{Return: fmt.Sprintf("%s:%s", req.Action, formatOpt(req.Note))}, nil
+}
+func (s *MyE2EHttpSecurityMatrix) AlternativeSecurity(ctx context.Context, req *E2EHttpSecurityMatrixAlternativeSecurityRequest) (*E2EHttpSecurityMatrixAlternativeSecurityResponse, error) {
+	return &E2EHttpSecurityMatrixAlternativeSecurityResponse{Return: fmt.Sprintf("%s:%s", req.ResourceId, formatOpt(req.Locale))}, nil
+}
+func (s *MyE2EHttpSecurityMatrix) OauthSecurity(ctx context.Context, req *E2EHttpSecurityMatrixOauthSecurityRequest) (*E2EHttpSecurityMatrixOauthSecurityResponse, error) {
+	return &E2EHttpSecurityMatrixOauthSecurityResponse{Return: fmt.Sprintf("%s:%s", req.Keyword, formatOptInt(req.Page))}, nil
+}
+func (s *MyE2EHttpSecurityMatrix) PublicPing(ctx context.Context, req *E2EHttpSecurityMatrixPublicPingRequest) (*E2EHttpSecurityMatrixPublicPingResponse, error) {
+	return &E2EHttpSecurityMatrixPublicPingResponse{Return: "pong"}, nil
 }
 
 func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
-	RegisterE2ePathSeverHandler(r, &MyE2ePathSever{})
-	RegisterE2eHttpRouteAndBodyHandler(r, &MyE2eHttpRouteAndBody{})
-	RegisterE2eHttpSecurityHandler(r, &MyE2eHttpSecurity{})
+	RegisterE2EPathSeverHandler(r, &MyE2EPathSever{})
+	RegisterE2EHttpRouteAndBodyHandler(r, &MyE2EHttpRouteAndBody{})
+	RegisterE2EHttpSecurityHandler(r, &MyE2EHttpSecurity{})
 
-	typeServer := &MyE2eTypeServer{attr1: "attr1", attr2: []string{"attr2"}}
-	RegisterE2eTypeServerHandler(r, typeServer)
+	typeServer := &MyE2ETypeServer{attr1: "attr1", attr2: []string{"attr2"}}
+	RegisterE2ETypeServerHandler(r, typeServer)
+	r.GET("/attribute/type_attr1", func(c *gin.Context) {
+		c.JSON(200, typeServer.attr1)
+	})
+	r.POST("/attribute/type_attr1", func(c *gin.Context) {
+		var body struct {
+			Value string `json:"type_attr_1"`
+		}
+		if err := c.ShouldBindJSON(&body); err != nil {
+			c.Status(400)
+			return
+		}
+		typeServer.attr1 = body.Value
+		c.Status(204)
+	})
+	r.GET("/attribute/type_attr2", func(c *gin.Context) {
+		c.JSON(200, typeServer.attr2)
+	})
 
-	attr := &MyE2eAttribute{attr1: "attr1", attr2: []string{"attr2"}, attr4: EnumSimple1V1, attr5: StructEmpty{}}
-	RegisterE2eAttributeHandler(r, attr)
+	attr := &MyE2EAttribute{attr1: "attr1", attr2: []string{"attr2"}, attr4: EnumSimple1V1, attr5: StructEmpty{}}
+	RegisterE2EAttributeHandler(r, attr)
+	r.GET("/attribute/attr1", func(c *gin.Context) {
+		c.JSON(200, attr.attr1)
+	})
+	r.POST("/attribute/attr1", func(c *gin.Context) {
+		var body struct {
+			Value string `json:"attr_1"`
+		}
+		if err := c.ShouldBindJSON(&body); err != nil {
+			c.Status(400)
+			return
+		}
+		attr.attr1 = body.Value
+		c.Status(204)
+	})
+	r.GET("/attribute/attr2", func(c *gin.Context) {
+		c.JSON(200, attr.attr2)
+	})
+	r.GET("/attribute/attr4", func(c *gin.Context) {
+		c.JSON(200, attr.attr4)
+	})
+	r.GET("/attribute/attr61", func(c *gin.Context) {
+		c.JSON(200, map[string]any{
+			"tag":  "V1",
+			"data": 1,
+		})
+	})
 
-	RegisterE2eHttpFormHandler(r, &MyE2eHttpForm{})
-	RegisterE2eHttpScopeMatrixHandler(r, &MyE2eHttpScopeMatrix{})
-	RegisterE2eHttpDefaultsMatrixHandler(r, &MyE2eHttpDefaultsMatrix{})
-	RegisterE2eHttpSecurityMatrixHandler(r, &MyE2eHttpSecurityMatrix{})
+	RegisterE2EHttpFormHandler(r, &MyE2EHttpForm{})
+	RegisterE2EHttpScopeMatrixHandler(r, &MyE2EHttpScopeMatrix{})
+	r.GET("/attribute/scope_inherited_attr", func(c *gin.Context) {
+		c.JSON(200, "inherited")
+	})
+	RegisterE2EHttpDefaultsMatrixHandler(r, &MyE2EHttpDefaultsMatrix{})
+	RegisterE2EHttpSecurityMatrixHandler(r, &MyE2EHttpSecurityMatrix{})
 
 	port := os.Getenv("PORT")
 	if port == "" {

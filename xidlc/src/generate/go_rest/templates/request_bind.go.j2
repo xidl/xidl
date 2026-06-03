@@ -22,6 +22,20 @@
             return
         }
     }
+{%- elif optional and ty == "uint64" %}
+    if raw, err := {{ call }}; err == nil {
+        if value, parseErr := xidlgohttp.ParseUint64(raw); parseErr == nil { {{ field }} = &value } else {
+            xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", parseErr.Error())
+            return
+        }
+    }
+{%- elif optional and ty == "int64" %}
+    if raw, err := {{ call }}; err == nil {
+        if value, parseErr := xidlgohttp.ParseInt64(raw); parseErr == nil { {{ field }} = &value } else {
+            xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", parseErr.Error())
+            return
+        }
+    }
 {%- elif optional and ty == "bool" %}
     if raw, err := {{ call }}; err == nil {
         if value, parseErr := xidlgohttp.ParseBool(raw); parseErr == nil { {{ field }} = &value } else {
@@ -48,6 +62,26 @@
     {%- elif ty == "int32" %}
         if raw, err := {{ call }}; err == nil {
             if value, parseErr := xidlgohttp.ParseInt32(raw); parseErr == nil { {{ field }} = value } else {
+                xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", parseErr.Error())
+                return
+            }
+        } else {
+            xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+            return
+        }
+    {%- elif ty == "uint64" %}
+        if raw, err := {{ call }}; err == nil {
+            if value, parseErr := xidlgohttp.ParseUint64(raw); parseErr == nil { {{ field }} = value } else {
+                xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", parseErr.Error())
+                return
+            }
+        } else {
+            xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+            return
+        }
+    {%- elif ty == "int64" %}
+        if raw, err := {{ call }}; err == nil {
+            if value, parseErr := xidlgohttp.ParseInt64(raw); parseErr == nil { {{ field }} = value } else {
                 xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", parseErr.Error())
                 return
             }
