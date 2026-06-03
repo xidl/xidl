@@ -167,9 +167,9 @@ fn setter(
         "{}Request",
         method_struct_prefix(interface_name, &setter_raw)
     ));
-    let request_schema_ref = request_name.as_ref().map(|name| {
-        scoped_name(module_path, name)
-    });
+    let request_schema_ref = request_name
+        .as_ref()
+        .map(|name| scoped_name(module_path, name));
     MethodInfo {
         name: ts_ident(&setter_raw),
         params: vec![param.clone()],

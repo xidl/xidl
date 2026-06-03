@@ -1,4 +1,6 @@
-use crate::generate::typescript::definition::contexts::{ClientParamContext, ParamDeclContext, TsType};
+use crate::generate::typescript::definition::contexts::{
+    ClientParamContext, ParamDeclContext, TsType,
+};
 use crate::generate::typescript::definition::names::scoped_name;
 use serde::Serialize;
 

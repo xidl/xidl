@@ -46,47 +46,29 @@ export const ColorSchema = z.enum(
 "red", "green", "blue"
 ]
 );
-export type Color = z.infer<
-typeof ColorSchema
->;
 export const FooSeqSchema = z.array(
-FooSchema
+Foo
 );
-export type FooSeq = z.infer<
-typeof FooSeqSchema
->;
 export const FooSeqSchema = z.array(
-FooSchema
+Foo
 ).length(
 12
 );
-export type FooSeq = z.infer<
-typeof FooSeqSchema
->;
 export const FooSeqSchema = z.array(
-FooSchema
+Foo
 );
-export type FooSeq = z.infer<
-typeof FooSeqSchema
->;
 export const FooSchema = z.object(
 {
     value : z.coerce.number(
 
     ).int(
 
-    ), chain : FooSeqSchema,
+    ), chain : FooSeq
 }
 );
-export type Foo = z.infer<
-typeof FooSchema
->;
 export const BarSeqSchema = z.array(
-BarSchema
+Bar
 );
-export type BarSeq = z.infer<
-typeof BarSeqSchema
->;
 export const BarSchema = z.union(
 [
 z.object(
@@ -103,23 +85,17 @@ z.object(
     {
         d_mem : z.coerce.number(
 
-        ), nested : BarSeqSchema
+        ), nested : BarSeq
     }
     )
 }
 )
 ]
 );
-export type Bar = z.infer<
-typeof BarSchema
->;
 export namespace M{
     export const SizeSchema = z.enum(
     [
     "small", "medium", "large"
     ]
     );
-    export type Size = z.infer<
-    typeof SizeSchema
-    >;
 }

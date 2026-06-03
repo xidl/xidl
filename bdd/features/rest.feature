@@ -80,9 +80,10 @@ Feature: REST API Generation and Communication
     And the client can send flatten struct with any field payload with key "foo" and value "bar"
 
     Examples:
-      | lang |
-      | rust |
-      | go   |
+      | lang   |
+      | rust   |
+      | go     |
+      | python |
 
   Scenario Outline: REST E2E test via Hurl using boilerplate
     Given a REST IDL file "bdd/features/data/<idl>.idl"

@@ -1,31 +1,31 @@
 {% macro render_type(ty) -%}
-{%- if ty.kind == "Primitive" -%}{{ ty.data }}
-{%- elif ty.kind == "ScopedName" -%}{{ ty.data }}
-{%- elif ty.kind == "Sequence" -%}Array<{{ render_type(ty.data) }}>
-{%- elif ty.kind == "Map" -%}Record<string, {{ render_type(ty.data) }}>
-{%- elif ty.kind == "Template" -%}{{ ty.data.ident }}<{% for arg in ty.data.args %}{{ render_type(arg) }}{% if not loop.last %}, {% endif %}{% endfor %}>
-{%- elif ty.kind == "InlineStruct" -%}{ {% for field in ty.data %}{{ field.prop }}{% if field.optional %}?{% endif %}: {{ render_type(field.ty) }}{% if not loop.last %}, {% endif %}{% endfor %} }
+    {%- if ty.kind == "Primitive" -%}{{ ty.data }}
+    {%- elif ty.kind == "ScopedName" -%}{{ ty.data }}
+    {%- elif ty.kind == "Sequence" -%}Array<{{ render_type(ty.data) }}>
+    {%- elif ty.kind == "Map" -%}Record<string, {{ render_type(ty.data) }}>
+    {%- elif ty.kind == "Template" -%}{{ ty.data.ident }}<{% for arg in ty.data.args %}{{ render_type(arg) }}{% if not loop.last %}, {% endif %}{% endfor %}>
+    {%- elif ty.kind == "InlineStruct" -%}{ {% for field in ty.data %}{{ field.prop }}{% if field.optional %}?{% endif %}: {{ render_type(field.ty) }}{% if not loop.last %}, {% endif %}{% endfor %} }
 {%- elif ty.kind == "InlineEnum" -%}{% for member in ty.data %}"{{ member }}"{% if not loop.last %} | {% endif %}{% endfor %}
 {%- elif ty.kind == "Union" -%}{% for variant in ty.data %}{{ render_type(variant) }}{% if not loop.last %} | {% endif %}{% endfor %}
-{%- elif ty.kind == "Any" -%}any
-{%- elif ty.kind == "Void" -%}void
-{%- elif ty.kind == "AsyncIterable" -%}AsyncIterable<{{ render_type(ty.data) }}>
-{%- elif ty.kind == "Literal" -%}{{ ty.data }}
-{%- elif ty.kind == "Optional" -%}{{ render_type(ty.data) }} | undefined
+    {%- elif ty.kind == "Any" -%}any
+    {%- elif ty.kind == "Void" -%}void
+    {%- elif ty.kind == "AsyncIterable" -%}AsyncIterable<{{ render_type(ty.data) }}>
+    {%- elif ty.kind == "Literal" -%}{{ ty.data }}
+    {%- elif ty.kind == "Optional" -%}{{ render_type(ty.data) }} | undefined
 {%- endif -%}
 {%- endmacro %}
 
 {% macro render_zod(schema) -%}
-{%- if schema.kind == "Primitive" -%}z.{{ schema.data }}
-{%- elif schema.kind == "ScopedName" -%}{{ schema.data }}
+    {%- if schema.kind == "Primitive" -%}z.{{ schema.data }}
+    {%- elif schema.kind == "ScopedName" -%}{{ schema.data }}
 {%- elif schema.kind == "Array" -%}z.array({{ render_zod(schema.data.element) }}){% if schema.data.length is not none %}.length({{ schema.data.length }}){% endif %}
-{%- elif schema.kind == "Record" -%}z.record({{ render_zod(schema.data) }})
-{%- elif schema.kind == "Object" -%}z.object({ {% for field in schema.data %}{{ field.prop }}: {{ render_zod(field.schema) }}{% if field.optional %}.optional(){% endif %}{% if not loop.last %}, {% endif %}{% endfor %} })
-{%- elif schema.kind == "Enum" -%}z.enum([{% for value in schema.data %}"{{ value }}"{% if not loop.last %}, {% endif %}{% endfor %}])
+    {%- elif schema.kind == "Record" -%}z.record({{ render_zod(schema.data) }})
+    {%- elif schema.kind == "Object" -%}z.object({ {% for field in schema.data %}{{ field.prop }}: {{ render_zod(field.schema) }}{% if field.optional %}.optional(){% endif %}{% if not loop.last %}, {% endif %}{% endfor %} })
+    {%- elif schema.kind == "Enum" -%}z.enum([{% for value in schema.data %}"{{ value }}"{% if not loop.last %}, {% endif %}{% endfor %}])
 {%- elif schema.kind == "Union" -%}{% if schema.data | length == 1 %}{{ render_zod(schema.data[0]) }}{% else %}z.union([{% for variant in schema.data %}{{ render_zod(variant) }}{% if not loop.last %}, {% endif %}{% endfor %}]){% endif %}
-{%- elif schema.kind == "Custom" -%}z.custom<{{ render_type(schema.data) }}>()
-{%- elif schema.kind == "Optional" -%}{{ render_zod(schema.data) }}.optional()
-{%- elif schema.kind == "Any" -%}z.any()
-{%- elif schema.kind == "Never" -%}z.never()
+    {%- elif schema.kind == "Custom" -%}z.custom<{{ render_type(schema.data) }}>()
+    {%- elif schema.kind == "Optional" -%}{{ render_zod(schema.data) }}.optional()
+    {%- elif schema.kind == "Any" -%}z.any()
+    {%- elif schema.kind == "Never" -%}z.never()
 {%- endif -%}
 {%- endmacro %}

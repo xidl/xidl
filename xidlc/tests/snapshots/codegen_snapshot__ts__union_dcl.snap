@@ -21,10 +21,8 @@ import{z}from"zod";
 import{xjson}from"@xidl/xidl-typescript-codec";
 export const BSchema = z.never(
 
-);
-export type B = z.infer<
-typeof BSchema
->;
+)
+
 export const CSchema = z.union(
 [
 z.object(
@@ -44,6 +42,3 @@ z.object(
 )
 ]
 );
-export type C = z.infer<
-typeof CSchema
->;

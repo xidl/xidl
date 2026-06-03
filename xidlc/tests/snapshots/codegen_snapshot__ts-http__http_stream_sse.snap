@@ -880,9 +880,7 @@ export class HttpStreamSseServiceClient{
         >(
         this.fetchImpl, url, {
             method : "GET", headers
-        }, z.coerce.string(
-
-        )
+        }, ifaceSchemas.FIXMESchema
         );
     }
 
@@ -987,9 +985,7 @@ export class HttpStreamSseServiceClient{
         const resp = await this.fetchImpl(
         url, {
             method : "POST", headers, body : encodeRequestBody(
-            body, "application/json", this.codecs, z.coerce.boolean(
-
-            )
+            body, "application/json", this.codecs, ifaceSchemas.FIXMESchema
             )
         }
         );
@@ -1036,9 +1032,7 @@ export class HttpStreamSseServiceClient{
         >(
         this.fetchImpl, url, {
             method : "GET", headers
-        }, z.coerce.boolean(
-
-        )
+        }, ifaceSchemas.FIXMESchema
         );
     }
 }
@@ -1970,7 +1964,7 @@ service : HttpStreamSseService, options : ServerOptions = {
             payload as ifaceTypes.HttpStreamSseServiceWatchTopicRequest
             );
             return sseResponse(
-            result, options
+            result, options, ifaceSchemas.FIXMESchema
             );
 
         },
@@ -2059,7 +2053,7 @@ service : HttpStreamSseService, options : ServerOptions = {
 
             );
             return sseResponse(
-            result, options
+            result, options, ifaceSchemas.FIXMESchema
             );
 
         },

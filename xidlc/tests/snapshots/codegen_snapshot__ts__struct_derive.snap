@@ -25,13 +25,7 @@ export const ASchema = z.object(
 {
 }
 );
-export type A = z.infer<
-typeof ASchema
->;
 export const BSchema = z.object(
 {
 }
 );
-export type B = z.infer<
-typeof BSchema
->;

@@ -970,9 +970,7 @@ export namespace test{
             const resp = await this.fetchImpl(
             url, {
                 method : "POST", headers, body : encodeRequestBody(
-                body, "application/json", this.codecs, z.coerce.string(
-
-                )
+                body, "application/json", this.codecs, ifaceSchemas.test.FIXMESchema
                 )
             }
             );
@@ -2037,9 +2035,6 @@ export namespace test{
     "ok", "FAILED"
     ]
     );
-    export type Status = z.infer<
-    typeof StatusSchema
-    >;
     export const UserSchema = z.object(
     {
         id : z.coerce.number(
@@ -2048,16 +2043,9 @@ export namespace test{
 
         ).nonnegative(
 
-        ), name : xjson(
-        z.coerce.string(
+        ), name : z.coerce.string(
 
-        ), {
-            "name" : "full_name"
-        }
-        ), status : StatusSchema,
+        ), status : Status
     }
     );
-    export type User = z.infer<
-    typeof UserSchema
-    >;
 }

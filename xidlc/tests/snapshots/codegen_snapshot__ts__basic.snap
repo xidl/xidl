@@ -30,9 +30,6 @@ export const PointSchema = z.object(
 
     ).int(
 
-    ),
+    )
 }
 );
-export type Point = z.infer<
-typeof PointSchema
->;

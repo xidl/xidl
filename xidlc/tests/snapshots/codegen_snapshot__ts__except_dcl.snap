@@ -35,8 +35,8 @@ import{z}from"zod";
 import{xjson}from"@xidl/xidl-typescript-codec";
 export const HelloWorldSchema = z.object(
 {
-    a : u8Schema, b : z.array(
-    u16Schema
+    a : u8, b : z.array(
+    u16
     ).length(
     10
     ), c : z.array(
@@ -50,16 +50,13 @@ export const HelloWorldSchema = z.object(
     ).length(
     20
     ), c : z.array(
-    u8Schema
+    u8
     ), d : z.coerce.string(
 
     ), d : z.coerce.string(
 
     ), d : z.number(
 
-    ),
+    )
 }
 );
-export type HelloWorld = z.infer<
-typeof HelloWorldSchema
->;

@@ -18,7 +18,4 @@ import{z}from"zod";
 import{xjson}from"@xidl/xidl-typescript-codec";
 export const ASchema = z.never(
 
-);
-export type A = z.infer<
-typeof ASchema
->;
+)

@@ -430,8 +430,7 @@ fn build_client_params(
     if matches!(op.meta.stream.kind, Some(HttpStreamKind::Client)) {
         return vec![ClientParamContext {
             name: "stream".to_string(),
-            ty: build_client_stream_ty(op, module_path, request_name)
-                .unwrap_or(TsType::Void),
+            ty: build_client_stream_ty(op, module_path, request_name).unwrap_or(TsType::Void),
         }];
     }
     op.signature

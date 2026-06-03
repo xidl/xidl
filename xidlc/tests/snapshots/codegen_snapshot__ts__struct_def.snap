@@ -43,7 +43,7 @@ export interface HelloWorld{
     >;
     d : string;
     d : string;
-    d : unknown;
+    d : any;
 }
 
 export{};
@@ -58,55 +58,37 @@ export const ASchema = z.object(
 {
 }
 );
-export type A = z.infer<
-typeof ASchema
->;
 export const ASchema = z.object(
 {
     a : z.coerce.number(
 
     ).int(
 
-    ),
+    )
 }
 );
-export type A = z.infer<
-typeof ASchema
->;
 export const ASchema = z.object(
 {
-    a : A.bSchema,
+    a : A.b
 }
 );
-export type A = z.infer<
-typeof ASchema
->;
 export const ASchema = z.object(
 {
 }
 );
-export type A = z.infer<
-typeof ASchema
->;
 export const _ASchema = z.object(
 {
 }
 );
-export type _A = z.infer<
-typeof _ASchema
->;
 export const _CustomSchema = z.object(
 {
-    var_inner : InnerSchema,
+    var_inner : Inner
 }
 );
-export type _Custom = z.infer<
-typeof _CustomSchema
->;
 export const HelloWorldSchema = z.object(
 {
-    a : u8Schema, b : z.array(
-    u16Schema
+    a : u8, b : z.array(
+    u16
     ).length(
     10
     ), c : z.array(
@@ -120,16 +102,13 @@ export const HelloWorldSchema = z.object(
     ).length(
     20
     ), c : z.array(
-    u8Schema
+    u8
     ), d : z.coerce.string(
 
     ), d : z.coerce.string(
 
-    ), d : z.unknown(
+    ), d : z.any(
 
-    ),
+    )
 }
 );
-export type HelloWorld = z.infer<
-typeof HelloWorldSchema
->;

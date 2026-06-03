@@ -238,6 +238,32 @@ class MyForm(FormServiceService):
 app = FastAPI(); adapter = FastAPIAdapter(app=app); register_routes(adapter, form_service_routes(MyForm()))
 if __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port})
 """
+        elif "issue_171" in context.idl_file:
+            server_code = f"""
+import asyncio, logging
+from {module_name} import StructWithAny
+from {module_name}_http import *
+from xidl.http import register_routes
+from xidl.fastapi import FastAPIAdapter
+from fastapi import FastAPI
+import uvicorn
+
+class MyRepro(ReproServiceService):
+    async def flatten_any(self, request):
+        if not isinstance(request.payload, dict) or request.payload.get("foo") != "bar":
+            raise Exception("invalid payload")
+        return ReproServiceFlattenAnyResponse()
+
+    async def flatten_struct_with_any(self, request):
+        payload = request.payload
+        field_val = getattr(payload, 'field', None) or (payload.get('field') if isinstance(payload, dict) else None)
+        if not isinstance(field_val, dict) or field_val.get("foo") != "bar":
+            raise Exception("invalid payload")
+        return ReproServiceFlattenStructWithAnyResponse()
+
+app = FastAPI(); adapter = FastAPIAdapter(app=app); register_routes(adapter, repro_service_routes(MyRepro()))
+if __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port})
+"""
         else:
             server_code = f"""
 from {module_name}_http import *
