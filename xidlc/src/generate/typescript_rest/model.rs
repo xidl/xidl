@@ -202,7 +202,7 @@ impl MethodModel {
         let response_ty = self
             .response_name
             .as_ref()
-            .map(|name| scoped_name(module_path, name))
+            .map(|name| format!("ifaceTypes.{}", scoped_name(module_path, name)))
             .unwrap_or_else(|| self.return_ty.clone());
         let body_single_key = self.body_single.as_ref().and_then(|_| {
             self.body_entries

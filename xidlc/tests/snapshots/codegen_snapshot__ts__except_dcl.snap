@@ -24,6 +24,8 @@ export interface HelloWorld{
     d : string;
     d : number;
 }
+
+export{};
 ===============
 except_dcl.zod.ts
 ===============
@@ -39,7 +41,7 @@ export const HelloWorldSchema = z.object(
     10
     ), c : z.array(
     z.array(
-    z.string(
+    z.coerce.string(
 
     )
     ).length(
@@ -49,9 +51,9 @@ export const HelloWorldSchema = z.object(
     20
     ), c : z.array(
     u8Schema
-    ), d : z.string(
+    ), d : z.coerce.string(
 
-    ), d : z.string(
+    ), d : z.coerce.string(
 
     ), d : z.number(
 

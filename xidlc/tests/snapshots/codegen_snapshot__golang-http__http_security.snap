@@ -250,7 +250,7 @@ type HttpSecurityServiceGetUserResponse struct {
 
 func HttpSecurityServiceGetUserSecurityRequirements() []xidlgohttp.SecurityRequirement {
 	return []xidlgohttp.SecurityRequirement{
-		{Kind: xidlgohttp.SecurityBasic, Realm: "GetUser"},
+		{Kind: xidlgohttp.SecurityBasic, Realm: "getuser"},
 		{Kind: xidlgohttp.SecurityAPIKey, Location: xidlgohttp.ApiKeyHeader, Name: "X-API-Key"},
 	}
 }

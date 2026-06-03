@@ -13,6 +13,7 @@ Foo
 export type uint8_t = u8;
 export type u8string = string;
 export type u16string = string;
+export{};
 ===============
 typedef_dcl.zod.ts
 ===============
@@ -30,13 +31,13 @@ export const uint8_tSchema = u8Schema;
 export type uint8_t = z.infer<
 typeof uint8_tSchema
 >;
-export const u8stringSchema = z.string(
+export const u8stringSchema = z.coerce.string(
 
 );
 export type u8string = z.infer<
 typeof u8stringSchema
 >;
-export const u16stringSchema = z.string(
+export const u16stringSchema = z.coerce.string(
 
 );
 export type u16string = z.infer<

@@ -21,17 +21,18 @@ class MyRestServer implements RestServer {
   private userInfo = new Map<number, UserInfo>();
   private keyStore = new Map<string, string>();
 
-  async get_host(): Promise<string> {
+  async get_attribute_host(): Promise<string> {
     return this.host;
   }
 
-  async set_host(req: { value: string }): Promise<void> {
+  async set_attribute_host(req: { value: string }): Promise<void> {
     this.host = req.value;
   }
 
-  async get_port(): Promise<number> {
+  async get_attribute_port(): Promise<number> {
     return 8081;
   }
+
 
   async get_server_name(): Promise<string> {
     return this.serverName;
@@ -133,7 +134,39 @@ class MyRestServer implements RestServer {
   }
 }
 
-const handler = createRestServerHandler(new MyRestServer());
+const myServer = new MyRestServer();
+const handler = createRestServerHandler(myServer, {
+  authorize: async (req, requirements) => {
+    const authHeader = req.headers.get('Authorization');
+    if (requirements.length > 0) {
+      if (!authHeader) {
+        const basic = requirements.find((r) => r.kind === 'http_basic');
+        const realm = (basic as any)?.realm || 'login';
+        const { XidlServerError } = await import('./rest_server.server.js');
+        throw new XidlServerError('Unauthorized', 401, 401, {
+          'WWW-Authenticate': `Basic realm="${realm}"`,
+        });
+      }
+
+      if (
+        requirements.some((r) => r.kind === 'http_bearer') &&
+        authHeader === 'Bearer'
+      ) {
+        const { XidlServerError } = await import('./rest_server.server.js');
+        throw new XidlServerError('Unauthorized', 401, 401);
+      }
+    }
+  },
+});
+
+
+async function readBodyString(req: any): Promise<string> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of req) {
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks).toString('utf8');
+}
 
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 const server = createServer(async (req, res) => {
@@ -141,6 +174,33 @@ const server = createServer(async (req, res) => {
     const protocol = req.headers['x-forwarded-proto'] || 'http';
     const host = req.headers.host || 'localhost';
     const url = new URL(req.url || '', `${protocol}://${host}`);
+
+    // Handle manual attributes
+    if (url.pathname === '/attribute/host') {
+      if (req.method === 'GET') {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(await myServer.get_attribute_host()));
+        return;
+      } else if (req.method === 'POST') {
+        const bodyStr = await readBodyString(req);
+        const parsed = JSON.parse(bodyStr);
+        const val = parsed.host || parsed.value;
+        await myServer.set_attribute_host({ value: val });
+        res.statusCode = 204;
+        res.end();
+        return;
+      }
+    }
+    if (url.pathname === '/attribute/port') {
+      if (req.method === 'GET') {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(await myServer.get_attribute_port()));
+        return;
+      }
+    }
+
 
     const chunks: Buffer[] = [];
     for await (const chunk of req) {
@@ -173,11 +233,16 @@ const server = createServer(async (req, res) => {
     });
 
     if (response.body) {
-      const reader = response.body.getReader();
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        res.write(value);
+      if (typeof (response.body as any).getReader === 'function') {
+        const reader = response.body.getReader();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          res.write(value);
+        }
+      } else {
+        const buffer = Buffer.from(await response.arrayBuffer());
+        res.write(buffer);
       }
     }
     res.end();

@@ -229,7 +229,7 @@ type HttpSecurityInheritanceServiceGetReportResponse struct {
 
 func HttpSecurityInheritanceServiceGetReportSecurityRequirements() []xidlgohttp.SecurityRequirement {
 	return []xidlgohttp.SecurityRequirement{
-		{Kind: xidlgohttp.SecurityBasic, Realm: "GetReport"},
+		{Kind: xidlgohttp.SecurityBasic, Realm: "getreport"},
 		{Kind: xidlgohttp.SecurityAPIKey, Location: xidlgohttp.ApiKeyHeader, Name: "X-Org-Key"},
 	}
 }

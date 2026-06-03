@@ -45,6 +45,8 @@ export interface HelloWorld{
     d : string;
     d : unknown;
 }
+
+export{};
 ===============
 struct_def.zod.ts
 ===============
@@ -61,7 +63,7 @@ typeof ASchema
 >;
 export const ASchema = z.object(
 {
-    a : z.number(
+    a : z.coerce.number(
 
     ).int(
 
@@ -109,7 +111,7 @@ export const HelloWorldSchema = z.object(
     10
     ), c : z.array(
     z.array(
-    z.string(
+    z.coerce.string(
 
     )
     ).length(
@@ -119,9 +121,9 @@ export const HelloWorldSchema = z.object(
     20
     ), c : z.array(
     u8Schema
-    ), d : z.string(
+    ), d : z.coerce.string(
 
-    ), d : z.string(
+    ), d : z.coerce.string(
 
     ), d : z.unknown(
 

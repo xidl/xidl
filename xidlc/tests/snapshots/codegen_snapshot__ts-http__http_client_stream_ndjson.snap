@@ -11,7 +11,7 @@ import type*as types from"./http_client_stream_ndjson";
 import type*as ifaceTypes from"./http_client_stream_ndjson.iface";
 import*as ifaceSchemas from"./http_client_stream_ndjson.iface.zod";
 import{serialize, deserialize}from"@xidl/xidl-typescript-codec";
-import type{z}from"zod";
+import{z}from"zod";
 export type FetchLike = (
 input : RequestInfo | URL, init ? : RequestInit
 ) => Promise<
@@ -902,6 +902,8 @@ export interface HttpClientStreamServiceUploadChunkRequest{
     number
     >;
 }
+
+export{};
 ===============
 http_client_stream_ndjson.iface.zod.ts
 ===============
@@ -911,10 +913,10 @@ import{z}from"zod";
 import{xjson}from"@xidl/xidl-typescript-codec";
 export const HttpClientStreamServiceUploadChunkRequestSchema = z.object(
 {
-    file_id : z.string(
+    file_id : z.coerce.string(
 
     ), chunk : z.array(
-    z.number(
+    z.coerce.number(
 
     ).int(
 
@@ -935,6 +937,8 @@ http_client_stream_ndjson.server.ts
 import type*as types from"./http_client_stream_ndjson";
 import type*as ifaceTypes from"./http_client_stream_ndjson.iface";
 import*as ifaceSchemas from"./http_client_stream_ndjson.iface.zod";
+import{serialize, deserialize}from"@xidl/xidl-typescript-codec";
+import{z}from"zod";
 type Awaitable<T> = T | Promise<
 T
 >;
@@ -945,10 +949,10 @@ Response
 >;
 export interface HttpCodec{
     encode ? : (
-    value : unknown
+    value : unknown, schema ? : z.ZodTypeAny
     ) => BodyInit | null;
     decode ? : <T>(
-    resp : Response
+    resp : Response, schema ? : z.ZodTypeAny
     ) => Promise<
     T
     >;
@@ -996,14 +1000,20 @@ export interface ServerOptions{
 export class XidlServerError extends Error{
     readonly status : number;
     readonly code : number;
+    readonly headers ? : Record<
+    string, string
+    >;
     constructor(
-    message : string, status = 500, code = status
+    message : string, status = 500, code = status, headers ? : Record<
+    string, string
+    >
     ){
         super(
         message
         );
         this.status = status;
         this.code = code;
+        this.headers = headers;
     }
 }
 
@@ -1017,25 +1027,59 @@ routes : RouteSpec[], options : ServerOptions,
             const url = new URL(
             request.url
             );
+            let pathMatched = false;
             for(const route of routes){
-                if(route.method!==request.method.toUpperCase(
-
-                )){
-                    continue;
-                }
                 const params = matchRoute(
                 route.path, url.pathname
                 );
                 if(params){
-                    return await route.handler(
-                    request, params
-                    );
+                    pathMatched = true;
+                    if(route.method===request.method.toUpperCase(
+
+                    )){
+                        return await route.handler(
+                        request, params
+                        );
+                    }
                 }
             }
+            if(pathMatched){
+                const allowed = routes
+                .filter(
+                (
+                r
+                ) => matchRoute(
+                r.path, url.pathname
+                )
+                )
+                .map(
+                (
+                r
+                ) => r.method
+                );
+                return new Response(
+                JSON.stringify(
+                {
+                    code : 405, msg : "Method Not Allowed"
+                }
+                ), {
+                    status : 405, headers : {
+                        "Content-Type" : "application/json", "Allow" : Array.from(
+                        new Set(
+                        allowed
+                        )
+                        ).join(
+                        ", "
+                        ),
+                    },
+                }
+                );
+            }
+
             return new Response(
             JSON.stringify(
             {
-                code : 404, msg : "not found"
+                code : 404, msg : "Not Found"
             }
             ), {
                 status : 404, headers : {
@@ -1153,7 +1197,9 @@ query : URLSearchParams, name : string, isMulti : boolean
     name
     );
     if(values.length===0){
-        return undefined;
+        return isMulti ?[
+
+        ] : undefined;
     }
     return isMulti ?values.map(
     parseScalar
@@ -1169,7 +1215,9 @@ headers : Headers, name : string, isMulti : boolean
     name
     );
     if(value===null){
-        return undefined;
+        return isMulti ?[
+
+        ] : undefined;
     }
     return isMulti ?value.split(
     ","
@@ -1195,7 +1243,9 @@ headers : Headers, name : string, isMulti : boolean
     name
     );
     if(!values||values.length===0){
-        return undefined;
+        return isMulti ?[
+
+        ] : undefined;
     }
     return isMulti ?values.map(
     parseScalar
@@ -1263,7 +1313,7 @@ string, string[]
 async function decodeRequestBody(
 request : Request, contentType : string, codecs : Record<
 string, HttpCodec
->,
+>, schema ? : z.ZodTypeAny,
 ) : Promise<
 unknown
 >{
@@ -1280,16 +1330,20 @@ unknown
         }
         );
         return custom(
-        response
+        response, schema
         );
     }
     if(mime==="application/json"||mime.endsWith(
     "+json"
-    )){
-        return await request.json(
+    )||mime==="application/msgpack"){
+        const data = await request.json(
 
         );
+        return schema ?deserialize(
+        data, schema
+        ) : data;
     }
+
     if(mime==="application/x-www-form-urlencoded"){
         const form = new URLSearchParams(
         await request.text(
@@ -1352,7 +1406,7 @@ string, unknown
 }
 
 async function*ndjsonRequestStream<T>(
-request : Request
+request : Request, schema ? : z.ZodTypeAny
 ) : AsyncIterable<
 T
 >{
@@ -1394,9 +1448,12 @@ T
             idx+1
             );
             if(line){
-                yield JSON.parse(
+                const data = JSON.parse(
                 line
-                )as T;
+                );
+                yield(schema ?deserialize(
+                data, schema
+                ) : data)as T;
             }
         }
     }
@@ -1405,7 +1462,7 @@ T
 function sseResponse<T>(
 source : AsyncIterable<
 T
->, options : ServerOptions,
+>, options : ServerOptions, schema ? : z.ZodTypeAny,
 ) : Response{
     void options;
     const encoder = new TextEncoder(
@@ -1420,10 +1477,13 @@ T
         controller
         ){
             for await(const item of source){
+                const serialized = schema ?serialize(
+                item, schema
+                ) : item;
                 controller.enqueue(
                 encoder.encode(
                 `event: next\n data: ${JSON.stringify(
-                    item
+                    serialized
                     )}\n\n`
                 )
                 );
@@ -1450,23 +1510,26 @@ T
 function encodeServerResponse(
 value : unknown, contentType : string, bodyMode : string, bodyFields : ResponseFieldSpec[], headerFields : ResponseFieldSpec[], cookieFields : ResponseFieldSpec[], codecs : Record<
 string, HttpCodec
->,
+>, schema ? : z.ZodTypeAny,
 ) : Response{
     const headers = new Headers(
 
     );
-    const payload = value&&typeof value==="object" ?(value as Record<
+    const serialized = schema ?serialize(
+    value, schema
+    ) : value;
+    const payload = serialized&&typeof serialized==="object" ?(serialized as Record<
     string, unknown
     >) : {
     };
     for(const field of headerFields){
         writeHeader(
-        headers, field.name, payload[field.key], field.isMulti??false
+        headers, field.name, payload[field.name], field.isMulti??false
         );
     }
     for(const field of cookieFields){
         writeCookie(
-        headers, field.name, payload[field.key], field.isMulti??false
+        headers, field.name, payload[field.name], field.isMulti??false
         );
     }
     if(bodyMode==="none"){
@@ -1476,12 +1539,12 @@ string, HttpCodec
         }
         );
     }
-    const body = bodyMode==="return" ?bodyFields[0]?.key==="return" ?value : payload[bodyFields[0]?.key??"return"] : Object.fromEntries(
+    const body = bodyMode==="return" ?bodyFields[0]?.name==="return" ?payload["return"]??serialized : payload[bodyFields[0]?.name??"return"] : Object.fromEntries(
     bodyFields.map(
     (
     field
     ) => [
-    field.name, payload[field.key]
+    field.name, payload[field.name]
     ]
     ).filter(
     (
@@ -1551,7 +1614,7 @@ headers : Headers, name : string, value : unknown, isMulti : boolean
 function encodeBody(
 value : unknown, contentType : string, codecs : Record<
 string, HttpCodec
->,
+>, schema ? : z.ZodTypeAny,
 ) : BodyInit | null{
     const mime = normalizeMime(
     contentType
@@ -1559,16 +1622,20 @@ string, HttpCodec
     const custom = codecs[mime]?.encode;
     if(custom){
         return custom(
-        value
+        value, schema
         );
     }
     if(mime==="application/json"||mime.endsWith(
     "+json"
-    )){
+    )||mime==="application/msgpack"){
+        const serialized = schema ?serialize(
+        value, schema
+        ) : value;
         return JSON.stringify(
-        value
+        serialized
         );
     }
+
     if(mime.startsWith(
     "text/"
     )){
@@ -1636,13 +1703,38 @@ function errorResponse(
 error : unknown
 ) : Response{
     if(error instanceof XidlServerError){
+        const headers = new Headers(
+        {
+            "Content-Type" : "application/json"
+        }
+        );
+        if(error.headers){
+            for(const[key, value]of Object.entries(
+            error.headers
+            )){
+                headers.set(
+                key, value
+                );
+            }
+        }
         return new Response(
         JSON.stringify(
         {
             code : error.code, msg : error.message
         }
         ), {
-            status : error.status, headers : {
+            status : error.status, headers,
+        }
+        );
+    }
+    if(error&&typeof error==="object"&&"name"in error&&error.name==="ZodError"){
+        return new Response(
+        JSON.stringify(
+        {
+            code : 400, msg : "validation failed", detail : (error as any).errors
+        }
+        ), {
+            status : 400, headers : {
                 "Content-Type" : "application/json"
             },
         }

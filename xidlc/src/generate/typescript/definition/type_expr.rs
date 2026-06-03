@@ -216,9 +216,9 @@ pub(crate) fn ts_type_for_type_spec(
 pub(crate) fn zod_schema_for_type_spec(ty: &hir::TypeSpec, module_path: &[String]) -> String {
     match ty {
         hir::TypeSpec::IntegerType(value) => integer_schema(value),
-        hir::TypeSpec::FloatingPtType => "z.number()".to_string(),
+        hir::TypeSpec::FloatingPtType => "z.coerce.number()".to_string(),
         hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => "z.string()".to_string(),
-        hir::TypeSpec::Boolean => "z.boolean()".to_string(),
+        hir::TypeSpec::Boolean => "z.coerce.boolean()".to_string(),
         hir::TypeSpec::AnyType | hir::TypeSpec::ObjectType | hir::TypeSpec::ValueBaseType => {
             "z.unknown()".to_string()
         }
@@ -232,7 +232,7 @@ pub(crate) fn zod_schema_for_type_spec(ty: &hir::TypeSpec, module_path: &[String
                 .as_ref()
                 .and_then(|len| xidl_parser::hir::const_expr_to_i64(&len.0)),
         ),
-        hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => "z.string()".to_string(),
+        hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => "z.coerce.string()".to_string(),
         hir::TypeSpec::FixedPtType(_) => "z.number()".to_string(),
         hir::TypeSpec::MapType(map) => {
             format!(

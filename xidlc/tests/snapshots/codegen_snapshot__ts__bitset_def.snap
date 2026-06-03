@@ -10,6 +10,7 @@ bitset_def.d.ts
 export type A = number;
 export type A = number;
 export type A = number;
+export{};
 ===============
 bitset_def.zod.ts
 ===============

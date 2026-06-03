@@ -11,6 +11,7 @@ export type B = never;
 export type C = {
     a : number} | {
     b : string};
+export{};
 ===============
 union_dcl.zod.ts
 ===============
@@ -28,7 +29,7 @@ export const CSchema = z.union(
 [
 z.object(
 {
-    a : z.number(
+    a : z.coerce.number(
 
     ).int(
 
@@ -36,7 +37,7 @@ z.object(
 }
 ), z.object(
 {
-    b : z.string(
+    b : z.coerce.string(
 
     )
 }
