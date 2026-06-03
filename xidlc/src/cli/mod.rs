@@ -82,7 +82,7 @@ enum GenLang {
         alias = "ts-rest",
         alias = "ts_rest"
     )]
-    TypescriptRest(ClientOnlyArgs),
+    TypescriptRest(ClientServerArgs),
     #[command(name = "go", alias = "golang")]
     Go(ClientServerArgs),
     #[command(name = "go-rest", alias = "go_rest")]
@@ -120,15 +120,6 @@ struct ClientServerArgs {
     files: Vec<PathBuf>,
 }
 
-#[derive(Debug, Args)]
-struct ClientOnlyArgs {
-    #[arg(long = "client", default_value_t = true)]
-    client: bool,
-    #[arg(long = "mock", default_value_t = false)]
-    mock: bool,
-    files: Vec<PathBuf>,
-}
-
 #[derive(Debug)]
 struct SharedGenArgs {
     out_dir: String,
@@ -156,7 +147,7 @@ impl GenLang {
             Self::RustJsonRpc(args) => Ok(shared.into_client_server("rust-jsonrpc", args)),
             Self::RustAxum(args) => Ok(shared.into_client_server("rust-axum", args)),
             Self::Typescript(args) => Ok(shared.into_client_server("typescript", args)),
-            Self::TypescriptRest(args) => Ok(shared.into_client_only("typescript-rest", args)),
+            Self::TypescriptRest(args) => Ok(shared.into_client_server("typescript-rest", args)),
             Self::Go(args) => Ok(shared.into_client_server("go", args)),
             Self::GoRest(args) => Ok(shared.into_client_server("go-rest", args)),
             Self::Python(args) => Ok(shared.into_client_server("python", args)),
@@ -239,18 +230,6 @@ impl SharedGenArgs {
             out_dir: self.out_dir,
             client: args.client,
             server: args.server,
-            mock: args.mock,
-            dry_run: self.dry_run,
-            files: args.files,
-        }
-    }
-
-    fn into_client_only(self, lang: impl Into<String>, args: ClientOnlyArgs) -> ArgsGenerate {
-        ArgsGenerate {
-            lang: lang.into(),
-            out_dir: self.out_dir,
-            client: args.client,
-            server: false,
             mock: args.mock,
             dry_run: self.dry_run,
             files: args.files,

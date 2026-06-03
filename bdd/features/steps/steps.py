@@ -52,10 +52,7 @@ def step_impl(context, lang):
     elif lang == "ts": cmd_lang = "typescript-rest"
 
     cmd = ["cargo", "run", "-p", "xidlc", "--features", "cli,fmt", "--", "gen", "-o", context.lang_dir, cmd_lang]
-    if lang == "ts":
-        cmd.append("--client")
-    else:
-        cmd.extend(["--client", "--server"])
+    cmd.extend(["--client", "--server"])
     cmd.append(context.idl_file)
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=os.getcwd())
     if result.returncode != 0:
@@ -324,6 +321,117 @@ if __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port
                 stdout, stderr = context.server_process.communicate()
                 assert False, f"Server failed to start:\n{stderr}"
             assert False, f"Timed out waiting for port {context.port}"
+
+@then('I can run the generated {lang} server using boilerplate')
+def step_impl(context, lang):
+    import shutil
+    idl_name = os.path.splitext(os.path.basename(context.idl_file))[0]
+    if lang == "go":
+        src_dir = os.path.join(os.getcwd(), "bdd", "boilerplate", idl_name, "go")
+        for f in os.listdir(src_dir):
+            shutil.copy(os.path.join(src_dir, f), context.lang_dir)
+        go_mod_path = os.path.join(context.lang_dir, "go.mod")
+        with open(go_mod_path, "r") as f:
+            content = f.read()
+        content = content.replace("{{GOLANG_XIDL_GO_REST_PATH}}", os.path.abspath('golang/xidl-go-rest'))
+        content = content.replace("{{GOLANG_XIDL_GO_PATH}}", os.path.abspath('golang/xidl-go'))
+        content = content.replace("{{GOLANG_XIDL_GO_CODEC_PATH}}", os.path.abspath('golang/xidl-go-codec'))
+        with open(go_mod_path, "w") as f:
+            f.write(content)
+        for f in os.listdir(context.lang_dir):
+            if f.endswith(".go") and f != "main.go":
+                path = os.path.join(context.lang_dir, f)
+                with open(path, "r") as fr:
+                    content = fr.read()
+                content = re.sub(r"package \w+", "package main", content, count=1)
+                with open(path, "w") as fw:
+                    fw.write(content)
+        subprocess.run(["go", "mod", "tidy"], cwd=context.lang_dir, check=True)
+        env = os.environ.copy()
+        env["PORT"] = str(context.port)
+        context.server_process = subprocess.Popen(["go", "run", "."], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+        t = threading.Thread(target=run_server_logging, args=(context.server_process, "GO-BOILERPLATE"))
+        t.daemon = True
+        t.start()
+    elif lang == "rust":
+        src_dir = os.path.join(os.getcwd(), "bdd", "boilerplate", idl_name, "rust")
+        shutil.copy(os.path.join(src_dir, "Cargo.toml"), context.lang_dir)
+        os.makedirs(os.path.join(context.lang_dir, "src"), exist_ok=True)
+        shutil.copy(os.path.join(src_dir, "src", "main.rs"), os.path.join(context.lang_dir, "src", "main.rs"))
+        cargo_toml_path = os.path.join(context.lang_dir, "Cargo.toml")
+        with open(cargo_toml_path, "r") as f:
+            content = f.read()
+        content = content.replace("{{RUST_XIDL_RUST_AXUM_PATH}}", os.path.abspath('xidl-rust-axum'))
+        with open(cargo_toml_path, "w") as f:
+            f.write(content)
+        env = os.environ.copy()
+        env["PORT"] = str(context.port)
+        env["CARGO_TARGET_DIR"] = os.path.join(os.path.abspath("."), "bdd", ".temp", "rust_target")
+        context.server_process = subprocess.Popen(["cargo", "run", "--offline"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+        t = threading.Thread(target=run_server_logging, args=(context.server_process, "RUST-BOILERPLATE"))
+        t.daemon = True
+        t.start()
+    elif lang == "ts":
+        src_dir = os.path.join(os.getcwd(), "bdd", "boilerplate", idl_name, "ts")
+        for f in os.listdir(src_dir):
+            shutil.copy(os.path.join(src_dir, f), context.lang_dir)
+        pkg_json_path = os.path.join(context.lang_dir, "package.json")
+        with open(pkg_json_path, "r") as f:
+            content = f.read()
+        content = content.replace("{{TS_XIDL_TYPESCRIPT_CODEC_PATH}}", os.path.abspath('typescript/xidl-typescript-codec'))
+        with open(pkg_json_path, "w") as f:
+            f.write(content)
+        codec_path = os.path.abspath(os.path.join(os.getcwd(), "typescript", "xidl-typescript-codec"))
+        if not os.path.exists(os.path.join(codec_path, "dist")):
+            subprocess.run(["pnpm", "install"], cwd=codec_path, check=True, capture_output=True)
+            subprocess.run(["pnpm", "build"], cwd=codec_path, check=True, capture_output=True)
+        subprocess.run(["npm", "install"], cwd=context.lang_dir, check=True, capture_output=True)
+        env = os.environ.copy()
+        env["PORT"] = str(context.port)
+        context.server_process = subprocess.Popen(["npx", "tsx", "server.ts"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+        t = threading.Thread(target=run_server_logging, args=(context.server_process, "TS-BOILERPLATE"))
+        t.daemon = True
+        t.start()
+    if not wait_for_port(context.port):
+        if context.server_process.poll() is not None:
+            stdout, stderr = context.server_process.communicate()
+            assert False, f"Server failed to start:\n{stderr}"
+        assert False, f"Timed out waiting for port {context.port}"
+
+@then('I can run hurl tests against the server')
+def step_impl(context):
+    idl_name = os.path.splitext(os.path.basename(context.idl_file))[0]
+    idl_hurl_mapping = {
+        "complex_rest": ["complex_rest.hurl"],
+        "city_rest": ["city_rest.hurl"],
+        "rest_server": ["rest_server.hurl"],
+        "rest_media_types": ["media_types.hurl"],
+        "e2e_test": [
+            "e2e_test.hurl",
+            "e2e_attribute.hurl",
+            "e2e_defaults_matrix.hurl",
+            "e2e_form.hurl",
+            "e2e_path.hurl",
+            "e2e_scope_matrix.hurl",
+            "e2e_security_matrix.hurl"
+        ]
+    }
+    hurl_files = idl_hurl_mapping.get(idl_name, [f"{idl_name}.hurl"])
+    for hurl_file_name in hurl_files:
+        hurl_file = os.path.join(os.getcwd(), "bdd", "features", "data", hurl_file_name)
+        cmd = [
+            "pnpm", "exec", "hurl",
+            "--test",
+            "--variable", f"base_url=http://127.0.0.1:{context.port}",
+            hurl_file
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True, cwd=os.path.join(os.getcwd(), "xidlc-examples"))
+        if result.returncode != 0:
+            print(f"Hurl file: {hurl_file_name}")
+            print(f"Hurl stdout: {result.stdout}")
+            print(f"Hurl stderr: {result.stderr}")
+        assert result.returncode == 0
+
 
 @then('the client can call math.add({a:d}, {b:d}) to get {expected:d}')
 def step_impl(context, a, b, expected):

@@ -83,3 +83,18 @@ Feature: REST API Generation and Communication
       | lang |
       | rust |
       | go   |
+
+  Scenario Outline: REST E2E test via Hurl using boilerplate
+    Given a REST IDL file "bdd/features/data/<idl>.idl"
+    When I generate <lang> code for the IDL
+    Then the generated <lang> code should be valid
+    And I can run the generated <lang> server using boilerplate
+    Then I can run hurl tests against the server
+
+    Examples:
+      | idl              | lang |
+      | complex_rest     | rust |
+      | city_rest        | rust |
+      | rest_server      | rust |
+      | rest_media_types | rust |
+      | e2e_test         | rust |
