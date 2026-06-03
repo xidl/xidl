@@ -109,7 +109,7 @@ fn render_security_requirements(out: &mut String, method: &MethodMeta) {
                 method
                     .basic_realm
                     .clone()
-                    .unwrap_or_else(|| method.method_name.clone())
+                    .unwrap_or_else(|| method.method_name.to_lowercase())
             )
             .unwrap(),
             HttpSecurityRequirement::HttpBearer => {

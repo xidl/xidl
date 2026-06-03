@@ -94,7 +94,12 @@ Feature: REST API Generation and Communication
     Examples:
       | idl              | lang |
       | complex_rest     | rust |
+      | complex_rest     | go   |
       | city_rest        | rust |
+      | city_rest        | go   |
       | rest_server      | rust |
+      | rest_server      | go   |
       | rest_media_types | rust |
+      | rest_media_types | go   |
       | e2e_test         | rust |
+      | e2e_test         | go   |

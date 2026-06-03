@@ -341,6 +341,11 @@ def step_impl(context, lang):
         for f in os.listdir(context.lang_dir):
             if f.endswith(".go") and f != "main.go":
                 path = os.path.join(context.lang_dir, f)
+                if f.endswith("_test.go"):
+                    new_f = f.replace("_test.go", "_test_model.go")
+                    new_path = os.path.join(context.lang_dir, new_f)
+                    os.rename(path, new_path)
+                    path = new_path
                 with open(path, "r") as fr:
                     content = fr.read()
                 content = re.sub(r"package \w+", "package main", content, count=1)

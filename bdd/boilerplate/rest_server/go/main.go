@@ -20,18 +20,6 @@ type MyRestServer struct {
 	keyStore   sync.Map
 }
 
-func (s *MyRestServer) GetAttributeHost(ctx context.Context, req *RestServerGetAttributeHostRequest) (*RestServerGetAttributeHostResponse, error) {
-	return &RestServerGetAttributeHostResponse{Return: s.host}, nil
-}
-
-func (s *MyRestServer) SetAttributeHost(ctx context.Context, req *RestServerSetAttributeHostRequest) (*RestServerSetAttributeHostResponse, error) {
-	s.host = req.Value
-	return &RestServerSetAttributeHostResponse{}, nil
-}
-
-func (s *MyRestServer) GetAttributePort(ctx context.Context, req *RestServerGetAttributePortRequest) (*RestServerGetAttributePortResponse, error) {
-	return &RestServerGetAttributePortResponse{Return: 8081}, nil
-}
 
 func (s *MyRestServer) GetServerName(ctx context.Context, req *RestServerGetServerNameRequest) (*RestServerGetServerNameResponse, error) {
 	return &RestServerGetServerNameResponse{Return: s.serverName}, nil
@@ -181,7 +169,7 @@ func ErrorMappingMiddleware() gin.HandlerFunc {
 		status := blw.Status()
 		if status == http.StatusInternalServerError && (strings.Contains(blw.body.String(), "not found") || strings.Contains(blw.body.String(), "key not found")) {
 			blw.ResponseWriter.WriteHeader(http.StatusNotFound)
-			_, _ = blw.ResponseWriter.Write([]byte(`{"code":"NOT_FOUND","message":"Not Found"}`))
+			_, _ = blw.ResponseWriter.Write([]byte(`{"code":404,"msg":"Not Found"}`))
 		} else {
 			if status != 0 {
 				blw.ResponseWriter.WriteHeader(status)
@@ -194,12 +182,27 @@ func ErrorMappingMiddleware() gin.HandlerFunc {
 func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
+	r.HandleMethodNotAllowed = true
 	r.Use(gin.Recovery(), ErrorMappingMiddleware())
 	svc := &MyRestServer{
 		host:       "localhost",
 		serverName: "rest_server",
 	}
 	RegisterRestServerHandler(r, svc)
+	r.GET("/attribute/host", func(c *gin.Context) {
+		c.JSON(200, svc.host)
+	})
+	r.POST("/attribute/host", func(c *gin.Context) {
+		var body struct {
+			Host string `json:"host"`
+		}
+		if err := c.ShouldBindJSON(&body); err != nil {
+			c.Status(400)
+			return
+		}
+		svc.host = body.Host
+		c.Status(204)
+	})
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"

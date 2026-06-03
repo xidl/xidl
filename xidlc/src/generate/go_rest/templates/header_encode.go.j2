@@ -3,11 +3,27 @@
         if {{ field }} != nil { httpReq.Header.Set("{{ wire_name }}", *{{ field }}) }
     {%- elif ty == "uint32" %}
         if {{ field }} != nil { httpReq.Header.Set("{{ wire_name }}", xidlgohttp.FormatUint32(*{{ field }})) }
+    {%- elif ty == "int32" %}
+        if {{ field }} != nil { httpReq.Header.Set("{{ wire_name }}", xidlgohttp.FormatInt32(*{{ field }})) }
+    {%- elif ty == "uint64" %}
+        if {{ field }} != nil { httpReq.Header.Set("{{ wire_name }}", xidlgohttp.FormatUint64(*{{ field }})) }
+    {%- elif ty == "int64" %}
+        if {{ field }} != nil { httpReq.Header.Set("{{ wire_name }}", xidlgohttp.FormatInt64(*{{ field }})) }
+    {%- elif ty == "bool" %}
+        if {{ field }} != nil { httpReq.Header.Set("{{ wire_name }}", xidlgohttp.FormatBool(*{{ field }})) }
     {%- endif %}
 {%- else %}
     {%- if ty == "string" %}
         httpReq.Header.Set("{{ wire_name }}", {{ field }})
     {%- elif ty == "uint32" %}
         httpReq.Header.Set("{{ wire_name }}", xidlgohttp.FormatUint32({{ field }}))
+    {%- elif ty == "int32" %}
+        httpReq.Header.Set("{{ wire_name }}", xidlgohttp.FormatInt32({{ field }}))
+    {%- elif ty == "uint64" %}
+        httpReq.Header.Set("{{ wire_name }}", xidlgohttp.FormatUint64({{ field }}))
+    {%- elif ty == "int64" %}
+        httpReq.Header.Set("{{ wire_name }}", xidlgohttp.FormatInt64({{ field }}))
+    {%- elif ty == "bool" %}
+        httpReq.Header.Set("{{ wire_name }}", xidlgohttp.FormatBool({{ field }}))
     {%- endif %}
 {%- endif %}

@@ -2,4 +2,12 @@
     w.Header().Set("{{ wire_name }}", {{ field }})
 {%- elif ty == "uint32" %}
     w.Header().Set("{{ wire_name }}", xidlgohttp.FormatUint32({{ field }}))
+{%- elif ty == "int32" %}
+    w.Header().Set("{{ wire_name }}", xidlgohttp.FormatInt32({{ field }}))
+{%- elif ty == "uint64" %}
+    w.Header().Set("{{ wire_name }}", xidlgohttp.FormatUint64({{ field }}))
+{%- elif ty == "int64" %}
+    w.Header().Set("{{ wire_name }}", xidlgohttp.FormatInt64({{ field }}))
+{%- elif ty == "bool" %}
+    w.Header().Set("{{ wire_name }}", xidlgohttp.FormatBool({{ field }}))
 {%- endif %}

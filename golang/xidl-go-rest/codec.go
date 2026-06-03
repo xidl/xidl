@@ -37,7 +37,12 @@ func MustCodecForMime(mime string) Codec {
 
 func (jsonCodec) ContentType() string { return "application/json" }
 func (jsonCodec) Encode(w io.Writer, value any) error {
-	return json.NewEncoder(w).Encode(value)
+	payload, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+	_, err = w.Write(payload)
+	return err
 }
 func (jsonCodec) Decode(r io.Reader, value any) error {
 	return json.NewDecoder(r).Decode(value)

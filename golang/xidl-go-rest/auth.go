@@ -3,6 +3,7 @@ package xidlgohttp
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/url"
@@ -168,7 +169,12 @@ func Unauthorized(w http.ResponseWriter, requirements []SecurityRequirement) {
 			break
 		}
 	}
-	http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusUnauthorized)
+	_ = json.NewEncoder(w).Encode(map[string]any{
+		"code": http.StatusUnauthorized,
+		"msg":  http.StatusText(http.StatusUnauthorized),
+	})
 }
 
 func BasicAuthFromContext(ctx context.Context) (BasicAuth, bool) {
