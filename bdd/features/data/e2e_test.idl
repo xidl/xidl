@@ -1,0 +1,504 @@
+#pragma xidlc package E2E Test
+#pragma xidlc version v1.0.0
+#pragma xidlc service http://127.0.0.1:8080 dev server
+#pragma xidlc service http://127.0.0.1:8080 product
+// Type E2E Test
+enum EnumEmpty {
+};
+
+enum EnumSimple1 {
+    V1,
+    V2,
+    V3,
+
+};
+
+struct StructEmpty {
+};
+
+struct StructSimple {
+    EnumEmpty member1;
+    EnumSimple1 member2;
+    StructEmpty member3;
+};
+
+struct StructHttpBody {
+    string name;
+    @optional
+    string alias;
+    sequence<string> tags;
+    map<string, string> labels;
+};
+
+union UnionSimple switch (EnumSimple1) {
+    case EnumSimple1::V1:
+        uint8 case1;
+    case EnumSimple1::V2:
+        sequence<any> case2;
+    case EnumSimple1::V3:
+        map<string, string> case3;
+    default:
+        uint8 default;
+};
+
+bitset MyBitset {
+    bitfield<3> a;
+    bitfield<1> b;
+    bitfield<4> ;
+    bitfield<10> c;
+    bitfield<12, short> d;
+};
+
+bitmask BitMaskSimple {
+    FLAG0,
+    FLAG1,
+    FLAG2,
+    FLAG3,
+    FLAG4,
+    FLAG5,
+    FLAG6,
+    FLAG7
+};
+// Interface
+interface E2eTypeServer {
+    attribute string type_attr1;
+    readonly attribute sequence<string> type_attr2;
+    void simple_op();
+
+    string simple_op_with_return1();
+
+    EnumEmpty simple_op_with_return2();
+
+    EnumSimple1 simple_op_with_return3();
+
+    StructEmpty simple_op_with_return4();
+
+    StructSimple simple_op_with_return5();
+
+    sequence<string> return_with_sequence1();
+
+    sequence<EnumEmpty> return_with_sequence2();
+
+    sequence<EnumSimple1> return_with_sequence3();
+
+    sequence<StructEmpty> return_with_sequence4();
+
+    sequence<StructSimple> return_with_sequence5();
+
+    map<string, uint8> return_with_map();
+
+    any return_with_any();
+
+    sequence<any> return_with_any_sequence();
+
+    map<string, any> return_with_any_map();
+    // map<any, any> return_with_any_map();
+    void parameter_op(
+        string a
+    );
+
+    void parameter_op2(
+        in string a
+    );
+
+    void parameter_op3(
+        in string a,
+        out uint8 b,
+        inout sequence<any> c
+    );
+
+    void parameter_op4(
+        out string a,
+        out uint8 b,
+        inout sequence<any> c
+    );
+
+    sequence<any> parameter_op5(
+        out string a,
+        out uint8 b,
+        inout sequence<any> c
+    );
+
+    map<string, any> parameter_op6(
+        out string a,
+        out uint8 b,
+        inout sequence<any> c
+    );
+
+};
+// attribute
+interface E2eAttribute {
+    attribute string attr1;
+    readonly attribute sequence<string> attr2;
+    attribute EnumEmpty attr3;
+    attribute EnumSimple1 attr4;
+    attribute StructEmpty attr5;
+    attribute StructSimple attr6;
+    attribute UnionSimple attr61;
+    attribute sequence<string> attr7;
+    attribute sequence<EnumEmpty> attr8;
+    attribute sequence<EnumSimple1> attr9;
+    attribute sequence<StructEmpty> attr10;
+    attribute sequence<StructSimple> attr11;
+    attribute map<string, uint8> attr12;
+    attribute any attr13;
+    attribute sequence<any> attr14;
+    attribute map<string, any> attr15;
+    @deprecated("2026-01-01")
+    readonly attribute string attr16;
+};
+// path
+interface E2ePathSever {
+    @get(path = "/v1/op_with_path/{param1}")
+    sequence<string> op_with_path(
+        in string param1
+    );
+
+    @get(path = "/v1/op_with_query/{param1}{?q}")
+    sequence<string> op_with_query(
+        in string param1,
+        string q
+    );
+
+    @post
+    @path("/v1/op_with_params/{path}")
+    sequence<string> op_with_params(
+        @path
+        @rename("path")
+        string path_name,
+        @query
+        sequence<string> q,
+        @cookie
+        sequence<uint8> b,
+        @body
+        map<string, any> a
+    );
+
+    @get
+    @path("/v1/op_with_query_wildcard/{*all}{?word,q}")
+    string op_with_query2(
+        string all,
+        @query
+        string word,
+        string q
+    );
+
+};
+
+@Consumes("application/x-www-form-urlencoded")
+interface E2eHttpForm {
+    @post(path = "/v2/forms/profile")
+    string submit_profile(
+        string name,
+        @optional
+        uint32 age,
+        out string normalized_name
+    );
+
+};
+
+@deprecated("2026-01-15")
+@Consumes("application/json")
+@Produces("application/json")
+interface E2eHttpScopeMatrix {
+    readonly attribute string scope_inherited_attr;
+    @deprecated
+    readonly attribute string scope_bare_attr;
+    @post(path = "/v2/scope/default")
+    string default_scope(
+        StructHttpBody request_body
+    );
+
+    @post(path = "/v2/scope/override-consumes")
+    @Consumes("application/x-www-form-urlencoded")
+    string override_consumes_only(
+        string name,
+        @optional
+        uint32 age,
+        out string normalized_name
+    );
+
+    @get(path = "/v2/scope/override-produces/{id}")
+    @Produces("application/msgpack")
+    StructHttpBody override_produces_only(
+        @path
+        @rename("id")
+        string resource_id,
+        out uint32 revision
+    );
+
+    @post(path = "/v2/scope/override-both")
+    @Consumes("application/x-www-form-urlencoded")
+    @Produces("application/msgpack")
+    StructHttpBody override_both_media(
+        string name,
+        @optional
+        uint32 age,
+        out string normalized_name
+    );
+
+    @deprecated
+    @get(path = "/v2/scope/deprecated/plain/{id}")
+    string deprecated_plain(
+        @path
+        @rename("id")
+        string resource_id
+    );
+
+    @deprecated("2026-02-01")
+    @get(path = "/v2/scope/deprecated/since/{id}")
+    string deprecated_since_only(
+        @path
+        @rename("id")
+        string resource_id
+    );
+
+    @deprecated(since = "2026-03-01", after = "2026-12-31")
+    @get(path = "/v2/scope/deprecated/window/{id}")
+    string deprecated_window(
+        @path
+        @rename("id")
+        string resource_id
+    );
+
+};
+
+interface E2eHttpRouteAndBody {
+    @get(path = "/v2/resources/{id}")
+    @path("/resources/{id}")
+    @path("/r/{id}")
+    string get_resource(
+        @path
+        @rename("id")
+        string resource_id,
+        @query
+        @rename("lang")
+        @optional
+        string locale,
+        @header
+        @rename("X-Trace-Id")
+        string trace_id
+    );
+
+    @get(path = "/v2/files/{*path}{?download,version}")
+    string get_file(
+        @path
+        @rename("path")
+        string file_path,
+        @query
+        @rename("download")
+        boolean download,
+        @query
+        @rename("version")
+        @optional
+        string version
+    );
+
+    @post(path = "/v2/resources")
+    StructHttpBody create_resource(
+        @flatten
+        StructHttpBody resource_body
+    );
+
+    @put(path = "/v2/resources/{id}")
+    void replace_resource(
+        @path
+        @rename("id")
+        string resource_id,
+        @header
+        @rename("If-Match")
+        string etag,
+        @body("payload")
+        StructHttpBody payload
+    );
+
+    @patch(path = "/v2/resources/{id}")
+    map<string, any> patch_resource(
+        @path
+        @rename("id")
+        string resource_id,
+        @query
+        @rename("dry_run")
+        boolean dry_run,
+        @cookie
+        @rename("sid")
+        string session_id,
+        @body("changes")
+        map<string, any> changes
+    );
+
+    @delete(path = "/v2/resources/{id}")
+    void delete_resource(
+        @path
+        @rename("id")
+        string resource_id,
+        @query
+        @rename("force")
+        @optional
+        boolean force
+    );
+
+    @head(path = "/v2/resources/{id}")
+    void probe_resource(
+        @path
+        @rename("id")
+        string resource_id,
+        @header
+        @rename("If-None-Match")
+        string if_none_match
+    );
+
+    @options(path = "/v2/resources/{id}")
+    void resource_options(
+        @path
+        @rename("id")
+        string resource_id
+    );
+
+    @get(path = "/v2/msgpack/resources/{id}")
+    @Produces("application/msgpack")
+    StructHttpBody get_msgpack_resource(
+        @path
+        @rename("id")
+        string resource_id,
+        out uint32 revision
+    );
+
+    @get(path = " //v2//dedup/{id}/ ")
+    @path("/v2/dedup/{id}")
+    string dedup_resource(
+        @path
+        string id,
+        @header
+        string x_trace_id
+    );
+
+    @get(path = "/v2/resources/preview")
+    StructHttpBody preview_resource(
+        @body("resource")
+        StructHttpBody resource
+    );
+
+};
+
+interface E2eHttpDefaultsMatrix {
+    @delete(path = "/v2/defaults/resources")
+    string delete_resource_default_query(
+        string id,
+        uint32 revision
+    );
+
+    @head(path = "/v2/defaults/resources/head")
+    void probe_resource_default_query(
+        string id,
+        uint32 revision
+    );
+
+    @options(path = "/v2/defaults/resources/options")
+    void resource_options_default_query(
+        string id,
+        uint32 revision
+    );
+
+    @put(path = "/v2/defaults/resources/{id}")
+    StructHttpBody replace_resource_default_body(
+        @path
+        @rename("id")
+        string id,
+        string name,
+        @optional
+        string alias
+    );
+
+    @patch(path = "/v2/defaults/resources/{id}")
+    StructHttpBody patch_resource_default_body(
+        @path
+        @rename("id")
+        string id,
+        string name,
+        @optional
+        string alias
+    );
+
+};
+
+@http_basic
+@api_key(in = "header", name = "X-Org-Key")
+interface E2eHttpSecurity {
+    @get(path = "/v2/secure/users/{id}")
+    @deprecated("2026-01-01")
+    string get_secure_user(
+        @path
+        @rename("id")
+        string user_id,
+        @query
+        @rename("locale")
+        @optional
+        string locale,
+        @header
+        @rename("X-Trace-Id")
+        string trace_id
+    );
+
+    @oauth2(scopes = "reports:write,reports:read")
+    @post(path = "/v2/secure/search")
+    string search_secure_user(
+        string keyword,
+        @optional
+        uint32 page
+    );
+
+    @no_security
+    @deprecated(since = "2026-01-01", after = "2026-06-01")
+    string healthz();
+
+};
+
+@http_basic(realm = "matrix realm")
+@api_key(in = "query", name = "org_key")
+interface E2eHttpSecurityMatrix {
+    @get(path = "/v2/security/inherited/{id}")
+    string inherited_security(
+        @path
+        @rename("id")
+        string resource_id,
+        @header
+        @rename("X-Trace-Id")
+        string trace_id
+    );
+
+    @http_bearer
+    @api_key(in = "cookie", name = "session_key")
+    @post(path = "/v2/security/bearer-cookie")
+    string bearer_or_cookie_security(
+        string action,
+        @optional
+        string note
+    );
+
+    @http_bearer
+    @api_key(in = "header", name = "X-Alt-Key")
+    @get(path = "/v2/security/alternatives/{id}")
+    string alternative_security(
+        @path
+        @rename("id")
+        string resource_id,
+        @query
+        @rename("locale")
+        @optional
+        string locale
+    );
+
+    @oauth2(scopes = "reports:write,reports:read")
+    @post(path = "/v2/security/oauth-search")
+    string oauth_security(
+        string keyword,
+        @optional
+        uint32 page
+    );
+
+    @no_security
+    @get(path = "/v2/security/public/ping")
+    string public_ping();
+
+};
