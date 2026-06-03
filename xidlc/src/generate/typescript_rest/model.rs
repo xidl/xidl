@@ -1,4 +1,4 @@
-use crate::generate::typescript::definition::contexts::{ClientParamContext, ParamDeclContext};
+use crate::generate::typescript::definition::contexts::{ClientParamContext, ParamDeclContext, TsType};
 use crate::generate::typescript::definition::names::scoped_name;
 use serde::Serialize;
 
@@ -68,7 +68,7 @@ pub(super) struct ClientClassContext {
 pub(super) struct ClientMethodContext {
     pub(super) name: String,
     pub(super) params: Vec<ClientParamContext>,
-    pub(super) return_ty: String,
+    pub(super) return_ty: TsType,
     pub(super) request_schema_ref: Option<String>,
     pub(super) body_schema_ref: Option<String>,
     pub(super) request_payload: Vec<RequestPayloadEntry>,
@@ -88,9 +88,9 @@ pub(super) struct ClientMethodContext {
     pub(super) response_body_mode: String,
     pub(super) is_server_stream: bool,
     pub(super) is_client_stream: bool,
-    pub(super) stream_item_ty: Option<String>,
+    pub(super) stream_item_ty: Option<TsType>,
     pub(super) stream_item_schema_ref: Option<String>,
-    pub(super) client_stream_item_ty: Option<String>,
+    pub(super) client_stream_item_ty: Option<TsType>,
     pub(super) security: Vec<SecurityContext>,
 }
 
@@ -105,7 +105,7 @@ pub(super) struct ServerClassContext {
 pub(super) struct ServerMethodContext {
     pub(super) name: String,
     pub(super) request_ty: Option<String>,
-    pub(super) response_ty: String,
+    pub(super) response_ty: TsType,
     pub(super) request_schema_ref: Option<String>,
     pub(super) body_schema_ref: Option<String>,
     pub(super) response_schema_ref: Option<String>,
@@ -126,9 +126,9 @@ pub(super) struct ServerMethodContext {
     pub(super) response_body_mode: String,
     pub(super) is_server_stream: bool,
     pub(super) is_client_stream: bool,
-    pub(super) stream_item_ty: Option<String>,
+    pub(super) stream_item_ty: Option<TsType>,
     pub(super) stream_item_schema_ref: Option<String>,
-    pub(super) client_stream_item_ty: Option<String>,
+    pub(super) client_stream_item_ty: Option<TsType>,
     pub(super) security: Vec<SecurityContext>,
 }
 
@@ -153,12 +153,12 @@ pub(super) struct MethodModel {
     pub(super) response_cookie_params: Vec<ValueParamContext>,
     pub(super) body_entries: Vec<RequestPayloadEntry>,
     pub(super) body_single: Option<String>,
-    pub(super) return_ty: String,
+    pub(super) return_ty: TsType,
     pub(super) response_body_mode: String,
     pub(super) response_body_entries: Vec<RequestPayloadEntry>,
-    pub(super) stream_item_ty: Option<String>,
+    pub(super) stream_item_ty: Option<TsType>,
     pub(super) stream_item_schema_ref: Option<String>,
-    pub(super) client_stream_item_ty: Option<String>,
+    pub(super) client_stream_item_ty: Option<TsType>,
     pub(super) is_server_stream: bool,
     pub(super) is_client_stream: bool,
     pub(super) security: Vec<SecurityContext>,
@@ -202,8 +202,8 @@ impl MethodModel {
         let response_ty = self
             .response_name
             .as_ref()
-            .map(|name| format!("ifaceTypes.{}", scoped_name(module_path, name)))
-            .unwrap_or_else(|| self.return_ty.clone());
+            .map(|name| TsType::ScopedName(scoped_name(module_path, name)))
+            .unwrap_or(self.return_ty);
         let body_single_key = self.body_single.as_ref().and_then(|_| {
             self.body_entries
                 .first()

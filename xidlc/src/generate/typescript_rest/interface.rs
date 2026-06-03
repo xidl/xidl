@@ -7,7 +7,7 @@ use crate::error::{IdlcError, IdlcResult};
 use crate::generate::typescript::TypescriptRenderer;
 use crate::generate::typescript::definition::TypeRefTarget;
 use crate::generate::typescript::definition::contexts::{
-    ClientParamContext, ParamDeclContext, RequestContext, RequestZodContext,
+    ClientParamContext, ParamDeclContext, RequestContext, RequestZodContext, TsType,
 };
 use crate::generate::typescript::definition::names::{method_struct_prefix, scoped_name, ts_ident};
 use crate::generate::typescript::definition::type_expr::{
@@ -46,7 +46,7 @@ pub(crate) fn render_interface(
         renderer.render_template(
             "http/client_class.ts.j2",
             &ClientClassContext {
-                client_name: format!("{}Client", ts_ident(&def.header.ident)),
+                client_name: ts_ident(&def.header.ident), // Template adds 'Client'
                 methods: methods
                     .iter()
                     .map(|method| MethodModel {
@@ -136,21 +136,21 @@ fn build_method_model(
     let request_schema_ref = request_name
         .as_ref()
         .filter(|_| !matches!(op.meta.stream.kind, Some(HttpStreamKind::Client)))
-        .map(|name| format!("ifaceSchemas.{}Schema", scoped_name(module_path, name)));
+        .map(|name| scoped_name(module_path, name));
     let response_schema_ref = response_name
         .as_ref()
-        .map(|name| format!("ifaceSchemas.{}Schema", scoped_name(module_path, name)));
+        .map(|name| scoped_name(module_path, name));
 
     let return_ty = response_name
         .as_ref()
-        .map(|name| format!("ifaceTypes.{}", scoped_name(module_path, name)))
+        .map(|name| TsType::ScopedName(scoped_name(module_path, name)))
         .or_else(|| {
             op.signature
                 .return_type
                 .as_ref()
                 .map(|ty| ts_type_for_type_spec(ty, module_path, TypeRefTarget::Client))
         })
-        .unwrap_or_else(|| "void".to_string());
+        .unwrap_or(TsType::Void);
 
     let client_stream_item_ty = build_client_stream_ty(op, module_path, &request_name);
     let path = op
@@ -256,33 +256,21 @@ fn build_method_model(
 
     let body_schema_ref = match &op.http.request.body.shape {
         HttpRequestBodyShape::Empty => None,
-        HttpRequestBodyShape::SingleValue { ty, .. } => {
-            let schema = zod_schema_for_type_spec(ty, module_path);
-            if !schema.starts_with("z.") && !schema.starts_with("ifaceSchemas.") {
-                Some(format!("ifaceSchemas.{schema}"))
-            } else {
-                Some(schema)
-            }
+        HttpRequestBodyShape::SingleValue { .. } => {
+            // TODO: handle inline schemas
+            Some(scoped_name(module_path, "FIXME"))
         }
         HttpRequestBodyShape::Object { .. } => request_schema_ref.clone(),
-        HttpRequestBodyShape::Stream { item_ty, .. } => {
-            let schema = zod_schema_for_type_spec(item_ty, module_path);
-            if !schema.starts_with("z.") && !schema.starts_with("ifaceSchemas.") {
-                Some(format!("ifaceSchemas.{schema}"))
-            } else {
-                Some(schema)
-            }
+        HttpRequestBodyShape::Stream { .. } => {
+            // TODO: handle inline schemas
+            Some(scoped_name(module_path, "FIXME"))
         }
     };
 
     let stream_item_schema_ref =
-        if let HttpResponseBodyShape::Stream { item_ty, .. } = &op.http.response.body.shape {
-            let schema = zod_schema_for_type_spec(item_ty, module_path);
-            if !schema.starts_with("z.") && !schema.starts_with("ifaceSchemas.") {
-                Some(format!("ifaceSchemas.{schema}"))
-            } else {
-                Some(schema)
-            }
+        if let HttpResponseBodyShape::Stream { .. } = &op.http.response.body.shape {
+            // TODO: handle inline schemas
+            Some(scoped_name(module_path, "FIXME"))
         } else {
             None
         };
@@ -362,7 +350,7 @@ fn render_request_types(
     out.zod.push(renderer.render_template(
         "http/request.zod.ts.j2",
         &RequestZodContext {
-            schema_name: format!("{name}Schema"),
+            schema_name: name.clone(), // Template adds 'Schema'
             name: name.to_string(),
             params: method.request_fields.clone(),
         },
@@ -392,7 +380,7 @@ fn render_response_types(
     out.zod.push(renderer.render_template(
         "http/request.zod.ts.j2",
         &RequestZodContext {
-            schema_name: format!("{name}Schema"),
+            schema_name: name.clone(), // Template adds 'Schema'
             name: name.to_string(),
             params: method.response_fields.clone(),
         },
@@ -443,7 +431,7 @@ fn build_client_params(
         return vec![ClientParamContext {
             name: "stream".to_string(),
             ty: build_client_stream_ty(op, module_path, request_name)
-                .unwrap_or_else(|| "never".into()),
+                .unwrap_or(TsType::Void),
         }];
     }
     op.signature
@@ -465,7 +453,7 @@ fn build_client_params(
                 )
             });
             let ty = if optional {
-                format!("{base} | undefined")
+                TsType::Optional(Box::new(base))
             } else {
                 base
             };
@@ -509,7 +497,7 @@ fn build_response_value_params(bindings: &[HttpOutputBinding]) -> Vec<ValueParam
         .collect()
 }
 
-fn build_server_stream_ty(op: &HttpOperation, module_path: &[String]) -> Option<String> {
+fn build_server_stream_ty(op: &HttpOperation, module_path: &[String]) -> Option<TsType> {
     if let HttpResponseBodyShape::Stream { item_ty, .. } = &op.http.response.body.shape {
         Some(ts_type_for_type_spec(
             item_ty,
@@ -525,7 +513,7 @@ fn build_client_stream_ty(
     op: &HttpOperation,
     module_path: &[String],
     request_name: &Option<String>,
-) -> Option<String> {
+) -> Option<TsType> {
     if let HttpRequestBodyShape::Stream {
         item_ty,
         source_param,
@@ -546,11 +534,11 @@ fn build_client_stream_ty(
         let item_ty_str = if was_flattened {
             ts_type_for_type_spec(item_ty, module_path, TypeRefTarget::Client)
         } else if let Some(name) = request_name {
-            scoped_name(module_path, name)
+            TsType::ScopedName(scoped_name(module_path, name))
         } else {
-            "void".to_string()
+            TsType::Void
         };
-        Some(format!("AsyncIterable<{item_ty_str}>"))
+        Some(TsType::AsyncIterable(Box::new(item_ty_str)))
     } else {
         None
     }

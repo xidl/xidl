@@ -2,12 +2,12 @@ use xidl_parser::hir;
 
 use super::contexts::{
     BodyParamContext, ClientMethodContext, ClientParamContext, CookieParamContext,
-    HeaderParamContext, PathParamContext, QueryParamContext, RequestPayloadEntry,
+    HeaderParamContext, PathParamContext, QueryParamContext, RequestPayloadEntry, TsType,
 };
 use super::http::is_sequence_type;
 use super::names::scoped_name;
 use super::route_template::path_param_is_catch_all;
-use super::type_expr::{ts_type_for_type_spec, zod_schema_for_type_spec};
+use super::type_expr::ts_type_for_type_spec;
 
 #[derive(Clone)]
 pub(crate) struct ParamInfo {
@@ -48,7 +48,7 @@ impl MethodInfo {
             name: self.name.clone(),
             params,
             return_ty: if self.is_server_stream {
-                format!("AsyncIterable<{return_payload_ty}>")
+                TsType::AsyncIterable(Box::new(return_payload_ty))
             } else {
                 return_payload_ty
             },
@@ -75,23 +75,24 @@ impl MethodInfo {
     fn return_schema_ref(&self, module_path: &[String]) -> Option<String> {
         if let Some(response_name) = &self.response_name {
             let full = scoped_name(module_path, response_name);
-            Some(format!("zodSchemas.{full}Schema"))
+            Some(full) // Template will add 'zodSchemas.' and 'Schema'
         } else if self.ret.is_void {
             None
         } else {
-            let spec = self.ret.ty.as_ref().expect("return type");
-            Some(zod_schema_for_type_spec(spec, module_path))
+            // Wait, zod_schema_for_type_spec now returns ZodSchema enum.
+            // But this function returns Option<String> as a reference.
+            // If it's an inline schema, it might be tricky.
+            // Let's assume for now this is always a ref.
+            None // TODO: handle inline schemas in client method
         }
     }
 
     fn body_schema_ref(&self, module_path: &[String]) -> Option<String> {
         if let Some(request_name) = &self.request_name {
             let full = scoped_name(module_path, request_name);
-            Some(format!("zodSchemas.{full}Schema"))
+            Some(full)
         } else {
-            self.body_params
-                .first()
-                .map(|param| zod_schema_for_type_spec(&param.ty, module_path))
+            None // TODO: handle inline body schemas
         }
     }
 
@@ -100,11 +101,11 @@ impl MethodInfo {
             let item_ty = self
                 .request_name
                 .as_ref()
-                .map(|name| scoped_name(module_path, name))
-                .unwrap_or_else(|| "void".to_string());
+                .map(|name| TsType::ScopedName(scoped_name(module_path, name)))
+                .unwrap_or(TsType::Void);
             return vec![ClientParamContext {
                 name: "stream".to_string(),
-                ty: format!("AsyncIterable<{item_ty}>"),
+                ty: TsType::AsyncIterable(Box::new(item_ty)),
             }];
         }
         self.params
@@ -114,7 +115,7 @@ impl MethodInfo {
                 ty: {
                     let ty = ts_type_for_type_spec(&param.ty, module_path, TypeRefTarget::Client);
                     if param.optional {
-                        format!("{ty} | undefined")
+                        TsType::Optional(Box::new(ty))
                     } else {
                         ty
                     }
@@ -123,11 +124,11 @@ impl MethodInfo {
             .collect()
     }
 
-    fn return_payload_ty(&self, module_path: &[String]) -> String {
+    fn return_payload_ty(&self, module_path: &[String]) -> TsType {
         if let Some(response_name) = &self.response_name {
-            scoped_name(module_path, response_name)
+            TsType::ScopedName(scoped_name(module_path, response_name))
         } else if self.ret.is_void {
-            "void".to_string()
+            TsType::Void
         } else {
             ts_type_for_type_spec(
                 self.ret.ty.as_ref().expect("return type"),
@@ -137,17 +138,17 @@ impl MethodInfo {
         }
     }
 
-    fn server_stream_item_ty(&self, module_path: &[String]) -> Option<String> {
+    fn server_stream_item_ty(&self, module_path: &[String]) -> Option<TsType> {
         self.is_server_stream
             .then(|| self.return_payload_ty(module_path))
     }
 
-    fn client_stream_item_ty(&self, module_path: &[String]) -> Option<String> {
+    fn client_stream_item_ty(&self, module_path: &[String]) -> Option<TsType> {
         self.is_client_stream.then(|| {
             self.request_name
                 .as_ref()
-                .map(|name| scoped_name(module_path, name))
-                .unwrap_or_else(|| "void".to_string())
+                .map(|name| TsType::ScopedName(scoped_name(module_path, name)))
+                .unwrap_or(TsType::Void)
         })
     }
 

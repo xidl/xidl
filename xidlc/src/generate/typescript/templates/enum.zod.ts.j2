@@ -1,3 +1,2 @@
-{% if values | length == 0 %}export const {{ schema_name }} = z.never();
-{% else %}export const {{ schema_name }} = z.enum([{{ values | join(", ") }}]);
-{% endif %}export type {{ ident }} = z.infer<typeof {{ schema_name }}>;
+{% from "macros.j2" import render_zod %}
+export const {{ schema_name }}Schema = {% if values | length == 0 %}z.never(){% else %}z.enum([{% for value in values %}"{{ value }}"{% if not loop.last %}, {% endif %}{% endfor %}]);{% endif %}

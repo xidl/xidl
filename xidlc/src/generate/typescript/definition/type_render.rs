@@ -106,7 +106,7 @@ fn render_typedefs(
         out.zod.push(renderer.render_template(
             "typedef.zod.ts.j2",
             &TypedefZodContext {
-                schema_name: format!("{name}Schema"),
+                schema_name: name.clone(), // Template will add 'Schema' suffix
                 name,
                 schema_expr,
             },
@@ -121,13 +121,21 @@ fn render_struct(
     renderer: &TypescriptRenderer,
 ) -> IdlcResult<TsRenderOutput> {
     let ident = ts_ident(&def.ident);
-    let extends = {
-        let parents = def
-            .parent
-            .iter()
-            .map(|parent| super::names::ts_scoped_name(parent, module_path, TypeRefTarget::Types))
-            .collect::<Vec<_>>();
-        (!parents.is_empty()).then(|| parents.join(", "))
+    let extends = if def.parent.is_empty() {
+        None
+    } else {
+        Some(
+            def.parent
+                .iter()
+                .map(|parent| {
+                    super::type_expr::ts_type_for_type_spec(
+                        &hir::TypeSpec::ScopedName(parent.clone()),
+                        module_path,
+                        TypeRefTarget::Types,
+                    )
+                })
+                .collect(),
+        )
     };
     let fields = struct_fields(&def.member, &def.annotations, module_path);
     let types = renderer.render_template(
@@ -150,7 +158,7 @@ fn render_struct(
     let zod = renderer.render_template(
         "struct.zod.ts.j2",
         &StructZodContext {
-            schema_name: format!("{ident}Schema"),
+            schema_name: ident.clone(), // Template will add 'Schema' suffix
             ident,
             fields: fields
                 .into_iter()
@@ -175,34 +183,37 @@ fn render_enum(def: &hir::EnumDcl, renderer: &TypescriptRenderer) -> IdlcResult<
     let members = def
         .member
         .iter()
-        .map(|value| {
-            format!(
-                "\"{}\"",
-                hir::effective_wire_name(&value.ident, &value.annotations, &def.annotations)
-            )
-        })
+        .map(|value| hir::effective_wire_name(&value.ident, &value.annotations, &def.annotations))
         .collect::<Vec<_>>();
     Ok(TsRenderOutput {
         types: vec![renderer.render_template(
             "enum.d.ts.j2",
             &EnumTypeContext {
                 ident: ident.clone(),
-                union: if members.is_empty() {
-                    "never".into()
-                } else {
-                    members.join(" | ")
-                },
+                members,
                 doc: doc_lines_from_annotations(&def.annotations),
             },
         )?],
-        zod: vec![renderer.render_template(
-            "enum.zod.ts.j2",
-            &EnumZodContext {
-                schema_name: format!("{ident}Schema"),
-                ident,
-                values: members,
-            },
-        )?],
+        zod: vec![
+            renderer.render_template(
+                "enum.zod.ts.j2",
+                &EnumZodContext {
+                    schema_name: ident.clone(), // Template will add 'Schema' suffix
+                    ident,
+                    values: def
+                        .member
+                        .iter()
+                        .map(|value| {
+                            hir::effective_wire_name(
+                                &value.ident,
+                                &value.annotations,
+                                &def.annotations,
+                            )
+                        })
+                        .collect(),
+                },
+            )?,
+        ],
         client: Vec::new(),
     })
 }
@@ -224,7 +235,12 @@ fn render_union(
                 module_path,
                 TypeRefTarget::Types,
             );
-            format!("{{ {prop}: {ty} }}")
+            super::contexts::TsType::InlineStruct(vec![FieldTypeContext {
+                prop,
+                ty,
+                optional: false,
+                doc: Vec::new(),
+            }])
         })
         .collect::<Vec<_>>();
     let schema_variants = def
@@ -233,7 +249,12 @@ fn render_union(
         .map(|case| {
             let prop = ts_prop_name(declarator_name(&case.element.value));
             let schema = zod_schema_for_element(&case.element.ty, &case.element.value, module_path);
-            format!("z.object({{ {prop}: {schema} }})")
+            super::contexts::ZodSchema::Object(vec![FieldZodContext {
+                prop,
+                schema,
+                optional: false,
+                xjson_meta: None,
+            }])
         })
         .collect::<Vec<_>>();
     Ok(TsRenderOutput {
@@ -241,18 +262,14 @@ fn render_union(
             "union.d.ts.j2",
             &UnionTypeContext {
                 ident: ident.clone(),
-                union: if variants.is_empty() {
-                    "never".into()
-                } else {
-                    variants.join(" | ")
-                },
+                variants,
                 doc: doc_lines_from_annotations(&def.annotations),
             },
         )?],
         zod: vec![renderer.render_template(
             "union.zod.ts.j2",
             &UnionZodContext {
-                schema_name: format!("{ident}Schema"),
+                schema_name: ident.clone(), // Template will add 'Schema' suffix
                 ident,
                 variants: schema_variants,
             },

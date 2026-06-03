@@ -1,6 +1,7 @@
+{% from "macros.j2" import render_type %}
 {% if doc and doc | length > 0 %}
-    /**
-    {% for line in doc %} * {{ line }}
-    {% endfor %} */
+/**
+{% for line in doc %} * {{ line }}
+{% endfor %} */
 {% endif %}
-export type {{ ident }} = {{ union }};
+export type {{ ident }} = {% if variants | length == 0 %}never{% else %}{% for variant in variants %}{{ render_type(variant) }}{% if not loop.last %} | {% endif %}{% endfor %}{% endif %};

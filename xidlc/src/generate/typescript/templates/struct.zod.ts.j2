@@ -1,4 +1,6 @@
-export const {{ schema_name }} = z.object({
-    {% for field in fields %}    {{ field.prop }}: {% if field.xjson_meta %}xjson({{ field.schema }}{% if field.optional %}.optional(){% endif %}, {{ field.xjson_meta }}){% else %}{{ field.schema }}{% if field.optional %}.optional(){% endif %}{% endif %},
-    {% endfor %}});
-export type {{ ident }} = z.infer<typeof {{ schema_name }}>;
+{% from "macros.j2" import render_zod %}
+export const {{ schema_name }}Schema = z.object({
+{% for field in fields %}
+    {{ field.prop }}: {{ render_zod(field.schema) }}{% if field.optional %}.optional(){% endif %}{% if not loop.last %},{% endif %}
+{% endfor %}
+});

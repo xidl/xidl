@@ -18,15 +18,50 @@ pub(crate) struct ModuleContext {
     pub(crate) blocks: Vec<String>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
+#[serde(tag = "kind", content = "data")]
+pub(crate) enum TsType {
+    Primitive(String),
+    ScopedName(String),
+    Sequence(Box<TsType>),
+    Map(Box<TsType>),
+    Template { ident: String, args: Vec<TsType> },
+    InlineStruct(Vec<FieldTypeContext>),
+    InlineEnum(Vec<String>),
+    Union(Vec<TsType>),
+    Any,
+    Void,
+    AsyncIterable(Box<TsType>),
+    Optional(Box<TsType>),
+}
+
+#[derive(Serialize, Clone)]
+#[serde(tag = "kind", content = "data")]
+pub(crate) enum ZodSchema {
+    Primitive(String),
+    ScopedName(String),
+    Array {
+        element: Box<ZodSchema>,
+        length: Option<i64>,
+    },
+    Record(Box<ZodSchema>),
+    Object(Vec<FieldZodContext>),
+    Enum(Vec<String>),
+    Union(Vec<ZodSchema>),
+    Custom(TsType),
+    Any,
+    Never,
+}
+
+#[derive(Serialize, Clone)]
 pub(crate) struct FieldTypeContext {
     pub(crate) prop: String,
-    pub(crate) ty: String,
+    pub(crate) ty: TsType,
     pub(crate) optional: bool,
     pub(crate) doc: Vec<String>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub(crate) struct XjsonMeta {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) name: Option<String>,
@@ -36,10 +71,10 @@ pub(crate) struct XjsonMeta {
     pub(crate) omitempty: Option<bool>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub(crate) struct FieldZodContext {
     pub(crate) prop: String,
-    pub(crate) schema: String,
+    pub(crate) schema: ZodSchema,
     pub(crate) optional: bool,
     pub(crate) xjson_meta: Option<XjsonMeta>,
 }
@@ -47,7 +82,7 @@ pub(crate) struct FieldZodContext {
 #[derive(Serialize)]
 pub(crate) struct StructTypeContext {
     pub(crate) ident: String,
-    pub(crate) extends: Option<String>,
+    pub(crate) extends: Option<Vec<TsType>>,
     pub(crate) fields: Vec<FieldTypeContext>,
     pub(crate) doc: Vec<String>,
 }
@@ -62,7 +97,7 @@ pub(crate) struct StructZodContext {
 #[derive(Serialize)]
 pub(crate) struct EnumTypeContext {
     pub(crate) ident: String,
-    pub(crate) union: String,
+    pub(crate) members: Vec<String>,
     pub(crate) doc: Vec<String>,
 }
 
@@ -76,7 +111,7 @@ pub(crate) struct EnumZodContext {
 #[derive(Serialize)]
 pub(crate) struct UnionTypeContext {
     pub(crate) ident: String,
-    pub(crate) union: String,
+    pub(crate) variants: Vec<TsType>,
     pub(crate) doc: Vec<String>,
 }
 
@@ -84,13 +119,13 @@ pub(crate) struct UnionTypeContext {
 pub(crate) struct UnionZodContext {
     pub(crate) ident: String,
     pub(crate) schema_name: String,
-    pub(crate) variants: Vec<String>,
+    pub(crate) variants: Vec<ZodSchema>,
 }
 
 #[derive(Serialize)]
 pub(crate) struct TypedefTypeContext {
     pub(crate) name: String,
-    pub(crate) type_expr: String,
+    pub(crate) type_expr: TsType,
     pub(crate) doc: Vec<String>,
 }
 
@@ -98,14 +133,14 @@ pub(crate) struct TypedefTypeContext {
 pub(crate) struct TypedefZodContext {
     pub(crate) name: String,
     pub(crate) schema_name: String,
-    pub(crate) schema_expr: String,
+    pub(crate) schema_expr: ZodSchema,
 }
 
 #[derive(Serialize, Clone)]
 pub(crate) struct ParamDeclContext {
     pub(crate) prop: String,
-    pub(crate) ty: String,
-    pub(crate) schema: String,
+    pub(crate) ty: TsType,
+    pub(crate) schema: ZodSchema,
     pub(crate) optional: bool,
     pub(crate) doc: Vec<String>,
 }
@@ -134,10 +169,10 @@ pub(crate) struct ClientClassContext {
 pub(crate) struct ClientMethodContext {
     pub(crate) name: String,
     pub(crate) params: Vec<ClientParamContext>,
-    pub(crate) return_ty: String,
+    pub(crate) return_ty: TsType,
     pub(crate) return_schema_ref: Option<String>,
-    pub(crate) stream_item_ty: Option<String>,
-    pub(crate) client_stream_item_ty: Option<String>,
+    pub(crate) stream_item_ty: Option<TsType>,
+    pub(crate) client_stream_item_ty: Option<TsType>,
     pub(crate) request_schema_ref: Option<String>,
     pub(crate) body_schema_ref: Option<String>,
     pub(crate) request_payload: Vec<RequestPayloadEntry>,
@@ -157,7 +192,7 @@ pub(crate) struct ClientMethodContext {
 #[derive(Serialize, Clone)]
 pub(crate) struct ClientParamContext {
     pub(crate) name: String,
-    pub(crate) ty: String,
+    pub(crate) ty: TsType,
 }
 
 #[derive(Serialize)]

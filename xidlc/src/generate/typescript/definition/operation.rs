@@ -104,10 +104,9 @@ pub(crate) fn render_op(
     }
     let request_name = (!buckets.params.is_empty())
         .then(|| format!("{}Request", method_struct_prefix(interface_name, &op.ident)));
-    let request_schema_ref = request_name.as_ref().map(|name| {
-        let full = scoped_name(module_path, name);
-        format!("zodSchemas.{full}Schema")
-    });
+    let request_schema_ref = request_name
+        .as_ref()
+        .map(|name| scoped_name(module_path, name));
     let response_name = (!buckets.output_params.is_empty()).then(|| {
         format!(
             "{}Response",

@@ -2,7 +2,9 @@ use crate::error::IdlcResult;
 use crate::generate::typescript::TypescriptRenderer;
 use xidl_parser::hir;
 
-use super::contexts::{ClientClassContext, ParamDeclContext, RequestContext, RequestZodContext};
+use super::contexts::{
+    ClientClassContext, ParamDeclContext, RequestContext, RequestZodContext, TsType, ZodSchema,
+};
 use super::method::{MethodInfo, TypeRefTarget};
 use super::names::{ts_ident, ts_prop_name};
 use super::operation::render_op;
@@ -28,7 +30,7 @@ pub(crate) fn render_interface(
         renderer.render_template(
             "client_class.ts.j2",
             &ClientClassContext {
-                client_name: format!("{}Client", ts_ident(&def.header.ident)),
+                client_name: ts_ident(&def.header.ident), // Template adds 'Client'
                 methods: methods
                     .iter()
                     .map(|method| method.to_template(module_path))
@@ -92,7 +94,7 @@ fn render_request(
     out.zod.push(renderer.render_template(
         "request.zod.ts.j2",
         &RequestZodContext {
-            schema_name: format!("{request_name}Schema"),
+            schema_name: request_name.clone(), // Template adds 'Schema'
             name: request_name.clone(),
             params,
         },
@@ -134,7 +136,7 @@ fn render_response(
     out.zod.push(renderer.render_template(
         "request.zod.ts.j2",
         &RequestZodContext {
-            schema_name: format!("{response_name}Schema"),
+            schema_name: response_name.clone(), // Template adds 'Schema'
             name: response_name.clone(),
             params,
         },
@@ -142,9 +144,9 @@ fn render_response(
     Ok(())
 }
 
-fn response_type(method: &MethodInfo, module_path: &[String]) -> String {
+fn response_type(method: &MethodInfo, module_path: &[String]) -> TsType {
     if method.ret.is_void {
-        "void".to_string()
+        TsType::Void
     } else {
         ts_type_for_type_spec(
             method.ret.ty.as_ref().expect("return type"),
@@ -154,9 +156,9 @@ fn response_type(method: &MethodInfo, module_path: &[String]) -> String {
     }
 }
 
-fn response_schema(method: &MethodInfo, module_path: &[String]) -> String {
+fn response_schema(method: &MethodInfo, module_path: &[String]) -> ZodSchema {
     if method.ret.is_void {
-        "z.void()".to_string()
+        ZodSchema::Primitive("void()".to_string())
     } else {
         zod_schema_for_type_spec(method.ret.ty.as_ref().expect("return type"), module_path)
     }
