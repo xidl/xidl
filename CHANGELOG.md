@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.76.1](https://github.com/xidl/xidl/compare/v0.76.0...v0.76.1) (2026-06-03)
+
+
+### Bug Fixes
+
+* address CI failures by applying formatting and updating Go snapshots ([7b8355b](https://github.com/xidl/xidl/commit/7b8355bf43d807e4d2f46c059dfd17aa5a194862))
+* **ts:** resolve BDD test failures and improve REST generator stability ([6c3dd99](https://github.com/xidl/xidl/commit/6c3dd99305aae69d978937ef80ad94f22ecd399c))
+
 ## [0.76.0](https://github.com/xidl/xidl/compare/v0.75.0...v0.76.0) (2026-06-02)
 
 
