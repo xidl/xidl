@@ -18,7 +18,7 @@ options: ServerOptions = {},
                 const url = new URL(request.url);
                 await authorizeRequest(request, [{% for security in method.security %}{ kind: "{{ security.kind }}"{% if security.location %}, location: "{{ security.location }}"{% endif %}{% if security.name %}, name: "{{ security.name }}"{% endif %}{% if security.realm %}, realm: "{{ security.realm }}"{% endif %}, scopes: [{% for scope in security.scopes %}"{{ scope }}"{% if not loop.last %}, {% endif %}{% endfor %}] }{% if not loop.last %}, {% endif %}{% endfor %}], options);
                 {% if method.is_client_stream %}
-                    const result = await service.{{ method.name }}(ndjsonRequestStream(request));
+                    const result = await service.{{ method.name }}(ndjsonRequestStream(request{% if method.stream_item_schema %}, {{ method.stream_item_schema }}{% endif %}));
                 {% else %}
                     const rawPayload = {
                         {% for param in method.path_params %}"{{ param.key_name }}": readPathParam(params, "{{ param.template_name }}"),
@@ -28,7 +28,7 @@ options: ServerOptions = {},
                     {% endfor %}
                 };
                 {% if method.body_entries | length > 0 %}
-                    const requestBody = await decodeRequestBody(request, "{{ method.request_content_type }}", options.codecs ?? {});
+                    const requestBody = await decodeRequestBody(request, "{{ method.request_content_type }}", options.codecs ?? {}{% if method.request_schema_ref %}, {{ method.request_schema_ref }}{% endif %});
                     applyRequestBody(rawPayload, requestBody, {% if method.body_single_key %}"{{ method.body_single_key }}"{% else %}undefined{% endif %}, [{% for entry in method.body_entries %}"{{ entry.raw_name }}"{% if not loop.last %}, {% endif %}{% endfor %}]);
                 {% endif %}
                 {% if method.request_ty %}const payload = {% if method.request_schema_ref %}{{ method.request_schema_ref }}.parse(rawPayload){% else %}rawPayload{% endif %};
@@ -36,14 +36,15 @@ options: ServerOptions = {},
                 {% else %}const result = await service.{{ method.name }}();
             {% endif %}{% endif %}
             {% if method.is_server_stream %}
-                return sseResponse(result, options);
+                return sseResponse(result, options{% if method.stream_item_schema %}, {{ method.stream_item_schema }}{% endif %});
             {% else %}
                 {% if method.response_schema_ref %}const parsed = {{ method.response_schema_ref }}.parse(result);
-                return encodeServerResponse(parsed, "{{ method.response_content_type }}", "{{ method.response_body_mode }}", [{% for entry in method.response_body_entries %}{ name: "{{ entry.raw_name }}", key: "{{ entry.access }}" }{% if not loop.last %}, {% endif %}{% endfor %}], [{% for param in method.response_header_params %}{ name: "{{ param.raw_name }}", key: "{{ param.key_name }}", isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], [{% for param in method.response_cookie_params %}{ name: "{{ param.raw_name }}", key: "{{ param.key_name }}", isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], options.codecs ?? {});
+                return encodeServerResponse(parsed, "{{ method.response_content_type }}", "{{ method.response_body_mode }}", [{% for entry in method.response_body_entries %}{ name: "{{ entry.raw_name }}", key: "{{ entry.access }}" }{% if not loop.last %}, {% endif %}{% endfor %}], [{% for param in method.response_header_params %}{ name: "{{ param.raw_name }}", key: "{{ param.key_name }}", isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], [{% for param in method.response_cookie_params %}{ name: "{{ param.raw_name }}", key: "{{ param.key_name }}", isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], options.codecs ?? {}, {{ method.response_schema_ref }});
                 {% elif method.response_ty == "void" %}return new Response(null, { status: 204 });
                 {% else %}return encodeServerResponse(result, "{{ method.response_content_type }}", "return", [{ name: "return", key: "return" }], [], [], options.codecs ?? {});
             {% endif %}
             {% endif %}
+
         },
     },
     {% endfor %}

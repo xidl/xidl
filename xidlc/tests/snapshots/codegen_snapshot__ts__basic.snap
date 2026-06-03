@@ -11,6 +11,8 @@ export interface Point{
     x : number;
     y : number;
 }
+
+export{};
 ===============
 basic.zod.ts
 ===============
@@ -20,11 +22,11 @@ import{z}from"zod";
 import{xjson}from"@xidl/xidl-typescript-codec";
 export const PointSchema = z.object(
 {
-    x : z.number(
+    x : z.coerce.number(
 
     ).int(
 
-    ), y : z.number(
+    ), y : z.coerce.number(
 
     ).int(
 

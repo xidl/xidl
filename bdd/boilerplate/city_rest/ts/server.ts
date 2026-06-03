@@ -17,7 +17,10 @@ class MySmartCityRestService implements SmartCityRestApi {
 
   async get_stop_eta(req: {
     stop_id: string;
+    line: string;
+    locale: string;
   }): Promise<SmartCityRestApiGetStopEtaResponse> {
+
     return {
       destination: 'Central Station',
       eta_seconds: 240,
@@ -30,14 +33,17 @@ class MySmartCityRestService implements SmartCityRestApi {
   }
 
   async download_asset(req: {
-    path: string;
+    asset_path: string;
+    version: string;
   }): Promise<SmartCityRestApiDownloadAssetResponse> {
     return {
       content_type: 'text/plain',
       etag: 'etag-demo',
-      return: new TextEncoder().encode(`asset:${req.path}`),
+      return: Array.from(new TextEncoder().encode(`asset:${req.asset_path}`)),
     };
+
   }
+
 
   async probe_lot(): Promise<void> {}
 
@@ -73,26 +79,29 @@ class MySmartCityRestService implements SmartCityRestApi {
   async get_device_status(req: {
     device_id: string;
     trace_id: string;
-    session: string;
+    session_id: string;
+    locale: string;
   }): Promise<SmartCityRestApiGetDeviceStatusResponse> {
     return {
       return: `device:${req.device_id}`,
-      session_echo: req.session,
+      session_echo: req.session_id,
       trace_echo: req.trace_id,
     };
   }
 
-  async get_api_version(): Promise<string> {
+
+  async get_attribute_api_version(): Promise<string> {
     return 'v2.0.0';
   }
 
-  async get_maintenance_mode(): Promise<boolean> {
+  async get_attribute_maintenance_mode(): Promise<boolean> {
     return this.maintenanceMode;
   }
 
-  async set_maintenance_mode(req: { value: boolean }): Promise<void> {
+  async set_attribute_maintenance_mode(req: { value: boolean }): Promise<void> {
     this.maintenanceMode = req.value;
   }
+
 }
 
 const handler = createSmartCityRestApiHandler(new MySmartCityRestService());

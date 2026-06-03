@@ -95,11 +95,16 @@ Feature: REST API Generation and Communication
       | idl              | lang |
       | complex_rest     | rust |
       | complex_rest     | go   |
+      | complex_rest     | ts   |
       | city_rest        | rust |
       | city_rest        | go   |
+      | city_rest        | ts   |
       | rest_server      | rust |
       | rest_server      | go   |
+      | rest_server      | ts   |
       | rest_media_types | rust |
       | rest_media_types | go   |
+      | rest_media_types | ts   |
       | e2e_test         | rust |
       | e2e_test         | go   |
+      | e2e_test         | ts   |

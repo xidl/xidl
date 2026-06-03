@@ -12,6 +12,8 @@ export interface A{
 
 export interface B{
 }
+
+export{};
 ===============
 struct_derive.zod.ts
 ===============

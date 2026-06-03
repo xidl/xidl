@@ -38,7 +38,7 @@ export class {{ client_name }} {
                 throw await parseXidlError(resp);
             }
             {% if method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs, {{ method.response_schema_ref }});
-            const responsePayload = buildResponsePayload(responseBody, resp, "{{ method.response_body_mode }}", [{% for param in method.response_header_params %}{ name: "{{ param.raw_name }}", key: {{ param.access }}, optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], [{% for param in method.response_cookie_params %}{ name: "{{ param.raw_name }}", key: {{ param.access }}, optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}]);
+            const responsePayload = buildResponsePayload(responseBody, resp, "{{ method.response_body_mode }}", [{% for param in method.response_header_params %}{ name: "{{ param.raw_name }}", key: "{{ param.access }}", optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], [{% for param in method.response_cookie_params %}{ name: "{{ param.raw_name }}", key: "{{ param.access }}", optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}]);
             return deserialize(responsePayload, {{ method.response_schema_ref }}) as {{ method.return_ty }};
             {% elif method.return_ty == "void" %}return;
             {% else %}return await decodeResponseBody<{{ method.return_ty }}>(resp, "{{ method.response_content_type }}", this.codecs);
@@ -52,7 +52,7 @@ export class {{ client_name }} {
             throw await parseXidlError(resp);
         }
         {% if method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs, {{ method.response_schema_ref }});
-        const responsePayload = buildResponsePayload(responseBody, resp, "{{ method.response_body_mode }}", [{% for param in method.response_header_params %}{ name: "{{ param.raw_name }}", key: {{ param.access }}, optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], [{% for param in method.response_cookie_params %}{ name: "{{ param.raw_name }}", key: {{ param.access }}, optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}]);
+        const responsePayload = buildResponsePayload(responseBody, resp, "{{ method.response_body_mode }}", [{% for param in method.response_header_params %}{ name: "{{ param.raw_name }}", key: "{{ param.access }}", optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], [{% for param in method.response_cookie_params %}{ name: "{{ param.raw_name }}", key: "{{ param.access }}", optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}]);
         return deserialize(responsePayload, {{ method.response_schema_ref }}) as {{ method.return_ty }};
         {% elif method.return_ty == "void" %}return;
         {% else %}return await decodeResponseBody<{{ method.return_ty }}>(resp, "{{ method.response_content_type }}", this.codecs);

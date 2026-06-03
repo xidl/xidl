@@ -143,7 +143,7 @@ fn build_method_model(
 
     let return_ty = response_name
         .as_ref()
-        .map(|name| scoped_name(module_path, name))
+        .map(|name| format!("ifaceTypes.{}", scoped_name(module_path, name)))
         .or_else(|| {
             op.signature
                 .return_type
@@ -234,7 +234,7 @@ fn build_method_model(
                     HttpOutputSource::Param { name } => name.clone(),
                 };
                 RequestPayloadEntry {
-                    raw_name: name.clone(),
+                    raw_name: f.field_name.clone(),
                     access: ts_ident(&name),
                 }
             })
@@ -630,14 +630,14 @@ fn security_contexts(op: &HttpOperation) -> Vec<SecurityContext> {
                 .iter()
                 .map(|value| match value {
                     HttpSecurityRequirement::HttpBasic => SecurityContext {
-                        kind: "basic".to_string(),
+                        kind: "http_basic".to_string(),
                         location: None,
                         name: None,
                         realm: op.meta.basic_auth_realm.clone(),
                         scopes: Vec::new(),
                     },
                     HttpSecurityRequirement::HttpBearer => SecurityContext {
-                        kind: "bearer".to_string(),
+                        kind: "http_bearer".to_string(),
                         location: None,
                         name: None,
                         realm: None,

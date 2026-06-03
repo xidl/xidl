@@ -32,6 +32,8 @@ export type Bar = {
 export namespace M{
     export type Size = "small" | "medium" | "large";
 }
+
+export{};
 ===============
 misc.zod.ts
 ===============
@@ -69,7 +71,7 @@ typeof FooSeqSchema
 >;
 export const FooSchema = z.object(
 {
-    value : z.number(
+    value : z.coerce.number(
 
     ).int(
 
@@ -89,7 +91,7 @@ export const BarSchema = z.union(
 [
 z.object(
 {
-    l_mem : z.number(
+    l_mem : z.coerce.number(
 
     ).int(
 
@@ -99,7 +101,7 @@ z.object(
 {
     s_mem : z.object(
     {
-        d_mem : z.number(
+        d_mem : z.coerce.number(
 
         ), nested : BarSeqSchema
     }

@@ -17,6 +17,7 @@ export type BM = number;
 export type U = {
     a : number} | {
     b : number};
+export{};
 ===============
 annotation_basic.zod.ts
 ===============
@@ -26,11 +27,11 @@ import{z}from"zod";
 import{xjson}from"@xidl/xidl-typescript-codec";
 export const SSchema = z.object(
 {
-    a : z.number(
+    a : z.coerce.number(
 
     ).int(
 
-    ), b : z.number(
+    ), b : z.coerce.number(
 
     ).int(
 
@@ -62,7 +63,7 @@ export const USchema = z.union(
 [
 z.object(
 {
-    a : z.number(
+    a : z.coerce.number(
 
     ).int(
 
@@ -70,7 +71,7 @@ z.object(
 }
 ), z.object(
 {
-    b : z.number(
+    b : z.coerce.number(
 
     ).int(
 

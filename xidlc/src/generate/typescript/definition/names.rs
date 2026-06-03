@@ -43,10 +43,11 @@ pub(crate) fn integer_schema(value: &hir::IntegerType) -> String {
         | hir::IntegerType::U32
         | hir::IntegerType::U16
         | hir::IntegerType::U8
-        | hir::IntegerType::UChar => "z.number().int().nonnegative()".to_string(),
-        _ => "z.number().int()".to_string(),
+        | hir::IntegerType::UChar => "z.coerce.number().int().nonnegative()".to_string(),
+        _ => "z.coerce.number().int()".to_string(),
     }
 }
+
 
 pub(crate) fn ts_ident(value: &str) -> String {
     let mut out = String::new();

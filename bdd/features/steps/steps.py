@@ -91,7 +91,7 @@ def step_impl(context, lang):
 
         codec_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../typescript/xidl-typescript-codec"))
         if not os.path.exists(os.path.join(codec_path, "dist")):
-            subprocess.run(["pnpm", "install"], cwd=codec_path, check=True, capture_output=True)
+            subprocess.run(["pnpm", "install", "--ignore-scripts"], cwd=codec_path, check=True, capture_output=True)
             subprocess.run(["pnpm", "build"], cwd=codec_path, check=True, capture_output=True)
         subprocess.run(["npm", "install", "zod@^3.23.0", "typescript", codec_path], cwd=context.lang_dir, check=True, capture_output=True)
 
@@ -378,19 +378,21 @@ def step_impl(context, lang):
         t.start()
     elif lang == "ts":
         src_dir = os.path.join(os.getcwd(), "bdd", "boilerplate", idl_name, "ts")
-        for f in os.listdir(src_dir):
-            shutil.copy(os.path.join(src_dir, f), context.lang_dir)
-        pkg_json_path = os.path.join(context.lang_dir, "package.json")
-        with open(pkg_json_path, "r") as f:
+        shutil.copy(os.path.join(src_dir, "server.ts"), context.lang_dir)
+        shutil.copy(os.path.join(src_dir, "tsconfig.json"), context.lang_dir)
+        shutil.copy(os.path.join(src_dir, "package.json"), context.lang_dir)
+        # Replace codec path placeholder in package.json
+        package_json_path = os.path.join(context.lang_dir, "package.json")
+        with open(package_json_path, "r") as f:
             content = f.read()
-        content = content.replace("{{TS_XIDL_TYPESCRIPT_CODEC_PATH}}", os.path.abspath('typescript/xidl-typescript-codec'))
-        with open(pkg_json_path, "w") as f:
-            f.write(content)
         codec_path = os.path.abspath(os.path.join(os.getcwd(), "typescript", "xidl-typescript-codec"))
+        content = content.replace("{{TS_XIDL_TYPESCRIPT_CODEC_PATH}}", codec_path)
+        with open(package_json_path, "w") as f:
+            f.write(content)
         if not os.path.exists(os.path.join(codec_path, "dist")):
-            subprocess.run(["pnpm", "install"], cwd=codec_path, check=True, capture_output=True)
+            subprocess.run(["pnpm", "install", "--ignore-scripts"], cwd=codec_path, check=True, capture_output=True)
             subprocess.run(["pnpm", "build"], cwd=codec_path, check=True, capture_output=True)
-        subprocess.run(["npm", "install"], cwd=context.lang_dir, check=True, capture_output=True)
+        subprocess.run(["npm", "install", "--ignore-scripts"], cwd=context.lang_dir, check=True, capture_output=True)
         env = os.environ.copy()
         env["PORT"] = str(context.port)
         context.server_process = subprocess.Popen(["npx", "tsx", "server.ts"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)

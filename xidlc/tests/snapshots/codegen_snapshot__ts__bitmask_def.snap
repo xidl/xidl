@@ -10,6 +10,7 @@ bitmask_def.d.ts
 export type EmptyBitmask = number;
 export type SimpleBitmask = number;
 export type PositionedBitmask = number;
+export{};
 ===============
 bitmask_def.zod.ts
 ===============

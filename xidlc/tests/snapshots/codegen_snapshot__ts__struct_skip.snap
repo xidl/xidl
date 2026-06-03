@@ -11,6 +11,8 @@ export interface SkipStruct{
     a : number;
     c : number;
 }
+
+export{};
 ===============
 struct_skip.zod.ts
 ===============
@@ -20,11 +22,11 @@ import{z}from"zod";
 import{xjson}from"@xidl/xidl-typescript-codec";
 export const SkipStructSchema = z.object(
 {
-    a : z.number(
+    a : z.coerce.number(
 
     ).int(
 
-    ), c : z.number(
+    ), c : z.coerce.number(
 
     ).int(
 

@@ -1,8 +1,11 @@
+import { serialize, deserialize } from "@xidl/xidl-typescript-codec";
+import { z } from "zod";
+
 type Awaitable<T> = T | Promise<T>;
 export type ServerHandler = (request: Request) => Promise<Response>;
 export interface HttpCodec {
-    encode?: (value: unknown) => BodyInit | null;
-    decode?: <T>(resp: Response) => Promise<T>;
+    encode?: (value: unknown, schema?: z.ZodTypeAny) => BodyInit | null;
+    decode?: <T>(resp: Response, schema?: z.ZodTypeAny) => Promise<T>;
 }
 
 type SecurityRequirement = {
@@ -37,13 +40,16 @@ export interface ServerOptions {
 export class XidlServerError extends Error {
     readonly status: number;
     readonly code: number;
+    readonly headers?: Record<string, string>;
 
-    constructor(message: string, status = 500, code = status) {
+    constructor(message: string, status = 500, code = status, headers?: Record<string, string>) {
         super(message);
         this.status = status;
         this.code = code;
+        this.headers = headers;
     }
 }
+
 
 function createRouter(
 routes: RouteSpec[],
@@ -52,16 +58,30 @@ options: ServerOptions,
     return async (request) => {
         try {
             const url = new URL(request.url);
+            let pathMatched = false;
             for (const route of routes) {
-                if (route.method !== request.method.toUpperCase()) {
-                    continue;
-                }
                 const params = matchRoute(route.path, url.pathname);
                 if (params) {
-                    return await route.handler(request, params);
+                    pathMatched = true;
+                    if (route.method === request.method.toUpperCase()) {
+                        return await route.handler(request, params);
+                    }
                 }
             }
-            return new Response(JSON.stringify({ code: 404, msg: "not found" }), {
+            if (pathMatched) {
+                const allowed = routes
+                    .filter((r) => matchRoute(r.path, url.pathname))
+                    .map((r) => r.method);
+                return new Response(JSON.stringify({ code: 405, msg: "Method Not Allowed" }), {
+                    status: 405,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Allow": Array.from(new Set(allowed)).join(", "),
+                    },
+                });
+            }
+
+            return new Response(JSON.stringify({ code: 404, msg: "Not Found" }), {
                 status: 404,
                 headers: { "Content-Type": "application/json" },
             });
@@ -71,8 +91,11 @@ options: ServerOptions,
             }
             return errorResponse(error);
         }
+
+
     };
 }
+
 
 async function authorizeRequest(
 request: Request,
@@ -121,7 +144,7 @@ function readPathParam(params: Record<string, string>, name: string): unknown {
 function readQueryParam(query: URLSearchParams, name: string, isMulti: boolean): unknown {
     const values = query.getAll(name);
     if (values.length === 0) {
-        return undefined;
+        return isMulti ? [] : undefined;
     }
     return isMulti ? values.map(parseScalar) : parseScalar(values[0] as string);
 }
@@ -129,7 +152,7 @@ function readQueryParam(query: URLSearchParams, name: string, isMulti: boolean):
 function readHeaderParam(headers: Headers, name: string, isMulti: boolean): unknown {
     const value = headers.get(name);
     if (value === null) {
-        return undefined;
+        return isMulti ? [] : undefined;
     }
     return isMulti ? value.split(",").map((item) => parseScalar(item.trim())) : parseScalar(value);
 }
@@ -137,10 +160,11 @@ function readHeaderParam(headers: Headers, name: string, isMulti: boolean): unkn
 function readCookieParam(headers: Headers, name: string, isMulti: boolean): unknown {
     const values = readRequestCookies(headers).get(name);
     if (!values || values.length === 0) {
-        return undefined;
+        return isMulti ? [] : undefined;
     }
     return isMulti ? values.map(parseScalar) : parseScalar(values[0] as string);
 }
+
 
 function readRequestCookies(headers: Headers): Map<string, string[]> {
     const out = new Map<string, string[]>();
@@ -170,16 +194,19 @@ async function decodeRequestBody(
 request: Request,
 contentType: string,
 codecs: Record<string, HttpCodec>,
+schema?: z.ZodTypeAny,
 ): Promise<unknown> {
     const mime = normalizeMime(contentType || request.headers.get("Content-Type") || "application/json");
     const custom = codecs[mime]?.decode;
     if (custom) {
         const response = new Response(request.body, { headers: request.headers });
-        return custom(response);
+        return custom(response, schema);
     }
-    if (mime === "application/json" || mime.endsWith("+json")) {
-        return await request.json();
+    if (mime === "application/json" || mime.endsWith("+json") || mime === "application/msgpack") {
+        const data = await request.json();
+        return schema ? deserialize(data, schema) : data;
     }
+
     if (mime === "application/x-www-form-urlencoded") {
         const form = new URLSearchParams(await request.text());
         const out: Record<string, unknown> = {};
@@ -215,7 +242,7 @@ bodyFields: string[],
     }
 }
 
-async function* ndjsonRequestStream<T>(request: Request): AsyncIterable<T> {
+async function* ndjsonRequestStream<T>(request: Request, schema?: z.ZodTypeAny): AsyncIterable<T> {
     if (!request.body) {
         return;
     }
@@ -236,7 +263,8 @@ async function* ndjsonRequestStream<T>(request: Request): AsyncIterable<T> {
             const line = buffer.slice(0, idx).trim();
             buffer = buffer.slice(idx + 1);
             if (line) {
-                yield JSON.parse(line) as T;
+                const data = JSON.parse(line);
+                yield (schema ? deserialize(data, schema) : data) as T;
             }
         }
     }
@@ -245,6 +273,7 @@ async function* ndjsonRequestStream<T>(request: Request): AsyncIterable<T> {
 function sseResponse<T>(
 source: AsyncIterable<T>,
 options: ServerOptions,
+schema?: z.ZodTypeAny,
 ): Response {
     void options;
     const encoder = new TextEncoder();
@@ -252,7 +281,8 @@ options: ServerOptions,
     new ReadableStream<Uint8Array>({
         async start(controller) {
             for await (const item of source) {
-                controller.enqueue(encoder.encode(`event: next\ndata: ${JSON.stringify(item)}\n\n`));
+                const serialized = schema ? serialize(item, schema) : item;
+                controller.enqueue(encoder.encode(`event: next\ndata: ${JSON.stringify(serialized)}\n\n`));
             }
             controller.enqueue(encoder.encode("event: complete\ndata: done\n\n"));
             controller.close();
@@ -270,29 +300,33 @@ bodyFields: ResponseFieldSpec[],
 headerFields: ResponseFieldSpec[],
 cookieFields: ResponseFieldSpec[],
 codecs: Record<string, HttpCodec>,
+schema?: z.ZodTypeAny,
 ): Response {
     const headers = new Headers();
-    const payload = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+    const serialized = schema ? serialize(value, schema) : value;
+    const payload = serialized && typeof serialized === "object" ? (serialized as Record<string, unknown>) : {};
     for (const field of headerFields) {
-        writeHeader(headers, field.name, payload[field.key], field.isMulti ?? false);
+        writeHeader(headers, field.name, payload[field.name], field.isMulti ?? false);
     }
     for (const field of cookieFields) {
-        writeCookie(headers, field.name, payload[field.key], field.isMulti ?? false);
+        writeCookie(headers, field.name, payload[field.name], field.isMulti ?? false);
     }
     if (bodyMode === "none") {
         return new Response(null, { status: 204, headers });
     }
     const body =
     bodyMode === "return"
-    ? bodyFields[0]?.key === "return"
-    ? value
-    : payload[bodyFields[0]?.key ?? "return"]
+    ? bodyFields[0]?.name === "return"
+    ? payload["return"] ?? serialized
+    : payload[bodyFields[0]?.name ?? "return"]
     : Object.fromEntries(
-    bodyFields.map((field) => [field.name, payload[field.key]]).filter((entry) => entry[1] !== undefined),
+    bodyFields.map((field) => [field.name, payload[field.name]]).filter((entry) => entry[1] !== undefined),
     );
     headers.set("Content-Type", contentType);
     return new Response(encodeBody(body, contentType, codecs), { status: 200, headers });
 }
+
+
 
 function writeHeader(headers: Headers, name: string, value: unknown, isMulti: boolean): void {
     if (value === undefined || value === null) {
@@ -321,15 +355,18 @@ function encodeBody(
 value: unknown,
 contentType: string,
 codecs: Record<string, HttpCodec>,
+schema?: z.ZodTypeAny,
 ): BodyInit | null {
     const mime = normalizeMime(contentType);
     const custom = codecs[mime]?.encode;
     if (custom) {
-        return custom(value);
+        return custom(value, schema);
     }
-    if (mime === "application/json" || mime.endsWith("+json")) {
-        return JSON.stringify(value);
+    if (mime === "application/json" || mime.endsWith("+json") || mime === "application/msgpack") {
+        const serialized = schema ? serialize(value, schema) : value;
+        return JSON.stringify(serialized);
     }
+
     if (mime.startsWith("text/")) {
         return String(value ?? "");
     }
@@ -366,8 +403,20 @@ function parseScalar(value: string): unknown {
 
 function errorResponse(error: unknown): Response {
     if (error instanceof XidlServerError) {
+        const headers = new Headers({ "Content-Type": "application/json" });
+        if (error.headers) {
+            for (const [key, value] of Object.entries(error.headers)) {
+                headers.set(key, value);
+            }
+        }
         return new Response(JSON.stringify({ code: error.code, msg: error.message }), {
             status: error.status,
+            headers,
+        });
+    }
+    if (error && typeof error === "object" && "name" in error && error.name === "ZodError") {
+        return new Response(JSON.stringify({ code: 400, msg: "validation failed", detail: (error as any).errors }), {
+            status: 400,
             headers: { "Content-Type": "application/json" },
         });
     }
@@ -377,3 +426,6 @@ function errorResponse(error: unknown): Response {
         headers: { "Content-Type": "application/json" },
     });
 }
+
+
+
