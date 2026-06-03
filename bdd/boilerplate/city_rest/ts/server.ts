@@ -20,7 +20,6 @@ class MySmartCityRestService implements SmartCityRestApi {
     line: string;
     locale: string;
   }): Promise<SmartCityRestApiGetStopEtaResponse> {
-
     return {
       destination: 'Central Station',
       eta_seconds: 240,
@@ -41,9 +40,7 @@ class MySmartCityRestService implements SmartCityRestApi {
       etag: 'etag-demo',
       return: Array.from(new TextEncoder().encode(`asset:${req.asset_path}`)),
     };
-
   }
-
 
   async probe_lot(): Promise<void> {}
 
@@ -89,7 +86,6 @@ class MySmartCityRestService implements SmartCityRestApi {
     };
   }
 
-
   async get_attribute_api_version(): Promise<string> {
     return 'v2.0.0';
   }
@@ -101,7 +97,6 @@ class MySmartCityRestService implements SmartCityRestApi {
   async set_attribute_maintenance_mode(req: { value: boolean }): Promise<void> {
     this.maintenanceMode = req.value;
   }
-
 }
 
 const handler = createSmartCityRestApiHandler(new MySmartCityRestService());

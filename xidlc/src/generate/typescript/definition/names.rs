@@ -48,7 +48,6 @@ pub(crate) fn integer_schema(value: &hir::IntegerType) -> String {
     }
 }
 
-
 pub(crate) fn ts_ident(value: &str) -> String {
     let mut out = String::new();
     for (idx, ch) in value.chars().enumerate() {

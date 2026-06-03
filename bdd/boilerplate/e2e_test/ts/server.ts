@@ -1,51 +1,51 @@
 import { createServer } from 'node:http';
 import type {
+  E2EHttpFormSubmitProfileResponse,
+  E2EHttpRouteAndBodyGetMsgpackResourceResponse,
+  E2EHttpScopeMatrixOverrideBothMediaResponse,
+  E2EHttpScopeMatrixOverrideConsumesOnlyResponse,
+  E2EHttpScopeMatrixOverrideProducesOnlyResponse,
   E2ETypeServerParameterOp3Response,
   E2ETypeServerParameterOp4Response,
   E2ETypeServerParameterOp5Response,
   E2ETypeServerParameterOp6Response,
-  E2EHttpFormSubmitProfileResponse,
-  E2EHttpScopeMatrixOverrideConsumesOnlyResponse,
-  E2EHttpScopeMatrixOverrideProducesOnlyResponse,
-  E2EHttpScopeMatrixOverrideBothMediaResponse,
-  E2EHttpRouteAndBodyGetMsgpackResourceResponse,
 } from './e2e_test.iface.js';
-import {
-  createE2ePathSeverHandler,
-  type E2ePathSever,
-  createE2eHttpRouteAndBodyHandler,
-  type E2eHttpRouteAndBody,
-  createE2eHttpSecurityHandler,
-  type E2eHttpSecurity,
-  createE2eTypeServerHandler,
-  type E2eTypeServer,
-  createE2eAttributeHandler,
-  type E2eAttribute,
-  createE2eHttpFormHandler,
-  type E2eHttpForm,
-  createE2eHttpScopeMatrixHandler,
-  type E2eHttpScopeMatrix,
-  createE2eHttpDefaultsMatrixHandler,
-  type E2eHttpDefaultsMatrix,
-  createE2eHttpSecurityMatrixHandler,
-  type E2eHttpSecurityMatrix,
-} from './e2e_test.server.js';
 import type {
-  StructHttpBody,
-  EnumSimple1,
   EnumEmpty,
+  EnumSimple1,
   StructEmpty,
+  StructHttpBody,
   StructSimple,
   UnionSimple,
 } from './e2e_test.js';
+import {
+  createE2eAttributeHandler,
+  createE2eHttpDefaultsMatrixHandler,
+  createE2eHttpFormHandler,
+  createE2eHttpRouteAndBodyHandler,
+  createE2eHttpScopeMatrixHandler,
+  createE2eHttpSecurityHandler,
+  createE2eHttpSecurityMatrixHandler,
+  createE2ePathSeverHandler,
+  createE2eTypeServerHandler,
+  type E2eAttribute,
+  type E2eHttpDefaultsMatrix,
+  type E2eHttpForm,
+  type E2eHttpRouteAndBody,
+  type E2eHttpScopeMatrix,
+  type E2eHttpSecurity,
+  type E2eHttpSecurityMatrix,
+  type E2ePathSever,
+  type E2eTypeServer,
+} from './e2e_test.server.js';
 
 function formatOpt(v: string | null | undefined): string {
-  if (v === undefined || v === null) return "None";
+  if (v === undefined || v === null) return 'None';
   return `Some("${v}")`;
 }
 
 function formatOptInt(v: number | null | undefined): string {
-  if (v === undefined || v === null) return "None";
+  if (v === undefined || v === null) return 'None';
   return `Some(${v})`;
 }
 
@@ -67,27 +67,43 @@ class MyE2ePathSever implements E2ePathSever {
     res.push(JSON.stringify(req.a));
     return res;
   }
-  async op_with_query2(req: { all: string; word: string; q: string }): Promise<string> {
+  async op_with_query2(req: {
+    all: string;
+    word: string;
+    q: string;
+  }): Promise<string> {
     return `${req.all}:${req.word}:${req.q}`;
   }
 }
 
 class MyE2eHttpRouteAndBody implements E2eHttpRouteAndBody {
-  async get_resource(req: { resource_id: string; locale?: string; trace_id: string }): Promise<string> {
+  async get_resource(req: {
+    resource_id: string;
+    locale?: string;
+    trace_id: string;
+  }): Promise<string> {
     return `id:${req.resource_id},lang:${formatOpt(req.locale)},trace:${req.trace_id}`;
   }
-  async get_file(req: { file_path: string; download: boolean; version?: string }): Promise<string> {
+  async get_file(req: {
+    file_path: string;
+    download: boolean;
+    version?: string;
+  }): Promise<string> {
     let filePath = req.file_path;
     if (filePath.startsWith('/')) {
       filePath = filePath.slice(1);
     }
     return `file:${filePath},download:${req.download},version:${formatOpt(req.version)}`;
   }
-  async create_resource(req: { resource_body: StructHttpBody }): Promise<StructHttpBody> {
+  async create_resource(req: {
+    resource_body: StructHttpBody;
+  }): Promise<StructHttpBody> {
     return req.resource_body;
   }
   async replace_resource(): Promise<void> {}
-  async patch_resource(req: { changes: Record<string, any> }): Promise<Record<string, any>> {
+  async patch_resource(req: {
+    changes: Record<string, any>;
+  }): Promise<Record<string, any>> {
     return req.changes;
   }
   async delete_resource(): Promise<void> {}
@@ -95,23 +111,35 @@ class MyE2eHttpRouteAndBody implements E2eHttpRouteAndBody {
   async resource_options(): Promise<void> {}
   async get_msgpack_resource(): Promise<E2EHttpRouteAndBodyGetMsgpackResourceResponse> {
     return {
-      return: { name: "msgpack", tags: [], labels: {} },
+      return: { labels: {}, name: 'msgpack', tags: [] },
       revision: 1,
     };
   }
-  async dedup_resource(req: { id: string; x_trace_id: string }): Promise<string> {
+  async dedup_resource(req: {
+    id: string;
+    x_trace_id: string;
+  }): Promise<string> {
     return `${req.id}:${req.x_trace_id}`;
   }
-  async preview_resource(req: { resource: StructHttpBody }): Promise<StructHttpBody> {
+  async preview_resource(req: {
+    resource: StructHttpBody;
+  }): Promise<StructHttpBody> {
     return req.resource;
   }
 }
 
 class MyE2eHttpSecurity implements E2eHttpSecurity {
-  async get_secure_user(req: { user_id: string; locale?: string; trace_id: string }): Promise<string> {
+  async get_secure_user(req: {
+    user_id: string;
+    locale?: string;
+    trace_id: string;
+  }): Promise<string> {
     return `user:${req.user_id},lang:${formatOpt(req.locale)},trace:${req.trace_id}`;
   }
-  async search_secure_user(req: { keyword: string; page?: number }): Promise<string> {
+  async search_secure_user(req: {
+    keyword: string;
+    page?: number;
+  }): Promise<string> {
     return `keyword:${req.keyword},page:${formatOptInt(req.page)}`;
   }
   async healthz(): Promise<string> {
@@ -172,20 +200,23 @@ class MyE2eTypeServer implements E2eTypeServer {
     return { a: 'op4', b: 4, c: [] };
   }
   async parameter_op5(): Promise<E2ETypeServerParameterOp5Response> {
-    return { return: ['op5'], a: 'op5', b: 5, c: [] };
+    return { a: 'op5', b: 5, c: [], return: ['op5'] };
   }
   async parameter_op6(): Promise<E2ETypeServerParameterOp6Response> {
-    return { return: {}, a: 'op6', b: 6, c: [] };
+    return { a: 'op6', b: 6, c: [], return: {} };
   }
 }
 
 class MyE2eAttribute implements E2eAttribute {}
 
 class MyE2eHttpForm implements E2eHttpForm {
-  async submit_profile(req: { name: string; age?: number }): Promise<E2EHttpFormSubmitProfileResponse> {
+  async submit_profile(req: {
+    name: string;
+    age?: number;
+  }): Promise<E2EHttpFormSubmitProfileResponse> {
     return {
-      return: `name:${req.name},age:${formatOptInt(req.age)}`,
       normalized_name: req.name.toUpperCase(),
+      return: `name:${req.name},age:${formatOptInt(req.age)}`,
     };
   }
 }
@@ -194,22 +225,34 @@ class MyE2eHttpScopeMatrix implements E2eHttpScopeMatrix {
   async default_scope(req: { request_body: StructHttpBody }): Promise<string> {
     return req.request_body.name;
   }
-  async override_consumes_only(req: { name: string; age?: number }): Promise<E2EHttpScopeMatrixOverrideConsumesOnlyResponse> {
+  async override_consumes_only(req: {
+    name: string;
+    age?: number;
+  }): Promise<E2EHttpScopeMatrixOverrideConsumesOnlyResponse> {
     return {
-      return: `name:${req.name},age:${formatOptInt(req.age)}`,
       normalized_name: req.name.toUpperCase(),
+      return: `name:${req.name},age:${formatOptInt(req.age)}`,
     };
   }
-  async override_produces_only(req: { resource_id: string }): Promise<E2EHttpScopeMatrixOverrideProducesOnlyResponse> {
+  async override_produces_only(req: {
+    resource_id: string;
+  }): Promise<E2EHttpScopeMatrixOverrideProducesOnlyResponse> {
     return {
-      return: { name: req.resource_id, tags: [], labels: {} },
+      return: { labels: {}, name: req.resource_id, tags: [] },
       revision: 1,
     };
   }
-  async override_both_media(req: { name: string; age?: number }): Promise<E2EHttpScopeMatrixOverrideBothMediaResponse> {
+  async override_both_media(req: {
+    name: string;
+    age?: number;
+  }): Promise<E2EHttpScopeMatrixOverrideBothMediaResponse> {
     return {
-      return: { name: req.name, tags: [`age:${formatOptInt(req.age)}`], labels: {} },
       normalized_name: 'OVERRIDDEN',
+      return: {
+        labels: {},
+        name: req.name,
+        tags: [`age:${formatOptInt(req.age)}`],
+      },
     };
   }
   async deprecated_plain(req: { resource_id: string }): Promise<string> {
@@ -224,30 +267,53 @@ class MyE2eHttpScopeMatrix implements E2eHttpScopeMatrix {
 }
 
 class MyE2eHttpDefaultsMatrix implements E2eHttpDefaultsMatrix {
-  async delete_resource_default_query(req: { id: string; revision: number }): Promise<string> {
+  async delete_resource_default_query(req: {
+    id: string;
+    revision: number;
+  }): Promise<string> {
     return `${req.id}:${req.revision}`;
   }
   async probe_resource_default_query(): Promise<void> {}
   async resource_options_default_query(): Promise<void> {}
-  async replace_resource_default_body(req: { id: string; name: string; alias?: string }): Promise<StructHttpBody> {
-    return { name: req.name, alias: req.alias, tags: [req.id], labels: {} };
+  async replace_resource_default_body(req: {
+    id: string;
+    name: string;
+    alias?: string;
+  }): Promise<StructHttpBody> {
+    return { alias: req.alias, labels: {}, name: req.name, tags: [req.id] };
   }
-  async patch_resource_default_body(req: { id: string; name: string; alias?: string }): Promise<StructHttpBody> {
-    return { name: req.name, alias: req.alias, tags: [req.id], labels: {} };
+  async patch_resource_default_body(req: {
+    id: string;
+    name: string;
+    alias?: string;
+  }): Promise<StructHttpBody> {
+    return { alias: req.alias, labels: {}, name: req.name, tags: [req.id] };
   }
 }
 
 class MyE2eHttpSecurityMatrix implements E2eHttpSecurityMatrix {
-  async inherited_security(req: { resource_id: string; trace_id: string }): Promise<string> {
+  async inherited_security(req: {
+    resource_id: string;
+    trace_id: string;
+  }): Promise<string> {
     return `${req.resource_id}:${req.trace_id}`;
   }
-  async bearer_or_cookie_security(req: { action: string; note?: string }): Promise<string> {
+  async bearer_or_cookie_security(req: {
+    action: string;
+    note?: string;
+  }): Promise<string> {
     return `${req.action}:${formatOpt(req.note)}`;
   }
-  async alternative_security(req: { resource_id: string; locale?: string }): Promise<string> {
+  async alternative_security(req: {
+    resource_id: string;
+    locale?: string;
+  }): Promise<string> {
     return `${req.resource_id}:${formatOpt(req.locale)}`;
   }
-  async oauth_security(req: { keyword: string; page?: number }): Promise<string> {
+  async oauth_security(req: {
+    keyword: string;
+    page?: number;
+  }): Promise<string> {
     return `${req.keyword}:${formatOptInt(req.page)}`;
   }
   async public_ping(): Promise<string> {
@@ -264,7 +330,7 @@ const attributeState = {
   attr1: 'attr1',
   attr2: ['attr2'],
   attr4: 'V1',
-  attr61: { tag: 'V1', data: 1 },
+  attr61: { data: 1, tag: 'V1' },
 };
 
 let hostState = 'localhost';
@@ -294,14 +360,13 @@ const server = createServer(async (req, res) => {
   try {
     let reqUrl = req.url || '';
     if (reqUrl.startsWith('/r/')) {
-      reqUrl = '/v2/resources/' + reqUrl.slice(3);
+      reqUrl = `/v2/resources/${reqUrl.slice(3)}`;
     } else if (reqUrl.startsWith('/resources/')) {
-      reqUrl = '/v2/resources/' + reqUrl.slice(11);
+      reqUrl = `/v2/resources/${reqUrl.slice(11)}`;
     }
     const protocol = req.headers['x-forwarded-proto'] || 'http';
     const hostHeader = req.headers.host || 'localhost';
     const url = new URL(reqUrl, `${protocol}://${hostHeader}`);
-
 
     // Handle manual attributes
     if (url.pathname === '/attribute/type_attr1') {
@@ -370,7 +435,7 @@ const server = createServer(async (req, res) => {
       if (req.method === 'GET') {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify("inherited"));
+        res.end(JSON.stringify('inherited'));
         return;
       }
     }
@@ -424,8 +489,8 @@ const server = createServer(async (req, res) => {
 
     if (!response) {
       response = new Response(JSON.stringify({ code: 404, msg: 'not found' }), {
-        status: 404,
         headers: { 'Content-Type': 'application/json' },
+        status: 404,
       });
     }
 
