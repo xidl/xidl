@@ -50,7 +50,6 @@ export class XidlServerError extends Error {
     }
 }
 
-
 function createRouter(
 routes: RouteSpec[],
 options: ServerOptions,
@@ -70,8 +69,8 @@ options: ServerOptions,
             }
             if (pathMatched) {
                 const allowed = routes
-                    .filter((r) => matchRoute(r.path, url.pathname))
-                    .map((r) => r.method);
+                .filter((r) => matchRoute(r.path, url.pathname))
+                .map((r) => r.method);
                 return new Response(JSON.stringify({ code: 405, msg: "Method Not Allowed" }), {
                     status: 405,
                     headers: {
@@ -92,10 +91,8 @@ options: ServerOptions,
             return errorResponse(error);
         }
 
-
     };
 }
-
 
 async function authorizeRequest(
 request: Request,
@@ -164,7 +161,6 @@ function readCookieParam(headers: Headers, name: string, isMulti: boolean): unkn
     }
     return isMulti ? values.map(parseScalar) : parseScalar(values[0] as string);
 }
-
 
 function readRequestCookies(headers: Headers): Map<string, string[]> {
     const out = new Map<string, string[]>();
@@ -326,8 +322,6 @@ schema?: z.ZodTypeAny,
     return new Response(encodeBody(body, contentType, codecs), { status: 200, headers });
 }
 
-
-
 function writeHeader(headers: Headers, name: string, value: unknown, isMulti: boolean): void {
     if (value === undefined || value === null) {
         return;
@@ -426,6 +420,3 @@ function errorResponse(error: unknown): Response {
         headers: { "Content-Type": "application/json" },
     });
 }
-
-
-

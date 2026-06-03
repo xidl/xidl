@@ -33,7 +33,6 @@ class MyRestServer implements RestServer {
     return 8081;
   }
 
-
   async get_server_name(): Promise<string> {
     return this.serverName;
   }
@@ -140,7 +139,7 @@ const handler = createRestServerHandler(myServer, {
     const authHeader = req.headers.get('Authorization');
     if (requirements.length > 0) {
       if (!authHeader) {
-        const basic = requirements.find((r) => r.kind === 'http_basic');
+        const basic = requirements.find(r => r.kind === 'http_basic');
         const realm = (basic as any)?.realm || 'login';
         const { XidlServerError } = await import('./rest_server.server.js');
         throw new XidlServerError('Unauthorized', 401, 401, {
@@ -149,7 +148,7 @@ const handler = createRestServerHandler(myServer, {
       }
 
       if (
-        requirements.some((r) => r.kind === 'http_bearer') &&
+        requirements.some(r => r.kind === 'http_bearer') &&
         authHeader === 'Bearer'
       ) {
         const { XidlServerError } = await import('./rest_server.server.js');
@@ -158,7 +157,6 @@ const handler = createRestServerHandler(myServer, {
     }
   },
 });
-
 
 async function readBodyString(req: any): Promise<string> {
   const chunks: Buffer[] = [];
@@ -200,7 +198,6 @@ const server = createServer(async (req, res) => {
         return;
       }
     }
-
 
     const chunks: Buffer[] = [];
     for await (const chunk of req) {

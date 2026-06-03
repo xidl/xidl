@@ -232,7 +232,9 @@ pub(crate) fn zod_schema_for_type_spec(ty: &hir::TypeSpec, module_path: &[String
                 .as_ref()
                 .and_then(|len| xidl_parser::hir::const_expr_to_i64(&len.0)),
         ),
-        hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => "z.coerce.string()".to_string(),
+        hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => {
+            "z.coerce.string()".to_string()
+        }
         hir::TypeSpec::FixedPtType(_) => "z.number()".to_string(),
         hir::TypeSpec::MapType(map) => {
             format!(

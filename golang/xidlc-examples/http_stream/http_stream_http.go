@@ -144,7 +144,7 @@ type HttpStreamApiAlertsResponse struct {
 
 func HttpStreamApiAlertsSecurityRequirements() []xidlgohttp.SecurityRequirement {
 	return []xidlgohttp.SecurityRequirement{
-		{Kind: xidlgohttp.SecurityBasic, Realm: "Alerts"},
+		{Kind: xidlgohttp.SecurityBasic, Realm: "alerts"},
 	}
 }
 
