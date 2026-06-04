@@ -68,6 +68,18 @@ func (s *MySmartCityRestService) UpdateProfile(ctx context.Context, req *SmartCi
 	}, nil
 }
 
+func (s *MySmartCityRestService) GetAttributeApiVersion(ctx context.Context, req *SmartCityRestApiGetAttributeApiVersionRequest) (*SmartCityRestApiGetAttributeApiVersionResponse, error) {
+	return &SmartCityRestApiGetAttributeApiVersionResponse{Return: "v2.0.0"}, nil
+}
+
+func (s *MySmartCityRestService) GetAttributeMaintenanceMode(ctx context.Context, req *SmartCityRestApiGetAttributeMaintenanceModeRequest) (*SmartCityRestApiGetAttributeMaintenanceModeResponse, error) {
+	return &SmartCityRestApiGetAttributeMaintenanceModeResponse{Return: false}, nil
+}
+
+func (s *MySmartCityRestService) SetAttributeMaintenanceMode(ctx context.Context, req *SmartCityRestApiSetAttributeMaintenanceModeRequest) (*SmartCityRestApiSetAttributeMaintenanceModeResponse, error) {
+	return &SmartCityRestApiSetAttributeMaintenanceModeResponse{}, nil
+}
+
 func (s *MySmartCityRestService) GetDeviceStatus(ctx context.Context, req *SmartCityRestApiGetDeviceStatusRequest) (*SmartCityRestApiGetDeviceStatusResponse, error) {
 	return &SmartCityRestApiGetDeviceStatusResponse{
 		Return:      "device:" + req.DeviceId,
@@ -120,9 +132,6 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.Use(MsgpackAndBytesMiddleware())
-	r.GET("/attribute/api_version", func(c *gin.Context) {
-		c.JSON(200, "v2.0.0")
-	})
 	svc := &MySmartCityRestService{}
 	RegisterSmartCityRestApiHandler(r, svc)
 	port := os.Getenv("PORT")

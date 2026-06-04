@@ -20,6 +20,18 @@ type MyRestServer struct {
 	keyStore   sync.Map
 }
 
+func (s *MyRestServer) GetAttributeHost(ctx context.Context, req *RestServerGetAttributeHostRequest) (*RestServerGetAttributeHostResponse, error) {
+	return &RestServerGetAttributeHostResponse{Return: s.host}, nil
+}
+
+func (s *MyRestServer) SetAttributeHost(ctx context.Context, req *RestServerSetAttributeHostRequest) (*RestServerSetAttributeHostResponse, error) {
+	s.host = req.Host
+	return &RestServerSetAttributeHostResponse{}, nil
+}
+
+func (s *MyRestServer) GetAttributePort(ctx context.Context, req *RestServerGetAttributePortRequest) (*RestServerGetAttributePortResponse, error) {
+	return &RestServerGetAttributePortResponse{Return: 8081}, nil
+}
 
 func (s *MyRestServer) GetServerName(ctx context.Context, req *RestServerGetServerNameRequest) (*RestServerGetServerNameResponse, error) {
 	return &RestServerGetServerNameResponse{Return: s.serverName}, nil
@@ -189,20 +201,6 @@ func main() {
 		serverName: "rest_server",
 	}
 	RegisterRestServerHandler(r, svc)
-	r.GET("/attribute/host", func(c *gin.Context) {
-		c.JSON(200, svc.host)
-	})
-	r.POST("/attribute/host", func(c *gin.Context) {
-		var body struct {
-			Host string `json:"host"`
-		}
-		if err := c.ShouldBindJSON(&body); err != nil {
-			c.Status(400)
-			return
-		}
-		svc.host = body.Host
-		c.Status(204)
-	})
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
