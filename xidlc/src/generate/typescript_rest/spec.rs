@@ -177,19 +177,22 @@ struct ZodImportCollector;
 impl ZodImportCollector {
     fn collect_exported_names(spec: &hir::Specification) -> Vec<String> {
         let mut names = std::collections::BTreeSet::new();
-        for def in &spec.0 {
+        Self::collect_defs(&spec.0, &mut names);
+        names.into_iter().collect()
+    }
+
+    fn collect_defs(defs: &[hir::Definition], names: &mut std::collections::BTreeSet<String>) {
+        for def in defs {
             match def {
                 hir::Definition::ModuleDcl(module) => {
-                    names.insert(crate::generate::typescript::definition::names::ts_ident(
-                        &module.ident,
-                    ));
+                    Self::collect_defs(&module.definition, names);
                 }
                 hir::Definition::ConstrTypeDcl(constr) => {
-                    Self::collect_constr_names(constr, &mut names);
+                    Self::collect_constr_names(constr, names);
                 }
                 hir::Definition::TypeDcl(ty) => match ty {
                     hir::TypeDcl::ConstrTypeDcl(constr) => {
-                        Self::collect_constr_names(constr, &mut names);
+                        Self::collect_constr_names(constr, names);
                     }
                     hir::TypeDcl::TypedefDcl(typedef) => {
                         for decl in &typedef.decl {
@@ -216,7 +219,6 @@ impl ZodImportCollector {
                 _ => {}
             }
         }
-        names.into_iter().collect()
     }
 
     fn collect_constr_names(

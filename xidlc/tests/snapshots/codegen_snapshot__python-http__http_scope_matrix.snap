@@ -38,6 +38,22 @@ require_security,
 # generated http module: xidlc
 
 @dataclass
+class HttpScopeMatrixServiceGetAttributeInheritedAttrRequest:
+    pass
+
+@dataclass
+class HttpScopeMatrixServiceGetAttributeInheritedAttrResponse:
+    value: str
+
+@dataclass
+class HttpScopeMatrixServiceGetAttributeBareAttrRequest:
+    pass
+
+@dataclass
+class HttpScopeMatrixServiceGetAttributeBareAttrResponse:
+    value: str
+
+@dataclass
 class HttpScopeMatrixServiceDefaultScopeRequest:
     req: MatrixBody
 
@@ -100,6 +116,14 @@ class HttpScopeMatrixServiceDeprecatedWindowResponse:
 
 class HttpScopeMatrixServiceService(abc.ABC):
     @abc.abstractmethod
+    async def get_attribute_inherited_attr(self, request: HttpScopeMatrixServiceGetAttributeInheritedAttrRequest) -> HttpScopeMatrixServiceGetAttributeInheritedAttrResponse:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    async def get_attribute_bare_attr(self, request: HttpScopeMatrixServiceGetAttributeBareAttrRequest) -> HttpScopeMatrixServiceGetAttributeBareAttrResponse:
+        raise NotImplementedError
+
+    @abc.abstractmethod
     async def default_scope(self, request: HttpScopeMatrixServiceDefaultScopeRequest) -> HttpScopeMatrixServiceDefaultScopeResponse:
         raise NotImplementedError
 
@@ -126,6 +150,44 @@ class HttpScopeMatrixServiceService(abc.ABC):
     @abc.abstractmethod
     async def deprecated_window(self, request: HttpScopeMatrixServiceDeprecatedWindowRequest) -> HttpScopeMatrixServiceDeprecatedWindowResponse:
         raise NotImplementedError
+
+async def _http_scope_matrix_service_get_attribute_inherited_attr_endpoint(service: HttpScopeMatrixServiceService, request: Request):
+    require_accept(request, "application/json")
+    request_value = HttpScopeMatrixServiceGetAttributeInheritedAttrRequest()
+    response_value = await service.get_attribute_inherited_attr(request_value)
+    return encode_json_response(response_value)
+
+def _http_scope_matrix_service_get_attribute_inherited_attr_route(service: HttpScopeMatrixServiceService) -> Route:
+    async def endpoint(request: Request):
+        return await _http_scope_matrix_service_get_attribute_inherited_attr_endpoint(service, request)
+    return Route(
+        method="GET",
+        paths=["/attribute/inherited_attr"],
+        endpoint=endpoint,
+        handler=service.get_attribute_inherited_attr,
+        request_model=HttpScopeMatrixServiceGetAttributeInheritedAttrRequest,
+        response_model=HttpScopeMatrixServiceGetAttributeInheritedAttrResponse,
+        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+    )
+
+async def _http_scope_matrix_service_get_attribute_bare_attr_endpoint(service: HttpScopeMatrixServiceService, request: Request):
+    require_accept(request, "application/json")
+    request_value = HttpScopeMatrixServiceGetAttributeBareAttrRequest()
+    response_value = await service.get_attribute_bare_attr(request_value)
+    return encode_json_response(response_value)
+
+def _http_scope_matrix_service_get_attribute_bare_attr_route(service: HttpScopeMatrixServiceService) -> Route:
+    async def endpoint(request: Request):
+        return await _http_scope_matrix_service_get_attribute_bare_attr_endpoint(service, request)
+    return Route(
+        method="GET",
+        paths=["/attribute/bare_attr"],
+        endpoint=endpoint,
+        handler=service.get_attribute_bare_attr,
+        request_model=HttpScopeMatrixServiceGetAttributeBareAttrRequest,
+        response_model=HttpScopeMatrixServiceGetAttributeBareAttrResponse,
+        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+    )
 
 async def _http_scope_matrix_service_default_scope_endpoint(service: HttpScopeMatrixServiceService, request: Request):
     require_accept(request, "application/json")
@@ -284,6 +346,8 @@ def _http_scope_matrix_service_deprecated_window_route(service: HttpScopeMatrixS
 
 def http_scope_matrix_service_routes(service: HttpScopeMatrixServiceService) -> list[Route]:
     return [
+        _http_scope_matrix_service_get_attribute_inherited_attr_route(service),
+        _http_scope_matrix_service_get_attribute_bare_attr_route(service),
         _http_scope_matrix_service_default_scope_route(service),
         _http_scope_matrix_service_override_consumes_only_route(service),
         _http_scope_matrix_service_override_produces_only_route(service),

@@ -173,12 +173,7 @@ fn validate_route_bindings(methods: &[spec_context::MethodContext]) -> IdlcResul
 }
 
 fn skips_operation(operation: &HttpOperation) -> bool {
-    matches!(
-        operation.meta.source,
-        HttpOperationSource::AttributeGet
-            | HttpOperationSource::AttributeSet
-            | HttpOperationSource::AttributeWatch
-    )
+    matches!(operation.meta.source, HttpOperationSource::AttributeWatch)
 }
 
 pub(super) fn is_server_stream(kind: Option<HttpStreamKind>) -> bool {

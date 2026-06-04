@@ -41,6 +41,8 @@ var (
 )
 
 type HttpScopeMatrixServiceService interface {
+	GetAttributeInheritedAttr(ctx context.Context, req *HttpScopeMatrixServiceGetAttributeInheritedAttrRequest) (*HttpScopeMatrixServiceGetAttributeInheritedAttrResponse, error)
+	GetAttributeBareAttr(ctx context.Context, req *HttpScopeMatrixServiceGetAttributeBareAttrRequest) (*HttpScopeMatrixServiceGetAttributeBareAttrResponse, error)
 	DefaultScope(ctx context.Context, req *HttpScopeMatrixServiceDefaultScopeRequest) (*HttpScopeMatrixServiceDefaultScopeResponse, error)
 	OverrideConsumesOnly(ctx context.Context, req *HttpScopeMatrixServiceOverrideConsumesOnlyRequest) (*HttpScopeMatrixServiceOverrideConsumesOnlyResponse, error)
 	OverrideProducesOnly(ctx context.Context, req *HttpScopeMatrixServiceOverrideProducesOnlyRequest) (*HttpScopeMatrixServiceOverrideProducesOnlyResponse, error)
@@ -51,6 +53,40 @@ type HttpScopeMatrixServiceService interface {
 }
 
 func RegisterHttpScopeMatrixServiceHandler(r gin.IRouter, svc HttpScopeMatrixServiceService) {
+	r.GET("/attribute/inherited_attr", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+			return
+		}
+
+		req := &HttpScopeMatrixServiceGetAttributeInheritedAttrRequest{}
+		resp, err := svc.GetAttributeInheritedAttr(c.Request.Context(), req)
+		if err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
+			return
+		}
+
+		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
+		}
+	})
+	r.GET("/attribute/bare_attr", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+			return
+		}
+
+		req := &HttpScopeMatrixServiceGetAttributeBareAttrRequest{}
+		resp, err := svc.GetAttributeBareAttr(c.Request.Context(), req)
+		if err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
+			return
+		}
+
+		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
+		}
+	})
 	r.POST("/v2/scope/default", func(c *gin.Context) {
 		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
@@ -257,6 +293,50 @@ func NewHttpScopeMatrixServiceClient(baseURL string, httpClient *http.Client, au
 	return &HttpScopeMatrixServiceClient{baseURL: strings.TrimRight(baseURL, "/"), httpClient: httpClient, auth: auth}
 }
 
+func (c *HttpScopeMatrixServiceClient) GetAttributeInheritedAttr(ctx context.Context, req *HttpScopeMatrixServiceGetAttributeInheritedAttrRequest) (*HttpScopeMatrixServiceGetAttributeInheritedAttrResponse, error) {
+	requestURL := c.baseURL + formatHttpScopeMatrixServiceGetAttributeInheritedAttrPath(req)
+	httpReq, err := http.NewRequestWithContext(ctx, "GET", requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Accept", "application/json")
+	resp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	}
+	decoded, err := decodeHttpScopeMatrixServiceGetAttributeInheritedAttrResponse(resp)
+	if err != nil {
+		return nil, err
+	}
+	return &decoded, nil
+}
+
+func (c *HttpScopeMatrixServiceClient) GetAttributeBareAttr(ctx context.Context, req *HttpScopeMatrixServiceGetAttributeBareAttrRequest) (*HttpScopeMatrixServiceGetAttributeBareAttrResponse, error) {
+	requestURL := c.baseURL + formatHttpScopeMatrixServiceGetAttributeBareAttrPath(req)
+	httpReq, err := http.NewRequestWithContext(ctx, "GET", requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Accept", "application/json")
+	resp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	}
+	decoded, err := decodeHttpScopeMatrixServiceGetAttributeBareAttrResponse(resp)
+	if err != nil {
+		return nil, err
+	}
+	return &decoded, nil
+}
+
 func (c *HttpScopeMatrixServiceClient) DefaultScope(ctx context.Context, req *HttpScopeMatrixServiceDefaultScopeRequest) (*HttpScopeMatrixServiceDefaultScopeResponse, error) {
 	requestURL := c.baseURL + formatHttpScopeMatrixServiceDefaultScopePath(req)
 	body := HttpScopeMatrixServiceDefaultScopeRequestBody{
@@ -435,6 +515,71 @@ func (c *HttpScopeMatrixServiceClient) DeprecatedWindow(ctx context.Context, req
 		return nil, err
 	}
 	return &decoded, nil
+}
+
+type HttpScopeMatrixServiceGetAttributeInheritedAttrRequest struct {
+}
+
+type HttpScopeMatrixServiceGetAttributeInheritedAttrResponse struct {
+	Return string `xjson:"return"`
+}
+
+func HttpScopeMatrixServiceGetAttributeInheritedAttrSecurityRequirements() []xidlgohttp.SecurityRequirement {
+	return []xidlgohttp.SecurityRequirement{}
+}
+
+func HttpScopeMatrixServiceGetAttributeInheritedAttrDeprecated() xidlgohttp.DeprecatedInfo {
+	return xidlgohttp.DeprecatedInfo{
+		Deprecated: true,
+		Since:      "2026-01-15T00:00:00Z",
+		Note:       "Deprecated. Since 2026-01-15T00:00:00Z.",
+	}
+}
+
+func formatHttpScopeMatrixServiceGetAttributeInheritedAttrPath(req *HttpScopeMatrixServiceGetAttributeInheritedAttrRequest) string {
+	path := "/attribute/inherited_attr"
+	return path
+}
+func decodeHttpScopeMatrixServiceGetAttributeInheritedAttrResponse(resp *http.Response) (HttpScopeMatrixServiceGetAttributeInheritedAttrResponse, error) {
+	out := HttpScopeMatrixServiceGetAttributeInheritedAttrResponse{}
+	var body string
+	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil {
+		return out, err
+	}
+	out.Return = body
+	return out, nil
+}
+
+type HttpScopeMatrixServiceGetAttributeBareAttrRequest struct {
+}
+
+type HttpScopeMatrixServiceGetAttributeBareAttrResponse struct {
+	Return string `xjson:"return"`
+}
+
+func HttpScopeMatrixServiceGetAttributeBareAttrSecurityRequirements() []xidlgohttp.SecurityRequirement {
+	return []xidlgohttp.SecurityRequirement{}
+}
+
+func HttpScopeMatrixServiceGetAttributeBareAttrDeprecated() xidlgohttp.DeprecatedInfo {
+	return xidlgohttp.DeprecatedInfo{
+		Deprecated: true,
+		Note:       "Deprecated.",
+	}
+}
+
+func formatHttpScopeMatrixServiceGetAttributeBareAttrPath(req *HttpScopeMatrixServiceGetAttributeBareAttrRequest) string {
+	path := "/attribute/bare_attr"
+	return path
+}
+func decodeHttpScopeMatrixServiceGetAttributeBareAttrResponse(resp *http.Response) (HttpScopeMatrixServiceGetAttributeBareAttrResponse, error) {
+	out := HttpScopeMatrixServiceGetAttributeBareAttrResponse{}
+	var body string
+	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil {
+		return out, err
+	}
+	out.Return = body
+	return out, nil
 }
 
 type HttpScopeMatrixServiceDefaultScopeRequest struct {

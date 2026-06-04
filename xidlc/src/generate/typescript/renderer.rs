@@ -8,6 +8,7 @@ use serde::Serialize;
 
 static TEMPLATES: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/src/generate/typescript/templates");
 
+// Force rebuild for template changes
 pub struct TypescriptRenderer {
     env: Environment<'static>,
 }

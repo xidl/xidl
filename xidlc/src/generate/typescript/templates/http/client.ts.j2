@@ -5,9 +5,6 @@
 import type * as types from "./{{ file_stem }}";
 import type * as ifaceTypes from "./{{ file_stem }}.iface";
 import * as ifaceSchemas from "./{{ file_stem }}.iface.zod";
-{% if imports | length > 0 %}
-    import { {{ imports | join(", ") }} } from "./{{ file_stem }}.iface.zod";
-{% endif %}
 {% for helper in helpers %}
     {{ helper }}
 {% endfor %}

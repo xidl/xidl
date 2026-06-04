@@ -419,9 +419,9 @@ const server = createServer(async (req, res) => {{
     for (const [key, value] of response.headers) {{ res.setHeader(key, value); }}
     if (response.body) {{ for await (const chunk of response.body as any) {{ res.write(chunk); }} }}
     res.end();
-  }} catch (err) {{ 
+  }} catch (err) {{
     console.error('TS LOG: Error', err);
-    res.statusCode = 500; res.end(String(err)); 
+    res.statusCode = 500; res.end(String(err));
   }}
 }});
 server.listen({context.port}, '127.0.0.1', () => {{

@@ -88,7 +88,7 @@ fn render_constr_type(
         hir::ConstrTypeDcl::UnionDef(def) => render_simple_struct(
             ctx,
             &go_export_name(prefix, &def.ident),
-            &[("Tag", "string", "tag"), ("Value", "any", "value")],
+            &[("Tag", "string", "tag"), ("Value", "any", ",flatten")],
         ),
         hir::ConstrTypeDcl::BitsetDcl(def) => render_simple_struct(
             ctx,

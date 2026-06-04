@@ -69,7 +69,7 @@ export const ASchema = z.object(
 );
 export const ASchema = z.object(
 {
-    a : A.b
+    a : A.bSchema
 }
 );
 export const ASchema = z.object(
@@ -82,13 +82,13 @@ export const _ASchema = z.object(
 );
 export const _CustomSchema = z.object(
 {
-    var_inner : Inner
+    var_inner : InnerSchema
 }
 );
 export const HelloWorldSchema = z.object(
 {
-    a : u8, b : z.array(
-    u16
+    a : u8Schema, b : z.array(
+    u16Schema
     ).length(
     10
     ), c : z.array(
@@ -102,7 +102,7 @@ export const HelloWorldSchema = z.object(
     ).length(
     20
     ), c : z.array(
-    u8
+    u8Schema
     ), d : z.coerce.string(
 
     ), d : z.coerce.string(

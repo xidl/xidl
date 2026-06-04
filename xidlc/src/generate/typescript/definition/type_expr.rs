@@ -238,6 +238,22 @@ pub(crate) fn ts_type_for_type_spec(
 }
 
 pub(crate) fn zod_schema_for_type_spec(ty: &hir::TypeSpec, module_path: &[String]) -> ZodSchema {
+    zod_schema_for_type_spec_impl(ty, module_path, None)
+}
+
+pub(crate) fn zod_schema_for_type_spec_with_prefix(
+    ty: &hir::TypeSpec,
+    module_path: &[String],
+    prefix: Option<&str>,
+) -> ZodSchema {
+    zod_schema_for_type_spec_impl(ty, module_path, prefix)
+}
+
+fn zod_schema_for_type_spec_impl(
+    ty: &hir::TypeSpec,
+    module_path: &[String],
+    prefix: Option<&str>,
+) -> ZodSchema {
     match ty {
         hir::TypeSpec::IntegerType(value) => ZodSchema::Primitive(integer_schema_primitive(value)),
         hir::TypeSpec::FloatingPtType => ZodSchema::Primitive("coerce.number()".to_string()),
@@ -249,10 +265,10 @@ pub(crate) fn zod_schema_for_type_spec(ty: &hir::TypeSpec, module_path: &[String
             ZodSchema::Any
         }
         hir::TypeSpec::ScopedName(value) => {
-            ZodSchema::ScopedName(zod_schema_ref(value, module_path))
+            ZodSchema::ScopedName(zod_schema_ref(value, module_path, prefix))
         }
         hir::TypeSpec::SequenceType(seq) => ZodSchema::Array {
-            element: Box::new(zod_schema_for_type_spec(&seq.ty, module_path)),
+            element: Box::new(zod_schema_for_type_spec_impl(&seq.ty, module_path, prefix)),
             length: seq
                 .len
                 .as_ref()
@@ -262,9 +278,11 @@ pub(crate) fn zod_schema_for_type_spec(ty: &hir::TypeSpec, module_path: &[String
             ZodSchema::Primitive("coerce.string()".to_string())
         }
         hir::TypeSpec::FixedPtType(_) => ZodSchema::Primitive("number()".to_string()),
-        hir::TypeSpec::MapType(map) => {
-            ZodSchema::Record(Box::new(zod_schema_for_type_spec(&map.value, module_path)))
-        }
+        hir::TypeSpec::MapType(map) => ZodSchema::Record(Box::new(zod_schema_for_type_spec_impl(
+            &map.value,
+            module_path,
+            prefix,
+        ))),
         hir::TypeSpec::TemplateType(value) => {
             let ty = ts_template_type(value, module_path, TypeRefTarget::Types);
             ZodSchema::Custom(ty)
