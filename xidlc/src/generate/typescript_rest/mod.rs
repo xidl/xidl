@@ -69,6 +69,11 @@ pub fn generate(
                 "typescript_mode" => "types_only"
             },
         }));
+    } else {
+        artifacts.push(Artifact::new_file(ArtifactFile {
+            path: format!("{file_name}.ts"),
+            content: "export {};\n".to_string(),
+        }));
     }
 
     Ok(artifacts)

@@ -36,7 +36,14 @@ pub(crate) fn render_interface(
     let methods = http_interface
         .operations
         .iter()
-        .filter(|operation| matches!(operation.meta.source, HttpOperationSource::Method))
+        .filter(|operation| {
+            matches!(
+                operation.meta.source,
+                HttpOperationSource::Method
+                    | HttpOperationSource::AttributeGet
+                    | HttpOperationSource::AttributeSet
+            )
+        })
         .map(|operation| build_method_meta(&interface_name, operation))
         .collect::<IdlcResult<Vec<_>>>()?;
 

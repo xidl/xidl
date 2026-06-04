@@ -278,7 +278,7 @@ schema?: z.ZodTypeAny,
         async start(controller) {
             for await (const item of source) {
                 const serialized = schema ? serialize(item, schema) : item;
-                controller.enqueue(encoder.encode(`event: next\ndata: ${JSON.stringify(serialized)}\n\n`));
+                controller.enqueue(encoder.encode("event: next\ndata: " + JSON.stringify(serialized) + "\n\n"));
             }
             controller.enqueue(encoder.encode("event: complete\ndata: done\n\n"));
             controller.close();

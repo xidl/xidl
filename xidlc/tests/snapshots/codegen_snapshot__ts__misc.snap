@@ -47,15 +47,15 @@ export const ColorSchema = z.enum(
 ]
 );
 export const FooSeqSchema = z.array(
-Foo
+FooSchema
 );
 export const FooSeqSchema = z.array(
-Foo
+FooSchema
 ).length(
 12
 );
 export const FooSeqSchema = z.array(
-Foo
+FooSchema
 );
 export const FooSchema = z.object(
 {
@@ -63,11 +63,11 @@ export const FooSchema = z.object(
 
     ).int(
 
-    ), chain : FooSeq
+    ), chain : FooSeqSchema
 }
 );
 export const BarSeqSchema = z.array(
-Bar
+BarSchema
 );
 export const BarSchema = z.union(
 [
@@ -85,7 +85,7 @@ z.object(
     {
         d_mem : z.coerce.number(
 
-        ), nested : BarSeq
+        ), nested : BarSeqSchema
     }
     )
 }

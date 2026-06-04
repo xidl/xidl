@@ -6,7 +6,12 @@ pub(super) fn collect_tokens(root: tree_sitter::Node<'_>) -> Vec<Token> {
     let mut tokens = Vec::new();
     let mut stack = vec![root];
     while let Some(node) = stack.pop() {
-        if node.child_count() == 0 {
+        let kind = node.kind();
+        if kind == "string"
+            || kind == "regex"
+            || kind == "template_string"
+            || node.child_count() == 0
+        {
             let start = node.start_byte();
             let end = node.end_byte();
             if start != end {

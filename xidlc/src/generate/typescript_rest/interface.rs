@@ -11,7 +11,7 @@ use crate::generate::typescript::definition::contexts::{
 };
 use crate::generate::typescript::definition::names::{method_struct_prefix, scoped_name, ts_ident};
 use crate::generate::typescript::definition::type_expr::{
-    ts_type_for_type_spec, zod_schema_for_type_spec,
+    ts_type_for_type_spec, zod_schema_for_type_spec_with_prefix,
 };
 use xidl_parser::hir;
 use xidl_parser::rest_hir::{
@@ -118,7 +118,7 @@ fn build_method_model(
         .map(|p| ParamDeclContext {
             prop: crate::generate::typescript::definition::names::ts_prop_name(&p.name),
             ty: ts_type_for_type_spec(&p.ty, module_path, TypeRefTarget::Types),
-            schema: zod_schema_for_type_spec(&p.ty, module_path),
+            schema: zod_schema_for_type_spec_with_prefix(&p.ty, module_path, Some("models")),
             optional: p.annotations.iter().any(|a| {
                 matches!(
                     a,
@@ -141,9 +141,9 @@ fn build_method_model(
         .as_ref()
         .map(|name| scoped_name(module_path, name));
 
-    let return_ty = response_name
+    let mut return_ty = response_name
         .as_ref()
-        .map(|name| TsType::ScopedName(scoped_name(module_path, name)))
+        .map(|name| TsType::ScopedName(format!("ifaceTypes.{}", scoped_name(module_path, name))))
         .or_else(|| {
             op.signature
                 .return_type
@@ -151,6 +151,12 @@ fn build_method_model(
                 .map(|ty| ts_type_for_type_spec(ty, module_path, TypeRefTarget::Client))
         })
         .unwrap_or(TsType::Void);
+    if matches!(
+        op.meta.stream.kind,
+        Some(xidl_parser::rest_hir::semantics::HttpStreamKind::Server)
+    ) {
+        return_ty = TsType::AsyncIterable(Box::new(return_ty));
+    }
 
     let client_stream_item_ty = build_client_stream_ty(op, module_path, &request_name);
     let path = op
@@ -256,21 +262,52 @@ fn build_method_model(
 
     let body_schema_ref = match &op.http.request.body.shape {
         HttpRequestBodyShape::Empty => None,
-        HttpRequestBodyShape::SingleValue { .. } => {
-            // TODO: handle inline schemas
-            Some(scoped_name(module_path, "FIXME"))
+        HttpRequestBodyShape::SingleValue { flatten, ty, .. } => {
+            if *flatten {
+                match ty {
+                    hir::TypeSpec::ScopedName(scoped) => {
+                        let parts = scoped
+                            .name
+                            .iter()
+                            .map(|part| {
+                                crate::generate::typescript::definition::names::ts_ident(part)
+                            })
+                            .collect::<Vec<_>>();
+                        Some(format!("models.{}", parts.join(".")))
+                    }
+                    _ => None,
+                }
+            } else {
+                request_schema_ref.clone()
+            }
         }
         HttpRequestBodyShape::Object { .. } => request_schema_ref.clone(),
-        HttpRequestBodyShape::Stream { .. } => {
-            // TODO: handle inline schemas
-            Some(scoped_name(module_path, "FIXME"))
-        }
+        HttpRequestBodyShape::Stream { item_ty, .. } => match item_ty {
+            hir::TypeSpec::ScopedName(scoped) => {
+                let parts = scoped
+                    .name
+                    .iter()
+                    .map(|part| crate::generate::typescript::definition::names::ts_ident(part))
+                    .collect::<Vec<_>>();
+                Some(format!("models.{}", parts.join(".")))
+            }
+            _ => None,
+        },
     };
 
     let stream_item_schema_ref =
-        if let HttpResponseBodyShape::Stream { .. } = &op.http.response.body.shape {
-            // TODO: handle inline schemas
-            Some(scoped_name(module_path, "FIXME"))
+        if let HttpResponseBodyShape::Stream { item_ty, .. } = &op.http.response.body.shape {
+            match item_ty {
+                hir::TypeSpec::ScopedName(scoped) => {
+                    let parts = scoped
+                        .name
+                        .iter()
+                        .map(|part| crate::generate::typescript::definition::names::ts_ident(part))
+                        .collect::<Vec<_>>();
+                    Some(format!("models.{}", parts.join(".")))
+                }
+                _ => None,
+            }
         } else {
             None
         };
@@ -394,7 +431,7 @@ fn build_response_fields(op: &HttpOperation, module_path: &[String]) -> Vec<Para
         fields.push(ParamDeclContext {
             prop: "return".to_string(),
             ty: ts_type_for_type_spec(ty, module_path, TypeRefTarget::Types),
-            schema: zod_schema_for_type_spec(ty, module_path),
+            schema: zod_schema_for_type_spec_with_prefix(ty, module_path, Some("models")),
             optional: false,
             doc: Vec::new(),
         });
@@ -408,7 +445,11 @@ fn build_response_fields(op: &HttpOperation, module_path: &[String]) -> Vec<Para
             fields.push(ParamDeclContext {
                 prop: crate::generate::typescript::definition::names::ts_prop_name(&param.name),
                 ty: ts_type_for_type_spec(&param.ty, module_path, TypeRefTarget::Types),
-                schema: zod_schema_for_type_spec(&param.ty, module_path),
+                schema: zod_schema_for_type_spec_with_prefix(
+                    &param.ty,
+                    module_path,
+                    Some("models"),
+                ),
                 optional: param.annotations.iter().any(|a| {
                     matches!(
                         a,
@@ -533,7 +574,7 @@ fn build_client_stream_ty(
         let item_ty_str = if was_flattened {
             ts_type_for_type_spec(item_ty, module_path, TypeRefTarget::Client)
         } else if let Some(name) = request_name {
-            TsType::ScopedName(scoped_name(module_path, name))
+            TsType::ScopedName(format!("ifaceTypes.{}", scoped_name(module_path, name)))
         } else {
             TsType::Void
         };

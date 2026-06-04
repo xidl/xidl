@@ -97,9 +97,7 @@ baseUrl : string, path : string
     )&&path.startsWith(
     "/"
     )){
-        return`${baseUrl}${path.slice(
-            1
-            )}`;
+        return`${baseUrl}${path.slice(1)}`;
     }
     if(!baseUrl.endsWith(
     "/"
@@ -221,21 +219,13 @@ cookies : string[], key : string, value : unknown, optional : boolean, isMulti :
     )){
         for(const item of value){
             cookies.push(
-            `${key}=${encodeURIComponent(
-                encodeScalar(
-                item
-                )
-                )}`
+            `${key}=${encodeURIComponent(encodeScalar(item))}`
             );
         }
         return;
     }
     cookies.push(
-    `${key}=${encodeURIComponent(
-        encodeScalar(
-        value
-        )
-        )}`
+    `${key}=${encodeURIComponent(encodeScalar(value))}`
     );
 }
 
@@ -285,9 +275,7 @@ path : string, query : URLSearchParams, headers : Headers, auth : ClientAuth | u
     }
     switch(auth.kind){
         case"basic" : headers.set(
-        "Authorization", `Basic ${btoa(
-            `${auth.username}:${auth.password}`
-            )}`
+        "Authorization", `Basic ${btoa(`${auth.username}:${auth.password}`)}`
         );
         break;
         case"bearer" : case"oauth2" : headers.set(
@@ -306,9 +294,7 @@ path : string, query : URLSearchParams, headers : Headers, auth : ClientAuth | u
                 const current = headers.get(
                 "Cookie"
                 );
-                const next = `${name}=${encodeURIComponent(
-                    auth.value
-                    )}`;
+                const next = `${name}=${encodeURIComponent(auth.value)}`;
                 headers.set(
                 "Cookie", current ?`${current}; ${next}` : next
                 );
@@ -796,9 +782,7 @@ Uint8Array
             ) : next.value;
             controller.enqueue(
             encoder.encode(
-            `${JSON.stringify(
-                serialized
-                )}\n`
+            `${JSON.stringify(serialized)}\n`
             )
             );
 
@@ -834,7 +818,9 @@ export class HttpStreamSseServiceClient{
 
     watch_topic(
     topic : string, lang : string
-    ) : string{
+    ) : AsyncIterable<
+    string
+    >{
         const parsed = ifaceSchemas.HttpStreamSseServiceWatchTopicRequestSchema.parse(
         {
             "topic" : topic, "lang" : lang
@@ -880,7 +866,7 @@ export class HttpStreamSseServiceClient{
         >(
         this.fetchImpl, url, {
             method : "GET", headers
-        }, ifaceSchemas.FIXMESchema
+        }, undefined
         );
     }
 
@@ -985,7 +971,7 @@ export class HttpStreamSseServiceClient{
         const resp = await this.fetchImpl(
         url, {
             method : "POST", headers, body : encodeRequestBody(
-            body, "application/json", this.codecs, ifaceSchemas.FIXMESchema
+            body, "application/json", this.codecs, ifaceSchemas.HttpStreamSseServiceSetAttributeOnlineRequestSchema
             )
         }
         );
@@ -999,7 +985,9 @@ export class HttpStreamSseServiceClient{
 
     watch_attribute_online(
 
-    ) : boolean{
+    ) : AsyncIterable<
+    boolean
+    >{
         let path = "/HttpStreamSseService/watch_attribute_online";
         const query = new URLSearchParams(
 
@@ -1032,7 +1020,7 @@ export class HttpStreamSseServiceClient{
         >(
         this.fetchImpl, url, {
             method : "GET", headers
-        }, ifaceSchemas.FIXMESchema
+        }, undefined
         );
     }
 }
@@ -1633,15 +1621,15 @@ T
                 ) : item;
                 controller.enqueue(
                 encoder.encode(
-                `event: next\n data: ${JSON.stringify(
-                    serialized
-                    )}\n\n`
+                "event: next\ndata: "+JSON.stringify(
+                serialized
+                )+"\n\n"
                 )
                 );
             }
             controller.enqueue(
             encoder.encode(
-            "event: complete\n data: done\n\n"
+            "event: complete\ndata: done\n\n"
             )
             );
             controller.close(
@@ -1753,11 +1741,7 @@ headers : Headers, name : string, value : unknown, isMulti : boolean
     ];
     for(const item of items){
         headers.append(
-        "Set-Cookie", `${name}=${encodeURIComponent(
-            encodeScalar(
-            item
-            )
-            )}`
+        "Set-Cookie", `${name}=${encodeURIComponent(encodeScalar(item))}`
         );
     }
 }
@@ -1964,7 +1948,7 @@ service : HttpStreamSseService, options : ServerOptions = {
             payload as ifaceTypes.HttpStreamSseServiceWatchTopicRequest
             );
             return sseResponse(
-            result, options, ifaceSchemas.FIXMESchema
+            result, options
             );
 
         },
@@ -2053,7 +2037,7 @@ service : HttpStreamSseService, options : ServerOptions = {
 
             );
             return sseResponse(
-            result, options, ifaceSchemas.FIXMESchema
+            result, options
             );
 
         },
@@ -2061,3 +2045,7 @@ service : HttpStreamSseService, options : ServerOptions = {
     ], options,
     );
 }
+===============
+http_stream_sse.ts
+===============
+export {};

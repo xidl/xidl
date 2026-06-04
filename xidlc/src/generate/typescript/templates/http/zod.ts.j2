@@ -5,8 +5,8 @@
 import { z } from "zod";
 import { xjson } from "@xidl/xidl-typescript-codec";
 {% if imports | length > 0 %}
-    import { {{ imports | join(", ") }} } from "./{{ file_stem }}.zod";
-    export { {{ imports | join(", ") }} };
+    import * as models from "./{{ file_stem }}.zod";
+    export { models };
 {% endif %}
 {% for block in blocks %}
     {{ block }}
