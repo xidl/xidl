@@ -109,7 +109,7 @@ def step_impl(context, lang):
         if f.endswith(".iface.zod.ts"):
             found_iface_zod = True
             content = open(os.path.join(context.lang_dir, f)).read()
-            assert re.search(r"import\s*\{[^}]+\}\s*from\s*[\"']\./", content) is not None
+            assert re.search(r"import\s*(\*\s*as\s+\w+|\{\s*[^}]+\s*\})\s*from\s*[\"']\./", content) is not None
     assert found_iface_zod, f"iface.zod.ts file not found in {files}"
 
 @then('the generated {lang} code should contain correct User struct and UserService interface')
@@ -156,6 +156,7 @@ def get_module_name(lang_dir):
     for f in files:
         if f.endswith("_http.py"): return f[:-8]
         if f.endswith("_http.go"): return f[:-8]
+        if f.endswith(".server.ts"): return f[:-10]
         if f.endswith(".rs") and not f.startswith("mod") and "jsonrpc" not in f: return f[:-3]
         if f.endswith(".rs") and "jsonrpc" in f: return f[:-3]
     return "main"
@@ -288,7 +289,30 @@ if __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port
         if "complex_rest" in context.idl_file:
             server_code = f'package main\nimport ("context"; "github.com/gin-gonic/gin"; "sync"; "net/http"; "fmt")\ntype MyUserService struct {{ users sync.Map }}\nfunc (s *MyUserService) GetUser(ctx context.Context, req *UserServiceGetUserRequest) (*UserServiceGetUserResponse, error) {{\n\tval, ok := s.users.Load(req.Id); if !ok {{ return &UserServiceGetUserResponse{{}}, nil }}\n\treturn &UserServiceGetUserResponse{{Return: *val.(*User)}}, nil\n}}\nfunc (s *MyUserService) CreateUser(ctx context.Context, req *UserServiceCreateUserRequest) (*UserServiceCreateUserResponse, error) {{\n\ts.users.Store(req.User.Id, &req.User); return &UserServiceCreateUserResponse{{Return: req.User}}, nil\n}}\nfunc (s *MyUserService) ListUsers(ctx context.Context, req *UserServiceListUsersRequest) (*UserServiceListUsersResponse, error) {{\n\tvar users []User; s.users.Range(func(k, v interface{{}}) bool {{ users = append(users, *v.(*User)); return true }})\n\treturn &UserServiceListUsersResponse{{Return: users}}, nil\n}}\nfunc main() {{ r := gin.Default(); svc := &MyUserService{{}}; RegisterUserServiceHandler(r, svc); http.ListenAndServe(fmt.Sprintf(":%d", {context.port}), r) }}'
         elif "all_scenarios" in context.idl_file:
-            server_code = f'package main\nimport ("context"; "github.com/gin-gonic/gin"; "net/http"; "fmt")\ntype MyAllScenarios struct {{ }}\nfunc (s *MyAllScenarios) GetItem(ctx context.Context, req *AllScenariosServiceGetItemRequest) (*AllScenariosServiceGetItemResponse, error) {{ return &AllScenariosServiceGetItemResponse{{Return: fmt.Sprintf("Item %d with %s and %s", req.Id, req.Filter, req.TraceId)}}, nil }}\nfunc (s *MyAllScenarios) CreateItem(ctx context.Context, req *AllScenariosServiceCreateItemRequest) (*AllScenariosServiceCreateItemResponse, error) {{ return &AllScenariosServiceCreateItemResponse{{Return: 42}}, nil }}\nfunc (s *MyAllScenarios) UpdateItem(ctx context.Context, req *AllScenariosServiceUpdateItemRequest) (*AllScenariosServiceUpdateItemResponse, error) {{ return &AllScenariosServiceUpdateItemResponse{{}}, nil }}\nfunc (s *MyAllScenarios) DeleteItem(ctx context.Context, req *AllScenariosServiceDeleteItemRequest) (*AllScenariosServiceDeleteItemResponse, error) {{ return &AllScenariosServiceDeleteItemResponse{{}}, nil }}\nfunc (s *MyAllScenarios) UploadForm(ctx context.Context, req *AllScenariosServiceUploadFormRequest) (*AllScenariosServiceUploadFormResponse, error) {{ return &AllScenariosServiceUploadFormResponse{{}}, nil }}\nfunc (s *MyAllScenarios) SecureData(ctx context.Context, req *AllScenariosServiceSecureDataRequest) (*AllScenariosServiceSecureDataResponse, error) {{ return &AllScenariosServiceSecureDataResponse{{Return: "Secret"}}, nil }}\nfunc main() {{ r := gin.Default(); svc := &MyAllScenarios{{}}; RegisterAllScenariosServiceHandler(r, svc); http.ListenAndServe(fmt.Sprintf(":%d", {context.port}), r) }}'
+            server_code = f'''package main
+import ("context"; "github.com/gin-gonic/gin"; "net/http"; "fmt"; "sync")
+type MyAllScenarios struct {{
+    status Status
+    sync.Mutex
+}}
+func (s *MyAllScenarios) GetItem(ctx context.Context, req *AllScenariosServiceGetItemRequest) (*AllScenariosServiceGetItemResponse, error) {{ return &AllScenariosServiceGetItemResponse{{Return: fmt.Sprintf("Item %d with %s and %s", req.Id, req.Filter, req.TraceId)}}, nil }}
+func (s *MyAllScenarios) CreateItem(ctx context.Context, req *AllScenariosServiceCreateItemRequest) (*AllScenariosServiceCreateItemResponse, error) {{ return &AllScenariosServiceCreateItemResponse{{Return: 42}}, nil }}
+func (s *MyAllScenarios) UpdateItem(ctx context.Context, req *AllScenariosServiceUpdateItemRequest) (*AllScenariosServiceUpdateItemResponse, error) {{ return &AllScenariosServiceUpdateItemResponse{{}}, nil }}
+func (s *MyAllScenarios) DeleteItem(ctx context.Context, req *AllScenariosServiceDeleteItemRequest) (*AllScenariosServiceDeleteItemResponse, error) {{ return &AllScenariosServiceDeleteItemResponse{{}}, nil }}
+func (s *MyAllScenarios) GetAttributeSystemStatus(ctx context.Context, req *AllScenariosServiceGetAttributeSystemStatusRequest) (*AllScenariosServiceGetAttributeSystemStatusResponse, error) {{
+    s.Lock(); defer s.Unlock(); return &AllScenariosServiceGetAttributeSystemStatusResponse{{Return: s.status}}, nil
+}}
+func (s *MyAllScenarios) SetAttributeSystemStatus(ctx context.Context, req *AllScenariosServiceSetAttributeSystemStatusRequest) (*AllScenariosServiceSetAttributeSystemStatusResponse, error) {{
+    s.Lock(); defer s.Unlock(); s.status = req.SystemStatus; return &AllScenariosServiceSetAttributeSystemStatusResponse{{}}, nil
+}}
+func (s *MyAllScenarios) GetAttributeVersion(ctx context.Context, req *AllScenariosServiceGetAttributeVersionRequest) (*AllScenariosServiceGetAttributeVersionResponse, error) {{
+    return &AllScenariosServiceGetAttributeVersionResponse{{Return: "1.0.0"}}, nil
+}}
+func (s *MyAllScenarios) UploadForm(ctx context.Context, req *AllScenariosServiceUploadFormRequest) (*AllScenariosServiceUploadFormResponse, error) {{ return &AllScenariosServiceUploadFormResponse{{}}, nil }}
+func (s *MyAllScenarios) SecureData(ctx context.Context, req *AllScenariosServiceSecureDataRequest) (*AllScenariosServiceSecureDataResponse, error) {{ return &AllScenariosServiceSecureDataResponse{{Return: "Secret"}}, nil }}
+func main() {{ r := gin.Default(); svc := &MyAllScenarios{{status: StatusActive}}; RegisterAllScenariosServiceHandler(r, svc); http.ListenAndServe(fmt.Sprintf(":%d", {context.port}), r) }}'''
+        elif "streaming" in context.idl_file:
+            server_code = f'package main\nimport ("context"; "github.com/gin-gonic/gin"; "net/http"; "fmt"; xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest")\ntype MyStream struct{{}}\nfunc (s *MyStream) Ticks(ctx context.Context, req *StreamingServiceTicksRequest, stream xidlgohttp.ServerStreamWriter[int32]) error {{\n\tfor i := int32(0); i < req.Count; i++ {{\n\t\tif err := stream.Write(i); err != nil {{\n\t\t\treturn err\n\t\t}}\n\t}}\n\treturn nil\n}}\nfunc main() {{ r := gin.Default(); svc := &MyStream{{}}; RegisterStreamingServiceHandler(r, svc); http.ListenAndServe(fmt.Sprintf(":%d", {context.port}), r) }}'
         elif "media_types" in context.idl_file:
             server_code = f'package main\nimport ("context"; "github.com/gin-gonic/gin"; "net/http"; "fmt")\ntype MyForm struct {{ }}\nfunc (s *MyForm) Submit(ctx context.Context, req *FormServiceSubmitRequest) (*FormServiceSubmitResponse, error) {{ return &FormServiceSubmitResponse{{Return: fmt.Sprintf("Received %s age %d", req.Name, req.Age)}}, nil }}\nfunc main() {{ r := gin.Default(); svc := &MyForm{{}}; RegisterFormServiceHandler(r, svc); http.ListenAndServe(fmt.Sprintf(":%d", {context.port}), r) }}'
         elif "issue_171" in context.idl_file:
@@ -304,6 +328,111 @@ if __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port
         subprocess.run(["go", "mod", "tidy"], cwd=context.lang_dir, check=True)
         context.server_process = subprocess.Popen(["go", "run", "."], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         t = threading.Thread(target=run_server_logging, args=(context.server_process, "GO")); t.daemon = True; t.start()
+        wait_for_port(context.port)
+    elif lang == "ts":
+        with open(os.path.join(context.lang_dir, "package.json"), "w") as f:
+            f.write('{"name": "test-ts-gen", "version": "1.0.0", "type": "module"}')
+        with open(os.path.join(context.lang_dir, "tsconfig.json"), "w") as f:
+            f.write('{"compilerOptions": {"target": "ESNext", "module": "ESNext", "moduleResolution": "node", "ignoreDeprecations": "6.0", "skipLibCheck": true, "strict": true}}')
+
+        codec_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../typescript/xidl-typescript-codec"))
+        subprocess.run(["npm", "install", "zod@^3.23.0", "typescript", "tsx", codec_path], cwd=context.lang_dir, check=True, capture_output=True)
+
+        if "complex_rest" in context.idl_file:
+            server_code = f"""
+import {{ createServer }} from 'node:http';
+import {{ createUserServiceHandler, type UserService }} from './{module_name}.server.js';
+class MyUserService implements UserService {{
+  private users = new Map<number, any>();
+  async get_user(req: {{ id: number }}): Promise<any> {{ return this.users.get(req.id); }}
+  async create_user(req: {{ user: any }}): Promise<any> {{ this.users.set(req.user.id, req.user); return req.user; }}
+  async list_users(req: {{ filter: string }}): Promise<any[]> {{ return Array.from(this.users.values()); }}
+}}
+const handler = createUserServiceHandler(new MyUserService());
+"""
+        elif "all_scenarios" in context.idl_file:
+            server_code = f"""
+import {{ createServer }} from 'node:http';
+import {{ createAllScenariosServiceHandler, type AllScenariosService }} from './{module_name}.server.js';
+class MyAllScenarios implements AllScenariosService {{
+  private status = "ACTIVE";
+  async get_item(req: {{ id: number, filter: string, trace_id: string }}): Promise<string> {{ return `Item ${{req.id}} with ${{req.filter}} and ${{req.trace_id}}`; }}
+  async create_item(req: {{ name: string, payload: any }}): Promise<number> {{ return 42; }}
+  async update_item(req: {{ id: number, metadata: any[] }}): Promise<void> {{}}
+  async delete_item(req: {{ id: number }}): Promise<void> {{}}
+  async upload_form(req: {{ key: string, value: string }}): Promise<void> {{}}
+  async secure_data(req: {{ auth: any }}): Promise<string> {{ return "Secret"; }}
+  async get_attribute_system_status(): Promise<string> {{ return this.status; }}
+  async set_attribute_system_status(req: {{ system_status: string }}): Promise<void> {{ this.status = req.system_status; }}
+  async get_attribute_version(): Promise<string> {{ return "1.0.0"; }}
+}}
+const handler = createAllScenariosServiceHandler(new MyAllScenarios());
+"""
+        elif "streaming" in context.idl_file:
+            server_code = f"""
+import {{ createServer }} from 'node:http';
+import {{ createStreamingServiceHandler, type StreamingService }} from './{module_name}.server.js';
+class MyStreaming implements StreamingService {{
+  async *ticks(req: {{ count: number }}): AsyncIterable<number> {{
+    for (let i = 0; i < req.count; i++) {{ yield i; }}
+  }}
+}}
+const handler = createStreamingServiceHandler(new MyStreaming());
+"""
+        elif "media_types" in context.idl_file:
+            server_code = f"""
+import {{ createServer }} from 'node:http';
+import {{ createFormServiceHandler, type FormService }} from './{module_name}.server.js';
+class MyForm implements FormService {{
+  async submit(req: {{ name: string, age: number }}): Promise<string> {{ return `Received ${{req.name}} age ${{req.age}}`; }}
+}}
+const handler = createFormServiceHandler(new MyForm());
+"""
+        elif "issue_171" in context.idl_file:
+            server_code = f"""
+import {{ createServer }} from 'node:http';
+import {{ issue_171 }} from './{module_name}.server.js';
+class MyRepro implements issue_171.ReproService {{
+  async flattenAny(req: {{ payload: any }}): Promise<void> {{ if (!req.payload || req.payload.foo !== "bar") throw new Error("invalid"); }}
+  async flattenStructWithAny(req: {{ payload: {{ field: any }} }}): Promise<void> {{ if (!req.payload?.field || req.payload.field.foo !== "bar") throw new Error("invalid"); }}
+}}
+const handler = issue_171.createReproServiceHandler(new MyRepro());
+"""
+        else:
+            server_code = f"// TODO: implement for other IDLs"
+
+        server_code += f"""
+const server = createServer(async (req, res) => {{
+  try {{
+    const protocol = (req.socket as any).encrypted ? 'https' : 'http';
+    const fullUrl = `${{protocol}}://${{req.headers.host}}${{req.url}}`;
+    const request = new Request(fullUrl, {{
+      method: req.method,
+      headers: req.headers as any,
+      body: req.method !== 'GET' && req.method !== 'HEAD' ? (req as any) : undefined,
+      // @ts-ignore
+      duplex: 'half'
+    }});
+    const response = await handler(request);
+    console.log(`TS LOG: ${{req.method}} ${{req.url}} -> ${{response.status}}`);
+    res.statusCode = response.status;
+    for (const [key, value] of response.headers) {{ res.setHeader(key, value); }}
+    if (response.body) {{ for await (const chunk of response.body as any) {{ res.write(chunk); }} }}
+    res.end();
+  }} catch (err) {{ 
+    console.error('TS LOG: Error', err);
+    res.statusCode = 500; res.end(String(err)); 
+  }}
+}});
+server.listen({context.port}, '127.0.0.1', () => {{
+    console.log(`TS LOG: Server listening on {context.port}`);
+}});
+"""
+
+        with open(os.path.join(context.lang_dir, "server.ts"), "w") as f: f.write(server_code)
+        env = os.environ.copy(); env["PORT"] = str(context.port)
+        context.server_process = subprocess.Popen(["npx", "tsx", "server.ts"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+        t = threading.Thread(target=run_server_logging, args=(context.server_process, "TS")); t.daemon = True; t.start()
         wait_for_port(context.port)
     elif lang == "rust":
         root_dir = os.path.abspath(".")
@@ -514,15 +643,19 @@ def step_impl(context, attr, value):
         inner = res["result"].get("value") or res["result"].get("return") or res["result"]
         assert str(inner) == value
     else:
-        url = f"http://127.0.0.1:{context.port}/{attr}"
-        if context.lang == "rust": url = f"http://127.0.0.1:{context.port}/attribute/{attr}"
-        if context.lang == "rust" and attr == "system_status":
-             resp = requests.post(url, json={"value": value}, timeout=10)
-        else:
-             resp = requests.put(url, json={"value": value}, timeout=10)
+        url = f"http://127.0.0.1:{context.port}/attribute/{attr}"
+        # Standard REST attributes use the attribute name as the key in the payload.
+        # Rust (axum) might also support 'value' but the projected HIR uses the ident.
+        payload = {attr: value}
+        resp = requests.post(url, json=payload, timeout=10)
         resp = requests.get(url, timeout=10)
+        if resp.status_code != 200:
+            print(f"DEBUG: GET {url} returned {resp.status_code}: {resp.text}")
         data = resp.json(); res = data.get("value") or data.get("return") or data if isinstance(data, dict) else data
         assert str(res) == value or (isinstance(res, dict) and str(res.get("value")) == value)
+        # Check if the returned value is inside a field named after the attribute (some generators do this)
+        if isinstance(res, dict) and attr in res:
+             assert str(res.get(attr)) == value
 
 @then('the client can create an item with name "{name}" and payload message "{msg}"')
 def step_impl(context, name, msg):
@@ -569,7 +702,7 @@ def step_impl(context, count):
     for line in resp.iter_lines():
         if line:
             raw = line.decode()
-            if raw.startswith('data:'):
+            if raw.startswith('data:') and 'done' not in raw:
                 received += 1
     assert received == count
 

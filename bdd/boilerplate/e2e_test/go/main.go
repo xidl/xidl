@@ -116,7 +116,18 @@ type MyE2ETypeServer struct {
 	attr2 []string
 }
 
+func (s *MyE2ETypeServer) GetAttributeTypeAttr1(ctx context.Context, req *E2ETypeServerGetAttributeTypeAttr1Request) (*E2ETypeServerGetAttributeTypeAttr1Response, error) {
+	return &E2ETypeServerGetAttributeTypeAttr1Response{Return: s.attr1}, nil
+}
 
+func (s *MyE2ETypeServer) SetAttributeTypeAttr1(ctx context.Context, req *E2ETypeServerSetAttributeTypeAttr1Request) (*E2ETypeServerSetAttributeTypeAttr1Response, error) {
+	s.attr1 = req.TypeAttr1
+	return &E2ETypeServerSetAttributeTypeAttr1Response{}, nil
+}
+
+func (s *MyE2ETypeServer) GetAttributeTypeAttr2(ctx context.Context, req *E2ETypeServerGetAttributeTypeAttr2Request) (*E2ETypeServerGetAttributeTypeAttr2Response, error) {
+	return &E2ETypeServerGetAttributeTypeAttr2Response{Return: s.attr2}, nil
+}
 
 func (s *MyE2ETypeServer) SimpleOp(ctx context.Context, req *E2ETypeServerSimpleOpRequest) (*E2ETypeServerSimpleOpResponse, error) {
 	return &E2ETypeServerSimpleOpResponse{}, nil
@@ -219,9 +230,151 @@ type MyE2EAttribute struct {
 	attr13 any
 	attr14 []any
 	attr15 map[string]any
+	attr16 string
 }
 
+func (s *MyE2EAttribute) GetAttributeAttr1(ctx context.Context, req *E2EAttributeGetAttributeAttr1Request) (*E2EAttributeGetAttributeAttr1Response, error) {
+	return &E2EAttributeGetAttributeAttr1Response{Return: s.attr1}, nil
+}
 
+func (s *MyE2EAttribute) SetAttributeAttr1(ctx context.Context, req *E2EAttributeSetAttributeAttr1Request) (*E2EAttributeSetAttributeAttr1Response, error) {
+	s.attr1 = req.Attr1
+	return &E2EAttributeSetAttributeAttr1Response{}, nil
+}
+
+func (s *MyE2EAttribute) GetAttributeAttr2(ctx context.Context, req *E2EAttributeGetAttributeAttr2Request) (*E2EAttributeGetAttributeAttr2Response, error) {
+	return &E2EAttributeGetAttributeAttr2Response{Return: s.attr2}, nil
+}
+
+func (s *MyE2EAttribute) GetAttributeAttr3(ctx context.Context, req *E2EAttributeGetAttributeAttr3Request) (*E2EAttributeGetAttributeAttr3Response, error) {
+	return &E2EAttributeGetAttributeAttr3Response{Return: s.attr3}, nil
+}
+
+func (s *MyE2EAttribute) SetAttributeAttr3(ctx context.Context, req *E2EAttributeSetAttributeAttr3Request) (*E2EAttributeSetAttributeAttr3Response, error) {
+	s.attr3 = req.Attr3
+	return &E2EAttributeSetAttributeAttr3Response{}, nil
+}
+
+func (s *MyE2EAttribute) GetAttributeAttr4(ctx context.Context, req *E2EAttributeGetAttributeAttr4Request) (*E2EAttributeGetAttributeAttr4Response, error) {
+	return &E2EAttributeGetAttributeAttr4Response{Return: s.attr4}, nil
+}
+
+func (s *MyE2EAttribute) SetAttributeAttr4(ctx context.Context, req *E2EAttributeSetAttributeAttr4Request) (*E2EAttributeSetAttributeAttr4Response, error) {
+	s.attr4 = req.Attr4
+	return &E2EAttributeSetAttributeAttr4Response{}, nil
+}
+
+func (s *MyE2EAttribute) GetAttributeAttr5(ctx context.Context, req *E2EAttributeGetAttributeAttr5Request) (*E2EAttributeGetAttributeAttr5Response, error) {
+	return &E2EAttributeGetAttributeAttr5Response{Return: s.attr5}, nil
+}
+
+func (s *MyE2EAttribute) SetAttributeAttr5(ctx context.Context, req *E2EAttributeSetAttributeAttr5Request) (*E2EAttributeSetAttributeAttr5Response, error) {
+	s.attr5 = req.Attr5
+	return &E2EAttributeSetAttributeAttr5Response{}, nil
+}
+
+func (s *MyE2EAttribute) GetAttributeAttr6(ctx context.Context, req *E2EAttributeGetAttributeAttr6Request) (*E2EAttributeGetAttributeAttr6Response, error) {
+	return &E2EAttributeGetAttributeAttr6Response{Return: s.attr6}, nil
+}
+
+func (s *MyE2EAttribute) SetAttributeAttr6(ctx context.Context, req *E2EAttributeSetAttributeAttr6Request) (*E2EAttributeSetAttributeAttr6Response, error) {
+	s.attr6 = req.Attr6
+	return &E2EAttributeSetAttributeAttr6Response{}, nil
+}
+
+func (s *MyE2EAttribute) GetAttributeAttr61(ctx context.Context, req *E2EAttributeGetAttributeAttr61Request) (*E2EAttributeGetAttributeAttr61Response, error) {
+	return &E2EAttributeGetAttributeAttr61Response{Return: s.attr61}, nil
+}
+
+func (s *MyE2EAttribute) SetAttributeAttr61(ctx context.Context, req *E2EAttributeSetAttributeAttr61Request) (*E2EAttributeSetAttributeAttr61Response, error) {
+	s.attr61 = req.Attr61
+	return &E2EAttributeSetAttributeAttr61Response{}, nil
+}
+
+func (s *MyE2EAttribute) GetAttributeAttr7(ctx context.Context, req *E2EAttributeGetAttributeAttr7Request) (*E2EAttributeGetAttributeAttr7Response, error) {
+	return &E2EAttributeGetAttributeAttr7Response{Return: s.attr7}, nil
+}
+
+func (s *MyE2EAttribute) SetAttributeAttr7(ctx context.Context, req *E2EAttributeSetAttributeAttr7Request) (*E2EAttributeSetAttributeAttr7Response, error) {
+	s.attr7 = req.Attr7
+	return &E2EAttributeSetAttributeAttr7Response{}, nil
+}
+
+func (s *MyE2EAttribute) GetAttributeAttr8(ctx context.Context, req *E2EAttributeGetAttributeAttr8Request) (*E2EAttributeGetAttributeAttr8Response, error) {
+	return &E2EAttributeGetAttributeAttr8Response{Return: s.attr8}, nil
+}
+
+func (s *MyE2EAttribute) SetAttributeAttr8(ctx context.Context, req *E2EAttributeSetAttributeAttr8Request) (*E2EAttributeSetAttributeAttr8Response, error) {
+	s.attr8 = req.Attr8
+	return &E2EAttributeSetAttributeAttr8Response{}, nil
+}
+
+func (s *MyE2EAttribute) GetAttributeAttr9(ctx context.Context, req *E2EAttributeGetAttributeAttr9Request) (*E2EAttributeGetAttributeAttr9Response, error) {
+	return &E2EAttributeGetAttributeAttr9Response{Return: s.attr9}, nil
+}
+
+func (s *MyE2EAttribute) SetAttributeAttr9(ctx context.Context, req *E2EAttributeSetAttributeAttr9Request) (*E2EAttributeSetAttributeAttr9Response, error) {
+	s.attr9 = req.Attr9
+	return &E2EAttributeSetAttributeAttr9Response{}, nil
+}
+
+func (s *MyE2EAttribute) GetAttributeAttr10(ctx context.Context, req *E2EAttributeGetAttributeAttr10Request) (*E2EAttributeGetAttributeAttr10Response, error) {
+	return &E2EAttributeGetAttributeAttr10Response{Return: s.attr10}, nil
+}
+
+func (s *MyE2EAttribute) SetAttributeAttr10(ctx context.Context, req *E2EAttributeSetAttributeAttr10Request) (*E2EAttributeSetAttributeAttr10Response, error) {
+	s.attr10 = req.Attr10
+	return &E2EAttributeSetAttributeAttr10Response{}, nil
+}
+
+func (s *MyE2EAttribute) GetAttributeAttr11(ctx context.Context, req *E2EAttributeGetAttributeAttr11Request) (*E2EAttributeGetAttributeAttr11Response, error) {
+	return &E2EAttributeGetAttributeAttr11Response{Return: s.attr11}, nil
+}
+
+func (s *MyE2EAttribute) SetAttributeAttr11(ctx context.Context, req *E2EAttributeSetAttributeAttr11Request) (*E2EAttributeSetAttributeAttr11Response, error) {
+	s.attr11 = req.Attr11
+	return &E2EAttributeSetAttributeAttr11Response{}, nil
+}
+
+func (s *MyE2EAttribute) GetAttributeAttr12(ctx context.Context, req *E2EAttributeGetAttributeAttr12Request) (*E2EAttributeGetAttributeAttr12Response, error) {
+	return &E2EAttributeGetAttributeAttr12Response{Return: s.attr12}, nil
+}
+
+func (s *MyE2EAttribute) SetAttributeAttr12(ctx context.Context, req *E2EAttributeSetAttributeAttr12Request) (*E2EAttributeSetAttributeAttr12Response, error) {
+	s.attr12 = req.Attr12
+	return &E2EAttributeSetAttributeAttr12Response{}, nil
+}
+
+func (s *MyE2EAttribute) GetAttributeAttr13(ctx context.Context, req *E2EAttributeGetAttributeAttr13Request) (*E2EAttributeGetAttributeAttr13Response, error) {
+	return &E2EAttributeGetAttributeAttr13Response{Return: s.attr13}, nil
+}
+
+func (s *MyE2EAttribute) SetAttributeAttr13(ctx context.Context, req *E2EAttributeSetAttributeAttr13Request) (*E2EAttributeSetAttributeAttr13Response, error) {
+	s.attr13 = req.Attr13
+	return &E2EAttributeSetAttributeAttr13Response{}, nil
+}
+
+func (s *MyE2EAttribute) GetAttributeAttr14(ctx context.Context, req *E2EAttributeGetAttributeAttr14Request) (*E2EAttributeGetAttributeAttr14Response, error) {
+	return &E2EAttributeGetAttributeAttr14Response{Return: s.attr14}, nil
+}
+
+func (s *MyE2EAttribute) SetAttributeAttr14(ctx context.Context, req *E2EAttributeSetAttributeAttr14Request) (*E2EAttributeSetAttributeAttr14Response, error) {
+	s.attr14 = req.Attr14
+	return &E2EAttributeSetAttributeAttr14Response{}, nil
+}
+
+func (s *MyE2EAttribute) GetAttributeAttr15(ctx context.Context, req *E2EAttributeGetAttributeAttr15Request) (*E2EAttributeGetAttributeAttr15Response, error) {
+	return &E2EAttributeGetAttributeAttr15Response{Return: s.attr15}, nil
+}
+
+func (s *MyE2EAttribute) SetAttributeAttr15(ctx context.Context, req *E2EAttributeSetAttributeAttr15Request) (*E2EAttributeSetAttributeAttr15Response, error) {
+	s.attr15 = req.Attr15
+	return &E2EAttributeSetAttributeAttr15Response{}, nil
+}
+
+func (s *MyE2EAttribute) GetAttributeAttr16(ctx context.Context, req *E2EAttributeGetAttributeAttr16Request) (*E2EAttributeGetAttributeAttr16Response, error) {
+	return &E2EAttributeGetAttributeAttr16Response{Return: s.attr16}, nil
+}
 
 type MyE2EHttpForm struct{}
 
@@ -234,6 +387,13 @@ func (s *MyE2EHttpForm) SubmitProfile(ctx context.Context, req *E2EHttpFormSubmi
 
 type MyE2EHttpScopeMatrix struct{}
 
+func (s *MyE2EHttpScopeMatrix) GetAttributeScopeInheritedAttr(ctx context.Context, req *E2EHttpScopeMatrixGetAttributeScopeInheritedAttrRequest) (*E2EHttpScopeMatrixGetAttributeScopeInheritedAttrResponse, error) {
+	return &E2EHttpScopeMatrixGetAttributeScopeInheritedAttrResponse{Return: "inherited"}, nil
+}
+
+func (s *MyE2EHttpScopeMatrix) GetAttributeScopeBareAttr(ctx context.Context, req *E2EHttpScopeMatrixGetAttributeScopeBareAttrRequest) (*E2EHttpScopeMatrixGetAttributeScopeBareAttrResponse, error) {
+	return &E2EHttpScopeMatrixGetAttributeScopeBareAttrResponse{Return: "bare"}, nil
+}
 
 func (s *MyE2EHttpScopeMatrix) DefaultScope(ctx context.Context, req *E2EHttpScopeMatrixDefaultScopeRequest) (*E2EHttpScopeMatrixDefaultScopeResponse, error) {
 	return &E2EHttpScopeMatrixDefaultScopeResponse{Return: req.RequestBody.Name}, nil
@@ -311,58 +471,18 @@ func main() {
 
 	typeServer := &MyE2ETypeServer{attr1: "attr1", attr2: []string{"attr2"}}
 	RegisterE2ETypeServerHandler(r, typeServer)
-	r.GET("/attribute/type_attr1", func(c *gin.Context) {
-		c.JSON(200, typeServer.attr1)
-	})
-	r.POST("/attribute/type_attr1", func(c *gin.Context) {
-		var body struct {
-			Value string `json:"type_attr_1"`
-		}
-		if err := c.ShouldBindJSON(&body); err != nil {
-			c.Status(400)
-			return
-		}
-		typeServer.attr1 = body.Value
-		c.Status(204)
-	})
-	r.GET("/attribute/type_attr2", func(c *gin.Context) {
-		c.JSON(200, typeServer.attr2)
-	})
 
-	attr := &MyE2EAttribute{attr1: "attr1", attr2: []string{"attr2"}, attr4: EnumSimple1V1, attr5: StructEmpty{}}
+	attr := &MyE2EAttribute{
+		attr1:  "attr1",
+		attr2:  []string{"attr2"},
+		attr4:  EnumSimple1V1,
+		attr5:  StructEmpty{},
+		attr61: UnionSimple{Tag: "V1", Value: map[string]any{"data": 1}},
+	}
 	RegisterE2EAttributeHandler(r, attr)
-	r.GET("/attribute/attr1", func(c *gin.Context) {
-		c.JSON(200, attr.attr1)
-	})
-	r.POST("/attribute/attr1", func(c *gin.Context) {
-		var body struct {
-			Value string `json:"attr_1"`
-		}
-		if err := c.ShouldBindJSON(&body); err != nil {
-			c.Status(400)
-			return
-		}
-		attr.attr1 = body.Value
-		c.Status(204)
-	})
-	r.GET("/attribute/attr2", func(c *gin.Context) {
-		c.JSON(200, attr.attr2)
-	})
-	r.GET("/attribute/attr4", func(c *gin.Context) {
-		c.JSON(200, attr.attr4)
-	})
-	r.GET("/attribute/attr61", func(c *gin.Context) {
-		c.JSON(200, map[string]any{
-			"tag":  "V1",
-			"data": 1,
-		})
-	})
 
 	RegisterE2EHttpFormHandler(r, &MyE2EHttpForm{})
 	RegisterE2EHttpScopeMatrixHandler(r, &MyE2EHttpScopeMatrix{})
-	r.GET("/attribute/scope_inherited_attr", func(c *gin.Context) {
-		c.JSON(200, "inherited")
-	})
 	RegisterE2EHttpDefaultsMatrixHandler(r, &MyE2EHttpDefaultsMatrix{})
 	RegisterE2EHttpSecurityMatrixHandler(r, &MyE2EHttpSecurityMatrix{})
 
