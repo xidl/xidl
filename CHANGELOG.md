@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.77.0](https://github.com/xidl/xidl/compare/v0.76.1...v0.77.0) (2026-06-04)
+
+
+### Features
+
+* **xidlc:** update REST generators and snapshots to support cross-language BDD requirements ([d8e59c3](https://github.com/xidl/xidl/commit/d8e59c314b03cb7273a378dd0045ee7343ebe672))
+
 ## [0.76.1](https://github.com/xidl/xidl/compare/v0.76.0...v0.76.1) (2026-06-03)
 
 
