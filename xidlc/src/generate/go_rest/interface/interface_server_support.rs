@@ -13,7 +13,7 @@ pub(super) fn render_accept_check(out: &mut String, method: &MethodMeta) {
         method.response_content_type
     )
     .unwrap();
-    writeln!(out, "\t\t\txidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, \"NOT_ACCEPTABLE\", err.Error())").unwrap();
+    writeln!(out, "\t\t\txidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())").unwrap();
     writeln!(out, "\t\t\treturn").unwrap();
     writeln!(out, "\t\t}}").unwrap();
 }
@@ -58,7 +58,7 @@ pub(super) fn render_content_type_check(out: &mut String, method: &MethodMeta) {
         expected
     )
     .unwrap();
-    writeln!(out, "\t\t\txidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, \"UNSUPPORTED_MEDIA_TYPE\", err.Error())").unwrap();
+    writeln!(out, "\t\t\txidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())").unwrap();
     writeln!(out, "\t\t\treturn").unwrap();
     writeln!(out, "\t\t}}").unwrap();
 }
@@ -80,7 +80,19 @@ pub(super) fn render_server_stream_handler(out: &mut String, method: &MethodMeta
         method.method_name
     )
     .unwrap();
-    writeln!(out, "\t\t\txidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, \"INTERNAL\", err.Error())").unwrap();
+    writeln!(
+        out,
+        "\t\t\tif httpErr, ok := err.(*xidlgohttp.HttpError); ok {{"
+    )
+    .unwrap();
+    writeln!(
+        out,
+        "\t\t\t\txidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)"
+    )
+    .unwrap();
+    writeln!(out, "\t\t\t}} else {{").unwrap();
+    writeln!(out, "\t\t\t\txidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())").unwrap();
+    writeln!(out, "\t\t\t}}").unwrap();
     writeln!(out, "\t\t\treturn").unwrap();
     writeln!(out, "\t\t}}").unwrap();
     writeln!(out, "\t\t_ = stream.Close()").unwrap();
@@ -104,7 +116,19 @@ pub(super) fn render_client_stream_handler(
     )
     .unwrap();
     writeln!(out, "\t\tif err != nil {{").unwrap();
-    writeln!(out, "\t\t\txidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, \"INTERNAL\", err.Error())").unwrap();
+    writeln!(
+        out,
+        "\t\t\tif httpErr, ok := err.(*xidlgohttp.HttpError); ok {{"
+    )
+    .unwrap();
+    writeln!(
+        out,
+        "\t\t\t\txidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)"
+    )
+    .unwrap();
+    writeln!(out, "\t\t\t}} else {{").unwrap();
+    writeln!(out, "\t\t\t\txidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())").unwrap();
+    writeln!(out, "\t\t\t}}").unwrap();
     writeln!(out, "\t\t\treturn").unwrap();
     writeln!(out, "\t\t}}").unwrap();
     render_response_write(out, method, "resp", renderer)
@@ -127,9 +151,22 @@ pub(super) fn render_unary_handler(
         )
         .unwrap();
         writeln!(out, "\t\tif err != nil {{").unwrap();
-        writeln!(out, "\t\t\txidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, \"INTERNAL\", err.Error())").unwrap();
+        writeln!(
+            out,
+            "\t\t\tif httpErr, ok := err.(*xidlgohttp.HttpError); ok {{"
+        )
+        .unwrap();
+        writeln!(
+            out,
+            "\t\t\t\txidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)"
+        )
+        .unwrap();
+        writeln!(out, "\t\t\t}} else {{").unwrap();
+        writeln!(out, "\t\t\t\txidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())").unwrap();
+        writeln!(out, "\t\t\t}}").unwrap();
         writeln!(out, "\t\t\treturn").unwrap();
         writeln!(out, "\t\t}}").unwrap();
+
         render_response_write(out, method, "resp", renderer)?;
     } else {
         writeln!(
@@ -138,7 +175,19 @@ pub(super) fn render_unary_handler(
             method.method_name
         )
         .unwrap();
-        writeln!(out, "\t\t\txidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, \"INTERNAL\", err.Error())").unwrap();
+        writeln!(
+            out,
+            "\t\t\tif httpErr, ok := err.(*xidlgohttp.HttpError); ok {{"
+        )
+        .unwrap();
+        writeln!(
+            out,
+            "\t\t\t\txidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)"
+        )
+        .unwrap();
+        writeln!(out, "\t\t\t}} else {{").unwrap();
+        writeln!(out, "\t\t\t\txidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())").unwrap();
+        writeln!(out, "\t\t\t}}").unwrap();
         writeln!(out, "\t\t\treturn").unwrap();
         writeln!(out, "\t\t}}").unwrap();
         writeln!(out, "\t\tc.Status(http.StatusNoContent)").unwrap();

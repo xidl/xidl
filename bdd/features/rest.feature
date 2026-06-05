@@ -113,3 +113,42 @@ Feature: REST API Generation and Communication
       | e2e_test         | rust |
       | e2e_test         | go   |
       | e2e_test         | ts   |
+
+  Scenario Outline: REST Bad Path - Not Found
+    Given a REST IDL file "bdd/features/data/complex_rest.idl"
+    When I generate <lang> code for the IDL
+    Then the generated <lang> code should be valid
+    And I can run the generated <lang> server and client
+    Then the client gets a 404 error with msg containing "not found" when requesting GET "/999"
+
+    Examples:
+      | lang |
+      | rust |
+      | go   |
+      | ts   |
+
+  Scenario Outline: REST Bad Path - Invalid Parameter
+    Given a REST IDL file "bdd/features/data/complex_rest.idl"
+    When I generate <lang> code for the IDL
+    Then the generated <lang> code should be valid
+    And I can run the generated <lang> server and client
+    # Rust says "Cannot parse...", Go says "invalid syntax" or similar. Both are 400.
+    Then the client gets a 400 error with msg containing "invalid" when requesting GET "/abc"
+
+    Examples:
+      | lang |
+      | go   |
+
+  Scenario: REST Bad Path - Invalid Parameter (Rust)
+    Given a REST IDL file "bdd/features/data/complex_rest.idl"
+    When I generate rust code for the IDL
+    Then the generated rust code should be valid
+    And I can run the generated rust server and client
+    Then the client gets a 400 error with msg containing "cannot parse" when requesting GET "/abc"
+
+  Scenario: REST Bad Path - Invalid Parameter (TS)
+    Given a REST IDL file "bdd/features/data/complex_rest.idl"
+    When I generate ts code for the IDL
+    Then the generated ts code should be valid
+    And I can run the generated ts server and client
+    Then the client gets a 400 error with msg containing "validation failed" when requesting GET "/abc"

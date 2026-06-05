@@ -287,7 +287,7 @@ if __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port
         go_mod = f"module test\ngo 1.25\nreplace github.com/xidl/xidl/golang/xidl-go-rest => {os.path.abspath('golang/xidl-go-rest')}\nreplace github.com/xidl/xidl/golang/xidl-go => {os.path.abspath('golang/xidl-go')}\nreplace github.com/xidl/xidl/golang/xidl-go-codec => {os.path.abspath('golang/xidl-go-codec')}\nrequire github.com/xidl/xidl/golang/xidl-go-rest v0.0.0\nrequire github.com/gin-gonic/gin v1.12.0\n"
         with open(os.path.join(context.lang_dir, "go.mod"), "w") as f: f.write(go_mod)
         if "complex_rest" in context.idl_file:
-            server_code = f'package main\nimport ("context"; "github.com/gin-gonic/gin"; "sync"; "net/http"; "fmt")\ntype MyUserService struct {{ users sync.Map }}\nfunc (s *MyUserService) GetUser(ctx context.Context, req *UserServiceGetUserRequest) (*UserServiceGetUserResponse, error) {{\n\tval, ok := s.users.Load(req.Id); if !ok {{ return &UserServiceGetUserResponse{{}}, nil }}\n\treturn &UserServiceGetUserResponse{{Return: *val.(*User)}}, nil\n}}\nfunc (s *MyUserService) CreateUser(ctx context.Context, req *UserServiceCreateUserRequest) (*UserServiceCreateUserResponse, error) {{\n\ts.users.Store(req.User.Id, &req.User); return &UserServiceCreateUserResponse{{Return: req.User}}, nil\n}}\nfunc (s *MyUserService) ListUsers(ctx context.Context, req *UserServiceListUsersRequest) (*UserServiceListUsersResponse, error) {{\n\tvar users []User; s.users.Range(func(k, v interface{{}}) bool {{ users = append(users, *v.(*User)); return true }})\n\treturn &UserServiceListUsersResponse{{Return: users}}, nil\n}}\nfunc main() {{ r := gin.Default(); svc := &MyUserService{{}}; RegisterUserServiceHandler(r, svc); http.ListenAndServe(fmt.Sprintf(":%d", {context.port}), r) }}'
+            server_code = f'package main\nimport ("context"; "github.com/gin-gonic/gin"; "sync"; "net/http"; "fmt"; xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest")\ntype MyUserService struct {{ users sync.Map }}\nfunc (s *MyUserService) GetUser(ctx context.Context, req *UserServiceGetUserRequest) (*UserServiceGetUserResponse, error) {{\n\tval, ok := s.users.Load(req.Id); if !ok {{ return nil, xidlgohttp.NewHttpError(http.StatusNotFound, "user not found") }}\n\treturn &UserServiceGetUserResponse{{Return: *val.(*User)}}, nil\n}}\nfunc (s *MyUserService) CreateUser(ctx context.Context, req *UserServiceCreateUserRequest) (*UserServiceCreateUserResponse, error) {{\n\ts.users.Store(req.User.Id, &req.User); return &UserServiceCreateUserResponse{{Return: req.User}}, nil\n}}\nfunc (s *MyUserService) ListUsers(ctx context.Context, req *UserServiceListUsersRequest) (*UserServiceListUsersResponse, error) {{\n\tvar users []User; s.users.Range(func(k, v interface{{}}) bool {{ users = append(users, *v.(*User)); return true }})\n\treturn &UserServiceListUsersResponse{{Return: users}}, nil\n}}\nfunc main() {{ r := gin.Default(); svc := &MyUserService{{}}; RegisterUserServiceHandler(r, svc); http.ListenAndServe(fmt.Sprintf(":%d", {context.port}), r) }}'
         elif "all_scenarios" in context.idl_file:
             server_code = f'''package main
 import ("context"; "github.com/gin-gonic/gin"; "net/http"; "fmt"; "sync")
@@ -341,10 +341,14 @@ func main() {{ r := gin.Default(); svc := &MyAllScenarios{{status: StatusActive}
         if "complex_rest" in context.idl_file:
             server_code = f"""
 import {{ createServer }} from 'node:http';
-import {{ createUserServiceHandler, type UserService }} from './{module_name}.server.js';
+import {{ createUserServiceHandler, type UserService, XidlServerError }} from './{module_name}.server.js';
 class MyUserService implements UserService {{
   private users = new Map<number, any>();
-  async get_user(req: {{ id: number }}): Promise<any> {{ return this.users.get(req.id); }}
+  async get_user(req: {{ id: number }}): Promise<any> {{
+    const user = this.users.get(req.id);
+    if (!user) throw new XidlServerError("user not found", 404);
+    return user;
+  }}
   async create_user(req: {{ user: any }}): Promise<any> {{ this.users.set(req.user.id, req.user); return req.user; }}
   async list_users(req: {{ filter: string }}): Promise<any[]> {{ return Array.from(this.users.values()); }}
 }}
@@ -717,6 +721,19 @@ def step_impl(context, name, age):
     except:
         res = resp.text
     assert name in str(res); assert str(age) in str(res)
+
+@then('the client gets a {status:d} error with msg containing "{expected_msg}" when requesting {method} "{path}"')
+def step_impl(context, status, expected_msg, method, path):
+    url = f"http://127.0.0.1:{context.port}{path}"
+    resp = requests.request(method, url, timeout=10)
+    assert resp.status_code == status, f"Expected {status}, got {resp.status_code}: {resp.text}"
+    try:
+        data = resp.json()
+    except Exception as e:
+        assert False, f"Failed to parse error response as JSON: {resp.text}. Error: {e}"
+    assert "code" in data, f"Missing 'code' in error response: {data}"
+    assert "msg" in data, f"Missing 'msg' in error response: {data}"
+    assert expected_msg.lower() in data["msg"].lower(), f"Expected message containing '{expected_msg}', got '{data['msg']}'"
 
 @then('the client can send flatten any payload with key "{key}" and value "{value}"')
 def step_impl(context, key, value):

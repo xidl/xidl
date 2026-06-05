@@ -15,7 +15,7 @@
     {%- if method.request_body_struct %}
         body := {{ method.request_body_struct }}{}
         if err := xidlgohttp.GinDecodeBody(c, "{{ method.request_content_type }}", &body); err != nil {
-            xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+            xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
             return
         }
         {%- for param in method.body_params %}
@@ -24,7 +24,7 @@
     {%- elif method.request_body_direct_field %}
         var body {{ method.request_body_direct_ty }}
         if err := xidlgohttp.GinDecodeBody(c, "{{ method.request_content_type }}", &body); err != nil {
-            xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+            xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
             return
         }
         req.{{ method.request_body_direct_field }} = body
