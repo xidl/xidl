@@ -1,0 +1,23 @@
+struct Item {
+    string name;
+};
+
+interface SerializationTest {
+    @get(path = "/string")
+    string get_string();
+
+    @get(path = "/int")
+    int32 get_int();
+
+    @get(path = "/bool")
+    boolean get_bool();
+
+    @get(path = "/struct")
+    Item get_struct();
+
+    @post(path = "/echo-string")
+    string echo_string(in string value);
+
+    @post(path = "/echo-struct")
+    Item echo_struct(in Item value);
+};
