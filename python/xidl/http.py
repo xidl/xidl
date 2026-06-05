@@ -245,6 +245,15 @@ def read_form_body(request: Request) -> Any:
         raise HttpError(400, "INVALID_ARGUMENT", "invalid form body") from exc
 
 
+def read_plain_body(request: Request, ty: str) -> Any:
+    body = request.body or b""
+    try:
+        value = body.decode("utf-8")
+        return coerce_scalar(value, ty)
+    except Exception as exc:
+        raise HttpError(400, "INVALID_ARGUMENT", f"invalid plain body: {exc}") from exc
+
+
 def read_json_field(
     body: Any,
     name: str,
@@ -280,6 +289,25 @@ def encode_json_response(value: Any, status_code: int = 200) -> Response:
         status_code=status_code,
         headers={"Content-Type": "application/json"},
         body=to_body(value),
+    )
+
+
+def encode_plain_response(value: Any, status_code: int = 200) -> Response:
+    if isinstance(value, Response):
+        return ensure_response_header(value, "Content-Type", "text/plain")
+    if value is None:
+        return Response(status_code=204)
+
+    if is_dataclass(value):
+        if hasattr(value, "value"):
+            value = getattr(value, "value")
+        elif hasattr(value, "return_"):
+            value = getattr(value, "return_")
+
+    return Response(
+        status_code=status_code,
+        headers={"Content-Type": "text/plain"},
+        body=str(value).lower().encode("utf-8") if isinstance(value, bool) else str(value).encode("utf-8"),
     )
 
 

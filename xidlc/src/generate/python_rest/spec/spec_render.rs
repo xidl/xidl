@@ -100,6 +100,13 @@ pub(super) fn render_endpoint_helper(
     {
         if method.request_content_type == "application/x-www-form-urlencoded" {
             writeln!(out, "    body = read_form_body(request)").unwrap();
+        } else if method.request_content_type == "text/plain" {
+            let param = method
+                .request_params
+                .iter()
+                .find(|p| matches!(p.source, ParamSource::Body))
+                .unwrap();
+            writeln!(out, "    body = read_plain_body(request, {:?})", param.ty).unwrap();
         } else {
             writeln!(out, "    body = read_json_body(request)").unwrap();
         }
@@ -111,16 +118,35 @@ pub(super) fn render_endpoint_helper(
         method.method_name
     )
     .unwrap();
+
+    let response_field_count =
+        method.response_params.len() + usize::from(method.return_ty.is_some());
+    if response_field_count == 1 {
+        writeln!(
+            out,
+            "    response_payload = getattr(response_value, 'value', getattr(response_value, 'return_', response_value))"
+        )
+        .unwrap();
+    } else {
+        writeln!(out, "    response_payload = response_value").unwrap();
+    }
+
     match method.stream_kind {
         Some(HttpStreamKind::Server) => {
             writeln!(
                 out,
-                "    return encode_stream_response(response_value, codec={:?})",
+                "    return encode_stream_response(response_payload, codec={:?})",
                 stream_codec_name(method.stream_codec)
             )
             .unwrap();
         }
-        _ => writeln!(out, "    return encode_json_response(response_value)").unwrap(),
+        _ => {
+            if method.response_content_type == "text/plain" {
+                writeln!(out, "    return encode_plain_response(response_payload)").unwrap();
+            } else {
+                writeln!(out, "    return encode_json_response(response_payload)").unwrap();
+            }
+        }
     }
     writeln!(out).unwrap();
     Ok(())

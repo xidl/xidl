@@ -43,9 +43,11 @@ T: {{ ident }} + Send + Sync + 'static,
         request: {{ method.request_struct }}{% endif %}
         ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
             let _ = &headers;
-            if !xidl_rust_axum::http::accepts_media_type(&headers, "{{ method.response_content_type }}") {
-                return Err(xidl_rust_axum::Error::not_acceptable());
-            }
+            {% if method.response_content_type and method.response_content_type != "" %}
+                if !xidl_rust_axum::http::accepts_media_type(&headers, "{{ method.response_content_type }}") {
+                    return Err(xidl_rust_axum::Error::not_acceptable());
+                }
+            {% endif %}
             {% if method.auth_ty == "xidl_rust_axum::auth::basic::BasicAuth" %}
                 let xidl_auth = match xidl_rust_axum::auth::basic::extract_basic_auth(&headers) {
                     Ok(auth) => auth,

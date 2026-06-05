@@ -372,13 +372,12 @@ const server = createServer(async (req, res) => {
     if (url.pathname === '/attribute/type_attr1') {
       if (req.method === 'GET') {
         res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify(typeServerState.type_attr1));
+        res.setHeader('Content-Type', 'text/plain');
+        res.end(String(typeServerState.type_attr1));
         return;
       } else if (req.method === 'POST') {
         const bodyStr = await readBodyString(req);
-        const parsed = JSON.parse(bodyStr);
-        typeServerState.type_attr1 = parsed.type_attr_1;
+        typeServerState.type_attr1 = bodyStr.trim();
         res.statusCode = 204;
         res.end();
         return;
@@ -387,7 +386,7 @@ const server = createServer(async (req, res) => {
     if (url.pathname === '/attribute/type_attr2') {
       if (req.method === 'GET') {
         res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Type', 'text/plain');
         res.end(JSON.stringify(typeServerState.type_attr2));
         return;
       }
@@ -395,13 +394,12 @@ const server = createServer(async (req, res) => {
     if (url.pathname === '/attribute/attr1') {
       if (req.method === 'GET') {
         res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify(attributeState.attr1));
+        res.setHeader('Content-Type', 'text/plain');
+        res.end(attributeState.attr1);
         return;
       } else if (req.method === 'POST') {
         const bodyStr = await readBodyString(req);
-        const parsed = JSON.parse(bodyStr);
-        attributeState.attr1 = parsed.attr_1;
+        attributeState.attr1 = bodyStr.trim();
         res.statusCode = 204;
         res.end();
         return;
@@ -410,7 +408,7 @@ const server = createServer(async (req, res) => {
     if (url.pathname === '/attribute/attr2') {
       if (req.method === 'GET') {
         res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Type', 'text/plain');
         res.end(JSON.stringify(attributeState.attr2));
         return;
       }
@@ -418,15 +416,15 @@ const server = createServer(async (req, res) => {
     if (url.pathname === '/attribute/attr4') {
       if (req.method === 'GET') {
         res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify(attributeState.attr4));
+        res.setHeader('Content-Type', 'text/plain');
+        res.end(attributeState.attr4);
         return;
       }
     }
     if (url.pathname === '/attribute/attr61') {
       if (req.method === 'GET') {
         res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Type', 'text/plain');
         res.end(JSON.stringify(attributeState.attr61));
         return;
       }
@@ -434,21 +432,20 @@ const server = createServer(async (req, res) => {
     if (url.pathname === '/attribute/scope_inherited_attr') {
       if (req.method === 'GET') {
         res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify('inherited'));
+        res.setHeader('Content-Type', 'text/plain');
+        res.end('inherited');
         return;
       }
     }
     if (url.pathname === '/attribute/host') {
       if (req.method === 'GET') {
         res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify(hostState));
+        res.setHeader('Content-Type', 'text/plain');
+        res.end(hostState);
         return;
       } else if (req.method === 'POST') {
         const bodyStr = await readBodyString(req);
-        const parsed = JSON.parse(bodyStr);
-        hostState = parsed.host;
+        hostState = bodyStr.trim();
         res.statusCode = 204;
         res.end();
         return;

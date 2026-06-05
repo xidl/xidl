@@ -151,14 +151,14 @@ pub(super) fn build_method(
             .body
             .content_type
             .clone()
-            .unwrap_or_else(|| "application/json".to_string()),
+            .unwrap_or_default(),
         response_content_type: operation
             .http
             .response
             .body
             .content_type
             .clone()
-            .unwrap_or_else(|| "application/json".to_string()),
+            .unwrap_or_default(),
         requires_request_content_type: !matches!(
             operation.http.request.body.shape,
             HttpRequestBodyShape::Empty
@@ -213,15 +213,21 @@ fn find_input_binding(op: &HttpOperation, name: &str) -> (ParamSource, String, b
             source_param,
             flatten,
             ..
-        } if source_param == name => (
-            ParamSource::Body,
-            if *flatten {
-                "".to_string()
-            } else {
-                name.to_string()
-            },
-            *flatten,
-        ),
+        } if source_param == name => {
+            let is_text = matches!(
+                op.http.request.body.codec,
+                Some(xidl_parser::rest_hir::HttpBodyCodec::Text)
+            );
+            (
+                ParamSource::Body,
+                if *flatten || is_text {
+                    "".to_string()
+                } else {
+                    name.to_string()
+                },
+                *flatten || is_text,
+            )
+        }
         HttpRequestBodyShape::Object { fields } => {
             if let Some(f) = fields.iter().find(|f| f.source_param == name) {
                 (ParamSource::Body, f.field_name.clone(), f.flatten)

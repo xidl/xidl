@@ -25,8 +25,8 @@ class MyRestServer implements RestServer {
     return this.host;
   }
 
-  async set_attribute_host(req: { value: string }): Promise<void> {
-    this.host = req.value;
+  async set_attribute_host(req: { host: string }): Promise<void> {
+    this.host = req.host;
   }
 
   async get_attribute_port(): Promise<number> {
@@ -172,32 +172,6 @@ const server = createServer(async (req, res) => {
     const protocol = req.headers['x-forwarded-proto'] || 'http';
     const host = req.headers.host || 'localhost';
     const url = new URL(req.url || '', `${protocol}://${host}`);
-
-    // Handle manual attributes
-    if (url.pathname === '/attribute/host') {
-      if (req.method === 'GET') {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify(await myServer.get_attribute_host()));
-        return;
-      } else if (req.method === 'POST') {
-        const bodyStr = await readBodyString(req);
-        const parsed = JSON.parse(bodyStr);
-        const val = parsed.host || parsed.value;
-        await myServer.set_attribute_host({ value: val });
-        res.statusCode = 204;
-        res.end();
-        return;
-      }
-    }
-    if (url.pathname === '/attribute/port') {
-      if (req.method === 'GET') {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify(await myServer.get_attribute_port()));
-        return;
-      }
-    }
 
     const chunks: Buffer[] = [];
     for await (const chunk of req) {

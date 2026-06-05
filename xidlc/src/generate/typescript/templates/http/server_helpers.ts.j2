@@ -213,7 +213,7 @@ schema?: z.ZodTypeAny,
         return out;
     }
     if (mime.startsWith("text/")) {
-        return await request.text();
+        return parseScalar(await request.text());
     }
     throw new XidlServerError(`unsupported request content type: ${mime}`, 415);
 }
