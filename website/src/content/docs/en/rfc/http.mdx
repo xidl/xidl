@@ -148,7 +148,10 @@ Common interpretation in HTTP mapping:
 - Request body decoding format.
 - Response body encoding format.
 
-The default value is `application/json`.
+Serialization rules:
+
+- By default, primitive types (such as `string`, `int32`, `bool`, etc.) are encoded directly as the text representation of their raw values.
+- Composite types (such as `struct`, `union`, `sequence`, `map`) default to `application/json`.
 
 Interface-level annotations serve as defaults, which method-level annotations override.
 

@@ -148,7 +148,10 @@ HTTP 映射中最常见的理解方式：
 - 请求体解码格式
 - 响应体编码格式
 
-默认值是 `application/json`。
+序列化规则如下：
+
+- 默认情况下，原生类型（如 `string`, `int32`, `bool` 等）直接按其原始值的文本形式编码。
+- 复合类型（如 `struct`, `union`, `sequence`, `map`）默认采用 `application/json` 格式。
 
 接口级注解作为默认值，方法级注解覆盖接口级配置。
 
