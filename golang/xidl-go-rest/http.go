@@ -20,19 +20,33 @@ type DeprecatedInfo struct {
 	Note       string
 }
 
-func WriteJSONError(w http.ResponseWriter, status int, code string, message string) {
+type HttpError struct {
+	Status  int
+	Code    int
+	Message string
+}
+
+func (e *HttpError) Error() string {
+	return e.Message
+}
+
+func NewHttpError(status int, message string) *HttpError {
+	return &HttpError{Status: status, Code: status, Message: message}
+}
+
+func WriteJSONError(w http.ResponseWriter, status int, code int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(map[string]any{
-		"code":    code,
-		"message": message,
+		"code": code,
+		"msg":  message,
 	})
 }
 
-func GinWriteJSONError(c *gin.Context, status int, code string, message string) {
+func GinWriteJSONError(c *gin.Context, status int, code int, message string) {
 	c.JSON(status, map[string]any{
-		"code":    code,
-		"message": message,
+		"code": code,
+		"msg":  message,
 	})
 }
 

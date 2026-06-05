@@ -14,11 +14,11 @@
         {%- endfor %}
     }
     if err := xidlgohttp.GinEncodeBody(c, "{{ method.response_content_type }}", respBody); err != nil {
-        xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
+        xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
     }
 {%- elif method.response_body_direct_field %}
     if err := xidlgohttp.GinEncodeBody(c, "{{ method.response_content_type }}", {{ value }}.{{ method.response_body_direct_field }}); err != nil {
-        xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
+        xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
     }
 {%- else %}
     c.Status(http.StatusNoContent)
