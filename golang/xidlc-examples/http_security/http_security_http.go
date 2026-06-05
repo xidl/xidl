@@ -30,7 +30,7 @@ type HttpSecurityApiService interface {
 func RegisterHttpSecurityApiHandler(r gin.IRouter, svc HttpSecurityApiService) {
 	r.GET("/reports/:id", func(c *gin.Context) {
 		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
 			return
 		}
 		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityApiGetReportSecurityRequirements())
@@ -45,29 +45,33 @@ func RegisterHttpSecurityApiHandler(r gin.IRouter, svc HttpSecurityApiService) {
 		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
 			req.Id = value
 		} else {
-			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		if value, err := xidlgohttp.HeaderString(c.Request.Header, "X-Trace-Id"); err == nil {
 			req.TraceId = value
 		} else {
-			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		resp, err := svc.GetReport(c.Request.Context(), req)
 		if err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
+			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
+				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			} else {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 			return
 		}
 
 		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
 		}
 	})
 	r.POST("/reports/:id", func(c *gin.Context) {
 		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
 			return
 		}
 		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityApiUpdateReportSecurityRequirements())
@@ -77,7 +81,7 @@ func RegisterHttpSecurityApiHandler(r gin.IRouter, svc HttpSecurityApiService) {
 		}
 		c.Request = c.Request.WithContext(ctx)
 		if err := xidlgohttp.GinRequireContentType(c, "application/json"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return
 		}
 
@@ -86,40 +90,48 @@ func RegisterHttpSecurityApiHandler(r gin.IRouter, svc HttpSecurityApiService) {
 		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
 			req.Id = value
 		} else {
-			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		body := HttpSecurityApiUpdateReportRequestBody{}
 		if err := xidlgohttp.GinDecodeBody(c, "application/json", &body); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		req.Body = body.Body
 		resp, err := svc.UpdateReport(c.Request.Context(), req)
 		if err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
+			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
+				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			} else {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 			return
 		}
 
 		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
 		}
 	})
 	r.GET("/health", func(c *gin.Context) {
 		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
 			return
 		}
 
 		req := &HttpSecurityApiHealthRequest{}
 		resp, err := svc.Health(c.Request.Context(), req)
 		if err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
+			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
+				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			} else {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 			return
 		}
 
 		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
 		}
 	})
 }

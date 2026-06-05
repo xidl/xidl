@@ -46,46 +46,54 @@ type Issue171ReproServiceService interface {
 func RegisterIssue171ReproServiceHandler(r gin.IRouter, svc Issue171ReproServiceService) {
 	r.POST("/flatten-any", func(c *gin.Context) {
 		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
 			return
 		}
 		if err := xidlgohttp.GinRequireContentType(c, "application/json"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return
 		}
 
 		req := &Issue171ReproServiceFlattenAnyRequest{}
 		var body any
 		if err := xidlgohttp.GinDecodeBody(c, "application/json", &body); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		req.Payload = body
 		if _, err := svc.FlattenAny(c.Request.Context(), req); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
+			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
+				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			} else {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 			return
 		}
 		c.Status(http.StatusNoContent)
 	})
 	r.POST("/flatten-struct-with-any", func(c *gin.Context) {
 		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
 			return
 		}
 		if err := xidlgohttp.GinRequireContentType(c, "application/json"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return
 		}
 
 		req := &Issue171ReproServiceFlattenStructWithAnyRequest{}
 		var body Issue171StructWithAny
 		if err := xidlgohttp.GinDecodeBody(c, "application/json", &body); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		req.Payload = body
 		if _, err := svc.FlattenStructWithAny(c.Request.Context(), req); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
+			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
+				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			} else {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 			return
 		}
 		c.Status(http.StatusNoContent)

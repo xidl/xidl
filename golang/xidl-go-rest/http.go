@@ -73,14 +73,25 @@ func GinEncodeBody(c *gin.Context, mime string, value any) error {
 }
 
 func RequireAccept(r *http.Request, mime string) error {
-	if mime == "" || mime == "application/json" {
+	if mime == "" {
 		return nil
 	}
 	accept := r.Header.Get("Accept")
-	if accept == "" || accept == "*/*" || strings.Contains(accept, mime) {
+	if accept == "" || accept == "*/*" {
 		return nil
 	}
-	return fmt.Errorf("accept %q does not include %q", accept, mime)
+	// Simple split and check, including common JSON variants if mime is application/json
+	parts := strings.Split(accept, ",")
+	for _, part := range parts {
+		mediaType := strings.TrimSpace(strings.Split(part, ";")[0])
+		if strings.EqualFold(mediaType, mime) {
+			return nil
+		}
+		if mime == "application/json" && (strings.EqualFold(mediaType, "application/*") || strings.EqualFold(mediaType, "*/json")) {
+			return nil
+		}
+	}
+	return NewHttpError(http.StatusNotAcceptable, fmt.Sprintf("accept %q does not include %q", accept, mime))
 }
 
 func GinRequireAccept(c *gin.Context, mime string) error {
@@ -88,22 +99,26 @@ func GinRequireAccept(c *gin.Context, mime string) error {
 }
 
 func RequireContentType(r *http.Request, mime string) error {
-	if mime == "" || mime == "application/json" {
+	if mime == "" {
 		return nil
 	}
 	contentType := r.Header.Get("Content-Type")
 	if contentType == "" {
-		return fmt.Errorf("missing content type %q", mime)
+		return NewHttpError(http.StatusUnsupportedMediaType, fmt.Sprintf("missing content type %q", mime))
 	}
 	mediaType := strings.TrimSpace(strings.Split(contentType, ";")[0])
 	if !strings.EqualFold(mediaType, mime) {
-		return fmt.Errorf("content type %q does not match %q", mediaType, mime)
+		return NewHttpError(http.StatusUnsupportedMediaType, fmt.Sprintf("content type %q does not match %q", mediaType, mime))
 	}
 	return nil
 }
 
 func GinRequireContentType(c *gin.Context, mime string) error {
 	return RequireContentType(c.Request, mime)
+}
+
+func HandleMethodNotAllowed(c *gin.Context) {
+	GinWriteJSONError(c, http.StatusMethodNotAllowed, http.StatusMethodNotAllowed, "method not allowed")
 }
 
 func ParseString(value string) (string, error) {

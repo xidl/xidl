@@ -30,23 +30,27 @@ func RegisterHelloWorldHandler(r gin.IRouter, svc HelloWorldService) {
 	r.OPTIONS("/hello", xidlgohttp.CORSMiddleware([]string{"*"}))
 	r.POST("/hello", xidlgohttp.CORSMiddleware([]string{"*"}), func(c *gin.Context) {
 		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
 			return
 		}
 		if err := xidlgohttp.GinRequireContentType(c, "application/json"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return
 		}
 
 		req := &HelloWorldSayHelloRequest{}
 		body := HelloWorldSayHelloRequestBody{}
 		if err := xidlgohttp.GinDecodeBody(c, "application/json", &body); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		req.Name = body.Name
 		if _, err := svc.SayHello(c.Request.Context(), req); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
+			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
+				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			} else {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 			return
 		}
 		c.Status(http.StatusNoContent)
@@ -54,13 +58,17 @@ func RegisterHelloWorldHandler(r gin.IRouter, svc HelloWorldService) {
 	r.OPTIONS("/trusted", xidlgohttp.CORSMiddleware([]string{"http://trust.me"}))
 	r.GET("/trusted", xidlgohttp.CORSMiddleware([]string{"http://trust.me"}), func(c *gin.Context) {
 		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
 			return
 		}
 
 		req := &HelloWorldTrustedRequest{}
 		if _, err := svc.Trusted(c.Request.Context(), req); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
+			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
+				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			} else {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 			return
 		}
 		c.Status(http.StatusNoContent)

@@ -36,7 +36,7 @@ type HttpStreamApiService interface {
 func RegisterHttpStreamApiHandler(r gin.IRouter, svc HttpStreamApiService) {
 	r.GET("/alerts/:district", func(c *gin.Context) {
 		if err := xidlgohttp.GinRequireAccept(c, "text/event-stream"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
 			return
 		}
 		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpStreamApiAlertsSecurityRequirements())
@@ -51,19 +51,23 @@ func RegisterHttpStreamApiHandler(r gin.IRouter, svc HttpStreamApiService) {
 		if value, err := xidlgohttp.GinPathString(c, "district"); err == nil {
 			req.District = value
 		} else {
-			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		stream := xidlgohttp.NewSSEServerStreamWriter[string](c.Writer)
 		if err := svc.Alerts(c.Request.Context(), req, stream); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
+			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
+				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			} else {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 			return
 		}
 		_ = stream.Close()
 	})
 	r.POST("/upload", func(c *gin.Context) {
 		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
 			return
 		}
 		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpStreamApiUploadAssetSecurityRequirements())
@@ -73,19 +77,23 @@ func RegisterHttpStreamApiHandler(r gin.IRouter, svc HttpStreamApiService) {
 		}
 		c.Request = c.Request.WithContext(ctx)
 		if err := xidlgohttp.GinRequireContentType(c, "application/x-ndjson"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return
 		}
 
 		stream := xidlgohttp.NewClientStreamReader[HttpStreamApiUploadAssetRequest](c.Request.Context(), c.Request.Body)
 		resp, err := svc.UploadAsset(c.Request.Context(), stream)
 		if err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
+			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
+				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			} else {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 			return
 		}
 
 		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "ENCODE", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
 		}
 	})
 }
