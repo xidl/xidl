@@ -261,14 +261,11 @@ fn base_attribute_operation(args: AttributeOperationArgs<'_>) -> HttpOperation {
         signature,
     } = args;
 
-    let request_content_type = "application/json".to_string();
-    let response_content_type = "application/json".to_string();
-
     let http = mapping::build_http_mapping(
         method,
         &stream,
-        &request_content_type,
-        &response_content_type,
+        None,
+        None,
         &request_params,
         &response_params,
         &return_type,

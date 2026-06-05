@@ -138,7 +138,15 @@ pub(crate) fn render_attr_operation_from_http(
         server_param_names,
         ret: ret.clone(),
         response_ty: ret.clone(),
-        request_body_flatten: false,
+        request_body_flatten: matches!(
+            http_op.http.request.body.shape,
+            xidl_parser::rest_hir::HttpRequestBodyShape::SingleValue { flatten, .. }
+                if flatten
+                    || matches!(
+                        http_op.http.request.body.codec,
+                        Some(xidl_parser::rest_hir::HttpBodyCodec::Text)
+                    )
+        ),
         http_method: http_method_code(http_method_from_hir(http_op.meta.method)),
         http_method_fn: http_method_fn(http_method_from_hir(http_op.meta.method)),
         reqwest_method: reqwest_method_code(http_method_from_hir(http_op.meta.method)),

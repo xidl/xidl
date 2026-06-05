@@ -200,16 +200,16 @@ Feature: REST API Generation and Communication
     When I generate <lang> code for the IDL
     Then the generated <lang> code should be valid
     And I can run the generated <lang> server and client
-    
+
     When the client requests GET "/string"
     Then the response body should be exactly "hello"
-    
+
     When the client requests GET "/int"
     Then the response body should be exactly "42"
-    
+
     When the client requests GET "/bool"
     Then the response body should be exactly "true"
-    
+
     When the client requests GET "/struct"
     Then the response body should be JSON matching
       """

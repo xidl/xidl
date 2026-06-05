@@ -60,4 +60,4 @@ GET {{base_url}}/attribute/api_version
 Authorization: Bearer mytoken
 HTTP 200
 [Asserts]
-body == "\"v2.0.0\""
+body == "v2.0.0"

@@ -241,6 +241,7 @@ if __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port
 """
         elif "serialization" in context.idl_file:
             server_code = f"""
+from {module_name} import Item
 from {module_name}_http import *
 from xidl.http import register_routes
 from xidl.fastapi import FastAPIAdapter

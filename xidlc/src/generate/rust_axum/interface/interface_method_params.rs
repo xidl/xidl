@@ -192,10 +192,20 @@ pub(super) fn find_input_binding(
             source_param,
             flatten: f,
             ..
-        } if source_param == name => (
-            Kind::Body,
-            if *f { "".to_string() } else { name.to_string() },
-        ),
+        } if source_param == name => {
+            let is_text = matches!(
+                op.http.request.body.codec,
+                Some(xidl_parser::rest_hir::HttpBodyCodec::Text)
+            );
+            (
+                Kind::Body,
+                if *f || is_text {
+                    "".to_string()
+                } else {
+                    name.to_string()
+                },
+            )
+        }
         HttpRequestBodyShape::Object { fields } => {
             if let Some(f) = fields.iter().find(|f| f.source_param == name) {
                 (Kind::Body, f.field_name.clone())

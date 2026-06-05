@@ -150,9 +150,13 @@ pub(crate) fn render_op_from_http(
     let has_return = http_op.signature.return_type.is_some();
     let total_outputs = out_params_count + usize::from(has_return);
 
+    let is_text = matches!(
+        http_op.http.request.body.codec,
+        Some(xidl_parser::rest_hir::HttpBodyCodec::Text)
+    );
     let request_body_flatten = matches!(
         http_op.http.request.body.shape,
-        HttpRequestBodyShape::SingleValue { flatten: true, .. }
+        HttpRequestBodyShape::SingleValue { flatten, .. } if flatten || is_text
     );
     let response_include_return = has_return;
     let response_is_empty = matches!(
@@ -236,14 +240,14 @@ pub(crate) fn render_op_from_http(
             .body
             .content_type
             .clone()
-            .unwrap_or_else(|| "application/json".to_string()),
+            .unwrap_or_default(),
         response_content_type: http_op
             .http
             .response
             .body
             .content_type
             .clone()
-            .unwrap_or_else(|| "application/json".to_string()),
+            .unwrap_or_default(),
         response_status: http_op.http.response.status.clone(),
     })
 }

@@ -2,7 +2,7 @@
 DELETE {{base_url}}/v2/defaults/resources?id=r1&revision=10
 HTTP 200
 [Asserts]
-body == "\"r1:10\""
+body == "r1:10"
 
 # E2eHttpDefaultsMatrix - replace_resource_default_body
 PUT {{base_url}}/v2/defaults/resources/r2

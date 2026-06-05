@@ -21,6 +21,7 @@ type Codec interface {
 type jsonCodec struct{}
 type formCodec struct{}
 type msgpackCodec struct{}
+type plainCodec struct{}
 
 func MustCodecForMime(mime string) Codec {
 	switch strings.ToLower(strings.TrimSpace(mime)) {
@@ -30,6 +31,8 @@ func MustCodecForMime(mime string) Codec {
 		return formCodec{}
 	case "application/msgpack":
 		return msgpackCodec{}
+	case "text/plain":
+		return plainCodec{}
 	default:
 		panic("unsupported mime type: " + mime)
 	}
@@ -77,6 +80,44 @@ func (msgpackCodec) Encode(w io.Writer, value any) error {
 func (msgpackCodec) Decode(r io.Reader, value any) error {
 	decoder := msgpack.NewDecoder(r)
 	return decoder.Decode(value)
+}
+
+func (plainCodec) ContentType() string { return "text/plain" }
+func (plainCodec) Encode(w io.Writer, value any) error {
+	rv := reflect.ValueOf(value)
+	if rv.Kind() == reflect.Pointer {
+		if rv.IsNil() {
+			return nil
+		}
+		rv = rv.Elem()
+	}
+	if rv.Kind() == reflect.Struct && rv.NumField() == 1 {
+		rv = rv.Field(0)
+	}
+	encoded, err := formatReflectValue(rv)
+	if err != nil {
+		return err
+	}
+	if len(encoded) == 0 {
+		return nil
+	}
+	_, err = io.WriteString(w, encoded[0])
+	return err
+}
+func (plainCodec) Decode(r io.Reader, value any) error {
+	payload, err := io.ReadAll(r)
+	if err != nil {
+		return err
+	}
+	rv := reflect.ValueOf(value)
+	if rv.Kind() != reflect.Pointer || rv.IsNil() {
+		return errors.New("plain decoding requires non-nil pointer")
+	}
+	rv = rv.Elem()
+	if rv.Kind() == reflect.Struct && rv.NumField() == 1 {
+		rv = rv.Field(0)
+	}
+	return assignScalar(rv, string(payload))
 }
 
 func structToValues(value any) (url.Values, error) {

@@ -194,7 +194,11 @@ fn build_method_model(
                 raw_name: source_param.clone(),
                 access: ts_ident(source_param),
             }];
-            let single = flatten.then(|| ts_ident(source_param));
+            let is_text = matches!(
+                op.http.request.body.codec,
+                Some(xidl_parser::rest_hir::HttpBodyCodec::Text)
+            );
+            let single = (*flatten || is_text).then(|| ts_ident(source_param));
             (entries, single)
         }
         HttpRequestBodyShape::Object { fields } => {
@@ -327,14 +331,14 @@ fn build_method_model(
             .body
             .content_type
             .clone()
-            .unwrap_or_else(|| "application/json".to_string()),
+            .unwrap_or_default(),
         response_content_type: op
             .http
             .response
             .body
             .content_type
             .clone()
-            .unwrap_or_else(|| "application/json".to_string()),
+            .unwrap_or_default(),
         path: path.clone(),
         http_method: http_method_name(op.meta.method).to_string(),
         path_params: build_value_params(&op.http.request.path)

@@ -78,8 +78,8 @@ fn get_signature_annotations(param: &hir::ParamDcl) -> Vec<HttpSignatureParamAnn
 pub fn build_http_mapping(
     method: HttpMethod,
     stream: &HttpStreamConfig,
-    request_content_type: &str,
-    response_content_type: &str,
+    request_content_type: Option<&str>,
+    response_content_type: Option<&str>,
     request_params: &[HttpParam],
     response_params: &[HttpParam],
     return_type: &Option<hir::TypeSpec>,
@@ -98,7 +98,7 @@ pub fn build_http_mapping(
 
 fn build_request_mapping(
     stream: &HttpStreamConfig,
-    content_type: &str,
+    content_type: Option<&str>,
     params: &[HttpParam],
 ) -> HttpRequestMapping {
     let mut path = Vec::new();
@@ -171,7 +171,14 @@ fn build_request_mapping(
         } else if matches!(body_shape, HttpRequestBodyShape::Empty) {
             (None, None)
         } else {
-            (Some(content_type.to_string()), map_body_codec(content_type))
+            let ct = content_type.map(|s| s.to_string()).unwrap_or_else(|| {
+                if is_composite_request_body(&body_shape) {
+                    "application/json".to_string()
+                } else {
+                    "text/plain".to_string()
+                }
+            });
+            (Some(ct.clone()), map_body_codec(&ct))
         };
 
     HttpRequestMapping {
@@ -190,7 +197,7 @@ fn build_request_mapping(
 fn build_response_mapping(
     method: HttpMethod,
     stream: &HttpStreamConfig,
-    content_type: &str,
+    content_type: Option<&str>,
     params: &[HttpParam],
     return_type: &Option<hir::TypeSpec>,
 ) -> HttpResponseMapping {
@@ -280,7 +287,14 @@ fn build_response_mapping(
         } else if matches!(body_shape, HttpResponseBodyShape::Empty) {
             (None, None)
         } else {
-            (Some(content_type.to_string()), map_body_codec(content_type))
+            let ct = content_type.map(|s| s.to_string()).unwrap_or_else(|| {
+                if is_composite_response_body(&body_shape) {
+                    "application/json".to_string()
+                } else {
+                    "text/plain".to_string()
+                }
+            });
+            (Some(ct.clone()), map_body_codec(&ct))
         };
 
     let status = if matches!(method, HttpMethod::Head)
@@ -300,6 +314,45 @@ fn build_response_mapping(
             shape: body_shape,
         },
         status,
+    }
+}
+
+fn is_composite_request_body(shape: &HttpRequestBodyShape) -> bool {
+    match shape {
+        HttpRequestBodyShape::Empty => false,
+        HttpRequestBodyShape::SingleValue { ty, .. } => is_composite_type(ty),
+        HttpRequestBodyShape::Object { .. } => true,
+        HttpRequestBodyShape::Stream { .. } => true,
+    }
+}
+
+fn is_composite_response_body(shape: &HttpResponseBodyShape) -> bool {
+    match shape {
+        HttpResponseBodyShape::Empty => false,
+        HttpResponseBodyShape::ReturnOnly { ty } => is_composite_type(ty),
+        HttpResponseBodyShape::SingleValue { ty, .. } => is_composite_type(ty),
+        HttpResponseBodyShape::Object { .. } => true,
+        HttpResponseBodyShape::Stream { .. } => true,
+    }
+}
+
+fn is_composite_type(ty: &hir::TypeSpec) -> bool {
+    match ty {
+        hir::TypeSpec::IntegerType(_)
+        | hir::TypeSpec::FloatingPtType
+        | hir::TypeSpec::CharType
+        | hir::TypeSpec::WideCharType
+        | hir::TypeSpec::Boolean
+        | hir::TypeSpec::StringType(_)
+        | hir::TypeSpec::WideStringType(_)
+        | hir::TypeSpec::FixedPtType(_) => false,
+        hir::TypeSpec::ScopedName(_)
+        | hir::TypeSpec::SequenceType(_)
+        | hir::TypeSpec::MapType(_)
+        | hir::TypeSpec::TemplateType(_)
+        | hir::TypeSpec::AnyType
+        | hir::TypeSpec::ObjectType
+        | hir::TypeSpec::ValueBaseType => true,
     }
 }
 

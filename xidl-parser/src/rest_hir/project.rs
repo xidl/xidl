@@ -289,8 +289,8 @@ fn project_operation(
     let http = mapping::build_http_mapping(
         method,
         &stream,
-        &request_content_type,
-        &response_content_type,
+        request_content_type.as_deref(),
+        response_content_type.as_deref(),
         &request_params,
         &response_params,
         &return_type,

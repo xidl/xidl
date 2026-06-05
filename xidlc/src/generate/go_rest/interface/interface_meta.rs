@@ -80,7 +80,11 @@ pub(crate) fn build_method_meta(
                 flatten,
                 ty,
             } => {
-                if *flatten {
+                let is_text = matches!(
+                    op.http.request.body.codec,
+                    Some(xidl_parser::rest_hir::HttpBodyCodec::Text)
+                );
+                if *flatten || is_text {
                     (
                         None,
                         Some(source_param.to_case(Case::Pascal)),
@@ -139,14 +143,14 @@ pub(crate) fn build_method_meta(
             .body
             .content_type
             .clone()
-            .unwrap_or_else(|| "application/json".to_string()),
+            .unwrap_or_default(),
         response_content_type: op
             .http
             .response
             .body
             .content_type
             .clone()
-            .unwrap_or_else(|| "application/json".to_string()),
+            .unwrap_or_default(),
         request_params,
         path_params,
         query_params,
@@ -209,7 +213,20 @@ fn build_param_meta(op: &HttpOperation, name: &str) -> ParamMeta {
                 }
                 HttpRequestBodyShape::SingleValue {
                     source_param: _, ..
-                } if !flatten => (ParamSource::Body, name.to_string()),
+                } => {
+                    let is_text = matches!(
+                        op.http.request.body.codec,
+                        Some(xidl_parser::rest_hir::HttpBodyCodec::Text)
+                    );
+                    (
+                        ParamSource::Body,
+                        if flatten || is_text {
+                            "".to_string()
+                        } else {
+                            name.to_string()
+                        },
+                    )
+                }
                 _ => (ParamSource::Body, "".to_string()),
             }
         };

@@ -99,10 +99,9 @@ pub fn effective_media_type(
     interface_annotations: &[hir::Annotation],
     method_annotations: &[hir::Annotation],
     target: &str,
-) -> String {
+) -> Option<String> {
     annotation_value(method_annotations, target)
         .or_else(|| annotation_value(interface_annotations, target))
-        .unwrap_or_else(|| "application/json".to_string())
 }
 
 pub(crate) fn annotation_value(annotations: &[hir::Annotation], target: &str) -> Option<String> {
