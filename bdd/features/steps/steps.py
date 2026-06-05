@@ -239,6 +239,23 @@ class MyForm(FormServiceService):
 app = FastAPI(); adapter = FastAPIAdapter(app=app); register_routes(adapter, form_service_routes(MyForm()))
 if __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port})
 """
+        elif "serialization" in context.idl_file:
+            server_code = f"""
+from {module_name}_http import *
+from xidl.http import register_routes
+from xidl.fastapi import FastAPIAdapter
+from fastapi import FastAPI
+import uvicorn
+class MySerialization(SerializationTestService):
+    async def get_string(self, request): return SerializationTestGetStringResponse(value="hello")
+    async def get_int(self, request): return SerializationTestGetIntResponse(value=42)
+    async def get_bool(self, request): return SerializationTestGetBoolResponse(value=True)
+    async def get_struct(self, request): return SerializationTestGetStructResponse(value=Item(name="world"))
+    async def echo_string(self, request): return SerializationTestEchoStringResponse(value=request.value)
+    async def echo_struct(self, request): return SerializationTestEchoStructResponse(value=request.value)
+app = FastAPI(); adapter = FastAPIAdapter(app=app); register_routes(adapter, serialization_test_routes(MySerialization()))
+if __name__ == "__main__": uvicorn.run(app, host="127.0.0.1", port={context.port})
+"""
         elif "issue_171" in context.idl_file:
             server_code = f"""
 import asyncio, logging
@@ -288,6 +305,8 @@ if __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port
         with open(os.path.join(context.lang_dir, "go.mod"), "w") as f: f.write(go_mod)
         if "complex_rest" in context.idl_file:
             server_code = f'package main\nimport ("context"; "github.com/gin-gonic/gin"; "sync"; "net/http"; "fmt"; xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest")\ntype MyUserService struct {{ users sync.Map }}\nfunc (s *MyUserService) GetUser(ctx context.Context, req *UserServiceGetUserRequest) (*UserServiceGetUserResponse, error) {{\n\tval, ok := s.users.Load(req.Id); if !ok {{ return nil, xidlgohttp.NewHttpError(http.StatusNotFound, "user not found") }}\n\treturn &UserServiceGetUserResponse{{Return: *val.(*User)}}, nil\n}}\nfunc (s *MyUserService) CreateUser(ctx context.Context, req *UserServiceCreateUserRequest) (*UserServiceCreateUserResponse, error) {{\n\ts.users.Store(req.User.Id, &req.User); return &UserServiceCreateUserResponse{{Return: req.User}}, nil\n}}\nfunc (s *MyUserService) ListUsers(ctx context.Context, req *UserServiceListUsersRequest) (*UserServiceListUsersResponse, error) {{\n\tvar users []User; s.users.Range(func(k, v interface{{}}) bool {{ users = append(users, *v.(*User)); return true }})\n\treturn &UserServiceListUsersResponse{{Return: users}}, nil\n}}\nfunc main() {{ r := gin.Default(); r.NoMethod(xidlgohttp.HandleMethodNotAllowed); svc := &MyUserService{{}}; RegisterUserServiceHandler(r, svc); http.ListenAndServe(fmt.Sprintf(":%d", {context.port}), r) }}'
+        elif "serialization" in context.idl_file:
+            server_code = f'package main\nimport ("context"; "github.com/gin-gonic/gin"; "net/http"; "fmt")\ntype MySerializationTest struct {{ }}\nfunc (s *MySerializationTest) GetString(ctx context.Context, req *SerializationTestGetStringRequest) (*SerializationTestGetStringResponse, error) {{ return &SerializationTestGetStringResponse{{Return: "hello"}}, nil }}\nfunc (s *MySerializationTest) GetInt(ctx context.Context, req *SerializationTestGetIntRequest) (*SerializationTestGetIntResponse, error) {{ return &SerializationTestGetIntResponse{{Return: 42}}, nil }}\nfunc (s *MySerializationTest) GetBool(ctx context.Context, req *SerializationTestGetBoolRequest) (*SerializationTestGetBoolResponse, error) {{ return &SerializationTestGetBoolResponse{{Return: true}}, nil }}\nfunc (s *MySerializationTest) GetStruct(ctx context.Context, req *SerializationTestGetStructRequest) (*SerializationTestGetStructResponse, error) {{ return &SerializationTestGetStructResponse{{Return: Item{{Name: "world"}}}}, nil }}\nfunc (s *MySerializationTest) EchoString(ctx context.Context, req *SerializationTestEchoStringRequest) (*SerializationTestEchoStringResponse, error) {{ return &SerializationTestEchoStringResponse{{Return: req.Value}}, nil }}\nfunc (s *MySerializationTest) EchoStruct(ctx context.Context, req *SerializationTestEchoStructRequest) (*SerializationTestEchoStructResponse, error) {{ return &SerializationTestEchoStructResponse{{Return: req.Value}}, nil }}\nfunc main() {{ r := gin.Default(); svc := &MySerializationTest{{}}; RegisterSerializationTestHandler(r, svc); http.ListenAndServe(fmt.Sprintf(":%d", {context.port}), r) }}'
         elif "all_scenarios" in context.idl_file:
             server_code = f'''package main
 import ("context"; "github.com/gin-gonic/gin"; "net/http"; "fmt"; "sync")
@@ -353,6 +372,43 @@ class MyUserService implements UserService {{
   async list_users(req: {{ filter: string }}): Promise<any[]> {{ return Array.from(this.users.values()); }}
 }}
 const handler = createUserServiceHandler(new MyUserService());
+const myServer = createServer(async (req, res) => {{
+  try {{
+    const request = {{
+      method: req.method || 'GET',
+      path: req.url?.split('?')[0] || '/',
+      headers: req.headers,
+      body: await new Promise((resolve) => {{
+        const chunks: any[] = [];
+        req.on('data', (chunk) => chunks.push(chunk));
+        req.on('end', () => resolve(Buffer.concat(chunks)));
+      }}),
+    }};
+    const response = await handler(request);
+    res.writeHead(response.status, response.headers);
+    res.end(response.body);
+  }} catch (err) {{
+    const status = err instanceof XidlServerError ? err.status : 500;
+    const msg = err instanceof Error ? err.message : String(err);
+    res.writeHead(status, {{ 'Content-Type': 'application/json' }});
+    res.end(JSON.stringify({{ code: status, msg }}));
+  }}
+}});
+myServer.listen({context.port});
+"""
+        elif "serialization" in context.idl_file:
+            server_code = f"""
+import {{ createServer }} from 'node:http';
+import {{ createSerializationTestHandler, type SerializationTest, XidlServerError }} from './{module_name}.server.js';
+class MySerializationTest implements SerializationTest {{
+  async get_string(): Promise<string> {{ return "hello"; }}
+  async get_int(): Promise<number> {{ return 42; }}
+  async get_bool(): Promise<boolean> {{ return true; }}
+  async get_struct(): Promise<any> {{ return {{ name: "world" }}; }}
+  async echo_string(req: {{ value: string }}): Promise<string> {{ return req.value; }}
+  async echo_struct(req: {{ value: any }}): Promise<any> {{ return req.value; }}
+}}
+const handler = createSerializationTestHandler(new MySerializationTest());
 const myServer = createServer(async (req, res) => {{
   try {{
     const request = {{
@@ -467,6 +523,8 @@ server.listen({context.port}, '127.0.0.1', () => {{
             cargo_toml = f'[package]\nname = "test-rust-rest"\nversion = "0.1.0"\nedition = "2021"\n[workspace]\n[dependencies]\nxidl-rust-axum = {{ path = "{os.path.join(root_dir, "xidl-rust-axum")}", features = ["stream"] }}\ntokio = {{ version = "1", features = ["full"] }}\nasync-trait = "0.1"\nserde = {{ version = "1", features = ["derive"] }}\nserde_json = "1"\naxum = "0.8"\nfutures-util = "0.3"\n'
             if "complex_rest" in context.idl_file:
                 server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MyUserService {{ users: std::sync::Arc<std::sync::Mutex<std::collections::HashMap<u32, gen::User>>>, }}\n#[async_trait]\nimpl gen::UserService for MyUserService {{\n    async fn get_user<\'a>(&\'a self, id: u32) -> Result<gen::User, xidl_rust_axum::Error> {{\n        let users = self.users.lock().unwrap(); users.get(&id).cloned().ok_or(xidl_rust_axum::Error::not_found())\n    }}\n    async fn create_user<\'a>(&\'a self, user: gen::User) -> Result<gen::User, xidl_rust_axum::Error> {{\n        let mut users = self.users.lock().unwrap(); users.insert(user.id, user.clone()); Ok(user)\n    }}\n    async fn list_users<\'a>(&\'a self, _filter: String) -> Result<Vec<gen::User>, xidl_rust_axum::Error> {{\n        let users = self.users.lock().unwrap(); Ok(users.values().cloned().collect())\n    }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let svc = gen::UserServiceServer::new(MyUserService {{ users: std::sync::Arc::new(std::sync::Mutex::new(std::collections::HashMap::new())), }});\n    xidl_rust_axum::Server::builder().with_service(svc).serve("127.0.0.1:{context.port}").await?; Ok(())\n}}'
+            elif "serialization" in context.idl_file:
+                server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MySerializationTest;\n#[async_trait]\nimpl gen::SerializationTest for MySerializationTest {{\n    async fn get_string<\'a>(&\'a self) -> Result<String, xidl_rust_axum::Error> {{ Ok("hello".to_string()) }}\n    async fn get_int<\'a>(&\'a self) -> Result<i32, xidl_rust_axum::Error> {{ Ok(42) }}\n    async fn get_bool<\'a>(&\'a self) -> Result<bool, xidl_rust_axum::Error> {{ Ok(true) }}\n    async fn get_struct<\'a>(&\'a self) -> Result<gen::Item, xidl_rust_axum::Error> {{ Ok(gen::Item {{ name: "world".to_string() }}) }}\n    async fn echo_string<\'a>(&\'a self, value: String) -> Result<String, xidl_rust_axum::Error> {{ Ok(value) }}\n    async fn echo_struct<\'a>(&\'a self, value: gen::Item) -> Result<gen::Item, xidl_rust_axum::Error> {{ Ok(value) }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let svc = gen::SerializationTestServer::new(MySerializationTest);\n    xidl_rust_axum::Server::builder().with_service(svc).serve("127.0.0.1:{context.port}").await?; Ok(())\n}}'
             elif "all_scenarios" in context.idl_file:
                 server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MyAllScenarios {{ status: std::sync::Mutex<gen::Status> }}\n#[async_trait]\nimpl gen::AllScenariosService for MyAllScenarios {{\n    async fn get_item<\'a>(&\'a self, id: u32, filter: String, trace_id: String) -> Result<String, xidl_rust_axum::Error> {{ Ok(format!("Item {{id}} with {{filter}} and {{trace_id}}")) }}\n    async fn create_item<\'a>(&\'a self, _name: String, _payload: gen::Payload) -> Result<u32, xidl_rust_axum::Error> {{ Ok(42) }}\n    async fn update_item<\'a>(&\'a self, _id: u32, _metadata: Vec<gen::Metadata>) -> Result<(), xidl_rust_axum::Error> {{ Ok(()) }}\n    async fn delete_item<\'a>(&\'a self, _id: u32) -> Result<(), xidl_rust_axum::Error> {{ Ok(()) }}\n    async fn get_attribute_system_status(&self) -> Result<gen::Status, xidl_rust_axum::Error> {{ Ok(*self.status.lock().unwrap()) }}\n    async fn set_attribute_system_status(&self, value: gen::Status) -> Result<(), xidl_rust_axum::Error> {{ *self.status.lock().unwrap() = value; Ok(()) }}\n    async fn get_attribute_version(&self) -> Result<String, xidl_rust_axum::Error> {{ Ok("1.0.0".into()) }}\n    async fn upload_form<\'a>(&\'a self, _key: String, _value: String) -> Result<(), xidl_rust_axum::Error> {{ Ok(()) }}\n    async fn secure_data<\'a>(&\'a self, _auth: xidl_rust_axum::auth::bearer::BearerAuth) -> Result<String, xidl_rust_axum::Error> {{ Ok("Secret".into()) }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let svc = gen::AllScenariosServiceServer::new(MyAllScenarios {{ status: std::sync::Mutex::new(gen::Status::ACTIVE) }});\n    xidl_rust_axum::Server::builder().with_service(svc).serve("127.0.0.1:{context.port}").await?; Ok(())\n}}'
             elif "streaming" in context.idl_file:
@@ -773,6 +831,21 @@ def step_impl(context, status, expected_msg, method, path):
     assert "code" in data, f"Missing 'code' in error response: {data}"
     assert "msg" in data, f"Missing 'msg' in error response: {data}"
     assert expected_msg.lower() in data["msg"].lower(), f"Expected message containing '{expected_msg}', got '{data['msg']}'"
+
+@when('the client requests GET "{path}"')
+def step_impl(context, path):
+    url = f"http://127.0.0.1:{context.port}{path}"
+    context.last_response = requests.get(url, timeout=10)
+
+@then('the response body should be exactly "{expected_body}"')
+def step_impl(context, expected_body):
+    assert context.last_response.text == expected_body, f"Expected '{expected_body}', got '{context.last_response.text}'"
+
+@then('the response body should be JSON matching')
+def step_impl(context):
+    expected_json = json.loads(context.text)
+    actual_json = context.last_response.json()
+    assert actual_json == expected_json, f"Expected {expected_json}, got {actual_json}"
 
 @then('the client can send flatten any payload with key "{key}" and value "{value}"')
 def step_impl(context, key, value):
