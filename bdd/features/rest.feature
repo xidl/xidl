@@ -152,3 +152,45 @@ Feature: REST API Generation and Communication
     Then the generated ts code should be valid
     And I can run the generated ts server and client
     Then the client gets a 400 error with msg containing "validation failed" when requesting GET "/abc"
+
+  Scenario Outline: REST Bad Path - Method Not Allowed
+    Given a REST IDL file "bdd/features/data/complex_rest.idl"
+    When I generate <lang> code for the IDL
+    Then the generated <lang> code should be valid
+    And I can run the generated <lang> server and client
+    # TS returns structured 405 error
+    Then the client gets a 405 error with msg containing "method" when requesting POST "/1"
+
+    Examples:
+      | lang |
+      | ts   |
+
+  Scenario Outline: REST Bad Path - Not Acceptable
+    Given a REST IDL file "bdd/features/data/complex_rest.idl"
+    When I generate <lang> code for the IDL
+    Then the generated <lang> code should be valid
+    And I can run the generated <lang> server and client
+    # First create the user so it's not a 404
+    And the client can create a user with name "Alice" and id 1
+    Then the client gets a 406 error with msg containing "accept" when requesting GET "/1" with headers
+      | name   | value      |
+      | Accept | text/plain |
+
+    Examples:
+      | lang |
+      | rust |
+      | go   |
+
+  Scenario Outline: REST Bad Path - Unsupported Media Type
+    Given a REST IDL file "bdd/features/data/complex_rest.idl"
+    When I generate <lang> code for the IDL
+    Then the generated <lang> code should be valid
+    And I can run the generated <lang> server and client
+    Then the client gets a 415 error with msg containing "type" when requesting POST "/" with headers
+      | name         | value      |
+      | Content-Type | text/plain |
+
+    Examples:
+      | lang |
+      | rust |
+      | go   |

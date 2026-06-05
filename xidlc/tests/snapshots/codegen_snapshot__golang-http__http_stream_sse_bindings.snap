@@ -41,7 +41,7 @@ type HttpStreamSseBindingsServiceService interface {
 func RegisterHttpStreamSseBindingsServiceHandler(r gin.IRouter, svc HttpStreamSseBindingsServiceService) {
 	r.GET("/files/*path", func(c *gin.Context) {
 		if err := xidlgohttp.GinRequireAccept(c, "text/event-stream"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
 			return
 		}
 
@@ -50,14 +50,14 @@ func RegisterHttpStreamSseBindingsServiceHandler(r gin.IRouter, svc HttpStreamSs
 		if value, err := xidlgohttp.GinPathString(c, "path"); err == nil {
 			req.Path = value
 		} else {
-			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		if value, err := xidlgohttp.QueryString(c.Request.URL.Query(), "lang"); err == nil {
 			req.Lang = value
 		} else {
-			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -65,16 +65,20 @@ func RegisterHttpStreamSseBindingsServiceHandler(r gin.IRouter, svc HttpStreamSs
 			if value, parseErr := xidlgohttp.ParseBool(raw); parseErr == nil {
 				req.Follow = value
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", parseErr.Error())
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, parseErr.Error())
 				return
 			}
 		} else {
-			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		stream := xidlgohttp.NewSSEServerStreamWriter[[]string](c.Writer)
 		if err := svc.TailFile(c.Request.Context(), req, stream); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, "INTERNAL", err.Error())
+			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
+				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			} else {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 			return
 		}
 		_ = stream.Close()
