@@ -555,7 +555,7 @@ server.listen({context.port}, '127.0.0.1', () => {{
 
         env = os.environ.copy()
         env["CARGO_TARGET_DIR"] = os.path.join(root_dir, "bdd", ".temp", "rust_target")
-        context.server_process = subprocess.Popen(["cargo", "run", "--offline"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+        context.server_process = subprocess.Popen(["cargo", "run"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
         t = threading.Thread(target=run_server_logging, args=(context.server_process, prefix)); t.daemon = True; t.start()
         if not wait_for_port(context.port):
             if context.server_process.poll() is not None:
@@ -613,7 +613,7 @@ def step_impl(context, lang):
         env = os.environ.copy()
         env["PORT"] = str(context.port)
         env["CARGO_TARGET_DIR"] = os.path.join(os.path.abspath("."), "bdd", ".temp", "rust_target")
-        context.server_process = subprocess.Popen(["cargo", "run", "--offline"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+        context.server_process = subprocess.Popen(["cargo", "run"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
         t = threading.Thread(target=run_server_logging, args=(context.server_process, "RUST-BOILERPLATE"))
         t.daemon = True
         t.start()
