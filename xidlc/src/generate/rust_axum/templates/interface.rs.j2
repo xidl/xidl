@@ -412,7 +412,8 @@
                                 {% endif %}
                                 {% for param in method.response_body_params %}
                                     {% if method.response_body_flatten %}
-                                        {{ param.name }}: {{ param.field_in_expr | replace("value." ~ param.name, "value") }},
+                                        {% set expr = param.field_in_expr | replace("value." ~ param.name, "value") %}
+                                        {{ param.name }}{% if param.name != expr %}: {{ expr }}{% endif %},
                                     {% else %}
                                         {{ param.name }}{% if param.name != param.field_in_expr %}: {{ param.field_in_expr }}{% endif %},
                                     {% endif %}
