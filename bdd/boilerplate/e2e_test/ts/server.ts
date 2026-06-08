@@ -425,7 +425,7 @@ const attributeState = {
   attr61: { data: 1, tag: 'V1' },
 };
 
-let hostState = 'localhost';
+const hostState = 'localhost';
 
 async function readBodyString(req: any): Promise<string> {
   const chunks: Buffer[] = [];

@@ -401,15 +401,8 @@ impl From<HttpAnnoServiceAddResponseInBody> for HttpAnnoServiceAddResponse {
         }
     }
 }
-#[derive(::serde::Serialize)]
-pub struct HttpAnnoServiceBumpRequestOutBody {
-    #[serde(default)]
-    pub value: i32,
-}
-#[derive(::serde::Deserialize)]
-pub struct HttpAnnoServiceBumpRequestInBody {
-    pub value: i32,
-}
+pub type HttpAnnoServiceBumpRequestOutBody = i32;
+pub type HttpAnnoServiceBumpRequestInBody = i32;
 #[derive(::serde::Deserialize)]
 struct HttpAnnoServiceBumpRequest {
     value: i32,
@@ -432,7 +425,7 @@ where
             let _ = xidl_headers;
             if !::xidl_rust_axum::http::content_type_matches(
                 xidl_headers,
-                "application/json",
+                "text/plain",
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
@@ -443,10 +436,10 @@ where
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
             let xidl_body: HttpAnnoServiceBumpRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
-                    "application/json",
+                    "text/plain",
                 )
                 .from_slice(&xidl_body_bytes)?;
-            let HttpAnnoServiceBumpRequestInBody { value } = xidl_body;
+            let value = xidl_body;
             Ok(Self { value })
         }
     }
@@ -483,27 +476,21 @@ impl From<HttpAnnoServiceBumpResponseInBody> for HttpAnnoServiceBumpResponse {
         }
     }
 }
-#[derive(::serde::Serialize)]
-pub struct HttpAnnoServiceGetCountResponseOutBody {
-    pub count: i32,
-}
-#[derive(::serde::Deserialize)]
-pub struct HttpAnnoServiceGetCountResponseInBody {
-    pub count: i32,
-}
+pub type HttpAnnoServiceGetCountResponseOutBody = i32;
+pub type HttpAnnoServiceGetCountResponseInBody = i32;
 pub struct HttpAnnoServiceGetCountResponse {
     pub count: i32,
 }
 #[allow(clippy::useless_conversion, unreachable_code, unused_variables)]
 impl From<HttpAnnoServiceGetCountResponse> for HttpAnnoServiceGetCountResponseOutBody {
     fn from(value: HttpAnnoServiceGetCountResponse) -> Self {
-        Self { count: value.count }
+        value.count
     }
 }
 #[allow(clippy::useless_conversion, unreachable_code, unused_variables)]
 impl From<HttpAnnoServiceGetCountResponseInBody> for HttpAnnoServiceGetCountResponse {
     fn from(value: HttpAnnoServiceGetCountResponseInBody) -> Self {
-        Self { count: value.count }
+        Self { count: value }
     }
 }
 pub struct HttpAnnoServiceServer<T> {
@@ -562,7 +549,7 @@ where
         request: HttpAnnoServiceGetUserRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpAnnoServiceGetUserRequest { id, lang } = request;
@@ -573,7 +560,7 @@ where
                 let mut resp = {
                     let body_value: String = resp_value;
                     let _ = &body_value;
-                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    let body = xidl_rust_axum::SerializeFactory::new("text/plain")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(
@@ -582,7 +569,7 @@ where
                         )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                            "application/json",
+                            "text/plain",
                         )
                         .body(::xidl_rust_axum::axum::body::Body::from(body))
                         .map_err(|err| xidl_rust_axum::Error::new(
@@ -616,7 +603,7 @@ where
         request: HttpAnnoServiceCreateUserRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpAnnoServiceCreateUserRequest { name, age } = request;
@@ -627,7 +614,7 @@ where
                 let mut resp = {
                     let body_value: String = resp_value;
                     let _ = &body_value;
-                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    let body = xidl_rust_axum::SerializeFactory::new("text/plain")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(
@@ -636,7 +623,7 @@ where
                         )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                            "application/json",
+                            "text/plain",
                         )
                         .body(::xidl_rust_axum::axum::body::Body::from(body))
                         .map_err(|err| xidl_rust_axum::Error::new(
@@ -670,7 +657,7 @@ where
         request: HttpAnnoServiceGetNameRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpAnnoServiceGetNameRequest { name } = request;
@@ -680,7 +667,7 @@ where
                 let mut resp = {
                     let body_value: String = resp_value;
                     let _ = &body_value;
-                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    let body = xidl_rust_axum::SerializeFactory::new("text/plain")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(
@@ -689,7 +676,7 @@ where
                         )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                            "application/json",
+                            "text/plain",
                         )
                         .body(::xidl_rust_axum::axum::body::Body::from(body))
                         .map_err(|err| xidl_rust_axum::Error::new(
@@ -723,7 +710,7 @@ where
         request: HttpAnnoServiceSearchUserRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpAnnoServiceSearchUserRequest { keyword, page } = request;
@@ -734,7 +721,7 @@ where
                 let mut resp = {
                     let body_value: String = resp_value;
                     let _ = &body_value;
-                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    let body = xidl_rust_axum::SerializeFactory::new("text/plain")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(
@@ -743,7 +730,7 @@ where
                         )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                            "application/json",
+                            "text/plain",
                         )
                         .body(::xidl_rust_axum::axum::body::Body::from(body))
                         .map_err(|err| xidl_rust_axum::Error::new(
@@ -777,7 +764,7 @@ where
         request: HttpAnnoServiceGetUserAliasRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpAnnoServiceGetUserAliasRequest { user_id, locale } = request;
@@ -788,7 +775,7 @@ where
                 let mut resp = {
                     let body_value: String = resp_value;
                     let _ = &body_value;
-                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    let body = xidl_rust_axum::SerializeFactory::new("text/plain")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(
@@ -797,7 +784,7 @@ where
                         )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                            "application/json",
+                            "text/plain",
                         )
                         .body(::xidl_rust_axum::axum::body::Body::from(body))
                         .map_err(|err| xidl_rust_axum::Error::new(
@@ -939,7 +926,7 @@ where
         uri: ::xidl_rust_axum::axum::http::Uri,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let mut resp = match svc.get_count().await {
@@ -948,7 +935,7 @@ where
                     let body_value: HttpAnnoServiceGetCountResponseOutBody = resp_value
                         .into();
                     let _ = &body_value;
-                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    let body = xidl_rust_axum::SerializeFactory::new("text/plain")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(
@@ -957,7 +944,7 @@ where
                         )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                            "application/json",
+                            "text/plain",
                         )
                         .body(::xidl_rust_axum::axum::body::Body::from(body))
                         .map_err(|err| xidl_rust_axum::Error::new(
@@ -990,9 +977,6 @@ where
         uri: ::xidl_rust_axum::axum::http::Uri,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
-            return Err(xidl_rust_axum::Error::not_acceptable());
-        }
         let mut resp = match svc.ping().await {
             Ok(resp_value) => {
                 let mut resp = {
@@ -1056,9 +1040,7 @@ impl HttpAnnoServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let query = HttpAnnoServiceGetUserRequestOutQuery {
@@ -1082,9 +1064,7 @@ impl HttpAnnoServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: String = xidl_rust_axum::DeserializeFactory::new(
-                    "application/json",
-                )
+            let body: String = xidl_rust_axum::DeserializeFactory::new("text/plain")
                 .from_slice(&body)?;
             Ok(body)
         } else {
@@ -1109,9 +1089,7 @@ impl HttpAnnoServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
@@ -1142,9 +1120,7 @@ impl HttpAnnoServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: String = xidl_rust_axum::DeserializeFactory::new(
-                    "application/json",
-                )
+            let body: String = xidl_rust_axum::DeserializeFactory::new("text/plain")
                 .from_slice(&body)?;
             Ok(body)
         } else {
@@ -1165,9 +1141,7 @@ impl HttpAnnoServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let query = HttpAnnoServiceGetNameRequestOutQuery {
@@ -1191,9 +1165,7 @@ impl HttpAnnoServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: String = xidl_rust_axum::DeserializeFactory::new(
-                    "application/json",
-                )
+            let body: String = xidl_rust_axum::DeserializeFactory::new("text/plain")
                 .from_slice(&body)?;
             Ok(body)
         } else {
@@ -1218,9 +1190,7 @@ impl HttpAnnoServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let query = HttpAnnoServiceSearchUserRequestOutQuery {
@@ -1245,9 +1215,7 @@ impl HttpAnnoServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: String = xidl_rust_axum::DeserializeFactory::new(
-                    "application/json",
-                )
+            let body: String = xidl_rust_axum::DeserializeFactory::new("text/plain")
                 .from_slice(&body)?;
             Ok(body)
         } else {
@@ -1273,9 +1241,7 @@ impl HttpAnnoServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let query = HttpAnnoServiceGetUserAliasRequestOutQuery {
@@ -1299,9 +1265,7 @@ impl HttpAnnoServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: String = xidl_rust_axum::DeserializeFactory::new(
-                    "application/json",
-                )
+            let body: String = xidl_rust_axum::DeserializeFactory::new("text/plain")
                 .from_slice(&body)?;
             Ok(body)
         } else {
@@ -1392,17 +1356,12 @@ impl HttpAnnoServiceClient {
             );
         let auth_target = &self.client;
         let _ = auth_target;
-        let body = HttpAnnoServiceBumpRequestOutBody {
-            value,
-        };
-        let body = xidl_rust_axum::SerializeFactory::new("application/json")
-            .to_vec(&body)?;
+        let body: i32 = value;
+        let body = xidl_rust_axum::SerializeFactory::new("text/plain").to_vec(&body)?;
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::CONTENT_TYPE,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
@@ -1442,9 +1401,7 @@ impl HttpAnnoServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
@@ -1461,7 +1418,7 @@ impl HttpAnnoServiceClient {
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
             let body: HttpAnnoServiceGetCountResponseInBody = xidl_rust_axum::DeserializeFactory::new(
-                    "application/json",
+                    "text/plain",
                 )
                 .from_slice(&body)?;
             Ok(body.into())
@@ -1483,9 +1440,7 @@ impl HttpAnnoServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;

@@ -85,7 +85,7 @@ openapi_http_header.json
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }

@@ -18,7 +18,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -41,7 +41,7 @@
         "operationId": "RestServer.set_attribute_host",
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }
@@ -72,7 +72,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "integer",
                   "format": "int32",
@@ -101,7 +101,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -194,7 +194,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "boolean"
                 }
@@ -333,7 +333,7 @@
         "operationId": "RestServer.set_server_name",
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }
@@ -414,7 +414,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -453,7 +453,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -492,7 +492,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -531,7 +531,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -597,7 +597,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "boolean"
                 }
@@ -658,7 +658,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }
@@ -705,7 +705,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "integer",
                 "format": "int64",

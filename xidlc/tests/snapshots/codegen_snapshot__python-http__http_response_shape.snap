@@ -22,6 +22,7 @@ ServerStreamResponse,
 StreamMetadata,
 cookie_value,
 encode_json_response,
+encode_plain_response,
 encode_stream_response,
 header_value,
 path_value,
@@ -29,6 +30,8 @@ query_value,
 read_form_body,
 read_json_body,
 read_json_field,
+read_plain_body,
+    read_json_value,
 read_scalar,
 require_accept,
 require_content_type,
@@ -102,10 +105,11 @@ class HttpResponseShapeServiceService(abc.ABC):
         raise NotImplementedError
 
 async def _http_response_shape_service_hello_endpoint(service: HttpResponseShapeServiceService, request: Request):
-    require_accept(request, "application/json")
+    require_accept(request, "text/plain")
     request_value = HttpResponseShapeServiceHelloRequest()
     response_value = await service.hello(request_value)
-    return encode_json_response(response_value)
+    response_payload = getattr(response_value, 'value', getattr(response_value, 'return_', response_value))
+    return encode_plain_response(response_payload)
 
 def _http_response_shape_service_hello_route(service: HttpResponseShapeServiceService) -> Route:
     async def endpoint(request: Request):
@@ -117,14 +121,15 @@ def _http_response_shape_service_hello_route(service: HttpResponseShapeServiceSe
         handler=service.hello,
         request_model=HttpResponseShapeServiceHelloRequest,
         response_model=HttpResponseShapeServiceHelloResponse,
-        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+        metadata=RouteMetadata(request_content_type="", response_content_type="text/plain", security=[], stream=None),
     )
 
 async def _http_response_shape_service_get_count_endpoint(service: HttpResponseShapeServiceService, request: Request):
-    require_accept(request, "application/json")
+    require_accept(request, "text/plain")
     request_value = HttpResponseShapeServiceGetCountRequest()
     response_value = await service.get_count(request_value)
-    return encode_json_response(response_value)
+    response_payload = getattr(response_value, 'value', getattr(response_value, 'return_', response_value))
+    return encode_plain_response(response_payload)
 
 def _http_response_shape_service_get_count_route(service: HttpResponseShapeServiceService) -> Route:
     async def endpoint(request: Request):
@@ -136,7 +141,7 @@ def _http_response_shape_service_get_count_route(service: HttpResponseShapeServi
         handler=service.get_count,
         request_model=HttpResponseShapeServiceGetCountRequest,
         response_model=HttpResponseShapeServiceGetCountResponse,
-        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+        metadata=RouteMetadata(request_content_type="", response_content_type="text/plain", security=[], stream=None),
     )
 
 async def _http_response_shape_service_add_endpoint(service: HttpResponseShapeServiceService, request: Request):
@@ -148,7 +153,8 @@ async def _http_response_shape_service_add_endpoint(service: HttpResponseShapeSe
         b=read_json_field(body, "b", "int", optional=False),
     )
     response_value = await service.add(request_value)
-    return encode_json_response(response_value)
+    response_payload = response_value
+    return encode_json_response(response_payload)
 
 def _http_response_shape_service_add_route(service: HttpResponseShapeServiceService) -> Route:
     async def endpoint(request: Request):
@@ -165,13 +171,14 @@ def _http_response_shape_service_add_route(service: HttpResponseShapeServiceServ
 
 async def _http_response_shape_service_bump_endpoint(service: HttpResponseShapeServiceService, request: Request):
     require_accept(request, "application/json")
-    require_content_type(request, "application/json")
-    body = read_json_body(request)
+    require_content_type(request, "text/plain")
+    body = read_plain_body(request, "int")
     request_value = HttpResponseShapeServiceBumpRequest(
-        value=read_json_field(body, "value", "int", optional=False),
+        value=read_json_value(body, "int", optional=False, wire_name=""),
     )
     response_value = await service.bump(request_value)
-    return encode_json_response(response_value)
+    response_payload = response_value
+    return encode_json_response(response_payload)
 
 def _http_response_shape_service_bump_route(service: HttpResponseShapeServiceService) -> Route:
     async def endpoint(request: Request):
@@ -183,14 +190,15 @@ def _http_response_shape_service_bump_route(service: HttpResponseShapeServiceSer
         handler=service.bump,
         request_model=HttpResponseShapeServiceBumpRequest,
         response_model=HttpResponseShapeServiceBumpResponse,
-        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+        metadata=RouteMetadata(request_content_type="text/plain", response_content_type="application/json", security=[], stream=None),
     )
 
 async def _http_response_shape_service_ping_endpoint(service: HttpResponseShapeServiceService, request: Request):
-    require_accept(request, "application/json")
+    require_accept(request, "")
     request_value = HttpResponseShapeServicePingRequest()
     response_value = await service.ping(request_value)
-    return encode_json_response(response_value)
+    response_payload = response_value
+    return encode_json_response(response_payload)
 
 def _http_response_shape_service_ping_route(service: HttpResponseShapeServiceService) -> Route:
     async def endpoint(request: Request):
@@ -202,7 +210,7 @@ def _http_response_shape_service_ping_route(service: HttpResponseShapeServiceSer
         handler=service.ping,
         request_model=HttpResponseShapeServicePingRequest,
         response_model=HttpResponseShapeServicePingResponse,
-        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+        metadata=RouteMetadata(request_content_type="", response_content_type="", security=[], stream=None),
     )
 
 def http_response_shape_service_routes(service: HttpResponseShapeServiceService) -> list[Route]:

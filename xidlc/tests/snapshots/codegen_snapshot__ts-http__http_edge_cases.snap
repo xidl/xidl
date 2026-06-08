@@ -857,7 +857,7 @@ export class HttpEdgeCasesServiceClient{
         this.baseUrl, path
         );
         headers.set(
-        "Accept", "application/json"
+        "Accept", ""
         );
         const resp = await this.fetchImpl(
         url, {
@@ -918,7 +918,7 @@ export class HttpEdgeCasesServiceClient{
         this.baseUrl, path
         );
         headers.set(
-        "Accept", "application/json"
+        "Accept", "text/plain"
         );
         const resp = await this.fetchImpl(
         url, {
@@ -933,7 +933,7 @@ export class HttpEdgeCasesServiceClient{
         return await decodeResponseBody<
         string
         >(
-        resp, "application/json", this.codecs
+        resp, "text/plain", this.codecs
         );
     }
 
@@ -980,7 +980,7 @@ export class HttpEdgeCasesServiceClient{
         this.baseUrl, path
         );
         headers.set(
-        "Accept", "application/json"
+        "Accept", "text/plain"
         );
         const resp = await this.fetchImpl(
         url, {
@@ -995,7 +995,7 @@ export class HttpEdgeCasesServiceClient{
         return await decodeResponseBody<
         string
         >(
-        resp, "application/json", this.codecs
+        resp, "text/plain", this.codecs
         );
     }
 
@@ -1047,7 +1047,7 @@ export class HttpEdgeCasesServiceClient{
         this.baseUrl, path
         );
         headers.set(
-        "Accept", "application/json"
+        "Accept", "text/plain"
         );
         const resp = await this.fetchImpl(
         url, {
@@ -1062,7 +1062,7 @@ export class HttpEdgeCasesServiceClient{
         return await decodeResponseBody<
         string
         >(
-        resp, "application/json", this.codecs
+        resp, "text/plain", this.codecs
         );
     }
 
@@ -1110,7 +1110,7 @@ export class HttpEdgeCasesServiceClient{
         this.baseUrl, path
         );
         headers.set(
-        "Accept", "application/json"
+        "Accept", "text/plain"
         );
         const resp = await this.fetchImpl(
         url, {
@@ -1125,7 +1125,7 @@ export class HttpEdgeCasesServiceClient{
         return await decodeResponseBody<
         string
         >(
-        resp, "application/json", this.codecs
+        resp, "text/plain", this.codecs
         );
     }
 }
@@ -1691,8 +1691,10 @@ unknown
     if(mime.startsWith(
     "text/"
     )){
-        return await request.text(
+        return parseScalar(
+        await request.text(
 
+        )
         );
     }
     throw new XidlServerError(
@@ -2158,7 +2160,7 @@ service : HttpEdgeCasesService, options : ServerOptions = {
             payload as ifaceTypes.HttpEdgeCasesServiceGetUserRequest
             );
             return encodeServerResponse(
-            result, "application/json", "return", [
+            result, "text/plain", "return", [
             {
                 name : "return", key : "return"
             }
@@ -2195,7 +2197,7 @@ service : HttpEdgeCasesService, options : ServerOptions = {
             payload as ifaceTypes.HttpEdgeCasesServiceDedupUserRequest
             );
             return encodeServerResponse(
-            result, "application/json", "return", [
+            result, "text/plain", "return", [
             {
                 name : "return", key : "return"
             }
@@ -2234,7 +2236,7 @@ service : HttpEdgeCasesService, options : ServerOptions = {
             payload as ifaceTypes.HttpEdgeCasesServiceGetItemRequest
             );
             return encodeServerResponse(
-            result, "application/json", "return", [
+            result, "text/plain", "return", [
             {
                 name : "return", key : "return"
             }
@@ -2273,7 +2275,7 @@ service : HttpEdgeCasesService, options : ServerOptions = {
             payload as ifaceTypes.HttpEdgeCasesServiceLookupRequest
             );
             return encodeServerResponse(
-            result, "application/json", "return", [
+            result, "text/plain", "return", [
             {
                 name : "return", key : "return"
             }

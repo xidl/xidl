@@ -103,7 +103,7 @@ openapi_http_annotations.json
         "operationId": "HttpAnnoService.bump",
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "format": "int32",
                 "type": "integer"
@@ -178,7 +178,7 @@ openapi_http_annotations.json
         "responses": {
           "200": {
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -205,7 +205,7 @@ openapi_http_annotations.json
         "responses": {
           "200": {
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "format": "int32",
                   "type": "integer"
@@ -243,7 +243,7 @@ openapi_http_annotations.json
         "responses": {
           "200": {
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -290,7 +290,7 @@ openapi_http_annotations.json
         "responses": {
           "200": {
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -357,7 +357,7 @@ openapi_http_annotations.json
         "responses": {
           "200": {
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -404,7 +404,7 @@ openapi_http_annotations.json
         "responses": {
           "200": {
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -451,7 +451,7 @@ openapi_http_annotations.json
         "responses": {
           "200": {
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -498,7 +498,7 @@ openapi_http_annotations.json
         "responses": {
           "200": {
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }

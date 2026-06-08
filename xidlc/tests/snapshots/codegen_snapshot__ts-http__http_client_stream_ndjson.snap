@@ -854,7 +854,7 @@ export class HttpClientStreamServiceClient{
         "Content-Type", "application/x-ndjson"
         );
         headers.set(
-        "Accept", "application/json"
+        "Accept", "text/plain"
         );
         const resp = await this.fetchImpl(
         url, {
@@ -871,7 +871,7 @@ export class HttpClientStreamServiceClient{
         return await decodeResponseBody<
         string
         >(
-        resp, "application/json", this.codecs
+        resp, "text/plain", this.codecs
         );
     }
 }
@@ -1357,8 +1357,10 @@ unknown
     if(mime.startsWith(
     "text/"
     )){
-        return await request.text(
+        return parseScalar(
+        await request.text(
 
+        )
         );
     }
     throw new XidlServerError(
@@ -1768,7 +1770,7 @@ service : HttpClientStreamService, options : ServerOptions = {
             )
             );
             return encodeServerResponse(
-            result, "application/json", "return", [
+            result, "text/plain", "return", [
             {
                 name : "return", key : "return"
             }

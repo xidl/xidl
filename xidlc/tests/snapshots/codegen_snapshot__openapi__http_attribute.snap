@@ -40,7 +40,7 @@ openapi_http_attribute.json
         "responses": {
           "200": {
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -64,7 +64,7 @@ openapi_http_attribute.json
         "operationId": "HttpAttributeService.set_attribute_name",
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }
@@ -94,7 +94,7 @@ openapi_http_attribute.json
         "responses": {
           "200": {
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }

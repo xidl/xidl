@@ -859,7 +859,7 @@ export class HttpCatchAllServiceClient{
         this.baseUrl, path
         );
         headers.set(
-        "Accept", "application/json"
+        "Accept", "text/plain"
         );
         const resp = await this.fetchImpl(
         url, {
@@ -874,7 +874,7 @@ export class HttpCatchAllServiceClient{
         return await decodeResponseBody<
         string
         >(
-        resp, "application/json", this.codecs
+        resp, "text/plain", this.codecs
         );
     }
 
@@ -924,7 +924,7 @@ export class HttpCatchAllServiceClient{
         this.baseUrl, path
         );
         headers.set(
-        "Accept", "application/json"
+        "Accept", "text/plain"
         );
         const resp = await this.fetchImpl(
         url, {
@@ -939,7 +939,7 @@ export class HttpCatchAllServiceClient{
         return await decodeResponseBody<
         string
         >(
-        resp, "application/json", this.codecs
+        resp, "text/plain", this.codecs
         );
     }
 }
@@ -1437,8 +1437,10 @@ unknown
     if(mime.startsWith(
     "text/"
     )){
-        return await request.text(
+        return parseScalar(
+        await request.text(
 
+        )
         );
     }
     throw new XidlServerError(
@@ -1857,7 +1859,7 @@ service : HttpCatchAllService, options : ServerOptions = {
             payload as ifaceTypes.HttpCatchAllServiceReadFileRequest
             );
             return encodeServerResponse(
-            result, "application/json", "return", [
+            result, "text/plain", "return", [
             {
                 name : "return", key : "return"
             }
@@ -1896,7 +1898,7 @@ service : HttpCatchAllService, options : ServerOptions = {
             payload as ifaceTypes.HttpCatchAllServiceReadAssetRequest
             );
             return encodeServerResponse(
-            result, "application/json", "return", [
+            result, "text/plain", "return", [
             {
                 name : "return", key : "return"
             }

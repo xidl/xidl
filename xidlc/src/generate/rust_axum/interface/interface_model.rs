@@ -38,6 +38,7 @@ pub(crate) struct MethodContext {
     pub(crate) ret: String,
     pub(crate) response_ty: String,
     pub(crate) request_body_flatten: bool,
+    pub(crate) response_body_flatten: bool,
     pub(crate) http_method: String,
     pub(crate) http_method_fn: String,
     pub(crate) reqwest_method: String,

@@ -903,7 +903,7 @@ export class HttpStreamSseServiceClient{
         this.baseUrl, path
         );
         headers.set(
-        "Accept", "application/json"
+        "Accept", "text/plain"
         );
         const resp = await this.fetchImpl(
         url, {
@@ -918,7 +918,7 @@ export class HttpStreamSseServiceClient{
         return await decodeResponseBody<
         boolean
         >(
-        resp, "application/json", this.codecs
+        resp, "text/plain", this.codecs
         );
     }
 
@@ -959,19 +959,17 @@ export class HttpStreamSseServiceClient{
         const url = joinUrl(
         this.baseUrl, path
         );
-        const body = {
-            "online" : parsed["online"]
-        };
+        const body = parsed;
         headers.set(
-        "Content-Type", "application/json"
+        "Content-Type", "text/plain"
         );
         headers.set(
-        "Accept", "application/json"
+        "Accept", ""
         );
         const resp = await this.fetchImpl(
         url, {
             method : "POST", headers, body : encodeRequestBody(
-            body, "application/json", this.codecs, ifaceSchemas.HttpStreamSseServiceSetAttributeOnlineRequestSchema
+            body, "text/plain", this.codecs, ifaceSchemas.HttpStreamSseServiceSetAttributeOnlineRequestSchema
             )
         }
         );
@@ -1512,8 +1510,10 @@ unknown
     if(mime.startsWith(
     "text/"
     )){
-        return await request.text(
+        return parseScalar(
+        await request.text(
 
+        )
         );
     }
     throw new XidlServerError(
@@ -1970,7 +1970,7 @@ service : HttpStreamSseService, options : ServerOptions = {
 
             );
             return encodeServerResponse(
-            result, "application/json", "return", [
+            result, "text/plain", "return", [
             {
                 name : "return", key : "return"
             }
@@ -1998,11 +1998,11 @@ service : HttpStreamSseService, options : ServerOptions = {
             const rawPayload = {
             };
             const requestBody = await decodeRequestBody(
-            request, "application/json", options.codecs??{
+            request, "text/plain", options.codecs??{
             }, ifaceSchemas.HttpStreamSseServiceSetAttributeOnlineRequestSchema
             );
             applyRequestBody(
-            rawPayload, requestBody, undefined, [
+            rawPayload, requestBody, "online", [
             "online"
             ]
             );

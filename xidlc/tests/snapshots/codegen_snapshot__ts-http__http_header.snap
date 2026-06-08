@@ -941,19 +941,17 @@ export namespace test{
             const url = joinUrl(
             this.baseUrl, path
             );
-            const body = {
-                "name" : parsed["name"]
-            };
+            const body = parsed;
             headers.set(
-            "Content-Type", "application/json"
+            "Content-Type", "text/plain"
             );
             headers.set(
-            "Accept", "application/json"
+            "Accept", ""
             );
             const resp = await this.fetchImpl(
             url, {
                 method : "POST", headers, body : encodeRequestBody(
-                body, "application/json", this.codecs, ifaceSchemas.test.HeaderServiceCreateUserRequestSchema
+                body, "text/plain", this.codecs, ifaceSchemas.test.HeaderServiceCreateUserRequestSchema
                 )
             }
             );
@@ -1507,8 +1505,10 @@ unknown
     if(mime.startsWith(
     "text/"
     )){
-        return await request.text(
+        return parseScalar(
+        await request.text(
 
+        )
         );
     }
     throw new XidlServerError(
@@ -1971,11 +1971,11 @@ export namespace test{
                     ),
                 };
                 const requestBody = await decodeRequestBody(
-                request, "application/json", options.codecs??{
+                request, "text/plain", options.codecs??{
                 }, ifaceSchemas.test.HeaderServiceCreateUserRequestSchema
                 );
                 applyRequestBody(
-                rawPayload, requestBody, undefined, [
+                rawPayload, requestBody, "name", [
                 "name"
                 ]
                 );

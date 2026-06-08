@@ -1591,7 +1591,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -1626,7 +1626,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -1659,7 +1659,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }
@@ -1670,7 +1670,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -1789,7 +1789,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }
@@ -1800,7 +1800,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -2990,7 +2990,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -3348,7 +3348,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }
@@ -4148,7 +4148,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }
@@ -4159,7 +4159,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -4204,7 +4204,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -4281,7 +4281,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }
@@ -4292,7 +4292,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -6510,7 +6510,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }
@@ -6521,7 +6521,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -6574,7 +6574,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -6651,7 +6651,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }
@@ -6662,7 +6662,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -7955,7 +7955,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }
@@ -8019,7 +8019,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -8054,7 +8054,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -9315,7 +9315,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -9577,7 +9577,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -9843,7 +9843,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -9915,7 +9915,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -9960,7 +9960,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -10025,7 +10025,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }
@@ -10124,7 +10124,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -10611,7 +10611,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }

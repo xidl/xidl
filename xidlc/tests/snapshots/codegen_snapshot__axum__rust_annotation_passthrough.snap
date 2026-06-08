@@ -72,15 +72,8 @@ where
         }
     }
 }
-#[derive(::serde::Serialize)]
-pub struct RustHttpSetAttributeDisplayNameRequestOutBody {
-    #[serde(default)]
-    pub display_name: String,
-}
-#[derive(::serde::Deserialize)]
-pub struct RustHttpSetAttributeDisplayNameRequestInBody {
-    pub display_name: String,
-}
+pub type RustHttpSetAttributeDisplayNameRequestOutBody = String;
+pub type RustHttpSetAttributeDisplayNameRequestInBody = String;
 #[derive(::serde::Deserialize)]
 struct RustHttpSetAttributeDisplayNameRequest {
     display_name: String,
@@ -104,7 +97,7 @@ where
             let _ = xidl_headers;
             if !::xidl_rust_axum::http::content_type_matches(
                 xidl_headers,
-                "application/json",
+                "text/plain",
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
@@ -115,10 +108,10 @@ where
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
             let xidl_body: RustHttpSetAttributeDisplayNameRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
-                    "application/json",
+                    "text/plain",
                 )
                 .from_slice(&xidl_body_bytes)?;
-            let RustHttpSetAttributeDisplayNameRequestInBody { display_name } = xidl_body;
+            let display_name = xidl_body;
             Ok(Self { display_name })
         }
     }
@@ -174,7 +167,7 @@ where
         request: RustHttpGetUserRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let RustHttpGetUserRequest { user_id } = request;
@@ -184,7 +177,7 @@ where
                 let mut resp = {
                     let body_value: String = resp_value;
                     let _ = &body_value;
-                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    let body = xidl_rust_axum::SerializeFactory::new("text/plain")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(
@@ -193,7 +186,7 @@ where
                         )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                            "application/json",
+                            "text/plain",
                         )
                         .body(::xidl_rust_axum::axum::body::Body::from(body))
                         .map_err(|err| xidl_rust_axum::Error::new(
@@ -226,7 +219,7 @@ where
         uri: ::xidl_rust_axum::axum::http::Uri,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let mut resp = match svc.get_attribute_display_name().await {
@@ -234,7 +227,7 @@ where
                 let mut resp = {
                     let body_value: String = resp_value;
                     let _ = &body_value;
-                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    let body = xidl_rust_axum::SerializeFactory::new("text/plain")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(
@@ -243,7 +236,7 @@ where
                         )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                            "application/json",
+                            "text/plain",
                         )
                         .body(::xidl_rust_axum::axum::body::Body::from(body))
                         .map_err(|err| xidl_rust_axum::Error::new(
@@ -341,9 +334,7 @@ impl RustHttpClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
@@ -359,9 +350,7 @@ impl RustHttpClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: String = xidl_rust_axum::DeserializeFactory::new(
-                    "application/json",
-                )
+            let body: String = xidl_rust_axum::DeserializeFactory::new("text/plain")
                 .from_slice(&body)?;
             Ok(body)
         } else {
@@ -384,9 +373,7 @@ impl RustHttpClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
@@ -402,9 +389,7 @@ impl RustHttpClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: String = xidl_rust_axum::DeserializeFactory::new(
-                    "application/json",
-                )
+            let body: String = xidl_rust_axum::DeserializeFactory::new("text/plain")
                 .from_slice(&body)?;
             Ok(body)
         } else {
@@ -435,17 +420,12 @@ impl RustHttpClient {
             );
         let auth_target = &self.client;
         let _ = auth_target;
-        let body = RustHttpSetAttributeDisplayNameRequestOutBody {
-            display_name,
-        };
-        let body = xidl_rust_axum::SerializeFactory::new("application/json")
-            .to_vec(&body)?;
+        let body: String = display_name;
+        let body = xidl_rust_axum::SerializeFactory::new("text/plain").to_vec(&body)?;
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::CONTENT_TYPE,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));

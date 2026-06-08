@@ -49,7 +49,7 @@ openapi_http_client_stream_ndjson.json
         "responses": {
           "200": {
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
