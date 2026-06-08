@@ -601,7 +601,7 @@ where
         uri: ::xidl_rust_axum::axum::http::Uri,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let mut resp = match svc.get_attribute_inherited_attr().await {
@@ -609,7 +609,7 @@ where
                 let mut resp = {
                     let body_value: String = resp_value;
                     let _ = &body_value;
-                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    let body = xidl_rust_axum::SerializeFactory::new("text/plain")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(
@@ -618,7 +618,7 @@ where
                         )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                            "application/json",
+                            "text/plain",
                         )
                         .body(::xidl_rust_axum::axum::body::Body::from(body))
                         .map_err(|err| xidl_rust_axum::Error::new(
@@ -669,7 +669,7 @@ where
         uri: ::xidl_rust_axum::axum::http::Uri,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let mut resp = match svc.get_attribute_bare_attr().await {
@@ -677,7 +677,7 @@ where
                 let mut resp = {
                     let body_value: String = resp_value;
                     let _ = &body_value;
-                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    let body = xidl_rust_axum::SerializeFactory::new("text/plain")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(
@@ -686,7 +686,7 @@ where
                         )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                            "application/json",
+                            "text/plain",
                         )
                         .body(::xidl_rust_axum::axum::body::Body::from(body))
                         .map_err(|err| xidl_rust_axum::Error::new(
@@ -1259,9 +1259,7 @@ impl HttpScopeMatrixServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
@@ -1277,9 +1275,7 @@ impl HttpScopeMatrixServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: String = xidl_rust_axum::DeserializeFactory::new(
-                    "application/json",
-                )
+            let body: String = xidl_rust_axum::DeserializeFactory::new("text/plain")
                 .from_slice(&body)?;
             Ok(body)
         } else {
@@ -1302,9 +1298,7 @@ impl HttpScopeMatrixServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
@@ -1320,9 +1314,7 @@ impl HttpScopeMatrixServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: String = xidl_rust_axum::DeserializeFactory::new(
-                    "application/json",
-                )
+            let body: String = xidl_rust_axum::DeserializeFactory::new("text/plain")
                 .from_slice(&body)?;
             Ok(body)
         } else {
@@ -2023,7 +2015,7 @@ where
         request: HttpSecurityMatrixServiceInheritedSecurityRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let basic = xidl_rust_axum::auth::basic::extract_basic_auth(&headers).ok();
@@ -2055,7 +2047,7 @@ where
                 let mut resp = {
                     let body_value: String = resp_value;
                     let _ = &body_value;
-                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    let body = xidl_rust_axum::SerializeFactory::new("text/plain")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(
@@ -2064,7 +2056,7 @@ where
                         )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                            "application/json",
+                            "text/plain",
                         )
                         .body(::xidl_rust_axum::axum::body::Body::from(body))
                         .map_err(|err| xidl_rust_axum::Error::new(
@@ -2103,7 +2095,7 @@ where
         request: HttpSecurityMatrixServiceBearerOrCookieSecurityRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let basic = xidl_rust_axum::auth::basic::extract_basic_auth(&headers).ok();
@@ -2148,7 +2140,7 @@ where
                 let mut resp = {
                     let body_value: String = resp_value;
                     let _ = &body_value;
-                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    let body = xidl_rust_axum::SerializeFactory::new("text/plain")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(
@@ -2157,7 +2149,7 @@ where
                         )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                            "application/json",
+                            "text/plain",
                         )
                         .body(::xidl_rust_axum::axum::body::Body::from(body))
                         .map_err(|err| xidl_rust_axum::Error::new(
@@ -2196,7 +2188,7 @@ where
         request: HttpSecurityMatrixServiceAlternativeSecurityRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let basic = xidl_rust_axum::auth::basic::extract_basic_auth(&headers).ok();
@@ -2229,7 +2221,7 @@ where
                 let mut resp = {
                     let body_value: String = resp_value;
                     let _ = &body_value;
-                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    let body = xidl_rust_axum::SerializeFactory::new("text/plain")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(
@@ -2238,7 +2230,7 @@ where
                         )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                            "application/json",
+                            "text/plain",
                         )
                         .body(::xidl_rust_axum::axum::body::Body::from(body))
                         .map_err(|err| xidl_rust_axum::Error::new(
@@ -2272,7 +2264,7 @@ where
         request: HttpSecurityMatrixServiceOauthSecurityRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpSecurityMatrixServiceOauthSecurityRequest { keyword, page } = request;
@@ -2283,7 +2275,7 @@ where
                 let mut resp = {
                     let body_value: String = resp_value;
                     let _ = &body_value;
-                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    let body = xidl_rust_axum::SerializeFactory::new("text/plain")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(
@@ -2292,7 +2284,7 @@ where
                         )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                            "application/json",
+                            "text/plain",
                         )
                         .body(::xidl_rust_axum::axum::body::Body::from(body))
                         .map_err(|err| xidl_rust_axum::Error::new(
@@ -2325,7 +2317,7 @@ where
         uri: ::xidl_rust_axum::axum::http::Uri,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let mut resp = match svc.public_ping().await {
@@ -2333,7 +2325,7 @@ where
                 let mut resp = {
                     let body_value: String = resp_value;
                     let _ = &body_value;
-                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    let body = xidl_rust_axum::SerializeFactory::new("text/plain")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(
@@ -2342,7 +2334,7 @@ where
                         )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                            "application/json",
+                            "text/plain",
                         )
                         .body(::xidl_rust_axum::axum::body::Body::from(body))
                         .map_err(|err| xidl_rust_axum::Error::new(
@@ -2427,9 +2419,7 @@ impl HttpSecurityMatrixServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
@@ -2464,9 +2454,7 @@ impl HttpSecurityMatrixServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: String = xidl_rust_axum::DeserializeFactory::new(
-                    "application/json",
-                )
+            let body: String = xidl_rust_axum::DeserializeFactory::new("text/plain")
                 .from_slice(&body)?;
             Ok(body)
         } else {
@@ -2492,9 +2480,7 @@ impl HttpSecurityMatrixServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_client = self.client.with_auth_override(Some(xidl_auth));
@@ -2535,9 +2521,7 @@ impl HttpSecurityMatrixServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: String = xidl_rust_axum::DeserializeFactory::new(
-                    "application/json",
-                )
+            let body: String = xidl_rust_axum::DeserializeFactory::new("text/plain")
                 .from_slice(&body)?;
             Ok(body)
         } else {
@@ -2564,9 +2548,7 @@ impl HttpSecurityMatrixServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let query = HttpSecurityMatrixServiceAlternativeSecurityRequestOutQuery {
@@ -2600,9 +2582,7 @@ impl HttpSecurityMatrixServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: String = xidl_rust_axum::DeserializeFactory::new(
-                    "application/json",
-                )
+            let body: String = xidl_rust_axum::DeserializeFactory::new("text/plain")
                 .from_slice(&body)?;
             Ok(body)
         } else {
@@ -2627,9 +2607,7 @@ impl HttpSecurityMatrixServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
@@ -2660,9 +2638,7 @@ impl HttpSecurityMatrixServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: String = xidl_rust_axum::DeserializeFactory::new(
-                    "application/json",
-                )
+            let body: String = xidl_rust_axum::DeserializeFactory::new("text/plain")
                 .from_slice(&body)?;
             Ok(body)
         } else {
@@ -2683,9 +2659,7 @@ impl HttpSecurityMatrixServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
@@ -2701,9 +2675,7 @@ impl HttpSecurityMatrixServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: String = xidl_rust_axum::DeserializeFactory::new(
-                    "application/json",
-                )
+            let body: String = xidl_rust_axum::DeserializeFactory::new("text/plain")
                 .from_slice(&body)?;
             Ok(body)
         } else {

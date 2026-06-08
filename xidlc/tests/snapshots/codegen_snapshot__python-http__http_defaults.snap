@@ -22,6 +22,7 @@ ServerStreamResponse,
 StreamMetadata,
 cookie_value,
 encode_json_response,
+encode_plain_response,
 encode_stream_response,
 header_value,
 path_value,
@@ -29,6 +30,7 @@ query_value,
 read_form_body,
 read_json_body,
 read_json_field,
+read_plain_body,
     read_json_value,
 read_scalar,
 require_accept,
@@ -208,12 +210,13 @@ class HttpDefaultsServiceService(abc.ABC):
         raise NotImplementedError
 
 async def _http_defaults_service_get_name_endpoint(service: HttpDefaultsServiceService, request: Request):
-    require_accept(request, "application/json")
+    require_accept(request, "text/plain")
     request_value = HttpDefaultsServiceGetNameRequest(
         name=read_scalar(query_value(request, "name"), "str", optional=False, default_on_missing=False, wire_name="name"),
     )
     response_value = await service.get_name(request_value)
-    return encode_json_response(response_value)
+    response_payload = getattr(response_value, 'value', getattr(response_value, 'return_', response_value))
+    return encode_plain_response(response_payload)
 
 def _http_defaults_service_get_name_route(service: HttpDefaultsServiceService) -> Route:
     async def endpoint(request: Request):
@@ -225,18 +228,19 @@ def _http_defaults_service_get_name_route(service: HttpDefaultsServiceService) -
         handler=service.get_name,
         request_model=HttpDefaultsServiceGetNameRequest,
         response_model=HttpDefaultsServiceGetNameResponse,
-        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+        metadata=RouteMetadata(request_content_type="", response_content_type="text/plain", security=[], stream=None),
     )
 
 async def _http_defaults_service_list_orders_endpoint(service: HttpDefaultsServiceService, request: Request):
-    require_accept(request, "application/json")
+    require_accept(request, "text/plain")
     request_value = HttpDefaultsServiceListOrdersRequest(
         user_id=read_scalar(path_value(request, "uid"), "int", optional=False, default_on_missing=False, wire_name="uid"),
         page=read_scalar(query_value(request, "page"), "int", optional=False, default_on_missing=False, wire_name="page"),
         size=read_scalar(query_value(request, "size"), "int", optional=False, default_on_missing=False, wire_name="size"),
     )
     response_value = await service.list_orders(request_value)
-    return encode_json_response(response_value)
+    response_payload = getattr(response_value, 'value', getattr(response_value, 'return_', response_value))
+    return encode_plain_response(response_payload)
 
 def _http_defaults_service_list_orders_route(service: HttpDefaultsServiceService) -> Route:
     async def endpoint(request: Request):
@@ -248,18 +252,19 @@ def _http_defaults_service_list_orders_route(service: HttpDefaultsServiceService
         handler=service.list_orders,
         request_model=HttpDefaultsServiceListOrdersRequest,
         response_model=HttpDefaultsServiceListOrdersResponse,
-        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+        metadata=RouteMetadata(request_content_type="", response_content_type="text/plain", security=[], stream=None),
     )
 
 async def _http_defaults_service_create_user_endpoint(service: HttpDefaultsServiceService, request: Request):
-    require_accept(request, "application/json")
+    require_accept(request, "text/plain")
     require_content_type(request, "application/json")
     body = read_json_body(request)
     request_value = HttpDefaultsServiceCreateUserRequest(
         req=read_json_field(body, "req", "CreateUserRequest", optional=False),
     )
     response_value = await service.create_user(request_value)
-    return encode_json_response(response_value)
+    response_payload = getattr(response_value, 'value', getattr(response_value, 'return_', response_value))
+    return encode_plain_response(response_payload)
 
 def _http_defaults_service_create_user_route(service: HttpDefaultsServiceService) -> Route:
     async def endpoint(request: Request):
@@ -271,18 +276,19 @@ def _http_defaults_service_create_user_route(service: HttpDefaultsServiceService
         handler=service.create_user,
         request_model=HttpDefaultsServiceCreateUserRequest,
         response_model=HttpDefaultsServiceCreateUserResponse,
-        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+        metadata=RouteMetadata(request_content_type="application/json", response_content_type="text/plain", security=[], stream=None),
     )
 
 async def _http_defaults_service_create_user_flat_endpoint(service: HttpDefaultsServiceService, request: Request):
-    require_accept(request, "application/json")
+    require_accept(request, "text/plain")
     require_content_type(request, "application/json")
     body = read_json_body(request)
     request_value = HttpDefaultsServiceCreateUserFlatRequest(
         req=read_json_value(body, "CreateUserRequest", optional=False, wire_name=""),
     )
     response_value = await service.create_user_flat(request_value)
-    return encode_json_response(response_value)
+    response_payload = getattr(response_value, 'value', getattr(response_value, 'return_', response_value))
+    return encode_plain_response(response_payload)
 
 def _http_defaults_service_create_user_flat_route(service: HttpDefaultsServiceService) -> Route:
     async def endpoint(request: Request):
@@ -294,11 +300,11 @@ def _http_defaults_service_create_user_flat_route(service: HttpDefaultsServiceSe
         handler=service.create_user_flat,
         request_model=HttpDefaultsServiceCreateUserFlatRequest,
         response_model=HttpDefaultsServiceCreateUserFlatResponse,
-        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+        metadata=RouteMetadata(request_content_type="application/json", response_content_type="text/plain", security=[], stream=None),
     )
 
 async def _http_defaults_service_search_user_endpoint(service: HttpDefaultsServiceService, request: Request):
-    require_accept(request, "application/json")
+    require_accept(request, "text/plain")
     require_content_type(request, "application/json")
     body = read_json_body(request)
     request_value = HttpDefaultsServiceSearchUserRequest(
@@ -306,7 +312,8 @@ async def _http_defaults_service_search_user_endpoint(service: HttpDefaultsServi
         age=read_json_field(body, "age", "int", optional=False),
     )
     response_value = await service.search_user(request_value)
-    return encode_json_response(response_value)
+    response_payload = getattr(response_value, 'value', getattr(response_value, 'return_', response_value))
+    return encode_plain_response(response_payload)
 
 def _http_defaults_service_search_user_route(service: HttpDefaultsServiceService) -> Route:
     async def endpoint(request: Request):
@@ -318,18 +325,19 @@ def _http_defaults_service_search_user_route(service: HttpDefaultsServiceService
         handler=service.search_user,
         request_model=HttpDefaultsServiceSearchUserRequest,
         response_model=HttpDefaultsServiceSearchUserResponse,
-        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+        metadata=RouteMetadata(request_content_type="application/json", response_content_type="text/plain", security=[], stream=None),
     )
 
 async def _http_defaults_service_preview_user_endpoint(service: HttpDefaultsServiceService, request: Request):
-    require_accept(request, "application/json")
+    require_accept(request, "text/plain")
     require_content_type(request, "application/json")
     body = read_json_body(request)
     request_value = HttpDefaultsServicePreviewUserRequest(
         req=read_json_field(body, "req", "CreateUserRequest", optional=False),
     )
     response_value = await service.preview_user(request_value)
-    return encode_json_response(response_value)
+    response_payload = getattr(response_value, 'value', getattr(response_value, 'return_', response_value))
+    return encode_plain_response(response_payload)
 
 def _http_defaults_service_preview_user_route(service: HttpDefaultsServiceService) -> Route:
     async def endpoint(request: Request):
@@ -341,17 +349,18 @@ def _http_defaults_service_preview_user_route(service: HttpDefaultsServiceServic
         handler=service.preview_user,
         request_model=HttpDefaultsServicePreviewUserRequest,
         response_model=HttpDefaultsServicePreviewUserResponse,
-        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+        metadata=RouteMetadata(request_content_type="application/json", response_content_type="text/plain", security=[], stream=None),
     )
 
 async def _http_defaults_service_get_user_endpoint(service: HttpDefaultsServiceService, request: Request):
-    require_accept(request, "application/json")
+    require_accept(request, "text/plain")
     request_value = HttpDefaultsServiceGetUserRequest(
         id=read_scalar(path_value(request, "id"), "int", optional=False, default_on_missing=False, wire_name="id"),
         lang=read_scalar(query_value(request, "lang"), "str", optional=False, default_on_missing=False, wire_name="lang"),
     )
     response_value = await service.get_user(request_value)
-    return encode_json_response(response_value)
+    response_payload = getattr(response_value, 'value', getattr(response_value, 'return_', response_value))
+    return encode_plain_response(response_payload)
 
 def _http_defaults_service_get_user_route(service: HttpDefaultsServiceService) -> Route:
     async def endpoint(request: Request):
@@ -363,17 +372,18 @@ def _http_defaults_service_get_user_route(service: HttpDefaultsServiceService) -
         handler=service.get_user,
         request_model=HttpDefaultsServiceGetUserRequest,
         response_model=HttpDefaultsServiceGetUserResponse,
-        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+        metadata=RouteMetadata(request_content_type="", response_content_type="text/plain", security=[], stream=None),
     )
 
 async def _http_defaults_service_get_user_alias_endpoint(service: HttpDefaultsServiceService, request: Request):
-    require_accept(request, "application/json")
+    require_accept(request, "text/plain")
     request_value = HttpDefaultsServiceGetUserAliasRequest(
         user_id=read_scalar(path_value(request, "id"), "int", optional=False, default_on_missing=False, wire_name="id"),
         locale=read_scalar(query_value(request, "lang"), "str", optional=False, default_on_missing=False, wire_name="lang"),
     )
     response_value = await service.get_user_alias(request_value)
-    return encode_json_response(response_value)
+    response_payload = getattr(response_value, 'value', getattr(response_value, 'return_', response_value))
+    return encode_plain_response(response_payload)
 
 def _http_defaults_service_get_user_alias_route(service: HttpDefaultsServiceService) -> Route:
     async def endpoint(request: Request):
@@ -385,17 +395,18 @@ def _http_defaults_service_get_user_alias_route(service: HttpDefaultsServiceServ
         handler=service.get_user_alias,
         request_model=HttpDefaultsServiceGetUserAliasRequest,
         response_model=HttpDefaultsServiceGetUserAliasResponse,
-        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+        metadata=RouteMetadata(request_content_type="", response_content_type="text/plain", security=[], stream=None),
     )
 
 async def _http_defaults_service_delete_user_endpoint(service: HttpDefaultsServiceService, request: Request):
-    require_accept(request, "application/json")
+    require_accept(request, "text/plain")
     request_value = HttpDefaultsServiceDeleteUserRequest(
         id=read_scalar(query_value(request, "id"), "int", optional=False, default_on_missing=False, wire_name="id"),
         revision=read_scalar(query_value(request, "revision"), "int", optional=False, default_on_missing=False, wire_name="revision"),
     )
     response_value = await service.delete_user(request_value)
-    return encode_json_response(response_value)
+    response_payload = getattr(response_value, 'value', getattr(response_value, 'return_', response_value))
+    return encode_plain_response(response_payload)
 
 def _http_defaults_service_delete_user_route(service: HttpDefaultsServiceService) -> Route:
     async def endpoint(request: Request):
@@ -407,17 +418,18 @@ def _http_defaults_service_delete_user_route(service: HttpDefaultsServiceService
         handler=service.delete_user,
         request_model=HttpDefaultsServiceDeleteUserRequest,
         response_model=HttpDefaultsServiceDeleteUserResponse,
-        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+        metadata=RouteMetadata(request_content_type="", response_content_type="text/plain", security=[], stream=None),
     )
 
 async def _http_defaults_service_probe_user_endpoint(service: HttpDefaultsServiceService, request: Request):
-    require_accept(request, "application/json")
+    require_accept(request, "")
     request_value = HttpDefaultsServiceProbeUserRequest(
         id=read_scalar(query_value(request, "id"), "int", optional=False, default_on_missing=False, wire_name="id"),
         revision=read_scalar(query_value(request, "revision"), "int", optional=False, default_on_missing=False, wire_name="revision"),
     )
     response_value = await service.probe_user(request_value)
-    return encode_json_response(response_value)
+    response_payload = response_value
+    return encode_json_response(response_payload)
 
 def _http_defaults_service_probe_user_route(service: HttpDefaultsServiceService) -> Route:
     async def endpoint(request: Request):
@@ -429,17 +441,18 @@ def _http_defaults_service_probe_user_route(service: HttpDefaultsServiceService)
         handler=service.probe_user,
         request_model=HttpDefaultsServiceProbeUserRequest,
         response_model=HttpDefaultsServiceProbeUserResponse,
-        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+        metadata=RouteMetadata(request_content_type="", response_content_type="", security=[], stream=None),
     )
 
 async def _http_defaults_service_user_options_endpoint(service: HttpDefaultsServiceService, request: Request):
-    require_accept(request, "application/json")
+    require_accept(request, "")
     request_value = HttpDefaultsServiceUserOptionsRequest(
         id=read_scalar(query_value(request, "id"), "int", optional=False, default_on_missing=False, wire_name="id"),
         revision=read_scalar(query_value(request, "revision"), "int", optional=False, default_on_missing=False, wire_name="revision"),
     )
     response_value = await service.user_options(request_value)
-    return encode_json_response(response_value)
+    response_payload = response_value
+    return encode_json_response(response_payload)
 
 def _http_defaults_service_user_options_route(service: HttpDefaultsServiceService) -> Route:
     async def endpoint(request: Request):
@@ -451,11 +464,11 @@ def _http_defaults_service_user_options_route(service: HttpDefaultsServiceServic
         handler=service.user_options,
         request_model=HttpDefaultsServiceUserOptionsRequest,
         response_model=HttpDefaultsServiceUserOptionsResponse,
-        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+        metadata=RouteMetadata(request_content_type="", response_content_type="", security=[], stream=None),
     )
 
 async def _http_defaults_service_replace_user_endpoint(service: HttpDefaultsServiceService, request: Request):
-    require_accept(request, "application/json")
+    require_accept(request, "text/plain")
     require_content_type(request, "application/json")
     body = read_json_body(request)
     request_value = HttpDefaultsServiceReplaceUserRequest(
@@ -464,7 +477,8 @@ async def _http_defaults_service_replace_user_endpoint(service: HttpDefaultsServ
         age=read_json_field(body, "age", "int", optional=False),
     )
     response_value = await service.replace_user(request_value)
-    return encode_json_response(response_value)
+    response_payload = getattr(response_value, 'value', getattr(response_value, 'return_', response_value))
+    return encode_plain_response(response_payload)
 
 def _http_defaults_service_replace_user_route(service: HttpDefaultsServiceService) -> Route:
     async def endpoint(request: Request):
@@ -476,11 +490,11 @@ def _http_defaults_service_replace_user_route(service: HttpDefaultsServiceServic
         handler=service.replace_user,
         request_model=HttpDefaultsServiceReplaceUserRequest,
         response_model=HttpDefaultsServiceReplaceUserResponse,
-        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+        metadata=RouteMetadata(request_content_type="application/json", response_content_type="text/plain", security=[], stream=None),
     )
 
 async def _http_defaults_service_patch_user_endpoint(service: HttpDefaultsServiceService, request: Request):
-    require_accept(request, "application/json")
+    require_accept(request, "text/plain")
     require_content_type(request, "application/json")
     body = read_json_body(request)
     request_value = HttpDefaultsServicePatchUserRequest(
@@ -489,7 +503,8 @@ async def _http_defaults_service_patch_user_endpoint(service: HttpDefaultsServic
         age=read_json_field(body, "age", "int", optional=False),
     )
     response_value = await service.patch_user(request_value)
-    return encode_json_response(response_value)
+    response_payload = getattr(response_value, 'value', getattr(response_value, 'return_', response_value))
+    return encode_plain_response(response_payload)
 
 def _http_defaults_service_patch_user_route(service: HttpDefaultsServiceService) -> Route:
     async def endpoint(request: Request):
@@ -501,7 +516,7 @@ def _http_defaults_service_patch_user_route(service: HttpDefaultsServiceService)
         handler=service.patch_user,
         request_model=HttpDefaultsServicePatchUserRequest,
         response_model=HttpDefaultsServicePatchUserResponse,
-        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+        metadata=RouteMetadata(request_content_type="application/json", response_content_type="text/plain", security=[], stream=None),
     )
 
 def http_defaults_service_routes(service: HttpDefaultsServiceService) -> list[Route]:

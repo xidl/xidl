@@ -67,7 +67,7 @@ openapi_http_stream_sse.json
         "responses": {
           "200": {
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "boolean"
                 }
@@ -91,7 +91,7 @@ openapi_http_stream_sse.json
         "operationId": "HttpStreamSseService.set_attribute_online",
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "boolean"
               }

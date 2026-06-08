@@ -86,9 +86,6 @@ where
         req: ::xidl_rust_axum::axum::extract::Request,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
-            return Err(xidl_rust_axum::Error::not_acceptable());
-        }
         let HttpUpgradeServiceConnectRawRequestInQuery { token } = query;
         let token: String = token;
         let mut resp = match svc
@@ -153,9 +150,7 @@ impl HttpUpgradeServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         req.headers_mut()

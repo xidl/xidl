@@ -849,7 +849,7 @@ export class HttpResponseShapeServiceClient{
         this.baseUrl, path
         );
         headers.set(
-        "Accept", "application/json"
+        "Accept", "text/plain"
         );
         const resp = await this.fetchImpl(
         url, {
@@ -864,7 +864,7 @@ export class HttpResponseShapeServiceClient{
         return await decodeResponseBody<
         string
         >(
-        resp, "application/json", this.codecs
+        resp, "text/plain", this.codecs
         );
     }
 
@@ -901,7 +901,7 @@ export class HttpResponseShapeServiceClient{
         this.baseUrl, path
         );
         headers.set(
-        "Accept", "application/json"
+        "Accept", "text/plain"
         );
         const resp = await this.fetchImpl(
         url, {
@@ -914,7 +914,7 @@ export class HttpResponseShapeServiceClient{
             );
         }
         const responseBody = await decodeOptionalResponseBody(
-        resp, "application/json", this.codecs, ifaceSchemas.HttpResponseShapeServiceGetCountResponseSchema
+        resp, "text/plain", this.codecs, ifaceSchemas.HttpResponseShapeServiceGetCountResponseSchema
         );
         const responsePayload = buildResponsePayload(
         responseBody, resp, "object", [
@@ -1038,11 +1038,9 @@ export class HttpResponseShapeServiceClient{
         const url = joinUrl(
         this.baseUrl, path
         );
-        const body = {
-            "value" : parsed["value"]
-        };
+        const body = parsed;
         headers.set(
-        "Content-Type", "application/json"
+        "Content-Type", "text/plain"
         );
         headers.set(
         "Accept", "application/json"
@@ -1050,7 +1048,7 @@ export class HttpResponseShapeServiceClient{
         const resp = await this.fetchImpl(
         url, {
             method : "POST", headers, body : encodeRequestBody(
-            body, "application/json", this.codecs, ifaceSchemas.HttpResponseShapeServiceBumpRequestSchema
+            body, "text/plain", this.codecs, ifaceSchemas.HttpResponseShapeServiceBumpRequestSchema
             )
         }
         );
@@ -1107,7 +1105,7 @@ export class HttpResponseShapeServiceClient{
         this.baseUrl, path
         );
         headers.set(
-        "Accept", "application/json"
+        "Accept", ""
         );
         const resp = await this.fetchImpl(
         url, {
@@ -1680,8 +1678,10 @@ unknown
     if(mime.startsWith(
     "text/"
     )){
-        return await request.text(
+        return parseScalar(
+        await request.text(
 
+        )
         );
     }
     throw new XidlServerError(
@@ -2109,7 +2109,7 @@ service : HttpResponseShapeService, options : ServerOptions = {
 
             );
             return encodeServerResponse(
-            result, "application/json", "return", [
+            result, "text/plain", "return", [
             {
                 name : "return", key : "return"
             }
@@ -2143,7 +2143,7 @@ service : HttpResponseShapeService, options : ServerOptions = {
             result
             );
             return encodeServerResponse(
-            parsed, "application/json", "object", [
+            parsed, "text/plain", "object", [
             {
                 name : "count", key : "count"
             }
@@ -2219,11 +2219,11 @@ service : HttpResponseShapeService, options : ServerOptions = {
             const rawPayload = {
             };
             const requestBody = await decodeRequestBody(
-            request, "application/json", options.codecs??{
+            request, "text/plain", options.codecs??{
             }, ifaceSchemas.HttpResponseShapeServiceBumpRequestSchema
             );
             applyRequestBody(
-            rawPayload, requestBody, undefined, [
+            rawPayload, requestBody, "value", [
             "value"
             ]
             );

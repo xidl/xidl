@@ -49,7 +49,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "boolean"
                 }

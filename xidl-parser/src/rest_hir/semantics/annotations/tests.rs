@@ -54,7 +54,7 @@ fn normalize_annotation_params_handles_all_param_forms() {
 }
 
 #[test]
-fn media_type_resolution_prefers_method_and_falls_back_to_default() {
+fn media_type_resolution_prefers_method_and_returns_none_when_missing() {
     let interface = vec![builtin(
         "Consume",
         Some(AnnotationParams::Raw("\"application/msgpack\"".to_string())),
@@ -65,12 +65,9 @@ fn media_type_resolution_prefers_method_and_falls_back_to_default() {
     )];
     assert_eq!(
         effective_media_type(&interface, &method, "Consumes"),
-        "text/plain"
+        Some("text/plain".to_string())
     );
-    assert_eq!(
-        effective_media_type(&[], &[], "Produces"),
-        "application/json"
-    );
+    assert_eq!(effective_media_type(&[], &[], "Produces"), None);
     assert_eq!(
         annotation_value(&interface, "Consumes").as_deref(),
         Some("application/msgpack")

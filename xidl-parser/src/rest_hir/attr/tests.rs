@@ -45,7 +45,7 @@ fn projects_readwrite_and_with_raises_attributes() {
     assert_eq!(ops[1].signature.params[0].name, "temperature_celsius");
     assert_eq!(
         ops[1].http.request.body.content_type.as_deref(),
-        Some("application/json")
+        Some("text/plain")
     );
 
     let with_raises = AttrDcl {

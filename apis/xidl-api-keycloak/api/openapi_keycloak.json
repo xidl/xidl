@@ -59,7 +59,7 @@
         "operationId": "KeycloakAdminApi.post_admin_realms",
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }
@@ -2391,7 +2391,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }
@@ -6011,7 +6011,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }
@@ -6382,7 +6382,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }
@@ -15556,7 +15556,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "boolean"
                 }
@@ -16287,7 +16287,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "integer",
                   "format": "int64"
@@ -17361,7 +17361,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }
@@ -18001,7 +18001,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }
@@ -18055,7 +18055,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "integer",
                   "format": "int64"
@@ -18511,7 +18511,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }
@@ -20464,7 +20464,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "integer",
                   "format": "int32"

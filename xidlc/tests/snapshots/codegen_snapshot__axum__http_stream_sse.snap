@@ -55,15 +55,8 @@ pub struct HttpStreamSseServiceWatchTopicRequest {
     pub topic: String,
     pub lang: String,
 }
-#[derive(::serde::Serialize)]
-pub struct HttpStreamSseServiceSetAttributeOnlineRequestOutBody {
-    #[serde(default)]
-    pub online: bool,
-}
-#[derive(::serde::Deserialize)]
-pub struct HttpStreamSseServiceSetAttributeOnlineRequestInBody {
-    pub online: bool,
-}
+pub type HttpStreamSseServiceSetAttributeOnlineRequestOutBody = bool;
+pub type HttpStreamSseServiceSetAttributeOnlineRequestInBody = bool;
 #[derive(::serde::Deserialize)]
 struct HttpStreamSseServiceSetAttributeOnlineRequest {
     online: bool,
@@ -87,7 +80,7 @@ where
             let _ = xidl_headers;
             if !::xidl_rust_axum::http::content_type_matches(
                 xidl_headers,
-                "application/json",
+                "text/plain",
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
@@ -98,10 +91,10 @@ where
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
             let xidl_body: HttpStreamSseServiceSetAttributeOnlineRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
-                    "application/json",
+                    "text/plain",
                 )
                 .from_slice(&xidl_body_bytes)?;
-            let HttpStreamSseServiceSetAttributeOnlineRequestInBody { online } = xidl_body;
+            let online = xidl_body;
             Ok(Self { online })
         }
     }
@@ -210,7 +203,7 @@ where
         uri: ::xidl_rust_axum::axum::http::Uri,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let mut resp = match svc.get_attribute_online().await {
@@ -218,7 +211,7 @@ where
                 let mut resp = {
                     let body_value: bool = resp_value;
                     let _ = &body_value;
-                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    let body = xidl_rust_axum::SerializeFactory::new("text/plain")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(
@@ -227,7 +220,7 @@ where
                         )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                            "application/json",
+                            "text/plain",
                         )
                         .body(::xidl_rust_axum::axum::body::Body::from(body))
                         .map_err(|err| xidl_rust_axum::Error::new(
@@ -393,9 +386,7 @@ impl HttpStreamSseServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
@@ -411,7 +402,7 @@ impl HttpStreamSseServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: bool = xidl_rust_axum::DeserializeFactory::new("application/json")
+            let body: bool = xidl_rust_axum::DeserializeFactory::new("text/plain")
                 .from_slice(&body)?;
             Ok(body)
         } else {
@@ -442,17 +433,12 @@ impl HttpStreamSseServiceClient {
             );
         let auth_target = &self.client;
         let _ = auth_target;
-        let body = HttpStreamSseServiceSetAttributeOnlineRequestOutBody {
-            online,
-        };
-        let body = xidl_rust_axum::SerializeFactory::new("application/json")
-            .to_vec(&body)?;
+        let body: bool = online;
+        let body = xidl_rust_axum::SerializeFactory::new("text/plain").to_vec(&body)?;
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::CONTENT_TYPE,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));

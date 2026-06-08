@@ -42,7 +42,7 @@ type HttpSecurityServiceService interface {
 
 func RegisterHttpSecurityServiceHandler(r gin.IRouter, svc HttpSecurityServiceService) {
 	r.GET("/users/:id", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
 			return
 		}
@@ -52,6 +52,10 @@ func RegisterHttpSecurityServiceHandler(r gin.IRouter, svc HttpSecurityServiceSe
 			return
 		}
 		c.Request = c.Request.WithContext(ctx)
+		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
+			return
+		}
 
 		req := &HttpSecurityServiceGetUserRequest{}
 
@@ -85,12 +89,12 @@ func RegisterHttpSecurityServiceHandler(r gin.IRouter, svc HttpSecurityServiceSe
 			return
 		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
 		}
 	})
 	r.POST("/users/search", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
 			return
 		}
@@ -123,13 +127,17 @@ func RegisterHttpSecurityServiceHandler(r gin.IRouter, svc HttpSecurityServiceSe
 			return
 		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
 		}
 	})
 	r.POST("/health", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
+			return
+		}
+		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return
 		}
 
@@ -144,7 +152,7 @@ func RegisterHttpSecurityServiceHandler(r gin.IRouter, svc HttpSecurityServiceSe
 			return
 		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
 		}
 	})
@@ -177,7 +185,7 @@ func (c *HttpSecurityServiceClient) GetUser(ctx context.Context, req *HttpSecuri
 	if err != nil {
 		return nil, err
 	}
-	httpReq.Header.Set("Accept", "application/json")
+	httpReq.Header.Set("Accept", "text/plain")
 
 	httpReq.Header.Set("X-Trace-Id", req.TraceId)
 	xidlgohttp.ApplyClientAuth(httpReq, c.auth, HttpSecurityServiceGetUserSecurityRequirements())
@@ -211,7 +219,7 @@ func (c *HttpSecurityServiceClient) SearchUser(ctx context.Context, req *HttpSec
 		return nil, err
 	}
 	httpReq.Header.Set("Content-Type", "application/json")
-	httpReq.Header.Set("Accept", "application/json")
+	httpReq.Header.Set("Accept", "text/plain")
 	xidlgohttp.ApplyClientAuth(httpReq, c.auth, HttpSecurityServiceSearchUserSecurityRequirements())
 	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
@@ -234,7 +242,7 @@ func (c *HttpSecurityServiceClient) Health(ctx context.Context, req *HttpSecurit
 	if err != nil {
 		return nil, err
 	}
-	httpReq.Header.Set("Accept", "application/json")
+	httpReq.Header.Set("Accept", "text/plain")
 	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
 		return nil, err
@@ -284,7 +292,7 @@ func formatHttpSecurityServiceGetUserPath(req *HttpSecurityServiceGetUserRequest
 func decodeHttpSecurityServiceGetUserResponse(resp *http.Response) (HttpSecurityServiceGetUserResponse, error) {
 	out := HttpSecurityServiceGetUserResponse{}
 	var body string
-	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil {
+	if err := xidlgohttp.MustCodecForMime("text/plain").Decode(resp.Body, &body); err != nil {
 		return out, err
 	}
 	out.Return = body
@@ -324,7 +332,7 @@ func formatHttpSecurityServiceSearchUserPath(req *HttpSecurityServiceSearchUserR
 func decodeHttpSecurityServiceSearchUserResponse(resp *http.Response) (HttpSecurityServiceSearchUserResponse, error) {
 	out := HttpSecurityServiceSearchUserResponse{}
 	var body string
-	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil {
+	if err := xidlgohttp.MustCodecForMime("text/plain").Decode(resp.Body, &body); err != nil {
 		return out, err
 	}
 	out.Return = body
@@ -358,7 +366,7 @@ func formatHttpSecurityServiceHealthPath(req *HttpSecurityServiceHealthRequest) 
 func decodeHttpSecurityServiceHealthResponse(resp *http.Response) (HttpSecurityServiceHealthResponse, error) {
 	out := HttpSecurityServiceHealthResponse{}
 	var body string
-	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil {
+	if err := xidlgohttp.MustCodecForMime("text/plain").Decode(resp.Body, &body); err != nil {
 		return out, err
 	}
 	out.Return = body

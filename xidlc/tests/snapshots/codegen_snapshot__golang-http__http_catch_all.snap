@@ -41,8 +41,12 @@ type HttpCatchAllServiceService interface {
 
 func RegisterHttpCatchAllServiceHandler(r gin.IRouter, svc HttpCatchAllServiceService) {
 	r.GET("/files/*path", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
+			return
+		}
+		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return
 		}
 
@@ -64,13 +68,17 @@ func RegisterHttpCatchAllServiceHandler(r gin.IRouter, svc HttpCatchAllServiceSe
 			return
 		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
 		}
 	})
 	r.GET("/assets/*key", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
+			return
+		}
+		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return
 		}
 
@@ -99,7 +107,7 @@ func RegisterHttpCatchAllServiceHandler(r gin.IRouter, svc HttpCatchAllServiceSe
 			return
 		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
 		}
 	})
@@ -124,7 +132,7 @@ func (c *HttpCatchAllServiceClient) ReadFile(ctx context.Context, req *HttpCatch
 	if err != nil {
 		return nil, err
 	}
-	httpReq.Header.Set("Accept", "application/json")
+	httpReq.Header.Set("Accept", "text/plain")
 	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
 		return nil, err
@@ -152,7 +160,7 @@ func (c *HttpCatchAllServiceClient) ReadAsset(ctx context.Context, req *HttpCatc
 	if err != nil {
 		return nil, err
 	}
-	httpReq.Header.Set("Accept", "application/json")
+	httpReq.Header.Set("Accept", "text/plain")
 	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
 		return nil, err
@@ -195,7 +203,7 @@ func formatHttpCatchAllServiceReadFilePath(req *HttpCatchAllServiceReadFileReque
 func decodeHttpCatchAllServiceReadFileResponse(resp *http.Response) (HttpCatchAllServiceReadFileResponse, error) {
 	out := HttpCatchAllServiceReadFileResponse{}
 	var body string
-	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil {
+	if err := xidlgohttp.MustCodecForMime("text/plain").Decode(resp.Body, &body); err != nil {
 		return out, err
 	}
 	out.Return = body
@@ -230,7 +238,7 @@ func formatHttpCatchAllServiceReadAssetPath(req *HttpCatchAllServiceReadAssetReq
 func decodeHttpCatchAllServiceReadAssetResponse(resp *http.Response) (HttpCatchAllServiceReadAssetResponse, error) {
 	out := HttpCatchAllServiceReadAssetResponse{}
 	var body string
-	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil {
+	if err := xidlgohttp.MustCodecForMime("text/plain").Decode(resp.Body, &body); err != nil {
 		return out, err
 	}
 	out.Return = body

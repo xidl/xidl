@@ -83,8 +83,8 @@ fn test_build_http_mapping_single_body() {
     let mapping = build_http_mapping(
         HttpMethod::Post,
         &stream,
-        "application/json",
-        "application/json",
+        Some("application/json"),
+        Some("application/json"),
         &request_params,
         &response_params,
         &return_type,
@@ -140,8 +140,8 @@ fn test_build_http_mapping_object_body() {
     let mapping = build_http_mapping(
         HttpMethod::Post,
         &stream,
-        "application/json",
-        "application/json",
+        Some("application/json"),
+        Some("application/json"),
         &request_params,
         &response_params,
         &return_type,
@@ -186,8 +186,8 @@ fn test_build_http_mapping_flatten_body() {
     let mapping = build_http_mapping(
         HttpMethod::Post,
         &stream,
-        "application/json",
-        "application/json",
+        Some("application/json"),
+        Some("application/json"),
         &request_params,
         &response_params,
         &return_type,

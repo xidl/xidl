@@ -177,15 +177,8 @@ pub mod test {
             }
         }
     }
-    #[derive(::serde::Serialize)]
-    pub struct HeaderServiceCreateUserRequestOutBody {
-        #[serde(default)]
-        pub name: String,
-    }
-    #[derive(::serde::Deserialize)]
-    pub struct HeaderServiceCreateUserRequestInBody {
-        pub name: String,
-    }
+    pub type HeaderServiceCreateUserRequestOutBody = String;
+    pub type HeaderServiceCreateUserRequestInBody = String;
     #[derive(::serde::Deserialize)]
     struct HeaderServiceCreateUserRequest {
         token: String,
@@ -252,7 +245,7 @@ pub mod test {
                 };
                 if !::xidl_rust_axum::http::content_type_matches(
                     xidl_headers,
-                    "application/json",
+                    "text/plain",
                 ) {
                     return Err(::xidl_rust_axum::Error::unsupported_media_type());
                 }
@@ -266,10 +259,10 @@ pub mod test {
                         format!("{err:?}"),
                     ))?;
                 let xidl_body: HeaderServiceCreateUserRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
-                        "application/json",
+                        "text/plain",
                     )
                     .from_slice(&xidl_body_bytes)?;
-                let HeaderServiceCreateUserRequestInBody { name } = xidl_body;
+                let name = xidl_body;
                 Ok(Self { token, session_id, name })
             }
         }
@@ -391,9 +384,6 @@ pub mod test {
             request: HeaderServiceCreateUserRequest,
         ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
             let _ = &headers;
-            if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
-                return Err(xidl_rust_axum::Error::not_acceptable());
-            }
             let HeaderServiceCreateUserRequest { token, session_id, name } = request;
             let token: String = token;
             let session_id: String = session_id;
@@ -590,9 +580,7 @@ pub mod test {
             req.headers_mut()
                 .insert(
                     xidl_rust_axum::reqwest::header::ACCEPT,
-                    xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                            "application/json",
-                        )
+                    xidl_rust_axum::reqwest::header::HeaderValue::from_str("")
                         .map_err(|err| xidl_rust_axum::Error::new(
                             400,
                             format!("{err:?}"),
@@ -640,17 +628,13 @@ pub mod test {
             }
             let auth_target = &self.client;
             let _ = auth_target;
-            let body = HeaderServiceCreateUserRequestOutBody {
-                name,
-            };
-            let body = xidl_rust_axum::SerializeFactory::new("application/json")
+            let body: String = name;
+            let body = xidl_rust_axum::SerializeFactory::new("text/plain")
                 .to_vec(&body)?;
             req.headers_mut()
                 .insert(
                     xidl_rust_axum::reqwest::header::CONTENT_TYPE,
-                    xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                            "application/json",
-                        )
+                    xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                         .map_err(|err| xidl_rust_axum::Error::new(
                             400,
                             format!("{err:?}"),

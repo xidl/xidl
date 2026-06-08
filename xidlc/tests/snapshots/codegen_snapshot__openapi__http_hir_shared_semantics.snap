@@ -72,7 +72,7 @@ openapi_http_hir_shared_semantics.json
         "responses": {
           "200": {
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }

@@ -324,9 +324,6 @@ where
         request: HttpEdgeCasesServiceHealthRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
-            return Err(xidl_rust_axum::Error::not_acceptable());
-        }
         let HttpEdgeCasesServiceHealthRequest { trace } = request;
         let trace: String = trace;
         let mut resp = match svc.health(trace).await {
@@ -363,7 +360,7 @@ where
         request: HttpEdgeCasesServiceGetUserRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpEdgeCasesServiceGetUserRequest { uid, locale } = request;
@@ -374,7 +371,7 @@ where
                 let mut resp = {
                     let body_value: String = resp_value;
                     let _ = &body_value;
-                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    let body = xidl_rust_axum::SerializeFactory::new("text/plain")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(
@@ -383,7 +380,7 @@ where
                         )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                            "application/json",
+                            "text/plain",
                         )
                         .body(::xidl_rust_axum::axum::body::Body::from(body))
                         .map_err(|err| xidl_rust_axum::Error::new(
@@ -417,7 +414,7 @@ where
         request: HttpEdgeCasesServiceDedupUserRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpEdgeCasesServiceDedupUserRequest { id } = request;
@@ -427,7 +424,7 @@ where
                 let mut resp = {
                     let body_value: String = resp_value;
                     let _ = &body_value;
-                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    let body = xidl_rust_axum::SerializeFactory::new("text/plain")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(
@@ -436,7 +433,7 @@ where
                         )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                            "application/json",
+                            "text/plain",
                         )
                         .body(::xidl_rust_axum::axum::body::Body::from(body))
                         .map_err(|err| xidl_rust_axum::Error::new(
@@ -470,7 +467,7 @@ where
         request: HttpEdgeCasesServiceGetItemRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpEdgeCasesServiceGetItemRequest { order_id, item_id } = request;
@@ -481,7 +478,7 @@ where
                 let mut resp = {
                     let body_value: String = resp_value;
                     let _ = &body_value;
-                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    let body = xidl_rust_axum::SerializeFactory::new("text/plain")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(
@@ -490,7 +487,7 @@ where
                         )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                            "application/json",
+                            "text/plain",
                         )
                         .body(::xidl_rust_axum::axum::body::Body::from(body))
                         .map_err(|err| xidl_rust_axum::Error::new(
@@ -524,7 +521,7 @@ where
         request: HttpEdgeCasesServiceLookupRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpEdgeCasesServiceLookupRequest { keyword, page_size } = request;
@@ -535,7 +532,7 @@ where
                 let mut resp = {
                     let body_value: String = resp_value;
                     let _ = &body_value;
-                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    let body = xidl_rust_axum::SerializeFactory::new("text/plain")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(
@@ -544,7 +541,7 @@ where
                         )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                            "application/json",
+                            "text/plain",
                         )
                         .body(::xidl_rust_axum::axum::body::Body::from(body))
                         .map_err(|err| xidl_rust_axum::Error::new(
@@ -602,9 +599,7 @@ impl HttpEdgeCasesServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let query = HttpEdgeCasesServiceHealthRequestOutQuery {
@@ -648,9 +643,7 @@ impl HttpEdgeCasesServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let query = HttpEdgeCasesServiceGetUserRequestOutQuery {
@@ -674,9 +667,7 @@ impl HttpEdgeCasesServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: String = xidl_rust_axum::DeserializeFactory::new(
-                    "application/json",
-                )
+            let body: String = xidl_rust_axum::DeserializeFactory::new("text/plain")
                 .from_slice(&body)?;
             Ok(body)
         } else {
@@ -698,9 +689,7 @@ impl HttpEdgeCasesServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
@@ -716,9 +705,7 @@ impl HttpEdgeCasesServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: String = xidl_rust_axum::DeserializeFactory::new(
-                    "application/json",
-                )
+            let body: String = xidl_rust_axum::DeserializeFactory::new("text/plain")
                 .from_slice(&body)?;
             Ok(body)
         } else {
@@ -745,9 +732,7 @@ impl HttpEdgeCasesServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
@@ -763,9 +748,7 @@ impl HttpEdgeCasesServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: String = xidl_rust_axum::DeserializeFactory::new(
-                    "application/json",
-                )
+            let body: String = xidl_rust_axum::DeserializeFactory::new("text/plain")
                 .from_slice(&body)?;
             Ok(body)
         } else {
@@ -790,9 +773,7 @@ impl HttpEdgeCasesServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let query = HttpEdgeCasesServiceLookupRequestOutQuery {
@@ -817,9 +798,7 @@ impl HttpEdgeCasesServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: String = xidl_rust_axum::DeserializeFactory::new(
-                    "application/json",
-                )
+            let body: String = xidl_rust_axum::DeserializeFactory::new("text/plain")
                 .from_slice(&body)?;
             Ok(body)
         } else {

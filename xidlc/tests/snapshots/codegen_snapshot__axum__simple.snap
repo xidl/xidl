@@ -564,9 +564,6 @@ where
         uri: ::xidl_rust_axum::axum::http::Uri,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
-            return Err(xidl_rust_axum::Error::not_acceptable());
-        }
         let mut resp = match svc.restart().await {
             Ok(resp_value) => {
                 let mut resp = {
@@ -757,9 +754,6 @@ where
         request: HttpServiceStopSimpleRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
-            return Err(xidl_rust_axum::Error::not_acceptable());
-        }
         let HttpServiceStopSimpleRequest { id } = request;
         let id: u32 = id;
         let mut resp = match svc.stop_simple(id).await {
@@ -945,9 +939,7 @@ impl HttpServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
@@ -1125,9 +1117,7 @@ impl HttpServiceClient {
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
-                    )
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
