@@ -29,22 +29,22 @@ type HelloWorldService interface {
 func RegisterHelloWorldHandler(r gin.IRouter, svc HelloWorldService) {
 	r.OPTIONS("/hello", xidlgohttp.CORSMiddleware([]string{"*"}))
 	r.POST("/hello", xidlgohttp.CORSMiddleware([]string{"*"}), func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+		if err := xidlgohttp.GinRequireAccept(c, ""); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
 			return
 		}
-		if err := xidlgohttp.GinRequireContentType(c, "application/json"); err != nil {
+		if err := xidlgohttp.GinRequireContentType(c, "text/plain"); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return
 		}
 
 		req := &HelloWorldSayHelloRequest{}
-		body := HelloWorldSayHelloRequestBody{}
-		if err := xidlgohttp.GinDecodeBody(c, "application/json", &body); err != nil {
+		var body string
+		if err := xidlgohttp.GinDecodeBody(c, "text/plain", &body); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-		req.Name = body.Name
+		req.Name = body
 		if _, err := svc.SayHello(c.Request.Context(), req); err != nil {
 			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
 				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
@@ -57,8 +57,12 @@ func RegisterHelloWorldHandler(r gin.IRouter, svc HelloWorldService) {
 	})
 	r.OPTIONS("/trusted", xidlgohttp.CORSMiddleware([]string{"http://trust.me"}))
 	r.GET("/trusted", xidlgohttp.CORSMiddleware([]string{"http://trust.me"}), func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+		if err := xidlgohttp.GinRequireAccept(c, ""); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
+			return
+		}
+		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return
 		}
 
@@ -90,19 +94,17 @@ func NewHelloWorldClient(baseURL string, httpClient *http.Client, auth xidlgohtt
 
 func (c *HelloWorldClient) SayHello(ctx context.Context, req *HelloWorldSayHelloRequest) (*HelloWorldSayHelloResponse, error) {
 	requestURL := c.baseURL + formatHelloWorldSayHelloPath(req)
-	body := HelloWorldSayHelloRequestBody{
-		Name: req.Name,
-	}
+	body := req.Name
 	var requestBody bytes.Buffer
-	if err := xidlgohttp.MustCodecForMime("application/json").Encode(&requestBody, body); err != nil {
+	if err := xidlgohttp.MustCodecForMime("text/plain").Encode(&requestBody, body); err != nil {
 		return nil, err
 	}
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", requestURL, &requestBody)
 	if err != nil {
 		return nil, err
 	}
-	httpReq.Header.Set("Content-Type", "application/json")
-	httpReq.Header.Set("Accept", "application/json")
+	httpReq.Header.Set("Content-Type", "text/plain")
+	httpReq.Header.Set("Accept", "")
 	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
 		return nil, err
@@ -124,7 +126,7 @@ func (c *HelloWorldClient) Trusted(ctx context.Context, req *HelloWorldTrustedRe
 	if err != nil {
 		return nil, err
 	}
-	httpReq.Header.Set("Accept", "application/json")
+	httpReq.Header.Set("Accept", "")
 	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
 		return nil, err
@@ -141,10 +143,6 @@ func (c *HelloWorldClient) Trusted(ctx context.Context, req *HelloWorldTrustedRe
 }
 
 type HelloWorldSayHelloRequest struct {
-	Name string `xjson:"name" form:"name"`
-}
-
-type HelloWorldSayHelloRequestBody struct {
 	Name string `xjson:"name" form:"name"`
 }
 
