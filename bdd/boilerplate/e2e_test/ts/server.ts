@@ -148,6 +148,15 @@ class MyE2eHttpSecurity implements E2eHttpSecurity {
 }
 
 class MyE2eTypeServer implements E2eTypeServer {
+  async get_attribute_type_attr1(): Promise<string> {
+    return typeServerState.type_attr1;
+  }
+  async set_attribute_type_attr1(req: { value: string }): Promise<void> {
+    typeServerState.type_attr1 = req.value;
+  }
+  async get_attribute_type_attr2(): Promise<string[]> {
+    return typeServerState.type_attr2;
+  }
   async simple_op(): Promise<void> {}
   async simple_op_with_return1(): Promise<string> {
     return 'simple_op_with_return1';
@@ -207,7 +216,84 @@ class MyE2eTypeServer implements E2eTypeServer {
   }
 }
 
-class MyE2eAttribute implements E2eAttribute {}
+class MyE2eAttribute implements E2eAttribute {
+  async get_attribute_attr1(): Promise<string> {
+    return attributeState.attr1;
+  }
+  async set_attribute_attr1(req: { value: string }): Promise<void> {
+    attributeState.attr1 = req.value;
+  }
+  async get_attribute_attr2(): Promise<string[]> {
+    return attributeState.attr2;
+  }
+  async get_attribute_attr3(): Promise<EnumEmpty> {
+    return {} as EnumEmpty;
+  }
+  async set_attribute_attr3(): Promise<void> {}
+  async get_attribute_attr4(): Promise<EnumSimple1> {
+    return attributeState.attr4 as EnumSimple1;
+  }
+  async set_attribute_attr4(req: { value: EnumSimple1 }): Promise<void> {
+    attributeState.attr4 = req.value;
+  }
+  async get_attribute_attr5(): Promise<StructEmpty> {
+    return {};
+  }
+  async set_attribute_attr5(): Promise<void> {}
+  async get_attribute_attr6(): Promise<StructSimple> {
+    return {
+      member1: {} as EnumEmpty,
+      member2: 'V1' as EnumSimple1,
+      member3: {},
+    };
+  }
+  async set_attribute_attr6(): Promise<void> {}
+  async get_attribute_attr61(): Promise<UnionSimple> {
+    return attributeState.attr61 as UnionSimple;
+  }
+  async set_attribute_attr61(req: { value: UnionSimple }): Promise<void> {
+    attributeState.attr61 = req.value as any;
+  }
+  async get_attribute_attr7(): Promise<string[]> {
+    return [];
+  }
+  async set_attribute_attr7(): Promise<void> {}
+  async get_attribute_attr8(): Promise<EnumEmpty[]> {
+    return [];
+  }
+  async set_attribute_attr8(): Promise<void> {}
+  async get_attribute_attr9(): Promise<EnumSimple1[]> {
+    return [];
+  }
+  async set_attribute_attr9(): Promise<void> {}
+  async get_attribute_attr10(): Promise<StructEmpty[]> {
+    return [];
+  }
+  async set_attribute_attr10(): Promise<void> {}
+  async get_attribute_attr11(): Promise<StructSimple[]> {
+    return [];
+  }
+  async set_attribute_attr11(): Promise<void> {}
+  async get_attribute_attr12(): Promise<Record<string, number>> {
+    return {};
+  }
+  async set_attribute_attr12(): Promise<void> {}
+  async get_attribute_attr13(): Promise<any> {
+    return null;
+  }
+  async set_attribute_attr13(): Promise<void> {}
+  async get_attribute_attr14(): Promise<any[]> {
+    return [];
+  }
+  async set_attribute_attr14(): Promise<void> {}
+  async get_attribute_attr15(): Promise<Record<string, any>> {
+    return {};
+  }
+  async set_attribute_attr15(): Promise<void> {}
+  async get_attribute_attr16(): Promise<string> {
+    return 'attr16';
+  }
+}
 
 class MyE2eHttpForm implements E2eHttpForm {
   async submit_profile(req: {
@@ -222,6 +308,12 @@ class MyE2eHttpForm implements E2eHttpForm {
 }
 
 class MyE2eHttpScopeMatrix implements E2eHttpScopeMatrix {
+  async get_attribute_scope_inherited_attr(): Promise<string> {
+    return 'inherited';
+  }
+  async get_attribute_scope_bare_attr(): Promise<string> {
+    return 'bare';
+  }
   async default_scope(req: { request_body: StructHttpBody }): Promise<string> {
     return req.request_body.name;
   }
@@ -367,90 +459,6 @@ const server = createServer(async (req, res) => {
     const protocol = req.headers['x-forwarded-proto'] || 'http';
     const hostHeader = req.headers.host || 'localhost';
     const url = new URL(reqUrl, `${protocol}://${hostHeader}`);
-
-    // Handle manual attributes
-    if (url.pathname === '/attribute/type_attr1') {
-      if (req.method === 'GET') {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/plain');
-        res.end(String(typeServerState.type_attr1));
-        return;
-      } else if (req.method === 'POST') {
-        const bodyStr = await readBodyString(req);
-        typeServerState.type_attr1 = bodyStr.trim();
-        res.statusCode = 204;
-        res.end();
-        return;
-      }
-    }
-    if (url.pathname === '/attribute/type_attr2') {
-      if (req.method === 'GET') {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/plain');
-        res.end(JSON.stringify(typeServerState.type_attr2));
-        return;
-      }
-    }
-    if (url.pathname === '/attribute/attr1') {
-      if (req.method === 'GET') {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/plain');
-        res.end(attributeState.attr1);
-        return;
-      } else if (req.method === 'POST') {
-        const bodyStr = await readBodyString(req);
-        attributeState.attr1 = bodyStr.trim();
-        res.statusCode = 204;
-        res.end();
-        return;
-      }
-    }
-    if (url.pathname === '/attribute/attr2') {
-      if (req.method === 'GET') {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/plain');
-        res.end(JSON.stringify(attributeState.attr2));
-        return;
-      }
-    }
-    if (url.pathname === '/attribute/attr4') {
-      if (req.method === 'GET') {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/plain');
-        res.end(attributeState.attr4);
-        return;
-      }
-    }
-    if (url.pathname === '/attribute/attr61') {
-      if (req.method === 'GET') {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/plain');
-        res.end(JSON.stringify(attributeState.attr61));
-        return;
-      }
-    }
-    if (url.pathname === '/attribute/scope_inherited_attr') {
-      if (req.method === 'GET') {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/plain');
-        res.end('inherited');
-        return;
-      }
-    }
-    if (url.pathname === '/attribute/host') {
-      if (req.method === 'GET') {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/plain');
-        res.end(hostState);
-        return;
-      } else if (req.method === 'POST') {
-        const bodyStr = await readBodyString(req);
-        hostState = bodyStr.trim();
-        res.statusCode = 204;
-        res.end();
-        return;
-      }
-    }
 
     const chunks: Buffer[] = [];
     for await (const chunk of req) {
