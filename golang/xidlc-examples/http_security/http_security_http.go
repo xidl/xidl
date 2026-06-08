@@ -29,7 +29,7 @@ type HttpSecurityApiService interface {
 
 func RegisterHttpSecurityApiHandler(r gin.IRouter, svc HttpSecurityApiService) {
 	r.GET("/reports/:id", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
 			return
 		}
@@ -39,6 +39,10 @@ func RegisterHttpSecurityApiHandler(r gin.IRouter, svc HttpSecurityApiService) {
 			return
 		}
 		c.Request = c.Request.WithContext(ctx)
+		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
+			return
+		}
 
 		req := &HttpSecurityApiGetReportRequest{}
 
@@ -65,12 +69,12 @@ func RegisterHttpSecurityApiHandler(r gin.IRouter, svc HttpSecurityApiService) {
 			return
 		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
 		}
 	})
 	r.POST("/reports/:id", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
 			return
 		}
@@ -80,7 +84,7 @@ func RegisterHttpSecurityApiHandler(r gin.IRouter, svc HttpSecurityApiService) {
 			return
 		}
 		c.Request = c.Request.WithContext(ctx)
-		if err := xidlgohttp.GinRequireContentType(c, "application/json"); err != nil {
+		if err := xidlgohttp.GinRequireContentType(c, "text/plain"); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return
 		}
@@ -93,12 +97,12 @@ func RegisterHttpSecurityApiHandler(r gin.IRouter, svc HttpSecurityApiService) {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-		body := HttpSecurityApiUpdateReportRequestBody{}
-		if err := xidlgohttp.GinDecodeBody(c, "application/json", &body); err != nil {
+		var body string
+		if err := xidlgohttp.GinDecodeBody(c, "text/plain", &body); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-		req.Body = body.Body
+		req.Body = body
 		resp, err := svc.UpdateReport(c.Request.Context(), req)
 		if err != nil {
 			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
@@ -109,13 +113,17 @@ func RegisterHttpSecurityApiHandler(r gin.IRouter, svc HttpSecurityApiService) {
 			return
 		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
 		}
 	})
 	r.GET("/health", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
+		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
+			return
+		}
+		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return
 		}
 
@@ -130,7 +138,7 @@ func RegisterHttpSecurityApiHandler(r gin.IRouter, svc HttpSecurityApiService) {
 			return
 		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
 		}
 	})
@@ -155,7 +163,7 @@ func (c *HttpSecurityApiClient) GetReport(ctx context.Context, req *HttpSecurity
 	if err != nil {
 		return nil, err
 	}
-	httpReq.Header.Set("Accept", "application/json")
+	httpReq.Header.Set("Accept", "text/plain")
 
 	httpReq.Header.Set("X-Trace-Id", req.TraceId)
 	xidlgohttp.ApplyClientAuth(httpReq, c.auth, HttpSecurityApiGetReportSecurityRequirements())
@@ -176,19 +184,17 @@ func (c *HttpSecurityApiClient) GetReport(ctx context.Context, req *HttpSecurity
 
 func (c *HttpSecurityApiClient) UpdateReport(ctx context.Context, req *HttpSecurityApiUpdateReportRequest) (*HttpSecurityApiUpdateReportResponse, error) {
 	requestURL := c.baseURL + formatHttpSecurityApiUpdateReportPath(req)
-	body := HttpSecurityApiUpdateReportRequestBody{
-		Body: req.Body,
-	}
+	body := req.Body
 	var requestBody bytes.Buffer
-	if err := xidlgohttp.MustCodecForMime("application/json").Encode(&requestBody, body); err != nil {
+	if err := xidlgohttp.MustCodecForMime("text/plain").Encode(&requestBody, body); err != nil {
 		return nil, err
 	}
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", requestURL, &requestBody)
 	if err != nil {
 		return nil, err
 	}
-	httpReq.Header.Set("Content-Type", "application/json")
-	httpReq.Header.Set("Accept", "application/json")
+	httpReq.Header.Set("Content-Type", "text/plain")
+	httpReq.Header.Set("Accept", "text/plain")
 	xidlgohttp.ApplyClientAuth(httpReq, c.auth, HttpSecurityApiUpdateReportSecurityRequirements())
 	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
@@ -211,7 +217,7 @@ func (c *HttpSecurityApiClient) Health(ctx context.Context, req *HttpSecurityApi
 	if err != nil {
 		return nil, err
 	}
-	httpReq.Header.Set("Accept", "application/json")
+	httpReq.Header.Set("Accept", "text/plain")
 	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
 		return nil, err
@@ -258,7 +264,7 @@ func formatHttpSecurityApiGetReportPath(req *HttpSecurityApiGetReportRequest) st
 func decodeHttpSecurityApiGetReportResponse(resp *http.Response) (HttpSecurityApiGetReportResponse, error) {
 	out := HttpSecurityApiGetReportResponse{}
 	var body string
-	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil {
+	if err := xidlgohttp.MustCodecForMime("text/plain").Decode(resp.Body, &body); err != nil {
 		return out, err
 	}
 	out.Return = body
@@ -267,10 +273,6 @@ func decodeHttpSecurityApiGetReportResponse(resp *http.Response) (HttpSecurityAp
 
 type HttpSecurityApiUpdateReportRequest struct {
 	Id   string `xjson:"id" form:"id"`
-	Body string `xjson:"body" form:"body"`
-}
-
-type HttpSecurityApiUpdateReportRequestBody struct {
 	Body string `xjson:"body" form:"body"`
 }
 
@@ -299,7 +301,7 @@ func formatHttpSecurityApiUpdateReportPath(req *HttpSecurityApiUpdateReportReque
 func decodeHttpSecurityApiUpdateReportResponse(resp *http.Response) (HttpSecurityApiUpdateReportResponse, error) {
 	out := HttpSecurityApiUpdateReportResponse{}
 	var body string
-	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil {
+	if err := xidlgohttp.MustCodecForMime("text/plain").Decode(resp.Body, &body); err != nil {
 		return out, err
 	}
 	out.Return = body
@@ -330,7 +332,7 @@ func formatHttpSecurityApiHealthPath(req *HttpSecurityApiHealthRequest) string {
 func decodeHttpSecurityApiHealthResponse(resp *http.Response) (HttpSecurityApiHealthResponse, error) {
 	out := HttpSecurityApiHealthResponse{}
 	var body string
-	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil {
+	if err := xidlgohttp.MustCodecForMime("text/plain").Decode(resp.Body, &body); err != nil {
 		return out, err
 	}
 	out.Return = body
