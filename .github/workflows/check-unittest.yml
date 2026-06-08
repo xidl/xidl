@@ -74,10 +74,6 @@ jobs:
         run: |
           make test-go
 
-      - name: BDD test
-        run: |
-          make test-bdd
-
       - name: Python test
         run: |
           make -C python test
