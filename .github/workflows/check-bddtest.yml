@@ -8,8 +8,64 @@ on:
   workflow_dispatch:
 
 jobs:
-  bddtest:
+  bddtest-shard:
+    name: bddtest (${{ matrix.shard }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - shard: jsonrpc-and-rest-core
+            port-base: 21000
+            features: >-
+              bdd/features/jsonrpc.feature
+              bdd/features/rest.feature:6
+              bdd/features/rest.feature:20
+              bdd/features/rest.feature:33
+              bdd/features/rest.feature:46
+          - shard: rest-media-and-any
+            port-base: 22000
+            features: >-
+              bdd/features/rest.feature:59
+              bdd/features/rest.feature:72
+              bdd/features/rest.feature:78
+          - shard: rest-boilerplate-a
+            port-base: 23000
+            features: >-
+              bdd/features/rest.feature:101
+              bdd/features/rest.feature:102
+              bdd/features/rest.feature:103
+              bdd/features/rest.feature:104
+              bdd/features/rest.feature:105
+          - shard: rest-boilerplate-b
+            port-base: 24000
+            features: >-
+              bdd/features/rest.feature:106
+              bdd/features/rest.feature:107
+              bdd/features/rest.feature:108
+              bdd/features/rest.feature:109
+              bdd/features/rest.feature:110
+          - shard: rest-boilerplate-c
+            port-base: 25000
+            features: >-
+              bdd/features/rest.feature:111
+              bdd/features/rest.feature:112
+              bdd/features/rest.feature:113
+              bdd/features/rest.feature:114
+              bdd/features/rest.feature:115
+          - shard: rest-errors
+            port-base: 26000
+            features: >-
+              bdd/features/rest.feature:117
+              bdd/features/rest.feature:130
+              bdd/features/rest.feature:142
+              bdd/features/rest.feature:149
+              bdd/features/rest.feature:156
+              bdd/features/rest.feature:168
+              bdd/features/rest.feature:184
+          - shard: rest-serialization
+            port-base: 27000
+            features: bdd/features/rest.feature:198
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -44,5 +100,16 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: BDD test
+        env:
+          XIDL_BDD_PORT_BASE: ${{ matrix.port-base }}
         run: |
-          make test-bdd
+          make test-bdd BDD_FEATURES="${{ matrix.features }}"
+
+  bddtest:
+    name: bddtest
+    runs-on: ubuntu-latest
+    needs: bddtest-shard
+    steps:
+      - name: BDD shards passed
+        run: |
+          echo "all bdd shards passed"

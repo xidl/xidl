@@ -3,6 +3,7 @@ GO_PATH ?= /tmp/xidl-go-path
 JINJA_TEMPLATES := $(shell find xidlc -type f -name '*.j2' | sort)
 XIDLC_SNAPSHOT_VERSION ?= 0.0.1
 XIDLC_SNAPSHOT_HASH ?= snapshot
+BDD_FEATURES ?= bdd/features
 
 .PHONY: test test-rust test-go test-go-codegen test-go-runtime test-python test-python-codegen test-python-runtime test-update test-coverage test-xidl-parser-coverage test-xidl-jsonrpc-coverage test-xidl-rust-axum-coverage build-xtypes docs-dev docs-build
 
@@ -15,7 +16,7 @@ test-go: test-go-codegen test-go-runtime
 
 test-bdd: init
 	pip install -r bdd/requirements.txt
-	behave bdd/features
+	behave $(BDD_FEATURES)
 
 test-go-codegen:
 	$(MAKE) -C golang test-go-codegen GO_CACHE=$(GO_CACHE) GO_PATH=$(GO_PATH)
