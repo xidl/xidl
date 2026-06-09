@@ -404,7 +404,7 @@ def normalize_query(value: Any) -> dict[str, list[str]]:
 
 
 def encode_error(error: HttpError) -> Response:
-    payload = {"code": error.status_code, "msg": error.message}
+    payload = {"code": error.code, "msg": error.message}
     headers = dict(error.headers)
     headers.setdefault("Content-Type", "application/json")
     return Response(status_code=error.status_code, headers=headers, body=payload)

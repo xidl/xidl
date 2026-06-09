@@ -4,7 +4,7 @@ JINJA_TEMPLATES := $(shell find xidlc -type f -name '*.j2' | sort)
 XIDLC_SNAPSHOT_VERSION ?= 0.0.1
 XIDLC_SNAPSHOT_HASH ?= snapshot
 
-.PHONY: test test-rust test-go test-go-codegen test-go-runtime test-update test-coverage test-xidl-parser-coverage test-xidl-jsonrpc-coverage test-xidl-rust-axum-coverage build-xtypes docs-dev docs-build
+.PHONY: test test-rust test-go test-go-codegen test-go-runtime test-python test-python-codegen test-python-runtime test-update test-coverage test-xidl-parser-coverage test-xidl-jsonrpc-coverage test-xidl-rust-axum-coverage build-xtypes docs-dev docs-build
 
 test: test-rust test-go test-bdd
 
@@ -22,6 +22,15 @@ test-go-codegen:
 
 test-go-runtime:
 	$(MAKE) -C golang test-go-runtime GO_CACHE=$(GO_CACHE) GO_PATH=$(GO_PATH)
+
+test-python:
+	$(MAKE) -C python test
+
+test-python-codegen:
+	$(MAKE) -C python test-python-codegen
+
+test-python-runtime:
+	$(MAKE) -C python test-python-runtime
 
 test-update:
 	INSTA_UPDATE=always XIDLC_VERSION=$(XIDLC_SNAPSHOT_VERSION) XIDLC_GIT_HASH=$(XIDLC_SNAPSHOT_HASH) make test-rust
