@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.78.0](https://github.com/xidl/xidl/compare/v0.77.0...v0.78.0) (2026-06-09)
+
+
+### Features
+
+* **http:** implement raw text serialization for primitive types and update BDD tests ([a72654f](https://github.com/xidl/xidl/commit/a72654f59651c7866e78ee12e7b09fb52497cd5b))
+* **http:** standardize error response format to {code, msg} and add BDD bad path tests ([a7cc8d3](https://github.com/xidl/xidl/commit/a7cc8d320968e77a05cdaf8de304264ac423b1ca))
+
+
+### Bug Fixes
+
+* **bdd:** avoid duplicate TS server listeners ([9b0ab5b](https://github.com/xidl/xidl/commit/9b0ab5b95afcde26a419e1008322d302838ab0d3))
+* **bdd:** avoid ephemeral port reuse ([30c9a6b](https://github.com/xidl/xidl/commit/30c9a6b00cf2e61564625c9e583f789f5f5229bb))
+* **bdd:** clean up server process groups ([7669e99](https://github.com/xidl/xidl/commit/7669e9980cdf625c5e54536f03f94c07ca770623))
+* **bdd:** extend rust boilerplate startup wait ([ba1a1de](https://github.com/xidl/xidl/commit/ba1a1de9af67c8565faad7769b0d47bfb9d85cf2))
+* **bdd:** reserve ports before starting test servers ([991d933](https://github.com/xidl/xidl/commit/991d933d56574ca4cd429a1ea966717bbb499d6a))
+* **generator:** resolve clippy warnings for redundant field names in Rust Axum from_request implementation and unused variable in Go template ([4b8f1c3](https://github.com/xidl/xidl/commit/4b8f1c30131b97269b45163fa53853ed0df2e32b))
+* **go:** update GinWriteJSONError calls in examples to match new signature ([dca7e75](https://github.com/xidl/xidl/commit/dca7e758a1502969dafdbe50d94e27fb47342d62))
+* **python:** install runtime test dependencies ([60446dc](https://github.com/xidl/xidl/commit/60446dc9cf21d91d5572179ebd58dbc3f3cd0208))
+* **python:** repair runtime test target ([75ae2ce](https://github.com/xidl/xidl/commit/75ae2ced7f85e6d7504678f05f25bba235212ff9))
+* **rest:** ensure SingleValue body shapes for text/plain are not wrapped in a JSON object in TS, Rust, Go, and Python generators ([208e697](https://github.com/xidl/xidl/commit/208e697c29e963b4b13233a69200bd909dda840c))
+* **rest:** ensure SingleValue response bodies for text/plain are mapped to type aliases instead of structs in Rust Axum generator and fix test assertions ([cf1924b](https://github.com/xidl/xidl/commit/cf1924bb43fa73e41a9e09a403a90391be134275))
+
 ## [0.77.0](https://github.com/xidl/xidl/compare/v0.76.1...v0.77.0) (2026-06-04)
 
 

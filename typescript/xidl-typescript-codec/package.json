@@ -18,5 +18,5 @@
     "test": "node --import tsx --test tests/**/*.test.ts"
   },
   "types": "dist/index.d.ts",
-  "version": "0.77.0"
+  "version": "0.78.0"
 }
