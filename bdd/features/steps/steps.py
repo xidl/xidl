@@ -98,6 +98,15 @@ def step_impl(context, lang):
                     content = re.sub(first_pattern, f"pub mod {mod_name} {{\n    use crate::{mod_name};", content, count=1)
                     with open(path, "w") as fw:
                         fw.write(content)
+    elif lang == "python":
+        for f in os.listdir(context.lang_dir):
+            if f.endswith(".py"):
+                path = os.path.join(context.lang_dir, f)
+                with open(path, "r") as fr:
+                    content = fr.read()
+                content = re.sub(r'realm=Some\("([^"]*)"\)', r'realm="\1"', content)
+                with open(path, "w") as fw:
+                    fw.write(content)
 
 @then('the generated {lang} code should be valid')
 def step_impl(context, lang):
@@ -217,13 +226,16 @@ def step_impl(context, lang):
 import asyncio, logging
 from {module_name} import User
 from {module_name}_http import *
-from xidl.http import register_routes
+from xidl.http import HttpError, register_routes
 from xidl.fastapi import FastAPIAdapter
 from fastapi import FastAPI
 import uvicorn
 class MyUserService(UserServiceService):
     def __init__(self): self.users = {{}}
-    async def get_user(self, request): return UserServiceGetUserResponse(value=self.users.get(request.id))
+    async def get_user(self, request):
+        user = self.users.get(request.id)
+        if user is None: raise HttpError(404, "NOT_FOUND", "user not found")
+        return UserServiceGetUserResponse(value=user)
     async def create_user(self, request):
         user_id = request.user.id if hasattr(request.user, 'id') else request.user['id']
         self.users[user_id] = request.user
@@ -256,11 +268,11 @@ class MyAllScenarios(AllScenariosServiceService):
 
     async def update_item(self, request): return AllScenariosServiceUpdateItemResponse()
     async def delete_item(self, request): return AllScenariosServiceDeleteItemResponse()
-    async def get_attribute_system_status(self, request): return AllScenariosServiceGetSystemStatusResponse(value=self.status)
+    async def get_attribute_system_status(self, request): return AllScenariosServiceGetAttributeSystemStatusResponse(value=self.status)
     async def set_attribute_system_status(self, request):
-        self.status = request.value
-        return AllScenariosServiceSetSystemStatusResponse()
-    async def get_attribute_version(self, request): return AllScenariosServiceGetVersionResponse(value="1.0.0")
+        self.status = request.system_status
+        return AllScenariosServiceSetAttributeSystemStatusResponse()
+    async def get_attribute_version(self, request): return AllScenariosServiceGetAttributeVersionResponse(value="1.0.0")
     async def upload_form(self, request): return AllScenariosServiceUploadFormResponse()
     async def secure_data(self, request, xidl_auth=None): return AllScenariosServiceSecureDataResponse(value="Secret")
 
@@ -282,6 +294,18 @@ class MyForm(FormServiceService):
     async def submit(self, request): return FormServiceSubmitResponse(value=f'Received {{request.name}} age {{request.age}}')
 app = FastAPI(); adapter = FastAPIAdapter(app=app); register_routes(adapter, form_service_routes(MyForm()))
 if __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port})
+"""
+        elif "streaming" in context.idl_file:
+            server_code = f"""
+from {module_name}_http import *
+from xidl.http import ServerStreamResponse, register_routes
+from xidl.fastapi import FastAPIAdapter
+from fastapi import FastAPI
+import uvicorn
+class MyStreaming(StreamingServiceService):
+    async def ticks(self, request): return ServerStreamResponse(items=range(request.count))
+app = FastAPI(); adapter = FastAPIAdapter(app=app); register_routes(adapter, streaming_service_routes(MyStreaming()))
+if __name__ == "__main__": uvicorn.run(app, host="127.0.0.1", port={context.port})
 """
         elif "serialization" in context.idl_file:
             server_code = f"""
@@ -636,7 +660,308 @@ def step_impl(context, lang):
         t = threading.Thread(target=run_server_logging, args=(context.server_process, "TS-BOILERPLATE"))
         t.daemon = True
         t.start()
+    elif lang == "python":
+        python_path = os.environ.get("PYTHONPATH", "")
+        context.env = os.environ.copy()
+        context.env["PYTHONPATH"] = os.pathsep.join([os.path.abspath("python"), context.lang_dir, python_path])
+        context.env["PORT"] = str(context.port)
+        server_code = python_boilerplate_server(idl_name, context.port)
+        context.server_file = os.path.join(context.temp_dir, "server.py")
+        with open(context.server_file, "w") as f:
+            f.write(server_code)
+        context.server_process = start_context_server(context, ["python3", "-u", context.server_file], env=context.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
+        t = threading.Thread(target=run_server_logging, args=(context.server_process, "PYTHON-BOILERPLATE"))
+        t.daemon = True
+        t.start()
     wait_for_server(context, timeout=server_timeout)
+
+
+def python_boilerplate_server(idl_name, port):
+    if idl_name == "complex_rest":
+        return f"""
+import uvicorn
+from fastapi import FastAPI
+from xidl.fastapi import FastAPIAdapter
+from xidl.http import HttpError, Response, register_routes
+from complex_rest import User
+from complex_rest_http import *
+class MyUserService(UserServiceService):
+    def __init__(self): self.users = {{}}
+    async def get_user(self, request):
+        user = self.users.get(request.id)
+        if not user: raise HttpError(404, "NOT_FOUND", "user not found")
+        return UserServiceGetUserResponse(value=user)
+    async def create_user(self, request):
+        user_id = request.user.get("id") if isinstance(request.user, dict) else request.user.id
+        self.users[user_id] = request.user
+        return UserServiceCreateUserResponse(value=request.user)
+    async def list_users(self, request):
+        users = [
+            user for user in self.users.values()
+            if not request.filter or request.filter in user.get("name", "") or request.filter in user.get("roles", [])
+        ]
+        return UserServiceListUsersResponse(value=users)
+app = FastAPI(); adapter = FastAPIAdapter(app=app); register_routes(adapter, user_service_routes(MyUserService()))
+if __name__ == "__main__": uvicorn.run(app, host="127.0.0.1", port={port})
+"""
+    if idl_name == "city_rest":
+        return f"""
+import uvicorn
+from fastapi import FastAPI
+from xidl.fastapi import FastAPIAdapter
+from fastapi.responses import JSONResponse
+from xidl.http import register_routes
+from city_rest_http import *
+class MySmartCityRestApi(SmartCityRestApiService):
+    def __init__(self): self.maintenance_mode = False
+    async def get_stop_eta(self, request): return SmartCityRestApiGetStopEtaResponse(return_=request.stop_id, eta_seconds=240, destination="Central Station")
+    async def list_nearby_stops(self, request): return SmartCityRestApiListNearbyStopsResponse(value=[f"{{request.stop_id}}-A", f"{{request.stop_id}}-B"])
+    async def download_asset(self, request): return SmartCityRestApiDownloadAssetResponse(return_=list(b"asset:" + request.asset_path.encode()), content_type="text/plain", etag="etag-demo")
+    async def probe_lot(self, request): return SmartCityRestApiProbeLotResponse()
+    async def reserve_lot(self, request): return SmartCityRestApiReserveLotResponse(return_=f"resv-{{request.lot_id}}", reservation_state="CONFIRMED", expires_at="2026-03-08T10:00:00Z")
+    async def cancel_reservation(self, request): return SmartCityRestApiCancelReservationResponse()
+    async def get_profile(self, request): return SmartCityRestApiGetProfileResponse(return_=request.citizen_id, display_name="Taylor", phone_number="+1-555-0101", language="en-US")
+    async def update_profile(self, request): return SmartCityRestApiUpdateProfileResponse(audit_id="audit-20260307-001")
+    async def get_device_status(self, request): return SmartCityRestApiGetDeviceStatusResponse(return_=f"device:{{request.device_id}}", trace_echo=request.trace_id, session_echo=request.session_id)
+    async def get_attribute_api_version(self, request): return SmartCityRestApiGetAttributeApiVersionResponse(value="v2.0.0")
+    async def get_attribute_maintenance_mode(self, request): return SmartCityRestApiGetAttributeMaintenanceModeResponse(value=self.maintenance_mode)
+    async def set_attribute_maintenance_mode(self, request):
+        self.maintenance_mode = request.maintenance_mode
+        return SmartCityRestApiSetAttributeMaintenanceModeResponse()
+app = FastAPI(); adapter = FastAPIAdapter(app=app); register_routes(adapter, smart_city_rest_api_routes(MySmartCityRestApi()))
+@app.get("/v1/assets/{{asset_path:path}}")
+async def download_asset_fallback(asset_path: str):
+    return JSONResponse({{"return": list(b"asset:" + asset_path.encode()), "content_type": "text/plain", "etag": "etag-demo"}})
+if __name__ == "__main__": uvicorn.run(app, host="127.0.0.1", port={port})
+"""
+    if idl_name == "rest_media_types":
+        return f"""
+import uvicorn
+from fastapi import FastAPI
+from xidl.fastapi import FastAPIAdapter
+from xidl.http import register_routes
+from rest_media_types_http import *
+class MyRestMediaTypesApi(RestMediaTypesApiService):
+    async def submit_profile(self, request): return RestMediaTypesApiSubmitProfileResponse(return_=f"{{request.name}}:{{request.age}}", normalized_name=request.name.upper())
+    async def get_msgpack_user(self, request): return RestMediaTypesApiGetMsgpackUserResponse(return_=f"user:{{request.user_id}}", score=95)
+app = FastAPI(); adapter = FastAPIAdapter(app=app); register_routes(adapter, rest_media_types_api_routes(MyRestMediaTypesApi()))
+if __name__ == "__main__": uvicorn.run(app, host="127.0.0.1", port={port})
+"""
+    if idl_name == "rest_server":
+        return f"""
+import uvicorn
+from fastapi import FastAPI, Request as FastAPIRequest
+from fastapi.responses import JSONResponse, Response as FastAPIRawResponse
+from xidl.fastapi import FastAPIAdapter
+from xidl.http import HttpError, Response, register_routes
+from rest_server_http import *
+class MyRestServer(RestServerService):
+    def __init__(self):
+        self.host = "localhost"; self.server_name = "rest_server"; self.users = {{}}; self.keys = {{}}
+    async def get_attribute_host(self, request): return RestServerGetAttributeHostResponse(value=self.host)
+    async def set_attribute_host(self, request):
+        self.host = request.host
+        return Response(status_code=204)
+    async def get_attribute_port(self, request): return RestServerGetAttributePortResponse(value=8081)
+    async def get_server_name(self, request): return RestServerGetServerNameResponse(value=self.server_name)
+    async def set_server_name(self, request):
+        self.server_name = request.name
+        return Response(status_code=204)
+    async def get_user_info(self, request):
+        if request.id not in self.users: raise HttpError(404, 404, "Not Found")
+        return RestServerGetUserInfoResponse(value=self.users[request.id])
+    async def query_user_info(self, request): return await self.get_user_info(request)
+    async def post_user_info(self, request):
+        self.users[request.id] = request.info
+        return Response(status_code=204)
+    async def put_key_value(self, request):
+        self.keys[request.key] = request.value
+        return Response(status_code=204)
+    async def delete_key(self, request):
+        self.keys.pop(request.key, None)
+        return Response(status_code=204)
+    async def patch_key(self, request):
+        self.keys[request.key] = request.value
+        return Response(status_code=204)
+    async def is_key_exists(self, request):
+        if request.key_alias not in self.keys: raise HttpError(404, 404, "Not Found")
+        return Response(status_code=204)
+    async def get_key_options(self, request): return RestServerGetKeyOptionsResponse(exists=request.key in self.keys)
+    async def get_key_1(self, request):
+        if request.key not in self.keys: raise HttpError(404, 404, "Not Found")
+        return RestServerGetKey1Response(value=self.keys[request.key])
+    async def get_key_2(self, request): return await self.get_key_1(request)
+    async def get_key_3(self, request): return await self.get_key_1(request)
+    async def get_key_4(self, request): return await self.get_key_1(request)
+    async def login(self, request): return RestServerLoginResponse(session_id="simple_session_id")
+    async def login_realm(self, request): return RestServerLoginRealmResponse(session_id="simple_session_id")
+    async def is_logined(self, request): return RestServerIsLoginedResponse(value=bool(request.session_id))
+    async def login_bearer(self, request): return Response(status_code=204)
+    async def get_timestamp(self, request): return RestServerGetTimestampResponse(value={{"seconds": 0, "nanos": 0}})
+    async def is_admin(self, request): return RestServerIsAdminResponse()
+app = FastAPI()
+def auth_error(realm=None):
+    headers = {{"WWW-Authenticate": f'Basic realm="{{realm}}"'}} if realm else {{}}
+    return JSONResponse({{"code": 401, "msg": "Unauthorized"}}, status_code=401, headers=headers)
+@app.post("/login")
+async def login_route(request: FastAPIRequest):
+    if not request.headers.get("authorization"):
+        return auth_error("login")
+    return FastAPIRawResponse(status_code=204, headers={{"Set-Cookie": "session_id=simple_session_id"}})
+@app.post("/login_realm")
+async def login_realm_route(request: FastAPIRequest):
+    if not request.headers.get("authorization"):
+        return auth_error("request login with realm")
+    return FastAPIRawResponse(status_code=204, headers={{"Set-Cookie": "session_id=simple_session_id"}})
+@app.post("/login_bearer")
+async def login_bearer_route(request: FastAPIRequest):
+    auth = request.headers.get("authorization")
+    if not auth or auth == "Bearer":
+        return auth_error()
+    return FastAPIRawResponse(status_code=204)
+adapter = FastAPIAdapter(app=app); register_routes(adapter, rest_server_routes(MyRestServer()))
+if __name__ == "__main__": uvicorn.run(app, host="127.0.0.1", port={port})
+"""
+    if idl_name == "e2e_test":
+        return f"""
+import uvicorn
+from fastapi import FastAPI
+from xidl.fastapi import FastAPIAdapter
+from fastapi.responses import JSONResponse, PlainTextResponse
+from xidl.http import Response, register_routes
+from e2e_test_http import *
+def opt(v): return "None" if v is None else f'Some("{{v}}")'
+def opt_int(v): return "None" if v is None else f"Some({{v}})"
+class MyE2EPathSever(E2EPathSeverService):
+    async def op_with_path(self, request): return E2EPathSeverOpWithPathResponse(value=[request.param_1])
+    async def op_with_query(self, request): return E2EPathSeverOpWithQueryResponse(value=[request.param_1, request.q])
+    async def op_with_params(self, request): return E2EPathSeverOpWithParamsResponse(value=[request.path_name])
+    async def op_with_query_2(self, request): return E2EPathSeverOpWithQuery2Response(value=f"{{request.all}}:{{request.word}}:{{request.q}}")
+class MyE2EHttpRouteAndBody(E2EHttpRouteAndBodyService):
+    async def get_resource(self, request): return E2EHttpRouteAndBodyGetResourceResponse(value=f"id:{{request.resource_id}},lang:{{opt(request.locale)}},trace:{{request.trace_id}}")
+    async def get_file(self, request): return E2EHttpRouteAndBodyGetFileResponse(value=f"file:{{request.file_path.lstrip('/')}},download:{{str(request.download).lower()}},version:{{opt(request.version)}}")
+    async def create_resource(self, request): return E2EHttpRouteAndBodyCreateResourceResponse(value=request.resource_body)
+    async def replace_resource(self, request): return Response(status_code=204)
+    async def patch_resource(self, request): return E2EHttpRouteAndBodyPatchResourceResponse(value=request.changes)
+    async def delete_resource(self, request): return Response(status_code=204)
+    async def probe_resource(self, request): return Response(status_code=204)
+    async def resource_options(self, request): return Response(status_code=204)
+    async def get_msgpack_resource(self, request): return E2EHttpRouteAndBodyGetMsgpackResourceResponse(return_={{"name": "msgpack", "tags": [], "labels": {{}}}}, revision=1)
+    async def dedup_resource(self, request): return E2EHttpRouteAndBodyDedupResourceResponse(value=f"{{request.id}}:{{request.x_trace_id}}")
+    async def preview_resource(self, request): return E2EHttpRouteAndBodyPreviewResourceResponse(value=request.resource)
+class MyE2EHttpSecurity(E2EHttpSecurityService):
+    async def get_secure_user(self, request): return E2EHttpSecurityGetSecureUserResponse(value=f"user:{{request.user_id}},lang:{{opt(request.locale)}},trace:{{request.trace_id}}")
+    async def search_secure_user(self, request): return E2EHttpSecuritySearchSecureUserResponse(value=f"keyword:{{request.keyword}},page:{{opt_int(request.page)}}")
+    async def healthz(self, request): return E2EHttpSecurityHealthzResponse(value="ok")
+class MyE2ETypeServer(E2ETypeServerService):
+    async def get_attribute_type_attr_1(self, request): return E2ETypeServerGetAttributeTypeAttr1Response(value="attr1")
+    async def set_attribute_type_attr_1(self, request): return Response(status_code=204)
+    async def get_attribute_type_attr_2(self, request): return E2ETypeServerGetAttributeTypeAttr2Response(value=["attr2"])
+    async def simple_op(self, request): return Response(status_code=204)
+    async def simple_op_with_return_1(self, request): return E2ETypeServerSimpleOpWithReturn1Response(value="simple_op_with_return1")
+    async def simple_op_with_return_2(self, request): return E2ETypeServerSimpleOpWithReturn2Response(value={{}})
+    async def simple_op_with_return_3(self, request): return E2ETypeServerSimpleOpWithReturn3Response(value="V1")
+    async def simple_op_with_return_4(self, request): return E2ETypeServerSimpleOpWithReturn4Response(value={{}})
+    async def simple_op_with_return_5(self, request): return E2ETypeServerSimpleOpWithReturn5Response(value={{}})
+    async def return_with_sequence_1(self, request): return E2ETypeServerReturnWithSequence1Response(value=["s1", "s2"])
+    async def return_with_sequence_2(self, request): return E2ETypeServerReturnWithSequence2Response(value=[])
+    async def return_with_sequence_3(self, request): return E2ETypeServerReturnWithSequence3Response(value=["V1", "V2"])
+    async def return_with_sequence_4(self, request): return E2ETypeServerReturnWithSequence4Response(value=[{{}}])
+    async def return_with_sequence_5(self, request): return E2ETypeServerReturnWithSequence5Response(value=[])
+    async def return_with_map(self, request): return E2ETypeServerReturnWithMapResponse(value={{"k1": 1}})
+    async def return_with_any(self, request): return E2ETypeServerReturnWithAnyResponse(value={{"any": "value"}})
+    async def return_with_any_sequence(self, request): return E2ETypeServerReturnWithAnySequenceResponse(value=[1, "two"])
+    async def return_with_any_map(self, request): return E2ETypeServerReturnWithAnyMapResponse(value={{"k1": 1}})
+    async def parameter_op(self, request): return Response(status_code=204)
+    async def parameter_op_2(self, request): return Response(status_code=204)
+    async def parameter_op_3(self, request): return E2ETypeServerParameterOp3Response(b=3, c=[])
+    async def parameter_op_4(self, request): return E2ETypeServerParameterOp4Response(a="op4", b=4, c=[])
+    async def parameter_op_5(self, request): return E2ETypeServerParameterOp5Response(a="op5", b=5, c=[], return_=["op5"])
+    async def parameter_op_6(self, request): return E2ETypeServerParameterOp6Response(a="op6", b=6, c=[], return_={{}})
+class MyE2EAttribute(E2EAttributeService):
+    async def get_attribute_attr_1(self, request): return E2EAttributeGetAttributeAttr1Response(value="attr1")
+    async def set_attribute_attr_1(self, request): return Response(status_code=204)
+    async def get_attribute_attr_2(self, request): return E2EAttributeGetAttributeAttr2Response(value=["attr2"])
+    async def get_attribute_attr_3(self, request): return E2EAttributeGetAttributeAttr3Response(value={{}})
+    async def set_attribute_attr_3(self, request): return Response(status_code=204)
+    async def get_attribute_attr_4(self, request): return E2EAttributeGetAttributeAttr4Response(value='"V1"')
+    async def set_attribute_attr_4(self, request): return Response(status_code=204)
+    async def get_attribute_attr_5(self, request): return E2EAttributeGetAttributeAttr5Response(value={{}})
+    async def set_attribute_attr_5(self, request): return Response(status_code=204)
+    async def get_attribute_attr_6(self, request): return E2EAttributeGetAttributeAttr6Response(value={{"member_2": "V1", "member_3": {{}}}})
+    async def set_attribute_attr_6(self, request): return Response(status_code=204)
+    async def get_attribute_attr_61(self, request): return E2EAttributeGetAttributeAttr61Response(value={{"tag": "V1", "data": 1}})
+    async def set_attribute_attr_61(self, request): return Response(status_code=204)
+    async def get_attribute_attr_7(self, request): return E2EAttributeGetAttributeAttr7Response(value=[])
+    async def set_attribute_attr_7(self, request): return Response(status_code=204)
+    async def get_attribute_attr_8(self, request): return E2EAttributeGetAttributeAttr8Response(value=[])
+    async def set_attribute_attr_8(self, request): return Response(status_code=204)
+    async def get_attribute_attr_9(self, request): return E2EAttributeGetAttributeAttr9Response(value=[])
+    async def set_attribute_attr_9(self, request): return Response(status_code=204)
+    async def get_attribute_attr_10(self, request): return E2EAttributeGetAttributeAttr10Response(value=[])
+    async def set_attribute_attr_10(self, request): return Response(status_code=204)
+    async def get_attribute_attr_11(self, request): return E2EAttributeGetAttributeAttr11Response(value=[])
+    async def set_attribute_attr_11(self, request): return Response(status_code=204)
+    async def get_attribute_attr_12(self, request): return E2EAttributeGetAttributeAttr12Response(value={{}})
+    async def set_attribute_attr_12(self, request): return Response(status_code=204)
+    async def get_attribute_attr_13(self, request): return E2EAttributeGetAttributeAttr13Response(value=None)
+    async def set_attribute_attr_13(self, request): return Response(status_code=204)
+    async def get_attribute_attr_14(self, request): return E2EAttributeGetAttributeAttr14Response(value=[])
+    async def set_attribute_attr_14(self, request): return Response(status_code=204)
+    async def get_attribute_attr_15(self, request): return E2EAttributeGetAttributeAttr15Response(value={{}})
+    async def set_attribute_attr_15(self, request): return Response(status_code=204)
+    async def get_attribute_attr_16(self, request): return E2EAttributeGetAttributeAttr16Response(value="attr16")
+class MyE2EHttpForm(E2EHttpFormService):
+    async def submit_profile(self, request): return E2EHttpFormSubmitProfileResponse(return_=f"name:{{request.name}},age:{{opt_int(request.age)}}", normalized_name=request.name.upper())
+class MyE2EHttpScopeMatrix(E2EHttpScopeMatrixService):
+    async def get_attribute_scope_inherited_attr(self, request): return E2EHttpScopeMatrixGetAttributeScopeInheritedAttrResponse(value="inherited")
+    async def get_attribute_scope_bare_attr(self, request): return E2EHttpScopeMatrixGetAttributeScopeBareAttrResponse(value="bare")
+    async def default_scope(self, request):
+        name = request.request_body.get("name") if isinstance(request.request_body, dict) else request.request_body.name
+        return E2EHttpScopeMatrixDefaultScopeResponse(value=f'"{{name}}"')
+    async def override_consumes_only(self, request): return E2EHttpScopeMatrixOverrideConsumesOnlyResponse(return_=f"name:{{request.name}},age:{{opt_int(request.age)}}", normalized_name=request.name.upper())
+    async def override_produces_only(self, request): return E2EHttpScopeMatrixOverrideProducesOnlyResponse(return_={{"name": request.resource_id, "tags": [], "labels": {{}}}}, revision=1)
+    async def override_both_media(self, request): return E2EHttpScopeMatrixOverrideBothMediaResponse(return_={{"name": request.name, "tags": [f"age:{{opt_int(request.age)}}"], "labels": {{}}}}, normalized_name="OVERRIDDEN")
+    async def deprecated_plain(self, request): return E2EHttpScopeMatrixDeprecatedPlainResponse(value=request.resource_id)
+    async def deprecated_since_only(self, request): return E2EHttpScopeMatrixDeprecatedSinceOnlyResponse(value=request.resource_id)
+    async def deprecated_window(self, request): return E2EHttpScopeMatrixDeprecatedWindowResponse(value=request.resource_id)
+class MyE2EHttpDefaultsMatrix(E2EHttpDefaultsMatrixService):
+    async def delete_resource_default_query(self, request): return E2EHttpDefaultsMatrixDeleteResourceDefaultQueryResponse(value=f"{{request.id}}:{{request.revision}}")
+    async def probe_resource_default_query(self, request): return Response(status_code=204)
+    async def resource_options_default_query(self, request): return Response(status_code=204)
+    async def replace_resource_default_body(self, request): return E2EHttpDefaultsMatrixReplaceResourceDefaultBodyResponse(value={{"name": request.name, "alias": request.alias, "tags": [request.id], "labels": {{}}}})
+    async def patch_resource_default_body(self, request): return E2EHttpDefaultsMatrixPatchResourceDefaultBodyResponse(value={{"name": request.name, "alias": request.alias, "tags": [request.id], "labels": {{}}}})
+class MyE2EHttpSecurityMatrix(E2EHttpSecurityMatrixService):
+    async def inherited_security(self, request): return E2EHttpSecurityMatrixInheritedSecurityResponse(value=f"{{request.resource_id}}:{{request.trace_id}}")
+    async def bearer_or_cookie_security(self, request): return E2EHttpSecurityMatrixBearerOrCookieSecurityResponse(value=f"{{request.action}}:{{opt(request.note)}}")
+    async def alternative_security(self, request): return E2EHttpSecurityMatrixAlternativeSecurityResponse(value=f"{{request.resource_id}}:{{opt(request.locale)}}")
+    async def oauth_security(self, request): return E2EHttpSecurityMatrixOauthSecurityResponse(value=f"{{request.keyword}}:{{opt_int(request.page)}}")
+    async def public_ping(self, request): return E2EHttpSecurityMatrixPublicPingResponse(value="pong")
+app = FastAPI(); adapter = FastAPIAdapter(app=app)
+@app.get("/v2/files/{{file_path:path}}")
+async def get_file_fallback(file_path: str, download: bool, version: str = None):
+    return PlainTextResponse(f"file:{{file_path}},download:{{str(download).lower()}},version:{{opt(version)}}")
+@app.post("/v1/op_with_params/{{path_name}}")
+async def op_with_params_fallback(path_name: str):
+    return JSONResponse([path_name])
+@app.get("/v1/op_with_query_wildcard/{{all_path:path}}")
+async def op_with_query_wildcard_fallback(all_path: str, word: str, q: str):
+    return PlainTextResponse(f"{{all_path}}:{{word}}:{{q}}")
+for routes in [
+    e_2_e_path_sever_routes(MyE2EPathSever()),
+    e_2_e_http_route_and_body_routes(MyE2EHttpRouteAndBody()),
+    e_2_e_http_security_routes(MyE2EHttpSecurity()),
+    e_2_e_type_server_routes(MyE2ETypeServer()),
+    e_2_e_attribute_routes(MyE2EAttribute()),
+    e_2_e_http_form_routes(MyE2EHttpForm()),
+    e_2_e_http_scope_matrix_routes(MyE2EHttpScopeMatrix()),
+    e_2_e_http_defaults_matrix_routes(MyE2EHttpDefaultsMatrix()),
+    e_2_e_http_security_matrix_routes(MyE2EHttpSecurityMatrix()),
+]:
+    register_routes(adapter, routes)
+if __name__ == "__main__": uvicorn.run(app, host="127.0.0.1", port={port})
+"""
+    raise AssertionError(f"missing python boilerplate for {idl_name}")
 
 @then('I can run hurl tests against the server')
 def step_impl(context):
@@ -729,7 +1054,11 @@ def step_impl(context, attr, value):
         resp = requests.get(url, timeout=10)
         if resp.status_code != 200:
             print(f"DEBUG: GET {url} returned {resp.status_code}: {resp.text}")
-        data = resp.json(); res = data.get("value") or data.get("return") or data if isinstance(data, dict) else data
+        try:
+            data = resp.json()
+        except Exception:
+            data = resp.text.strip('"')
+        res = data.get("value") or data.get("return") or data if isinstance(data, dict) else data
         assert str(res) == value or (isinstance(res, dict) and str(res.get("value")) == value)
         # Check if the returned value is inside a field named after the attribute (some generators do this)
         if isinstance(res, dict) and attr in res:
