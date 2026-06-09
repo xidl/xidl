@@ -166,7 +166,7 @@ def wait_for_server(context, timeout=60):
             stdout, stderr = context.server_process.communicate()
             assert False, f"Server failed to start:\n{stderr}"
         assert False, f"Timed out waiting for port {context.port}"
-    time.sleep(0.2)
+    time.sleep(0.5)
     if context.server_process.poll() is not None:
         stdout, stderr = context.server_process.communicate()
         assert False, f"Server failed to stay running:\n{stderr}"
