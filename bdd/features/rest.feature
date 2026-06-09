@@ -16,6 +16,7 @@ Feature: REST API Generation and Communication
       | rust |
       | go   |
       | ts   |
+      | python |
 
   Scenario Outline: REST with Unions and Attributes
     Given a REST IDL file "bdd/features/data/all_scenarios.idl"
@@ -29,6 +30,7 @@ Feature: REST API Generation and Communication
       | rust |
       | go   |
       | ts   |
+      | python |
 
   Scenario Outline: REST Attributes
     Given a REST IDL file "bdd/features/data/all_scenarios.idl"
@@ -42,6 +44,7 @@ Feature: REST API Generation and Communication
       | rust |
       | go   |
       | ts   |
+      | python |
 
   Scenario Outline: REST Streaming
     Given a REST IDL file "bdd/features/data/streaming.idl"
@@ -55,6 +58,7 @@ Feature: REST API Generation and Communication
       | rust |
       | go   |
       | ts   |
+      | python |
 
   Scenario Outline: REST Form-urlencoded
     Given a REST IDL file "bdd/features/data/media_types.idl"
@@ -68,6 +72,7 @@ Feature: REST API Generation and Communication
       | rust |
       | go   |
       | ts   |
+      | python |
 
   Scenario: TypeScript REST Schema Imports
     Given a REST IDL file "bdd/features/data/complex_rest.idl"
@@ -88,6 +93,7 @@ Feature: REST API Generation and Communication
       | rust |
       | go   |
       | ts   |
+      | python |
 
   Scenario Outline: REST E2E test via Hurl using boilerplate
     Given a REST IDL file "bdd/features/data/<idl>.idl"
@@ -101,18 +107,23 @@ Feature: REST API Generation and Communication
       | complex_rest     | rust |
       | complex_rest     | go   |
       | complex_rest     | ts   |
+      | complex_rest     | python |
       | city_rest        | rust |
       | city_rest        | go   |
       | city_rest        | ts   |
+      | city_rest        | python |
       | rest_server      | rust |
       | rest_server      | go   |
       | rest_server      | ts   |
+      | rest_server      | python |
       | rest_media_types | rust |
       | rest_media_types | go   |
       | rest_media_types | ts   |
+      | rest_media_types | python |
       | e2e_test         | rust |
       | e2e_test         | go   |
       | e2e_test         | ts   |
+      | e2e_test         | python |
 
   Scenario Outline: REST Bad Path - Not Found
     Given a REST IDL file "bdd/features/data/complex_rest.idl"
@@ -126,6 +137,7 @@ Feature: REST API Generation and Communication
       | rust |
       | go   |
       | ts   |
+      | python |
 
   Scenario Outline: REST Bad Path - Invalid Parameter
     Given a REST IDL file "bdd/features/data/complex_rest.idl"
@@ -138,6 +150,7 @@ Feature: REST API Generation and Communication
     Examples:
       | lang |
       | go   |
+      | python |
 
   Scenario: REST Bad Path - Invalid Parameter (Rust)
     Given a REST IDL file "bdd/features/data/complex_rest.idl"
@@ -180,6 +193,7 @@ Feature: REST API Generation and Communication
       | lang |
       | rust |
       | go   |
+      | python |
 
   Scenario Outline: REST Bad Path - Unsupported Media Type
     Given a REST IDL file "bdd/features/data/complex_rest.idl"
@@ -194,6 +208,7 @@ Feature: REST API Generation and Communication
       | lang |
       | rust |
       | go   |
+      | python |
 
   Scenario Outline: REST Serialization Rules
     Given a REST IDL file "bdd/features/data/serialization.idl"
