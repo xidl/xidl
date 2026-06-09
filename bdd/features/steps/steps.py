@@ -417,34 +417,11 @@ class MyUserService implements UserService {{
   async list_users(req: {{ filter: string }}): Promise<any[]> {{ return Array.from(this.users.values()); }}
 }}
 const handler = createUserServiceHandler(new MyUserService());
-const myServer = createServer(async (req, res) => {{
-  try {{
-    const request = {{
-      method: req.method || 'GET',
-      path: req.url?.split('?')[0] || '/',
-      headers: req.headers,
-      body: await new Promise((resolve) => {{
-        const chunks: any[] = [];
-        req.on('data', (chunk) => chunks.push(chunk));
-        req.on('end', () => resolve(Buffer.concat(chunks)));
-      }}),
-    }};
-    const response = await handler(request);
-    res.writeHead(response.status, response.headers);
-    res.end(response.body);
-  }} catch (err) {{
-    const status = err instanceof XidlServerError ? err.status : 500;
-    const msg = err instanceof Error ? err.message : String(err);
-    res.writeHead(status, {{ 'Content-Type': 'application/json' }});
-    res.end(JSON.stringify({{ code: status, msg }}));
-  }}
-}});
-myServer.listen({context.port});
 """
         elif "serialization" in context.idl_file:
             server_code = f"""
 import {{ createServer }} from 'node:http';
-import {{ createSerializationTestHandler, type SerializationTest, XidlServerError }} from './{module_name}.server.js';
+import {{ createSerializationTestHandler, type SerializationTest }} from './{module_name}.server.js';
 class MySerializationTest implements SerializationTest {{
   async get_string(): Promise<string> {{ return "hello"; }}
   async get_int(): Promise<number> {{ return 42; }}
@@ -454,29 +431,6 @@ class MySerializationTest implements SerializationTest {{
   async echo_struct(req: {{ value: any }}): Promise<any> {{ return req.value; }}
 }}
 const handler = createSerializationTestHandler(new MySerializationTest());
-const myServer = createServer(async (req, res) => {{
-  try {{
-    const request = {{
-      method: req.method || 'GET',
-      path: req.url?.split('?')[0] || '/',
-      headers: req.headers,
-      body: await new Promise((resolve) => {{
-        const chunks: any[] = [];
-        req.on('data', (chunk) => chunks.push(chunk));
-        req.on('end', () => resolve(Buffer.concat(chunks)));
-      }}),
-    }};
-    const response = await handler(request);
-    res.writeHead(response.status, response.headers);
-    res.end(response.body);
-  }} catch (err) {{
-    const status = err instanceof XidlServerError ? err.status : 500;
-    const msg = err instanceof Error ? err.message : String(err);
-    res.writeHead(status, {{ 'Content-Type': 'application/json' }});
-    res.end(JSON.stringify({{ code: status, msg }}));
-  }}
-}});
-myServer.listen({context.port});
 """
         elif "all_scenarios" in context.idl_file:
             server_code = f"""
