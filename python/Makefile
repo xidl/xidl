@@ -11,4 +11,5 @@ test-python-codegen:
 	$(XIDLC_BIN) gen --out-dir "xidlc_examples/http_stream" python-rest ../xidlc/tests/python-http/http_stream.idl; \
 
 test-python-runtime:
+	python3 -m pip install -r requirements.txt
 	PYTHONPATH=. python3 -m unittest discover -s tests -v
