@@ -10,25 +10,37 @@ import threading
 import re
 import socket
 import json
+import random
 from behave import given, when, then
 
-_next_test_port = int(os.environ.get("XIDL_BDD_PORT_BASE", "21000"))
-_allocated_test_ports = set()
+_test_port_base = int(os.environ.get("XIDL_BDD_PORT_BASE", "12000"))
+_test_port_span = int(os.environ.get("XIDL_BDD_PORT_SPAN", "1000"))
+_reserved_test_ports = set()
+_port_random = random.SystemRandom()
 
-def allocate_test_port():
-    global _next_test_port
-    while True:
-        port = _next_test_port
-        _next_test_port += 1
-        if port in _allocated_test_ports:
+def reserve_test_port():
+    for _ in range(_test_port_span * 2):
+        port = _test_port_base + _port_random.randrange(_test_port_span)
+        if port in _reserved_test_ports:
             continue
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            try:
-                sock.bind(("127.0.0.1", port))
-            except OSError:
-                continue
-        _allocated_test_ports.add(port)
-        return port
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            sock.bind(("127.0.0.1", port))
+        except OSError:
+            sock.close()
+            continue
+        _reserved_test_ports.add(port)
+        return port, sock
+    raise RuntimeError(
+        f"unable to allocate test port in range "
+        f"{_test_port_base}-{_test_port_base + _test_port_span - 1}"
+    )
+
+def release_reserved_test_port(context):
+    guard = getattr(context, "port_guard", None)
+    if guard is not None:
+        guard.close()
+        context.port_guard = None
 
 @given('a REST IDL file "{idl_file}"')
 def step_impl(context, idl_file):
@@ -39,7 +51,7 @@ def step_impl(context, idl_file):
     context.temp_dir = tempfile.mkdtemp(dir=base_temp)
     context.lang_dir = os.path.join(context.temp_dir, "gen")
     os.makedirs(context.lang_dir)
-    context.port = allocate_test_port()
+    context.port, context.port_guard = reserve_test_port()
 
 @given('a JSON-RPC IDL file "{idl_file}"')
 def step_impl(context, idl_file):
@@ -50,7 +62,7 @@ def step_impl(context, idl_file):
     context.temp_dir = tempfile.mkdtemp(dir=base_temp)
     context.lang_dir = os.path.join(context.temp_dir, "gen")
     os.makedirs(context.lang_dir)
-    context.port = allocate_test_port()
+    context.port, context.port_guard = reserve_test_port()
 
 @when('I generate {lang} code for the IDL')
 def step_impl(context, lang):
@@ -158,21 +170,28 @@ def wait_for_port(port, timeout=60):
     return False
 
 def start_server_process(args, **kwargs):
+    if kwargs.get("stdout") == subprocess.PIPE and kwargs.get("stderr") == subprocess.PIPE:
+        kwargs["stderr"] = subprocess.STDOUT
     return subprocess.Popen(args, start_new_session=True, **kwargs)
+
+def start_context_server(context, args, **kwargs):
+    release_reserved_test_port(context)
+    return start_server_process(args, **kwargs)
 
 def wait_for_server(context, timeout=60):
     if not wait_for_port(context.port, timeout):
         if context.server_process.poll() is not None:
             stdout, stderr = context.server_process.communicate()
-            assert False, f"Server failed to start:\n{stderr}"
+            assert False, f"Server failed to start:\n{stdout or stderr}"
         assert False, f"Timed out waiting for port {context.port}"
     time.sleep(0.5)
     if context.server_process.poll() is not None:
         stdout, stderr = context.server_process.communicate()
-        assert False, f"Server failed to stay running:\n{stderr}"
+        assert False, f"Server failed to stay running:\n{stdout or stderr}"
 
 def run_server_logging(process, prefix):
-    for line in iter(process.stderr.readline, ''):
+    stream = process.stderr or process.stdout
+    for line in iter(stream.readline, ''):
         if not line: break
         print(f"{prefix} LOG: {line.strip()}")
 
@@ -323,7 +342,7 @@ if __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port
 """
         context.server_file = os.path.join(context.temp_dir, "server.py")
         with open(context.server_file, "w") as f: f.write(server_code)
-        context.server_process = start_server_process(["python3", "-u", context.server_file], env=context.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
+        context.server_process = start_context_server(context, ["python3", "-u", context.server_file], env=context.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
         t = threading.Thread(target=run_server_logging, args=(context.server_process, "PYTHON")); t.daemon = True; t.start()
         wait_for_server(context)
     elif lang == "go":
@@ -371,7 +390,7 @@ func main() {{ r := gin.Default(); svc := &MyAllScenarios{{status: StatusActive}
                 content = re.sub(r"package \w+", "package main", content, count=1)
                 with open(path, "w") as fw: fw.write(content)
         subprocess.run(["go", "mod", "tidy"], cwd=context.lang_dir, check=True)
-        context.server_process = start_server_process(["go", "run", "."], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        context.server_process = start_context_server(context, ["go", "run", "."], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         t = threading.Thread(target=run_server_logging, args=(context.server_process, "GO")); t.daemon = True; t.start()
         wait_for_server(context)
     elif lang == "ts":
@@ -540,7 +559,7 @@ server.listen({context.port}, '127.0.0.1', () => {{
 
         with open(os.path.join(context.lang_dir, "server.ts"), "w") as f: f.write(server_code)
         env = os.environ.copy(); env["PORT"] = str(context.port)
-        context.server_process = start_server_process(["npx", "tsx", "server.ts"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+        context.server_process = start_context_server(context, ["npx", "tsx", "server.ts"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
         t = threading.Thread(target=run_server_logging, args=(context.server_process, "TS")); t.daemon = True; t.start()
         wait_for_server(context)
     elif lang == "rust":
@@ -580,7 +599,7 @@ server.listen({context.port}, '127.0.0.1', () => {{
 
         env = os.environ.copy()
         env["CARGO_TARGET_DIR"] = os.path.join(root_dir, "bdd", ".temp", "rust_target")
-        context.server_process = start_server_process(["cargo", "run"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+        context.server_process = start_context_server(context, ["cargo", "run"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
         t = threading.Thread(target=run_server_logging, args=(context.server_process, prefix)); t.daemon = True; t.start()
         wait_for_server(context)
 
@@ -616,7 +635,7 @@ def step_impl(context, lang):
         subprocess.run(["go", "mod", "tidy"], cwd=context.lang_dir, check=True)
         env = os.environ.copy()
         env["PORT"] = str(context.port)
-        context.server_process = start_server_process(["go", "run", "."], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+        context.server_process = start_context_server(context, ["go", "run", "."], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
         t = threading.Thread(target=run_server_logging, args=(context.server_process, "GO-BOILERPLATE"))
         t.daemon = True
         t.start()
@@ -634,7 +653,7 @@ def step_impl(context, lang):
         env = os.environ.copy()
         env["PORT"] = str(context.port)
         env["CARGO_TARGET_DIR"] = os.path.join(os.path.abspath("."), "bdd", ".temp", "rust_target")
-        context.server_process = start_server_process(["cargo", "run"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+        context.server_process = start_context_server(context, ["cargo", "run"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
         t = threading.Thread(target=run_server_logging, args=(context.server_process, "RUST-BOILERPLATE"))
         t.daemon = True
         t.start()
@@ -657,7 +676,7 @@ def step_impl(context, lang):
         subprocess.run(["npm", "install", "--ignore-scripts"], cwd=context.lang_dir, check=True, capture_output=True)
         env = os.environ.copy()
         env["PORT"] = str(context.port)
-        context.server_process = start_server_process(["npx", "tsx", "server.ts"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+        context.server_process = start_context_server(context, ["npx", "tsx", "server.ts"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
         t = threading.Thread(target=run_server_logging, args=(context.server_process, "TS-BOILERPLATE"))
         t.daemon = True
         t.start()
