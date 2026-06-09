@@ -146,6 +146,20 @@ def wait_for_port(port, timeout=60):
             time.sleep(0.5)
     return False
 
+def start_server_process(args, **kwargs):
+    return subprocess.Popen(args, start_new_session=True, **kwargs)
+
+def wait_for_server(context, timeout=60):
+    if not wait_for_port(context.port, timeout):
+        if context.server_process.poll() is not None:
+            stdout, stderr = context.server_process.communicate()
+            assert False, f"Server failed to start:\n{stderr}"
+        assert False, f"Timed out waiting for port {context.port}"
+    time.sleep(0.2)
+    if context.server_process.poll() is not None:
+        stdout, stderr = context.server_process.communicate()
+        assert False, f"Server failed to stay running:\n{stderr}"
+
 def run_server_logging(process, prefix):
     for line in iter(process.stderr.readline, ''):
         if not line: break
@@ -298,9 +312,9 @@ if __name__ == '__main__': uvicorn.run(app, host='127.0.0.1', port={context.port
 """
         context.server_file = os.path.join(context.temp_dir, "server.py")
         with open(context.server_file, "w") as f: f.write(server_code)
-        context.server_process = subprocess.Popen(["python3", "-u", context.server_file], env=context.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
+        context.server_process = start_server_process(["python3", "-u", context.server_file], env=context.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
         t = threading.Thread(target=run_server_logging, args=(context.server_process, "PYTHON")); t.daemon = True; t.start()
-        wait_for_port(context.port)
+        wait_for_server(context)
     elif lang == "go":
         go_mod = f"module test\ngo 1.25\nreplace github.com/xidl/xidl/golang/xidl-go-rest => {os.path.abspath('golang/xidl-go-rest')}\nreplace github.com/xidl/xidl/golang/xidl-go => {os.path.abspath('golang/xidl-go')}\nreplace github.com/xidl/xidl/golang/xidl-go-codec => {os.path.abspath('golang/xidl-go-codec')}\nrequire github.com/xidl/xidl/golang/xidl-go-rest v0.0.0\nrequire github.com/gin-gonic/gin v1.12.0\n"
         with open(os.path.join(context.lang_dir, "go.mod"), "w") as f: f.write(go_mod)
@@ -346,9 +360,9 @@ func main() {{ r := gin.Default(); svc := &MyAllScenarios{{status: StatusActive}
                 content = re.sub(r"package \w+", "package main", content, count=1)
                 with open(path, "w") as fw: fw.write(content)
         subprocess.run(["go", "mod", "tidy"], cwd=context.lang_dir, check=True)
-        context.server_process = subprocess.Popen(["go", "run", "."], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        context.server_process = start_server_process(["go", "run", "."], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         t = threading.Thread(target=run_server_logging, args=(context.server_process, "GO")); t.daemon = True; t.start()
-        wait_for_port(context.port)
+        wait_for_server(context)
     elif lang == "ts":
         with open(os.path.join(context.lang_dir, "package.json"), "w") as f:
             f.write('{"name": "test-ts-gen", "version": "1.0.0", "type": "module"}')
@@ -515,9 +529,9 @@ server.listen({context.port}, '127.0.0.1', () => {{
 
         with open(os.path.join(context.lang_dir, "server.ts"), "w") as f: f.write(server_code)
         env = os.environ.copy(); env["PORT"] = str(context.port)
-        context.server_process = subprocess.Popen(["npx", "tsx", "server.ts"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+        context.server_process = start_server_process(["npx", "tsx", "server.ts"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
         t = threading.Thread(target=run_server_logging, args=(context.server_process, "TS")); t.daemon = True; t.start()
-        wait_for_port(context.port)
+        wait_for_server(context)
     elif lang == "rust":
         root_dir = os.path.abspath(".")
         if context.protocol == "rest":
@@ -555,13 +569,9 @@ server.listen({context.port}, '127.0.0.1', () => {{
 
         env = os.environ.copy()
         env["CARGO_TARGET_DIR"] = os.path.join(root_dir, "bdd", ".temp", "rust_target")
-        context.server_process = subprocess.Popen(["cargo", "run"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+        context.server_process = start_server_process(["cargo", "run"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
         t = threading.Thread(target=run_server_logging, args=(context.server_process, prefix)); t.daemon = True; t.start()
-        if not wait_for_port(context.port):
-            if context.server_process.poll() is not None:
-                stdout, stderr = context.server_process.communicate()
-                assert False, f"Server failed to start:\n{stderr}"
-            assert False, f"Timed out waiting for port {context.port}"
+        wait_for_server(context)
 
 @then('I can run the generated {lang} server using boilerplate')
 def step_impl(context, lang):
@@ -595,7 +605,7 @@ def step_impl(context, lang):
         subprocess.run(["go", "mod", "tidy"], cwd=context.lang_dir, check=True)
         env = os.environ.copy()
         env["PORT"] = str(context.port)
-        context.server_process = subprocess.Popen(["go", "run", "."], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+        context.server_process = start_server_process(["go", "run", "."], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
         t = threading.Thread(target=run_server_logging, args=(context.server_process, "GO-BOILERPLATE"))
         t.daemon = True
         t.start()
@@ -613,7 +623,7 @@ def step_impl(context, lang):
         env = os.environ.copy()
         env["PORT"] = str(context.port)
         env["CARGO_TARGET_DIR"] = os.path.join(os.path.abspath("."), "bdd", ".temp", "rust_target")
-        context.server_process = subprocess.Popen(["cargo", "run"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+        context.server_process = start_server_process(["cargo", "run"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
         t = threading.Thread(target=run_server_logging, args=(context.server_process, "RUST-BOILERPLATE"))
         t.daemon = True
         t.start()
@@ -636,15 +646,11 @@ def step_impl(context, lang):
         subprocess.run(["npm", "install", "--ignore-scripts"], cwd=context.lang_dir, check=True, capture_output=True)
         env = os.environ.copy()
         env["PORT"] = str(context.port)
-        context.server_process = subprocess.Popen(["npx", "tsx", "server.ts"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+        context.server_process = start_server_process(["npx", "tsx", "server.ts"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
         t = threading.Thread(target=run_server_logging, args=(context.server_process, "TS-BOILERPLATE"))
         t.daemon = True
         t.start()
-    if not wait_for_port(context.port):
-        if context.server_process.poll() is not None:
-            stdout, stderr = context.server_process.communicate()
-            assert False, f"Server failed to start:\n{stderr}"
-        assert False, f"Timed out waiting for port {context.port}"
+    wait_for_server(context)
 
 @then('I can run hurl tests against the server')
 def step_impl(context):
