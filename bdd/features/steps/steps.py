@@ -12,12 +12,23 @@ import socket
 import json
 from behave import given, when, then
 
-def get_free_port():
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(('', 0))
-    port = s.getsockname()[1]
-    s.close()
-    return port
+_next_test_port = int(os.environ.get("XIDL_BDD_PORT_BASE", "21000"))
+_allocated_test_ports = set()
+
+def allocate_test_port():
+    global _next_test_port
+    while True:
+        port = _next_test_port
+        _next_test_port += 1
+        if port in _allocated_test_ports:
+            continue
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            try:
+                sock.bind(("127.0.0.1", port))
+            except OSError:
+                continue
+        _allocated_test_ports.add(port)
+        return port
 
 @given('a REST IDL file "{idl_file}"')
 def step_impl(context, idl_file):
@@ -28,7 +39,7 @@ def step_impl(context, idl_file):
     context.temp_dir = tempfile.mkdtemp(dir=base_temp)
     context.lang_dir = os.path.join(context.temp_dir, "gen")
     os.makedirs(context.lang_dir)
-    context.port = get_free_port()
+    context.port = allocate_test_port()
 
 @given('a JSON-RPC IDL file "{idl_file}"')
 def step_impl(context, idl_file):
@@ -39,7 +50,7 @@ def step_impl(context, idl_file):
     context.temp_dir = tempfile.mkdtemp(dir=base_temp)
     context.lang_dir = os.path.join(context.temp_dir, "gen")
     os.makedirs(context.lang_dir)
-    context.port = get_free_port()
+    context.port = allocate_test_port()
 
 @when('I generate {lang} code for the IDL')
 def step_impl(context, lang):
