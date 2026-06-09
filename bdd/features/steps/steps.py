@@ -561,6 +561,7 @@ server.listen({context.port}, '127.0.0.1', () => {{
 def step_impl(context, lang):
     import shutil
     idl_name = os.path.splitext(os.path.basename(context.idl_file))[0]
+    server_timeout = 60
     if lang == "go":
         src_dir = os.path.join(os.getcwd(), "bdd", "boilerplate", idl_name, "go")
         for f in os.listdir(src_dir):
@@ -611,6 +612,7 @@ def step_impl(context, lang):
         t = threading.Thread(target=run_server_logging, args=(context.server_process, "RUST-BOILERPLATE"))
         t.daemon = True
         t.start()
+        server_timeout = 180
     elif lang == "ts":
         src_dir = os.path.join(os.getcwd(), "bdd", "boilerplate", idl_name, "ts")
         shutil.copy(os.path.join(src_dir, "server.ts"), context.lang_dir)
@@ -634,7 +636,7 @@ def step_impl(context, lang):
         t = threading.Thread(target=run_server_logging, args=(context.server_process, "TS-BOILERPLATE"))
         t.daemon = True
         t.start()
-    wait_for_server(context)
+    wait_for_server(context, timeout=server_timeout)
 
 @then('I can run hurl tests against the server')
 def step_impl(context):
