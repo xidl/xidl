@@ -16,7 +16,7 @@ jobs:
       matrix:
         include:
           - shard: jsonrpc-and-rest-core
-            port-base: 21000
+            port-base: 12000
             features: >-
               bdd/features/jsonrpc.feature
               bdd/features/rest.feature:6
@@ -24,13 +24,13 @@ jobs:
               bdd/features/rest.feature:33
               bdd/features/rest.feature:46
           - shard: rest-media-and-any
-            port-base: 22000
+            port-base: 13000
             features: >-
               bdd/features/rest.feature:59
               bdd/features/rest.feature:72
               bdd/features/rest.feature:78
           - shard: rest-boilerplate-a
-            port-base: 23000
+            port-base: 14000
             features: >-
               bdd/features/rest.feature:101
               bdd/features/rest.feature:102
@@ -38,7 +38,7 @@ jobs:
               bdd/features/rest.feature:104
               bdd/features/rest.feature:105
           - shard: rest-boilerplate-b
-            port-base: 24000
+            port-base: 15000
             features: >-
               bdd/features/rest.feature:106
               bdd/features/rest.feature:107
@@ -46,7 +46,7 @@ jobs:
               bdd/features/rest.feature:109
               bdd/features/rest.feature:110
           - shard: rest-boilerplate-c
-            port-base: 25000
+            port-base: 16000
             features: >-
               bdd/features/rest.feature:111
               bdd/features/rest.feature:112
@@ -54,7 +54,7 @@ jobs:
               bdd/features/rest.feature:114
               bdd/features/rest.feature:115
           - shard: rest-errors
-            port-base: 26000
+            port-base: 17000
             features: >-
               bdd/features/rest.feature:117
               bdd/features/rest.feature:130
@@ -64,7 +64,7 @@ jobs:
               bdd/features/rest.feature:168
               bdd/features/rest.feature:184
           - shard: rest-serialization
-            port-base: 27000
+            port-base: 18000
             features: bdd/features/rest.feature:198
     steps:
       - name: Checkout
