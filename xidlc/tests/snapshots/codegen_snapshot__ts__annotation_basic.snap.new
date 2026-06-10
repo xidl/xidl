@@ -1,5 +1,6 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
+assertion_line: 105
 expression: output
 ---
 ===============

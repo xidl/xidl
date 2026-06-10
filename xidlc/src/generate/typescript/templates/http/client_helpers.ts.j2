@@ -1,4 +1,4 @@
-import { serialize, deserialize } from "@xidl/xidl-typescript-codec";
+import { serialize, deserialize } from "xidl-typescript-codec";
 import { z } from "zod";
 
 export type FetchLike = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
