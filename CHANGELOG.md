@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.78.1](https://github.com/xidl/xidl/compare/v0.78.0...v0.78.1) (2026-06-10)
+
+
+### Bug Fixes
+
+* **xidl:** fix package name ([a406176](https://github.com/xidl/xidl/commit/a4061764baee5212eba56b0117e1472998d666af))
+
 ## [0.78.0](https://github.com/xidl/xidl/compare/v0.77.0...v0.78.0) (2026-06-09)
 
 
