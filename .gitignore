@@ -7,5 +7,6 @@ website/dist
 website/.astro
 website/.netlify
 node_modules
+typescript/xidl-typescript-codec/dist/
 /bdd/gen/
 /bdd/.temp/
