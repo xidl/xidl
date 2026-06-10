@@ -9,7 +9,7 @@
     "typescript": "^5.0.0"
   },
   "main": "dist/index.js",
-  "name": "@xidl/xidl-typescript-codec",
+  "name": "xidl-typescript-codec",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
