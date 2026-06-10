@@ -16,4 +16,7 @@ jobs:
       - uses: actions/checkout@v6
       - name: Publish package
         working-directory: typescript/xidl-typescript-codec/
-        run: npm publish --registry=https://registry.npmjs.org/ --access public
+        run: |
+          cp ../../README.md .
+          cp ../../LICENSE .
+          npm publish --registry=https://registry.npmjs.org/ --access public

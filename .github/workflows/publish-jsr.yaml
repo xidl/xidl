@@ -16,4 +16,7 @@ jobs:
       - uses: actions/checkout@v6
       - name: Publish package
         working-directory: typescript/xidl-typescript-codec/
-        run: npx jsr publish
+        run: |
+          cp ../../README.md .
+          cp ../../LICENSE .
+          npx jsr publish --allow-dirty
