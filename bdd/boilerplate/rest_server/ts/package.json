@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@xidl/xidl-typescript-codec": "file:{{TS_XIDL_TYPESCRIPT_CODEC_PATH}}",
+    "xidl-typescript-codec": "file:{{TS_XIDL_TYPESCRIPT_CODEC_PATH}}",
     "zod": "^3.23.0"
   },
   "devDependencies": {

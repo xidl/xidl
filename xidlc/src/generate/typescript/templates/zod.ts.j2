@@ -3,7 +3,7 @@
 
 {% endif %}{% filter tsfmt %}
 import { z } from "zod";
-import { xjson } from "@xidl/xidl-typescript-codec";
+import { xjson } from "xidl-typescript-codec";
 {% for block in blocks %}
     {{ block }}
 {% endfor %}

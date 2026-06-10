@@ -3,7 +3,7 @@
 
 {% endif %}{% filter tsfmt %}
 import { z } from "zod";
-import { xjson } from "@xidl/xidl-typescript-codec";
+import { xjson } from "xidl-typescript-codec";
 {% if imports | length > 0 %}
     import * as models from "./{{ file_stem }}.zod";
     export { models };
