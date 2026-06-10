@@ -2,5 +2,5 @@
   "exports": "./src/index.ts",
   "license": "Apache-2.0",
   "name": "@xidl/xidl-typescript-codec",
-  "version": "0.78.0"
+  "version": "0.78.1"
 }
