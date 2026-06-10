@@ -1,0 +1,19 @@
+name: publish-jsr
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  publish-jsr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+      - name: Publish package
+        working-directory: typescript/xidl-typescript-codec/
+        run: npx jsr publish

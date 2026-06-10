@@ -115,6 +115,11 @@
           "jsonpath": "$.version",
           "path": "typescript/xidl-typescript-codec/package.json",
           "type": "json"
+        },
+        {
+          "jsonpath": "$.version",
+          "path": "typescript/xidl-typescript-codec/jsr.json",
+          "type": "json"
         }
       ],
       "release-type": "simple"
