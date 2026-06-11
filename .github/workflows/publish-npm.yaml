@@ -14,6 +14,23 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v6
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: "pnpm"
+          cache-dependency-path: typescript/xidl-typescript-codec/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: typescript/xidl-typescript-codec/
+
       - name: Publish package
         working-directory: typescript/xidl-typescript-codec/
         run: |
