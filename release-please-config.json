@@ -5,6 +5,7 @@
   "include-v-in-tag": true,
   "packages": {
     ".": {
+      "component": "xidl",
       "extra-files": [
         {
           "jsonpath": "$.dependencies.xidlc.version",
@@ -53,11 +54,6 @@
         },
         {
           "jsonpath": "$.package[?(@.name.value=='xidl-build')].version",
-          "path": "Cargo.lock",
-          "type": "toml"
-        },
-        {
-          "jsonpath": "$.package[?(@.name.value=='xidlc-examples')].version",
           "path": "Cargo.lock",
           "type": "toml"
         },
@@ -142,5 +138,17 @@
       "release-type": "simple",
       "tag-separator": "/"
     }
-  }
+  },
+  "plugins": [
+    {
+      "type": "linked-versions",
+      "groupName": "xidl",
+      "components": [
+        "xidl",
+        "golang/xidl-go",
+        "golang/xidl-go-codec",
+        "golang/xidl-go-rest"
+      ]
+    }
+  ]
 }
