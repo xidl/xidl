@@ -6,14 +6,14 @@ from dataclasses import dataclass
 from xidl.django import DjangoAdapter
 from xidl.fastapi import FastAPIAdapter
 from xidl.http import encode_json_response, register_routes
-from xidlc_examples.http_security.http_security_http import (
+from tests.generated.http_security.http_security_http import (
     HttpSecurityServiceGetUserResponse,
     HttpSecurityServiceHealthResponse,
     HttpSecurityServiceSearchUserResponse,
     HttpSecurityServiceService,
     http_security_service_routes,
 )
-from xidlc_examples.http_stream.http_stream_http import (
+from tests.generated.http_stream.http_stream_http import (
     HttpStreamApiService,
     HttpStreamApiUploadAssetResponse,
     ServerStreamResponse,

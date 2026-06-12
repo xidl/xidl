@@ -562,6 +562,73 @@ def step_impl(context, status, expected_msg, method, path):
     assert "msg" in data, f"Missing 'msg' in error response: {data}"
     assert expected_msg.lower() in data["msg"].lower(), f"Expected message containing '{expected_msg}', got '{data['msg']}'"
 
+@then('the client can receive {count:d} alerts for "{district}" with basic auth')
+def step_impl(context, count, district):
+    url = f"http://127.0.0.1:{context.port}/alerts/{district}"
+    resp = requests.get(url, auth=("user", "pass"), stream=True, timeout=10)
+    assert resp.status_code == 200, f"Got {resp.status_code}: {resp.text}"
+    received = 0
+    for line in resp.iter_lines():
+        if line:
+            raw = line.decode()
+            if raw.startswith('data:'):
+                val = raw[5:].strip()
+                if val.startswith('"') and val.endswith('"'): val = val[1:-1]
+                assert district in val
+                received += 1
+                if received == count: break
+    assert received == count
+
+@then('the client can upload {count:d} chunks for asset "{asset_id}" with bearer auth and get result containing "{expected}"')
+def step_impl(context, count, asset_id, expected):
+    import base64
+    url = f"http://127.0.0.1:{context.port}/assets"
+    def gen():
+        for i in range(count):
+            # NDJSON with xidl StreamFrame
+            chunk_b64 = base64.b64encode(b"data").decode()
+            yield (json.dumps({"t": "next", "data": {"asset_id": asset_id, "chunk": chunk_b64}}) + "\n").encode()
+        yield (json.dumps({"t": "complete"}) + "\n").encode()
+
+    headers = {"Authorization": "Bearer token-1", "Content-Type": "application/x-ndjson"}
+    resp = requests.post(url, data=gen(), headers=headers, timeout=10)
+    assert resp.status_code == 200, f"Got {resp.status_code}: {resp.text}"
+    assert expected in resp.text
+
+@then('the client can get a msgpack user with id "{user_id}" and see score {score:d}')
+def step_impl(context, user_id, score):
+    import msgpack
+    url = f"http://127.0.0.1:{context.port}/v1/msgpack/users/{user_id}"
+    resp = requests.get(url, headers={"Accept": "application/msgpack"}, timeout=10)
+    assert resp.status_code == 200, f"Got {resp.status_code}: {resp.text}"
+    data = msgpack.unpackb(resp.content, raw=False)
+    # Go uses Uppercase by default if not tagged, but xidl should tag them.
+    # For now, we support both to be robust.
+    res_val = data.get("return") or data.get("Return")
+    score_val = data.get("score") or data.get("Score")
+    assert res_val == f"user:{user_id}"
+    assert score_val == score
+
+@then('the response header "{header}" should be "{value}" when requesting {method} "{path}" with headers')
+def step_impl(context, header, value, method, path):
+    url = f"http://127.0.0.1:{context.port}{path}"
+    headers = {}
+    if context.table:
+        for row in context.table:
+            headers[row['name']] = row['value']
+    resp = requests.request(method, url, headers=headers, timeout=10)
+    assert resp.headers.get(header) == value, f"Expected {header}: {value}, got {resp.headers.get(header)}"
+
+@then('the response header "{header}" should not be present when requesting {method} "{path}" with headers')
+def step_impl(context, header, method, path):
+    url = f"http://127.0.0.1:{context.port}{path}"
+    headers = {}
+    if context.table:
+        for row in context.table:
+            headers[row['name']] = row['value']
+    resp = requests.request(method, url, headers=headers, timeout=10)
+    assert header not in resp.headers, f"Expected header {header} to be absent, but got {resp.headers.get(header)}"
+
 @when('the client requests GET "{path}"')
 def step_impl(context, path):
     url = f"http://127.0.0.1:{context.port}{path}"

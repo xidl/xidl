@@ -1,0 +1,11 @@
+@cors("*")
+interface CorsAny {
+    @get(path = "/any")
+    string hello();
+};
+
+interface CorsSpecific {
+    @cors("http://trust.me")
+    @get(path = "/trusted")
+    string trusted();
+};
