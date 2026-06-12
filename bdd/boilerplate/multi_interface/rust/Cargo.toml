@@ -1,0 +1,13 @@
+[package]
+name = "test-rust-jsonrpc"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+xidl-jsonrpc = { path = "{{RUST_XIDL_JSONRPC_PATH}}", features = ["transport-tcp"] }
+tokio = { version = "1", features = ["full"] }
+async-trait = "0.1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
