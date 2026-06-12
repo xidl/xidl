@@ -1,3 +1,6 @@
 {
-  ".": "0.78.1"
+  ".": "0.78.1",
+  "golang/xidl-go": "0.78.1",
+  "golang/xidl-go-codec": "0.78.1",
+  "golang/xidl-go-rest": "0.78.1"
 }
