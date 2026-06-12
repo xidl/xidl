@@ -309,7 +309,7 @@ def run_generated_server_using_boilerplate(context, lang):
         shutil.copy(os.path.join(src_dir, "Cargo.toml"), context.lang_dir)
         os.makedirs(os.path.join(context.lang_dir, "src"), exist_ok=True)
         shutil.copy(os.path.join(src_dir, "src", "main.rs"), os.path.join(context.lang_dir, "src", "main.rs"))
-        
+
         # Replace placeholders in Cargo.toml
         cargo_toml_path = os.path.join(context.lang_dir, "Cargo.toml")
         with open(cargo_toml_path, "r") as f:
@@ -318,7 +318,7 @@ def run_generated_server_using_boilerplate(context, lang):
         content = content.replace("{{RUST_XIDL_JSONRPC_PATH}}", os.path.abspath('xidl-jsonrpc'))
         with open(cargo_toml_path, "w") as f:
             f.write(content)
-            
+
         # Replace placeholders in main.rs
         main_rs_path = os.path.join(context.lang_dir, "src", "main.rs")
         with open(main_rs_path, "r") as f:
@@ -339,7 +339,7 @@ def run_generated_server_using_boilerplate(context, lang):
         shutil.copy(os.path.join(src_dir, "server.ts"), context.lang_dir)
         shutil.copy(os.path.join(src_dir, "tsconfig.json"), context.lang_dir)
         shutil.copy(os.path.join(src_dir, "package.json"), context.lang_dir)
-        
+
         # Replace placeholders in package.json
         package_json_path = os.path.join(context.lang_dir, "package.json")
         with open(package_json_path, "r") as f:
@@ -348,7 +348,7 @@ def run_generated_server_using_boilerplate(context, lang):
         content = content.replace("{{TS_XIDL_TYPESCRIPT_CODEC_PATH}}", codec_path)
         with open(package_json_path, "w") as f:
             f.write(content)
-            
+
         # Replace placeholders in server.ts
         server_ts_path = os.path.join(context.lang_dir, "server.ts")
         with open(server_ts_path, "r") as f:
