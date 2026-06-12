@@ -135,7 +135,7 @@ class AdapterTests(unittest.IsolatedAsyncioTestCase):
             id="7",
         )
         self.assertEqual(401, response.status_code)
-        self.assertEqual("UNAUTHORIZED", response.body["code"])
+        self.assertEqual(401, response.body["code"])
         self.assertEqual("application/json", response.headers["Content-Type"])
         self.assertIn("WWW-Authenticate", response.headers)
 
@@ -209,7 +209,7 @@ class AdapterTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual(415, response.status_code)
         body = json.loads(response.body)
-        self.assertEqual("UNSUPPORTED_MEDIA_TYPE", body["code"])
+        self.assertEqual(415, body["code"])
         self.assertEqual("application/json", response.headers["Content-Type"])
 
 

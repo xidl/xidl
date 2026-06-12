@@ -73,7 +73,7 @@ func ErrorMappingMiddleware() gin.HandlerFunc {
 		status := blw.Status()
 		if status == http.StatusInternalServerError && strings.Contains(blw.body.String(), "user not found") {
 			blw.ResponseWriter.WriteHeader(http.StatusNotFound)
-			_, _ = blw.ResponseWriter.Write([]byte(`{"code":"NOT_FOUND","message":"user not found"}`))
+			_, _ = blw.ResponseWriter.Write([]byte(`{"code":404,"msg":"user not found"}`))
 		} else {
 			if status != 0 {
 				blw.ResponseWriter.WriteHeader(status)
