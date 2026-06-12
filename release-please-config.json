@@ -123,6 +123,24 @@
         }
       ],
       "release-type": "simple"
+    },
+    "golang/xidl-go": {
+      "component": "golang/xidl-go",
+      "include-component-in-tag": true,
+      "release-type": "simple",
+      "tag-separator": "/"
+    },
+    "golang/xidl-go-codec": {
+      "component": "golang/xidl-go-codec",
+      "include-component-in-tag": true,
+      "release-type": "simple",
+      "tag-separator": "/"
+    },
+    "golang/xidl-go-rest": {
+      "component": "golang/xidl-go-rest",
+      "include-component-in-tag": true,
+      "release-type": "simple",
+      "tag-separator": "/"
     }
   }
 }
