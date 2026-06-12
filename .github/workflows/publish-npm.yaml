@@ -36,4 +36,4 @@ jobs:
         run: |
           cp ../../README.md .
           cp ../../LICENSE .
-          npm publish --registry=https://registry.npmjs.org/ --access public
+          npm publish --access public --provenance
