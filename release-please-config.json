@@ -108,6 +108,11 @@
           "type": "toml"
         },
         {
+          "jsonpath": "$.package[?(@.name.value=='xidl-examples')].version",
+          "path": "Cargo.lock",
+          "type": "toml"
+        },
+        {
           "jsonpath": "$.version",
           "path": "typescript/xidl-typescript-codec/package.json",
           "type": "json"
@@ -127,6 +132,10 @@
         },
         {
           "path": "golang/xidl-go/go.mod",
+          "type": "generic"
+        },
+        {
+          "path": "golang/xidlc-examples/go.mod",
           "type": "generic"
         }
       ],

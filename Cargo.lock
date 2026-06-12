@@ -3754,7 +3754,7 @@ dependencies = [
 
 [[package]]
 name = "xidlc-examples"
-version = "0.78.1"
+version = "0.79.1"
 dependencies = [
  "anyhow",
  "async-stream",
