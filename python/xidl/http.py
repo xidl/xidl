@@ -31,7 +31,7 @@ class Response:
 @dataclass
 class HttpError(Exception):
     status_code: int
-    code: str
+    code: int
     message: str
     headers: dict[str, str] = field(default_factory=dict)
 
@@ -110,7 +110,7 @@ def register_routes(adapter: RouteAdapter, routes: Sequence[Route]) -> None:
 
 async def execute_route(route: Route, request: Request) -> RuntimeResult:
     if request.method.upper() != route.method.upper():
-        raise HttpError(405, "METHOD_NOT_ALLOWED", "method does not match route")
+        raise HttpError(405, 405, "method does not match route")
     return await route.endpoint(request)
 
 
@@ -125,7 +125,7 @@ def require_accept(request: Request, mime: str) -> None:
         return
     if mime.endswith("/json") and "application/json" in accepted_types:
         return
-    raise HttpError(406, "NOT_ACCEPTABLE", f"accept {accept!r} does not include {mime!r}")
+    raise HttpError(406, 406, f"accept {accept!r} does not include {mime!r}")
 
 
 def require_content_type(request: Request, mime: str) -> None:
@@ -133,12 +133,12 @@ def require_content_type(request: Request, mime: str) -> None:
         return
     content_type = first_header(request.headers, "content-type")
     if content_type is None:
-        raise HttpError(415, "UNSUPPORTED_MEDIA_TYPE", f"missing content type {mime!r}")
+        raise HttpError(415, 415, f"missing content type {mime!r}")
     media_type = content_type.split(";", 1)[0].strip()
     if media_type.lower() != mime.lower():
         raise HttpError(
             415,
-            "UNSUPPORTED_MEDIA_TYPE",
+            415,
             f"content type {media_type!r} does not match {mime!r}",
         )
 
@@ -180,13 +180,13 @@ def require_security(
         if requirement.kind in {"bearer", "oauth2"}:
             headers["WWW-Authenticate"] = "Bearer"
             break
-    raise HttpError(401, "UNAUTHORIZED", "missing required authentication", headers=headers)
+    raise HttpError(401, 401, "missing required authentication", headers=headers)
 
 
 def path_value(request: Request, name: str) -> str:
     value = request.path_params.get(name)
     if value is None or value == "":
-        raise HttpError(400, "INVALID_ARGUMENT", f"missing path value {name!r}")
+        raise HttpError(400, 400, f"missing path value {name!r}")
     return value
 
 
@@ -215,11 +215,11 @@ def read_scalar(
             return None
         if default_on_missing:
             return default_value(ty)
-        raise HttpError(400, "INVALID_ARGUMENT", f"missing value for {wire_name!r}")
+        raise HttpError(400, 400, f"missing value for {wire_name!r}")
     try:
         return coerce_scalar(value, ty)
     except ValueError as exc:
-        raise HttpError(400, "INVALID_ARGUMENT", str(exc)) from exc
+        raise HttpError(400, 400, str(exc)) from exc
 
 
 def read_json_body(request: Request) -> Any:
@@ -229,7 +229,7 @@ def read_json_body(request: Request) -> Any:
     try:
         return json.loads(body.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise HttpError(400, "INVALID_ARGUMENT", "invalid JSON body") from exc
+        raise HttpError(400, 400, "invalid JSON body") from exc
 
 
 def read_form_body(request: Request) -> Any:
@@ -242,7 +242,7 @@ def read_form_body(request: Request) -> Any:
         parsed = parse_qs(body.decode("utf-8"))
         return {k: v[0] for k, v in parsed.items()}
     except Exception as exc:
-        raise HttpError(400, "INVALID_ARGUMENT", "invalid form body") from exc
+        raise HttpError(400, 400, "invalid form body") from exc
 
 
 def read_plain_body(request: Request, ty: str) -> Any:
@@ -251,7 +251,7 @@ def read_plain_body(request: Request, ty: str) -> Any:
         value = body.decode("utf-8")
         return coerce_scalar(value, ty)
     except Exception as exc:
-        raise HttpError(400, "INVALID_ARGUMENT", f"invalid plain body: {exc}") from exc
+        raise HttpError(400, 400, f"invalid plain body: {exc}") from exc
 
 
 def read_json_field(
@@ -262,7 +262,7 @@ def read_json_field(
     optional: bool,
 ) -> Any:
     if not isinstance(body, dict):
-        raise HttpError(400, "INVALID_ARGUMENT", "expected JSON object body")
+        raise HttpError(400, 400, "expected JSON object body")
     if name not in body:
         if optional:
             return None
@@ -282,7 +282,7 @@ def encode_json_response(value: Any, status_code: int = 200) -> Response:
     if isinstance(value, Response):
         return ensure_response_header(value, "Content-Type", "application/json")
     if isinstance(value, ServerStreamResponse):
-        raise HttpError(500, "INTERNAL", "stream response used in unary route")
+        raise HttpError(500, 500, "stream response used in unary route")
     if value is None:
         return Response(status_code=204)
     return Response(
@@ -321,7 +321,7 @@ def encode_stream_response(
         headers = dict(value.headers)
         headers.setdefault("Content-Type", stream_content_type(codec))
         return ServerStreamResponse(items=value.items, status_code=value.status_code, headers=headers)
-    raise HttpError(500, "INTERNAL", "expected ServerStreamResponse for stream route")
+    raise HttpError(500, 500, "expected ServerStreamResponse for stream route")
 
 
 def framework_path(path: str, framework: str) -> str:
@@ -554,7 +554,7 @@ def coerce_json(value: Any, ty: str, *, optional: bool, wire_name: str) -> Any:
     if value is None:
         if optional:
             return None
-        raise HttpError(400, "INVALID_ARGUMENT", f"null is not allowed for {wire_name!r}")
+        raise HttpError(400, 400, f"null is not allowed for {wire_name!r}")
     if ty == "str":
         return str(value)
     if ty == "int":
@@ -565,11 +565,11 @@ def coerce_json(value: Any, ty: str, *, optional: bool, wire_name: str) -> Any:
         return bool(value)
     if ty.startswith("list["):
         if not isinstance(value, list):
-            raise HttpError(400, "INVALID_ARGUMENT", f"expected list for {wire_name!r}")
+            raise HttpError(400, 400, f"expected list for {wire_name!r}")
         inner = ty[5:-1]
         return [coerce_json(item, inner, optional=False, wire_name=wire_name) for item in value]
     if ty.startswith("dict["):
         if not isinstance(value, dict):
-            raise HttpError(400, "INVALID_ARGUMENT", f"expected object for {wire_name!r}")
+            raise HttpError(400, 400, f"expected object for {wire_name!r}")
         return value
     return value

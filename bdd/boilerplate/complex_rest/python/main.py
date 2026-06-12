@@ -15,7 +15,7 @@ class MyUserService(UserServiceService):
     async def get_user(self, request):
         user = self.users.get(request.id)
         if user is None:
-            raise HttpError(404, "NOT_FOUND", "user not found")
+            raise HttpError(404, 404, "user not found")
         return UserServiceGetUserResponse(value=user)
 
     async def create_user(self, request):

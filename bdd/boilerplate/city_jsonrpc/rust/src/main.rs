@@ -12,7 +12,8 @@ impl gen::SmartCityRpcApi for MySmartCity {
     async fn report_trip<'a>(&'a self, _order_id: String, _rider_id: String, _status: String) -> Result<(), xidl_jsonrpc::Error> { Ok(()) }
     async fn summarize<'a>(&'a self, _day: String) -> Result<gen::SmartCityRpcApisummarizeResult, xidl_jsonrpc::Error> { Ok(gen::SmartCityRpcApisummarizeResult { trip_count: 10, gross_revenue_cents: 1000 }) }
     async fn get_attribute_region<'a>(&'a self) -> Result<String, xidl_jsonrpc::Error> { Ok("us-east".into()) }
-    async fn get_attribute_firmware_channel<'a>(&self) -> Result<String, xidl_jsonrpc::Error> { Ok("stable".into()) }
+    async fn get_attribute_firmware_channel<'a>(&'a self) -> Result<String, xidl_jsonrpc::Error> { Ok("stable".into()) }
+    async fn set_attribute_firmware_channel<'a>(&'a self, _firmware_channel: String) -> Result<(), xidl_jsonrpc::Error> { Ok(()) }
 }
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
