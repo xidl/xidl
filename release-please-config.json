@@ -141,14 +141,14 @@
   },
   "plugins": [
     {
-      "type": "linked-versions",
-      "groupName": "xidl",
       "components": [
         "xidl",
         "golang/xidl-go",
         "golang/xidl-go-codec",
         "golang/xidl-go-rest"
-      ]
+      ],
+      "groupName": "xidl",
+      "type": "linked-versions"
     }
   ]
 }
