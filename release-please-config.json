@@ -116,6 +116,18 @@
           "jsonpath": "$.version",
           "path": "typescript/xidl-typescript-codec/jsr.json",
           "type": "json"
+        },
+        {
+          "path": "golang/xidl-go-codec/go.mod",
+          "type": "generic"
+        },
+        {
+          "path": "golang/xidl-go-rest/go.mod",
+          "type": "generic"
+        },
+        {
+          "path": "golang/xidl-go/go.mod",
+          "type": "generic"
         }
       ],
       "release-type": "simple"

@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/gin-gonic/gin v1.12.0
-	github.com/xidl/xidl/golang/xidl-go-rest v0.0.0
+	github.com/xidl/xidl/golang/xidl-go-rest v0.78.1 // x-release-please-version
 )
 
 require (
@@ -33,7 +33,7 @@ require (
 	github.com/ugorji/go/codec v1.3.1 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
-	github.com/xidl/xidl/golang/xidl-go-codec v0.0.0 // indirect
+	github.com/xidl/xidl/golang/xidl-go-codec v0.78.1 // x-release-please-version
 	go.mongodb.org/mongo-driver/v2 v2.5.0 // indirect
 	golang.org/x/arch v0.23.0 // indirect
 	golang.org/x/crypto v0.48.0 // indirect
