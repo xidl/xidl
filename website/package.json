@@ -13,7 +13,15 @@
     "@biomejs/biome": "2.4.10",
     "typescript": "^5.7.0"
   },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "onFail": "download",
+      "version": "^24.16.0"
+    }
+  },
   "name": "website",
+  "packageManager": "pnpm@11.5.0",
   "private": true,
   "scripts": {
     "astro": "astro",

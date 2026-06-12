@@ -13,6 +13,9 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
+  "repository": {
+    "url": "https://github.com/xidl/xidl"
+  },
   "scripts": {
     "build": "tsc",
     "test": "node --import tsx --test tests/**/*.test.ts"

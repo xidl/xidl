@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: latest
           cache: "pnpm"
           cache-dependency-path: typescript/xidl-typescript-codec/pnpm-lock.yaml
 
@@ -36,4 +36,4 @@ jobs:
         run: |
           cp ../../README.md .
           cp ../../LICENSE .
-          npm publish --access public --provenance
+          npm publish --registry=https://registry.npmjs.org/
