@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.79.1](https://github.com/xidl/xidl/compare/v0.79.0...v0.79.1) (2026-06-12)
+
+
+### Bug Fixes
+
+* enable subpath tags for Go modules and update internal dependencies using release-please ([4a5591b](https://github.com/xidl/xidl/commit/4a5591b1f969c5ae73bf48821d3cb2e06193c073))
+
 ## [0.79.0](https://github.com/xidl/xidl/compare/v0.78.1...v0.79.0) (2026-06-12)
 
 
