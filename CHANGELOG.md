@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.79.0](https://github.com/xidl/xidl/compare/v0.78.1...v0.79.0) (2026-06-12)
+
+
+### Features
+
+* unify golang versions in release-please and remove xidlc-examples from tracking ([d900fef](https://github.com/xidl/xidl/commit/d900fef239dd22c3ca78cee6a9121dee4bdb1200))
+
+
+### Bug Fixes
+
+* fix err code ([4c66e24](https://github.com/xidl/xidl/commit/4c66e2427e833ab1211d800242390f43ab017ac0))
+* fix golang tag ([67737bc](https://github.com/xidl/xidl/commit/67737bc8cf945f5480de3ea77ed06abf42bc649f))
+
 ## [0.78.1](https://github.com/xidl/xidl/compare/v0.78.0...v0.78.1) (2026-06-10)
 
 
