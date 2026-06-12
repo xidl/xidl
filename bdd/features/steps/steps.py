@@ -255,239 +255,36 @@ def start_python_boilerplate_server(context, idl_name, log_prefix):
 
 @then('I can run the generated {lang} server and client')
 def step_impl(context, lang):
-    module_name = get_module_name(context.lang_dir)
-    if lang == "python":
-        start_python_boilerplate_server(context, get_idl_name(context), "PYTHON")
-        wait_for_server(context)
-    elif lang == "go":
-        go_mod = f"module test\ngo 1.25\nreplace github.com/xidl/xidl/golang/xidl-go-rest => {os.path.abspath('golang/xidl-go-rest')}\nreplace github.com/xidl/xidl/golang/xidl-go => {os.path.abspath('golang/xidl-go')}\nreplace github.com/xidl/xidl/golang/xidl-go-codec => {os.path.abspath('golang/xidl-go-codec')}\nrequire github.com/xidl/xidl/golang/xidl-go-rest v0.0.0\nrequire github.com/gin-gonic/gin v1.12.0\n"
-        with open(os.path.join(context.lang_dir, "go.mod"), "w") as f: f.write(go_mod)
-        if "complex_rest" in context.idl_file:
-            server_code = f'package main\nimport ("context"; "github.com/gin-gonic/gin"; "sync"; "net/http"; "fmt"; xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest")\ntype MyUserService struct {{ users sync.Map }}\nfunc (s *MyUserService) GetUser(ctx context.Context, req *UserServiceGetUserRequest) (*UserServiceGetUserResponse, error) {{\n\tval, ok := s.users.Load(req.Id); if !ok {{ return nil, xidlgohttp.NewHttpError(http.StatusNotFound, "user not found") }}\n\treturn &UserServiceGetUserResponse{{Return: *val.(*User)}}, nil\n}}\nfunc (s *MyUserService) CreateUser(ctx context.Context, req *UserServiceCreateUserRequest) (*UserServiceCreateUserResponse, error) {{\n\ts.users.Store(req.User.Id, &req.User); return &UserServiceCreateUserResponse{{Return: req.User}}, nil\n}}\nfunc (s *MyUserService) ListUsers(ctx context.Context, req *UserServiceListUsersRequest) (*UserServiceListUsersResponse, error) {{\n\tvar users []User; s.users.Range(func(k, v interface{{}}) bool {{ users = append(users, *v.(*User)); return true }})\n\treturn &UserServiceListUsersResponse{{Return: users}}, nil\n}}\nfunc main() {{ r := gin.Default(); r.NoMethod(xidlgohttp.HandleMethodNotAllowed); svc := &MyUserService{{}}; RegisterUserServiceHandler(r, svc); http.ListenAndServe(fmt.Sprintf(":%d", {context.port}), r) }}'
-        elif "serialization" in context.idl_file:
-            server_code = f'package main\nimport ("context"; "github.com/gin-gonic/gin"; "net/http"; "fmt")\ntype MySerializationTest struct {{ }}\nfunc (s *MySerializationTest) GetString(ctx context.Context, req *SerializationTestGetStringRequest) (*SerializationTestGetStringResponse, error) {{ return &SerializationTestGetStringResponse{{Return: "hello"}}, nil }}\nfunc (s *MySerializationTest) GetInt(ctx context.Context, req *SerializationTestGetIntRequest) (*SerializationTestGetIntResponse, error) {{ return &SerializationTestGetIntResponse{{Return: 42}}, nil }}\nfunc (s *MySerializationTest) GetBool(ctx context.Context, req *SerializationTestGetBoolRequest) (*SerializationTestGetBoolResponse, error) {{ return &SerializationTestGetBoolResponse{{Return: true}}, nil }}\nfunc (s *MySerializationTest) GetStruct(ctx context.Context, req *SerializationTestGetStructRequest) (*SerializationTestGetStructResponse, error) {{ return &SerializationTestGetStructResponse{{Return: Item{{Name: "world"}}}}, nil }}\nfunc (s *MySerializationTest) EchoString(ctx context.Context, req *SerializationTestEchoStringRequest) (*SerializationTestEchoStringResponse, error) {{ return &SerializationTestEchoStringResponse{{Return: req.Value}}, nil }}\nfunc (s *MySerializationTest) EchoStruct(ctx context.Context, req *SerializationTestEchoStructRequest) (*SerializationTestEchoStructResponse, error) {{ return &SerializationTestEchoStructResponse{{Return: req.Value}}, nil }}\nfunc main() {{ r := gin.Default(); svc := &MySerializationTest{{}}; RegisterSerializationTestHandler(r, svc); http.ListenAndServe(fmt.Sprintf(":%d", {context.port}), r) }}'
-        elif "all_scenarios" in context.idl_file:
-            server_code = f'''package main
-import ("context"; "github.com/gin-gonic/gin"; "net/http"; "fmt"; "sync")
-type MyAllScenarios struct {{
-    status Status
-    sync.Mutex
-}}
-func (s *MyAllScenarios) GetItem(ctx context.Context, req *AllScenariosServiceGetItemRequest) (*AllScenariosServiceGetItemResponse, error) {{ return &AllScenariosServiceGetItemResponse{{Return: fmt.Sprintf("Item %d with %s and %s", req.Id, req.Filter, req.TraceId)}}, nil }}
-func (s *MyAllScenarios) CreateItem(ctx context.Context, req *AllScenariosServiceCreateItemRequest) (*AllScenariosServiceCreateItemResponse, error) {{ return &AllScenariosServiceCreateItemResponse{{Return: 42}}, nil }}
-func (s *MyAllScenarios) UpdateItem(ctx context.Context, req *AllScenariosServiceUpdateItemRequest) (*AllScenariosServiceUpdateItemResponse, error) {{ return &AllScenariosServiceUpdateItemResponse{{}}, nil }}
-func (s *MyAllScenarios) DeleteItem(ctx context.Context, req *AllScenariosServiceDeleteItemRequest) (*AllScenariosServiceDeleteItemResponse, error) {{ return &AllScenariosServiceDeleteItemResponse{{}}, nil }}
-func (s *MyAllScenarios) GetAttributeSystemStatus(ctx context.Context, req *AllScenariosServiceGetAttributeSystemStatusRequest) (*AllScenariosServiceGetAttributeSystemStatusResponse, error) {{
-    s.Lock(); defer s.Unlock(); return &AllScenariosServiceGetAttributeSystemStatusResponse{{Return: s.status}}, nil
-}}
-func (s *MyAllScenarios) SetAttributeSystemStatus(ctx context.Context, req *AllScenariosServiceSetAttributeSystemStatusRequest) (*AllScenariosServiceSetAttributeSystemStatusResponse, error) {{
-    s.Lock(); defer s.Unlock(); s.status = req.SystemStatus; return &AllScenariosServiceSetAttributeSystemStatusResponse{{}}, nil
-}}
-func (s *MyAllScenarios) GetAttributeVersion(ctx context.Context, req *AllScenariosServiceGetAttributeVersionRequest) (*AllScenariosServiceGetAttributeVersionResponse, error) {{
-    return &AllScenariosServiceGetAttributeVersionResponse{{Return: "1.0.0"}}, nil
-}}
-func (s *MyAllScenarios) UploadForm(ctx context.Context, req *AllScenariosServiceUploadFormRequest) (*AllScenariosServiceUploadFormResponse, error) {{ return &AllScenariosServiceUploadFormResponse{{}}, nil }}
-func (s *MyAllScenarios) SecureData(ctx context.Context, req *AllScenariosServiceSecureDataRequest) (*AllScenariosServiceSecureDataResponse, error) {{ return &AllScenariosServiceSecureDataResponse{{Return: "Secret"}}, nil }}
-func main() {{ r := gin.Default(); svc := &MyAllScenarios{{status: StatusActive}}; RegisterAllScenariosServiceHandler(r, svc); http.ListenAndServe(fmt.Sprintf(":%d", {context.port}), r) }}'''
-        elif "streaming" in context.idl_file:
-            server_code = f'package main\nimport ("context"; "github.com/gin-gonic/gin"; "net/http"; "fmt"; xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest")\ntype MyStream struct{{}}\nfunc (s *MyStream) Ticks(ctx context.Context, req *StreamingServiceTicksRequest, stream xidlgohttp.ServerStreamWriter[int32]) error {{\n\tfor i := int32(0); i < req.Count; i++ {{\n\t\tif err := stream.Write(i); err != nil {{\n\t\t\treturn err\n\t\t}}\n\t}}\n\treturn nil\n}}\nfunc main() {{ r := gin.Default(); svc := &MyStream{{}}; RegisterStreamingServiceHandler(r, svc); http.ListenAndServe(fmt.Sprintf(":%d", {context.port}), r) }}'
-        elif "media_types" in context.idl_file:
-            server_code = f'package main\nimport ("context"; "github.com/gin-gonic/gin"; "net/http"; "fmt")\ntype MyForm struct {{ }}\nfunc (s *MyForm) Submit(ctx context.Context, req *FormServiceSubmitRequest) (*FormServiceSubmitResponse, error) {{ return &FormServiceSubmitResponse{{Return: fmt.Sprintf("Received %s age %d", req.Name, req.Age)}}, nil }}\nfunc main() {{ r := gin.Default(); svc := &MyForm{{}}; RegisterFormServiceHandler(r, svc); http.ListenAndServe(fmt.Sprintf(":%d", {context.port}), r) }}'
-        elif "issue_171" in context.idl_file:
-            server_code = f'package main\nimport ("context"; "github.com/gin-gonic/gin"; "net/http"; "fmt"; "errors")\ntype MyRepro struct{{}}\nfunc (s *MyRepro) FlattenAny(ctx context.Context, req *Issue171ReproServiceFlattenAnyRequest) (*Issue171ReproServiceFlattenAnyResponse, error) {{\n\tm, ok := req.Payload.(map[string]any)\n\tif !ok || m["foo"] != "bar" {{\n\t\treturn nil, errors.New("invalid payload")\n\t}}\n\treturn &Issue171ReproServiceFlattenAnyResponse{{}}, nil\n}}\nfunc (s *MyRepro) FlattenStructWithAny(ctx context.Context, req *Issue171ReproServiceFlattenStructWithAnyRequest) (*Issue171ReproServiceFlattenStructWithAnyResponse, error) {{\n\tm, ok := req.Payload.Field.(map[string]any)\n\tif !ok || m["foo"] != "bar" {{\n\t\treturn nil, errors.New("invalid payload")\n\t}}\n\treturn &Issue171ReproServiceFlattenStructWithAnyResponse{{}}, nil\n}}\nfunc main() {{ r := gin.Default(); svc := &MyRepro{{}}; RegisterIssue171ReproServiceHandler(r, svc); http.ListenAndServe(fmt.Sprintf(":%d", {context.port}), r) }}'
-        else:
-            server_code = f'package main\nimport ("context"; "github.com/gin-gonic/gin"; "net/http"; "fmt")\ntype MyHelloWorld struct{{}}\nfunc (s *MyHelloWorld) Hello(ctx context.Context, req *HelloWorldHelloRequest) (*HelloWorldHelloResponse, error) {{ return &HelloWorldHelloResponse{{Return: "Hello BDD"}}, nil }}\nfunc (s *MyHelloWorld) Echo(ctx context.Context, req *HelloWorldEchoRequest) (*HelloWorldEchoResponse, error) {{ return &HelloWorldEchoResponse{{Return: req.Msg}}, nil }}\nfunc main() {{ r := gin.Default(); svc := &MyHelloWorld{{}}; RegisterHelloWorldHandler(r, svc); http.ListenAndServe(fmt.Sprintf(":%d", {context.port}), r) }}'
-        with open(os.path.join(context.lang_dir, "server.go"), "w") as f: f.write(server_code)
-        for f in os.listdir(context.lang_dir):
-            if f.endswith(".go") and f != "server.go":
-                path = os.path.join(context.lang_dir, f); content = open(path).read()
-                content = re.sub(r"package \w+", "package main", content, count=1)
-                with open(path, "w") as fw: fw.write(content)
-        subprocess.run(["go", "mod", "tidy"], cwd=context.lang_dir, check=True)
-        context.server_process = start_context_server(context, ["go", "run", "."], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        t = threading.Thread(target=run_server_logging, args=(context.server_process, "GO")); t.daemon = True; t.start()
-        wait_for_server(context)
-    elif lang == "ts":
-        with open(os.path.join(context.lang_dir, "package.json"), "w") as f:
-            f.write('{"name": "test-ts-gen", "version": "1.0.0", "type": "module"}')
-        with open(os.path.join(context.lang_dir, "tsconfig.json"), "w") as f:
-            f.write('{"compilerOptions": {"target": "ESNext", "module": "ESNext", "moduleResolution": "node", "ignoreDeprecations": "6.0", "skipLibCheck": true, "strict": true}}')
-
-        codec_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../typescript/xidl-typescript-codec"))
-        subprocess.run(["npm", "install", "zod@^3.23.0", "typescript", "tsx", codec_path], cwd=context.lang_dir, check=True, capture_output=True)
-
-        if "complex_rest" in context.idl_file:
-            server_code = f"""
-import {{ createServer }} from 'node:http';
-import {{ createUserServiceHandler, type UserService, XidlServerError }} from './{module_name}.server.js';
-class MyUserService implements UserService {{
-  private users = new Map<number, any>();
-  async get_user(req: {{ id: number }}): Promise<any> {{
-    const user = this.users.get(req.id);
-    if (!user) throw new XidlServerError("user not found", 404);
-    return user;
-  }}
-  async create_user(req: {{ user: any }}): Promise<any> {{ this.users.set(req.user.id, req.user); return req.user; }}
-  async list_users(req: {{ filter: string }}): Promise<any[]> {{ return Array.from(this.users.values()); }}
-}}
-const handler = createUserServiceHandler(new MyUserService());
-"""
-        elif "serialization" in context.idl_file:
-            server_code = f"""
-import {{ createServer }} from 'node:http';
-import {{ createSerializationTestHandler, type SerializationTest }} from './{module_name}.server.js';
-class MySerializationTest implements SerializationTest {{
-  async get_string(): Promise<string> {{ return "hello"; }}
-  async get_int(): Promise<number> {{ return 42; }}
-  async get_bool(): Promise<boolean> {{ return true; }}
-  async get_struct(): Promise<any> {{ return {{ name: "world" }}; }}
-  async echo_string(req: {{ value: string }}): Promise<string> {{ return req.value; }}
-  async echo_struct(req: {{ value: any }}): Promise<any> {{ return req.value; }}
-}}
-const handler = createSerializationTestHandler(new MySerializationTest());
-"""
-        elif "all_scenarios" in context.idl_file:
-            server_code = f"""
-import {{ createServer }} from 'node:http';
-import {{ createAllScenariosServiceHandler, type AllScenariosService }} from './{module_name}.server.js';
-class MyAllScenarios implements AllScenariosService {{
-  private status = "ACTIVE";
-  async get_item(req: {{ id: number, filter: string, trace_id: string }}): Promise<string> {{ return `Item ${{req.id}} with ${{req.filter}} and ${{req.trace_id}}`; }}
-  async create_item(req: {{ name: string, payload: any }}): Promise<number> {{ return 42; }}
-  async update_item(req: {{ id: number, metadata: any[] }}): Promise<void> {{}}
-  async delete_item(req: {{ id: number }}): Promise<void> {{}}
-  async upload_form(req: {{ key: string, value: string }}): Promise<void> {{}}
-  async secure_data(req: {{ auth: any }}): Promise<string> {{ return "Secret"; }}
-  async get_attribute_system_status(): Promise<string> {{ return this.status; }}
-  async set_attribute_system_status(req: {{ system_status: string }}): Promise<void> {{ this.status = req.system_status; }}
-  async get_attribute_version(): Promise<string> {{ return "1.0.0"; }}
-}}
-const handler = createAllScenariosServiceHandler(new MyAllScenarios());
-"""
-        elif "streaming" in context.idl_file:
-            server_code = f"""
-import {{ createServer }} from 'node:http';
-import {{ createStreamingServiceHandler, type StreamingService }} from './{module_name}.server.js';
-class MyStreaming implements StreamingService {{
-  async *ticks(req: {{ count: number }}): AsyncIterable<number> {{
-    for (let i = 0; i < req.count; i++) {{ yield i; }}
-  }}
-}}
-const handler = createStreamingServiceHandler(new MyStreaming());
-"""
-        elif "media_types" in context.idl_file:
-            server_code = f"""
-import {{ createServer }} from 'node:http';
-import {{ createFormServiceHandler, type FormService }} from './{module_name}.server.js';
-class MyForm implements FormService {{
-  async submit(req: {{ name: string, age: number }}): Promise<string> {{ return `Received ${{req.name}} age ${{req.age}}`; }}
-}}
-const handler = createFormServiceHandler(new MyForm());
-"""
-        elif "issue_171" in context.idl_file:
-            server_code = f"""
-import {{ createServer }} from 'node:http';
-import {{ issue_171 }} from './{module_name}.server.js';
-class MyRepro implements issue_171.ReproService {{
-  async flattenAny(req: {{ payload: any }}): Promise<void> {{ if (!req.payload || req.payload.foo !== "bar") throw new Error("invalid"); }}
-  async flattenStructWithAny(req: {{ payload: {{ field: any }} }}): Promise<void> {{ if (!req.payload?.field || req.payload.field.foo !== "bar") throw new Error("invalid"); }}
-}}
-const handler = issue_171.createReproServiceHandler(new MyRepro());
-"""
-        else:
-            server_code = f"// TODO: implement for other IDLs"
-
-        server_code += f"""
-const server = createServer(async (req, res) => {{
-  try {{
-    const protocol = (req.socket as any).encrypted ? 'https' : 'http';
-    const fullUrl = `${{protocol}}://${{req.headers.host}}${{req.url}}`;
-    const request = new Request(fullUrl, {{
-      method: req.method,
-      headers: req.headers as any,
-      body: req.method !== 'GET' && req.method !== 'HEAD' ? (req as any) : undefined,
-      // @ts-ignore
-      duplex: 'half'
-    }});
-    const response = await handler(request);
-    console.log(`TS LOG: ${{req.method}} ${{req.url}} -> ${{response.status}}`);
-    res.statusCode = response.status;
-    for (const [key, value] of response.headers) {{ res.setHeader(key, value); }}
-    if (response.body) {{ for await (const chunk of response.body as any) {{ res.write(chunk); }} }}
-    res.end();
-  }} catch (err) {{
-    console.error('TS LOG: Error', err);
-    res.statusCode = 500; res.end(String(err));
-  }}
-}});
-server.listen({context.port}, '127.0.0.1', () => {{
-    console.log(`TS LOG: Server listening on {context.port}`);
-}});
-"""
-
-        with open(os.path.join(context.lang_dir, "server.ts"), "w") as f: f.write(server_code)
-        env = os.environ.copy(); env["PORT"] = str(context.port)
-        context.server_process = start_context_server(context, ["npx", "tsx", "server.ts"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
-        t = threading.Thread(target=run_server_logging, args=(context.server_process, "TS")); t.daemon = True; t.start()
-        wait_for_server(context)
-    elif lang == "rust":
-        root_dir = os.path.abspath(".")
-        if context.protocol == "rest":
-            cargo_toml = f'[package]\nname = "test-rust-rest"\nversion = "0.1.0"\nedition = "2021"\n[workspace]\n[dependencies]\nxidl-rust-axum = {{ path = "{os.path.join(root_dir, "xidl-rust-axum")}", features = ["stream"] }}\ntokio = {{ version = "1", features = ["full"] }}\nasync-trait = "0.1"\nserde = {{ version = "1", features = ["derive"] }}\nserde_json = "1"\naxum = "0.8"\nfutures-util = "0.3"\n'
-            if "complex_rest" in context.idl_file:
-                server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MyUserService {{ users: std::sync::Arc<std::sync::Mutex<std::collections::HashMap<u32, gen::User>>>, }}\n#[async_trait]\nimpl gen::UserService for MyUserService {{\n    async fn get_user<\'a>(&\'a self, id: u32) -> Result<gen::User, xidl_rust_axum::Error> {{\n        let users = self.users.lock().unwrap(); users.get(&id).cloned().ok_or(xidl_rust_axum::Error::not_found())\n    }}\n    async fn create_user<\'a>(&\'a self, user: gen::User) -> Result<gen::User, xidl_rust_axum::Error> {{\n        let mut users = self.users.lock().unwrap(); users.insert(user.id, user.clone()); Ok(user)\n    }}\n    async fn list_users<\'a>(&\'a self, _filter: String) -> Result<Vec<gen::User>, xidl_rust_axum::Error> {{\n        let users = self.users.lock().unwrap(); Ok(users.values().cloned().collect())\n    }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let svc = gen::UserServiceServer::new(MyUserService {{ users: std::sync::Arc::new(std::sync::Mutex::new(std::collections::HashMap::new())), }});\n    xidl_rust_axum::Server::builder().with_service(svc).serve("127.0.0.1:{context.port}").await?; Ok(())\n}}'
-            elif "serialization" in context.idl_file:
-                server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MySerializationTest;\n#[async_trait]\nimpl gen::SerializationTest for MySerializationTest {{\n    async fn get_string<\'a>(&\'a self) -> Result<String, xidl_rust_axum::Error> {{ Ok("hello".to_string()) }}\n    async fn get_int<\'a>(&\'a self) -> Result<i32, xidl_rust_axum::Error> {{ Ok(42) }}\n    async fn get_bool<\'a>(&\'a self) -> Result<bool, xidl_rust_axum::Error> {{ Ok(true) }}\n    async fn get_struct<\'a>(&\'a self) -> Result<gen::Item, xidl_rust_axum::Error> {{ Ok(gen::Item {{ name: "world".to_string() }}) }}\n    async fn echo_string<\'a>(&\'a self, value: String) -> Result<String, xidl_rust_axum::Error> {{ Ok(value) }}\n    async fn echo_struct<\'a>(&\'a self, value: gen::Item) -> Result<gen::Item, xidl_rust_axum::Error> {{ Ok(value) }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let svc = gen::SerializationTestServer::new(MySerializationTest);\n    xidl_rust_axum::Server::builder().with_service(svc).serve("127.0.0.1:{context.port}").await?; Ok(())\n}}'
-            elif "all_scenarios" in context.idl_file:
-                server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MyAllScenarios {{ status: std::sync::Mutex<gen::Status> }}\n#[async_trait]\nimpl gen::AllScenariosService for MyAllScenarios {{\n    async fn get_item<\'a>(&\'a self, id: u32, filter: String, trace_id: String) -> Result<String, xidl_rust_axum::Error> {{ Ok(format!("Item {{id}} with {{filter}} and {{trace_id}}")) }}\n    async fn create_item<\'a>(&\'a self, _name: String, _payload: gen::Payload) -> Result<u32, xidl_rust_axum::Error> {{ Ok(42) }}\n    async fn update_item<\'a>(&\'a self, _id: u32, _metadata: Vec<gen::Metadata>) -> Result<(), xidl_rust_axum::Error> {{ Ok(()) }}\n    async fn delete_item<\'a>(&\'a self, _id: u32) -> Result<(), xidl_rust_axum::Error> {{ Ok(()) }}\n    async fn get_attribute_system_status(&self) -> Result<gen::Status, xidl_rust_axum::Error> {{ Ok(*self.status.lock().unwrap()) }}\n    async fn set_attribute_system_status(&self, value: gen::Status) -> Result<(), xidl_rust_axum::Error> {{ *self.status.lock().unwrap() = value; Ok(()) }}\n    async fn get_attribute_version(&self) -> Result<String, xidl_rust_axum::Error> {{ Ok("1.0.0".into()) }}\n    async fn upload_form<\'a>(&\'a self, _key: String, _value: String) -> Result<(), xidl_rust_axum::Error> {{ Ok(()) }}\n    async fn secure_data<\'a>(&\'a self, _auth: xidl_rust_axum::auth::bearer::BearerAuth) -> Result<String, xidl_rust_axum::Error> {{ Ok("Secret".into()) }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let svc = gen::AllScenariosServiceServer::new(MyAllScenarios {{ status: std::sync::Mutex::new(gen::Status::ACTIVE) }});\n    xidl_rust_axum::Server::builder().with_service(svc).serve("127.0.0.1:{context.port}").await?; Ok(())\n}}'
-            elif "streaming" in context.idl_file:
-                server_code = f'use async_trait::async_trait;\nuse futures_util::stream::StreamExt;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MyStream;\n#[async_trait]\nimpl gen::StreamingService for MyStream {{\n    async fn ticks<\'a>(&\'a self, req: xidl_rust_axum::Request<gen::StreamingServiceTicksRequest>) -> Result<xidl_rust_axum::stream::SseStream<i32>, xidl_rust_axum::Error> {{\n        let count = req.data.count;\n        let s = futures_util::stream::iter(0..count).map(|i| Ok::<_, xidl_rust_axum::Error>(i));\n        Ok(xidl_rust_axum::stream::boxed_sse(s))\n    }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let svc = gen::StreamingServiceServer::new(MyStream);\n    xidl_rust_axum::Server::builder().with_service(svc).serve("127.0.0.1:{context.port}").await?; Ok(())\n}}'
-            elif "media_types" in context.idl_file:
-                server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MyForm;\n#[async_trait]\nimpl gen::FormService for MyForm {{\n    async fn submit<\'a>(&\'a self, name: String, age: i32) -> Result<String, xidl_rust_axum::Error> {{ Ok(format!("Received {{name}} age {{age}}")) }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let svc = gen::FormServiceServer::new(MyForm);\n    xidl_rust_axum::Server::builder().with_service(svc).serve("127.0.0.1:{context.port}").await?; Ok(())\n}}'
-            elif "issue_171" in context.idl_file:
-                server_code = f'use async_trait::async_trait;\npub mod issue_171 {{\n    pub use crate::gen::issue_171::*;\n}}\nmod gen {{\n    include!("../{module_name}.rs");\n}}\nstruct MyRepro;\n#[async_trait]\nimpl issue_171::ReproService for MyRepro {{\n    async fn flattenAny<\'a>(&\'a self, payload: xidl_rust_axum::serde_json::Value) -> Result<(), xidl_rust_axum::Error> {{\n        if payload.get("foo").and_then(|v| v.as_str()) == Some("bar") {{\n            Ok(())\n        }} else {{\n            Err(xidl_rust_axum::Error::bad_request())\n        }}\n    }}\n    async fn flattenStructWithAny<\'a>(&\'a self, payload: issue_171::StructWithAny) -> Result<(), xidl_rust_axum::Error> {{\n        if payload.field.get("foo").and_then(|v| v.as_str()) == Some("bar") {{\n            Ok(())\n        }} else {{\n            Err(xidl_rust_axum::Error::bad_request())\n        }}\n    }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let svc = issue_171::ReproServiceServer::new(MyRepro);\n    xidl_rust_axum::Server::builder().with_service(svc).serve("127.0.0.1:{context.port}").await?; Ok(())\n}}'
-            else:
-                server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MyHelloWorld;\n#[async_trait] impl gen::HelloWorldService for MyHelloWorld {{ async fn hello<\'a>(&\'a self) -> Result<String, xidl_rust_axum::Error> {{ Ok("Hello BDD".into()) }} async fn echo<\'a>(&\'a self, msg: String) -> Result<String, xidl_rust_axum::Error> {{ Ok(msg) }} }}\n#[tokio::main] async fn main() -> Result<(), Box<dyn std::error::Error>> {{ let svc = gen::HelloWorldServer::new(MyHelloWorld); xidl_rust_axum::Server::builder().with_service(svc).serve("127.0.0.1:{context.port}").await?; Ok(()) }}'
-            prefix = "RUST-REST"
-        elif context.protocol == "jsonrpc":
-            cargo_toml = f'[package]\nname = "test-rust-jsonrpc"\nversion = "0.1.0"\nedition = "2021"\n[workspace]\n[dependencies]\nxidl-jsonrpc = {{ path = "{os.path.join(root_dir, "xidl-jsonrpc")}", features = ["transport-tcp"] }}\ntokio = {{ version = "1", features = ["full"] }}\nasync-trait = "0.1"\nserde = {{ version = "1", features = ["derive"] }}\nserde_json = "1"\n'
-            if "city_jsonrpc" in context.idl_file:
-                server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MySmartCity;\n#[async_trait]\nimpl gen::SmartCityRpcApi for MySmartCity {{\n    async fn quote_trip<\'a>(&\'a self, _rider_id: String, _zone_id: String) -> Result<gen::SmartCityRpcApiquoteTripResult, xidl_jsonrpc::Error> {{ Ok(gen::SmartCityRpcApiquoteTripResult {{ amount_cents: 100, currency: "USD".into(), r#return: "quote-1".into() }}) }}\n    async fn create_invoice<\'a>(&\'a self, _rider_id: String, _amount_cents: i32, _currency: String) -> Result<gen::SmartCityRpcApicreateInvoiceResult, xidl_jsonrpc::Error> {{ Ok(gen::SmartCityRpcApicreateInvoiceResult {{ invoice_id: "inv-1".into(), payment_url: "http://pay".into(), r#return: "inv-1".into() }}) }}\n    async fn mark_paid<\'a>(&\'a self, _invoice_id: String) -> Result<(), xidl_jsonrpc::Error> {{ Ok(()) }}\n    async fn heartbeat<\'a>(&\'a self) -> Result<(), xidl_jsonrpc::Error> {{ Ok(()) }}\n    async fn rotate_session<\'a>(&\'a self, _session_token: String) -> Result<gen::SmartCityRpcApirotateSessionResult, xidl_jsonrpc::Error> {{ Ok(gen::SmartCityRpcApirotateSessionResult {{ session_token: "new-tok".into(), expires_at_epoch_sec: 3600 }}) }}\n    async fn dispatch<\'a>(&\'a self, _vehicle_id: String, _pickup_stop: String) -> Result<gen::SmartCityRpcApidispatchResult, xidl_jsonrpc::Error> {{ Ok(gen::SmartCityRpcApidispatchResult {{ job_id: "job-1".into(), r#return: 42 }}) }}\n    async fn report_trip<\'a>(&\'a self, _order_id: String, _rider_id: String, _status: String) -> Result<(), xidl_jsonrpc::Error> {{ Ok(()) }}\n    async fn summarize<\'a>(&\'a self, _day: String) -> Result<gen::SmartCityRpcApisummarizeResult, xidl_jsonrpc::Error> {{ Ok(gen::SmartCityRpcApisummarizeResult {{ trip_count: 10, gross_revenue_cents: 1000 }}) }}\n    async fn get_attribute_region<\'a>(&\'a self) -> Result<String, xidl_jsonrpc::Error> {{ Ok("us-east".into()) }}\n    async fn get_attribute_firmware_channel<\'a>(&\'a self) -> Result<String, xidl_jsonrpc::Error> {{ Ok("stable".into()) }}\n    async fn set_attribute_firmware_channel<\'a>(&\'a self, _value: String) -> Result<(), xidl_jsonrpc::Error> {{ Ok(()) }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let server = xidl_jsonrpc::Server::builder().with_service(gen::SmartCityRpcApiServer::new(MySmartCity)).with_endpoint("tcp://127.0.0.1:{context.port}").build().await?;\n    server.serve().await?; Ok(())\n}}'
-            elif "multi_interface" in context.idl_file:
-                server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MyMath;\n#[async_trait] impl gen::Math for MyMath {{ async fn add<\'a>(&\'a self, a: i32, b: i32) -> Result<i32, xidl_jsonrpc::Error> {{ Ok(a + b) }} }}\nstruct MyStore {{ last: std::sync::Mutex<String> }}\n#[async_trait] impl gen::Store for MyStore {{ async fn save<\'a>(&\'a self, value: String) -> Result<(), xidl_jsonrpc::Error> {{ *self.last.lock().unwrap() = value; Ok(()) }} async fn last_value<\'a>(&\'a self) -> Result<String, xidl_jsonrpc::Error> {{ Ok(self.last.lock().unwrap().clone()) }} }}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let server = xidl_jsonrpc::Server::builder()\n        .with_service(gen::MathServer::new(MyMath))\n        .with_service(gen::StoreServer::new(MyStore {{ last: std::sync::Mutex::new("".into()) }}))\n        .with_endpoint("tcp://127.0.0.1:{context.port}")\n        .build().await?;\n    server.serve().await?; Ok(())\n}}'
-            elif "complex" in context.idl_file:
-                server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MyCalculator;\n#[async_trait]\nimpl gen::Calculator for MyCalculator {{\n    async fn calculate<\'a>(&\'a self, req: gen::AddRequest, op: gen::Operation) -> Result<gen::AddResponse, xidl_jsonrpc::Error> {{\n        let result = match op {{ gen::Operation::ADD => req.a + req.b, gen::Operation::SUBTRACT => req.a - req.b }};\n        Ok(gen::AddResponse {{ result }})\n    }}\n    async fn get_history<\'a>(&\'a self) -> Result<Vec<i32>, xidl_jsonrpc::Error> {{ Ok(vec![]) }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let server = xidl_jsonrpc::Server::builder().with_service(gen::CalculatorServer::new(MyCalculator)).with_endpoint("tcp://127.0.0.1:{context.port}").build().await?;\n    server.serve().await?; Ok(())\n}}'
-            else:
-                server_code = f'use async_trait::async_trait;\nmod gen {{ include!("../{module_name}.rs"); }}\nstruct MyCalculator;\n#[async_trait]\nimpl gen::Calculator for MyCalculator {{\n    async fn add<\'a>(&\'a self, a: i32, b: i32) -> Result<i32, xidl_jsonrpc::Error> {{ Ok(a + b) }}\n    async fn subtract<\'a>(&\'a self, a: i32, b: i32) -> Result<i32, xidl_jsonrpc::Error> {{ Ok(a - b) }}\n}}\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {{\n    let server = xidl_jsonrpc::Server::builder().with_service(gen::CalculatorServer::new(MyCalculator)).with_endpoint("tcp://127.0.0.1:{context.port}").build().await?;\n    server.serve().await?; Ok(())\n}}'
-            prefix = "RUST-JSONRPC"
-
-        with open(os.path.join(context.lang_dir, "Cargo.toml"), "w") as f: f.write(cargo_toml)
-        os.makedirs(os.path.join(context.lang_dir, "src"), exist_ok=True)
-        with open(os.path.join(context.lang_dir, "src", "main.rs"), "w") as f: f.write(server_code)
-
-        env = os.environ.copy()
-        env["CARGO_TARGET_DIR"] = os.path.join(root_dir, "bdd", ".temp", "rust_target")
-        context.server_process = start_context_server(context, ["cargo", "run"], cwd=context.lang_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
-        t = threading.Thread(target=run_server_logging, args=(context.server_process, prefix)); t.daemon = True; t.start()
-        wait_for_server(context)
+    run_generated_server_using_boilerplate(context, lang)
 
 @then('I can run the generated {lang} server using boilerplate')
 def step_impl(context, lang):
+    run_generated_server_using_boilerplate(context, lang)
+
+def run_generated_server_using_boilerplate(context, lang):
     import shutil
-    idl_name = os.path.splitext(os.path.basename(context.idl_file))[0]
+    idl_name = get_idl_name(context)
+    src_dir = os.path.join(os.getcwd(), "bdd", "boilerplate", idl_name, lang)
+    if not os.path.exists(src_dir):
+        # Fallback to default boilerplate for protocol
+        fallback_name = context.protocol if context.protocol else "rest"
+        src_dir = os.path.join(os.getcwd(), "bdd", "boilerplate", fallback_name, lang)
+
     server_timeout = 60
+    module_name = get_module_name(context.lang_dir)
+
     if lang == "go":
-        src_dir = os.path.join(os.getcwd(), "bdd", "boilerplate", idl_name, "go")
         for f in os.listdir(src_dir):
             shutil.copy(os.path.join(src_dir, f), context.lang_dir)
         go_mod_path = os.path.join(context.lang_dir, "go.mod")
-        with open(go_mod_path, "r") as f:
-            content = f.read()
-        content = content.replace("{{GOLANG_XIDL_GO_REST_PATH}}", os.path.abspath('golang/xidl-go-rest'))
-        content = content.replace("{{GOLANG_XIDL_GO_PATH}}", os.path.abspath('golang/xidl-go'))
-        content = content.replace("{{GOLANG_XIDL_GO_CODEC_PATH}}", os.path.abspath('golang/xidl-go-codec'))
-        with open(go_mod_path, "w") as f:
-            f.write(content)
+        if os.path.exists(go_mod_path):
+            with open(go_mod_path, "r") as f:
+                content = f.read()
+            content = content.replace("{{GOLANG_XIDL_GO_REST_PATH}}", os.path.abspath('golang/xidl-go-rest'))
+            content = content.replace("{{GOLANG_XIDL_GO_PATH}}", os.path.abspath('golang/xidl-go'))
+            content = content.replace("{{GOLANG_XIDL_GO_CODEC_PATH}}", os.path.abspath('golang/xidl-go-codec'))
+            with open(go_mod_path, "w") as f:
+                f.write(content)
         for f in os.listdir(context.lang_dir):
             if f.endswith(".go") and f != "main.go":
                 path = os.path.join(context.lang_dir, f)
@@ -509,16 +306,27 @@ def step_impl(context, lang):
         t.daemon = True
         t.start()
     elif lang == "rust":
-        src_dir = os.path.join(os.getcwd(), "bdd", "boilerplate", idl_name, "rust")
         shutil.copy(os.path.join(src_dir, "Cargo.toml"), context.lang_dir)
         os.makedirs(os.path.join(context.lang_dir, "src"), exist_ok=True)
         shutil.copy(os.path.join(src_dir, "src", "main.rs"), os.path.join(context.lang_dir, "src", "main.rs"))
+        
+        # Replace placeholders in Cargo.toml
         cargo_toml_path = os.path.join(context.lang_dir, "Cargo.toml")
         with open(cargo_toml_path, "r") as f:
             content = f.read()
         content = content.replace("{{RUST_XIDL_RUST_AXUM_PATH}}", os.path.abspath('xidl-rust-axum'))
+        content = content.replace("{{RUST_XIDL_JSONRPC_PATH}}", os.path.abspath('xidl-jsonrpc'))
         with open(cargo_toml_path, "w") as f:
             f.write(content)
+            
+        # Replace placeholders in main.rs
+        main_rs_path = os.path.join(context.lang_dir, "src", "main.rs")
+        with open(main_rs_path, "r") as f:
+            content = f.read()
+        content = content.replace("{{MODULE_NAME}}", module_name)
+        with open(main_rs_path, "w") as f:
+            f.write(content)
+
         env = os.environ.copy()
         env["PORT"] = str(context.port)
         env["CARGO_TARGET_DIR"] = os.path.join(os.path.abspath("."), "bdd", ".temp", "rust_target")
@@ -528,11 +336,11 @@ def step_impl(context, lang):
         t.start()
         server_timeout = 180
     elif lang == "ts":
-        src_dir = os.path.join(os.getcwd(), "bdd", "boilerplate", idl_name, "ts")
         shutil.copy(os.path.join(src_dir, "server.ts"), context.lang_dir)
         shutil.copy(os.path.join(src_dir, "tsconfig.json"), context.lang_dir)
         shutil.copy(os.path.join(src_dir, "package.json"), context.lang_dir)
-        # Replace codec path placeholder in package.json
+        
+        # Replace placeholders in package.json
         package_json_path = os.path.join(context.lang_dir, "package.json")
         with open(package_json_path, "r") as f:
             content = f.read()
@@ -540,6 +348,15 @@ def step_impl(context, lang):
         content = content.replace("{{TS_XIDL_TYPESCRIPT_CODEC_PATH}}", codec_path)
         with open(package_json_path, "w") as f:
             f.write(content)
+            
+        # Replace placeholders in server.ts
+        server_ts_path = os.path.join(context.lang_dir, "server.ts")
+        with open(server_ts_path, "r") as f:
+            content = f.read()
+        content = content.replace("{{MODULE_NAME}}", module_name)
+        with open(server_ts_path, "w") as f:
+            f.write(content)
+
         if not os.path.exists(os.path.join(codec_path, "dist")):
             subprocess.run(["pnpm", "install", "--ignore-scripts"], cwd=codec_path, check=True, capture_output=True)
             subprocess.run(["pnpm", "build"], cwd=codec_path, check=True, capture_output=True)
