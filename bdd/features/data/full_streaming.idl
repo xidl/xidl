@@ -1,0 +1,21 @@
+#pragma xidlc package http_stream
+#pragma xidlc version v1.0.0
+
+@http_basic
+interface HttpStreamApi {
+    @server_stream
+    @stream_codec("sse")
+    @get(path = "/alerts/{district}")
+    string alerts(
+        @path string district
+    );
+
+    @http_bearer
+    @client_stream
+    @stream_codec("ndjson")
+    @post(path = "/assets")
+    string upload_asset(
+        string asset_id,
+        sequence<octet> chunk
+    );
+};

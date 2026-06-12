@@ -133,10 +133,6 @@
         {
           "path": "golang/xidl-go/go.mod",
           "type": "generic"
-        },
-        {
-          "path": "golang/xidlc-examples/go.mod",
-          "type": "generic"
         }
       ],
       "release-type": "simple"

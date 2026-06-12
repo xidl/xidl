@@ -210,6 +210,29 @@ Feature: REST API Generation and Communication
       | go   |
       | python |
 
+  Scenario Outline: REST Complex Streaming with Auth
+    Given a REST IDL file "bdd/features/data/full_streaming.idl"
+    When I generate <lang> code for the IDL
+    Then the generated <lang> code should be valid
+    And I can run the generated <lang> server and client
+    And the client can receive 2 alerts for "pudong" with basic auth
+    And the client can upload 2 chunks for asset "a1" with bearer auth and get result containing "a1"
+
+    Examples:
+      | lang |
+      | go   |
+
+  Scenario Outline: REST Msgpack Produces
+    Given a REST IDL file "bdd/features/data/rest_media_types.idl"
+    When I generate <lang> code for the IDL
+    Then the generated <lang> code should be valid
+    And I can run the generated <lang> server and client
+    And the client can get a msgpack user with id "u123" and see score 95
+
+    Examples:
+      | lang |
+      | go   |
+
   Scenario Outline: REST Serialization Rules
     Given a REST IDL file "bdd/features/data/serialization.idl"
     When I generate <lang> code for the IDL

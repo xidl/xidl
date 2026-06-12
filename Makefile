@@ -12,7 +12,7 @@ test: test-rust test-go test-bdd
 test-rust: init
 	XIDLC_VERSION=$(XIDLC_SNAPSHOT_VERSION) XIDLC_GIT_HASH=$(XIDLC_SNAPSHOT_HASH) cargo test --all -F transport-all -F fmt
 
-test-go: test-go-codegen test-go-runtime
+test-go: test-go-runtime
 
 test-bdd: init
 	pip install -r bdd/requirements.txt

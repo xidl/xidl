@@ -2,3 +2,4 @@ behave
 requests
 fastapi
 uvicorn
+msgpack
