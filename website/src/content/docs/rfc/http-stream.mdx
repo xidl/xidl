@@ -1,9 +1,152 @@
 ---
-title: "RFC: HTTP Stream"
-description: "RFC: HTTP Stream - XIDL Documentation"
-template: doc
+title: "HTTP Stream RFC"
+description: "Interaction model, codec, and lifecycle rules for XIDL HTTP streaming mapping."
 ---
 
-> Status: Planned
+# XIDL HTTP Stream Mapping Specification
 
-This page has not been written yet.
+This page defines a streaming profile built on top of HTTP mapping, used to express long-connection request or response streams.
+
+## Scope
+
+This RFC mainly defines:
+
+- Streaming method models.
+- Annotations and type constraints.
+- HTTP wire protocol recommendations.
+- Codec selection.
+- Lifecycle, cancellation, and error semantics.
+
+This page does not define:
+
+- Message broker transport.
+- Reliability semantics beyond HTTP itself.
+- Exactly-once delivery.
+
+## Streaming Method Annotations
+
+A method is considered a streaming method if it carries one of the following annotations:
+
+- `@server_stream`
+- `@client_stream`
+
+Optional annotations:
+
+- `@path @rename("...")`
+- `@stream_codec("ndjson" | "sse")`
+- HTTP security-related annotations.
+
+Default values:
+
+- HTTP method: `POST`
+- Codec: `ndjson`
+- Path: `/{method_name}`
+
+## Type Constraints
+
+- `@client_stream` must have exactly one streaming input parameter of type `sequence<T>`.
+- The return value of `@server_stream` must be `sequence<T>`.
+- `@server_stream` and `@client_stream` are mutually exclusive.
+
+## Interaction Model
+
+### Server Stream
+
+- The client sends a single request object.
+- The server continuously returns multiple stream items.
+
+### Client Stream
+
+- The client continuously sends multiple stream items.
+- The server finally returns a single completion result.
+
+## Route Templates
+
+Streaming methods follow the same path template rules as the standard HTTP RFC:
+
+- `{name}`
+- `{*name}`
+- `{?name1,name2,...}`
+
+Query and Path variables are still bound by `@query` and `@path`.
+
+## Security Model
+
+Streaming methods reuse the rules from the HTTP Security RFC:
+
+- Interface-level declarations provide defaults.
+- Method-level declarations override defaults.
+- `@no_security` clears inherited requirements.
+
+Additional notes for streaming:
+
+- Authentication occurs before the stream is established.
+- Credentials are not part of the stream item payload.
+- Token refresh and session renewal are implementation concerns.
+
+## Wire Profile
+
+### General HTTP Requirements
+
+- `Content-Type` must match the selected codec.
+- Long-connection responses typically use chunked transfer encoding.
+- Proxies or gateways should avoid unnecessary buffering.
+
+### NDJSON
+
+The default codec is `ndjson`.
+
+Common MIME type:
+
+- `application/x-ndjson`
+
+Frame object example:
+
+```json
+{ "t": "next", "seq": 1, "data": 42 }
+```
+
+Common fields:
+
+- `t`: Frame type.
+- `seq`: Monotonically increasing sequence number for each direction.
+- `data`: Business data.
+- `error`: Error information.
+- `meta`: Additional metadata.
+
+### SSE
+
+`sse` is only applicable to `@server_stream`.
+
+Common mappings:
+
+- `event: next`
+- `event: error`
+- `event: complete`
+
+## Lifecycle
+
+Start:
+
+- The stream is considered established only after the server accepts the request and returns a success status.
+
+End:
+
+- Receipt of `complete`.
+- Receipt of `error`.
+- Explicit `cancel`.
+- Transport disconnection.
+
+## Byte Stream Modeling
+
+If you want to express a byte stream, you can model the stream item type as `octet`:
+
+- `sequence<octet>` represents a sequence of byte items.
+
+The specific on-wire encoding depends on the selected codec.
+
+## Implementation Recommendations
+
+- Prioritize robust implementation of `server_stream`.
+- Codec and security rules should remain consistent with standard HTTP mapping.
+- `seq` should be guaranteed to monotonically increase for each direction and stream.

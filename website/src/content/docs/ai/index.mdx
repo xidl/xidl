@@ -1,19 +1,19 @@
 ---
 title: "AI Skills"
-description: "An agent-oriented operating summary for working effectively in the XIDL repository."
+description: "XIDL repository operation summary for Agents and automated workflows."
 ---
 
-This section summarizes the repository for agents and automation workflows.
+This section consolidates the most Agent-friendly context in the repository into an operational guide.
 
-## Covers
+## What's Included
 
-- repository terminology
-- supported generators and transports
-- common commands
-- source-of-truth locations
-- plugin expectations
+- Repository terminology
+- Supported generators and transport protocols
+- Common commands
+- Location of the source of truth
+- Plugin development conventions
 
-## Start with these sources
+## Recommended Resources
 
 1. `docs/index.md`
 2. `docs/user/xidlc.md`
@@ -22,7 +22,7 @@ This section summarizes the repository for agents and automation workflows.
 5. `docs/architecture.md`
 6. `docs/plugin.md`
 
-## Common commands
+## Common Commands
 
 ```bash
 xidlc gen --out-dir out rust api.idl
@@ -30,9 +30,9 @@ xidlc gen --out-dir out rust-axum api.idl
 xidlc gen --out-dir out openapi api.idl
 ```
 
-## Key guidance
+## Key Advice
 
-- prefer implementation-backed claims
-- cross-check with `xidlc-examples/`
-- defer transport ambiguity to the RFCs
-- inspect generator modules directly when target capability is unclear
+- Prioritize conclusions supported by the implementation.
+- Cross-verify with `xidlc-examples/`.
+- Refer to RFCs when transport semantics are unclear.
+- Examine the generator modules directly when target capabilities are unclear.

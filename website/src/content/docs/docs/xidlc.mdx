@@ -1,0 +1,83 @@
+---
+title: "xidlc Usage Guide"
+description: "The core mental model, common parameters, and typical workflows of the XIDL CLI."
+---
+
+# Using `xidlc`
+
+`xidlc` is the standard entry point for XIDL. It reads one or more `.idl` files and generates artifacts for the selected targets.
+
+## Establish the Correct Mental Model
+
+The way `xidlc` works is straightforward:
+
+1. Input one or more IDL files.
+2. Select a target generator.
+3. Specify the output directory.
+4. Obtain the files corresponding to that target.
+
+Minimal command:
+
+```bash
+xidlc gen --out-dir out rust path/to/file.idl
+```
+
+Short version:
+
+```bash
+xidlc gen -o out rust path/to/file.idl
+```
+
+## Common Parameters
+
+- `--out-dir`, `-o`: Specify the output directory.
+- `<lang>`: Select the target generator subcommand under `xidlc gen`.
+- `--client`: Generate additional client-related artifacts for targets that support this parameter.
+- `--server`: Generate server-related artifacts for targets that support this parameter.
+- `--dry-run`: Execute the parsing and generation process without writing files to disk.
+
+## Typical Workflows
+
+### Generate Rust Types
+
+```bash
+xidlc gen -o src/generated rust api.idl
+```
+
+### Generate Axum HTTP Bindings
+
+```bash
+xidlc gen -o src/generated rust-axum api.idl
+```
+
+### Generate JSON-RPC Bindings
+
+```bash
+xidlc gen -o src/generated rust-jsonrpc api.idl
+```
+
+### Generate OpenAPI
+
+```bash
+xidlc gen -o generated openapi api.idl
+```
+
+### Generate OpenRPC
+
+```bash
+xidlc gen -o generated openrpc api.idl
+```
+
+## Formatting
+
+The CLI also provides a formatting subcommand:
+
+```bash
+xidlc fmt path/to/file.idl
+```
+
+In-place formatting:
+
+```bash
+xidlc fmt --inplace path/to/file.idl
+```

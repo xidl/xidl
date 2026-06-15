@@ -1,0 +1,32 @@
+---
+title: "Rust Integration"
+description: "Common ways to integrate XIDL into Rust projects."
+---
+
+# Rust Integration
+
+For Rust developers, XIDL provides [xidl-build](https://crates.io/crates/xidl-build) to automatically generate code in `build.rs` without needing to install `xidlc`:
+
+1. `Cargo.toml`:
+
+    ```toml
+    [build-dependencies]
+    xidl-build = "<version>"
+    ```
+
+2. Add `build.rs`:
+
+    ```rust
+    fn main() {
+        xidl_build::Builder::new()
+            .with_lang("rust")
+            .compile(&["api/example.idl"])
+            .expect("generate xidl artifacts");
+    }
+    ```
+
+3. Include generated code in source:
+
+    ```rust
+    include!(concat!(env!("OUT_DIR"), "/api/example.rs"));
+    ```

@@ -1,0 +1,48 @@
+---
+title: "Target Generators"
+description: "XIDL built-in targets, aliases, typical outputs, and common combinations."
+---
+
+# Target Generators
+
+This page summarizes the targets currently supported built-in by `xidlc` and their typical use cases.
+
+## Built-in Targets
+
+| Target | Common Aliases | Artifact Type | Typical Combination |
+| --- | --- | --- | --- |
+| `rust` | `rs` | Rust types and modules | Rust libraries or applications |
+| `rust-jsonrpc` | `rust_jsonrpc`, `rs_jsonrpc`, `rs-jsonrpc` | Rust JSON-RPC bindings | `xidl-jsonrpc` |
+| `rust-axum` | `rust_axum`, `axum`, `rs_axum`, `rs-axum` | Rust HTTP / Stream bindings | `xidl-rust-axum` |
+| `typescript` | `ts` | TypeScript declarations and Schemas | Frontend or toolchains |
+| `go` | `golang` | Go types or auxiliary code | Go projects |
+| `go-rest` | `go_rest` | Go HTTP bindings | Go HTTP services |
+| `python` | `py` | Python code generation | Python projects |
+| `python-rest` | `py_rest`, `python_rest` | Python HTTP bindings | Python HTTP services |
+| `openapi` | None | `openapi_{filename}.json` | Documentation and downstream consumption |
+| `openrpc` | `open-rpc` | `openrpc.json` | JSON-RPC documentation |
+
+## `--client` and `--server`
+
+Some generators support distinguishing between client and server artifacts, such as:
+
+- `rust-axum`
+- `rust-jsonrpc`
+
+If a target does not support this distinction, these parameters may be ignored or have no significant effect.
+
+## When to Choose Which Target
+
+- **Only data structures**: Choose `rust`, `typescript`, `go`, or `python`.
+- **HTTP service capabilities**: Choose `rust-axum`, `go-rest`, or `python-rest`.
+- **JSON-RPC**: Choose `rust-jsonrpc`.
+- **Publishing HTTP contracts externally**: Choose `openapi`.
+- **Publishing JSON-RPC contracts externally**: Choose `openrpc`.
+- **Debugging internal representations**: Choose `hir`, `rest-hir`, or `typed-ast`.
+
+## Schema File Output
+
+In addition to generating code, XIDL can also generate OpenAPI and OpenRPC files suitable for HTTP and JSON-RPC:
+
+- `openapi`
+- `openrpc`

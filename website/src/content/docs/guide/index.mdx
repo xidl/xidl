@@ -1,27 +1,50 @@
 ---
-title: "Quickstart"
-description: "Start with installation, a first IDL file, and the main XIDL workflow."
+title: "Installation"
+description: "Install `xidlc`"
 ---
 
-# Guide
+import { TabItem, Tabs } from '@astrojs/starlight/components';
 
-This section is the shortest path from zero to a working XIDL project.
+The xidl compiler, or xidlc, can compile `.idl` files containing interface definitions.
 
-## Recommended order
+## 1. Install `xidlc`
 
-1. Read [Install & Quickstart](./quickstart/).
-2. Continue with [First HTTP API](./first-http-api/).
-3. Set up editor support in [Editor](./editor/).
-4. Use the [Docs](../docs/) section for syntax, generators, and references.
+<Tabs>
+  <TabItem label="macOS / Linux">
 
-## What this section covers
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://xidl.github.io/xidl/public/install.sh | sh
+```
 
-- installing `xidlc`
-- writing a minimal `.idl` file
-- generating your first target output
-- understanding where HTTP and Rust fit into the toolchain
+  </TabItem>
+  <TabItem label="Windows PowerShell">
 
-## When to leave this section
+```bash
+iwr -useb https://xidl.github.io/xidl/public/install.ps1 | iex
+```
 
-Move on to the detailed docs once you need exact target behavior, annotations,
-or RFC-level transport rules.
+  </TabItem>
+  <TabItem label="Cargo">
+
+```bash
+cargo install xidlc
+```
+
+  </TabItem>
+</Tabs>
+
+## Install Visual Studio Code Extension
+
+xidl provides a Visual Studio Code extension that offers features like syntax highlighting, syntax checking, go-to-definition, and API preview:
+
+<br/>
+
+<a href="vscode:extension/cathaysia.vscode-idl-language">
+<svg width="280" height="48" viewBox="0 0 280 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="280" height="48" rx="24" fill="#007ACC"/>
+  <g transform="translate(24, 12) scale(1.0)">
+    <path d="m21.29 4.1-4.12-2a1.36 1.36 0 0 0-.48-.1h-.08a1.18 1.18 0 0 0-.72.24l-.14.12-7.88 7.19L4.44 7a.83.83 0 0 0-.54-.17.88.88 0 0 0-.53.17l-1.1 1a.8.8 0 0 0-.27.61.84.84 0 0 0 .27.62l3 2.71-3 2.72a.84.84 0 0 0 0 1.23l1.1 1a.89.89 0 0 0 .6.22.93.93 0 0 0 .47-.17l3.43-2.61 7.88 7.19a1.2 1.2 0 0 0 .76.36h.17a1 1 0 0 0 .49-.12l4.12-2a1.25 1.25 0 0 0 .71-1.1V5.23a1.26 1.26 0 0 0-.71-1.13zM17 16.47l-6-4.53 6-4.53z" fill="white"/>
+  </g>
+  <text x="60" y="30" fill="white" font-family="sans-serif" font-size="18" font-weight="600">Install Extension</text>
+</svg>
+</a>
