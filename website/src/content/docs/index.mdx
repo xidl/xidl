@@ -1,48 +1,61 @@
 ---
 title: "XIDL"
-description: "Define once, connect seamlessly across languages and protocols."
+description: "An IDL toolchain for modern distributed systems: define once, generate multiple protocols, code, and specifications."
 template: splash
 hero:
-  tagline: "High-performance, strongly-typed IDL designed for modern distributed systems."
-  image:
-    file: ../../assets/favicon.svg
+  tagline: "Drive HTTP, JSON-RPC, Rust code, OpenAPI, OpenRPC, and more with a single IDL."
   actions:
-    - text: "Get Started"
+    - text: "Getting Started"
       link: ./guide/
       icon: right-arrow
       variant: primary
-    - text: "Read RFC"
+    - text: "Detailed Documentation"
+      link: ./docs/
+      icon: document
+    - text: "Read RFCs"
       link: ./rfc/
       icon: external
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-## Why XIDL?
+## Why XIDL
+
+XIDL is not just a "code generator", but a workflow built around contract definitions:
+You write the IDL first, then generate server-side code, client-side code, schemas, auxiliary runtimes, and toolchain artifacts from the same contract.
 
 <CardGrid stagger>
-	<Card title="Cross-language" icon="setting">
-		Define once, generate clients and servers for Rust, Go, Python, and more.
-	</Card>
-	<Card title="Multi-protocol" icon="add-document">
-		Native support for HTTP (REST) and JSON-RPC.
-	</Card>
-	<Card title="Type Safe" icon="pencil">
-		Strong typing system to catch errors at compile time.
-	</Card>
-	<Card title="Modern Tooling" icon="rocket">
-		Integrated with `xidlc` compiler and modern build systems.
-	</Card>
+  <Card title="One Contract, Multiple Outputs" icon="seti:document">
+    The same IDL can generate Rust types, Axum HTTP interfaces, JSON-RPC bindings,
+    OpenAPI, OpenRPC, and intermediate products for debugging and toolchains.
+  </Card>
+  <Card title="Explicit Protocol Rules" icon="seti:gear">
+    HTTP routes, parameter sources, streaming interactions, and security declarations
+    are written directly in the contract, rather than scattered across various
+    runtime frameworks and comment conventions.
+  </Card>
+  <Card title="Friendly to Both People and Tools" icon="seti:search">
+    Structured IDL is convenient for team reviews and easy for generators, editors,
+    language servers, and AI tools to understand and process.
+  </Card>
+  <Card title="Learn the Main Line First, Then Expand" icon="seti:rocket">
+    The main line of documentation starts with `xidlc` and takes you through
+    the shortest path to run your first HTTP + Rust example; other targets and
+    protocols can be explored as needed.
+  </Card>
 </CardGrid>
 
-## What can you build?
+## What Can You Do With It
 
-- **Microservices**: Reliable connections between services in different languages.
-- **Web APIs**: Fast, spec-compliant HTTP interfaces.
-- **Real-time Streams**: Built-in support for streaming data.
+- Define HTTP APIs and generate `rust-axum` server/client code.
+- Define JSON-RPC interfaces and generate `rust-jsonrpc` bindings and `openrpc.json`.
+- Generate OpenAPI from the same contract to avoid drift between implementation and documentation specifications.
+- Integrate the generation process into Rust `build.rs`, or generate products manually via `xidlc`.
+- Establish auditable, traceable, and explicit declarations for streaming APIs and security policies.
 
-## Next Steps
+## Where to Start
 
-- [Quickstart](./guide/quickstart/)
-- [IDL Syntax](./docs/idl/)
-- [Supported Targets](./docs/targets/)
+- First time with XIDL: See the [Guide Overview](./guide/) and [Quick Start](./guide/quickstart/).
+- Want to run HTTP + Rust first: See [Your First HTTP API](./guide/first-http-api/).
+- Understand CLI, language, and target generators: See the [Detailed Documentation](./docs/).
+- Confirm precise semantics and mapping rules: See the [RFCs](./rfc/).

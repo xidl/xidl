@@ -1,0 +1,45 @@
+---
+title: "Built-in Annotations"
+description: "XIDL built-in annotations"
+---
+
+## `@rename`
+
+`@rename("...")` is used to rename the serialized name of a field.
+
+- Acts on `struct` / `union` members.
+- Used as the wire / property name when generating HTTP / JSON mappings.
+- Typically maps to `#[serde(rename = "...")]` in Rust.
+
+Example:
+
+```idl
+struct User {
+  uint32 id;
+  @rename("new_name")
+  string name;
+};
+```
+
+## `@rename_all`
+
+`@rename_all("...")` allows renaming all fields within a structure.
+
+```idl
+@rename_all("snake_case")
+struct User {
+  uint32 id;
+  string name;
+};
+```
+
+Supported parameters:
+
+- lowercase
+- UPPERCASE
+- PascalCase
+- camelCase
+- snake_case
+- SCREAMING_SNAKE_CASE
+- kebab-case
+- SCREAMING-KEBAB-CASE

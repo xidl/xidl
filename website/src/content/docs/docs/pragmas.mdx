@@ -1,0 +1,40 @@
+---
+title: "Compiler Pragmas"
+description: "XIDL compiler pragmas"
+---
+
+# Compiler Pragmas
+
+XIDL supports `#pragma xidlc ...` directives to provide extra configuration for the compiler and generators.
+
+## Basic Syntax
+
+```idl
+#pragma xidlc ...
+```
+
+## OpenAPI Metadata
+
+Supported:
+
+```idl
+#pragma xidlc package rev-tunnel
+#pragma xidlc package "rev-tunnel"
+```
+
+Effect:
+
+- Sets OpenAPI `info.title`.
+
+## OpenAPI Version
+
+Supported:
+
+```idl
+#pragma xidlc version v1.0.0
+#pragma xidlc version "1.0.0"
+```
+
+Effect:
+
+- Sets OpenAPI `info.version`.

@@ -1,9 +1,92 @@
 ---
-title: "Reference"
-description: "Reference - XIDL Documentation"
-template: doc
+title: "Language Basics"
+description: "Basics of the XIDL language"
 ---
 
-> Status: Planned
+## Basic Types
 
-This page has not been written yet.
+The following basic types are available:
+
+| Type Name | Description |
+| --- | --- |
+| uint8 | 8-bit unsigned integer |
+| uint16 | 16-bit unsigned integer |
+| uint32 | 32-bit unsigned integer |
+| uint64 | 64-bit unsigned integer |
+| int8 | 8-bit signed integer |
+| int16 | 16-bit signed integer |
+| int32 | 32-bit signed integer |
+| int64 | 64-bit signed integer |
+| float32 | 32-bit single-precision floating-point number |
+| float64 | 64-bit double-precision floating-point number |
+| boolean | Boolean value |
+| string | String |
+
+## Container Types
+
+| Type Name | Description |
+| --- | --- |
+| sequence\<T> | Variable-length array with elements of type T |
+| map\<K, V> | Key-value pair collection with keys of type K and values of type V |
+
+## Structs
+
+```idl
+struct Point {
+    uint32 x;
+    uint32 y;
+};
+```
+
+## Enums
+
+```idl
+enum Color {
+    Red,
+    Green,
+    Blue
+};
+```
+
+## Interfaces
+
+```idl
+interface ILogger {
+    void log(string message);
+};
+```
+
+## Union
+
+```idl
+enum Color {
+    Red,
+    Green,
+    Blue
+};
+
+union ColorPoint switch(Color) {
+    case Red:
+        uint32 red_x;
+        uint32 red_y;
+    case Green:
+        uint32 green_x;
+        uint32 green_y;
+    case Blue:
+        uint32 blue_x;
+        uint32 blue_y;
+    default:
+        uint32 default_x;
+        uint32 default_y;
+};
+```
+
+## Annotations
+
+```idl
+struct Point {
+    uint32 x;
+    @optional
+    uint32 y;
+};
+```

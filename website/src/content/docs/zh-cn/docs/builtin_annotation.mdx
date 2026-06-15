@@ -3,9 +3,9 @@ title: "内置注解"
 description: "XIDL 内置注解"
 ---
 
-## `@name`
+## `@rename`
 
-`@name("...")` 用来重命名字段的序列化名字。
+`@rename("...")` 用来重命名字段的序列化名字。
 
 - 作用于 `struct` / `union` 成员
 - 生成 HTTP / JSON 映射时会把它当作 wire / property name
@@ -14,11 +14,32 @@ description: "XIDL 内置注解"
 示例：
 
 ```idl
-module demo {
-  struct User {
-    uint32 id;
-    @name("full_name")
-    string name;
-  };
+struct User {
+  uint32 id;
+  @name("new_name")
+  string name;
 };
 ```
+
+## `@rename_all`
+
+`@rename_all("...")` 允许重命名所有字段的名字。
+
+```idl
+@rename_all("snake_case")
+struct User {
+  uint32 id;
+  string name;
+};
+```
+
+支持的参数如下:
+
+- lowercase
+- UPPERCASE
+- PascalCase
+- camelCase
+- snake_case
+- SCREAMINGSNAKECASE
+- kebab-case
+- SCREAMING-KEBAB-CASE

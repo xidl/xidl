@@ -1,0 +1,32 @@
+---
+title: "rust-jsonrpc Target"
+description: "The minimal workflow for the rust-jsonrpc target and how it integrates with xidl-jsonrpc."
+---
+
+`rust-jsonrpc` generates Rust JSON-RPC server/client bindings from IDL.
+
+## Minimal Command
+
+```bash
+xidlc gen --out-dir out rust-jsonrpc your.idl
+```
+
+After generating, implement the resulting trait and expose the service through `xidl_jsonrpc::Server`.
+
+## Examples in the Repository
+
+Server:
+
+```bash
+cargo run -p xidlc-examples --example jsonrpc_hello_world_server
+```
+
+Client:
+
+```bash
+cargo run -p xidlc-examples --example jsonrpc_hello_world_client -- --name World
+```
+
+## Runtime Integration
+
+The generated code is designed to be used with the `xidl-jsonrpc` runtime by default.

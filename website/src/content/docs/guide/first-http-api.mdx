@@ -1,9 +1,89 @@
 ---
-title: "First HTTP API"
-description: "First HTTP API - XIDL Documentation"
-template: doc
+title: "Your First REST API"
+description: "Run through the XIDL REST mainline with a minimal IDL."
 ---
 
-> Status: Planned
+After installing `xidlc`, we can use it to generate server and client code. In this article, we will:
 
-This page has not been written yet.
+1. Define a REST service.
+2. Generate Rust server interfaces and create a service.
+3. Generate a Rust client and use it to access the service.
+
+## 1. Define a REST Interface
+
+Create `hello_world.idl`:
+
+```idl
+interface HelloWorld {
+    @post(path = "/hello")
+    void say_hello(
+        in string name
+    );
+};
+```
+
+## 2. Generate Rust Server Code
+
+```bash
+xidlc gen --output-dir server rust-axum hello_world.idl
+```
+
+Now `xidlc` will generate server-side code in the `server` directory.
+
+## 3. Create the Server
+
+```rust
+include!("./server/hello_world.rs");
+
+struct HelloWorldImpl;
+
+#[async_trait::async_trait]
+impl HelloWorld for HelloWorldImpl {
+    async fn sayHello(&self, name: String) -> Result<(), xidl_rust_axum::Error> {
+        println!("Hello, {}!", name);
+        Ok(())
+    }
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let addr = "127.0.0.1:3000";
+    println!("axum hello_world server listening on {addr}");
+
+    xidl_rust_axum::Server::builder()
+        .with_service(HelloWorldServer::new(HelloWorldImpl))
+        .serve(addr)
+        .await?;
+
+    Ok(())
+}
+```
+
+## 4. Generate Client Interface
+
+```bash
+xidlc gen --output-dir client rust-axum --client hello_world.idl
+```
+
+This will generate the client in the `client` directory.
+
+## 5. Use the Client
+
+```rust
+include!("./client/hello_world.rs");
+
+#[tokio::main]
+async fn main() {
+    let client = HelloWorldClient::new("http://127.0.0.1:3000");
+    let _ = client.say_hello("world".to_string()).await;
+}
+
+```
+
+## 6. Generate OpenAPI Documentation
+
+Additionally, you can generate OpenAPI documentation:
+
+```bash
+xidlc gen openapi hello_world.idl
+```

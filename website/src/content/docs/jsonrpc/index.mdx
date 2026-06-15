@@ -1,0 +1,118 @@
+---
+title: "JSON-RPC Interface"
+description: "XIDL JSON-RPC Interface"
+sidebar:
+  badge: PREVIEW
+---
+
+# JSON-RPC
+
+XIDL's JSON-RPC family covers:
+
+1. Standard JSON-RPC request/response mapping
+2. JSON-RPC Stream
+3. Security and deployment conventions at the runtime level
+
+The most common output targets are:
+
+- `rust-jsonrpc`
+- `openrpc`
+
+## Basic Mapping
+
+JSON-RPC method names are combined from module, interface, and operation names.
+
+```idl
+module math {
+    interface Calc {
+        long add(in long a, in long b);
+    };
+};
+```
+
+This method will map to:
+
+```text
+math.Calc.add
+```
+
+## Parameter and Result Mapping
+
+In practice, it can be understood as follows:
+
+- The request `params` is an object.
+- `in` and `inout` parameters appear on the request side.
+- Return values, `out`, and `inout` parameters appear on the result side.
+
+Example:
+
+```idl
+interface SmartCityRpcApi {
+    string quoteTrip(
+        in string rider_id,
+        in string zone_id,
+        out long amount_cents,
+        out string currency
+    );
+};
+```
+
+This naturally forms:
+
+- A request parameter object
+- A result object
+
+## Generated Output
+
+`rust-jsonrpc` currently typically generates:
+
+- Business trait
+- Server wrapper
+- Client wrapper
+- Parameter structures for each method
+
+`openrpc` currently typically generates:
+
+- `openrpc.json`
+
+## JSON-RPC Stream
+
+JSON-RPC Stream adds streaming message exchange to the request/response model.
+
+Common annotations:
+
+- `@server_stream`
+- `@client_stream`
+- `@bidi_stream`
+
+In practice:
+
+- It is closer to a full-duplex model than HTTP Stream.
+- The transport layer can be TCP, WebSocket, or other runtime channels.
+- The current repository already supports these concepts, but this part is also implementation-driven.
+
+## Security Boundaries
+
+There is currently no separate JSON-RPC security RFC in this repository.
+
+In actual deployment, JSON-RPC security is usually determined by the peripheral transport layer, for example:
+
+- HTTP
+- WebSocket handshake
+- IPC boundaries
+- Process boundaries
+
+Therefore, you should understand JSON-RPC security as a "runtime and deployment issue" rather than the contract language itself inventing a separate authentication protocol.
+
+## Recommended Workflow
+
+1. Define interfaces and data types with IDL.
+2. Generate runnable bindings with `rust-jsonrpc`.
+3. Generate Schema with `openrpc`.
+4. Consult the RFC for precise behavior when needed.
+
+## Further Reading
+
+- [Target Generators](./targets/)
+- [JSON-RPC RFC](../rfc/jsonrpc/)
+- [JSON-RPC Stream RFC](../rfc/jsonrpc-stream/)
