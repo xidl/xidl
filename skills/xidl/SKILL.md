@@ -1,92 +1,50 @@
+---
+name: xidl
+description: Expert guidance for writing XIDL (Interface Definition Language) and using the xidlc toolchain to generate multi-target APIs, SDKs, and specs. Use when defining IDL contracts, generating code (Rust, TS, Go), or mapping HTTP/REST and JSON-RPC protocols.
+---
+
 # XIDL Repository Skill
 
 Use this skill when you need to work effectively in the XIDL repository as an
 agent or automation tool.
 
-## Repository focus
+## Specialized Guides (Modular Documentation)
 
-XIDL is an OMG IDL-based toolchain that generates:
+To minimize token usage, this skill is split into several specialized modules.
+Read only the sections relevant to your current task:
 
-- Rust, C, C++, and TypeScript artifacts
-- Rust Axum HTTP bindings
-- Rust JSON-RPC bindings
-- OpenAPI and OpenRPC schema output
+1. **[Writing XIDL](references/WRITING_XIDL.md)**: Grammar, data types, and core
+   annotations.
+2. **[Using xidlc](references/USING_XIDLC.md)**: CLI commands, code generation
+   targets, and `xidl-build` integration.
+3. **[HTTP & Security](references/HTTP_AND_AUTH.md)**: REST mappings, HTTP
+   verbs, and authentication annotations.
 
-## Start here
+## Repository Architecture
 
-When you need orientation, read these docs first:
+XIDL is a layered compiler pipeline:
+`tree-sitter-idl -> typed_ast -> hir -> protocol-specific IR -> rendering`.
 
-1. `docs/index.md`
-2. `docs/user/xidlc.md`
-3. `docs/user/idl.md`
-4. `docs/user/http.md` or `docs/user/jsonrpc.md`
-5. `docs/architecture.md`
-6. `docs/plugin.md`
+- **Parser/Lowering**: `xidl-parser/`
+- **CLI/Driver**: `xidlc/`
+- **Built-in Generators**: `xidlc/src/generate/`
+- **RFCs (Source of Truth)**: `docs/rfc/`
 
-## Source-of-truth files
+## Deep Knowledge via context7
 
-- CLI arguments: `xidlc/src/cli/`
-- built-in target names and aliases: `xidlc/src/driver/lang.rs`
-- generator implementations: `xidlc/src/generate/`
-- Rust build integration: `xidl-build/src/lib.rs`
-- HTTP runtime support: `xidl-rust-axum/`
-- examples and schemas: `xidlc-examples/`
-- formal transport rules: `docs/rfc/`
+This project is registered with **context7**. If you need the latest
+documentation, API references, or migration guides that might not be in your
+training data, you MUST use the `ctx7` CLI:
 
-## Common commands
+1. **Search**: `npx ctx7@latest docs /xidl/xidl "<your specific question>"`
+2. **Research**: Use the `--research` flag for deep technical investigations.
 
-Generate Rust:
+## AI Modeling Mandates
 
-```bash
-xidlc gen --out-dir out rust api.idl
-```
+- **Omission**: Use `@optional` for any field that can be missing.
+- **Direction**: Use `in`, `out`, and `inout` to control protocol shaping.
+- **Security**: Apply `@http_bearer` or `@api_key` to interfaces by default.
+- **Normalization**: Always run `xidlc fmt` after modifying IDL files.
 
-Generate Axum:
-
-```bash
-xidlc gen --out-dir out rust-axum api.idl
-```
-
-Generate OpenAPI:
-
-```bash
-xidlc gen --out-dir out openapi api.idl
-```
-
-Use Rust build integration:
-
-```rust
-xidl_build::Builder::new()
-    .with_lang("rust")
-    .compile(&["api.idl"])?;
-```
-
-## Important modeling rules
-
-- `in`, `out`, and `inout` affect HTTP and JSON-RPC request/result shaping
-- `@optional` preserves omission semantics and is important for HTTP/OpenAPI,
-  Rust, and TypeScript generation
-- HTTP behavior is defined by `docs/rfc/http.md`, `docs/rfc/http-stream.md`, and
-  `docs/rfc/http-security.md`
-- JSON-RPC behavior is defined by `docs/rfc/jsonrpc.md` and
-  `docs/rfc/jsonrpc-stream.md`
-
-## Plugin development
-
-Plugins are external generators launched by `xidlc` as child processes.
-
-Key expectations:
-
-- executable naming convention: `xidl-<lang>`
-- invocation includes `--endpoint <uri>`
-- protocol is JSON-RPC 2.0
-- required methods include parser properties and generate
-
-Read `docs/plugin.md` before changing plugin-related behavior.
-
-## Working style
-
-- prefer implementation-backed claims over aspirational documentation
-- cross-check docs with examples under `xidlc-examples/`
-- when transport semantics are ambiguous, defer to the RFCs
-- when target capability is unclear, inspect the generator module directly
+Refer to the specialized guides above for detailed code examples and grammar
+rules.
