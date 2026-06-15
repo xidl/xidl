@@ -5,7 +5,7 @@ description: "XIDL 内建目标、别名、典型输出和常见搭配。"
 
 # 目标生成器
 
-这一页汇总当前 `xidlc` 能识别的内建目标，以及它们通常用于什么场景。
+这一页汇总当前 `xidlc` 内建支持的目标，以及它们通常用于什么场景。
 
 ## 内建目标
 
@@ -40,11 +40,9 @@ description: "XIDL 内建目标、别名、典型输出和常见搭配。"
 - 你要对外发布 JSON-RPC 契约：选 `openrpc`
 - 你在调试内部表示：选 `hir`、`rest-hir`、`typed-ast`
 
-## Schema 单文件输出
+## Schema 文件输出
 
-在 Rust `build.rs` 集成里，`with_output_filename` 目前主要适用于：
+除了生成代码外, XIDL 还可以生成适用于 HTTP 和 JSON-RPC 的 OpenAPI 和 OpenRPC 文件文件：
 
 - `openapi`
 - `openrpc`
-
-因为这两个目标天然产出单文件 Schema。
