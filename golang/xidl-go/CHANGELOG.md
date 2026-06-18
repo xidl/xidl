@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.80.0](https://github.com/xidl/xidl/compare/golang/xidl-go/v0.79.1...golang/xidl-go/v0.80.0) (2026-06-18)
+
+
+### Miscellaneous Chores
+
+* **golang/xidl-go:** Synchronize xidl versions
+
 ## [0.79.1](https://github.com/xidl/xidl/compare/golang/xidl-go/v0.79.0...golang/xidl-go/v0.79.1) (2026-06-12)
 
 

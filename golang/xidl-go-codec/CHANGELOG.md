@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.80.0](https://github.com/xidl/xidl/compare/golang/xidl-go-codec/v0.79.1...golang/xidl-go-codec/v0.80.0) (2026-06-18)
+
+
+### Features
+
+* **xidl-go-codex:** compatible with standard json ([89b6245](https://github.com/xidl/xidl/commit/89b6245387990c7ee5070bec028aa2afbf843682))
+
 ## [0.79.1](https://github.com/xidl/xidl/compare/golang/xidl-go-codec/v0.79.0...golang/xidl-go-codec/v0.79.1) (2026-06-12)
 
 
