@@ -3,7 +3,7 @@ mod interface;
 mod render;
 mod spec;
 
-use crate::error::IdlcResult;
+use crate::error::{IdlcError, IdlcResult};
 use crate::generate::utils::go_package_name;
 use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir};
 use crate::macros::hashmap;
@@ -18,6 +18,7 @@ pub fn generate(
     input_path: &Path,
     props: HashMap<String, serde_json::Value>,
 ) -> IdlcResult<Vec<Artifact>> {
+    GoRestRenderMode::from_properties(&props)?;
     let spec = rest_hir.spec.clone();
     let stem = input_path
         .file_stem()
@@ -94,6 +95,40 @@ impl crate::jsonrpc::Codegen for GoRestCodegen {
     }
 }
 
+#[derive(Clone, Copy)]
+pub(crate) struct GoRestRenderMode {
+    pub(crate) enable_client: bool,
+    pub(crate) enable_server: bool,
+}
+
+impl GoRestRenderMode {
+    pub(crate) fn from_properties(props: &HashMap<String, serde_json::Value>) -> IdlcResult<Self> {
+        let enable_client = props
+            .get("enable_client")
+            .and_then(serde_json::Value::as_bool)
+            .unwrap_or(true);
+        let enable_server = props
+            .get("enable_server")
+            .and_then(serde_json::Value::as_bool)
+            .unwrap_or(true);
+        if !enable_client && !enable_server {
+            return Err(IdlcError::rpc(
+                "go-rest requires enable_client or enable_server",
+            ));
+        }
+        Ok(Self {
+            enable_client,
+            enable_server,
+        })
+    }
+}
+
+pub(crate) struct GoRestRenderContext<'a> {
+    pub(crate) renderer: &'a GoRestRenderer,
+    pub(crate) rest_hir: &'a xidl_parser::rest_hir::RestHirDocument,
+    pub(crate) mode: GoRestRenderMode,
+}
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub(crate) enum HttpMethod {
     Get,
@@ -160,8 +195,42 @@ pub(crate) struct MethodMeta {
     pub(crate) deprecated_note: Option<String>,
 }
 
+#[derive(Default, Serialize)]
+pub(crate) struct GoRestRenderBlocks {
+    server: Vec<String>,
+    client: Vec<String>,
+    shared: Vec<String>,
+}
+
+impl GoRestRenderBlocks {
+    pub(crate) fn extend(&mut self, other: Self) {
+        self.server.extend(other.server);
+        self.client.extend(other.client);
+        self.shared.extend(other.shared);
+    }
+
+    pub(crate) fn push_server(&mut self, block: String) {
+        if !block.is_empty() {
+            self.server.push(block);
+        }
+    }
+
+    pub(crate) fn push_client(&mut self, block: String) {
+        if !block.is_empty() {
+            self.client.push(block);
+        }
+    }
+
+    pub(crate) fn push_shared(&mut self, block: String) {
+        if !block.is_empty() {
+            self.shared.push(block);
+        }
+    }
+}
+
 #[derive(Serialize)]
-pub struct GoRestRenderOutput {
+pub(crate) struct GoRestRenderOutput {
     package_name: String,
-    blocks: Vec<String>,
+    blocks: GoRestRenderBlocks,
+    opt: ParserProperties,
 }

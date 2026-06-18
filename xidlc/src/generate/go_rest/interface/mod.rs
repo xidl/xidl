@@ -8,30 +8,28 @@ mod interface_templates;
 mod interface_types;
 
 use crate::error::IdlcResult;
-use crate::generate::go_rest::MethodMeta;
+use crate::generate::go_rest::{GoRestRenderBlocks, MethodMeta};
 use std::fmt::Write;
 use xidl_parser::hir;
-use xidl_parser::rest_hir::{HttpOperationSource, RestHirDocument};
+use xidl_parser::rest_hir::HttpOperationSource;
 
-use super::GoRestRenderer;
+use super::{GoRestRenderContext, GoRestRenderer};
 use interface_client::render_client;
 pub(crate) use interface_meta::build_method_meta;
 use interface_server::render_server;
 use interface_types::render_method_types;
 
 pub(crate) fn render_interface(
-    out: &mut String,
     interface: &hir::InterfaceDcl,
     prefix: &[String],
-    renderer: &GoRestRenderer,
-    rest_hir: &RestHirDocument,
-) -> IdlcResult<()> {
+    context: &GoRestRenderContext<'_>,
+) -> IdlcResult<GoRestRenderBlocks> {
     let hir::InterfaceDclInner::InterfaceDef(def) = &interface.decl else {
-        return Ok(());
+        return Ok(GoRestRenderBlocks::default());
     };
     let interface_name = super::definition::export_name(prefix, &def.header.ident);
-    let Some(http_interface) = rest_hir.find_interface(prefix, &def.header.ident) else {
-        return Ok(());
+    let Some(http_interface) = context.rest_hir.find_interface(prefix, &def.header.ident) else {
+        return Ok(GoRestRenderBlocks::default());
     };
     let methods = http_interface
         .operations
@@ -47,19 +45,28 @@ pub(crate) fn render_interface(
         .map(|operation| build_method_meta(&interface_name, operation))
         .collect::<IdlcResult<Vec<_>>>()?;
 
-    writeln!(out, "type {interface_name}Service interface {{").unwrap();
-    for method in &methods {
-        render_service_method(out, method);
-    }
-    writeln!(out, "}}").unwrap();
-    writeln!(out).unwrap();
+    let mut blocks = GoRestRenderBlocks::default();
 
-    render_server(out, &interface_name, &methods, renderer)?;
-    render_client(out, &interface_name, &methods, renderer)?;
+    let mut server = String::new();
+    writeln!(server, "type {interface_name}Service interface {{").unwrap();
     for method in &methods {
-        render_method_types(out, method, renderer)?;
+        render_service_method(&mut server, method);
     }
-    Ok(())
+    writeln!(server, "}}").unwrap();
+    writeln!(server).unwrap();
+    render_server(&mut server, &interface_name, &methods, context.renderer)?;
+    blocks.push_server(server);
+
+    let mut client = String::new();
+    render_client(&mut client, &interface_name, &methods, context.renderer)?;
+    blocks.push_client(client);
+
+    let mut shared = String::new();
+    for method in &methods {
+        render_method_types(&mut shared, method, context.renderer)?;
+    }
+    blocks.push_shared(shared);
+    Ok(blocks)
 }
 
 fn render_service_method(out: &mut String, method: &MethodMeta) {

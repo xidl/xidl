@@ -12,7 +12,9 @@ import (
 "net/url"
 "strings"
 
-"github.com/gin-gonic/gin"
+{% if opt.enable_server -%}
+    "github.com/gin-gonic/gin"
+{% endif -%}
 xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
 )
 
@@ -23,4 +25,10 @@ _ = url.Values{}
 _ = strings.TrimSpace
 )
 
-{% for block in blocks %}{{ block }}{%- endfor %}
+{% if opt.enable_server -%}
+    {% for block in blocks.server %}{{ block }}{%- endfor %}
+    {% endif -%}
+    {% if opt.enable_client -%}
+        {% for block in blocks.client %}{{ block }}{%- endfor %}
+        {% endif -%}
+        {% for block in blocks.shared %}{{ block }}{%- endfor %}
