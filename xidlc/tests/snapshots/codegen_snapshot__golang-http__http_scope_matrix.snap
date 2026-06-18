@@ -340,6 +340,203 @@ func RegisterHttpScopeMatrixServiceHandler(r gin.IRouter, svc HttpScopeMatrixSer
 	})
 }
 
+type HttpSecurityMatrixServiceService interface {
+	InheritedSecurity(ctx context.Context, req *HttpSecurityMatrixServiceInheritedSecurityRequest) (*HttpSecurityMatrixServiceInheritedSecurityResponse, error)
+	BearerOrCookieSecurity(ctx context.Context, req *HttpSecurityMatrixServiceBearerOrCookieSecurityRequest) (*HttpSecurityMatrixServiceBearerOrCookieSecurityResponse, error)
+	AlternativeSecurity(ctx context.Context, req *HttpSecurityMatrixServiceAlternativeSecurityRequest) (*HttpSecurityMatrixServiceAlternativeSecurityResponse, error)
+	OauthSecurity(ctx context.Context, req *HttpSecurityMatrixServiceOauthSecurityRequest) (*HttpSecurityMatrixServiceOauthSecurityResponse, error)
+	PublicPing(ctx context.Context, req *HttpSecurityMatrixServicePublicPingRequest) (*HttpSecurityMatrixServicePublicPingResponse, error)
+}
+
+func RegisterHttpSecurityMatrixServiceHandler(r gin.IRouter, svc HttpSecurityMatrixServiceService) {
+	r.GET("/v2/security/inherited/:id", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
+			return
+		}
+		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityMatrixServiceInheritedSecuritySecurityRequirements())
+		if err != nil {
+			xidlgohttp.Unauthorized(c.Writer, HttpSecurityMatrixServiceInheritedSecuritySecurityRequirements())
+			return
+		}
+		c.Request = c.Request.WithContext(ctx)
+		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
+			return
+		}
+
+		req := &HttpSecurityMatrixServiceInheritedSecurityRequest{}
+
+		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
+			req.Id = value
+		} else {
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		if value, err := xidlgohttp.HeaderString(c.Request.Header, "x_trace_id"); err == nil {
+			req.XTraceId = value
+		} else {
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+			return
+		}
+		resp, err := svc.InheritedSecurity(c.Request.Context(), req)
+		if err != nil {
+			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
+				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			} else {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
+			return
+		}
+
+		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+		}
+	})
+	r.POST("/v2/security/bearer-cookie", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
+			return
+		}
+		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityMatrixServiceBearerOrCookieSecuritySecurityRequirements())
+		if err != nil {
+			xidlgohttp.Unauthorized(c.Writer, HttpSecurityMatrixServiceBearerOrCookieSecuritySecurityRequirements())
+			return
+		}
+		c.Request = c.Request.WithContext(ctx)
+		if err := xidlgohttp.GinRequireContentType(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
+			return
+		}
+
+		req := &HttpSecurityMatrixServiceBearerOrCookieSecurityRequest{}
+		body := HttpSecurityMatrixServiceBearerOrCookieSecurityRequestBody{}
+		if err := xidlgohttp.GinDecodeBody(c, "application/json", &body); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+			return
+		}
+		req.Action = body.Action
+		req.Note = body.Note
+		resp, err := svc.BearerOrCookieSecurity(c.Request.Context(), req)
+		if err != nil {
+			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
+				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			} else {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
+			return
+		}
+
+		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+		}
+	})
+	r.GET("/v2/security/alternatives/:id", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
+			return
+		}
+		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityMatrixServiceAlternativeSecuritySecurityRequirements())
+		if err != nil {
+			xidlgohttp.Unauthorized(c.Writer, HttpSecurityMatrixServiceAlternativeSecuritySecurityRequirements())
+			return
+		}
+		c.Request = c.Request.WithContext(ctx)
+		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
+			return
+		}
+
+		req := &HttpSecurityMatrixServiceAlternativeSecurityRequest{}
+
+		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
+			req.Id = value
+		} else {
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		req.Locale = xidlgohttp.QueryOptionalString(c.Request.URL.Query(), "locale")
+		resp, err := svc.AlternativeSecurity(c.Request.Context(), req)
+		if err != nil {
+			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
+				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			} else {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
+			return
+		}
+
+		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+		}
+	})
+	r.POST("/v2/security/oauth-search", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
+			return
+		}
+		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityMatrixServiceOauthSecuritySecurityRequirements())
+		if err != nil {
+			xidlgohttp.Unauthorized(c.Writer, HttpSecurityMatrixServiceOauthSecuritySecurityRequirements())
+			return
+		}
+		c.Request = c.Request.WithContext(ctx)
+		if err := xidlgohttp.GinRequireContentType(c, "application/json"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
+			return
+		}
+
+		req := &HttpSecurityMatrixServiceOauthSecurityRequest{}
+		body := HttpSecurityMatrixServiceOauthSecurityRequestBody{}
+		if err := xidlgohttp.GinDecodeBody(c, "application/json", &body); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+			return
+		}
+		req.Keyword = body.Keyword
+		req.Page = body.Page
+		resp, err := svc.OauthSecurity(c.Request.Context(), req)
+		if err != nil {
+			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
+				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			} else {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
+			return
+		}
+
+		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+		}
+	})
+	r.GET("/v2/security/public/ping", func(c *gin.Context) {
+		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
+			return
+		}
+		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
+			return
+		}
+
+		req := &HttpSecurityMatrixServicePublicPingRequest{}
+		resp, err := svc.PublicPing(c.Request.Context(), req)
+		if err != nil {
+			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
+				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			} else {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
+			return
+		}
+
+		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+		}
+	})
+}
+
 type HttpScopeMatrixServiceClient struct {
 	baseURL    string
 	httpClient *http.Client
@@ -571,6 +768,161 @@ func (c *HttpScopeMatrixServiceClient) DeprecatedWindow(ctx context.Context, req
 		return nil, fmt.Errorf("http %d", resp.StatusCode)
 	}
 	decoded, err := decodeHttpScopeMatrixServiceDeprecatedWindowResponse(resp)
+	if err != nil {
+		return nil, err
+	}
+	return &decoded, nil
+}
+
+type HttpSecurityMatrixServiceClient struct {
+	baseURL    string
+	httpClient *http.Client
+	auth       xidlgohttp.ClientAuth
+}
+
+func NewHttpSecurityMatrixServiceClient(baseURL string, httpClient *http.Client, auth xidlgohttp.ClientAuth) *HttpSecurityMatrixServiceClient {
+	if httpClient == nil {
+		httpClient = http.DefaultClient
+	}
+	return &HttpSecurityMatrixServiceClient{baseURL: strings.TrimRight(baseURL, "/"), httpClient: httpClient, auth: auth}
+}
+
+func (c *HttpSecurityMatrixServiceClient) InheritedSecurity(ctx context.Context, req *HttpSecurityMatrixServiceInheritedSecurityRequest) (*HttpSecurityMatrixServiceInheritedSecurityResponse, error) {
+	requestURL := c.baseURL + formatHttpSecurityMatrixServiceInheritedSecurityPath(req)
+	httpReq, err := http.NewRequestWithContext(ctx, "GET", requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Accept", "text/plain")
+
+	httpReq.Header.Set("x_trace_id", req.XTraceId)
+	xidlgohttp.ApplyClientAuth(httpReq, c.auth, HttpSecurityMatrixServiceInheritedSecuritySecurityRequirements())
+	resp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	}
+	decoded, err := decodeHttpSecurityMatrixServiceInheritedSecurityResponse(resp)
+	if err != nil {
+		return nil, err
+	}
+	return &decoded, nil
+}
+
+func (c *HttpSecurityMatrixServiceClient) BearerOrCookieSecurity(ctx context.Context, req *HttpSecurityMatrixServiceBearerOrCookieSecurityRequest) (*HttpSecurityMatrixServiceBearerOrCookieSecurityResponse, error) {
+	requestURL := c.baseURL + formatHttpSecurityMatrixServiceBearerOrCookieSecurityPath(req)
+	body := HttpSecurityMatrixServiceBearerOrCookieSecurityRequestBody{
+		Action: req.Action,
+		Note:   req.Note,
+	}
+	var requestBody bytes.Buffer
+	if err := xidlgohttp.MustCodecForMime("application/json").Encode(&requestBody, body); err != nil {
+		return nil, err
+	}
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", requestURL, &requestBody)
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Accept", "text/plain")
+	xidlgohttp.ApplyClientAuth(httpReq, c.auth, HttpSecurityMatrixServiceBearerOrCookieSecuritySecurityRequirements())
+	resp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	}
+	decoded, err := decodeHttpSecurityMatrixServiceBearerOrCookieSecurityResponse(resp)
+	if err != nil {
+		return nil, err
+	}
+	return &decoded, nil
+}
+
+func (c *HttpSecurityMatrixServiceClient) AlternativeSecurity(ctx context.Context, req *HttpSecurityMatrixServiceAlternativeSecurityRequest) (*HttpSecurityMatrixServiceAlternativeSecurityResponse, error) {
+	requestURL := c.baseURL + formatHttpSecurityMatrixServiceAlternativeSecurityPath(req)
+	query := url.Values{}
+
+	if req.Locale != nil {
+		query.Set("locale", *req.Locale)
+	}
+	if encoded := query.Encode(); encoded != "" {
+		requestURL += "?" + encoded
+	}
+	httpReq, err := http.NewRequestWithContext(ctx, "GET", requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Accept", "text/plain")
+	xidlgohttp.ApplyClientAuth(httpReq, c.auth, HttpSecurityMatrixServiceAlternativeSecuritySecurityRequirements())
+	resp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	}
+	decoded, err := decodeHttpSecurityMatrixServiceAlternativeSecurityResponse(resp)
+	if err != nil {
+		return nil, err
+	}
+	return &decoded, nil
+}
+
+func (c *HttpSecurityMatrixServiceClient) OauthSecurity(ctx context.Context, req *HttpSecurityMatrixServiceOauthSecurityRequest) (*HttpSecurityMatrixServiceOauthSecurityResponse, error) {
+	requestURL := c.baseURL + formatHttpSecurityMatrixServiceOauthSecurityPath(req)
+	body := HttpSecurityMatrixServiceOauthSecurityRequestBody{
+		Keyword: req.Keyword,
+		Page:    req.Page,
+	}
+	var requestBody bytes.Buffer
+	if err := xidlgohttp.MustCodecForMime("application/json").Encode(&requestBody, body); err != nil {
+		return nil, err
+	}
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", requestURL, &requestBody)
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Accept", "text/plain")
+	xidlgohttp.ApplyClientAuth(httpReq, c.auth, HttpSecurityMatrixServiceOauthSecuritySecurityRequirements())
+	resp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	}
+	decoded, err := decodeHttpSecurityMatrixServiceOauthSecurityResponse(resp)
+	if err != nil {
+		return nil, err
+	}
+	return &decoded, nil
+}
+
+func (c *HttpSecurityMatrixServiceClient) PublicPing(ctx context.Context, req *HttpSecurityMatrixServicePublicPingRequest) (*HttpSecurityMatrixServicePublicPingResponse, error) {
+	requestURL := c.baseURL + formatHttpSecurityMatrixServicePublicPingPath(req)
+	httpReq, err := http.NewRequestWithContext(ctx, "GET", requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Accept", "text/plain")
+	resp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	}
+	decoded, err := decodeHttpSecurityMatrixServicePublicPingResponse(resp)
 	if err != nil {
 		return nil, err
 	}
@@ -923,358 +1275,6 @@ func decodeHttpScopeMatrixServiceDeprecatedWindowResponse(resp *http.Response) (
 	}
 	out.Return = body
 	return out, nil
-}
-
-type HttpSecurityMatrixServiceService interface {
-	InheritedSecurity(ctx context.Context, req *HttpSecurityMatrixServiceInheritedSecurityRequest) (*HttpSecurityMatrixServiceInheritedSecurityResponse, error)
-	BearerOrCookieSecurity(ctx context.Context, req *HttpSecurityMatrixServiceBearerOrCookieSecurityRequest) (*HttpSecurityMatrixServiceBearerOrCookieSecurityResponse, error)
-	AlternativeSecurity(ctx context.Context, req *HttpSecurityMatrixServiceAlternativeSecurityRequest) (*HttpSecurityMatrixServiceAlternativeSecurityResponse, error)
-	OauthSecurity(ctx context.Context, req *HttpSecurityMatrixServiceOauthSecurityRequest) (*HttpSecurityMatrixServiceOauthSecurityResponse, error)
-	PublicPing(ctx context.Context, req *HttpSecurityMatrixServicePublicPingRequest) (*HttpSecurityMatrixServicePublicPingResponse, error)
-}
-
-func RegisterHttpSecurityMatrixServiceHandler(r gin.IRouter, svc HttpSecurityMatrixServiceService) {
-	r.GET("/v2/security/inherited/:id", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
-		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityMatrixServiceInheritedSecuritySecurityRequirements())
-		if err != nil {
-			xidlgohttp.Unauthorized(c.Writer, HttpSecurityMatrixServiceInheritedSecuritySecurityRequirements())
-			return
-		}
-		c.Request = c.Request.WithContext(ctx)
-		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
-			return
-		}
-
-		req := &HttpSecurityMatrixServiceInheritedSecurityRequest{}
-
-		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			req.Id = value
-		} else {
-			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		if value, err := xidlgohttp.HeaderString(c.Request.Header, "x_trace_id"); err == nil {
-			req.XTraceId = value
-		} else {
-			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
-			return
-		}
-		resp, err := svc.InheritedSecurity(c.Request.Context(), req)
-		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
-			}
-			return
-		}
-
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
-		}
-	})
-	r.POST("/v2/security/bearer-cookie", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
-		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityMatrixServiceBearerOrCookieSecuritySecurityRequirements())
-		if err != nil {
-			xidlgohttp.Unauthorized(c.Writer, HttpSecurityMatrixServiceBearerOrCookieSecuritySecurityRequirements())
-			return
-		}
-		c.Request = c.Request.WithContext(ctx)
-		if err := xidlgohttp.GinRequireContentType(c, "application/json"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
-			return
-		}
-
-		req := &HttpSecurityMatrixServiceBearerOrCookieSecurityRequest{}
-		body := HttpSecurityMatrixServiceBearerOrCookieSecurityRequestBody{}
-		if err := xidlgohttp.GinDecodeBody(c, "application/json", &body); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
-			return
-		}
-		req.Action = body.Action
-		req.Note = body.Note
-		resp, err := svc.BearerOrCookieSecurity(c.Request.Context(), req)
-		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
-			}
-			return
-		}
-
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
-		}
-	})
-	r.GET("/v2/security/alternatives/:id", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
-		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityMatrixServiceAlternativeSecuritySecurityRequirements())
-		if err != nil {
-			xidlgohttp.Unauthorized(c.Writer, HttpSecurityMatrixServiceAlternativeSecuritySecurityRequirements())
-			return
-		}
-		c.Request = c.Request.WithContext(ctx)
-		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
-			return
-		}
-
-		req := &HttpSecurityMatrixServiceAlternativeSecurityRequest{}
-
-		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			req.Id = value
-		} else {
-			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		req.Locale = xidlgohttp.QueryOptionalString(c.Request.URL.Query(), "locale")
-		resp, err := svc.AlternativeSecurity(c.Request.Context(), req)
-		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
-			}
-			return
-		}
-
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
-		}
-	})
-	r.POST("/v2/security/oauth-search", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
-		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityMatrixServiceOauthSecuritySecurityRequirements())
-		if err != nil {
-			xidlgohttp.Unauthorized(c.Writer, HttpSecurityMatrixServiceOauthSecuritySecurityRequirements())
-			return
-		}
-		c.Request = c.Request.WithContext(ctx)
-		if err := xidlgohttp.GinRequireContentType(c, "application/json"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
-			return
-		}
-
-		req := &HttpSecurityMatrixServiceOauthSecurityRequest{}
-		body := HttpSecurityMatrixServiceOauthSecurityRequestBody{}
-		if err := xidlgohttp.GinDecodeBody(c, "application/json", &body); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
-			return
-		}
-		req.Keyword = body.Keyword
-		req.Page = body.Page
-		resp, err := svc.OauthSecurity(c.Request.Context(), req)
-		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
-			}
-			return
-		}
-
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
-		}
-	})
-	r.GET("/v2/security/public/ping", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
-		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
-			return
-		}
-
-		req := &HttpSecurityMatrixServicePublicPingRequest{}
-		resp, err := svc.PublicPing(c.Request.Context(), req)
-		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
-			}
-			return
-		}
-
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
-		}
-	})
-}
-
-type HttpSecurityMatrixServiceClient struct {
-	baseURL    string
-	httpClient *http.Client
-	auth       xidlgohttp.ClientAuth
-}
-
-func NewHttpSecurityMatrixServiceClient(baseURL string, httpClient *http.Client, auth xidlgohttp.ClientAuth) *HttpSecurityMatrixServiceClient {
-	if httpClient == nil {
-		httpClient = http.DefaultClient
-	}
-	return &HttpSecurityMatrixServiceClient{baseURL: strings.TrimRight(baseURL, "/"), httpClient: httpClient, auth: auth}
-}
-
-func (c *HttpSecurityMatrixServiceClient) InheritedSecurity(ctx context.Context, req *HttpSecurityMatrixServiceInheritedSecurityRequest) (*HttpSecurityMatrixServiceInheritedSecurityResponse, error) {
-	requestURL := c.baseURL + formatHttpSecurityMatrixServiceInheritedSecurityPath(req)
-	httpReq, err := http.NewRequestWithContext(ctx, "GET", requestURL, nil)
-	if err != nil {
-		return nil, err
-	}
-	httpReq.Header.Set("Accept", "text/plain")
-
-	httpReq.Header.Set("x_trace_id", req.XTraceId)
-	xidlgohttp.ApplyClientAuth(httpReq, c.auth, HttpSecurityMatrixServiceInheritedSecuritySecurityRequirements())
-	resp, err := c.httpClient.Do(httpReq)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
-	}
-	decoded, err := decodeHttpSecurityMatrixServiceInheritedSecurityResponse(resp)
-	if err != nil {
-		return nil, err
-	}
-	return &decoded, nil
-}
-
-func (c *HttpSecurityMatrixServiceClient) BearerOrCookieSecurity(ctx context.Context, req *HttpSecurityMatrixServiceBearerOrCookieSecurityRequest) (*HttpSecurityMatrixServiceBearerOrCookieSecurityResponse, error) {
-	requestURL := c.baseURL + formatHttpSecurityMatrixServiceBearerOrCookieSecurityPath(req)
-	body := HttpSecurityMatrixServiceBearerOrCookieSecurityRequestBody{
-		Action: req.Action,
-		Note:   req.Note,
-	}
-	var requestBody bytes.Buffer
-	if err := xidlgohttp.MustCodecForMime("application/json").Encode(&requestBody, body); err != nil {
-		return nil, err
-	}
-	httpReq, err := http.NewRequestWithContext(ctx, "POST", requestURL, &requestBody)
-	if err != nil {
-		return nil, err
-	}
-	httpReq.Header.Set("Content-Type", "application/json")
-	httpReq.Header.Set("Accept", "text/plain")
-	xidlgohttp.ApplyClientAuth(httpReq, c.auth, HttpSecurityMatrixServiceBearerOrCookieSecuritySecurityRequirements())
-	resp, err := c.httpClient.Do(httpReq)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
-	}
-	decoded, err := decodeHttpSecurityMatrixServiceBearerOrCookieSecurityResponse(resp)
-	if err != nil {
-		return nil, err
-	}
-	return &decoded, nil
-}
-
-func (c *HttpSecurityMatrixServiceClient) AlternativeSecurity(ctx context.Context, req *HttpSecurityMatrixServiceAlternativeSecurityRequest) (*HttpSecurityMatrixServiceAlternativeSecurityResponse, error) {
-	requestURL := c.baseURL + formatHttpSecurityMatrixServiceAlternativeSecurityPath(req)
-	query := url.Values{}
-
-	if req.Locale != nil {
-		query.Set("locale", *req.Locale)
-	}
-	if encoded := query.Encode(); encoded != "" {
-		requestURL += "?" + encoded
-	}
-	httpReq, err := http.NewRequestWithContext(ctx, "GET", requestURL, nil)
-	if err != nil {
-		return nil, err
-	}
-	httpReq.Header.Set("Accept", "text/plain")
-	xidlgohttp.ApplyClientAuth(httpReq, c.auth, HttpSecurityMatrixServiceAlternativeSecuritySecurityRequirements())
-	resp, err := c.httpClient.Do(httpReq)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
-	}
-	decoded, err := decodeHttpSecurityMatrixServiceAlternativeSecurityResponse(resp)
-	if err != nil {
-		return nil, err
-	}
-	return &decoded, nil
-}
-
-func (c *HttpSecurityMatrixServiceClient) OauthSecurity(ctx context.Context, req *HttpSecurityMatrixServiceOauthSecurityRequest) (*HttpSecurityMatrixServiceOauthSecurityResponse, error) {
-	requestURL := c.baseURL + formatHttpSecurityMatrixServiceOauthSecurityPath(req)
-	body := HttpSecurityMatrixServiceOauthSecurityRequestBody{
-		Keyword: req.Keyword,
-		Page:    req.Page,
-	}
-	var requestBody bytes.Buffer
-	if err := xidlgohttp.MustCodecForMime("application/json").Encode(&requestBody, body); err != nil {
-		return nil, err
-	}
-	httpReq, err := http.NewRequestWithContext(ctx, "POST", requestURL, &requestBody)
-	if err != nil {
-		return nil, err
-	}
-	httpReq.Header.Set("Content-Type", "application/json")
-	httpReq.Header.Set("Accept", "text/plain")
-	xidlgohttp.ApplyClientAuth(httpReq, c.auth, HttpSecurityMatrixServiceOauthSecuritySecurityRequirements())
-	resp, err := c.httpClient.Do(httpReq)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
-	}
-	decoded, err := decodeHttpSecurityMatrixServiceOauthSecurityResponse(resp)
-	if err != nil {
-		return nil, err
-	}
-	return &decoded, nil
-}
-
-func (c *HttpSecurityMatrixServiceClient) PublicPing(ctx context.Context, req *HttpSecurityMatrixServicePublicPingRequest) (*HttpSecurityMatrixServicePublicPingResponse, error) {
-	requestURL := c.baseURL + formatHttpSecurityMatrixServicePublicPingPath(req)
-	httpReq, err := http.NewRequestWithContext(ctx, "GET", requestURL, nil)
-	if err != nil {
-		return nil, err
-	}
-	httpReq.Header.Set("Accept", "text/plain")
-	resp, err := c.httpClient.Do(httpReq)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
-	}
-	decoded, err := decodeHttpSecurityMatrixServicePublicPingResponse(resp)
-	if err != nil {
-		return nil, err
-	}
-	return &decoded, nil
 }
 
 type HttpSecurityMatrixServiceInheritedSecurityRequest struct {

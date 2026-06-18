@@ -2,7 +2,9 @@ use crate::error::IdlcResult;
 use xidl_parser::hir;
 use xidl_parser::rest_hir::RestHirDocument;
 
-use super::GoRestRenderer;
+use super::{
+    GoRestRenderBlocks, GoRestRenderContext, GoRestRenderMode, GoRestRenderOutput, GoRestRenderer,
+};
 
 pub(crate) fn render_spec(
     spec: &hir::Specification,
@@ -11,45 +13,51 @@ pub(crate) fn render_spec(
     properties: &xidl_parser::hir::ParserProperties,
 ) -> IdlcResult<String> {
     let renderer = GoRestRenderer::new()?;
-    let mut blocks = Vec::new();
+    let context = GoRestRenderContext {
+        renderer: &renderer,
+        rest_hir,
+        mode: GoRestRenderMode::from_properties(properties)?,
+    };
+    let mut template_properties = properties.clone();
+    template_properties.insert(
+        "enable_client".to_string(),
+        context.mode.enable_client.into(),
+    );
+    template_properties.insert(
+        "enable_server".to_string(),
+        context.mode.enable_server.into(),
+    );
+    let mut blocks = GoRestRenderBlocks::default();
     for def in &spec.0 {
-        let mut block = String::new();
-        render_definition(&mut block, def, &[], &renderer, rest_hir)?;
-        if !block.is_empty() {
-            blocks.push(block);
-        }
+        blocks.extend(render_definition(def, &[], &context)?);
     }
-    renderer
-        .render_template(
-            "spec.go.j2",
-            &serde_json::json!({
-                "package_name": package_name,
-                "blocks": blocks,
-                "opt": properties,
-            }),
-        )
-        .and_then(|rendered| super::render::format_go_source(&rendered))
+    renderer.render_spec(&GoRestRenderOutput {
+        package_name: package_name.to_string(),
+        blocks,
+        opt: template_properties,
+    })
 }
 
 fn render_definition(
-    out: &mut String,
     def: &hir::Definition,
     prefix: &[String],
-    renderer: &GoRestRenderer,
-    rest_hir: &RestHirDocument,
-) -> IdlcResult<()> {
+    context: &GoRestRenderContext<'_>,
+) -> IdlcResult<GoRestRenderBlocks> {
+    let mut blocks = GoRestRenderBlocks::default();
     match def {
         hir::Definition::ModuleDcl(module) => {
             let mut next = prefix.to_vec();
             next.push(module.ident.clone());
             for def in &module.definition {
-                render_definition(out, def, &next, renderer, rest_hir)?;
+                blocks.extend(render_definition(def, &next, context)?);
             }
         }
         hir::Definition::InterfaceDcl(interface) => {
-            super::interface::render_interface(out, interface, prefix, renderer, rest_hir)?
+            blocks.extend(super::interface::render_interface(
+                interface, prefix, context,
+            )?);
         }
         _ => {}
     }
-    Ok(())
+    Ok(blocks)
 }

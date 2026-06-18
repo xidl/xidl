@@ -75,6 +75,20 @@ fn case_props(folder: &str, case_name: &str) -> HashMap<String, serde_json::Valu
     HashMap::from([(String::from("enable_metadata"), true.into())])
 }
 
+async fn generate_go_rest_with_props(props: HashMap<String, serde_json::Value>) -> String {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("golang-http")
+        .join("http_defaults.idl");
+    let source = fs::read_to_string(&path).expect("read idl");
+    let mut generator = xidlc::driver::Generator::new(String::from("go-rest"));
+    let files = generator
+        .generate_from_idl(&source, &path, props)
+        .await
+        .expect("generate go-rest");
+    render_output(files)
+}
+
 #[tokio::test(flavor = "current_thread")]
 async fn codegen_snapshots_from_idl_folders() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests");
@@ -128,4 +142,59 @@ async fn generated_header_uses_compiler_metadata_overrides() {
         output.contains(&expected),
         "generated header should use compiler metadata overrides: {output}"
     );
+}
+
+#[tokio::test(flavor = "current_thread")]
+async fn go_rest_server_flag_omits_client_code() {
+    let output = generate_go_rest_with_props(HashMap::from([
+        (String::from("enable_client"), false.into()),
+        (String::from("enable_server"), true.into()),
+    ]))
+    .await;
+
+    assert!(output.contains("type HttpDefaultsServiceService interface"));
+    assert!(output.contains("func RegisterHttpDefaultsServiceHandler"));
+    assert!(!output.contains("type HttpDefaultsServiceClient struct"));
+    assert!(!output.contains("func NewHttpDefaultsServiceClient"));
+}
+
+#[tokio::test(flavor = "current_thread")]
+async fn go_rest_client_flag_omits_server_code() {
+    let output = generate_go_rest_with_props(HashMap::from([
+        (String::from("enable_client"), true.into()),
+        (String::from("enable_server"), false.into()),
+    ]))
+    .await;
+
+    assert!(output.contains("type HttpDefaultsServiceClient struct"));
+    assert!(output.contains("func NewHttpDefaultsServiceClient"));
+    assert!(!output.contains("type HttpDefaultsServiceService interface"));
+    assert!(!output.contains("func RegisterHttpDefaultsServiceHandler"));
+    assert!(!output.contains("\"github.com/gin-gonic/gin\""));
+}
+
+#[tokio::test(flavor = "current_thread")]
+async fn go_rest_rejects_empty_client_server_mode() {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("golang-http")
+        .join("http_defaults.idl");
+    let source = fs::read_to_string(&path).expect("read idl");
+    let mut generator = xidlc::driver::Generator::new(String::from("go-rest"));
+    let result = generator
+        .generate_from_idl(
+            &source,
+            &path,
+            HashMap::from([
+                (String::from("enable_client"), false.into()),
+                (String::from("enable_server"), false.into()),
+            ]),
+        )
+        .await;
+    let err = match result {
+        Ok(_) => panic!("empty go-rest mode should fail"),
+        Err(err) => err,
+    };
+
+    assert!(err.to_string().contains("enable_client or enable_server"));
 }

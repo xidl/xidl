@@ -19,7 +19,7 @@ impl GoRestRenderer {
         Ok(Self { env })
     }
 
-    pub fn render_spec(&self, output: &GoRestRenderOutput) -> IdlcResult<String> {
+    pub(crate) fn render_spec(&self, output: &GoRestRenderOutput) -> IdlcResult<String> {
         let rendered = self.render_template("spec.go.j2", output)?;
         format_go_source(&rendered)
     }
