@@ -108,7 +108,7 @@
           "type": "toml"
         },
         {
-          "jsonpath": "$.package[?(@.name.value=='xidl-examples')].version",
+          "jsonpath": "$.package[?(@.name.value=='xidlc-examples')].version",
           "path": "Cargo.lock",
           "type": "toml"
         },
