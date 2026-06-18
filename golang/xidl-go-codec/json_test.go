@@ -55,6 +55,17 @@ type ConflictOuter struct {
 	A string `xjson:"a"` // shadows SimpleStruct.A
 }
 
+type StandardJSONStruct struct {
+	Id      string `json:"id"`
+	Name    string `json:"name,omitempty"`
+	Count   int    `json:"count,string"`
+	Ignored bool   `json:"-"`
+}
+
+type XJSONPreferredStruct struct {
+	Id string `json:"id" xjson:"xid"`
+}
+
 func TestMarshalStruct(t *testing.T) {
 	s := SimpleStruct{A: 10, B: "", C: true, D: 42}
 	got, err := Marshal(s)
@@ -91,6 +102,53 @@ func TestMarshalStruct(t *testing.T) {
 	if string(got) != want {
 		t.Errorf("Marshal(ConflictOuter) = %s, want %s", got, want)
 	}
+}
+
+func TestStandardJSONTags(t *testing.T) {
+	t.Run("marshal", func(t *testing.T) {
+		got, err := Marshal(StandardJSONStruct{
+			Id:      "abc",
+			Count:   42,
+			Ignored: true,
+		})
+		if err != nil {
+			t.Fatalf("Marshal failed: %v", err)
+		}
+
+		want := `{"id":"abc","count":"42"}`
+		if string(got) != want {
+			t.Errorf("Marshal(StandardJSONStruct) = %s, want %s", got, want)
+		}
+	})
+
+	t.Run("unmarshal", func(t *testing.T) {
+		var got StandardJSONStruct
+		data := []byte(`{"id":"abc","name":"Alice","count":"42","Ignored":true}`)
+		if err := Unmarshal(data, &got); err != nil {
+			t.Fatalf("Unmarshal failed: %v", err)
+		}
+
+		want := StandardJSONStruct{
+			Id:    "abc",
+			Name:  "Alice",
+			Count: 42,
+		}
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("Unmarshal(StandardJSONStruct) = %+v, want %+v", got, want)
+		}
+	})
+
+	t.Run("xjson tag has priority", func(t *testing.T) {
+		got, err := Marshal(XJSONPreferredStruct{Id: "abc"})
+		if err != nil {
+			t.Fatalf("Marshal failed: %v", err)
+		}
+
+		want := `{"xid":"abc"}`
+		if string(got) != want {
+			t.Errorf("Marshal(XJSONPreferredStruct) = %s, want %s", got, want)
+		}
+	})
 }
 
 func TestUnmarshalBasic(t *testing.T) {

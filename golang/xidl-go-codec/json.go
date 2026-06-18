@@ -159,6 +159,16 @@ func parseTag(tag string) (string, fieldOptions) {
 	return tag, ""
 }
 
+func structTag(f reflect.StructField) (string, bool) {
+	if tag, ok := f.Tag.Lookup("xjson"); ok {
+		return tag, tag != ""
+	}
+	if tag, ok := f.Tag.Lookup("json"); ok {
+		return tag, tag != ""
+	}
+	return "", false
+}
+
 func (o fieldOptions) Contains(option string) bool {
 	if len(o) == 0 {
 		return false
@@ -248,7 +258,7 @@ func typeFields(t reflect.Type) structFields {
 				}
 			}
 
-			tag := f.Tag.Get("xjson")
+			tag, tagged := structTag(f)
 			if tag == "-" {
 				continue
 			}
@@ -275,7 +285,7 @@ func typeFields(t reflect.Type) structFields {
 						name:      f.Name,
 						index:     index,
 						typ:       f.Type,
-						tag:       tag != "",
+						tag:       tagged,
 						tagged:    tagName,
 						omitempty: opts.Contains("omitempty"),
 						asString:  opts.Contains("string"),
@@ -294,7 +304,7 @@ func typeFields(t reflect.Type) structFields {
 				name:      name,
 				index:     index,
 				typ:       f.Type,
-				tag:       tag != "",
+				tag:       tagged,
 				tagged:    tagName,
 				omitempty: opts.Contains("omitempty"),
 				asString:  opts.Contains("string"),
