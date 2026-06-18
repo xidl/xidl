@@ -16,7 +16,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.79.1"
+version = "0.80.0"
 edition = "2024"
 description = "A IDL codegen."
 license = "Apache-2.0"
@@ -29,12 +29,12 @@ repository = "https://github.com/xidl/xidl"
 strip = true
 
 [workspace.dependencies]
-xidl-parser = { version = "0.79.1", path = "xidl-parser" }
-xidl-parser-derive = { version = "0.79.1", path = "xidl-parser-derive" }
-xidl-jsonrpc = { version = "0.79.1", path = "xidl-jsonrpc" }
-xidl-rust-axum = { version = "0.79.1", path = "xidl-rust-axum" }
-xidl-build = { version = "0.79.1", path = "xidl-build" }
-xidlc = { version = "0.79.1", path = "xidlc" }
+xidl-parser = { version = "0.80.0", path = "xidl-parser" }
+xidl-parser-derive = { version = "0.80.0", path = "xidl-parser-derive" }
+xidl-jsonrpc = { version = "0.80.0", path = "xidl-jsonrpc" }
+xidl-rust-axum = { version = "0.80.0", path = "xidl-rust-axum" }
+xidl-build = { version = "0.80.0", path = "xidl-build" }
+xidlc = { version = "0.80.0", path = "xidlc" }
 
 async-trait = "0.1.89"
 async-stream = "0.3"
