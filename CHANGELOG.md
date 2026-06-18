@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.80.1](https://github.com/xidl/xidl/compare/v0.80.0...v0.80.1) (2026-06-18)
+
+
+### Bug Fixes
+
+* **go-rest:** honor client and server generation flags ([f99999f](https://github.com/xidl/xidl/commit/f99999f2e03da78160d277c38f6d3f21276e0234))
+
 ## [0.80.0](https://github.com/xidl/xidl/compare/v0.79.1...v0.80.0) (2026-06-18)
 
 
