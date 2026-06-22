@@ -1,0 +1,25 @@
+const int32 answer = 42;
+
+typedef sequence<string> NameSeq;
+typedef long Count;
+
+exception ServiceError {
+    string message;
+    long code;
+};
+
+bitmask AccessMask {
+    Read,
+    Write
+};
+
+bitset Flags {
+    bitfield<1> active;
+};
+
+union Result switch (int32) {
+    case 0:
+        long number;
+    case 1:
+        string text;
+};

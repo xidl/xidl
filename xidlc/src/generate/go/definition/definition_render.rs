@@ -1,12 +1,15 @@
 use crate::error::IdlcResult;
 use crate::generate::go::{GoRenderContext, ParamDirection};
 use convert_case::{Case, Casing};
-use std::fmt::Write;
 use xidl_parser::hir;
 
 use super::definition_attr::render_attr_types;
 use super::definition_names::{go_export_name, go_field_name};
 use super::definition_support::{is_out_param, operation_params, param_direction};
+use super::definition_templates::{
+    ConstTemplate, FieldTemplate, InterfaceTemplate, MethodTemplate, OperationTypesTemplate,
+    StructTemplate, render_field_block, render_method_block,
+};
 use super::definition_type_render::{render_exception, render_type_dcl};
 use super::definition_types::{go_const_type, go_type, render_const_expr};
 
@@ -18,9 +21,7 @@ pub(super) fn render_const(
     let name = go_export_name(prefix, &def.ident);
     let ty = go_const_type(&def.ty);
     let value = render_const_expr(&def.value)?;
-    writeln!(&mut ctx.body, "const {name} {ty} = {value}").unwrap();
-    writeln!(&mut ctx.body).unwrap();
-    Ok(())
+    ctx.push_template("const.go.j2", &ConstTemplate { name, ty, value })
 }
 
 pub(super) fn render_interface(
@@ -39,9 +40,12 @@ pub(super) fn render_interface(
         for export in &body.0 {
             match export {
                 hir::Export::OpDcl(op) => {
-                    let (request_name, response_name) =
-                        render_operation_types(ctx, &interface_name, op, container_annotations)?;
-                    methods.push((go_field_name(&op.ident), request_name, response_name));
+                    methods.push(render_operation_types(
+                        ctx,
+                        &interface_name,
+                        op,
+                        container_annotations,
+                    )?);
                 }
                 hir::Export::AttrDcl(attr) => {
                     methods.extend(render_attr_types(ctx, &interface_name, attr)?)
@@ -52,17 +56,13 @@ pub(super) fn render_interface(
             }
         }
     }
-    writeln!(&mut ctx.body, "type {interface_name} interface {{").unwrap();
-    for (method_name, request_name, response_name) in methods {
-        writeln!(
-            &mut ctx.body,
-            "\t{method_name}(ctx context.Context, req *{request_name}) (*{response_name}, error)"
-        )
-        .unwrap();
-    }
-    writeln!(&mut ctx.body, "}}").unwrap();
-    writeln!(&mut ctx.body).unwrap();
-    Ok(())
+    ctx.push_template(
+        "interface.go.j2",
+        &InterfaceTemplate {
+            name: interface_name,
+            methods: render_method_block(ctx, &methods)?,
+        },
+    )
 }
 
 fn render_operation_types(
@@ -70,7 +70,7 @@ fn render_operation_types(
     interface_name: &str,
     op: &hir::OpDcl,
     container_annotations: &[hir::Annotation],
-) -> IdlcResult<(String, String)> {
+) -> IdlcResult<MethodTemplate> {
     let request_name = format!(
         "{}{}Request",
         interface_name,
@@ -81,7 +81,7 @@ fn render_operation_types(
         interface_name,
         op.ident.to_case(Case::Pascal)
     );
-    writeln!(&mut ctx.body, "type {request_name} struct {{").unwrap();
+    let mut request_fields = Vec::new();
     for param in operation_params(op)
         .iter()
         .filter(|param| !is_out_param(param.attr.as_ref()))
@@ -93,19 +93,20 @@ fn render_operation_types(
         } else {
             hir::effective_wire_name(raw_name, &param.annotations, container_annotations)
         };
-        writeln!(
-            &mut ctx.body,
-            "\t{field} {} `xjson:\"{wire_name}\"`",
-            go_type(&param.ty),
-        )
-        .unwrap();
+        request_fields.push(FieldTemplate {
+            name: field,
+            ty: go_type(&param.ty),
+            tag: wire_name,
+        });
     }
-    writeln!(&mut ctx.body, "}}").unwrap();
-    writeln!(&mut ctx.body).unwrap();
 
-    writeln!(&mut ctx.body, "type {response_name} struct {{").unwrap();
+    let mut response_fields = Vec::new();
     if let hir::OpTypeSpec::TypeSpec(ty) = &op.ty {
-        writeln!(&mut ctx.body, "\tReturn {} `xjson:\"return\"`", go_type(ty)).unwrap();
+        response_fields.push(FieldTemplate {
+            name: "Return".to_string(),
+            ty: go_type(ty),
+            tag: "return".to_string(),
+        });
     }
     for param in operation_params(op).iter().filter(|param| {
         matches!(
@@ -120,14 +121,28 @@ fn render_operation_types(
         } else {
             hir::effective_wire_name(raw_name, &param.annotations, container_annotations)
         };
-        writeln!(
-            &mut ctx.body,
-            "\t{field} {} `xjson:\"{wire_name}\"`",
-            go_type(&param.ty),
-        )
-        .unwrap();
+        response_fields.push(FieldTemplate {
+            name: field,
+            ty: go_type(&param.ty),
+            tag: wire_name,
+        });
     }
-    writeln!(&mut ctx.body, "}}").unwrap();
-    writeln!(&mut ctx.body).unwrap();
-    Ok((request_name, response_name))
+    ctx.push_template(
+        "operation_types.go.j2",
+        &OperationTypesTemplate {
+            request: StructTemplate {
+                name: request_name.clone(),
+                fields: render_field_block(ctx, request_fields)?,
+            },
+            response: StructTemplate {
+                name: response_name.clone(),
+                fields: render_field_block(ctx, response_fields)?,
+            },
+        },
+    )?;
+    Ok(MethodTemplate {
+        name: go_field_name(&op.ident),
+        request_name,
+        response_name,
+    })
 }

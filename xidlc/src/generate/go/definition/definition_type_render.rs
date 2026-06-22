@@ -1,11 +1,14 @@
 use crate::error::IdlcResult;
 use crate::generate::go::GoRenderContext;
 use convert_case::{Case, Casing};
-use std::fmt::Write;
 use xidl_parser::hir::{self, effective_wire_name};
 
 use super::definition_names::{go_export_name, go_field_name, pointer_type};
 use super::definition_support::declarator_name;
+use super::definition_templates::{
+    EnumMemberTemplate, EnumTemplate, ExceptionTemplate, FieldTemplate, StructTemplate,
+    TypeDeclTemplate, render_enum_member_block, render_field_block,
+};
 use super::definition_types::{constr_type_name, type_with_decl};
 
 pub(super) fn render_type_dcl(
@@ -18,9 +21,14 @@ pub(super) fn render_type_dcl(
         hir::TypeDcl::TypedefDcl(typedef) => render_typedef(ctx, typedef, prefix),
         hir::TypeDcl::NativeDcl(native) => {
             let name = go_export_name(prefix, &native.decl.0);
-            writeln!(&mut ctx.body, "type {name} any").unwrap();
-            writeln!(&mut ctx.body).unwrap();
-            Ok(())
+            ctx.push_template(
+                "type_decl.go.j2",
+                &TypeDeclTemplate {
+                    name,
+                    ty: "any".to_string(),
+                    alias: false,
+                },
+            )
         }
     }
 }
@@ -31,12 +39,13 @@ pub(super) fn render_exception(
     prefix: &[String],
 ) -> IdlcResult<()> {
     let name = go_export_name(prefix, &def.ident);
-    render_field_struct(ctx, &name, &def.member, &[]);
-    writeln!(&mut ctx.body, "func (e *{name}) Error() string {{").unwrap();
-    writeln!(&mut ctx.body, "\treturn \"{name}\"").unwrap();
-    writeln!(&mut ctx.body, "}}").unwrap();
-    writeln!(&mut ctx.body).unwrap();
-    Ok(())
+    ctx.push_template(
+        "exception.go.j2",
+        &ExceptionTemplate {
+            name,
+            fields: render_field_block(ctx, field_templates(&def.member, &[]))?,
+        },
+    )
 }
 
 fn render_typedef(
@@ -49,28 +58,28 @@ fn render_typedef(
             for decl in &def.decl {
                 let name = go_field_name(declarator_name(decl));
                 let base = type_with_decl(ty, decl);
-                writeln!(
-                    &mut ctx.body,
-                    "type {} = {}",
-                    go_export_name(prefix, &name),
-                    base
-                )
-                .unwrap();
-                writeln!(&mut ctx.body).unwrap();
+                ctx.push_template(
+                    "type_decl.go.j2",
+                    &TypeDeclTemplate {
+                        name: go_export_name(prefix, &name),
+                        ty: base,
+                        alias: true,
+                    },
+                )?;
             }
         }
         hir::TypedefType::ConstrTypeDcl(constr) => {
             render_constr_type(ctx, constr, prefix)?;
             let base = constr_type_name(constr, prefix);
             for decl in &def.decl {
-                writeln!(
-                    &mut ctx.body,
-                    "type {} = {}",
-                    go_export_name(prefix, declarator_name(decl)),
-                    base
-                )
-                .unwrap();
-                writeln!(&mut ctx.body).unwrap();
+                ctx.push_template(
+                    "type_decl.go.j2",
+                    &TypeDeclTemplate {
+                        name: go_export_name(prefix, declarator_name(decl)),
+                        ty: base.clone(),
+                        alias: true,
+                    },
+                )?;
             }
         }
     }
@@ -95,16 +104,14 @@ fn render_constr_type(
             &go_export_name(prefix, &def.ident),
             &[("Bits", "uint64", "bits")],
         ),
-        hir::ConstrTypeDcl::BitmaskDcl(def) => {
-            writeln!(
-                &mut ctx.body,
-                "type {} uint64",
-                go_export_name(prefix, &def.ident)
-            )
-            .unwrap();
-            writeln!(&mut ctx.body).unwrap();
-            Ok(())
-        }
+        hir::ConstrTypeDcl::BitmaskDcl(def) => ctx.push_template(
+            "type_decl.go.j2",
+            &TypeDeclTemplate {
+                name: go_export_name(prefix, &def.ident),
+                ty: "uint64".to_string(),
+                alias: false,
+            },
+        ),
         hir::ConstrTypeDcl::StructForwardDcl(_) | hir::ConstrTypeDcl::UnionForwardDcl(_) => Ok(()),
     }
 }
@@ -116,26 +123,31 @@ fn render_struct(
 ) -> IdlcResult<()> {
     render_field_struct(
         ctx,
-        &go_export_name(prefix, &def.ident),
+        go_export_name(prefix, &def.ident),
         &def.member,
         &def.annotations,
-    );
-    Ok(())
+    )
 }
 
 fn render_enum(ctx: &mut GoRenderContext, def: &hir::EnumDcl, prefix: &[String]) -> IdlcResult<()> {
     let name = go_export_name(prefix, &def.ident);
-    writeln!(&mut ctx.body, "type {name} string").unwrap();
-    writeln!(&mut ctx.body).unwrap();
-    writeln!(&mut ctx.body, "const (").unwrap();
+    let mut members = Vec::new();
     for member in &def.member {
         let value_name = format!("{}{}", name, member.ident.to_case(Case::Pascal));
         let wire_name = effective_wire_name(&member.ident, &member.annotations, &def.annotations);
-        writeln!(&mut ctx.body, "\t{value_name} {name} = \"{wire_name}\"").unwrap();
+        members.push(EnumMemberTemplate {
+            name: value_name,
+            enum_name: name.clone(),
+            wire_name,
+        });
     }
-    writeln!(&mut ctx.body, ")").unwrap();
-    writeln!(&mut ctx.body).unwrap();
-    Ok(())
+    ctx.push_template(
+        "enum.go.j2",
+        &EnumTemplate {
+            name,
+            members: render_enum_member_block(ctx, members)?,
+        },
+    )
 }
 
 fn render_simple_struct(
@@ -143,22 +155,45 @@ fn render_simple_struct(
     name: &str,
     fields: &[(&str, &str, &str)],
 ) -> IdlcResult<()> {
-    writeln!(&mut ctx.body, "type {name} struct {{").unwrap();
-    for (field, ty, tag) in fields {
-        writeln!(&mut ctx.body, "\t{field} {ty} `xjson:\"{tag}\"`").unwrap();
-    }
-    writeln!(&mut ctx.body, "}}").unwrap();
-    writeln!(&mut ctx.body).unwrap();
-    Ok(())
+    ctx.push_template(
+        "struct.go.j2",
+        &StructTemplate {
+            name: name.to_string(),
+            fields: render_field_block(
+                ctx,
+                fields
+                    .iter()
+                    .map(|(name, ty, tag)| FieldTemplate {
+                        name: (*name).to_string(),
+                        ty: (*ty).to_string(),
+                        tag: (*tag).to_string(),
+                    })
+                    .collect(),
+            )?,
+        },
+    )
 }
 
 fn render_field_struct(
     ctx: &mut GoRenderContext,
-    name: &str,
+    name: String,
     members: &[hir::Member],
     container_annotations: &[hir::Annotation],
-) {
-    writeln!(&mut ctx.body, "type {name} struct {{").unwrap();
+) -> IdlcResult<()> {
+    ctx.push_template(
+        "struct.go.j2",
+        &StructTemplate {
+            name,
+            fields: render_field_block(ctx, field_templates(members, container_annotations))?,
+        },
+    )
+}
+
+fn field_templates(
+    members: &[hir::Member],
+    container_annotations: &[hir::Annotation],
+) -> Vec<FieldTemplate> {
+    let mut fields = Vec::new();
     for member in members {
         let is_optional = member.is_optional();
         let is_skipped = hir::is_skipped(&member.annotations);
@@ -174,9 +209,12 @@ fn render_field_struct(
             } else {
                 effective_wire_name(raw_name, &member.annotations, container_annotations)
             };
-            writeln!(&mut ctx.body, "\t{field} {ty} `xjson:\"{wire_name}\"`").unwrap();
+            fields.push(FieldTemplate {
+                name: field,
+                ty,
+                tag: wire_name,
+            });
         }
     }
-    writeln!(&mut ctx.body, "}}").unwrap();
-    writeln!(&mut ctx.body).unwrap();
+    fields
 }
