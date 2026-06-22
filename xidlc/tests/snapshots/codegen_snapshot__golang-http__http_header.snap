@@ -54,10 +54,6 @@ type TestHeaderServiceService interface {
 
 func RegisterTestHeaderServiceHandler(r gin.IRouter, svc TestHeaderServiceService) {
 	r.GET("/v1/headers/:id", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return
@@ -117,10 +113,6 @@ func RegisterTestHeaderServiceHandler(r gin.IRouter, svc TestHeaderServiceServic
 		}
 	})
 	r.POST("/v1/headers", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, ""); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		if err := xidlgohttp.GinRequireContentType(c, "text/plain"); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return

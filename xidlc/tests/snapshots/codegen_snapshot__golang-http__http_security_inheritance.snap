@@ -42,10 +42,6 @@ type HttpSecurityInheritanceServiceService interface {
 
 func RegisterHttpSecurityInheritanceServiceHandler(r gin.IRouter, svc HttpSecurityInheritanceServiceService) {
 	r.GET("/reports/:id", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityInheritanceServiceGetReportSecurityRequirements())
 		if err != nil {
 			xidlgohttp.Unauthorized(c.Writer, HttpSecurityInheritanceServiceGetReportSecurityRequirements())
@@ -80,10 +76,6 @@ func RegisterHttpSecurityInheritanceServiceHandler(r gin.IRouter, svc HttpSecuri
 		}
 	})
 	r.POST("/reports/:id", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityInheritanceServiceUpdateReportSecurityRequirements())
 		if err != nil {
 			xidlgohttp.Unauthorized(c.Writer, HttpSecurityInheritanceServiceUpdateReportSecurityRequirements())
@@ -124,10 +116,6 @@ func RegisterHttpSecurityInheritanceServiceHandler(r gin.IRouter, svc HttpSecuri
 		}
 	})
 	r.GET("/health", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return

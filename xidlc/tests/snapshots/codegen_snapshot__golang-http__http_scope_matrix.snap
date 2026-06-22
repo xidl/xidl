@@ -54,10 +54,6 @@ type HttpScopeMatrixServiceService interface {
 
 func RegisterHttpScopeMatrixServiceHandler(r gin.IRouter, svc HttpScopeMatrixServiceService) {
 	r.GET("/attribute/inherited_attr", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return
@@ -79,10 +75,6 @@ func RegisterHttpScopeMatrixServiceHandler(r gin.IRouter, svc HttpScopeMatrixSer
 		}
 	})
 	r.GET("/attribute/bare_attr", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return
@@ -350,10 +342,6 @@ type HttpSecurityMatrixServiceService interface {
 
 func RegisterHttpSecurityMatrixServiceHandler(r gin.IRouter, svc HttpSecurityMatrixServiceService) {
 	r.GET("/v2/security/inherited/:id", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityMatrixServiceInheritedSecuritySecurityRequirements())
 		if err != nil {
 			xidlgohttp.Unauthorized(c.Writer, HttpSecurityMatrixServiceInheritedSecuritySecurityRequirements())
@@ -395,10 +383,6 @@ func RegisterHttpSecurityMatrixServiceHandler(r gin.IRouter, svc HttpSecurityMat
 		}
 	})
 	r.POST("/v2/security/bearer-cookie", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityMatrixServiceBearerOrCookieSecuritySecurityRequirements())
 		if err != nil {
 			xidlgohttp.Unauthorized(c.Writer, HttpSecurityMatrixServiceBearerOrCookieSecuritySecurityRequirements())
@@ -433,10 +417,6 @@ func RegisterHttpSecurityMatrixServiceHandler(r gin.IRouter, svc HttpSecurityMat
 		}
 	})
 	r.GET("/v2/security/alternatives/:id", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityMatrixServiceAlternativeSecuritySecurityRequirements())
 		if err != nil {
 			xidlgohttp.Unauthorized(c.Writer, HttpSecurityMatrixServiceAlternativeSecuritySecurityRequirements())
@@ -473,10 +453,6 @@ func RegisterHttpSecurityMatrixServiceHandler(r gin.IRouter, svc HttpSecurityMat
 		}
 	})
 	r.POST("/v2/security/oauth-search", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityMatrixServiceOauthSecuritySecurityRequirements())
 		if err != nil {
 			xidlgohttp.Unauthorized(c.Writer, HttpSecurityMatrixServiceOauthSecuritySecurityRequirements())
@@ -511,10 +487,6 @@ func RegisterHttpSecurityMatrixServiceHandler(r gin.IRouter, svc HttpSecurityMat
 		}
 	})
 	r.GET("/v2/security/public/ping", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return

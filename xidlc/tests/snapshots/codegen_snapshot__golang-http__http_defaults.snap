@@ -50,10 +50,6 @@ type HttpDefaultsServiceService interface {
 
 func RegisterHttpDefaultsServiceHandler(r gin.IRouter, svc HttpDefaultsServiceService) {
 	r.POST("/get_name", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return
@@ -82,10 +78,6 @@ func RegisterHttpDefaultsServiceHandler(r gin.IRouter, svc HttpDefaultsServiceSe
 		}
 	})
 	r.GET("/list_orders/:uid", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return
@@ -143,10 +135,6 @@ func RegisterHttpDefaultsServiceHandler(r gin.IRouter, svc HttpDefaultsServiceSe
 		}
 	})
 	r.POST("/users", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		if err := xidlgohttp.GinRequireContentType(c, "application/json"); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return
@@ -174,10 +162,6 @@ func RegisterHttpDefaultsServiceHandler(r gin.IRouter, svc HttpDefaultsServiceSe
 		}
 	})
 	r.POST("/users/search", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		if err := xidlgohttp.GinRequireContentType(c, "application/json"); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return
@@ -206,10 +190,6 @@ func RegisterHttpDefaultsServiceHandler(r gin.IRouter, svc HttpDefaultsServiceSe
 		}
 	})
 	r.GET("/v1/users/:id", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return
@@ -250,10 +230,6 @@ func RegisterHttpDefaultsServiceHandler(r gin.IRouter, svc HttpDefaultsServiceSe
 		}
 	})
 	r.POST("/get_user_alias/:id", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return

@@ -105,7 +105,6 @@ class HttpResponseShapeServiceService(abc.ABC):
         raise NotImplementedError
 
 async def _http_response_shape_service_hello_endpoint(service: HttpResponseShapeServiceService, request: Request):
-    require_accept(request, "text/plain")
     request_value = HttpResponseShapeServiceHelloRequest()
     response_value = await service.hello(request_value)
     response_payload = getattr(response_value, 'value', getattr(response_value, 'return_', response_value))
@@ -125,7 +124,6 @@ def _http_response_shape_service_hello_route(service: HttpResponseShapeServiceSe
     )
 
 async def _http_response_shape_service_get_count_endpoint(service: HttpResponseShapeServiceService, request: Request):
-    require_accept(request, "text/plain")
     request_value = HttpResponseShapeServiceGetCountRequest()
     response_value = await service.get_count(request_value)
     response_payload = getattr(response_value, 'value', getattr(response_value, 'return_', response_value))
@@ -145,7 +143,6 @@ def _http_response_shape_service_get_count_route(service: HttpResponseShapeServi
     )
 
 async def _http_response_shape_service_add_endpoint(service: HttpResponseShapeServiceService, request: Request):
-    require_accept(request, "application/json")
     require_content_type(request, "application/json")
     body = read_json_body(request)
     request_value = HttpResponseShapeServiceAddRequest(
@@ -170,7 +167,6 @@ def _http_response_shape_service_add_route(service: HttpResponseShapeServiceServ
     )
 
 async def _http_response_shape_service_bump_endpoint(service: HttpResponseShapeServiceService, request: Request):
-    require_accept(request, "application/json")
     require_content_type(request, "text/plain")
     body = read_plain_body(request, "int")
     request_value = HttpResponseShapeServiceBumpRequest(
@@ -194,7 +190,6 @@ def _http_response_shape_service_bump_route(service: HttpResponseShapeServiceSer
     )
 
 async def _http_response_shape_service_ping_endpoint(service: HttpResponseShapeServiceService, request: Request):
-    require_accept(request, "")
     request_value = HttpResponseShapeServicePingRequest()
     response_value = await service.ping(request_value)
     response_payload = response_value

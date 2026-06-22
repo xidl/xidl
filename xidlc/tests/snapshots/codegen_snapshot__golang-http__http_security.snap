@@ -42,10 +42,6 @@ type HttpSecurityServiceService interface {
 
 func RegisterHttpSecurityServiceHandler(r gin.IRouter, svc HttpSecurityServiceService) {
 	r.GET("/users/:id", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityServiceGetUserSecurityRequirements())
 		if err != nil {
 			xidlgohttp.Unauthorized(c.Writer, HttpSecurityServiceGetUserSecurityRequirements())
@@ -94,10 +90,6 @@ func RegisterHttpSecurityServiceHandler(r gin.IRouter, svc HttpSecurityServiceSe
 		}
 	})
 	r.POST("/users/search", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityServiceSearchUserSecurityRequirements())
 		if err != nil {
 			xidlgohttp.Unauthorized(c.Writer, HttpSecurityServiceSearchUserSecurityRequirements())
@@ -132,10 +124,6 @@ func RegisterHttpSecurityServiceHandler(r gin.IRouter, svc HttpSecurityServiceSe
 		}
 	})
 	r.POST("/health", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return

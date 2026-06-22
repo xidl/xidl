@@ -179,13 +179,11 @@ Feature: REST API Generation and Communication
       | ts   |
 
   Scenario Outline: REST Bad Path - Not Acceptable
-    Given a REST IDL file "bdd/features/data/complex_rest.idl"
+    Given a REST IDL file "bdd/features/data/rest_media_types.idl"
     When I generate <lang> code for the IDL
     Then the generated <lang> code should be valid
     And I can run the generated <lang> server and client
-    # First create the user so it's not a 404
-    And the client can create a user with name "Alice" and id 1
-    Then the client gets a 406 error with msg containing "accept" when requesting GET "/1" with headers
+    Then the client gets a 406 error with msg containing "accept" when requesting GET "/v1/msgpack/users/1" with headers
       | name   | value      |
       | Accept | text/plain |
 

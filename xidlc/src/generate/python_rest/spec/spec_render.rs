@@ -71,12 +71,14 @@ pub(super) fn render_endpoint_helper(
         method.endpoint_name, interface_name
     )
     .unwrap();
-    writeln!(
-        out,
-        "    require_accept(request, {:?})",
-        method.response_content_type
-    )
-    .unwrap();
+    if method.response_content_type_explicit {
+        writeln!(
+            out,
+            "    require_accept(request, {:?})",
+            method.response_content_type
+        )
+        .unwrap();
+    }
     if method.requires_request_content_type {
         writeln!(
             out,

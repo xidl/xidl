@@ -35,10 +35,6 @@ type HttpStreamApiService interface {
 
 func RegisterHttpStreamApiHandler(r gin.IRouter, svc HttpStreamApiService) {
 	r.GET("/alerts/:district", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/event-stream"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpStreamApiAlertsSecurityRequirements())
 		if err != nil {
 			xidlgohttp.Unauthorized(c.Writer, HttpStreamApiAlertsSecurityRequirements())
@@ -70,10 +66,6 @@ func RegisterHttpStreamApiHandler(r gin.IRouter, svc HttpStreamApiService) {
 		_ = stream.Close()
 	})
 	r.POST("/upload", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpStreamApiUploadAssetSecurityRequirements())
 		if err != nil {
 			xidlgohttp.Unauthorized(c.Writer, HttpStreamApiUploadAssetSecurityRequirements())

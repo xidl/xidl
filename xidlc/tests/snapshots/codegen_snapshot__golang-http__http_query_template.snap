@@ -41,10 +41,6 @@ type HttpQueryTemplateServiceService interface {
 
 func RegisterHttpQueryTemplateServiceHandler(r gin.IRouter, svc HttpQueryTemplateServiceService) {
 	r.GET("/users/:id", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return
@@ -92,10 +88,6 @@ func RegisterHttpQueryTemplateServiceHandler(r gin.IRouter, svc HttpQueryTemplat
 		}
 	})
 	r.POST("/search", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		if err := xidlgohttp.GinRequireContentType(c, "text/plain"); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return

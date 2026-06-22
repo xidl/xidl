@@ -62,7 +62,6 @@ class HttpStreamApiService(abc.ABC):
         raise NotImplementedError
 
 async def _http_stream_api_alerts_endpoint(service: HttpStreamApiService, request: Request):
-    require_accept(request, "text/event-stream")
     _security = require_security(request, [SecurityRequirement(kind="basic", realm=None), ])
     request_value = HttpStreamApiAlertsRequest(
         district=read_scalar(path_value(request, "district"), "str", optional=False, default_on_missing=False, wire_name="district"),
@@ -85,7 +84,6 @@ def _http_stream_api_alerts_route(service: HttpStreamApiService) -> Route:
     )
 
 async def _http_stream_api_upload_asset_endpoint(service: HttpStreamApiService, request: Request):
-    require_accept(request, "text/plain")
     require_content_type(request, "application/x-ndjson")
     _security = require_security(request, [SecurityRequirement(kind="bearer"), ])
     body = read_json_body(request)

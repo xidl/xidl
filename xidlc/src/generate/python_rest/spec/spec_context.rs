@@ -37,6 +37,7 @@ pub(super) struct MethodContext {
     pub(super) response_type: String,
     pub(super) request_content_type: String,
     pub(super) response_content_type: String,
+    pub(super) response_content_type_explicit: bool,
     pub(super) requires_request_content_type: bool,
     pub(super) security_expr: String,
     pub(super) stream_expr: String,
@@ -159,6 +160,7 @@ pub(super) fn build_method(
             .content_type
             .clone()
             .unwrap_or_default(),
+        response_content_type_explicit: operation.http.response.body.content_type_explicit,
         requires_request_content_type: !matches!(
             operation.http.request.body.shape,
             HttpRequestBodyShape::Empty

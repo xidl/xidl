@@ -41,10 +41,6 @@ type RestMediaTypesApiService interface {
 
 func RegisterRestMediaTypesApiHandler(r gin.IRouter, svc RestMediaTypesApiService) {
 	r.POST("/v1/forms/profile", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "application/json"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		if err := xidlgohttp.GinRequireContentType(c, "application/x-www-form-urlencoded"); err != nil {
 			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
 			return
