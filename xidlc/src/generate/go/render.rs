@@ -1,6 +1,7 @@
 use crate::error::{IdlcError, IdlcResult};
 use include_dir::{Dir, include_dir};
 use minijinja::{Environment, Error, ErrorKind};
+use serde::Serialize;
 use xidl_parser::hir::ParserProperties;
 
 use super::GoRenderOutput;
@@ -14,16 +15,21 @@ pub struct GoRenderer {
 impl GoRenderer {
     pub fn new(properties: &ParserProperties) -> IdlcResult<Self> {
         let mut env = Environment::new();
+        env.set_keep_trailing_newline(true);
         env.set_loader(|name| load_template(name).map(Some));
         env.add_global("opt", minijinja::Value::from_serialize(properties));
         Ok(Self { env })
     }
 
     pub fn render_spec(&self, output: &GoRenderOutput) -> IdlcResult<String> {
+        self.render_template("spec.go.j2", output)
+    }
+
+    pub fn render_template<S: Serialize>(&self, name: &str, ctx: &S) -> IdlcResult<String> {
         self.env
-            .get_template("spec.go.j2")
+            .get_template(name)
             .map_err(|err| IdlcError::template(err.to_string()))?
-            .render(output)
+            .render(ctx)
             .map_err(|err| IdlcError::template(err.to_string()))
     }
 }

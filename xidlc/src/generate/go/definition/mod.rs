@@ -2,6 +2,7 @@ mod definition_attr;
 mod definition_names;
 mod definition_render;
 mod definition_support;
+mod definition_templates;
 mod definition_type_render;
 mod definition_types;
 

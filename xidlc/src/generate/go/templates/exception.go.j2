@@ -1,0 +1,4 @@
+type {{ name }} struct {{ "{" }}{{ "\n" }}{{ fields }}}
+
+func (e *{{ name }}) Error() string {{ "{" }}{{ "\n" }}{{ "\t" }}return "{{ name }}"
+}{{ "\n" }}

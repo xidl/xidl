@@ -3,9 +3,7 @@
 
 {% endif -%}
 package {{ package_name }}
-
 {%- if uses_context %}
     import "context"
-
 {%- endif %}
-{% for block in blocks %}{{ block }}{%- endfor %}
+{{ body -}}

@@ -78,25 +78,40 @@ pub(crate) struct GoRenderContext {
     pub(crate) package_name: String,
     pub(crate) properties: ParserProperties,
     pub(crate) state: GoRenderState,
+    renderer: GoRenderer,
     pub(crate) body: String,
 }
 
 impl GoRenderContext {
-    pub(crate) fn new(package_name: String, properties: ParserProperties) -> Self {
-        Self {
+    pub(crate) fn new(package_name: String, properties: ParserProperties) -> IdlcResult<Self> {
+        let renderer = GoRenderer::new(&properties)?;
+        Ok(Self {
             package_name,
             properties,
             state: GoRenderState::default(),
+            renderer,
             body: String::new(),
-        }
+        })
     }
 
-    pub(crate) fn finish(self, blocks: Vec<String>) -> GoRenderOutput {
-        GoRenderOutput {
+    pub(crate) fn push_template<S: Serialize>(&mut self, name: &str, ctx: &S) -> IdlcResult<()> {
+        let rendered = self.render_template(name, ctx)?;
+        self.body.push_str(&rendered);
+        Ok(())
+    }
+
+    pub(crate) fn render_template<S: Serialize>(&self, name: &str, ctx: &S) -> IdlcResult<String> {
+        self.renderer.render_template(name, ctx)
+    }
+
+    pub(crate) fn finish(self, blocks: Vec<String>) -> IdlcResult<String> {
+        let body = blocks.concat();
+        let output = GoRenderOutput {
             package_name: self.package_name,
             uses_context: self.state.uses_context,
-            blocks,
-        }
+            body,
+        };
+        self.renderer.render_spec(&output)
     }
 }
 
@@ -104,7 +119,7 @@ impl GoRenderContext {
 pub struct GoRenderOutput {
     package_name: String,
     uses_context: bool,
-    blocks: Vec<String>,
+    body: String,
 }
 pub(crate) enum ParamDirection {
     In,
