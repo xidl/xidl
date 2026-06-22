@@ -35,10 +35,6 @@ type ReportApiService interface {
 
 func RegisterReportApiHandler(r gin.IRouter, svc ReportApiService) {
 	r.GET("/reports/:id", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/plain"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		ctx, err := xidlgohttp.RequireAuth(c.Request, ReportApiGetReportSecurityRequirements())
 		if err != nil {
 			xidlgohttp.Unauthorized(c.Writer, ReportApiGetReportSecurityRequirements())
@@ -82,10 +78,6 @@ func RegisterReportApiHandler(r gin.IRouter, svc ReportApiService) {
 		}
 	})
 	r.GET("/reports/:id/events", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireAccept(c, "text/event-stream"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
-			return
-		}
 		ctx, err := xidlgohttp.RequireAuth(c.Request, ReportApiWatchReportSecurityRequirements())
 		if err != nil {
 			xidlgohttp.Unauthorized(c.Writer, ReportApiWatchReportSecurityRequirements())

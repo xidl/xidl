@@ -154,7 +154,6 @@ class HttpScopeMatrixServiceService(abc.ABC):
         raise NotImplementedError
 
 async def _http_scope_matrix_service_get_attribute_inherited_attr_endpoint(service: HttpScopeMatrixServiceService, request: Request):
-    require_accept(request, "text/plain")
     request_value = HttpScopeMatrixServiceGetAttributeInheritedAttrRequest()
     response_value = await service.get_attribute_inherited_attr(request_value)
     response_payload = getattr(response_value, 'value', getattr(response_value, 'return_', response_value))
@@ -174,7 +173,6 @@ def _http_scope_matrix_service_get_attribute_inherited_attr_route(service: HttpS
     )
 
 async def _http_scope_matrix_service_get_attribute_bare_attr_endpoint(service: HttpScopeMatrixServiceService, request: Request):
-    require_accept(request, "text/plain")
     request_value = HttpScopeMatrixServiceGetAttributeBareAttrRequest()
     response_value = await service.get_attribute_bare_attr(request_value)
     response_payload = getattr(response_value, 'value', getattr(response_value, 'return_', response_value))
@@ -434,7 +432,6 @@ class HttpSecurityMatrixServiceService(abc.ABC):
         raise NotImplementedError
 
 async def _http_security_matrix_service_inherited_security_endpoint(service: HttpSecurityMatrixServiceService, request: Request):
-    require_accept(request, "text/plain")
     _security = require_security(request, [SecurityRequirement(kind="basic", realm=Some("matrix realm")), SecurityRequirement(kind="api_key", location="query", name="org_key"), ])
     request_value = HttpSecurityMatrixServiceInheritedSecurityRequest(
         id=read_scalar(path_value(request, "id"), "str", optional=False, default_on_missing=False, wire_name="id"),
@@ -458,7 +455,6 @@ def _http_security_matrix_service_inherited_security_route(service: HttpSecurity
     )
 
 async def _http_security_matrix_service_bearer_or_cookie_security_endpoint(service: HttpSecurityMatrixServiceService, request: Request):
-    require_accept(request, "text/plain")
     require_content_type(request, "application/json")
     _security = require_security(request, [SecurityRequirement(kind="bearer"), SecurityRequirement(kind="api_key", location="cookie", name="session_key"), ])
     body = read_json_body(request)
@@ -484,7 +480,6 @@ def _http_security_matrix_service_bearer_or_cookie_security_route(service: HttpS
     )
 
 async def _http_security_matrix_service_alternative_security_endpoint(service: HttpSecurityMatrixServiceService, request: Request):
-    require_accept(request, "text/plain")
     _security = require_security(request, [SecurityRequirement(kind="bearer"), SecurityRequirement(kind="api_key", location="header", name="X-Alt-Key"), ])
     request_value = HttpSecurityMatrixServiceAlternativeSecurityRequest(
         id=read_scalar(path_value(request, "id"), "str", optional=False, default_on_missing=False, wire_name="id"),
@@ -508,7 +503,6 @@ def _http_security_matrix_service_alternative_security_route(service: HttpSecuri
     )
 
 async def _http_security_matrix_service_oauth_security_endpoint(service: HttpSecurityMatrixServiceService, request: Request):
-    require_accept(request, "text/plain")
     require_content_type(request, "application/json")
     _security = require_security(request, [SecurityRequirement(kind="oauth2", scopes=["reports:write", "reports:read"]), ])
     body = read_json_body(request)
@@ -534,7 +528,6 @@ def _http_security_matrix_service_oauth_security_route(service: HttpSecurityMatr
     )
 
 async def _http_security_matrix_service_public_ping_endpoint(service: HttpSecurityMatrixServiceService, request: Request):
-    require_accept(request, "text/plain")
     request_value = HttpSecurityMatrixServicePublicPingRequest()
     response_value = await service.public_ping(request_value)
     response_payload = getattr(response_value, 'value', getattr(response_value, 'return_', response_value))

@@ -94,7 +94,6 @@ class HttpSecurityServiceService(abc.ABC):
         raise NotImplementedError
 
 async def _http_security_service_get_user_endpoint(service: HttpSecurityServiceService, request: Request):
-    require_accept(request, "text/plain")
     _security = require_security(request, [SecurityRequirement(kind="basic", realm=None), SecurityRequirement(kind="api_key", location="header", name="X-API-Key"), ])
     request_value = HttpSecurityServiceGetUserRequest(
         id=read_scalar(path_value(request, "id"), "int", optional=False, default_on_missing=False, wire_name="id"),
@@ -119,7 +118,6 @@ def _http_security_service_get_user_route(service: HttpSecurityServiceService) -
     )
 
 async def _http_security_service_search_user_endpoint(service: HttpSecurityServiceService, request: Request):
-    require_accept(request, "text/plain")
     require_content_type(request, "application/json")
     _security = require_security(request, [SecurityRequirement(kind="oauth2", scopes=["write:users", "read:users"]), ])
     body = read_json_body(request)
@@ -145,7 +143,6 @@ def _http_security_service_search_user_route(service: HttpSecurityServiceService
     )
 
 async def _http_security_service_health_endpoint(service: HttpSecurityServiceService, request: Request):
-    require_accept(request, "text/plain")
     request_value = HttpSecurityServiceHealthRequest()
     response_value = await service.health(request_value)
     response_payload = getattr(response_value, 'value', getattr(response_value, 'return_', response_value))

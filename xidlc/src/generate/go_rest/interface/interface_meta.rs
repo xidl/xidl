@@ -151,6 +151,7 @@ pub(crate) fn build_method_meta(
             .content_type
             .clone()
             .unwrap_or_default(),
+        response_content_type_explicit: op.http.response.body.content_type_explicit,
         request_params,
         path_params,
         query_params,

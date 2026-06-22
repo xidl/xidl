@@ -188,6 +188,7 @@ fn build_request_mapping(
         cookie,
         body: HttpRequestBodyMapping {
             content_type: final_content_type,
+            content_type_explicit: content_type.is_some(),
             codec: final_codec,
             shape: body_shape,
         },
@@ -310,6 +311,7 @@ fn build_response_mapping(
         cookie,
         body: HttpResponseBodyMapping {
             content_type: final_content_type,
+            content_type_explicit: content_type.is_some(),
             codec: final_codec,
             shape: body_shape,
         },

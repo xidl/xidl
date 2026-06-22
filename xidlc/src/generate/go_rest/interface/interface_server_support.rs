@@ -7,6 +7,9 @@ use super::GoRestRenderer;
 use super::interface_binding::render_response_write;
 
 pub(super) fn render_accept_check(out: &mut String, method: &MethodMeta) {
+    if !method.response_content_type_explicit {
+        return;
+    }
     writeln!(
         out,
         "\t\tif err := xidlgohttp.GinRequireAccept(c, \"{}\"); err != nil {{",

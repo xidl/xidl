@@ -145,6 +145,7 @@ pub struct HttpInputBinding {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HttpRequestBodyMapping {
     pub content_type: Option<String>,
+    pub content_type_explicit: bool,
     pub codec: Option<HttpBodyCodec>,
     pub shape: HttpRequestBodyShape,
 }
@@ -200,6 +201,7 @@ pub enum HttpOutputSource {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HttpResponseBodyMapping {
     pub content_type: Option<String>,
+    pub content_type_explicit: bool,
     pub codec: Option<HttpBodyCodec>,
     pub shape: HttpResponseBodyShape,
 }
