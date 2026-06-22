@@ -1,8 +1,8 @@
 use crate::error::IdlcResult;
 use crate::generate::go::GoRenderContext;
-use convert_case::{Case, Casing};
 use xidl_parser::hir;
 
+use super::definition_names::go_capitalize;
 use super::definition_templates::{
     EmptyStructTemplate, FieldTemplate, MethodTemplate, StructTemplate, render_field_block,
 };
@@ -42,12 +42,12 @@ fn push_get_attr(
     let request_name = format!(
         "{}GetAttribute{}Request",
         interface_name,
-        raw.to_case(Case::Pascal)
+        go_capitalize(raw)
     );
     let response_name = format!(
         "{}GetAttribute{}Response",
         interface_name,
-        raw.to_case(Case::Pascal)
+        go_capitalize(raw)
     );
     ctx.push_template(
         "empty_struct.go.j2",
@@ -70,7 +70,7 @@ fn push_get_attr(
         },
     )?;
     out.push(MethodTemplate {
-        name: format!("GetAttribute{}", raw.to_case(Case::Pascal)),
+        name: format!("GetAttribute{}", go_capitalize(raw)),
         request_name,
         response_name,
     });
@@ -87,12 +87,12 @@ fn push_set_attr(
     let request_name = format!(
         "{}SetAttribute{}Request",
         interface_name,
-        raw.to_case(Case::Pascal)
+        go_capitalize(raw)
     );
     let response_name = format!(
         "{}SetAttribute{}Response",
         interface_name,
-        raw.to_case(Case::Pascal)
+        go_capitalize(raw)
     );
     ctx.push_template(
         "struct.go.j2",
@@ -115,7 +115,7 @@ fn push_set_attr(
         },
     )?;
     out.push(MethodTemplate {
-        name: format!("SetAttribute{}", raw.to_case(Case::Pascal)),
+        name: format!("SetAttribute{}", go_capitalize(raw)),
         request_name,
         response_name,
     });

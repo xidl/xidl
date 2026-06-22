@@ -1,9 +1,8 @@
 use crate::error::IdlcResult;
 use crate::generate::go::GoRenderContext;
-use convert_case::{Case, Casing};
 use xidl_parser::hir::{self, effective_wire_name};
 
-use super::definition_names::{go_export_name, go_field_name, pointer_type};
+use super::definition_names::{go_capitalize, go_export_name, go_field_name, pointer_type};
 use super::definition_support::declarator_name;
 use super::definition_templates::{
     EnumMemberTemplate, EnumTemplate, ExceptionTemplate, FieldTemplate, StructTemplate,
@@ -133,7 +132,7 @@ fn render_enum(ctx: &mut GoRenderContext, def: &hir::EnumDcl, prefix: &[String])
     let name = go_export_name(prefix, &def.ident);
     let mut members = Vec::new();
     for member in &def.member {
-        let value_name = format!("{}{}", name, member.ident.to_case(Case::Pascal));
+        let value_name = format!("{}{}", name, go_capitalize(&member.ident));
         let wire_name = effective_wire_name(&member.ident, &member.annotations, &def.annotations);
         members.push(EnumMemberTemplate {
             name: value_name,

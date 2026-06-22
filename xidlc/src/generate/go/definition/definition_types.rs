@@ -2,7 +2,7 @@ use crate::error::IdlcResult;
 use convert_case::{Case, Casing};
 use xidl_parser::hir;
 
-use super::definition_names::go_export_name;
+use super::definition_names::{go_capitalize, go_export_name};
 
 pub(crate) fn constr_type_name(constr: &hir::ConstrTypeDcl, prefix: &[String]) -> String {
     match constr {
@@ -46,7 +46,7 @@ pub(crate) fn go_scoped_name(value: &hir::ScopedName) -> String {
     value
         .name
         .iter()
-        .map(|part| part.to_case(Case::Pascal))
+        .map(|part| go_capitalize(part))
         .collect::<Vec<_>>()
         .join("")
 }
