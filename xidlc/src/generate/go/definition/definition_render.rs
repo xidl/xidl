@@ -1,10 +1,9 @@
 use crate::error::IdlcResult;
 use crate::generate::go::{GoRenderContext, ParamDirection};
-use convert_case::{Case, Casing};
 use xidl_parser::hir;
 
 use super::definition_attr::render_attr_types;
-use super::definition_names::{go_export_name, go_field_name};
+use super::definition_names::{go_capitalize, go_export_name, go_field_name};
 use super::definition_support::{is_out_param, operation_params, param_direction};
 use super::definition_templates::{
     ConstTemplate, FieldTemplate, InterfaceTemplate, MethodTemplate, OperationTypesTemplate,
@@ -71,28 +70,29 @@ fn render_operation_types(
     op: &hir::OpDcl,
     container_annotations: &[hir::Annotation],
 ) -> IdlcResult<MethodTemplate> {
-    let request_name = format!(
-        "{}{}Request",
-        interface_name,
-        op.ident.to_case(Case::Pascal)
-    );
-    let response_name = format!(
-        "{}{}Response",
-        interface_name,
-        op.ident.to_case(Case::Pascal)
-    );
+    let request_name = format!("{}{}Request", interface_name, go_capitalize(&op.ident));
+    let response_name = format!("{}{}Response", interface_name, go_capitalize(&op.ident));
     let mut request_fields = Vec::new();
-    for param in operation_params(op)
+    let in_params: Vec<_> = operation_params(op)
         .iter()
         .filter(|param| !is_out_param(param.attr.as_ref()))
-    {
+        .collect();
+    let is_single_request = in_params.len() == 1 && is_composite_type(&in_params[0].ty);
+
+    for param in in_params {
         let raw_name = &param.declarator.0;
-        let field = go_field_name(raw_name);
-        let wire_name = if hir::is_skipped(&param.annotations) {
+        let mut field = go_field_name(raw_name);
+        let mut wire_name = if hir::is_skipped(&param.annotations) {
             "-".to_string()
         } else {
             hir::effective_wire_name(raw_name, &param.annotations, container_annotations)
         };
+
+        if is_single_request {
+            field = String::new();
+            wire_name = ",inline".to_string();
+        }
+
         request_fields.push(FieldTemplate {
             name: field,
             ty: go_type(&param.ty),
@@ -101,26 +101,51 @@ fn render_operation_types(
     }
 
     let mut response_fields = Vec::new();
+    let out_params: Vec<_> = operation_params(op)
+        .iter()
+        .filter(|param| {
+            matches!(
+                param_direction(param.attr.as_ref()),
+                ParamDirection::Out | ParamDirection::InOut
+            )
+        })
+        .collect();
+
+    let is_single_response = if let hir::OpTypeSpec::TypeSpec(ty) = &op.ty {
+        out_params.is_empty() && is_composite_type(ty)
+    } else {
+        out_params.len() == 1 && is_composite_type(&out_params[0].ty)
+    };
+
     if let hir::OpTypeSpec::TypeSpec(ty) = &op.ty {
+        let mut field = "Return".to_string();
+        let mut wire_name = "return".to_string();
+
+        if is_single_response {
+            field = String::new();
+            wire_name = ",inline".to_string();
+        }
+
         response_fields.push(FieldTemplate {
-            name: "Return".to_string(),
+            name: field,
             ty: go_type(ty),
-            tag: "return".to_string(),
+            tag: wire_name,
         });
     }
-    for param in operation_params(op).iter().filter(|param| {
-        matches!(
-            param_direction(param.attr.as_ref()),
-            ParamDirection::Out | ParamDirection::InOut
-        )
-    }) {
+    for param in out_params {
         let raw_name = &param.declarator.0;
-        let field = go_field_name(raw_name);
-        let wire_name = if hir::is_skipped(&param.annotations) {
+        let mut field = go_field_name(raw_name);
+        let mut wire_name = if hir::is_skipped(&param.annotations) {
             "-".to_string()
         } else {
             hir::effective_wire_name(raw_name, &param.annotations, container_annotations)
         };
+
+        if is_single_response {
+            field = String::new();
+            wire_name = ",inline".to_string();
+        }
+
         response_fields.push(FieldTemplate {
             name: field,
             ty: go_type(&param.ty),
@@ -146,3 +171,28 @@ fn render_operation_types(
         response_name,
     })
 }
+
+fn is_composite_type(ty: &hir::TypeSpec) -> bool {
+    match ty {
+        hir::TypeSpec::IntegerType(_)
+        | hir::TypeSpec::FloatingPtType
+        | hir::TypeSpec::CharType
+        | hir::TypeSpec::WideCharType
+        | hir::TypeSpec::Boolean
+        | hir::TypeSpec::StringType(_)
+        | hir::TypeSpec::WideStringType(_)
+        | hir::TypeSpec::FixedPtType(_) => false,
+        hir::TypeSpec::ScopedName(_)
+        | hir::TypeSpec::SequenceType(_)
+        | hir::TypeSpec::MapType(_)
+        | hir::TypeSpec::TemplateType(_)
+        | hir::TypeSpec::AnyType
+        | hir::TypeSpec::ObjectType
+        | hir::TypeSpec::ValueBaseType => true,
+    }
+}
+
+// debugging
+#[allow(dead_code)]
+fn debug_print(op: &str, is_single: bool, ty: &hir::TypeSpec) {
+    println!("DEBUG: op={}, is_single={}, ty={:?}", op, is_single, ty);

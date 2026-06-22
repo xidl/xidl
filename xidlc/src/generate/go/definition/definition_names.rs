@@ -5,8 +5,20 @@ pub(crate) fn go_export_name(prefix: &[String], value: &str) -> String {
         .iter()
         .map(|part| part.to_case(Case::Pascal))
         .collect::<Vec<_>>();
-    parts.push(value.to_case(Case::Pascal));
+    parts.push(go_capitalize(value));
     parts.join("")
+}
+
+pub(crate) fn go_capitalize(value: &str) -> String {
+    if value.contains('_') {
+        value.to_case(Case::Pascal)
+    } else {
+        let mut chars = value.chars();
+        match chars.next() {
+            None => String::new(),
+            Some(f) => f.to_uppercase().collect::<String>() + chars.as_str(),
+        }
+    }
 }
 
 pub(crate) fn go_field_name(value: &str) -> String {
