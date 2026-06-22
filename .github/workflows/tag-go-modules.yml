@@ -1,0 +1,65 @@
+name: tag-go-modules
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version_tag:
+        description: Root release tag to mirror, for example v0.81.0.
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  tag-go-modules:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release ref
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Create Go module tags
+        env:
+          ROOT_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.version_tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          if [[ ! "$ROOT_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
+            echo "ROOT_TAG must look like v0.81.0, got: $ROOT_TAG" >&2
+            exit 1
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch --force --tags origin
+
+          modules=(
+            "golang/xidl-go"
+            "golang/xidl-go-codec"
+            "golang/xidl-go-rest"
+          )
+
+          target_sha="$(git rev-parse "refs/tags/${ROOT_TAG}^{}")"
+
+          for module in "${modules[@]}"; do
+            module_tag="${module}/${ROOT_TAG}"
+
+            if git ls-remote --exit-code --tags origin "refs/tags/${module_tag}" >/dev/null 2>&1; then
+              existing_sha="$(git rev-parse "refs/tags/${module_tag}^{}")"
+              if [[ "$existing_sha" != "$target_sha" ]]; then
+                echo "Tag ${module_tag} already points to ${existing_sha}, expected ${target_sha}" >&2
+                exit 1
+              fi
+
+              echo "Tag ${module_tag} already exists"
+              continue
+            fi
+
+            git tag -a "$module_tag" "$target_sha" -m "Release ${module_tag}"
+            git push origin "refs/tags/${module_tag}"
+          done
