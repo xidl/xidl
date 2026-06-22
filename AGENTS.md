@@ -13,9 +13,6 @@
 
 ## Code Style
 
-- Every new handwritten Rust source file MUST stay at or below 300 lines.
-- Every edited handwritten Rust source file already above 300 lines MUST NOT
-  increase in line count.
 - Generated files, snapshot files, and vendored files MUST NEVER be used as
   precedents for handwritten code.
 - Each crate MUST contain one implementation per responsibility.

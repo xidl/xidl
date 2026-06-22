@@ -1,12 +1,15 @@
 use super::*;
 use crate::typed_ast::{
-    AddExpr, AndExpr, AnnotationAppl, AnnotationName, AutoIdKind, BooleanLiteral,
-    BuiltinAnnotation, ConstExpr as TypedConstExpr, DataRepresentationKind, ExtensibilityKind,
-    Identifier, IntegerLiteral as TypedIntegerLiteral, Literal as TypedLiteral, MultExpr, OrExpr,
-    PlacementKind, PositiveIntConst, PrimaryExpr, ScopedName as TypedScopedName, ServicePlatform,
-    ShiftExpr, TopicPlatform, TryConstructFailAction, UnaryExpr,
-    UnaryOperator as TypedUnaryOperator, VerbatimLanguage, XorExpr,
+    AddExpr, AndExpr, AutoIdKind, BooleanLiteral, BuiltinAnnotation, ConstExpr as TypedConstExpr,
+    DataRepresentationKind, ExtensibilityKind, Identifier, IntegerLiteral as TypedIntegerLiteral,
+    Literal as TypedLiteral, MultExpr, OrExpr, PlacementKind, PositiveIntConst, PrimaryExpr,
+    ScopedName as TypedScopedName, ServicePlatform, ShiftExpr, TopicPlatform,
+    TryConstructFailAction, UnaryExpr, UnaryOperator as TypedUnaryOperator, VerbatimLanguage,
+    XorExpr,
 };
+
+mod literals;
+mod paths;
 
 fn int_expr(value: &str) -> TypedConstExpr {
     TypedConstExpr(OrExpr::XorExpr(XorExpr::AndExpr(AndExpr::ShiftExpr(
@@ -339,110 +342,4 @@ fn maps_builtin_annotations_to_hir_variants() {
             serde_json::to_value(expected).unwrap()
         );
     }
-}
-
-#[test]
-fn renders_all_literal_forms_when_converting_builtin_values() {
-    assert_eq!(
-        from_builtin_annotation(BuiltinAnnotation::Id {
-            value: TypedIntegerLiteral::OctNumber("0o77".to_string()),
-        })
-        .and_then(|value| match value {
-            Annotation::Id { value } => Some(value),
-            _ => None,
-        })
-        .as_deref(),
-        Some("0o77")
-    );
-    let float = render_hir_const_expr(&ConstExpr::Literal(Literal::FloatingPtLiteral(
-        crate::hir::FloatingPtLiteral {
-            sign: Some(IntegerSign::Minus),
-            integer: crate::hir::DecNumber("12".to_string()),
-            fraction: crate::hir::DecNumber("5".to_string()),
-        },
-    )));
-    assert_eq!(float, "-12.5");
-    assert_eq!(
-        render_hir_const_expr(&ConstExpr::Literal(Literal::CharLiteral("'x'".to_string()))),
-        "'x'"
-    );
-    assert_eq!(
-        render_hir_const_expr(&ConstExpr::Literal(Literal::WideCharacterLiteral(
-            "L'x'".to_string()
-        ))),
-        "L'x'"
-    );
-    assert_eq!(
-        render_hir_const_expr(&ConstExpr::Literal(Literal::WideStringLiteral(
-            "L\"wide\"".to_string()
-        ))),
-        "L\"wide\""
-    );
-    assert_eq!(
-        render_hir_const_expr(&ConstExpr::ScopedName(crate::hir::ScopedName {
-            name: vec!["pkg".to_string(), "Value".to_string()],
-            is_root: true,
-        })),
-        "::pkg::Value"
-    );
-    assert_eq!(
-        render_hir_const_expr(&ConstExpr::UnaryExpr(
-            UnaryOperator::Add,
-            Box::new(ConstExpr::Literal(Literal::IntegerLiteral(IntegerLiteral(
-                "1".to_string(),
-            )))),
-        )),
-        "(+1)"
-    );
-    assert_eq!(
-        render_hir_const_expr(&ConstExpr::UnaryExpr(
-            UnaryOperator::Not,
-            Box::new(ConstExpr::Literal(Literal::IntegerLiteral(IntegerLiteral(
-                "1".to_string(),
-            )))),
-        )),
-        "(~1)"
-    );
-    for (op, expected) in [
-        (BinaryOperator::Or, "(1 | 2)"),
-        (BinaryOperator::Xor, "(1 ^ 2)"),
-        (BinaryOperator::And, "(1 & 2)"),
-        (BinaryOperator::LeftShift, "(1 << 2)"),
-        (BinaryOperator::RightShift, "(1 >> 2)"),
-        (BinaryOperator::Add, "(1 + 2)"),
-        (BinaryOperator::Sub, "(1 - 2)"),
-        (BinaryOperator::Mult, "(1 * 2)"),
-        (BinaryOperator::Div, "(1 / 2)"),
-        (BinaryOperator::Mod, "(1 % 2)"),
-    ] {
-        assert_eq!(
-            render_hir_const_expr(&ConstExpr::BinaryExpr(
-                op,
-                Box::new(ConstExpr::Literal(Literal::IntegerLiteral(IntegerLiteral(
-                    "1".to_string(),
-                )))),
-                Box::new(ConstExpr::Literal(Literal::IntegerLiteral(IntegerLiteral(
-                    "2".to_string(),
-                )))),
-            )),
-            expected
-        );
-    }
-}
-
-#[test]
-fn annotation_from_builtin_path_uses_conversion_function() {
-    let appl = AnnotationAppl {
-        name: AnnotationName::Builtin("id".to_string()),
-        params: None,
-        builtin: Some(BuiltinAnnotation::Id {
-            value: TypedIntegerLiteral::BinNumber("0b101".to_string()),
-        }),
-        is_extend: false,
-        extra: Vec::new(),
-    };
-    assert_eq!(
-        serde_json::to_value(Annotation::from(appl)).unwrap(),
-        serde_json::json!({"Id":{"value":"0b101"}})
-    );
 }

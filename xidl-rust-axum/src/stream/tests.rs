@@ -1,6 +1,7 @@
 use super::*;
+use crate::Error;
 use axum::body::{self, Body};
-use futures_util::stream;
+use futures_util::{StreamExt, stream};
 use serde::{Deserialize, Serialize};
 use std::pin::Pin;
 use std::task::{Context, Poll};

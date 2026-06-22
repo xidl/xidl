@@ -14,13 +14,13 @@ workspace = true
 
 [dependencies]
 tree-sitter.workspace = true
-tree-sitter-idl = { workspace = true }
-xidl-parser-derive = { workspace = true }
+tree-sitter-idl.workspace = true
+xidl-parser-derive.workspace = true
 thiserror.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 md5.workspace = true
-minijinja = { workspace = true }
+minijinja.workspace = true
 include_dir = "0.7"
 jiff = "0.2"
 convert_case.workspace = true
