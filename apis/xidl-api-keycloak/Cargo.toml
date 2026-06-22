@@ -24,7 +24,7 @@ serde.workspace = true
 xidl-rust-axum.workspace = true
 
 [build-dependencies]
-xidl-build = { workspace = true }
+xidl-build.workspace = true
 
 
 [lints]

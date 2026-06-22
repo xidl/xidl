@@ -1,186 +1,7 @@
-use super::*;
+use super::super::*;
+use super::{Annotation, AnnotationParam, AnnotationParams, RenameRule};
 use convert_case::{Case, Casing};
-use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, str::FromStr};
-
-#[cfg(test)]
-mod tests;
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub enum Annotation {
-    Id {
-        value: String,
-    },
-    Key {
-        value: Option<String>,
-    },
-    AutoId {
-        value: Option<String>,
-    },
-    Optional {
-        value: Option<String>,
-    },
-    Position {
-        value: String,
-    },
-    Value {
-        value: String,
-    },
-    Extensibility {
-        kind: String,
-    },
-    Final,
-    Appendable,
-    Mutable,
-    MustUnderstand {
-        value: Option<String>,
-    },
-    Default {
-        value: String,
-    },
-    Range {
-        min: String,
-        max: String,
-    },
-    Min {
-        value: String,
-    },
-    Max {
-        value: String,
-    },
-    Unit {
-        value: String,
-    },
-    BitBound {
-        value: String,
-    },
-    External {
-        value: Option<String>,
-    },
-    Nested {
-        value: Option<String>,
-    },
-    Verbatim {
-        language: Option<String>,
-        placement: Option<String>,
-        text: String,
-    },
-    Service {
-        platform: Option<String>,
-    },
-    Oneway {
-        value: Option<String>,
-    },
-    Ami {
-        value: Option<String>,
-    },
-    HashId {
-        value: Option<String>,
-    },
-    DefaultNested {
-        value: Option<String>,
-    },
-    IgnoreLiteralNames {
-        value: Option<String>,
-    },
-    TryConstruct {
-        value: Option<String>,
-    },
-    NonSerialized {
-        value: Option<String>,
-    },
-    DataRepresentation {
-        kinds: Vec<String>,
-    },
-    Topic {
-        name: Option<String>,
-        platform: Option<String>,
-    },
-    Choice,
-    Empty,
-    DdsService,
-    DdsRequestTopic {
-        name: String,
-    },
-    DdsReplyTopic {
-        name: String,
-    },
-    Builtin {
-        name: String,
-        params: Option<AnnotationParams>,
-    },
-    ScopedName {
-        name: ScopedName,
-        params: Option<AnnotationParams>,
-    },
-    DefaultLiteral,
-    Rename {
-        name: String,
-    },
-    RenameAll {
-        rule: RenameRule,
-    },
-    Skip,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum RenameRule {
-    None,
-    LowerCase,
-    UpperCase,
-    PascalCase,
-    CamelCase,
-    SnakeCase,
-    ScreamingSnakeCase,
-    KebabCase,
-    ScreamingKebabCase,
-}
-
-impl RenameRule {
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            Self::None => "None",
-            Self::LowerCase => "lowercase",
-            Self::UpperCase => "UPPERCASE",
-            Self::PascalCase => "PascalCase",
-            Self::CamelCase => "camelCase",
-            Self::SnakeCase => "snake_case",
-            Self::ScreamingSnakeCase => "SCREAMING_SNAKE_CASE",
-            Self::KebabCase => "kebab-case",
-            Self::ScreamingKebabCase => "SCREAMING-KEBAB-CASE",
-        }
-    }
-}
-impl FromStr for RenameRule {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "lowercase" => Ok(Self::LowerCase),
-            "UPPERCASE" => Ok(Self::UpperCase),
-            "PascalCase" => Ok(Self::PascalCase),
-            "camelCase" => Ok(Self::CamelCase),
-            "snake_case" => Ok(Self::SnakeCase),
-            "SCREAMING_SNAKE_CASE" | "SCREAMINGSNAKECASE" => Ok(Self::ScreamingSnakeCase),
-            "kebab-case" => Ok(Self::KebabCase),
-            "SCREAMING-KEBAB-CASE" => Ok(Self::ScreamingKebabCase),
-            _ => Ok(Self::None),
-        }
-    }
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub enum AnnotationParams {
-    ConstExpr(ConstExpr),
-    Positional(Vec<ConstExpr>),
-    Params(Vec<AnnotationParam>),
-    Raw(String),
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct AnnotationParam {
-    pub ident: String,
-    pub value: Option<ConstExpr>,
-}
+use std::collections::HashMap;
 
 pub fn annotation_name(annotation: &Annotation) -> Option<&str> {
     match annotation {
@@ -357,7 +178,7 @@ impl From<crate::typed_ast::AnnotationAppl> for Annotation {
                 params,
             },
             crate::typed_ast::AnnotationName::Builtin(name) => match value.builtin {
-                Some(builtin) => super::annotation_builtin::from_builtin_annotation(builtin)
+                Some(builtin) => super::super::annotation_builtin::from_builtin_annotation(builtin)
                     .unwrap_or(Self::Builtin { name, params }),
                 None => Self::Builtin { name, params },
             },
@@ -399,7 +220,7 @@ impl From<crate::typed_ast::AnnotationParams> for AnnotationParams {
     }
 }
 
-fn apply_rename_rule(raw_name: &str, rule: RenameRule) -> String {
+pub(super) fn apply_rename_rule(raw_name: &str, rule: RenameRule) -> String {
     match rule {
         RenameRule::None => raw_name.to_string(),
         RenameRule::LowerCase => raw_name.to_case(Case::Flat),
@@ -503,7 +324,7 @@ fn trim_annotation_quotes(value: &str) -> Option<String> {
     }
 }
 
-fn render_annotation_const_expr(expr: &ConstExpr) -> String {
+pub(super) fn render_annotation_const_expr(expr: &ConstExpr) -> String {
     match expr {
         ConstExpr::ScopedName(value) => {
             let prefix = if value.is_root { "::" } else { "" };

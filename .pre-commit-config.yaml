@@ -82,3 +82,21 @@ repos:
       - id: deno-fmt
         exclude: ^README\.md$
         exclude_types: ["javascript", "jsx", "ts", "tsx", "json"]
+
+  - repo: https://github.com/cathaysia/style
+    rev: v0.1.7
+    hooks:
+      - id: check-line-length
+        exclude: |
+          (?x)^(
+            bdd/boilerplate/e2e_test/rust/src/main\.rs|
+            bdd/boilerplate/e2e_test/ts/server\.ts|
+            xidl-typeobject/src/dds_xtypes_typeobject\.rs|
+            xidlc-examples/src/e2e_test\.rs|
+            xidlc/src/import/openapi\.rs|
+            xidlc/src/jsonrpc/ipc\.rs|
+            xidlc/src/openapi/.*\.rs
+          )$
+      - id: move-module-mod
+      - id: compact_workspace_deps
+      - id: full-qualify-log

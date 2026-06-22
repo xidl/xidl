@@ -1,7 +1,15 @@
+mod convert;
+mod names;
+
+pub(crate) use convert::{decode_expr, encode_expr};
+
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::rust::util::{
-    array_type, declarator_dims, declarator_name, rust_ident, rust_scoped_name,
-    serde_rename_from_annotations,
+    array_type, declarator_dims, declarator_name, rust_ident, serde_rename_from_annotations,
+};
+use names::{
+    canonical_name, public_path_from_canonical, render_public_scoped, scoped_key, transport_ident,
+    transport_module,
 };
 use serde::Serialize;
 use std::collections::{BTreeSet, HashMap};
@@ -206,15 +214,25 @@ fn render_struct(
         for decl in &member.ident {
             let name = rust_ident(&declarator_name(decl));
             let ty = member_ty(member, decl, direction, module_name, registry)?;
-            #[rustfmt::skip]
             let (enc, dec) = if member.is_optional() {
                 let e = encode_expr("value", &member.ty, registry)?;
                 let d = decode_expr("value", &member.ty, registry)?;
-                (if e == "value" { format!("value.{name}") } else { format!("value.{name}.map(|value| {e})") },
-                 if d == "value" { format!("value.{name}") } else { format!("value.{name}.map(|value| {d})") })
+                let enc = if e == "value" {
+                    format!("value.{name}")
+                } else {
+                    format!("value.{name}.map(|value| {e})")
+                };
+                let dec = if d == "value" {
+                    format!("value.{name}")
+                } else {
+                    format!("value.{name}.map(|value| {d})")
+                };
+                (enc, dec)
             } else {
-                (encode_expr(&format!("value.{name}"), &member.ty, registry)?,
-                 decode_expr(&format!("value.{name}"), &member.ty, registry)?)
+                (
+                    encode_expr(&format!("value.{name}"), &member.ty, registry)?,
+                    decode_expr(&format!("value.{name}"), &member.ty, registry)?,
+                )
             };
             fields.push(TransportFieldContext {
                 name: name.clone(),
@@ -364,87 +382,6 @@ fn track_type(
     }
     Ok(())
 }
-
-#[rustfmt::skip]
-pub(crate) fn encode_expr(expr: &str, ty: &hir::TypeSpec, r: &TypeRegistry) -> IdlcResult<String> {
-    convert_expr(expr, ty, r)
-}
-
-#[rustfmt::skip]
-pub(crate) fn decode_expr(expr: &str, ty: &hir::TypeSpec, r: &TypeRegistry) -> IdlcResult<String> {
-    convert_expr(expr, ty, r)
-}
-
-fn convert_expr(expr: &str, ty: &hir::TypeSpec, registry: &TypeRegistry) -> IdlcResult<String> {
-    Ok(match ty {
-        hir::TypeSpec::SequenceType(seq) => {
-            let inner = convert_expr("value", &seq.ty, registry)?;
-            if inner == "value" {
-                format!("{expr}.into_iter().collect()")
-            } else {
-                format!("{expr}.into_iter().map(|value| {inner}).collect()")
-            }
-        }
-        hir::TypeSpec::MapType(map) => {
-            let inner = convert_expr("value", &map.value, registry)?;
-            if inner == "value" {
-                format!("{expr}.into_iter().collect()")
-            } else {
-                format!("{expr}.into_iter().map(|(key, value)| (key, {inner})).collect()")
-            }
-        }
-        hir::TypeSpec::ScopedName(value) => {
-            let name = scoped_key(value);
-            match registry.get(&name) {
-                Some(TransportTypeDef::Struct(_)) | Some(TransportTypeDef::Enum(_)) => {
-                    format!("{expr}.into()")
-                }
-                Some(TransportTypeDef::Typedef(def)) => match &def.ty {
-                    hir::TypedefType::TypeSpec(inner) => convert_expr(expr, inner, registry)?,
-                    hir::TypedefType::ConstrTypeDcl(_) => {
-                        return Err(IdlcError::rpc(format!(
-                            "unsupported inline typedef transport for '{}'",
-                            name
-                        )));
-                    }
-                },
-                None => expr.to_string(),
-            }
-        }
-        _ => expr.to_string(),
-    })
-}
-
-#[rustfmt::skip]
-fn canonical_name(module_path: &[String], ident: &str) -> String {
-    if module_path.is_empty() { ident.to_string() } else { format!("{}::{}", module_path.join("::"), ident) }
-}
-
-#[rustfmt::skip]
-fn scoped_key(value: &hir::ScopedName) -> String { value.name.join("::") }
-
-#[rustfmt::skip]
-fn transport_ident(value: &str) -> String { value.split("::").map(|part| part.to_string()).collect::<Vec<_>>().join("_") }
-
-#[rustfmt::skip]
-fn transport_module(direction: &str, interface_ident: &str) -> String { format!("__xidl_{direction}_{interface_ident}") }
-
-fn public_path_from_canonical(value: &str, module_path: &[String]) -> String {
-    let parts = value.split("::").map(rust_ident).collect::<Vec<_>>();
-    let current = module_path
-        .iter()
-        .map(|part| rust_ident(part))
-        .collect::<Vec<_>>();
-    if parts.starts_with(&current) {
-        let suffix = parts[current.len()..].join("::");
-        format!("super::{suffix}")
-    } else {
-        format!("crate::{}", parts.join("::"))
-    }
-}
-
-#[rustfmt::skip]
-fn render_public_scoped(value: &hir::ScopedName) -> String { rust_scoped_name(value) }
 
 #[cfg(test)]
 mod tests;

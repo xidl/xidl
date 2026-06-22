@@ -39,7 +39,6 @@ macro_rules! impl_from_for_number {
     };
 }
 
-#[rustfmt::skip]
 impl_from_for_number!(
     f32 => Float as f64, f64 => Float,
     i8 => Int as isize, i16 => Int as isize, i32 => Int as isize, i64 => Int as isize,
