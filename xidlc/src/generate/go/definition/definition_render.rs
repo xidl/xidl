@@ -191,8 +191,3 @@ fn is_composite_type(ty: &hir::TypeSpec) -> bool {
         | hir::TypeSpec::ValueBaseType => true,
     }
 }
-
-// debugging
-#[allow(dead_code)]
-fn debug_print(op: &str, is_single: bool, ty: &hir::TypeSpec) {
-    println!("DEBUG: op={}, is_single={}, ty={:?}", op, is_single, ty);

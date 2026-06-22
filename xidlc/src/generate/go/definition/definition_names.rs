@@ -22,7 +22,7 @@ pub(crate) fn go_capitalize(value: &str) -> String {
 }
 
 pub(crate) fn go_field_name(value: &str) -> String {
-    let ident = value.to_case(Case::Pascal);
+    let ident = go_capitalize(value);
     if go_keyword(&ident) {
         format!("{ident}_")
     } else {

@@ -1,5 +1,5 @@
 use crate::error::IdlcResult;
-use convert_case::{Case, Casing};
+
 use xidl_parser::hir;
 
 use super::definition_names::{go_capitalize, go_export_name};
@@ -103,7 +103,7 @@ pub(crate) fn go_type(ty: &hir::TypeSpec) -> String {
         }
         hir::TypeSpec::TemplateType(value) => format!(
             "{}[{}]",
-            value.ident.to_case(Case::Pascal),
+            go_capitalize(&value.ident),
             value
                 .args
                 .iter()
