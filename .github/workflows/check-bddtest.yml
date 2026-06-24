@@ -75,6 +75,8 @@ jobs:
         with:
           version: latest
 
+      - uses: jdx/mise-action@v3
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:

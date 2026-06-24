@@ -82,7 +82,7 @@ enum GenLang {
         alias = "ts-rest",
         alias = "ts_rest"
     )]
-    TypescriptRest(FilesArgs),
+    TypescriptRest(ClientServerArgs),
     #[command(name = "go", alias = "golang")]
     Go(ClientServerArgs),
     #[command(name = "go-rest", alias = "go_rest")]
@@ -188,7 +188,7 @@ impl GenLang {
             Self::RustJsonRpc(_) => "xidlc gen rust-jsonrpc [OPTIONS] [FILES]...",
             Self::RustAxum(_) => "xidlc gen rust-axum [OPTIONS] [FILES]...",
             Self::Typescript(_) => "xidlc gen typescript [OPTIONS] [FILES]...",
-            Self::TypescriptRest(_) => "xidlc gen typescript-rest [FILES]...",
+            Self::TypescriptRest(_) => "xidlc gen typescript-rest [OPTIONS] [FILES]...",
             Self::Go(_) => "xidlc gen go [OPTIONS] [FILES]...",
             Self::GoRest(_) => "xidlc gen go-rest [OPTIONS] [FILES]...",
             Self::Openapi(_) => "xidlc gen openapi [FILES]...",
@@ -281,23 +281,4 @@ impl Cli {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn parses_gen_subcommand_with_lang_enum_and_files() {
-        let cli = Cli::try_parse_from(["xidlc", "gen", "rust", "demo.idl"]).expect("parse cli");
-        match cli.command {
-            Command::Gen(args) => match args.lang {
-                GenLang::Rust(lang) => {
-                    assert_eq!(lang.files, vec![PathBuf::from("demo.idl")]);
-                    assert!(!lang.client);
-                    assert!(lang.server);
-                }
-                _ => panic!("expected rust lang"),
-            },
-            Command::Fmt(_) => panic!("expected gen command"),
-            Command::Import(_) => panic!("expected gen command"),
-        }
-    }
-}
+mod tests;

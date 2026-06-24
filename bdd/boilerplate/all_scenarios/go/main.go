@@ -49,7 +49,7 @@ func (s *MyAllScenarios) SecureData(ctx context.Context, req *AllScenariosServic
 }
 func main() {
 	r := gin.Default()
-	svc := &MyAllScenarios{status: StatusActive}
+	svc := &MyAllScenarios{status: StatusACTIVE}
 	RegisterAllScenariosServiceHandler(r, svc)
 	http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), r)
 }
