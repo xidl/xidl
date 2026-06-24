@@ -54,5 +54,4 @@ docs-build:
 	pnpm --dir docs build
 
 init:
-	cd ./xidlc-examples && pnpm install
 	cd ./typescript/xidl-typescript-codec && pnpm install && pnpm build
