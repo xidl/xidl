@@ -30,14 +30,6 @@ struct ClientFileContext {
 }
 
 #[derive(Serialize)]
-struct ServerFileContext {
-    file_stem: String,
-    helpers: Vec<String>,
-    blocks: Vec<String>,
-    imports: Vec<String>,
-}
-
-#[derive(Serialize)]
 struct ModuleContext {
     ident: String,
     blocks: Vec<String>,
@@ -47,7 +39,6 @@ pub(crate) struct TsHttpOutput {
     pub(crate) types: String,
     pub(crate) zod: String,
     pub(crate) client: String,
-    pub(crate) server: String,
 }
 
 pub(crate) fn render_spec(
@@ -110,15 +101,6 @@ pub(crate) fn render_spec(
                 imports: zod_imports.clone(),
             },
         )?,
-        server: renderer.render_template(
-            "http/server.ts.j2",
-            &ServerFileContext {
-                file_stem: file_stem.to_string(),
-                helpers: vec![renderer.render_template("http/server_helpers.ts.j2", &())?],
-                blocks: blocks.server,
-                imports: zod_imports,
-            },
-        )?,
     })
 }
 
@@ -144,8 +126,6 @@ fn render_defs(
                         .push(render_module(renderer, &ident, &body.zod.join("\n"))?);
                     out.client
                         .push(render_module(renderer, &ident, &body.client.join("\n"))?);
-                    out.server
-                        .push(render_module(renderer, &ident, &body.server.join("\n"))?);
                 }
             }
             hir::Definition::InterfaceDcl(interface) => {

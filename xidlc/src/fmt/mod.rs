@@ -12,8 +12,6 @@ use std::collections::HashMap;
 use self::helpers::{build_gap, collect_tokens, ensure_trailing_newline, normalize_blank_lines};
 
 const IDL_QUERY: &str = include_str!("queries/idl.scm");
-#[cfg(feature = "fmt-typescript")]
-const TYPESCRIPT_QUERY: &str = include_str!("queries/typescript.scm");
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) enum InsertKind {
@@ -81,16 +79,6 @@ pub fn format_rust_source(source: &str) -> IdlcResult<String> {
     Ok(source.to_string())
 }
 
-#[cfg(feature = "fmt-typescript")]
-pub fn format_typescript_source(source: &str) -> IdlcResult<String> {
-    format_tree_sitter_source(source, TYPESCRIPT_QUERY, "typescript", false, false, true)
-}
-
-#[cfg(not(feature = "fmt-typescript"))]
-pub fn format_typescript_source(source: &str) -> IdlcResult<String> {
-    Ok(source.to_string())
-}
-
 pub fn format_jinja_source(source: &str) -> IdlcResult<String> {
     if jinja::should_skip_jinja_format(source) {
         return Ok(source.to_string());
@@ -99,32 +87,6 @@ pub fn format_jinja_source(source: &str) -> IdlcResult<String> {
     Ok(normalize_blank_lines(&jinja::normalize_jinja_indentation(
         source,
     )))
-}
-
-#[cfg(feature = "fmt-typescript")]
-fn format_tree_sitter_source(
-    source: &str,
-    query_source: &str,
-    label: &str,
-    preserve_inline_ws: bool,
-    indent_parens: bool,
-    normalize_indent: bool,
-) -> IdlcResult<String> {
-    let language = match label {
-        #[cfg(feature = "fmt-typescript")]
-        "typescript" => tree_sitter_typescript::LANGUAGE_TYPESCRIPT.into(),
-        _ => unreachable!(),
-    };
-    let output = Formatter::new(FormatConfig {
-        language,
-        query_source,
-        label,
-        preserve_inline_ws,
-        indent_parens,
-        normalize_indent,
-    })
-    .format(source)?;
-    Ok(normalize_blank_lines(&output))
 }
 
 fn push_action(actions: &mut HashMap<usize, Vec<InsertKind>>, pos: usize, kind: InsertKind) {

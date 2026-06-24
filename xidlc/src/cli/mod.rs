@@ -82,7 +82,7 @@ enum GenLang {
         alias = "ts-rest",
         alias = "ts_rest"
     )]
-    TypescriptRest(ClientServerArgs),
+    TypescriptRest(FilesArgs),
     #[command(name = "go", alias = "golang")]
     Go(ClientServerArgs),
     #[command(name = "go-rest", alias = "go_rest")]
@@ -138,7 +138,9 @@ impl GenLang {
             Self::RustJsonRpc(args) => Ok(shared.into_client_server("rust-jsonrpc", args)),
             Self::RustAxum(args) => Ok(shared.into_client_server("rust-axum", args)),
             Self::Typescript(args) => Ok(shared.into_client_server("typescript", args)),
-            Self::TypescriptRest(args) => Ok(shared.into_client_server("typescript-rest", args)),
+            Self::TypescriptRest(args) => {
+                Ok(shared.into_client_only("typescript-rest", args.files))
+            }
             Self::Go(args) => Ok(shared.into_client_server("go", args)),
             Self::GoRest(args) => Ok(shared.into_client_server("go-rest", args)),
             Self::Openapi(args) => Ok(shared.into_plain("openapi", args.files)),
@@ -186,7 +188,7 @@ impl GenLang {
             Self::RustJsonRpc(_) => "xidlc gen rust-jsonrpc [OPTIONS] [FILES]...",
             Self::RustAxum(_) => "xidlc gen rust-axum [OPTIONS] [FILES]...",
             Self::Typescript(_) => "xidlc gen typescript [OPTIONS] [FILES]...",
-            Self::TypescriptRest(_) => "xidlc gen typescript-rest [OPTIONS] [FILES]...",
+            Self::TypescriptRest(_) => "xidlc gen typescript-rest [FILES]...",
             Self::Go(_) => "xidlc gen go [OPTIONS] [FILES]...",
             Self::GoRest(_) => "xidlc gen go-rest [OPTIONS] [FILES]...",
             Self::Openapi(_) => "xidlc gen openapi [FILES]...",
@@ -218,6 +220,18 @@ impl SharedGenArgs {
             mock: args.mock,
             dry_run: self.dry_run,
             files: args.files,
+        }
+    }
+
+    fn into_client_only(self, lang: impl Into<String>, files: Vec<PathBuf>) -> ArgsGenerate {
+        ArgsGenerate {
+            lang: lang.into(),
+            out_dir: self.out_dir,
+            client: true,
+            server: false,
+            mock: false,
+            dry_run: self.dry_run,
+            files,
         }
     }
 }
