@@ -18,13 +18,3 @@ pub fn is_upper_case(value: &str) -> std::result::Result<bool, Error> {
 
     Ok(true)
 }
-
-#[cfg(feature = "gen-typescript")]
-pub fn typescript_format_filter(value: String) -> std::result::Result<String, Error> {
-    crate::fmt::format_typescript_source(&value).map_err(|err| {
-        Error::new(
-            ErrorKind::InvalidOperation,
-            format!("typescript format failed: {err}"),
-        )
-    })
-}

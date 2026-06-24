@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::utils::typescript_format_filter;
 use include_dir::{Dir, include_dir};
 use minijinja::{Environment, Error, ErrorKind};
 use serde::Serialize;
@@ -17,8 +16,6 @@ impl TypescriptRenderer {
     pub fn new() -> IdlcResult<Self> {
         let mut env = Environment::new();
         env.set_loader(|name| load_template(name).map(Some));
-        env.add_filter("ts", typescript_format_filter);
-        env.add_filter("tsfmt", typescript_format_filter);
         Ok(Self { env })
     }
 

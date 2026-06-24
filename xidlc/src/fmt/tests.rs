@@ -1,4 +1,4 @@
-use super::{format_idl_source, format_jinja_source, format_typescript_source};
+use super::{format_idl_source, format_jinja_source};
 
 #[test]
 fn jinja_control_statement_indents_block() {
@@ -72,11 +72,4 @@ fn idl_formatter_appends_trailing_newline() {
     let source = "struct Point {\n    int32 x;\n};";
     let formatted = format_idl_source(source).expect("format idl");
     assert!(formatted.ends_with('\n'));
-}
-
-#[test]
-fn ts_formatter_handles_colon_in_string() {
-    let source = "const x = \"event: next\\ndata: \";\n";
-    let formatted = format_typescript_source(source).expect("format ts");
-    assert_eq!(formatted, "const x = \"event: next\\ndata: \";\n");
 }
