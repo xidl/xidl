@@ -87,15 +87,6 @@ enum GenLang {
     Go(ClientServerArgs),
     #[command(name = "go-rest", alias = "go_rest")]
     GoRest(ClientServerArgs),
-    #[command(name = "python", alias = "py")]
-    Python(ClientServerArgs),
-    #[command(
-        name = "python-rest",
-        alias = "python_rest",
-        alias = "py-rest",
-        alias = "py_rest"
-    )]
-    PythonRest(ClientServerArgs),
     #[command(name = "openapi")]
     Openapi(FilesArgs),
     #[command(name = "openrpc", alias = "open-rpc")]
@@ -150,8 +141,6 @@ impl GenLang {
             Self::TypescriptRest(args) => Ok(shared.into_client_server("typescript-rest", args)),
             Self::Go(args) => Ok(shared.into_client_server("go", args)),
             Self::GoRest(args) => Ok(shared.into_client_server("go-rest", args)),
-            Self::Python(args) => Ok(shared.into_client_server("python", args)),
-            Self::PythonRest(args) => Ok(shared.into_client_server("python-rest", args)),
             Self::Openapi(args) => Ok(shared.into_plain("openapi", args.files)),
             Self::Openrpc(args) => Ok(shared.into_plain("openrpc", args.files)),
             Self::External(values) => parse_external(shared, values),
@@ -176,8 +165,6 @@ impl GenLang {
             Self::TypescriptRest(_) => gen_cmd.find_subcommand_mut("typescript-rest"),
             Self::Go(_) => gen_cmd.find_subcommand_mut("go"),
             Self::GoRest(_) => gen_cmd.find_subcommand_mut("go-rest"),
-            Self::Python(_) => gen_cmd.find_subcommand_mut("python"),
-            Self::PythonRest(_) => gen_cmd.find_subcommand_mut("python-rest"),
             Self::Openapi(_) => gen_cmd.find_subcommand_mut("openapi"),
             Self::Openrpc(_) => gen_cmd.find_subcommand_mut("openrpc"),
             Self::External(_) => None,
@@ -202,8 +189,6 @@ impl GenLang {
             Self::TypescriptRest(_) => "xidlc gen typescript-rest [OPTIONS] [FILES]...",
             Self::Go(_) => "xidlc gen go [OPTIONS] [FILES]...",
             Self::GoRest(_) => "xidlc gen go-rest [OPTIONS] [FILES]...",
-            Self::Python(_) => "xidlc gen python [OPTIONS] [FILES]...",
-            Self::PythonRest(_) => "xidlc gen python-rest [OPTIONS] [FILES]...",
             Self::Openapi(_) => "xidlc gen openapi [FILES]...",
             Self::Openrpc(_) => "xidlc gen openrpc [FILES]...",
             Self::External(_) => "xidlc gen <lang> [FILES]...",

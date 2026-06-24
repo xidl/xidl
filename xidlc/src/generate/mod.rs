@@ -8,10 +8,6 @@ pub mod hir_gen;
 pub mod openapi;
 #[cfg(feature = "gen-openrpc")]
 pub mod openrpc;
-#[cfg(feature = "gen-python")]
-pub mod python;
-#[cfg(feature = "gen-python-rest")]
-pub mod python_rest;
 pub mod rest_hir_gen;
 #[cfg(feature = "gen-rust")]
 pub mod rust;

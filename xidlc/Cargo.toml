@@ -24,8 +24,6 @@ default = [
   "gen-typescript-rest",
   "gen-go",
   "gen-go-rest",
-  "gen-python",
-  "gen-python-rest",
   "gen-openapi",
   "gen-openrpc",
 ]
@@ -36,8 +34,6 @@ gen-typescript = []
 gen-typescript-rest = ["gen-typescript"]
 gen-go = []
 gen-go-rest = ["gen-go"]
-gen-python = []
-gen-python-rest = ["gen-python"]
 gen-openapi = []
 gen-openrpc = []
 cli = [

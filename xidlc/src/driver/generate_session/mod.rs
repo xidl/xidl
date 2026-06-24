@@ -91,10 +91,6 @@ impl CodegenSession {
             Plugin::Go => run_server!(crate::generate::go::GoCodegen),
             #[cfg(feature = "gen-go-rest")]
             Plugin::GoRest => run_server!(crate::generate::go_rest::GoRestCodegen),
-            #[cfg(feature = "gen-python")]
-            Plugin::Python => run_server!(crate::generate::python::PythonCodegen),
-            #[cfg(feature = "gen-python-rest")]
-            Plugin::PythonRest => run_server!(crate::generate::python_rest::PythonRestCodegen),
             #[cfg(feature = "gen-rust")]
             Plugin::Rust => run_server!(crate::generate::rust::RustCodegen),
             #[cfg(feature = "gen-rust-jsonrpc")]

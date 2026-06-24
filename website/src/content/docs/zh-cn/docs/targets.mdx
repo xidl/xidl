@@ -17,8 +17,6 @@ description: "XIDL 内建目标、别名、典型输出和常见搭配。"
 | `typescript` | `ts` | TypeScript 声明和 Schema | 前端或工具链 |
 | `go` | `golang` | Go 类型或辅助代码 | Go 项目 |
 | `go-rest` | `go_rest` | Go HTTP 绑定 | Go HTTP 服务 |
-| `python` | `py` | Python 代码生成 | Python 项目 |
-| `python-rest` | `py_rest`, `python_rest` | Python HTTP 绑定 | Python HTTP 服务 |
 | `openapi` | 无 | `openapi_{filename}.json` | 文档和下游消费 |
 | `openrpc` | `open-rpc` | `openrpc.json` | JSON-RPC 文档 |
 
@@ -33,8 +31,8 @@ description: "XIDL 内建目标、别名、典型输出和常见搭配。"
 
 ## 什么时候选哪个目标
 
-- 你只要数据结构：选 `rust`、`typescript`、`go`、`python`
-- 你要 HTTP 服务能力：选 `rust-axum`、`go-rest`、`python-rest`
+- 你只要数据结构：选 `rust`、`typescript` 或 `go`
+- 你要 HTTP 服务能力：选 `rust-axum` 或 `go-rest`
 - 你要 JSON-RPC：选 `rust-jsonrpc`
 - 你要对外发布 HTTP 契约：选 `openapi`
 - 你要对外发布 JSON-RPC 契约：选 `openrpc`

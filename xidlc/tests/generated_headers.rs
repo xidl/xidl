@@ -83,16 +83,6 @@ async fn generated_headers_include_current_version_and_git_hash_for_code_targets
             fixture: "shared/http_defaults.idl",
             comment_prefix: "//",
         },
-        HeaderCase {
-            lang: "python",
-            fixture: "shared/basic.idl",
-            comment_prefix: "#",
-        },
-        HeaderCase {
-            lang: "python-rest",
-            fixture: "shared/http_defaults.idl",
-            comment_prefix: "#",
-        },
     ];
 
     for case in cases {

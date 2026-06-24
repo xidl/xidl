@@ -27,8 +27,6 @@ gen-typescript = ["xidlc/gen-typescript"]
 gen-typescript-rest = ["gen-typescript", "xidlc/gen-typescript-rest"]
 gen-go = ["xidlc/gen-go"]
 gen-go-rest = ["gen-go", "xidlc/gen-go-rest"]
-gen-python = ["xidlc/gen-python"]
-gen-python-rest = ["gen-python", "xidlc/gen-python-rest"]
 gen-openapi = ["xidlc/gen-openapi"]
 gen-openrpc = ["xidlc/gen-openrpc"]
 
