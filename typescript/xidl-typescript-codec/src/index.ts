@@ -16,6 +16,8 @@ export function getMeta(schema: z.ZodTypeAny): XidlJsonMeta | undefined {
     const meta = metaMap.get(current);
     if (meta) return meta;
 
+    if (current instanceof z.ZodArray) break;
+
     if ('unwrap' in current && typeof (current as any).unwrap === 'function') {
       current = (current as any).unwrap();
     } else if ('_def' in current && (current as any)._def.innerType) {
@@ -46,6 +48,8 @@ export function xjson<T extends z.ZodTypeAny>(
 function unwrapSchema(schema: z.ZodTypeAny): z.ZodTypeAny {
   let current = schema;
   while (true) {
+    if (current instanceof z.ZodArray) break;
+
     if ('unwrap' in current && typeof (current as any).unwrap === 'function') {
       current = (current as any).unwrap();
     } else if ('_def' in current && (current as any)._def.innerType) {
@@ -167,7 +171,7 @@ export function serialize(value: any, schema: z.ZodTypeAny): any {
   }
   if (unwrapped instanceof z.ZodArray) {
     if (!Array.isArray(value)) return value;
-    const elementSchema = unwrapped.element;
+    const elementSchema = unwrapped.element as z.ZodTypeAny;
     return value.map(item => serialize(item, elementSchema));
   }
 
@@ -250,7 +254,7 @@ export function deserialize(value: any, schema: z.ZodTypeAny): any {
   }
   if (unwrapped instanceof z.ZodArray) {
     if (!Array.isArray(value)) return value;
-    const elementSchema = unwrapped.element;
+    const elementSchema = unwrapped.element as z.ZodTypeAny;
     return value.map(item => deserialize(item, elementSchema));
   }
 
