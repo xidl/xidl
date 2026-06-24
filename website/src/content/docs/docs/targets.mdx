@@ -17,8 +17,6 @@ This page summarizes the targets currently supported built-in by `xidlc` and the
 | `typescript` | `ts` | TypeScript declarations and Schemas | Frontend or toolchains |
 | `go` | `golang` | Go types or auxiliary code | Go projects |
 | `go-rest` | `go_rest` | Go HTTP bindings | Go HTTP services |
-| `python` | `py` | Python code generation | Python projects |
-| `python-rest` | `py_rest`, `python_rest` | Python HTTP bindings | Python HTTP services |
 | `openapi` | None | `openapi_{filename}.json` | Documentation and downstream consumption |
 | `openrpc` | `open-rpc` | `openrpc.json` | JSON-RPC documentation |
 
@@ -33,8 +31,8 @@ If a target does not support this distinction, these parameters may be ignored o
 
 ## When to Choose Which Target
 
-- **Only data structures**: Choose `rust`, `typescript`, `go`, or `python`.
-- **HTTP service capabilities**: Choose `rust-axum`, `go-rest`, or `python-rest`.
+- **Only data structures**: Choose `rust`, `typescript`, or `go`.
+- **HTTP service capabilities**: Choose `rust-axum` or `go-rest`.
 - **JSON-RPC**: Choose `rust-jsonrpc`.
 - **Publishing HTTP contracts externally**: Choose `openapi`.
 - **Publishing JSON-RPC contracts externally**: Choose `openrpc`.

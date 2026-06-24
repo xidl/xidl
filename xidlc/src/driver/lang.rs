@@ -38,15 +38,6 @@ pub enum Plugin {
     Go,
     #[serde(alias = "go_rest", alias = "go-rest")]
     GoRest,
-    #[serde(alias = "py", alias = "python")]
-    Python,
-    #[serde(
-        alias = "py_rest",
-        alias = "py-rest",
-        alias = "python_rest",
-        alias = "python-rest"
-    )]
-    PythonRest,
     #[serde(alias = "openapi")]
     Openapi,
     #[serde(alias = "openrpc", alias = "open-rpc")]
@@ -92,12 +83,6 @@ mod tests {
             ("golang", Plugin::Go),
             ("go_rest", Plugin::GoRest),
             ("go-rest", Plugin::GoRest),
-            ("py", Plugin::Python),
-            ("python", Plugin::Python),
-            ("py_rest", Plugin::PythonRest),
-            ("py-rest", Plugin::PythonRest),
-            ("python_rest", Plugin::PythonRest),
-            ("python-rest", Plugin::PythonRest),
             ("openapi", Plugin::Openapi),
             ("openrpc", Plugin::Openrpc),
             ("open-rpc", Plugin::Openrpc),

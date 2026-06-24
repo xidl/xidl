@@ -62,10 +62,6 @@ jobs:
         run: |
           pre-commit run -a
 
-      - name: Python compile
-        run: |
-          python3 -m compileall python
-
       - name: Cargo test
         run: |
           make test-rust
@@ -73,10 +69,6 @@ jobs:
       - name: Go test
         run: |
           make test-go
-
-      - name: Python test
-        run: |
-          make -C python test
 
   clippy:
     runs-on: ubuntu-latest

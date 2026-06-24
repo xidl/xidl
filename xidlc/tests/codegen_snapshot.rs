@@ -9,8 +9,6 @@ fn lang_and_codegen(folder: &str) -> Option<&'static str> {
         "ts-http" => Some("typescript-rest"),
         "golang" => Some("go"),
         "golang-http" => Some("go-rest"),
-        "python" => Some("python"),
-        "python-http" => Some("python-rest"),
         "axum" => Some("axum"),
         "openapi" => Some("openapi"),
         "openrpc" => Some("openrpc"),

@@ -1,6 +1,0 @@
-struct SkipStruct {
-    long a;
-    @skip
-    long b;
-    long c;
-};
