@@ -125,7 +125,7 @@ def step_impl(context, lang):
         if not os.path.exists(os.path.join(codec_path, "dist")):
             subprocess.run(["pnpm", "install", "--ignore-scripts"], cwd=codec_path, check=True, capture_output=True)
             subprocess.run(["pnpm", "build"], cwd=codec_path, check=True, capture_output=True)
-        subprocess.run(["npm", "install", "zod@^3.23.0", "typescript", codec_path], cwd=context.lang_dir, check=True, capture_output=True)
+        subprocess.run(["npm", "install", "zod@^4.4.3", "typescript", codec_path], cwd=context.lang_dir, check=True, capture_output=True)
 
         result = subprocess.run(["npx", "tsc", "--noEmit", "-p", "."], cwd=context.lang_dir, capture_output=True, text=True)
         if result.returncode != 0:
@@ -373,6 +373,7 @@ def run_generated_server_using_boilerplate(context, lang):
 
 @then('I can run hurl tests against the server')
 def step_impl(context):
+    assert shutil.which("hurl") is not None, "missing hurl CLI in PATH"
     idl_name = os.path.splitext(os.path.basename(context.idl_file))[0]
     idl_hurl_mapping = {
         "complex_rest": ["complex_rest.hurl"],
@@ -393,12 +394,12 @@ def step_impl(context):
     for hurl_file_name in hurl_files:
         hurl_file = os.path.join(os.getcwd(), "bdd", "features", "data", hurl_file_name)
         cmd = [
-            "pnpm", "exec", "hurl",
+            "hurl",
             "--test",
             "--variable", f"base_url=http://127.0.0.1:{context.port}",
             hurl_file
         ]
-        result = subprocess.run(cmd, capture_output=True, text=True, cwd=os.path.join(os.getcwd(), "xidlc-examples"))
+        result = subprocess.run(cmd, capture_output=True, text=True, cwd=context.lang_dir)
         if result.returncode != 0:
             print(f"Hurl file: {hurl_file_name}")
             print(f"Hurl stdout: {result.stdout}")
