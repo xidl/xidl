@@ -31,6 +31,10 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: typescript/xidl-typescript-codec/
 
+      - name: Build package
+        run: pnpm build
+        working-directory: typescript/xidl-typescript-codec/
+
       - name: Publish package
         working-directory: typescript/xidl-typescript-codec/
         run: |
