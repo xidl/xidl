@@ -21,12 +21,6 @@ pub fn is_upper_case(value: &str) -> std::result::Result<bool, Error> {
 
 #[cfg(feature = "gen-typescript")]
 pub fn typescript_format_filter(value: String) -> std::result::Result<String, Error> {
-    if value.contains("event: next") {
-        println!(
-            "--- BEFORE FORMATTING ---\n{}\n-------------------------",
-            value
-        );
-    }
     crate::fmt::format_typescript_source(&value).map_err(|err| {
         Error::new(
             ErrorKind::InvalidOperation,
