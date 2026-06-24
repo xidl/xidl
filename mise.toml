@@ -1,0 +1,5 @@
+[tools]
+node = "24.16.0"
+python = "3.12.13"
+go = "1.25.0"
+"github:Orange-OpenSource/hurl" = "8.0.1"
