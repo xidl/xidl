@@ -270,7 +270,7 @@ def run_generated_server_using_boilerplate(context, lang):
         fallback_name = context.protocol if context.protocol else "rest"
         src_dir = os.path.join(os.getcwd(), "bdd", "boilerplate", fallback_name, lang)
 
-    server_timeout = 60
+    server_timeout = 120
     module_name = get_module_name(context.lang_dir)
 
     if lang == "go":

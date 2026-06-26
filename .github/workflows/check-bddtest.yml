@@ -77,26 +77,10 @@ jobs:
 
       - uses: jdx/mise-action@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: latest
-
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: 1.92.0
-
-      - name: Setup Go
-        uses: actions/setup-go@v6
-        with:
-          go-version-file: golang/xidl-go/go.mod
-          cache: true
-
-      - name: Setup Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
 
       - name: Cache Rust
         uses: Swatinem/rust-cache@v2
