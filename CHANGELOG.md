@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.83.0](https://github.com/xidl/xidl/compare/v0.82.0...v0.83.0) (2026-06-26)
+
+
+### Features
+
+* **codec:** update typescript-xidl-codec ([0a756ae](https://github.com/xidl/xidl/commit/0a756ae05ae0602821d39c4d0cd811f63d2307b4))
+* remove useless code ([0ba29ac](https://github.com/xidl/xidl/commit/0ba29acf98e11d64153fc4682ecf4050e7bfd921))
+* **xidlc:** remove python support ([3ff1644](https://github.com/xidl/xidl/commit/3ff1644eed3b93dcb58f8de491488d382c393c0f))
+* **xidlc:** remove typescript server support ([6d3c3f8](https://github.com/xidl/xidl/commit/6d3c3f8d78b25a43e5975f8c08bec2b03d7a9537))
+
+
+### Bug Fixes
+
+* **xidlc:** remove println before format ts ([c62621a](https://github.com/xidl/xidl/commit/c62621a19f5ae37adca90c4b73901656ae59b274))
+
 ## [0.82.0](https://github.com/xidl/xidl/compare/v0.81.0...v0.82.0) (2026-06-22)
 
 
