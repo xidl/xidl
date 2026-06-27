@@ -85,11 +85,16 @@ jobs:
       - name: Cache Rust
         uses: Swatinem/rust-cache@v2
 
+      - name: Install just
+        uses: taiki-e/install-action@v2
+        with:
+          tool: just
+
       - name: BDD test
         env:
           XIDL_BDD_PORT_BASE: ${{ matrix.port-base }}
         run: |
-          make test-bdd BDD_FEATURES="${{ matrix.features }}"
+          BDD_FEATURES="${{ matrix.features }}" just test-bdd
 
   bddtest:
     name: bddtest

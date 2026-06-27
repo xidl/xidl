@@ -1,0 +1,11 @@
+set shell := ["bash", "-c"]
+
+go_cache := env_var_or_default("GO_CACHE", "/tmp/xidl-go-cache")
+go_path := env_var_or_default("GO_PATH", "/tmp/xidl-go-path")
+
+# Run all go tests
+test: test-go-runtime
+
+# Test go runtime
+test-go-runtime:
+    cd xidl-go-codec && GOCACHE={{go_cache}} GOPATH={{go_path}} go test ./...
