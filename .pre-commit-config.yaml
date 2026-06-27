@@ -57,7 +57,7 @@ repos:
         name: jinjafmt
         language: system
         types: [file]
-        entry: make fmt-jinja
+        entry: just fmt-jinja
         files: \.rs$
         pass_filenames: false
 

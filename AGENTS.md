@@ -37,8 +37,8 @@
 - A module with multiple test files MUST place them under `mod/tests/`.
 - Snapshot assertions MUST stay in the crate that owns the rendered output.
 - Every bug fix MUST add or update a regression test in the owning crate.
-- The command `make test` MUST pass.
-- The command `make test-coverage` MUST pass.
+- The command `just test` MUST pass.
+- The command `just test-coverage` MUST pass.
 - The coverage threshold for the tarpaulin command above MUST stay at or above
   95%.
 - The command `pre-commit run -a` MUST pass.

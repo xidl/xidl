@@ -58,17 +58,22 @@ jobs:
         with:
           tool: taplo-cli
 
+      - name: Install just
+        uses: taiki-e/install-action@v2
+        with:
+          tool: just
+
       - name: Pre-commit
         run: |
           pre-commit run -a
 
       - name: Cargo test
         run: |
-          make test-rust
+          just test-rust
 
       - name: Go test
         run: |
-          make test-go
+          just test-go
 
   clippy:
     runs-on: ubuntu-latest
@@ -102,9 +107,14 @@ jobs:
         with:
           tool: cargo-tarpaulin
 
+      - name: Install just
+        uses: taiki-e/install-action@v2
+        with:
+          tool: just
+
       - name: xidl-parser coverage
         run: |
-          make test-coverage
+          just test-coverage
 
   try-publish:
     runs-on: ubuntu-latest
