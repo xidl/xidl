@@ -28,7 +28,9 @@ class MyE2EPathSever(E2EPathSeverService):
         return E2EPathSeverOpWithParamsResponse(value=[request.path_name])
 
     async def op_with_query_2(self, request):
-        return E2EPathSeverOpWithQuery2Response(value=f"{request.all}:{request.word}:{request.q}")
+        return E2EPathSeverOpWithQuery2Response(
+            value=f"{request.all}:{request.word}:{request.q}"
+        )
 
 
 class MyE2EHttpRouteAndBody(E2EHttpRouteAndBodyService):
@@ -66,7 +68,9 @@ class MyE2EHttpRouteAndBody(E2EHttpRouteAndBodyService):
         )
 
     async def dedup_resource(self, request):
-        return E2EHttpRouteAndBodyDedupResourceResponse(value=f"{request.id}:{request.x_trace_id}")
+        return E2EHttpRouteAndBodyDedupResourceResponse(
+            value=f"{request.id}:{request.x_trace_id}"
+        )
 
     async def preview_resource(self, request):
         return E2EHttpRouteAndBodyPreviewResourceResponse(value=request.resource)
@@ -189,7 +193,9 @@ class MyE2EAttribute(E2EAttributeService):
         return Response(status_code=204)
 
     async def get_attribute_attr_6(self, request):
-        return E2EAttributeGetAttributeAttr6Response(value={"member_2": "V1", "member_3": {}})
+        return E2EAttributeGetAttributeAttr6Response(
+            value={"member_2": "V1", "member_3": {}}
+        )
 
     async def set_attribute_attr_6(self, request):
         return Response(status_code=204)
@@ -268,7 +274,9 @@ class MyE2EHttpForm(E2EHttpFormService):
 
 class MyE2EHttpScopeMatrix(E2EHttpScopeMatrixService):
     async def get_attribute_scope_inherited_attr(self, request):
-        return E2EHttpScopeMatrixGetAttributeScopeInheritedAttrResponse(value="inherited")
+        return E2EHttpScopeMatrixGetAttributeScopeInheritedAttrResponse(
+            value="inherited"
+        )
 
     async def get_attribute_scope_bare_attr(self, request):
         return E2EHttpScopeMatrixGetAttributeScopeBareAttrResponse(value="bare")
@@ -294,7 +302,11 @@ class MyE2EHttpScopeMatrix(E2EHttpScopeMatrixService):
 
     async def override_both_media(self, request):
         return E2EHttpScopeMatrixOverrideBothMediaResponse(
-            return_={"name": request.name, "tags": [f"age:{opt_int(request.age)}"], "labels": {}},
+            return_={
+                "name": request.name,
+                "tags": [f"age:{opt_int(request.age)}"],
+                "labels": {},
+            },
             normalized_name="OVERRIDDEN",
         )
 
@@ -322,12 +334,22 @@ class MyE2EHttpDefaultsMatrix(E2EHttpDefaultsMatrixService):
 
     async def replace_resource_default_body(self, request):
         return E2EHttpDefaultsMatrixReplaceResourceDefaultBodyResponse(
-            value={"name": request.name, "alias": request.alias, "tags": [request.id], "labels": {}}
+            value={
+                "name": request.name,
+                "alias": request.alias,
+                "tags": [request.id],
+                "labels": {},
+            }
         )
 
     async def patch_resource_default_body(self, request):
         return E2EHttpDefaultsMatrixPatchResourceDefaultBodyResponse(
-            value={"name": request.name, "alias": request.alias, "tags": [request.id], "labels": {}}
+            value={
+                "name": request.name,
+                "alias": request.alias,
+                "tags": [request.id],
+                "labels": {},
+            }
         )
 
 

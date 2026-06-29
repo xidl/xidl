@@ -2,6 +2,7 @@ import os
 import shutil
 import signal
 
+
 def after_scenario(context, scenario):
     if hasattr(context, "port_guard") and context.port_guard is not None:
         context.port_guard.close()
