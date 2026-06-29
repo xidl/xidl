@@ -100,3 +100,9 @@ repos:
       - id: move-module-mod
       - id: compact_workspace_deps
       - id: full-qualify-log
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.20
+    hooks:
+      # - id: ruff-check
+      - id: ruff-format

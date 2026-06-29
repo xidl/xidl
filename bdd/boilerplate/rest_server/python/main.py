@@ -103,21 +103,27 @@ app = FastAPI()
 
 def auth_error(realm=None):
     headers = {"WWW-Authenticate": f'Basic realm="{realm}"'} if realm else {}
-    return JSONResponse({"code": 401, "msg": "Unauthorized"}, status_code=401, headers=headers)
+    return JSONResponse(
+        {"code": 401, "msg": "Unauthorized"}, status_code=401, headers=headers
+    )
 
 
 @app.post("/login")
 async def login_route(request: FastAPIRequest):
     if not request.headers.get("authorization"):
         return auth_error("login")
-    return FastAPIRawResponse(status_code=204, headers={"Set-Cookie": "session_id=simple_session_id"})
+    return FastAPIRawResponse(
+        status_code=204, headers={"Set-Cookie": "session_id=simple_session_id"}
+    )
 
 
 @app.post("/login_realm")
 async def login_realm_route(request: FastAPIRequest):
     if not request.headers.get("authorization"):
         return auth_error("request login with realm")
-    return FastAPIRawResponse(status_code=204, headers={"Set-Cookie": "session_id=simple_session_id"})
+    return FastAPIRawResponse(
+        status_code=204, headers={"Set-Cookie": "session_id=simple_session_id"}
+    )
 
 
 @app.post("/login_bearer")

@@ -67,7 +67,9 @@ class MySmartCityRestApi(SmartCityRestApiService):
         return SmartCityRestApiGetAttributeApiVersionResponse(value="v2.0.0")
 
     async def get_attribute_maintenance_mode(self, request):
-        return SmartCityRestApiGetAttributeMaintenanceModeResponse(value=self.maintenance_mode)
+        return SmartCityRestApiGetAttributeMaintenanceModeResponse(
+            value=self.maintenance_mode
+        )
 
     async def set_attribute_maintenance_mode(self, request):
         self.maintenance_mode = request.maintenance_mode

@@ -19,7 +19,11 @@ class MyUserService(UserServiceService):
         return UserServiceGetUserResponse(value=user)
 
     async def create_user(self, request):
-        user_id = request.user.get("id") if isinstance(request.user, dict) else request.user.id
+        user_id = (
+            request.user.get("id")
+            if isinstance(request.user, dict)
+            else request.user.id
+        )
         self.users[user_id] = request.user
         return UserServiceCreateUserResponse(value=request.user)
 

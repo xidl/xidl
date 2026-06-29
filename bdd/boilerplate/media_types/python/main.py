@@ -10,7 +10,9 @@ from media_types_http import *
 
 class MyForm(FormServiceService):
     async def submit(self, request):
-        return FormServiceSubmitResponse(value=f"Received {request.name} age {request.age}")
+        return FormServiceSubmitResponse(
+            value=f"Received {request.name} age {request.age}"
+        )
 
 
 app = FastAPI()
