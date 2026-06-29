@@ -46,7 +46,7 @@ test-coverage:
 
 # Test rust axum coverage
 test-xidl-rust-axum-coverage:
-    cargo tarpaulin --manifest-path xidl-rust-axum/Cargo.toml --packages xidl-rust-axum --all-features --include-files "xidl-rust-axum/src/*" --fail-under 80 --out Stdout
+    cargo tarpaulin --manifest-path crates/xidl-rust-axum/Cargo.toml --packages xidl-rust-axum --all-features --include-files "crates/xidl-rust-axum/src/*" --fail-under 80 --out Stdout
 
 # Test parser coverage
 test-xidl-parser-coverage:
@@ -54,7 +54,7 @@ test-xidl-parser-coverage:
 
 # Test jsonrpc coverage
 test-xidl-jsonrpc-coverage:
-    cargo tarpaulin --manifest-path xidl-jsonrpc/Cargo.toml --packages xidl-jsonrpc --all-features --include-files "xidl-jsonrpc/src/*" --exclude-files "xidl-jsonrpc/src/transport/io.rs" --fail-under 80 --out Stdout
+    cargo tarpaulin --manifest-path crates/xidl-jsonrpc/Cargo.toml --packages xidl-jsonrpc --all-features --include-files "crates/xidl-jsonrpc/src/*" --exclude-files "crates/xidl-jsonrpc/src/transport/io.rs" --fail-under 80 --out Stdout
 
 # Format Jinja templates
 fmt-jinja:

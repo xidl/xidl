@@ -314,8 +314,8 @@ def run_generated_server_using_boilerplate(context, lang):
         cargo_toml_path = os.path.join(context.lang_dir, "Cargo.toml")
         with open(cargo_toml_path, "r") as f:
             content = f.read()
-        content = content.replace("{{RUST_XIDL_RUST_AXUM_PATH}}", os.path.abspath('xidl-rust-axum'))
-        content = content.replace("{{RUST_XIDL_JSONRPC_PATH}}", os.path.abspath('xidl-jsonrpc'))
+        content = content.replace("{{RUST_XIDL_RUST_AXUM_PATH}}", os.path.abspath('./crates/xidl-rust-axum'))
+        content = content.replace("{{RUST_XIDL_JSONRPC_PATH}}", os.path.abspath('./crates/xidl-jsonrpc'))
         with open(cargo_toml_path, "w") as f:
             f.write(content)
 
