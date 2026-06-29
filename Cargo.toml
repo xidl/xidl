@@ -4,15 +4,15 @@ members = [
   "xidl-build",
   "xidlc-examples",
   "xidl-parser-derive",
-  "xidl-jsonrpc",
-  "xidl-rust-axum",
+  "crates/xidl-jsonrpc",
+  "crates/xidl-rust-axum",
   "xidlc",
   "xidl-parser",
   "xidl-typeobject",
-  "apis/xidl-api-keycloak",
-  "apis/xidl-api-discord",
-  "apis/xidl-api-reddit",
-  "apis/xidl-api-github",
+  "crates/xidl-api-keycloak",
+  "crates/xidl-api-discord",
+  "crates/xidl-api-reddit",
+  "crates/xidl-api-github",
 ]
 
 [workspace.package]
@@ -31,8 +31,8 @@ strip = true
 [workspace.dependencies]
 xidl-parser = { version = "0.83.0", path = "xidl-parser" }
 xidl-parser-derive = { version = "0.83.0", path = "xidl-parser-derive" }
-xidl-jsonrpc = { version = "0.83.0", path = "xidl-jsonrpc" }
-xidl-rust-axum = { version = "0.83.0", path = "xidl-rust-axum" }
+xidl-jsonrpc = { version = "0.83.0", path = "crates/xidl-jsonrpc" }
+xidl-rust-axum = { version = "0.83.0", path = "crates/xidl-rust-axum" }
 xidl-build = { version = "0.83.0", path = "xidl-build" }
 xidlc = { version = "0.83.0", path = "xidlc" }
 
