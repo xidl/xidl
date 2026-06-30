@@ -144,6 +144,7 @@ pub(crate) fn build_method_meta(
             .content_type
             .clone()
             .unwrap_or_default(),
+        request_content_type_explicit: op.http.request.body.content_type_explicit,
         response_content_type: op
             .http
             .response

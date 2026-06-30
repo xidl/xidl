@@ -173,6 +173,7 @@ pub(crate) struct MethodMeta {
     pub(crate) response_body_direct_field: Option<String>,
     pub(crate) response_body_direct_ty: Option<String>,
     pub(crate) request_content_type: String,
+    pub(crate) request_content_type_explicit: bool,
     pub(crate) response_content_type: String,
     pub(crate) response_content_type_explicit: bool,
     pub(crate) request_params: Vec<ParamMeta>,

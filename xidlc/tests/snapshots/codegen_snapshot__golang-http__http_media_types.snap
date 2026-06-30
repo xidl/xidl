@@ -77,10 +77,6 @@ func RegisterRestMediaTypesApiHandler(r gin.IRouter, svc RestMediaTypesApiServic
 			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
 			return
 		}
-		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
-			return
-		}
 
 		req := &RestMediaTypesApiGetMsgpackUserRequest{}
 

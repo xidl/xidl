@@ -41,10 +41,6 @@ func RegisterHttpStreamApiHandler(r gin.IRouter, svc HttpStreamApiService) {
 			return
 		}
 		c.Request = c.Request.WithContext(ctx)
-		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
-			return
-		}
 
 		req := &HttpStreamApiAlertsRequest{}
 
@@ -72,10 +68,6 @@ func RegisterHttpStreamApiHandler(r gin.IRouter, svc HttpStreamApiService) {
 			return
 		}
 		c.Request = c.Request.WithContext(ctx)
-		if err := xidlgohttp.GinRequireContentType(c, "application/x-ndjson"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
-			return
-		}
 
 		stream := xidlgohttp.NewClientStreamReader[HttpStreamApiUploadAssetRequest](c.Request.Context(), c.Request.Body)
 		resp, err := svc.UploadAsset(c.Request.Context(), stream)
