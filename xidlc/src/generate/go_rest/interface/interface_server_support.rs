@@ -44,9 +44,10 @@ pub(super) fn render_auth_check(out: &mut String, method: &MethodMeta) {
 }
 
 pub(super) fn render_content_type_check(out: &mut String, method: &MethodMeta) {
-    if method.request_content_type == "application/json"
-        && method.body_params.is_empty()
-        && !matches!(method.stream_kind, Some(HttpStreamKind::Client))
+    if !method.request_content_type_explicit {
+        return;
+    }
+    if method.body_params.is_empty() && !matches!(method.stream_kind, Some(HttpStreamKind::Client))
     {
         return;
     }
@@ -55,6 +56,9 @@ pub(super) fn render_content_type_check(out: &mut String, method: &MethodMeta) {
     } else {
         method.request_content_type.as_str()
     };
+    if expected.is_empty() {
+        return;
+    }
     writeln!(
         out,
         "\t\tif err := xidlgohttp.GinRequireContentType(c, \"{}\"); err != nil {{",

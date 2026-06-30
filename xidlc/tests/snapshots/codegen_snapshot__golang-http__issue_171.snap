@@ -45,10 +45,6 @@ type Issue171ReproServiceService interface {
 
 func RegisterIssue171ReproServiceHandler(r gin.IRouter, svc Issue171ReproServiceService) {
 	r.POST("/flatten-any", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireContentType(c, "application/json"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
-			return
-		}
 
 		req := &Issue171ReproServiceFlattenAnyRequest{}
 		var body any
@@ -68,10 +64,6 @@ func RegisterIssue171ReproServiceHandler(r gin.IRouter, svc Issue171ReproService
 		c.Status(http.StatusNoContent)
 	})
 	r.POST("/flatten-struct-with-any", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireContentType(c, "application/json"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
-			return
-		}
 
 		req := &Issue171ReproServiceFlattenStructWithAnyRequest{}
 		var body Issue171StructWithAny

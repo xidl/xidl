@@ -40,10 +40,6 @@ type HttpStreamSseBindingsServiceService interface {
 
 func RegisterHttpStreamSseBindingsServiceHandler(r gin.IRouter, svc HttpStreamSseBindingsServiceService) {
 	r.GET("/files/*path", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
-			return
-		}
 
 		req := &HttpStreamSseBindingsServiceTailFileRequest{}
 

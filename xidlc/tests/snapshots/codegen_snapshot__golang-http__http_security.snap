@@ -48,10 +48,6 @@ func RegisterHttpSecurityServiceHandler(r gin.IRouter, svc HttpSecurityServiceSe
 			return
 		}
 		c.Request = c.Request.WithContext(ctx)
-		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
-			return
-		}
 
 		req := &HttpSecurityServiceGetUserRequest{}
 
@@ -96,10 +92,6 @@ func RegisterHttpSecurityServiceHandler(r gin.IRouter, svc HttpSecurityServiceSe
 			return
 		}
 		c.Request = c.Request.WithContext(ctx)
-		if err := xidlgohttp.GinRequireContentType(c, "application/json"); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
-			return
-		}
 
 		req := &HttpSecurityServiceSearchUserRequest{}
 		body := HttpSecurityServiceSearchUserRequestBody{}
@@ -124,10 +116,6 @@ func RegisterHttpSecurityServiceHandler(r gin.IRouter, svc HttpSecurityServiceSe
 		}
 	})
 	r.POST("/health", func(c *gin.Context) {
-		if err := xidlgohttp.GinRequireContentType(c, ""); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
-			return
-		}
 
 		req := &HttpSecurityServiceHealthRequest{}
 		resp, err := svc.Health(c.Request.Context(), req)

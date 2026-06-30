@@ -87,6 +87,19 @@ async fn generate_go_rest_with_props(props: HashMap<String, serde_json::Value>) 
     render_output(files)
 }
 
+async fn generate_go_rest_source(source: &str) -> String {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("golang-http")
+        .join("inline.idl");
+    let mut generator = xidlc::driver::Generator::new(String::from("go-rest"));
+    let files = generator
+        .generate_from_idl(source, &path, case_props("golang-http", "inline"))
+        .await
+        .expect("generate go-rest");
+    render_output(files)
+}
+
 #[tokio::test(flavor = "current_thread")]
 async fn codegen_snapshots_from_idl_folders() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests");
@@ -116,6 +129,36 @@ async fn codegen_snapshots_from_idl_folders() {
         let snapshot_name = format!("{folder}__{case_name}");
         insta::assert_snapshot!(snapshot_name, output);
     }
+}
+
+#[tokio::test(flavor = "current_thread")]
+async fn go_rest_content_type_check_requires_explicit_consumes() {
+    let output = generate_go_rest_source(
+        r#"
+#pragma xidlc package xidlc
+
+struct CreatePayload {
+    string name;
+};
+
+interface ContentTypeCheckService {
+    @post(path = "/implicit")
+    string implicit_create(
+        CreatePayload req
+    );
+
+    @post(path = "/explicit")
+    @Consumes("application/json")
+    string explicit_create(
+        CreatePayload req
+    );
+};
+"#,
+    )
+    .await;
+
+    assert_eq!(output.matches("GinRequireContentType").count(), 1);
+    assert!(output.contains(r#"GinRequireContentType(c, "application/json")"#));
 }
 
 #[tokio::test(flavor = "current_thread")]

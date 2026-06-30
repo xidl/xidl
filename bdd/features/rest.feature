@@ -149,11 +149,11 @@ Feature: REST API Generation and Communication
       | go   |
 
   Scenario Outline: REST Bad Path - Unsupported Media Type
-    Given a REST IDL file "bdd/features/data/complex_rest.idl"
+    Given a REST IDL file "bdd/features/data/rest_media_types.idl"
     When I generate <lang> code for the IDL
     Then the generated <lang> code should be valid
     And I can run the generated <lang> server and client
-    Then the client gets a 415 error with msg containing "type" when requesting POST "/" with headers
+    Then the client gets a 415 error with msg containing "type" when requesting POST "/v1/forms/profile" with headers
       | name         | value      |
       | Content-Type | text/plain |
 
