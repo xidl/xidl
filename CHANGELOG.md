@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.83.1](https://github.com/xidl/xidl/compare/v0.83.0...v0.83.1) (2026-06-30)
+
+
+### Bug Fixes
+
+* **go-rest:** skip content-type checks without @Consumes ([a980e6c](https://github.com/xidl/xidl/commit/a980e6cf66670af764b7654e9798ad41675b8c88))
+
 ## [0.83.0](https://github.com/xidl/xidl/compare/v0.82.0...v0.83.0) (2026-06-26)
 
 
