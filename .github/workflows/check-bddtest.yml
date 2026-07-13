@@ -73,7 +73,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v6
         with:
-          version: latest
+          version: 11.11.0
 
       - uses: jdx/mise-action@v4
 
