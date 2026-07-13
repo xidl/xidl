@@ -155,7 +155,7 @@ def step_impl(context, lang):
             f.write('{"name": "test-ts-gen", "version": "1.0.0", "type": "module"}')
         with open(os.path.join(context.lang_dir, "tsconfig.json"), "w") as f:
             f.write(
-                '{"compilerOptions": {"target": "ESNext", "module": "ESNext", "moduleResolution": "node", "ignoreDeprecations": "6.0", "skipLibCheck": true, "strict": true}}'
+                '{"compilerOptions": {"target": "ESNext", "module": "ESNext", "ignoreDeprecations": "6.0", "skipLibCheck": true, "strict": true}}'
             )
 
         codec_path = os.path.abspath(
