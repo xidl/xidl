@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.84.0](https://github.com/xidl/xidl/compare/v0.83.1...v0.84.0) (2026-07-15)
+
+
+### Features
+
+* **rest:** support raw byte stream for sequence&lt;octet&gt; ([49cde98](https://github.com/xidl/xidl/commit/49cde98bafa39fff3c7ab15c609dfec1199591c0))
+
 ## [0.83.1](https://github.com/xidl/xidl/compare/v0.83.0...v0.83.1) (2026-06-30)
 
 
