@@ -71,3 +71,34 @@ Override default JSON serialization.
 @Produces("application/octet-stream")
 void upload_data(sequence<uint8> data);
 ```
+
+## 6. HTTP Streams
+
+XIDL supports HTTP streaming endpoints via annotations.
+
+- **Server-Sent Events / NDJSON**: `@server_stream` (Server streams responses to
+  client)
+- **Client Streams**: `@client_stream` (Client streams requests to server)
+- **Bidirectional WebSocket**: `@bidi_stream` (Full-duplex communication over
+  WebSocket)
+
+**Raw Byte Streams:** When an endpoint expects or returns a single parameter of
+type `sequence<octet>`, the stream will operate as a raw byte stream (i.e.,
+`application/octet-stream`) instead of using structured framing (like SSE or
+NDJSON). This is highly efficient for transferring large files or media chunks.
+
+**Example:**
+
+```idl
+interface StreamApi {
+    // Structured data streaming via NDJSON
+    @client_stream
+    @post(path = "/logs")
+    void upload_logs(in sequence<LogEntry> logs);
+
+    // Raw byte streaming for file uploads
+    @client_stream
+    @post(path = "/upload")
+    string upload_file(in sequence<octet> chunk);
+};
+```
