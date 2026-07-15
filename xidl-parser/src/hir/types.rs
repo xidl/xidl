@@ -61,6 +61,7 @@ pub struct FixedPtType {
 pub enum IntegerType {
     Char,
     UChar,
+    Octet,
     U8,
     U16,
     U32,
@@ -95,7 +96,7 @@ impl From<crate::typed_ast::SimpleTypeSpec> for TypeSpec {
                     crate::typed_ast::BaseTypeSpec::WideCharType(_) => TypeSpec::WideCharType,
                     crate::typed_ast::BaseTypeSpec::BooleanType(_) => TypeSpec::Boolean,
                     crate::typed_ast::BaseTypeSpec::OctetType(_) => {
-                        TypeSpec::IntegerType(IntegerType::U8)
+                        TypeSpec::IntegerType(IntegerType::Octet)
                     }
                     crate::typed_ast::BaseTypeSpec::AnyType(_) => TypeSpec::AnyType,
                     crate::typed_ast::BaseTypeSpec::ObjectType(_) => TypeSpec::ObjectType,

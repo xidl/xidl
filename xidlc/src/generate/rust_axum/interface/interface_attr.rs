@@ -202,6 +202,7 @@ pub(crate) fn render_attr_operation_from_http(
         is_server_stream: matches!(http_op.meta.stream.kind, Some(HttpStreamKind::Server)),
         is_client_stream: matches!(http_op.meta.stream.kind, Some(HttpStreamKind::Client)),
         is_bidi_stream: matches!(http_op.meta.stream.kind, Some(HttpStreamKind::Bidi)),
+        is_byte_stream: false,
         is_upgrade: false,
         upgrade_protocol: None,
         request_item_ty: "()".to_string(),

@@ -98,6 +98,7 @@ Feature: REST API Generation and Communication
       | city_rest        | go   |
       | rest_server      | rust |
       | rest_server      | go   |
+      | byte_stream      | rust |
       | rest_media_types | rust |
       | rest_media_types | go   |
       | e2e_test         | rust |

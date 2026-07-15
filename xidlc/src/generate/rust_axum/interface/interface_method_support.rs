@@ -60,13 +60,18 @@ pub(crate) fn request_payload_ty(
     auth_wrapper_struct: &Option<String>,
     is_client_stream: bool,
     is_bidi_stream: bool,
+    is_byte_stream: bool,
     response_ty: &str,
 ) -> String {
     if let Some(wrapper) = auth_wrapper_struct {
         return wrapper.clone();
     }
     if is_client_stream {
-        format!("xidl_rust_axum::stream::NdjsonStream<{request_ty}>")
+        if is_byte_stream {
+            "xidl_rust_axum::stream::ByteStream".to_string()
+        } else {
+            format!("xidl_rust_axum::stream::NdjsonStream<{request_ty}>")
+        }
     } else if is_bidi_stream {
         format!("xidl_rust_axum::stream::BidiServerStream<{request_ty}, {response_ty}>")
     } else {

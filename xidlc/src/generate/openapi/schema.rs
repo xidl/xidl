@@ -217,6 +217,7 @@ fn integer_schema(value: &hir::IntegerType) -> RefOr<Schema> {
         hir::IntegerType::U32
         | hir::IntegerType::U16
         | hir::IntegerType::U8
+        | hir::IntegerType::Octet
         | hir::IntegerType::UChar => {
             object = object
                 .format(Some(SchemaFormat::KnownFormat(KnownFormat::Int32)))

@@ -53,7 +53,8 @@ fn integer_schema(value: &hir::IntegerType) -> Value {
         hir::IntegerType::U32
         | hir::IntegerType::U16
         | hir::IntegerType::U8
-        | hir::IntegerType::UChar => {
+        | hir::IntegerType::UChar
+        | hir::IntegerType::Octet => {
             json!({ "type": "integer", "format": "int32", "minimum": 0 })
         }
         hir::IntegerType::I64 => json!({ "type": "integer", "format": "int64" }),

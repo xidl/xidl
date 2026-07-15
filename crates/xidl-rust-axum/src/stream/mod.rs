@@ -1,4 +1,5 @@
 mod bidi;
+mod bytes;
 mod ndjson;
 mod sse;
 mod writer;
@@ -6,6 +7,9 @@ mod writer;
 pub use bidi::{BidiClientStream, BidiServerStream};
 #[cfg(not(tarpaulin_include))]
 pub use bidi::{open_bidi_client, open_bidi_client_with_headers, open_bidi_server};
+#[cfg(feature = "client")]
+pub use bytes::open_byte_stream;
+pub use bytes::{ByteReader, boxed_bytes, byte_stream_response, decode_bytes_body};
 #[cfg(feature = "client")]
 pub use ndjson::encode_ndjson_body;
 pub use ndjson::{boxed_ndjson, decode_ndjson_body};
@@ -21,6 +25,9 @@ use ndjson::decode_ndjson_reader;
 #[cfg(all(test, feature = "client"))]
 use sse::{SseDecodeState, StreamAction};
 use std::pin::Pin;
+
+/// Boxed raw byte stream used for octet sequence.
+pub type ByteStream = Pin<Box<dyn Stream<Item = Result<axum::body::Bytes>> + Send + 'static>>;
 
 /// Boxed server-sent event stream used by generated handlers.
 pub type SseStream<T> = Pin<Box<dyn Stream<Item = Result<T>> + Send + 'static>>;

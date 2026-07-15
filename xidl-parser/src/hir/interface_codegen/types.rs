@@ -54,7 +54,7 @@ pub fn idl_type_spec(ty: &TypeSpec) -> String {
 pub fn idl_integer_type(value: &IntegerType) -> String {
     match value {
         IntegerType::Char => "int8".to_string(),
-        IntegerType::UChar => "uint8".to_string(),
+        IntegerType::UChar | IntegerType::Octet => "uint8".to_string(),
         IntegerType::U8 => "uint8".to_string(),
         IntegerType::U16 => "unsigned short".to_string(),
         IntegerType::U32 => "unsigned long".to_string(),

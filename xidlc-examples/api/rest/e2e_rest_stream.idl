@@ -56,11 +56,20 @@ interface E2eHttpStream {
     );
 
     @client_stream
-    @stream_codec("ndjson")
     @path("/v2/stream/upload")
     StructUploadResult upload_chunks(
         in string file_id,
         in sequence<octet> chunk
     );
+
+    @client_stream
+    @path("/v2/stream/upload_bytes")
+    StructUploadResult upload_bytes(
+        in sequence<octet> chunk
+    );
+
+    @server_stream
+    @path("/v2/stream/download_bytes")
+    sequence<octet> download_bytes();
 
 };

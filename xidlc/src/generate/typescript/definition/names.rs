@@ -53,7 +53,8 @@ pub(crate) fn integer_schema_primitive(value: &hir::IntegerType) -> String {
         | hir::IntegerType::U32
         | hir::IntegerType::U16
         | hir::IntegerType::U8
-        | hir::IntegerType::UChar => "coerce.number().int().nonnegative()".to_string(),
+        | hir::IntegerType::UChar
+        | hir::IntegerType::Octet => "coerce.number().int().nonnegative()".to_string(),
         _ => "coerce.number().int()".to_string(),
     }
 }

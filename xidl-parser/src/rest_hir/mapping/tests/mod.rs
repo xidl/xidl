@@ -1,5 +1,6 @@
 use super::*;
 use crate::hir;
+use crate::rest_hir::semantics::HttpStreamCodec;
 use std::collections::HashMap;
 
 mod streams;
