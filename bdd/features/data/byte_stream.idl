@@ -1,0 +1,13 @@
+#pragma xidlc package byte_stream
+#pragma xidlc version v1.0.0
+#pragma xidlc service http://127.0.0.1:8080 byte_stream
+
+interface ByteStreamService {
+    @server_stream
+    @get(path = "/download")
+    sequence<octet> download_bytes();
+
+    @client_stream
+    @post(path = "/upload")
+    string upload_bytes(in sequence<octet> chunk);
+}

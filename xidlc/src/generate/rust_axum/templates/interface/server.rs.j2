@@ -343,7 +343,11 @@ T: {{ ident }} + Send + Sync + 'static,
                     {% endif %}
                     return Ok(resp);
                 {% elif method.is_client_stream %}
-                    let stream = xidl_rust_axum::stream::decode_ndjson_body::<{{ method.request_item_ty }}>(body);
+                    {% if method.is_byte_stream %}
+                        let stream = xidl_rust_axum::stream::decode_bytes_body(body);
+                    {% else %}
+                        let stream = xidl_rust_axum::stream::decode_ndjson_body::<{{ method.request_item_ty }}>(body);
+                    {% endif %}
                     {% if method.auth_wrapper_struct %}
                         let data = {{ method.auth_wrapper_struct }} { xidl_auth, data: stream };
                     {% else %}
@@ -445,7 +449,9 @@ T: {{ ident }} + Send + Sync + 'static,
                                         {% endif %}
                                     {% endfor %}
                                 {% endif %}
-                                let mut resp = {% if method.is_server_stream %}
+                                let mut resp = {% if method.is_server_stream and method.is_byte_stream %}
+                                xidl_rust_axum::stream::byte_stream_response(resp_value)
+                            {% elif method.is_server_stream %}
                                 xidl_rust_axum::stream::sse_response(resp_value)
                             {% elif method.is_upgrade %}
                                 resp_value

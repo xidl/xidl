@@ -98,7 +98,7 @@ impl {{ ident }}Client {
 impl {{ ident }}Client {
     {% for method in methods %}
         #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
-        pub async fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{% if method.is_client_stream %}xidl_rust_axum::stream::Writer<{{ method.request_item_ty }}, {{ method.response_ty }}>{% elif method.is_bidi_stream %}xidl_rust_axum::stream::ReaderWriter<{{ method.request_item_ty }}, {{ method.response_ty }}>{% elif method.is_server_stream %}xidl_rust_axum::stream::Reader<{{ method.response_ty }}>{% elif method.is_upgrade %}::xidl_rust_axum::reqwest::Upgraded{% else %}{{ method.response_ty }}{% endif %}, xidl_rust_axum::Error> {
+        pub async fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{% if method.is_client_stream %}{% if method.is_byte_stream %}xidl_rust_axum::stream::Writer<xidl_rust_axum::axum::body::Bytes, {{ method.response_ty }}>{% else %}xidl_rust_axum::stream::Writer<{{ method.request_item_ty }}, {{ method.response_ty }}>{% endif %}{% elif method.is_bidi_stream %}xidl_rust_axum::stream::ReaderWriter<{{ method.request_item_ty }}, {{ method.response_ty }}>{% elif method.is_server_stream %}{% if method.is_byte_stream %}xidl_rust_axum::stream::ByteReader{% else %}xidl_rust_axum::stream::Reader<{{ method.response_ty }}>{% endif %}{% elif method.is_upgrade %}::xidl_rust_axum::reqwest::Upgraded{% else %}{{ method.response_ty }}{% endif %}, xidl_rust_axum::Error> {
             let path = "{{ method.path }}".to_string();
             {% for param in method.path_params %}
                 let path = path.replace("{{ ['{', param.path_template_name, '}'] | join}}", &{{ param.name }}.to_string());
@@ -338,15 +338,27 @@ impl {{ ident }}Client {
                     return xidl_rust_axum::stream::open_bidi_client::<{{ method.request_item_ty }}, {{ method.response_ty }}>(&ws_url).await;
                 {% endif %}
             {% elif method.is_client_stream %}
-                req.headers_mut().insert(
-                xidl_rust_axum::reqwest::header::CONTENT_TYPE,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/x-ndjson"),
-                );
-                let (tx, rx) = xidl_rust_axum::tokio::sync::mpsc::channel(32);
-                let outbound = xidl_rust_axum::futures_util::stream::unfold(rx, |mut rx| async move {
-                    rx.recv().await.map(|item| (item, rx))
-                });
-                *req.body_mut() = Some(xidl_rust_axum::stream::encode_ndjson_body(Box::pin(outbound)));
+                {% if method.is_byte_stream %}
+                    req.headers_mut().insert(
+                    xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+                    xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/octet-stream"),
+                    );
+                    let (tx, rx) = xidl_rust_axum::tokio::sync::mpsc::channel(32);
+                    let outbound = xidl_rust_axum::futures_util::stream::unfold(rx, |mut rx| async move {
+                        rx.recv().await.map(|item| (item, rx))
+                    });
+                    *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::wrap_stream(outbound));
+                {% else %}
+                    req.headers_mut().insert(
+                    xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+                    xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/x-ndjson"),
+                    );
+                    let (tx, rx) = xidl_rust_axum::tokio::sync::mpsc::channel(32);
+                    let outbound = xidl_rust_axum::futures_util::stream::unfold(rx, |mut rx| async move {
+                        rx.recv().await.map(|item| (item, rx))
+                    });
+                    *req.body_mut() = Some(xidl_rust_axum::stream::encode_ndjson_body(Box::pin(outbound)));
+                {% endif %}
                 let http = self.client.http().clone();
                 let response_task = xidl_rust_axum::tokio::spawn(async move {
                     let resp = http
@@ -406,7 +418,11 @@ impl {{ ident }}Client {
                 *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
             {% endif %}
             {% if method.is_server_stream %}
-                xidl_rust_axum::stream::open_sse::<{{ method.response_ty }}>(self.client.http(), req).await
+                {% if method.is_byte_stream %}
+                    xidl_rust_axum::stream::open_byte_stream(self.client.http(), req).await
+                {% else %}
+                    xidl_rust_axum::stream::open_sse::<{{ method.response_ty }}>(self.client.http(), req).await
+                {% endif %}
             {% elif method.is_upgrade %}
                 let resp = self
                 .client

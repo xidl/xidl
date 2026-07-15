@@ -245,6 +245,7 @@ pub enum HttpBodyCodec {
 pub enum HttpStreamPayloadCodec {
     Ndjson,
     Sse,
+    Bytes,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

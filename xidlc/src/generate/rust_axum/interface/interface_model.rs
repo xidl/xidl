@@ -77,6 +77,7 @@ pub(crate) struct MethodContext {
     pub(crate) is_server_stream: bool,
     pub(crate) is_client_stream: bool,
     pub(crate) is_bidi_stream: bool,
+    pub(crate) is_byte_stream: bool,
     pub(crate) request_item_ty: String,
     pub(crate) ret_in_ty: String,
     pub(crate) ret_out_ty: String,

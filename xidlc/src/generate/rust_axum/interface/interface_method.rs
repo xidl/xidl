@@ -15,7 +15,8 @@ use crate::generate::rust_axum::interface::{MethodContext, RenderEnv};
 use crate::generate::rust_axum::transport::{TransportDirection, TransportTracker};
 use xidl_parser::hir;
 use xidl_parser::rest_hir::{
-    HttpOperation, HttpRequestBodyShape, HttpResponseBodyShape, semantics::HttpStreamKind,
+    HttpOperation, HttpRequestBodyShape, HttpResponseBodyShape, HttpStreamPayloadCodec,
+    semantics::HttpStreamKind,
 };
 
 pub(crate) fn render_op_from_http(
@@ -108,6 +109,20 @@ pub(crate) fn render_op_from_http(
         None
     };
 
+    let is_byte_stream = matches!(
+        http_op.http.request.body.shape,
+        HttpRequestBodyShape::Stream {
+            codec: HttpStreamPayloadCodec::Bytes,
+            ..
+        }
+    ) || matches!(
+        http_op.http.response.body.shape,
+        HttpResponseBodyShape::Stream {
+            codec: HttpStreamPayloadCodec::Bytes,
+            ..
+        }
+    );
+
     let request_ty = request_struct.clone().unwrap_or_else(|| "()".to_string());
     let response_ty_str = response_ty(http_op, &struct_prefix, &ret);
     let request_payload_ty = request_payload_ty(
@@ -115,6 +130,7 @@ pub(crate) fn render_op_from_http(
         &auth_wrapper_struct,
         is_client_stream,
         is_bidi_stream,
+        is_byte_stream,
         &response_ty_str,
     );
 
@@ -236,6 +252,7 @@ pub(crate) fn render_op_from_http(
         is_server_stream,
         is_client_stream,
         is_bidi_stream,
+        is_byte_stream,
         is_upgrade,
         upgrade_protocol,
         request_item_ty: request_ty,

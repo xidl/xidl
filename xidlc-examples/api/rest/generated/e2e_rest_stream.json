@@ -69,6 +69,43 @@
         }
       }
     },
+    "/v2/stream/download_bytes": {
+      "get": {
+        "operationId": "E2eHttpStream.download_bytes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/octet-stream": {
+                "itemSchema": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int32",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "http_bearer": []
+          }
+        ]
+      }
+    },
     "/v2/stream/events/{channel}": {
       "get": {
         "operationId": "E2eHttpStream.watch_channel",
@@ -135,6 +172,52 @@
             "application/x-ndjson": {
               "itemSchema": {
                 "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StructUploadResult"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "http_bearer": []
+          }
+        ]
+      }
+    },
+    "/v2/stream/upload_bytes": {
+      "post": {
+        "operationId": "E2eHttpStream.upload_bytes",
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "itemSchema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 0
+                }
               }
             }
           }

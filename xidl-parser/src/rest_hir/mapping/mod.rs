@@ -1,10 +1,12 @@
-use super::semantics::{HttpStreamCodec, HttpStreamConfig, HttpStreamKind};
+use super::semantics::{HttpStreamConfig, HttpStreamKind};
 use super::validate::{HttpParamDirection, param_direction};
 use super::*;
 use crate::hir;
 
 #[cfg(test)]
 mod tests;
+mod utils;
+use utils::*;
 
 pub fn build_operation_signature(op: &hir::OpDcl) -> HttpOperationSignature {
     let params = op
@@ -75,6 +77,16 @@ fn get_signature_annotations(param: &hir::ParamDcl) -> Vec<HttpSignatureParamAnn
     sig_annos
 }
 
+/// Returns true iff `ty` is `sequence<octet>`, indicating a raw byte buffer
+/// that should be streamed without framing.
+fn is_byte_sequence(ty: &hir::TypeSpec) -> bool {
+    matches!(
+        ty,
+        hir::TypeSpec::SequenceType(seq)
+            if matches!(*seq.ty, hir::TypeSpec::IntegerType(hir::IntegerType::Octet))
+    )
+}
+
 pub fn build_http_mapping(
     method: HttpMethod,
     stream: &HttpStreamConfig,
@@ -130,10 +142,15 @@ fn build_request_mapping(
     let body_shape = if is_stream {
         // Stream
         if let Some(param) = body_params.first() {
+            let codec = if body_params.len() == 1 && is_byte_sequence(&param.ty) {
+                HttpStreamPayloadCodec::Bytes
+            } else {
+                map_stream_codec(stream.codec)
+            };
             HttpRequestBodyShape::Stream {
                 source_param: param.name.clone(),
                 item_ty: param.ty.clone(),
-                codec: map_stream_codec(stream.codec),
+                codec,
             }
         } else {
             HttpRequestBodyShape::Empty
@@ -163,9 +180,20 @@ fn build_request_mapping(
 
     let (final_content_type, final_codec) =
         if is_stream && !matches!(body_shape, HttpRequestBodyShape::Empty) {
-            let ct = match stream.codec {
-                HttpStreamCodec::Ndjson => "application/x-ndjson",
-                HttpStreamCodec::Sse => "text/event-stream",
+            let ct = match &body_shape {
+                HttpRequestBodyShape::Stream {
+                    codec: HttpStreamPayloadCodec::Bytes,
+                    ..
+                } => "application/octet-stream",
+                HttpRequestBodyShape::Stream {
+                    codec: HttpStreamPayloadCodec::Ndjson,
+                    ..
+                } => "application/x-ndjson",
+                HttpRequestBodyShape::Stream {
+                    codec: HttpStreamPayloadCodec::Sse,
+                    ..
+                } => "text/event-stream",
+                _ => unreachable!(),
             };
             (Some(ct.to_string()), map_body_codec(ct))
         } else if matches!(body_shape, HttpRequestBodyShape::Empty) {
@@ -228,18 +256,28 @@ fn build_response_mapping(
     );
     let body_shape = if is_stream {
         if let Some(ty) = return_type {
+            let codec = if is_byte_sequence(ty) {
+                HttpStreamPayloadCodec::Bytes
+            } else {
+                map_stream_codec(stream.codec)
+            };
             HttpResponseBodyShape::Stream {
                 item_source: HttpOutputSource::ReturnValue,
                 item_ty: ty.clone(),
-                codec: map_stream_codec(stream.codec),
+                codec,
             }
         } else if let Some(param) = body_outputs.first() {
+            let codec = if body_outputs.len() == 1 && is_byte_sequence(&param.ty) {
+                HttpStreamPayloadCodec::Bytes
+            } else {
+                map_stream_codec(stream.codec)
+            };
             HttpResponseBodyShape::Stream {
                 item_source: HttpOutputSource::Param {
                     name: param.name.clone(),
                 },
                 item_ty: param.ty.clone(),
-                codec: map_stream_codec(stream.codec),
+                codec,
             }
         } else {
             HttpResponseBodyShape::Empty
@@ -280,9 +318,20 @@ fn build_response_mapping(
 
     let (final_content_type, final_codec) =
         if is_stream && !matches!(body_shape, HttpResponseBodyShape::Empty) {
-            let ct = match stream.codec {
-                HttpStreamCodec::Ndjson => "application/x-ndjson",
-                HttpStreamCodec::Sse => "text/event-stream",
+            let ct = match &body_shape {
+                HttpResponseBodyShape::Stream {
+                    codec: HttpStreamPayloadCodec::Bytes,
+                    ..
+                } => "application/octet-stream",
+                HttpResponseBodyShape::Stream {
+                    codec: HttpStreamPayloadCodec::Ndjson,
+                    ..
+                } => "application/x-ndjson",
+                HttpResponseBodyShape::Stream {
+                    codec: HttpStreamPayloadCodec::Sse,
+                    ..
+                } => "text/event-stream",
+                _ => unreachable!(),
             };
             (Some(ct.to_string()), map_body_codec(ct))
         } else if matches!(body_shape, HttpResponseBodyShape::Empty) {
@@ -316,65 +365,5 @@ fn build_response_mapping(
             shape: body_shape,
         },
         status,
-    }
-}
-
-fn is_composite_request_body(shape: &HttpRequestBodyShape) -> bool {
-    match shape {
-        HttpRequestBodyShape::Empty => false,
-        HttpRequestBodyShape::SingleValue { ty, .. } => is_composite_type(ty),
-        HttpRequestBodyShape::Object { .. } => true,
-        HttpRequestBodyShape::Stream { .. } => true,
-    }
-}
-
-fn is_composite_response_body(shape: &HttpResponseBodyShape) -> bool {
-    match shape {
-        HttpResponseBodyShape::Empty => false,
-        HttpResponseBodyShape::ReturnOnly { ty } => is_composite_type(ty),
-        HttpResponseBodyShape::SingleValue { ty, .. } => is_composite_type(ty),
-        HttpResponseBodyShape::Object { .. } => true,
-        HttpResponseBodyShape::Stream { .. } => true,
-    }
-}
-
-fn is_composite_type(ty: &hir::TypeSpec) -> bool {
-    match ty {
-        hir::TypeSpec::IntegerType(_)
-        | hir::TypeSpec::FloatingPtType
-        | hir::TypeSpec::CharType
-        | hir::TypeSpec::WideCharType
-        | hir::TypeSpec::Boolean
-        | hir::TypeSpec::StringType(_)
-        | hir::TypeSpec::WideStringType(_)
-        | hir::TypeSpec::FixedPtType(_) => false,
-        hir::TypeSpec::ScopedName(_)
-        | hir::TypeSpec::SequenceType(_)
-        | hir::TypeSpec::MapType(_)
-        | hir::TypeSpec::TemplateType(_)
-        | hir::TypeSpec::AnyType
-        | hir::TypeSpec::ObjectType
-        | hir::TypeSpec::ValueBaseType => true,
-    }
-}
-
-fn map_body_codec(content_type: &str) -> Option<HttpBodyCodec> {
-    if content_type.eq_ignore_ascii_case("application/json") {
-        Some(HttpBodyCodec::Json)
-    } else if content_type.eq_ignore_ascii_case("application/x-www-form-urlencoded") {
-        Some(HttpBodyCodec::FormUrlEncoded)
-    } else if content_type.eq_ignore_ascii_case("application/msgpack") {
-        Some(HttpBodyCodec::Msgpack)
-    } else if content_type.eq_ignore_ascii_case("text/plain") {
-        Some(HttpBodyCodec::Text)
-    } else {
-        None
-    }
-}
-
-fn map_stream_codec(codec: HttpStreamCodec) -> HttpStreamPayloadCodec {
-    match codec {
-        HttpStreamCodec::Ndjson => HttpStreamPayloadCodec::Ndjson,
-        HttpStreamCodec::Sse => HttpStreamPayloadCodec::Sse,
     }
 }

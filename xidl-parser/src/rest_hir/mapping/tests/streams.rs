@@ -1,4 +1,5 @@
 use super::*;
+use crate::rest_hir::semantics::HttpStreamCodec;
 
 #[test]
 fn test_build_http_mapping_covers_bindings_streams_and_codecs() {

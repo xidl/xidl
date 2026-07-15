@@ -18,7 +18,9 @@ pub(crate) fn go_type(ty: &hir::TypeSpec) -> String {
     match ty {
         hir::TypeSpec::IntegerType(value) => match value {
             hir::IntegerType::Char => "int8".to_string(),
-            hir::IntegerType::UChar | hir::IntegerType::U8 => "uint8".to_string(),
+            hir::IntegerType::UChar | hir::IntegerType::Octet | hir::IntegerType::U8 => {
+                "uint8".to_string()
+            }
             hir::IntegerType::U16 => "uint16".to_string(),
             hir::IntegerType::U32 => "uint32".to_string(),
             hir::IntegerType::U64 => "uint64".to_string(),

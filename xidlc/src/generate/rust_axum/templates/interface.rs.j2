@@ -25,7 +25,7 @@
             req: ::xidl_rust_axum::Request<{{ method.request_payload_ty }}>{% else %}{% if method.server_params | length > 0 %},
             {{ method.server_params | join(", ") }}{% endif %}{% if method.is_upgrade %},
             upgrade: ::xidl_rust_axum::upgrade::Upgrade{% endif %}{% endif %}
-            ) -> ::xidl_rust_axum::Result<{% if method.is_server_stream %}xidl_rust_axum::stream::SseStream<{{ method.response_ty }}>{% elif method.is_bidi_stream %}(){% elif method.is_upgrade %}::xidl_rust_axum::axum::response::Response{% else %}{{ method.response_ty }}{% endif %}>;
+            ) -> ::xidl_rust_axum::Result<{% if method.is_server_stream %}{% if method.is_byte_stream %}xidl_rust_axum::stream::ByteStream{% else %}xidl_rust_axum::stream::SseStream<{{ method.response_ty }}>{% endif %}{% elif method.is_bidi_stream %}(){% elif method.is_upgrade %}::xidl_rust_axum::axum::response::Response{% else %}{{ method.response_ty }}{% endif %}>;
         {% endfor %}
     }
 {% endif %}
@@ -302,7 +302,7 @@
         {% if method.auth_wrapper_struct and opt.enable_server %}
             pub struct {{ method.auth_wrapper_struct }} {
                 pub xidl_auth: {{ method.auth_ty }},
-                pub data: {% if method.is_client_stream %}xidl_rust_axum::stream::NdjsonStream<{{ method.request_item_ty }}>{% elif method.is_bidi_stream %}xidl_rust_axum::stream::BidiServerStream<{{ method.request_item_ty }}, {{ method.response_ty }}>{% endif %},
+                pub data: {% if method.is_client_stream %}{% if method.is_byte_stream %}xidl_rust_axum::stream::ByteStream{% else %}xidl_rust_axum::stream::NdjsonStream<{{ method.request_item_ty }}>{% endif %}{% elif method.is_bidi_stream %}xidl_rust_axum::stream::BidiServerStream<{{ method.request_item_ty }}, {{ method.response_ty }}>{% else %}{{ method.request_payload_ty }}{% endif %},
             }
 
         {% endif %}

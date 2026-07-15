@@ -47,7 +47,9 @@ fn render_scoped_name(value: &hir::ScopedName) -> String {
 fn rust_integer_type(value: &hir::IntegerType) -> String {
     match value {
         hir::IntegerType::Char | hir::IntegerType::I8 => "i8".to_string(),
-        hir::IntegerType::UChar | hir::IntegerType::U8 => "u8".to_string(),
+        hir::IntegerType::UChar | hir::IntegerType::Octet | hir::IntegerType::U8 => {
+            "u8".to_string()
+        }
         hir::IntegerType::U16 => "u16".to_string(),
         hir::IntegerType::U32 => "u32".to_string(),
         hir::IntegerType::U64 => "u64".to_string(),
