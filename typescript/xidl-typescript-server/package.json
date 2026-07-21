@@ -1,0 +1,39 @@
+{
+  "description": "Web-standard server runtime and Next.js adapter for xidlc TypeScript REST output",
+  "devDependencies": {
+    "@types/node": "^26.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^6.0.3",
+    "xidl-typescript-codec": "file:../xidl-typescript-codec",
+    "zod": "^4.4.3"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./next": {
+      "import": "./dist/next.js",
+      "types": "./dist/next.d.ts"
+    }
+  },
+  "main": "dist/index.js",
+  "name": "xidl-typescript-server",
+  "peerDependencies": {
+    "xidl-typescript-codec": "^0.84.0",
+    "zod": "^4.4.3"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "url": "https://github.com/xidl/xidl"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "node --import tsx --test tests/**/*.test.ts"
+  },
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "version": "0.84.0"
+}

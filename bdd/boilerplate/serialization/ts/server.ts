@@ -1,7 +1,8 @@
 import { createServer } from 'node:http';
+import { createRouter } from 'xidl-typescript-server';
 import {
-  createSerializationTestHandler,
   type SerializationTest,
+  SerializationTestOperations,
 } from './{{MODULE_NAME}}.server.js';
 
 class MySerializationTest implements SerializationTest {
@@ -24,7 +25,11 @@ class MySerializationTest implements SerializationTest {
     return req.value;
   }
 }
-const handler = createSerializationTestHandler(new MySerializationTest());
+const service = new MySerializationTest();
+const handler = createRouter(
+  Object.values(SerializationTestOperations),
+  service,
+);
 
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 const server = createServer(async (req, res) => {

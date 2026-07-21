@@ -1,7 +1,8 @@
 import { createServer } from 'node:http';
+import { createRouter } from 'xidl-typescript-server';
 import {
-  createFormServiceHandler,
   type FormService,
+  FormServiceOperations,
 } from './{{MODULE_NAME}}.server.js';
 
 class MyForm implements FormService {
@@ -9,7 +10,8 @@ class MyForm implements FormService {
     return `Received ${req.name} age ${req.age}`;
   }
 }
-const handler = createFormServiceHandler(new MyForm());
+const service = new MyForm();
+const handler = createRouter(Object.values(FormServiceOperations), service);
 
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 const server = createServer(async (req, res) => {

@@ -1,4 +1,6 @@
 import { createServer } from 'node:http';
+import { encode } from '@msgpack/msgpack';
+import { createRouter } from 'xidl-typescript-server';
 import type {
   E2EHttpFormSubmitProfileResponse,
   E2EHttpRouteAndBodyGetMsgpackResourceResponse,
@@ -19,24 +21,24 @@ import type {
   UnionSimple,
 } from './e2e_test.js';
 import {
-  createE2eAttributeHandler,
-  createE2eHttpDefaultsMatrixHandler,
-  createE2eHttpFormHandler,
-  createE2eHttpRouteAndBodyHandler,
-  createE2eHttpScopeMatrixHandler,
-  createE2eHttpSecurityHandler,
-  createE2eHttpSecurityMatrixHandler,
-  createE2ePathSeverHandler,
-  createE2eTypeServerHandler,
   type E2eAttribute,
+  E2eAttributeOperations,
   type E2eHttpDefaultsMatrix,
+  E2eHttpDefaultsMatrixOperations,
   type E2eHttpForm,
+  E2eHttpFormOperations,
   type E2eHttpRouteAndBody,
+  E2eHttpRouteAndBodyOperations,
   type E2eHttpScopeMatrix,
+  E2eHttpScopeMatrixOperations,
   type E2eHttpSecurity,
   type E2eHttpSecurityMatrix,
+  E2eHttpSecurityMatrixOperations,
+  E2eHttpSecurityOperations,
   type E2ePathSever,
+  E2ePathSeverOperations,
   type E2eTypeServer,
+  E2eTypeServerOperations,
 } from './e2e_test.server.js';
 
 function formatOpt(v: string | null | undefined): string {
@@ -427,6 +429,12 @@ const attributeState = {
 
 const hostState = 'localhost';
 
+const msgpackOptions = {
+  codecs: {
+    'application/msgpack': { encode },
+  },
+};
+
 async function readBodyString(req: any): Promise<string> {
   const chunks: Buffer[] = [];
   for await (const chunk of req) {
@@ -436,15 +444,32 @@ async function readBodyString(req: any): Promise<string> {
 }
 
 const handlers = [
-  createE2ePathSeverHandler(new MyE2ePathSever()),
-  createE2eHttpRouteAndBodyHandler(new MyE2eHttpRouteAndBody()),
-  createE2eHttpSecurityHandler(new MyE2eHttpSecurity()),
-  createE2eTypeServerHandler(new MyE2eTypeServer()),
-  createE2eAttributeHandler(new MyE2eAttribute()),
-  createE2eHttpFormHandler(new MyE2eHttpForm()),
-  createE2eHttpScopeMatrixHandler(new MyE2eHttpScopeMatrix()),
-  createE2eHttpDefaultsMatrixHandler(new MyE2eHttpDefaultsMatrix()),
-  createE2eHttpSecurityMatrixHandler(new MyE2eHttpSecurityMatrix()),
+  createRouter(Object.values(E2ePathSeverOperations), new MyE2ePathSever()),
+  createRouter(
+    Object.values(E2eHttpRouteAndBodyOperations),
+    new MyE2eHttpRouteAndBody(),
+    msgpackOptions,
+  ),
+  createRouter(
+    Object.values(E2eHttpSecurityOperations),
+    new MyE2eHttpSecurity(),
+  ),
+  createRouter(Object.values(E2eTypeServerOperations), new MyE2eTypeServer()),
+  createRouter(Object.values(E2eAttributeOperations), new MyE2eAttribute()),
+  createRouter(Object.values(E2eHttpFormOperations), new MyE2eHttpForm()),
+  createRouter(
+    Object.values(E2eHttpScopeMatrixOperations),
+    new MyE2eHttpScopeMatrix(),
+    msgpackOptions,
+  ),
+  createRouter(
+    Object.values(E2eHttpDefaultsMatrixOperations),
+    new MyE2eHttpDefaultsMatrix(),
+  ),
+  createRouter(
+    Object.values(E2eHttpSecurityMatrixOperations),
+    new MyE2eHttpSecurityMatrix(),
+  ),
 ];
 
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;

@@ -83,6 +83,8 @@ def step_impl(context, lang):
         cmd_lang = "python-rest"
     elif lang == "ts":
         cmd_lang = "typescript-rest"
+    elif lang == "nextjs":
+        cmd_lang = "typescript-rest"
 
     cmd = [
         "cargo",
@@ -149,7 +151,7 @@ def step_impl(context, lang):
         assert any(f.endswith(".py") for f in files)
     elif lang == "rust":
         assert any(f.endswith(".rs") for f in files)
-    elif lang == "ts":
+    elif lang in ("ts", "nextjs"):
         assert any(f.endswith(".ts") for f in files)
         with open(os.path.join(context.lang_dir, "package.json"), "w") as f:
             f.write('{"name": "test-ts-gen", "version": "1.0.0", "type": "module"}')
@@ -163,6 +165,11 @@ def step_impl(context, lang):
                 os.path.dirname(__file__), "../../../typescript/xidl-typescript-codec"
             )
         )
+        server_path = os.path.abspath(
+            os.path.join(
+                os.path.dirname(__file__), "../../../typescript/xidl-typescript-server"
+            )
+        )
         if not os.path.exists(os.path.join(codec_path, "dist")):
             subprocess.run(
                 ["pnpm", "install", "--ignore-scripts"],
@@ -173,8 +180,25 @@ def step_impl(context, lang):
             subprocess.run(
                 ["pnpm", "build"], cwd=codec_path, check=True, capture_output=True
             )
+        if not os.path.exists(os.path.join(server_path, "dist")):
+            subprocess.run(
+                ["pnpm", "install", "--ignore-scripts"],
+                cwd=server_path,
+                check=True,
+                capture_output=True,
+            )
+            subprocess.run(
+                ["pnpm", "build"], cwd=server_path, check=True, capture_output=True
+            )
         subprocess.run(
-            ["npm", "install", "zod@^4.4.3", "typescript", codec_path],
+            [
+                "npm",
+                "install",
+                "zod@^4.4.3",
+                "typescript",
+                codec_path,
+                server_path,
+            ],
             cwd=context.lang_dir,
             check=True,
             capture_output=True,
@@ -508,7 +532,11 @@ def run_generated_server_using_boilerplate(context, lang):
         codec_path = os.path.abspath(
             os.path.join(os.getcwd(), "typescript", "xidl-typescript-codec")
         )
+        server_path = os.path.abspath(
+            os.path.join(os.getcwd(), "typescript", "xidl-typescript-server")
+        )
         content = content.replace("{{TS_XIDL_TYPESCRIPT_CODEC_PATH}}", codec_path)
+        content = content.replace("{{TS_XIDL_TYPESCRIPT_SERVER_PATH}}", server_path)
         with open(package_json_path, "w") as f:
             f.write(content)
 
@@ -520,16 +548,20 @@ def run_generated_server_using_boilerplate(context, lang):
         with open(server_ts_path, "w") as f:
             f.write(content)
 
-        if not os.path.exists(os.path.join(codec_path, "dist")):
-            subprocess.run(
-                ["pnpm", "install", "--ignore-scripts"],
-                cwd=codec_path,
-                check=True,
-                capture_output=True,
-            )
-            subprocess.run(
-                ["pnpm", "build"], cwd=codec_path, check=True, capture_output=True
-            )
+        for package_path in (codec_path, server_path):
+            if not os.path.exists(os.path.join(package_path, "dist")):
+                subprocess.run(
+                    ["pnpm", "install", "--ignore-scripts"],
+                    cwd=package_path,
+                    check=True,
+                    capture_output=True,
+                )
+                subprocess.run(
+                    ["pnpm", "build"],
+                    cwd=package_path,
+                    check=True,
+                    capture_output=True,
+                )
         subprocess.run(
             ["npm", "install", "--ignore-scripts"],
             cwd=context.lang_dir,
@@ -552,6 +584,84 @@ def run_generated_server_using_boilerplate(context, lang):
         )
         t.daemon = True
         t.start()
+    elif lang == "nextjs":
+        shutil.copytree(src_dir, context.lang_dir, dirs_exist_ok=True)
+        codec_path = os.path.abspath(
+            os.path.join(os.getcwd(), "typescript", "xidl-typescript-codec")
+        )
+        server_path = os.path.abspath(
+            os.path.join(os.getcwd(), "typescript", "xidl-typescript-server")
+        )
+        for package_path in (codec_path, server_path):
+            if not os.path.exists(os.path.join(package_path, "dist")):
+                subprocess.run(
+                    ["pnpm", "install", "--ignore-scripts"],
+                    cwd=package_path,
+                    check=True,
+                    capture_output=True,
+                )
+                subprocess.run(
+                    ["pnpm", "build"],
+                    cwd=package_path,
+                    check=True,
+                    capture_output=True,
+                )
+
+        subprocess.run(
+            ["npm", "install", "--ignore-scripts"],
+            cwd=context.lang_dir,
+            check=True,
+            capture_output=True,
+        )
+        package_archives = []
+        for package_path in (codec_path, server_path):
+            result = subprocess.run(
+                [
+                    "npm",
+                    "pack",
+                    package_path,
+                    "--pack-destination",
+                    context.lang_dir,
+                ],
+                cwd=context.lang_dir,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            archive = result.stdout.strip().splitlines()[-1]
+            package_archives.append(os.path.join(context.lang_dir, archive))
+        subprocess.run(
+            ["npm", "install", "--ignore-scripts", *package_archives],
+            cwd=context.lang_dir,
+            check=True,
+            capture_output=True,
+        )
+        env = os.environ.copy()
+        env["PORT"] = str(context.port)
+        context.server_process = start_context_server(
+            context,
+            [
+                "npx",
+                "next",
+                "dev",
+                "--hostname",
+                "127.0.0.1",
+                "--port",
+                str(context.port),
+            ],
+            cwd=context.lang_dir,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            env=env,
+        )
+        t = threading.Thread(
+            target=run_server_logging,
+            args=(context.server_process, "NEXTJS-BOILERPLATE"),
+        )
+        t.daemon = True
+        t.start()
+        server_timeout = 180
     elif lang == "python":
         start_python_boilerplate_server(context, idl_name, "PYTHON-BOILERPLATE")
     wait_for_server(context, timeout=server_timeout)
@@ -881,15 +991,24 @@ def step_impl(context, count, asset_id, expected):
 
     def gen():
         for i in range(count):
-            # NDJSON with xidl StreamFrame
-            chunk_b64 = base64.b64encode(b"data").decode()
-            yield (
-                json.dumps(
-                    {"t": "next", "data": {"asset_id": asset_id, "chunk": chunk_b64}}
-                )
-                + "\n"
-            ).encode()
-        yield (json.dumps({"t": "complete"}) + "\n").encode()
+            if context.lang == "ts":
+                yield (
+                    json.dumps({"asset_id": asset_id, "chunk": list(b"data")}) + "\n"
+                ).encode()
+            else:
+                # Go uses the xidl StreamFrame envelope.
+                chunk_b64 = base64.b64encode(b"data").decode()
+                yield (
+                    json.dumps(
+                        {
+                            "t": "next",
+                            "data": {"asset_id": asset_id, "chunk": chunk_b64},
+                        }
+                    )
+                    + "\n"
+                ).encode()
+        if context.lang != "ts":
+            yield (json.dumps({"t": "complete"}) + "\n").encode()
 
     headers = {
         "Authorization": "Bearer token-1",

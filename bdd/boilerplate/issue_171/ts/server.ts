@@ -1,4 +1,5 @@
 import { createServer } from 'node:http';
+import { createRouter } from 'xidl-typescript-server';
 import { issue_171 } from './{{MODULE_NAME}}.server.js';
 
 class MyRepro implements issue_171.ReproService {
@@ -10,7 +11,11 @@ class MyRepro implements issue_171.ReproService {
       throw new Error('invalid');
   }
 }
-const handler = issue_171.createReproServiceHandler(new MyRepro());
+const service = new MyRepro();
+const handler = createRouter(
+  Object.values(issue_171.ReproServiceOperations),
+  service,
+);
 
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 const server = createServer(async (req, res) => {

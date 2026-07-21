@@ -69,8 +69,13 @@ fn render_output(files: Vec<xidlc::driver::File>) -> String {
 }
 
 fn case_props(folder: &str, case_name: &str) -> HashMap<String, serde_json::Value> {
-    let _ = (folder, case_name);
-    HashMap::from([(String::from("enable_metadata"), true.into())])
+    let _ = case_name;
+    let mut props = HashMap::from([(String::from("enable_metadata"), true.into())]);
+    if folder == "ts-http" {
+        props.insert(String::from("enable_client"), true.into());
+        props.insert(String::from("enable_server"), true.into());
+    }
+    props
 }
 
 async fn generate_go_rest_with_props(props: HashMap<String, serde_json::Value>) -> String {
@@ -84,6 +89,20 @@ async fn generate_go_rest_with_props(props: HashMap<String, serde_json::Value>) 
         .generate_from_idl(&source, &path, props)
         .await
         .expect("generate go-rest");
+    render_output(files)
+}
+
+async fn generate_typescript_rest_with_props(props: HashMap<String, serde_json::Value>) -> String {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("ts-http")
+        .join("http_defaults.idl");
+    let source = fs::read_to_string(&path).expect("read idl");
+    let mut generator = xidlc::driver::Generator::new(String::from("typescript-rest"));
+    let files = generator
+        .generate_from_idl(&source, &path, props)
+        .await
+        .expect("generate typescript-rest");
     render_output(files)
 }
 
@@ -234,6 +253,67 @@ async fn go_rest_rejects_empty_client_server_mode() {
         .await;
     let err = match result {
         Ok(_) => panic!("empty go-rest mode should fail"),
+        Err(err) => err,
+    };
+
+    assert!(err.to_string().contains("enable_client or enable_server"));
+}
+
+#[tokio::test(flavor = "current_thread")]
+async fn typescript_rest_server_flag_omits_client_code() {
+    let output = generate_typescript_rest_with_props(HashMap::from([
+        (String::from("enable_client"), false.into()),
+        (String::from("enable_server"), true.into()),
+    ]))
+    .await;
+
+    assert!(output.contains("http_defaults.server.ts"));
+    assert!(output.contains("HttpDefaultsServiceOperations"));
+    assert!(!output.contains("http_defaults.client.ts"));
+}
+
+#[tokio::test(flavor = "current_thread")]
+async fn typescript_rest_client_flag_omits_server_code() {
+    let output = generate_typescript_rest_with_props(HashMap::from([
+        (String::from("enable_client"), true.into()),
+        (String::from("enable_server"), false.into()),
+    ]))
+    .await;
+
+    assert!(output.contains("http_defaults.client.ts"));
+    assert!(!output.contains("http_defaults.server.ts"));
+    assert!(!output.contains("HttpDefaultsServiceOperations"));
+}
+
+#[tokio::test(flavor = "current_thread")]
+async fn typescript_rest_defaults_to_client_only() {
+    let output = generate_typescript_rest_with_props(HashMap::new()).await;
+
+    assert!(output.contains("http_defaults.client.ts"));
+    assert!(!output.contains("http_defaults.server.ts"));
+    assert!(!output.contains("HttpDefaultsServiceOperations"));
+}
+
+#[tokio::test(flavor = "current_thread")]
+async fn typescript_rest_rejects_empty_client_server_mode() {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("ts-http")
+        .join("http_defaults.idl");
+    let source = fs::read_to_string(&path).expect("read idl");
+    let mut generator = xidlc::driver::Generator::new(String::from("typescript-rest"));
+    let result = generator
+        .generate_from_idl(
+            &source,
+            &path,
+            HashMap::from([
+                (String::from("enable_client"), false.into()),
+                (String::from("enable_server"), false.into()),
+            ]),
+        )
+        .await;
+    let err = match result {
+        Ok(_) => panic!("empty typescript-rest mode should fail"),
         Err(err) => err,
     };
 

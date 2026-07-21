@@ -104,7 +104,7 @@ struct FilesArgs {
 struct ClientServerArgs {
     #[arg(long = "client", default_value_t = false)]
     client: bool,
-    #[arg(long = "server", default_value_t = true)]
+    #[arg(long = "server", default_value_t = false)]
     server: bool,
     #[arg(long = "mock", default_value_t = false)]
     mock: bool,
@@ -138,9 +138,7 @@ impl GenLang {
             Self::RustJsonRpc(args) => Ok(shared.into_client_server("rust-jsonrpc", args)),
             Self::RustAxum(args) => Ok(shared.into_client_server("rust-axum", args)),
             Self::Typescript(args) => Ok(shared.into_client_server("typescript", args)),
-            Self::TypescriptRest(args) => {
-                Ok(shared.into_client_only("typescript-rest", args.files))
-            }
+            Self::TypescriptRest(args) => Ok(shared.into_client_server("typescript-rest", args)),
             Self::Go(args) => Ok(shared.into_client_server("go", args)),
             Self::GoRest(args) => Ok(shared.into_client_server("go-rest", args)),
             Self::Openapi(args) => Ok(shared.into_plain("openapi", args.files)),
@@ -212,26 +210,24 @@ impl SharedGenArgs {
     }
 
     fn into_client_server(self, lang: impl Into<String>, args: ClientServerArgs) -> ArgsGenerate {
+        let lang = lang.into();
+        let (client, server) = if !args.client && !args.server {
+            if lang == "typescript-rest" {
+                (true, false)
+            } else {
+                (false, true)
+            }
+        } else {
+            (args.client, args.server)
+        };
         ArgsGenerate {
-            lang: lang.into(),
+            lang,
             out_dir: self.out_dir,
-            client: args.client,
-            server: args.server,
+            client,
+            server,
             mock: args.mock,
             dry_run: self.dry_run,
             files: args.files,
-        }
-    }
-
-    fn into_client_only(self, lang: impl Into<String>, files: Vec<PathBuf>) -> ArgsGenerate {
-        ArgsGenerate {
-            lang: lang.into(),
-            out_dir: self.out_dir,
-            client: true,
-            server: false,
-            mock: false,
-            dry_run: self.dry_run,
-            files,
         }
     }
 }

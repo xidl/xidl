@@ -12,6 +12,7 @@ test: test-rust test-go test-bdd
 # Initialize typescript codec
 init:
     cd ./typescript/xidl-typescript-codec && pnpm install && pnpm build
+    cd ./typescript/xidl-typescript-server && pnpm install && pnpm build
 
 # Test Rust
 test-rust: init

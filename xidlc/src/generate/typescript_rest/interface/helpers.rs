@@ -165,7 +165,9 @@ pub(super) fn build_client_stream_ty(
                 })
         });
 
-        let item_ty_str = if was_flattened {
+        let is_byte_stream =
+            op.http.request.body.content_type.as_deref() == Some("application/octet-stream");
+        let item_ty_str = if was_flattened || is_byte_stream {
             ts_type_for_type_spec(item_ty, module_path, TypeRefTarget::Client)
         } else if let Some(name) = request_name {
             TsType::ScopedName(format!("ifaceTypes.{}", scoped_name(module_path, name)))

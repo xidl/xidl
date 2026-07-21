@@ -20,52 +20,54 @@ jobs:
             features: >-
               bdd/features/jsonrpc.feature
               bdd/features/rest.feature:6
-              bdd/features/rest.feature:20
-              bdd/features/rest.feature:33
-              bdd/features/rest.feature:46
+              bdd/features/rest.feature:21
+              bdd/features/rest.feature:34
+              bdd/features/rest.feature:47
           - shard: rest-media-and-any
             port-base: 13000
             features: >-
-              bdd/features/rest.feature:59
-              bdd/features/rest.feature:72
-              bdd/features/rest.feature:78
+              bdd/features/rest.feature:60
+              bdd/features/rest.feature:73
+              bdd/features/rest.feature:79
           - shard: rest-boilerplate-a
             port-base: 14000
             features: >-
-              bdd/features/rest.feature:101
               bdd/features/rest.feature:102
               bdd/features/rest.feature:103
               bdd/features/rest.feature:104
               bdd/features/rest.feature:105
+              bdd/features/rest.feature:106
           - shard: rest-boilerplate-b
             port-base: 15000
             features: >-
-              bdd/features/rest.feature:106
               bdd/features/rest.feature:107
               bdd/features/rest.feature:108
               bdd/features/rest.feature:109
               bdd/features/rest.feature:110
+              bdd/features/rest.feature:111
           - shard: rest-boilerplate-c
             port-base: 16000
             features: >-
-              bdd/features/rest.feature:111
               bdd/features/rest.feature:112
               bdd/features/rest.feature:113
               bdd/features/rest.feature:114
               bdd/features/rest.feature:115
+              bdd/features/rest.feature:116
+              bdd/features/rest.feature:117
+              bdd/features/rest.feature:118
           - shard: rest-errors
             port-base: 17000
             features: >-
-              bdd/features/rest.feature:117
-              bdd/features/rest.feature:130
-              bdd/features/rest.feature:142
-              bdd/features/rest.feature:149
-              bdd/features/rest.feature:156
+              bdd/features/rest.feature:120
+              bdd/features/rest.feature:133
+              bdd/features/rest.feature:146
+              bdd/features/rest.feature:153
               bdd/features/rest.feature:168
-              bdd/features/rest.feature:184
+              bdd/features/rest.feature:183
+              bdd/features/rest.feature:196
           - shard: rest-serialization
             port-base: 18000
-            features: bdd/features/rest.feature:198
+            features: bdd/features/rest.feature:208
     steps:
       - name: Checkout
         uses: actions/checkout@v7

@@ -1,7 +1,8 @@
 import { createServer } from 'node:http';
+import { createRouter } from 'xidl-typescript-server';
 import {
   type AllScenariosService,
-  createAllScenariosServiceHandler,
+  AllScenariosServiceOperations,
 } from './{{MODULE_NAME}}.server.js';
 
 class MyAllScenarios implements AllScenariosService {
@@ -34,7 +35,11 @@ class MyAllScenarios implements AllScenariosService {
     return '1.0.0';
   }
 }
-const handler = createAllScenariosServiceHandler(new MyAllScenarios());
+const service = new MyAllScenarios();
+const handler = createRouter(
+  Object.values(AllScenariosServiceOperations),
+  service,
+);
 
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 const server = createServer(async (req, res) => {

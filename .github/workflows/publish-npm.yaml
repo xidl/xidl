@@ -25,7 +25,9 @@ jobs:
         with:
           node-version: latest
           cache: "pnpm"
-          cache-dependency-path: typescript/xidl-typescript-codec/pnpm-lock.yaml
+          cache-dependency-path: |
+            typescript/xidl-typescript-codec/pnpm-lock.yaml
+            typescript/xidl-typescript-server/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -37,6 +39,22 @@ jobs:
 
       - name: Publish package
         working-directory: typescript/xidl-typescript-codec/
+        run: |
+          cp ../../README.md .
+          cp ../../LICENSE .
+          npm publish --registry=https://registry.npmjs.org/
+
+      - name: Install server dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: typescript/xidl-typescript-server/
+
+      - name: Build server package
+        working-directory: typescript/xidl-typescript-server/
+        run: |
+          pnpm build
+
+      - name: Publish server package
+        working-directory: typescript/xidl-typescript-server/
         run: |
           cp ../../README.md .
           cp ../../LICENSE .

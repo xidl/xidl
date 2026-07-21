@@ -31,18 +31,20 @@ export class {{ client_name }}Client {
                 path = `${path}?${queryString}`;
             }
             const url = joinUrl(this.baseUrl, path);
-            {% if method.is_server_stream %}return sseJsonStream<{{ render_type(method.stream_item_ty) }}>(this.fetchImpl, url, { method: "{{ method.http_method }}", headers }, {% if method.stream_item_schema_ref %}ifaceSchemas.{{ method.stream_item_schema_ref }}Schema{% else %}undefined{% endif %});
-            {% elif method.is_client_stream %}headers.set("Content-Type", "{{ method.request_content_type }}");
-            headers.set("Accept", "{{ method.response_content_type }}");
-            const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers, body: ndjsonBody(stream, {% if method.request_schema_ref %}ifaceSchemas.{{ method.request_schema_ref }}Schema{% else %}undefined{% endif %}) });
-            if (!resp.ok) {
-                throw await parseXidlError(resp);
-            }
-            {% if method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs, ifaceSchemas.{{ method.response_schema_ref }}Schema);
-            const responsePayload = buildResponsePayload(responseBody, resp, "{{ method.response_body_mode }}", [{% for param in method.response_header_params %}{ name: "{{ param.raw_name }}", key: "{{ param.access }}", optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], [{% for param in method.response_cookie_params %}{ name: "{{ param.raw_name }}", key: "{{ param.access }}", optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}]);
-            return deserialize(responsePayload, ifaceSchemas.{{ method.response_schema_ref }}Schema) as {{ render_type(method.return_ty) }};
-            {% elif method.return_ty.kind == "Void" %}return;
-            {% else %}return await decodeResponseBody<{{ render_type(method.return_ty) }}>(resp, "{{ method.response_content_type }}", this.codecs);
+            {% if method.is_server_stream %}{% if method.response_content_type == "application/octet-stream" %}return byteResponseStream(this.fetchImpl, url, { method: "{{ method.http_method }}", headers });
+            {% else %}return sseJsonStream<{{ render_type(method.stream_item_ty) }}>(this.fetchImpl, url, { method: "{{ method.http_method }}", headers }, {% if method.stream_item_schema_ref %}ifaceSchemas.{{ method.stream_item_schema_ref }}Schema{% else %}undefined{% endif %});
+        {% endif %}
+        {% elif method.is_client_stream %}headers.set("Content-Type", "{{ method.request_content_type }}");
+        headers.set("Accept", "{{ method.response_content_type }}");
+        const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers, body: {% if method.request_content_type == "application/octet-stream" %}byteStreamBody(stream){% else %}ndjsonBody(stream, {% if method.request_schema_ref %}ifaceSchemas.{{ method.request_schema_ref }}Schema{% else %}undefined{% endif %}){% endif %} });
+        if (!resp.ok) {
+            throw await parseXidlError(resp);
+        }
+        {% if method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs, ifaceSchemas.{{ method.response_schema_ref }}Schema);
+        const responsePayload = buildResponsePayload(responseBody, resp, "{{ method.response_body_mode }}", [{% for param in method.response_header_params %}{ name: "{{ param.raw_name }}", key: "{{ param.access }}", optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], [{% for param in method.response_cookie_params %}{ name: "{{ param.raw_name }}", key: "{{ param.access }}", optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}]);
+        return deserialize(responsePayload, ifaceSchemas.{{ method.response_schema_ref }}Schema) as {{ render_type(method.return_ty) }};
+        {% elif method.return_ty.kind == "Void" %}return;
+        {% else %}return await decodeResponseBody<{{ render_type(method.return_ty) }}>(resp, "{{ method.response_content_type }}", this.codecs);
         {% endif %}
         {% else %}{% if method.body_single %}const body = {% if method.request_schema_ref %}parsed{% else %}{{ method.body_single }}{% endif %};
         {% elif method.body_entries | length > 0 %}const body = { {% for entry in method.body_entries %}"{{ entry.raw_name }}": {% if method.request_schema_ref %}parsed["{{ entry.raw_name }}"]{% else %}{{ entry.access }}{% endif %}{% if not loop.last %}, {% endif %}{% endfor %} };
