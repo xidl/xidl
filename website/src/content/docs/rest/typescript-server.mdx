@@ -1,0 +1,176 @@
+---
+title: "TypeScript REST Server"
+description: "Generate TypeScript REST server contracts and integrate them with Fetch API runtimes or Next.js App Router."
+---
+
+The `typescript-rest` target can generate a client, a server contract, or both.
+The generated server contract contains service interfaces and operation metadata;
+request parsing, validation, response encoding, and framework integration live in
+the reusable `xidl-typescript-server` runtime.
+
+## Generate Client and Server Artifacts
+
+Without flags, `typescript-rest` generates the client only:
+
+```bash
+xidlc gen -o src/generated typescript-rest api.idl
+```
+
+Generate only the server contract:
+
+```bash
+xidlc gen -o src/generated typescript-rest --server api.idl
+```
+
+Generate both client and server artifacts:
+
+```bash
+xidlc gen -o src/generated typescript-rest --client --server api.idl
+```
+
+The important outputs are:
+
+- `api.client.ts` when client generation is enabled.
+- `api.server.ts` when server generation is enabled.
+- Shared TypeScript model, interface, and Zod schema files used by both sides.
+
+## Install the Runtime
+
+```bash
+pnpm add xidl-typescript-server xidl-typescript-codec zod
+```
+
+`xidl-typescript-server` uses the standard Fetch API `Request` and `Response`
+types, so the service implementation is independent of a particular Node.js
+framework.
+
+## Implement the Generated Service
+
+Assume the IDL contains this service:
+
+```idl
+struct User {
+    uint32 id;
+    string name;
+};
+
+interface UserService {
+    @get(path = "/api/users/{id}")
+    User get_user(@path uint32 id);
+
+    @post(path = "/api/users")
+    User create_user(User user);
+};
+```
+
+Implement the interface generated in `api.server.ts`:
+
+```ts
+import { XidlServerError } from 'xidl-typescript-server';
+import type { User } from './generated/api';
+import type { UserService } from './generated/api.server';
+
+export class AppUserService implements UserService {
+  private readonly users = new Map<number, User>();
+
+  async get_user(request: { id: number }): Promise<User> {
+    const user = this.users.get(request.id);
+    if (!user) {
+      throw new XidlServerError('user not found', 404);
+    }
+    return user;
+  }
+
+  async create_user(request: { user: User }): Promise<User> {
+    this.users.set(request.user.id, request.user);
+    return request.user;
+  }
+}
+
+export const userService = new AppUserService();
+```
+
+Generated methods also accept a second `ServerContext` argument when the
+implementation needs the original request, matched route parameters, or
+operation metadata.
+
+## Use the Fetch API Router
+
+`createRouter` combines operation metadata with a service implementation and
+returns a Fetch API-compatible handler:
+
+```ts
+import { createRouter } from 'xidl-typescript-server';
+import { UserServiceOperations } from './generated/api.server';
+import { userService } from './service';
+
+export const handler = createRouter(
+  Object.values(UserServiceOperations),
+  userService,
+);
+
+export function fetch(request: Request): Promise<Response> {
+  return handler(request);
+}
+```
+
+Attach this handler to the adapter provided by the target runtime. The router
+handles path matching, query/header/cookie/body extraction, Zod validation,
+content negotiation, and response serialization.
+
+## Integrate with Next.js App Router
+
+Next.js Route Handlers export functions named after HTTP methods from a
+`route.ts` file. `createNextRoute` adapts one generated operation directly to
+that convention.
+
+For `POST /api/users`, create `app/api/users/route.ts`:
+
+```ts
+import { createNextRoute } from 'xidl-typescript-server/next';
+import { UserServiceOperations } from '../../../src/generated/api.server';
+import { userService } from '../../../src/service';
+
+export const POST = createNextRoute(
+  UserServiceOperations.create_user,
+  userService,
+);
+```
+
+For `GET /api/users/{id}`, create `app/api/users/[id]/route.ts`:
+
+```ts
+import { createNextRoute } from 'xidl-typescript-server/next';
+import { UserServiceOperations } from '../../../../src/generated/api.server';
+import { userService } from '../../../../src/service';
+
+export const GET = createNextRoute(
+  UserServiceOperations.get_user,
+  userService,
+);
+```
+
+The dynamic segment name must match the IDL route parameter: `[id]` maps to
+`{id}`. In current Next.js versions, Route Handler parameters are promises;
+`createNextRoute` awaits `context.params` internally before invoking the
+service.
+
+The same pattern works for `PUT`, `PATCH`, and `DELETE` when the generated
+operation uses that method.
+
+## Errors, Authorization, and Codecs
+
+- Throw `XidlServerError` for an explicit HTTP status and typed JSON error.
+- Invalid generated request schemas return HTTP 400 responses.
+- Unsupported request and response media types return HTTP 415 and 406.
+- Pass `authorize`, `codecs`, or `onError` through the optional third argument
+  of `createRouter` or `createNextRoute`.
+- SSE server streams, NDJSON client streams, and raw byte streams are handled by
+  the runtime according to the generated operation metadata.
+
+## Recommended Reading
+
+- [RESTful Basics](../)
+- [HTTP Stream](../stream/)
+- [HTTP Security](../security/)
+- [Target Generators](../../docs/targets/)

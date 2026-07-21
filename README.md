@@ -108,6 +108,18 @@ Generate an Axum HTTP surface:
 xidlc gen --out-dir out rust-axum api.idl
 ```
 
+Generate a TypeScript REST client (the default mode):
+
+```bash
+xidlc gen --out-dir out typescript-rest api.idl
+```
+
+Generate TypeScript REST client and server contracts:
+
+```bash
+xidlc gen --out-dir out typescript-rest --client --server api.idl
+```
+
 Generate OpenAPI:
 
 ```bash
@@ -120,6 +132,7 @@ xidlc gen --out-dir generated openapi api.idl
 - [Installation](website/src/content/docs/guide/quickstart.mdx)
 - [Using xidlc](website/src/content/docs/docs/xidlc.mdx)
 - [HTTP Guide](website/src/content/docs/docs/http.mdx)
+- [TypeScript REST Server and Next.js](website/src/content/docs/rest/typescript-server.mdx)
 - [JSON-RPC Guide](website/src/content/docs/docs/jsonrpc.mdx)
 - [Targets Reference](website/src/content/docs/docs/targets.mdx)
 - [HTTP RFC](website/src/content/docs/rfc/http.mdx)
@@ -130,6 +143,8 @@ xidlc gen --out-dir generated openapi api.idl
 - [`xidlc`](https://crates.io/crates/xidlc): compiler and generators
 - [`xidl-build`](https://crates.io/crates/xidl-build): Rust `build.rs` integration
 - [`xidl-rust-axum`](xidl-rust-axum/README.md): Axum runtime for generated HTTP services
+- [`xidl-typescript-server`](typescript/xidl-typescript-server): Fetch API server runtime and Next.js adapter
+- [`xidl-typescript-codec`](typescript/xidl-typescript-codec): TypeScript runtime codecs
 - `xidl-jsonrpc`: JSON-RPC runtime support
 - [`idl-language-server`](https://github.com/xidl/idl-language-server): editor support, diagnostics, and interactive workflows
 

@@ -56,6 +56,29 @@ xidlc gen -o src/generated rust-axum api.idl
 xidlc gen -o src/generated rust-jsonrpc api.idl
 ```
 
+### Generate TypeScript REST Bindings
+
+Client only (default):
+
+```bash
+xidlc gen -o src/generated typescript-rest api.idl
+```
+
+Server only:
+
+```bash
+xidlc gen -o src/generated typescript-rest --server api.idl
+```
+
+Client and server:
+
+```bash
+xidlc gen -o src/generated typescript-rest --client --server api.idl
+```
+
+See [TypeScript REST Server](../../rest/typescript-server/) for runtime and
+Next.js integration.
+
 ### Generate OpenAPI
 
 ```bash

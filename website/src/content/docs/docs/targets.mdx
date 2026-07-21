@@ -15,6 +15,7 @@ This page summarizes the targets currently supported built-in by `xidlc` and the
 | `rust-jsonrpc` | `rust_jsonrpc`, `rs_jsonrpc`, `rs-jsonrpc` | Rust JSON-RPC bindings | `xidl-jsonrpc` |
 | `rust-axum` | `rust_axum`, `axum`, `rs_axum`, `rs-axum` | Rust HTTP / Stream bindings | `xidl-rust-axum` |
 | `typescript` | `ts` | TypeScript declarations and Schemas | Frontend or toolchains |
+| `typescript-rest` | `typescript_rest`, `ts-rest`, `ts_rest` | TypeScript REST client/server bindings | `xidl-typescript-server` |
 | `go` | `golang` | Go types or auxiliary code | Go projects |
 | `go-rest` | `go_rest` | Go HTTP bindings | Go HTTP services |
 | `openapi` | None | `openapi_{filename}.json` | Documentation and downstream consumption |
@@ -26,13 +27,17 @@ Some generators support distinguishing between client and server artifacts, such
 
 - `rust-axum`
 - `rust-jsonrpc`
+- `typescript-rest`
 
 If a target does not support this distinction, these parameters may be ignored or have no significant effect.
+
+`typescript-rest` defaults to client-only generation. Use `--server` for
+server-only output, or `--client --server` to generate both sides.
 
 ## When to Choose Which Target
 
 - **Only data structures**: Choose `rust`, `typescript`, or `go`.
-- **HTTP service capabilities**: Choose `rust-axum` or `go-rest`.
+- **HTTP service capabilities**: Choose `rust-axum`, `go-rest`, or `typescript-rest`.
 - **JSON-RPC**: Choose `rust-jsonrpc`.
 - **Publishing HTTP contracts externally**: Choose `openapi`.
 - **Publishing JSON-RPC contracts externally**: Choose `openrpc`.
