@@ -6,7 +6,7 @@ require (
 	github.com/gin-contrib/cors v1.7.7
 	github.com/gin-gonic/gin v1.12.0
 	github.com/vmihailenco/msgpack/v5 v5.4.1
-	github.com/xidl/xidl/golang/xidl-go-codec v0.84.0 // x-release-please-version
+	github.com/xidl/xidl/golang/xidl-go-codec v0.85.0 // x-release-please-version
 )
 
 require (
