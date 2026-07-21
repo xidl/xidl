@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.85.0](https://github.com/xidl/xidl/compare/v0.84.0...v0.85.0) (2026-07-21)
+
+
+### Features
+
+* **typescript:** add REST server and Next.js support ([c630f5c](https://github.com/xidl/xidl/commit/c630f5cf303dcaf30c3dd3ccc116f19c8758f619))
+
+
+### Bug Fixes
+
+* **release:** sync TypeScript server codec peer version ([167a154](https://github.com/xidl/xidl/commit/167a154fbc4e49ad9d1ba2bd23eb89aa39d572d7))
+
 ## [0.84.0](https://github.com/xidl/xidl/compare/v0.83.1...v0.84.0) (2026-07-15)
 
 
