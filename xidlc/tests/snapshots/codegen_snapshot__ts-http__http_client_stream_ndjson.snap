@@ -529,12 +529,12 @@ export class HttpClientStreamServiceClient {
             }
             const url = joinUrl(this.baseUrl, path);
             headers.set("Content-Type", "application/x-ndjson");
-            headers.set("Accept", "text/plain");
-            const resp = await this.fetchImpl(url, { method: "POST", headers, body: ndjsonBody(stream, undefined) });
-            if (!resp.ok) {
-                throw await parseXidlError(resp);
-            }
-            return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
+        headers.set("Accept", "text/plain");
+        const resp = await this.fetchImpl(url, { method: "POST", headers, body: ndjsonBody(stream, undefined) });
+        if (!resp.ok) {
+            throw await parseXidlError(resp);
+        }
+        return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
         
         
     }

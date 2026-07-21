@@ -533,8 +533,8 @@ export class HttpStreamSseBindingsServiceClient {
             }
             const url = joinUrl(this.baseUrl, path);
             return sseJsonStream<types.ProjectEvent>(this.fetchImpl, url, { method: "GET", headers }, ifaceSchemas.models.ProjectEventSchema);
-            
-            
+        
+        
     }
     }
 ===============
