@@ -1,0 +1,170 @@
+---
+title: "TypeScript REST Server"
+description: "生成 TypeScript REST 服务端契约，并集成 Fetch API 运行时或 Next.js App Router。"
+---
+
+`typescript-rest` 目标可以只生成客户端、只生成服务端契约，或者同时生成两者。
+生成的服务端代码只包含 service interface 和 operation metadata；请求解析、校验、
+响应编码以及框架集成都由可复用的 `xidl-typescript-server` 运行库提供。
+
+## 生成客户端和服务端产物
+
+不传标志时，`typescript-rest` 默认只生成客户端：
+
+```bash
+xidlc gen -o src/generated typescript-rest api.idl
+```
+
+只生成服务端契约：
+
+```bash
+xidlc gen -o src/generated typescript-rest --server api.idl
+```
+
+同时生成客户端和服务端：
+
+```bash
+xidlc gen -o src/generated typescript-rest --client --server api.idl
+```
+
+主要产物包括：
+
+- 启用 client 时生成 `api.client.ts`。
+- 启用 server 时生成 `api.server.ts`。
+- 两端共用的 TypeScript model、interface 和 Zod schema 文件。
+
+## 安装运行库
+
+```bash
+pnpm add xidl-typescript-server xidl-typescript-codec zod
+```
+
+`xidl-typescript-server` 使用标准 Fetch API 的 `Request` 和 `Response`，
+因此业务实现不依赖某个特定的 Node.js 框架。
+
+## 实现生成的 Service
+
+假设 IDL 中定义了下面的服务：
+
+```idl
+struct User {
+    uint32 id;
+    string name;
+};
+
+interface UserService {
+    @get(path = "/api/users/{id}")
+    User get_user(@path uint32 id);
+
+    @post(path = "/api/users")
+    User create_user(User user);
+};
+```
+
+实现 `api.server.ts` 中生成的接口：
+
+```ts
+import { XidlServerError } from 'xidl-typescript-server';
+import type { User } from './generated/api';
+import type { UserService } from './generated/api.server';
+
+export class AppUserService implements UserService {
+  private readonly users = new Map<number, User>();
+
+  async get_user(request: { id: number }): Promise<User> {
+    const user = this.users.get(request.id);
+    if (!user) {
+      throw new XidlServerError('user not found', 404);
+    }
+    return user;
+  }
+
+  async create_user(request: { user: User }): Promise<User> {
+    this.users.set(request.user.id, request.user);
+    return request.user;
+  }
+}
+
+export const userService = new AppUserService();
+```
+
+生成的方法还支持第二个 `ServerContext` 参数。业务实现需要访问原始请求、匹配到的
+路由参数或 operation metadata 时，可以显式声明并使用它。
+
+## 使用 Fetch API Router
+
+`createRouter` 将 operation metadata 和 service 实现组合起来，并返回一个兼容
+Fetch API 的 handler：
+
+```ts
+import { createRouter } from 'xidl-typescript-server';
+import { UserServiceOperations } from './generated/api.server';
+import { userService } from './service';
+
+export const handler = createRouter(
+  Object.values(UserServiceOperations),
+  userService,
+);
+
+export function fetch(request: Request): Promise<Response> {
+  return handler(request);
+}
+```
+
+将这个 handler 接入目标运行时提供的 adapter 即可。Router 会负责路径匹配、
+query/header/cookie/body 提取、Zod 校验、内容协商和响应序列化。
+
+## 集成 Next.js App Router
+
+Next.js Route Handler 在 `route.ts` 中按 HTTP 方法名导出函数。
+`createNextRoute` 可以把一个生成的 operation 直接适配成这种形式。
+
+对于 `POST /api/users`，创建 `app/api/users/route.ts`：
+
+```ts
+import { createNextRoute } from 'xidl-typescript-server/next';
+import { UserServiceOperations } from '../../../src/generated/api.server';
+import { userService } from '../../../src/service';
+
+export const POST = createNextRoute(
+  UserServiceOperations.create_user,
+  userService,
+);
+```
+
+对于 `GET /api/users/{id}`，创建 `app/api/users/[id]/route.ts`：
+
+```ts
+import { createNextRoute } from 'xidl-typescript-server/next';
+import { UserServiceOperations } from '../../../../src/generated/api.server';
+import { userService } from '../../../../src/service';
+
+export const GET = createNextRoute(
+  UserServiceOperations.get_user,
+  userService,
+);
+```
+
+动态目录名必须和 IDL 路由参数一致：`[id]` 对应 `{id}`。当前 Next.js 的 Route
+Handler 参数是 Promise；`createNextRoute` 会在调用 service 前自动等待
+`context.params`。
+
+当生成的 operation 使用对应方法时，同样的形式也适用于 `PUT`、`PATCH` 和
+`DELETE`。
+
+## 错误、鉴权和 Codec
+
+- 抛出 `XidlServerError` 可以返回明确的 HTTP 状态码和 typed JSON error。
+- 不符合生成 schema 的请求会返回 HTTP 400。
+- 不支持的请求和响应媒体类型会返回 HTTP 415 和 406。
+- 可以通过 `createRouter` 或 `createNextRoute` 的第三个参数传入 `authorize`、
+  `codecs` 或 `onError`。
+- 运行库会根据生成的 operation metadata 处理 SSE server stream、NDJSON
+  client stream 和原始字节流。
+
+## 建议连读
+
+- [RESTful 基础](../)
+- [HTTP Stream](../stream/)
+- [HTTP Security](../security/)
+- [目标生成器](../../docs/targets/)

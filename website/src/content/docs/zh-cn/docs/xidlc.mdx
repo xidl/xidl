@@ -56,6 +56,28 @@ xidlc gen -o src/generated rust-axum api.idl
 xidlc gen -o src/generated rust-jsonrpc api.idl
 ```
 
+### 生成 TypeScript REST 绑定
+
+默认只生成客户端：
+
+```bash
+xidlc gen -o src/generated typescript-rest api.idl
+```
+
+只生成服务端：
+
+```bash
+xidlc gen -o src/generated typescript-rest --server api.idl
+```
+
+同时生成客户端和服务端：
+
+```bash
+xidlc gen -o src/generated typescript-rest --client --server api.idl
+```
+
+运行库和 Next.js 集成方式见 [TypeScript REST Server](../../rest/typescript-server/)。
+
 ### 生成 OpenAPI
 
 ```bash
