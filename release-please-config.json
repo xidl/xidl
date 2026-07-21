@@ -123,6 +123,16 @@
           "type": "json"
         },
         {
+          "jsonpath": "$.version",
+          "path": "typescript/xidl-typescript-server/package.json",
+          "type": "json"
+        },
+        {
+          "jsonpath": "$.peerDependencies.xidl-typescript-codec",
+          "path": "typescript/xidl-typescript-server/package.json",
+          "type": "json"
+        },
+        {
           "path": "golang/xidl-go-codec/go.mod",
           "type": "generic"
         },
