@@ -23,8 +23,8 @@ test-go: test-go-runtime
 
 # Test BDD
 test-bdd: init
-    pip install -r bdd/requirements.txt
-    behave {{bdd_features}}
+    python3 -m pip install -r bdd/requirements.txt
+    python3 -m behave {{bdd_features}}
 
 # Test Go codegen
 test-go-codegen:

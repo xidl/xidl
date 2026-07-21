@@ -532,8 +532,8 @@ export class HttpStreamSseServiceClient {
             }
             const url = joinUrl(this.baseUrl, path);
             return sseJsonStream<string>(this.fetchImpl, url, { method: "GET", headers }, undefined);
-            
-            
+        
+        
     }
     
         async get_attribute_online(): Promise<boolean> {
@@ -594,8 +594,8 @@ export class HttpStreamSseServiceClient {
             }
             const url = joinUrl(this.baseUrl, path);
             return sseJsonStream<boolean>(this.fetchImpl, url, { method: "GET", headers }, undefined);
-            
-            
+        
+        
     }
     }
 ===============
