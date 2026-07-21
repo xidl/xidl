@@ -1,7 +1,8 @@
 import { createServer } from 'node:http';
+import { createRouter } from 'xidl-typescript-server';
 import {
-  createStreamingServiceHandler,
   type StreamingService,
+  StreamingServiceOperations,
 } from './{{MODULE_NAME}}.server.js';
 
 class MyStreaming implements StreamingService {
@@ -11,7 +12,11 @@ class MyStreaming implements StreamingService {
     }
   }
 }
-const handler = createStreamingServiceHandler(new MyStreaming());
+const service = new MyStreaming();
+const handler = createRouter(
+  Object.values(StreamingServiceOperations),
+  service,
+);
 
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 const server = createServer(async (req, res) => {

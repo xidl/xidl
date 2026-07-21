@@ -1,8 +1,9 @@
 import { createServer } from 'node:http';
+import { createRouter, XidlServerError } from 'xidl-typescript-server';
 import type { User } from './complex_rest.js';
 import {
-  createUserServiceHandler,
   type UserService,
+  UserServiceOperations,
 } from './complex_rest.server.js';
 
 class MyUserService implements UserService {
@@ -11,7 +12,6 @@ class MyUserService implements UserService {
   async get_user(req: { id: number }): Promise<User> {
     const user = this.users.get(req.id);
     if (!user) {
-      const { XidlServerError } = await import('./complex_rest.server.js');
       throw new XidlServerError('Not Found', 404);
     }
     return user;
@@ -37,7 +37,8 @@ class MyUserService implements UserService {
   }
 }
 
-const handler = createUserServiceHandler(new MyUserService());
+const service = new MyUserService();
+const handler = createRouter(Object.values(UserServiceOperations), service);
 
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 const server = createServer(async (req, res) => {

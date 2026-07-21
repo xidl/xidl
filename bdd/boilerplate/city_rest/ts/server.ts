@@ -1,4 +1,5 @@
 import { createServer } from 'node:http';
+import { createRouter } from 'xidl-typescript-server';
 import type {
   SmartCityRestApiDownloadAssetResponse,
   SmartCityRestApiGetDeviceStatusResponse,
@@ -8,8 +9,8 @@ import type {
   SmartCityRestApiUpdateProfileResponse,
 } from './city_rest.js';
 import {
-  createSmartCityRestApiHandler,
   type SmartCityRestApi,
+  SmartCityRestApiOperations,
 } from './city_rest.server.js';
 
 class MySmartCityRestService implements SmartCityRestApi {
@@ -99,7 +100,11 @@ class MySmartCityRestService implements SmartCityRestApi {
   }
 }
 
-const handler = createSmartCityRestApiHandler(new MySmartCityRestService());
+const service = new MySmartCityRestService();
+const handler = createRouter(
+  Object.values(SmartCityRestApiOperations),
+  service,
+);
 
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 const server = createServer(async (req, res) => {

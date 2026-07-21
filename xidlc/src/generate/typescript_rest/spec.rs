@@ -30,6 +30,12 @@ struct ClientFileContext {
 }
 
 #[derive(Serialize)]
+struct ServerFileContext {
+    file_stem: String,
+    blocks: Vec<String>,
+}
+
+#[derive(Serialize)]
 struct ModuleContext {
     ident: String,
     blocks: Vec<String>,
@@ -39,6 +45,7 @@ pub(crate) struct TsHttpOutput {
     pub(crate) types: String,
     pub(crate) zod: String,
     pub(crate) client: String,
+    pub(crate) server: String,
 }
 
 pub(crate) fn render_spec(
@@ -56,10 +63,14 @@ pub(crate) fn render_spec(
         let has_schema = blocks
             .zod
             .iter()
+            .chain(&blocks.client)
+            .chain(&blocks.server)
             .any(|block| ZodImportCollector::is_word_in_text(&schema_name, block));
         let has_mod_zod = blocks
             .zod
             .iter()
+            .chain(&blocks.client)
+            .chain(&blocks.server)
             .any(|block| ZodImportCollector::is_word_in_text(&name, block));
         if has_schema {
             zod_imports.push(schema_name);
@@ -101,6 +112,13 @@ pub(crate) fn render_spec(
                 imports: zod_imports.clone(),
             },
         )?,
+        server: renderer.render_template(
+            "http/server.ts.j2",
+            &ServerFileContext {
+                file_stem: file_stem.to_string(),
+                blocks: blocks.server,
+            },
+        )?,
     })
 }
 
@@ -126,6 +144,8 @@ fn render_defs(
                         .push(render_module(renderer, &ident, &body.zod.join("\n"))?);
                     out.client
                         .push(render_module(renderer, &ident, &body.client.join("\n"))?);
+                    out.server
+                        .push(render_module(renderer, &ident, &body.server.join("\n"))?);
                 }
             }
             hir::Definition::InterfaceDcl(interface) => {

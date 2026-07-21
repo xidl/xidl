@@ -1,4 +1,5 @@
 import { createServer } from 'node:http';
+import { createRouter, XidlServerError } from 'xidl-typescript-server';
 import type {
   RestServerGetKey1Response,
   RestServerGetKey2Response,
@@ -10,10 +11,7 @@ import type {
   Timestamp,
   UserInfo,
 } from './rest_server.js';
-import {
-  createRestServerHandler,
-  type RestServer,
-} from './rest_server.server.js';
+import { type RestServer, RestServerOperations } from './rest_server.server.js';
 
 class MyRestServer implements RestServer {
   private host = 'localhost';
@@ -44,7 +42,6 @@ class MyRestServer implements RestServer {
   async get_user_info(req: { id: number }): Promise<UserInfo> {
     const user = this.userInfo.get(req.id);
     if (!user) {
-      const { XidlServerError } = await import('./rest_server.server.js');
       throw new XidlServerError('Not Found', 404);
     }
     return user;
@@ -72,7 +69,6 @@ class MyRestServer implements RestServer {
 
   async is_key_exists(req: { key_alias: string }): Promise<void> {
     if (!this.keyStore.has(req.key_alias)) {
-      const { XidlServerError } = await import('./rest_server.server.js');
       throw new XidlServerError('Not Found', 404);
     }
   }
@@ -88,7 +84,6 @@ class MyRestServer implements RestServer {
   async get_key_1(req: { key: string }): Promise<RestServerGetKey1Response> {
     const val = this.keyStore.get(req.key);
     if (val === undefined) {
-      const { XidlServerError } = await import('./rest_server.server.js');
       throw new XidlServerError('Not Found', 404);
     }
     return { value: val };
@@ -134,14 +129,13 @@ class MyRestServer implements RestServer {
 }
 
 const myServer = new MyRestServer();
-const handler = createRestServerHandler(myServer, {
+const handler = createRouter(Object.values(RestServerOperations), myServer, {
   authorize: async (req, requirements) => {
     const authHeader = req.headers.get('Authorization');
     if (requirements.length > 0) {
       if (!authHeader) {
         const basic = requirements.find(r => r.kind === 'http_basic');
         const realm = (basic as any)?.realm || 'login';
-        const { XidlServerError } = await import('./rest_server.server.js');
         throw new XidlServerError('Unauthorized', 401, 401, {
           'WWW-Authenticate': `Basic realm="${realm}"`,
         });
@@ -151,7 +145,6 @@ const handler = createRestServerHandler(myServer, {
         requirements.some(r => r.kind === 'http_bearer') &&
         authHeader === 'Bearer'
       ) {
-        const { XidlServerError } = await import('./rest_server.server.js');
         throw new XidlServerError('Unauthorized', 401, 401);
       }
     }

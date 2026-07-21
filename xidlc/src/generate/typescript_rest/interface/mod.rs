@@ -4,6 +4,7 @@ mod render_types;
 use super::model::{
     ClientClassContext, MethodModel, PathParamContext, RequestPayloadEntry, TsHttpBlocks,
 };
+use super::server::ServerClass;
 use crate::error::IdlcResult;
 use crate::generate::typescript::TypescriptRenderer;
 use crate::generate::typescript::definition::TypeRefTarget;
@@ -20,7 +21,7 @@ use helpers::{
 use render_types::{render_request_types, render_response_types};
 use xidl_parser::hir;
 use xidl_parser::rest_hir::{
-    HttpOperation, HttpRequestBodyShape, HttpResponseBodyShape, RestHirDocument,
+    HttpOperation, HttpOutputSource, HttpRequestBodyShape, HttpResponseBodyShape, RestHirDocument,
     semantics::HttpStreamKind,
 };
 
@@ -65,6 +66,7 @@ pub(crate) fn render_interface(
                         request_content_type: method.request_content_type.clone(),
                         response_content_type: method.response_content_type.clone(),
                         path: method.path.clone(),
+                        paths: method.paths.clone(),
                         http_method: method.http_method.clone(),
                         path_params: method.path_params.clone(),
                         query_params: method.query_params.clone(),
@@ -76,6 +78,7 @@ pub(crate) fn render_interface(
                         body_single: method.body_single.clone(),
                         return_ty: method.return_ty.clone(),
                         response_body_mode: method.response_body_mode.clone(),
+                        response_body_entries: method.response_body_entries.clone(),
                         stream_item_ty: method.stream_item_ty.clone(),
                         stream_item_schema_ref: method.stream_item_schema_ref.clone(),
                         client_stream_item_ty: method.client_stream_item_ty.clone(),
@@ -90,6 +93,8 @@ pub(crate) fn render_interface(
             },
         )?,
     );
+    out.server
+        .push(ServerClass::new(&def.header.ident, module_path, methods).render(renderer)?);
     Ok(out)
 }
 
@@ -156,12 +161,13 @@ fn build_method_model(
     }
 
     let client_stream_item_ty = build_client_stream_ty(op, module_path, &request_name);
-    let path = op
+    let paths = op
         .meta
         .routes
-        .first()
+        .iter()
         .map(|route| route.path.clone())
-        .unwrap_or_else(|| "/".to_string());
+        .collect::<Vec<_>>();
+    let path = paths.first().cloned().unwrap_or_else(|| "/".to_string());
 
     let request_payload = op
         .signature
@@ -214,6 +220,50 @@ fn build_method_model(
                 access: ts_ident(source_param),
             }];
             (entries, None)
+        }
+    };
+
+    let response_body_entries = match &op.http.response.body.shape {
+        HttpResponseBodyShape::Empty => Vec::new(),
+        HttpResponseBodyShape::ReturnOnly { .. } => vec![RequestPayloadEntry {
+            raw_name: "return".to_string(),
+            access: "return".to_string(),
+        }],
+        HttpResponseBodyShape::SingleValue { source, .. } => {
+            let name = match source {
+                HttpOutputSource::ReturnValue => "return".to_string(),
+                HttpOutputSource::Param { name } => name.clone(),
+            };
+            vec![RequestPayloadEntry {
+                raw_name: name.clone(),
+                access: ts_ident(&name),
+            }]
+        }
+        HttpResponseBodyShape::Object { fields } => fields
+            .iter()
+            .map(|field| {
+                let name = match &field.source {
+                    HttpOutputSource::ReturnValue => "return".to_string(),
+                    HttpOutputSource::Param { name } => name.clone(),
+                };
+                RequestPayloadEntry {
+                    raw_name: field.field_name.clone(),
+                    access: ts_ident(&name),
+                }
+            })
+            .collect(),
+        HttpResponseBodyShape::Stream {
+            item_source: source,
+            ..
+        } => {
+            let name = match source {
+                HttpOutputSource::ReturnValue => "return".to_string(),
+                HttpOutputSource::Param { name } => name.clone(),
+            };
+            vec![RequestPayloadEntry {
+                raw_name: name.clone(),
+                access: ts_ident(&name),
+            }]
         }
     };
 
@@ -293,6 +343,7 @@ fn build_method_model(
             .clone()
             .unwrap_or_default(),
         path: path.clone(),
+        paths,
         http_method: http_method_name(op.meta.method).to_string(),
         path_params: build_value_params(&op.http.request.path)
             .into_iter()
@@ -312,6 +363,7 @@ fn build_method_model(
         body_single,
         return_ty,
         response_body_mode: build_response_body_mode(op).to_string(),
+        response_body_entries,
         stream_item_ty: build_server_stream_ty(op, module_path),
         stream_item_schema_ref,
         client_stream_item_ty,

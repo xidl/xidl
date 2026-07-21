@@ -1,11 +1,13 @@
 import { createServer } from 'node:http';
+import { encode } from '@msgpack/msgpack';
+import { createRouter } from 'xidl-typescript-server';
 import type {
   RestMediaTypesApiGetMsgpackUserResponse,
   RestMediaTypesApiSubmitProfileResponse,
 } from './rest_media_types.js';
 import {
-  createRestMediaTypesApiHandler,
   type RestMediaTypesApi,
+  RestMediaTypesApiOperations,
 } from './rest_media_types.server.js';
 
 class MyRestMediaTypesService implements RestMediaTypesApi {
@@ -29,7 +31,16 @@ class MyRestMediaTypesService implements RestMediaTypesApi {
   }
 }
 
-const handler = createRestMediaTypesApiHandler(new MyRestMediaTypesService());
+const service = new MyRestMediaTypesService();
+const handler = createRouter(
+  Object.values(RestMediaTypesApiOperations),
+  service,
+  {
+    codecs: {
+      'application/msgpack': { encode },
+    },
+  },
+);
 
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 const server = createServer(async (req, res) => {

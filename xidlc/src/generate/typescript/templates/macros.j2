@@ -19,7 +19,7 @@
     {%- if schema.kind == "Primitive" -%}z.{{ schema.data }}
     {%- elif schema.kind == "ScopedName" -%}{{ schema.data }}
 {%- elif schema.kind == "Array" -%}z.array({{ render_zod(schema.data.element) }}){% if schema.data.length is not none %}.length({{ schema.data.length }}){% endif %}
-    {%- elif schema.kind == "Record" -%}z.record({{ render_zod(schema.data) }})
+    {%- elif schema.kind == "Record" -%}z.record(z.string(), {{ render_zod(schema.data) }})
     {%- elif schema.kind == "Object" -%}z.object({ {% for field in schema.data %}{{ field.prop }}: {{ render_zod(field.schema) }}{% if field.optional %}.optional(){% endif %}{% if not loop.last %}, {% endif %}{% endfor %} })
     {%- elif schema.kind == "Enum" -%}z.enum([{% for value in schema.data %}"{{ value }}"{% if not loop.last %}, {% endif %}{% endfor %}])
 {%- elif schema.kind == "Union" -%}{% if schema.data | length == 1 %}{{ render_zod(schema.data[0]) }}{% else %}z.union([{% for variant in schema.data %}{{ render_zod(variant) }}{% if not loop.last %}, {% endif %}{% endfor %}]){% endif %}

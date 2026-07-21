@@ -1,8 +1,9 @@
 mod interface;
 mod model;
+mod server;
 mod spec;
 
-use crate::error::IdlcResult;
+use crate::error::{IdlcError, IdlcResult};
 use crate::generate::typescript::TypescriptRenderer;
 use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir};
 use crate::macros::hashmap;
@@ -20,6 +21,15 @@ pub fn generate(
         .get("enable_client")
         .and_then(serde_json::Value::as_bool)
         .unwrap_or(true);
+    let enable_server = props
+        .get("enable_server")
+        .and_then(serde_json::Value::as_bool)
+        .unwrap_or(false);
+    if !enable_client && !enable_server {
+        return Err(IdlcError::rpc(
+            "typescript-rest requires enable_client or enable_server",
+        ));
+    }
 
     let spec = rest_hir.spec.clone();
     let file_name = input_path.file_stem().unwrap().to_str().unwrap();
@@ -41,6 +51,12 @@ pub fn generate(
         artifacts.push(Artifact::new_file(ArtifactFile {
             path: format!("{file_name}.client.ts"),
             content: output.client,
+        }));
+    }
+    if enable_server {
+        artifacts.push(Artifact::new_file(ArtifactFile {
+            path: format!("{file_name}.server.ts"),
+            content: output.server,
         }));
     }
     let non_interface = strip_interfaces(spec);
@@ -75,6 +91,7 @@ impl crate::jsonrpc::Codegen for TypescriptRestCodegen {
             "expand_interface" => false,
             "hir_kind" => "http",
             "enable_client" => true,
+            "enable_server" => false,
             "enable_metadata" => true
         })
     }

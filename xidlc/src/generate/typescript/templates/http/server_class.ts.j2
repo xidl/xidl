@@ -1,0 +1,45 @@
+{% from "macros.j2" import render_type %}
+export interface {{ service_name }} {
+    {% for method in methods %}
+        {{ method.name }}({% if method.is_client_stream %}stream: {{ render_type(method.client_stream_item_ty) }}, {% elif method.request_ty %}request: ifaceTypes.{{ method.request_ty }}, {% endif %}context: ServerContext): Awaitable<{% if method.is_server_stream %}AsyncIterable<{{ render_type(method.stream_item_ty) }}>{% else %}{{ render_type(method.response_ty) }}{% endif %}>;
+    {% endfor %}
+}
+
+export const {{ service_name }}Operations = {
+    {% for method in methods %}
+        {{ method.name }}: defineOperation<{{ service_name }}, "{{ method.name }}">({
+            handler: "{{ method.name }}",
+            method: "{{ method.http_method }}",
+            path: "{{ method.path }}",
+            paths: [{% for path in method.paths %}"{{ path }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+            request: {
+                kind: "{% if method.is_client_stream %}stream{% elif method.request_ty %}object{% else %}none{% endif %}",
+                {% if method.request_schema_ref %}schema: ifaceSchemas.{{ method.request_schema_ref }}Schema,
+                {% endif %}path: [{% for param in method.path_params %}{ parameter: "{{ param.template_name }}", wireName: "{{ param.template_name }}", key: "{{ param.access }}", multi: false, catchAll: {{ param.catch_all | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}],
+                query: [{% for param in method.query_params %}{ wireName: "{{ param.raw_name }}", key: "{{ param.access }}", multi: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}],
+                headers: [{% for param in method.header_params %}{ wireName: "{{ param.raw_name }}", key: "{{ param.access }}", multi: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}],
+                cookies: [{% for param in method.cookie_params %}{ wireName: "{{ param.raw_name }}", key: "{{ param.access }}", multi: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}],
+                body: {
+                    kind: "{% if method.is_client_stream %}stream{% elif method.body_entries | length > 0 %}value{% else %}none{% endif %}",
+                    contentType: "{{ method.request_content_type }}",
+                    fields: [{% for entry in method.body_entries %}{ wireName: "{{ entry.raw_name }}", key: "{{ entry.access }}" }{% if not loop.last %}, {% endif %}{% endfor %}],
+                    {% if method.body_single_key %}singleKey: "{{ method.body_single_key }}",
+                    {% endif %}{% if method.body_schema_ref %}schema: ifaceSchemas.{{ method.body_schema_ref }}Schema,
+                {% endif %}
+            },
+        },
+        response: {
+            contentType: "{{ method.response_content_type }}",
+            bodyMode: "{{ method.response_body_mode }}",
+            bodyFields: [{% for entry in method.response_body_entries %}{ wireName: "{{ entry.raw_name }}", key: "{{ entry.access }}" }{% if not loop.last %}, {% endif %}{% endfor %}],
+            headers: [{% for param in method.response_header_params %}{ wireName: "{{ param.raw_name }}", key: "{{ param.access }}", multi: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}],
+            cookies: [{% for param in method.response_cookie_params %}{ wireName: "{{ param.raw_name }}", key: "{{ param.access }}", multi: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}],
+            {% if method.response_schema_ref %}schema: ifaceSchemas.{{ method.response_schema_ref }}Schema,
+            {% endif %}stream: {{ method.is_server_stream | lower }},
+            {% if method.stream_item_schema_ref %}streamSchema: ifaceSchemas.{{ method.stream_item_schema_ref }}Schema,
+            {% endif %}
+        },
+        security: [{% for security in method.security %}{ kind: "{{ security.kind }}"{% if security.location %}, location: "{{ security.location }}"{% endif %}{% if security.name %}, name: "{{ security.name }}"{% endif %}{% if security.realm %}, realm: "{{ security.realm }}"{% endif %}, scopes: [{% for scope in security.scopes %}"{{ scope }}"{% if not loop.last %}, {% endif %}{% endfor %}] }{% if not loop.last %}, {% endif %}{% endfor %}],
+    }),
+    {% endfor %}
+} as const;

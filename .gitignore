@@ -8,6 +8,7 @@ website/.astro
 website/.netlify
 node_modules
 typescript/xidl-typescript-codec/dist/
+typescript/xidl-typescript-server/dist/
 /bdd/gen/
 /bdd/.temp/
 /python/tests/generated/
