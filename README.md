@@ -152,3 +152,8 @@ xidlc gen --out-dir generated openapi api.idl
 
 HTTP and JSON-RPC are available today. Stream support exists and continues to
 evolve, especially in the more advanced transport and interactive workflows.
+
+## Links
+
+- [Linux Do](https://linux.do/)
+- [XIDL Language Server](https://github.com/xidl/idl-language-server)
