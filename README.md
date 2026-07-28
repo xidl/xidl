@@ -10,11 +10,6 @@ definition to drive HTTP, JSON-RPC, streaming APIs, security metadata,
 generated SDKs, and machine-readable specs. It combines contract authoring,
 protocol mapping, code generation, and interactive tooling into one workflow.
 
-<div align="center">
-
-[![Discord Server Invite](https://invidget.switchblade.xyz/KFzqhbvJ5)](https://discord.gg/KFzqhbvJ5)
-</div>
-
 ![Crates.io Version](<https://img.shields.io/crates/v/xidlc?label=xidlc(crates.io)>)
 ![Crates.io Version](<https://img.shields.io/crates/v/xidl-build?label=xidl-build(crates.io)>)
 ![GitHub Release](https://img.shields.io/github/v/release/xidl/xidl)
@@ -137,21 +132,6 @@ xidlc gen --out-dir generated openapi api.idl
 - [Targets Reference](website/src/content/docs/docs/targets.mdx)
 - [HTTP RFC](website/src/content/docs/rfc/http.mdx)
 - [JSON-RPC RFC](website/src/content/docs/rfc/jsonrpc.mdx)
-
-## Ecosystem
-
-- [`xidlc`](https://crates.io/crates/xidlc): compiler and generators
-- [`xidl-build`](https://crates.io/crates/xidl-build): Rust `build.rs` integration
-- [`xidl-rust-axum`](xidl-rust-axum/README.md): Axum runtime for generated HTTP services
-- [`xidl-typescript-server`](typescript/xidl-typescript-server): Fetch API server runtime and Next.js adapter
-- [`xidl-typescript-codec`](typescript/xidl-typescript-codec): TypeScript runtime codecs
-- `xidl-jsonrpc`: JSON-RPC runtime support
-- [`idl-language-server`](https://github.com/xidl/idl-language-server): editor support, diagnostics, and interactive workflows
-
-## Status
-
-HTTP and JSON-RPC are available today. Stream support exists and continues to
-evolve, especially in the more advanced transport and interactive workflows.
 
 ## Links
 
