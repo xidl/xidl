@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.86.0](https://github.com/xidl/xidl/compare/v0.85.0...v0.86.0) (2026-07-31)
+
+
+### Features
+
+* **jsonrpc:** bump s2n-quic to 1.85.0 ([04f93d3](https://github.com/xidl/xidl/commit/04f93d3ac16ac239ea256a12aaef4b730781a885))
+
 ## [0.85.0](https://github.com/xidl/xidl/compare/v0.84.0...v0.85.0) (2026-07-21)
 
 
