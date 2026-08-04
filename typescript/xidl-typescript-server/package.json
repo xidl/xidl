@@ -20,7 +20,7 @@
   "main": "dist/index.js",
   "name": "xidl-typescript-server",
   "peerDependencies": {
-    "xidl-typescript-codec": "^0.86.0",
+    "xidl-typescript-codec": "^0.86.1",
     "zod": "^4.4.3"
   },
   "publishConfig": {
@@ -35,5 +35,5 @@
   },
   "type": "module",
   "types": "dist/index.d.ts",
-  "version": "0.86.0"
+  "version": "0.86.1"
 }

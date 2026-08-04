@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.86.1](https://github.com/xidl/xidl/compare/v0.86.0...v0.86.1) (2026-08-04)
+
+
+### Bug Fixes
+
+* **jsonrpc:** fix private serde api ([a8aa699](https://github.com/xidl/xidl/commit/a8aa6997a5663f32609b67f441b39b92ab464407))
+
 ## [0.86.0](https://github.com/xidl/xidl/compare/v0.85.0...v0.86.0) (2026-07-31)
 
 
