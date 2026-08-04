@@ -375,7 +375,7 @@ impl serde::Serialize for CodegenInput {
     fn serialize<__S>(
         &self,
         __serializer: __S,
-    ) -> serde::__private228::Result<__S::Ok, __S::Error>
+    ) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
     {
@@ -826,7 +826,7 @@ impl serde::Serialize for Artifact {
     fn serialize<__S>(
         &self,
         __serializer: __S,
-    ) -> serde::__private228::Result<__S::Ok, __S::Error>
+    ) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
     {
