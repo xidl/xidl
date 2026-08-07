@@ -7,6 +7,9 @@
   "paths": {
     "/v1/forms/profile": {
       "post": {
+        "tags": [
+          "RestMediaTypesApi"
+        ],
         "operationId": "RestMediaTypesApi.submit_profile",
         "requestBody": {
           "content": {
@@ -54,8 +57,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -69,6 +82,9 @@
     },
     "/v1/msgpack/users/{user_id}": {
       "get": {
+        "tags": [
+          "RestMediaTypesApi"
+        ],
         "operationId": "RestMediaTypesApi.get_msgpack_user",
         "parameters": [
           {
@@ -105,8 +121,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -140,5 +166,10 @@
         }
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "RestMediaTypesApi"
+    }
+  ]
 }

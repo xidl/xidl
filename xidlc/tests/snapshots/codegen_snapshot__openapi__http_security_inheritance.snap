@@ -78,10 +78,13 @@ openapi_http_security_inheritance.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
         },
-        "security": []
+        "security": [],
+        "tags": [
+          "HttpSecurityInheritanceService"
+        ]
       }
     },
     "/reports/{id}": {
@@ -108,6 +111,26 @@ openapi_http_security_inheritance.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -116,7 +139,7 @@ openapi_http_security_inheritance.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -126,6 +149,9 @@ openapi_http_security_inheritance.json
           {
             "api_key-header-x-org-key": []
           }
+        ],
+        "tags": [
+          "HttpSecurityInheritanceService"
         ]
       },
       "post": {
@@ -160,6 +186,26 @@ openapi_http_security_inheritance.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -168,7 +214,7 @@ openapi_http_security_inheritance.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -177,8 +223,16 @@ openapi_http_security_inheritance.json
               "reports:write"
             ]
           }
+        ],
+        "tags": [
+          "HttpSecurityInheritanceService"
         ]
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "HttpSecurityInheritanceService"
+    }
+  ]
 }

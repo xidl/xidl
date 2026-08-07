@@ -17,6 +17,9 @@
   "paths": {
     "/E2eStreamAttribute/watch_attribute_attr17": {
       "get": {
+        "tags": [
+          "E2eStreamAttribute"
+        ],
         "operationId": "E2eStreamAttribute.watch_attribute_attr17",
         "responses": {
           "200": {
@@ -30,7 +33,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -44,6 +47,9 @@
     },
     "/attribute/attr17": {
       "get": {
+        "tags": [
+          "E2eStreamAttribute"
+        ],
         "operationId": "E2eStreamAttribute.get_attribute_attr17",
         "responses": {
           "200": {
@@ -57,7 +63,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -71,6 +77,9 @@
     },
     "/v2/stream/download_bytes": {
       "get": {
+        "tags": [
+          "E2eHttpStream"
+        ],
         "operationId": "E2eHttpStream.download_bytes",
         "responses": {
           "200": {
@@ -88,8 +97,18 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -108,6 +127,9 @@
     },
     "/v2/stream/events/{channel}": {
       "get": {
+        "tags": [
+          "E2eHttpStream"
+        ],
         "operationId": "E2eHttpStream.watch_channel",
         "parameters": [
           {
@@ -146,8 +168,28 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -166,6 +208,9 @@
     },
     "/v2/stream/upload": {
       "post": {
+        "tags": [
+          "E2eHttpStream"
+        ],
         "operationId": "E2eHttpStream.upload_chunks",
         "requestBody": {
           "content": {
@@ -187,8 +232,28 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -207,6 +272,9 @@
     },
     "/v2/stream/upload_bytes": {
       "post": {
+        "tags": [
+          "E2eHttpStream"
+        ],
         "operationId": "E2eHttpStream.upload_bytes",
         "requestBody": {
           "content": {
@@ -233,8 +301,28 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -345,5 +433,13 @@
         "scheme": "bearer"
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "E2eHttpStream"
+    },
+    {
+      "name": "E2eStreamAttribute"
+    }
+  ]
 }

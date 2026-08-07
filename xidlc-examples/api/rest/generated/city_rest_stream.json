@@ -7,6 +7,9 @@
   "paths": {
     "/alerts/{district}": {
       "get": {
+        "tags": [
+          "CityRestStreamApi"
+        ],
         "operationId": "CityRestStreamApi.alerts",
         "parameters": [
           {
@@ -37,8 +40,28 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -57,6 +80,9 @@
     },
     "/assets/upload": {
       "post": {
+        "tags": [
+          "CityRestStreamApi"
+        ],
         "operationId": "CityRestStreamApi.upload_asset",
         "requestBody": {
           "content": {
@@ -78,8 +104,28 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -98,6 +144,9 @@
     },
     "/attribute/maintenance_mode": {
       "get": {
+        "tags": [
+          "CityRestStreamApi"
+        ],
         "operationId": "CityRestStreamApi.get_attribute_maintenance_mode",
         "responses": {
           "200": {
@@ -110,8 +159,18 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -128,6 +187,9 @@
         ]
       },
       "post": {
+        "tags": [
+          "CityRestStreamApi"
+        ],
         "operationId": "CityRestStreamApi.set_attribute_maintenance_mode",
         "requestBody": {
           "content": {
@@ -142,8 +204,28 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -162,6 +244,9 @@
     },
     "/chat": {
       "get": {
+        "tags": [
+          "CityRestStreamApi"
+        ],
         "operationId": "CityRestStreamApi.chat",
         "requestBody": {
           "content": {
@@ -189,8 +274,28 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -209,6 +314,9 @@
     },
     "/ticker": {
       "get": {
+        "tags": [
+          "CityRestStreamApi"
+        ],
         "operationId": "CityRestStreamApi.ticker",
         "responses": {
           "200": {
@@ -222,7 +330,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -267,5 +375,10 @@
         "scheme": "bearer"
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "CityRestStreamApi"
+    }
+  ]
 }

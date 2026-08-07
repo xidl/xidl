@@ -28,6 +28,7 @@ pub(crate) struct MethodInfo {
     pub(crate) security_requirements: Option<Vec<HttpSecurityRequirement>>,
     pub(crate) security: Option<Vec<SecurityRequirement>>,
     pub(crate) response_content_type: String,
+    pub(crate) tag: String,
 }
 
 pub(crate) fn render_http_operation(
@@ -177,6 +178,7 @@ pub(crate) fn render_http_operation(
         security_requirements,
         security,
         response_content_type,
+        tag: interface_name.to_string(),
     }
 }
 

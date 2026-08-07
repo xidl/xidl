@@ -75,6 +75,16 @@ openapi_http_defaults.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -83,9 +93,12 @@ openapi_http_defaults.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpDefaultsService"
+        ]
       }
     },
     "/get_user_alias/{id}": {
@@ -122,6 +135,16 @@ openapi_http_defaults.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -130,9 +153,12 @@ openapi_http_defaults.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpDefaultsService"
+        ]
       }
     },
     "/list_orders/{uid}": {
@@ -181,6 +207,16 @@ openapi_http_defaults.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -189,9 +225,12 @@ openapi_http_defaults.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpDefaultsService"
+        ]
       }
     },
     "/users": {
@@ -230,6 +269,16 @@ openapi_http_defaults.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -238,9 +287,12 @@ openapi_http_defaults.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpDefaultsService"
+        ]
       },
       "post": {
         "operationId": "HttpDefaultsService.create_user",
@@ -264,6 +316,16 @@ openapi_http_defaults.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -272,9 +334,12 @@ openapi_http_defaults.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpDefaultsService"
+        ]
       }
     },
     "/users/flat": {
@@ -300,6 +365,16 @@ openapi_http_defaults.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -308,9 +383,12 @@ openapi_http_defaults.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpDefaultsService"
+        ]
       }
     },
     "/users/head": {
@@ -342,6 +420,16 @@ openapi_http_defaults.json
           "204": {
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -350,9 +438,12 @@ openapi_http_defaults.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpDefaultsService"
+        ]
       }
     },
     "/users/options": {
@@ -384,6 +475,16 @@ openapi_http_defaults.json
           "204": {
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -392,9 +493,12 @@ openapi_http_defaults.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpDefaultsService"
+        ]
       }
     },
     "/users/preview": {
@@ -420,6 +524,16 @@ openapi_http_defaults.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -428,9 +542,12 @@ openapi_http_defaults.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpDefaultsService"
+        ]
       }
     },
     "/users/search": {
@@ -470,6 +587,16 @@ openapi_http_defaults.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -478,9 +605,12 @@ openapi_http_defaults.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpDefaultsService"
+        ]
       }
     },
     "/users/{id}": {
@@ -532,6 +662,16 @@ openapi_http_defaults.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -540,9 +680,12 @@ openapi_http_defaults.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpDefaultsService"
+        ]
       },
       "put": {
         "operationId": "HttpDefaultsService.replace_user",
@@ -592,6 +735,16 @@ openapi_http_defaults.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -600,9 +753,12 @@ openapi_http_defaults.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpDefaultsService"
+        ]
       }
     },
     "/v1/users/{id}": {
@@ -639,6 +795,16 @@ openapi_http_defaults.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -647,10 +813,18 @@ openapi_http_defaults.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpDefaultsService"
+        ]
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "HttpDefaultsService"
+    }
+  ]
 }

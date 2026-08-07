@@ -7,13 +7,16 @@
   "paths": {
     "/upgrade/echo": {
       "get": {
+        "tags": [
+          "HttpUpgradeService"
+        ],
         "operationId": "HttpUpgradeService.connect_echo",
         "responses": {
           "204": {
             "description": "OK"
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -27,6 +30,9 @@
     },
     "/upgrade/raw": {
       "get": {
+        "tags": [
+          "HttpUpgradeService"
+        ],
         "operationId": "HttpUpgradeService.connect_raw",
         "parameters": [
           {
@@ -42,8 +48,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -57,6 +73,9 @@
     },
     "/upgrade/secure": {
       "get": {
+        "tags": [
+          "HttpUpgradeService"
+        ],
         "operationId": "HttpUpgradeService.connect_secure",
         "parameters": [
           {
@@ -72,8 +91,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -107,5 +136,10 @@
         }
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "HttpUpgradeService"
+    }
+  ]
 }

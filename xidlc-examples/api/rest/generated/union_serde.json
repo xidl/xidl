@@ -13,6 +13,9 @@
   "paths": {
     "/attribute/bool_sample": {
       "get": {
+        "tags": [
+          "UnionSerdeService"
+        ],
         "operationId": "UnionSerdeService.get_attribute_bool_sample",
         "responses": {
           "200": {
@@ -26,7 +29,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -40,6 +43,9 @@
     },
     "/attribute/char_sample": {
       "get": {
+        "tags": [
+          "UnionSerdeService"
+        ],
         "operationId": "UnionSerdeService.get_attribute_char_sample",
         "responses": {
           "200": {
@@ -53,7 +59,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -67,6 +73,9 @@
     },
     "/attribute/int_sample": {
       "get": {
+        "tags": [
+          "UnionSerdeService"
+        ],
         "operationId": "UnionSerdeService.get_attribute_int_sample",
         "responses": {
           "200": {
@@ -80,7 +89,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -94,6 +103,9 @@
     },
     "/attribute/sample": {
       "get": {
+        "tags": [
+          "UnionSerdeService"
+        ],
         "operationId": "UnionSerdeService.get_attribute_sample",
         "responses": {
           "200": {
@@ -107,7 +119,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -296,5 +308,10 @@
         ]
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "UnionSerdeService"
+    }
+  ]
 }

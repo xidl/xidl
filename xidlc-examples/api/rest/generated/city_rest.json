@@ -7,6 +7,9 @@
   "paths": {
     "/attribute/api_version": {
       "get": {
+        "tags": [
+          "SmartCityRestApi"
+        ],
         "operationId": "SmartCityRestApi.get_attribute_api_version",
         "responses": {
           "200": {
@@ -19,8 +22,18 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -39,6 +52,9 @@
     },
     "/attribute/maintenance_mode": {
       "get": {
+        "tags": [
+          "SmartCityRestApi"
+        ],
         "operationId": "SmartCityRestApi.get_attribute_maintenance_mode",
         "responses": {
           "200": {
@@ -51,8 +67,18 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -69,6 +95,9 @@
         ]
       },
       "post": {
+        "tags": [
+          "SmartCityRestApi"
+        ],
         "operationId": "SmartCityRestApi.set_attribute_maintenance_mode",
         "requestBody": {
           "content": {
@@ -83,8 +112,28 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -103,6 +152,9 @@
     },
     "/v1/assets/{path}": {
       "get": {
+        "tags": [
+          "SmartCityRestApi"
+        ],
         "operationId": "SmartCityRestApi.download_asset",
         "parameters": [
           {
@@ -154,8 +206,28 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -174,6 +246,9 @@
     },
     "/v1/citizens/{citizen_id}": {
       "get": {
+        "tags": [
+          "SmartCityRestApi"
+        ],
         "operationId": "SmartCityRestApi.get_profile",
         "parameters": [
           {
@@ -216,8 +291,28 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -234,6 +329,9 @@
         ]
       },
       "patch": {
+        "tags": [
+          "SmartCityRestApi"
+        ],
         "operationId": "SmartCityRestApi.update_profile",
         "parameters": [
           {
@@ -277,8 +375,28 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -297,6 +415,9 @@
     },
     "/v1/devices/{device_id}": {
       "get": {
+        "tags": [
+          "SmartCityRestApi"
+        ],
         "operationId": "SmartCityRestApi.get_device_status",
         "parameters": [
           {
@@ -359,8 +480,28 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -379,6 +520,9 @@
     },
     "/v1/parking/lots/{lot_id}": {
       "head": {
+        "tags": [
+          "SmartCityRestApi"
+        ],
         "operationId": "SmartCityRestApi.probe_lot",
         "parameters": [
           {
@@ -402,8 +546,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -418,6 +572,9 @@
     },
     "/v1/parking/lots/{lot_id}/reservations/{reservation_id}": {
       "delete": {
+        "tags": [
+          "SmartCityRestApi"
+        ],
         "operationId": "SmartCityRestApi.cancel_reservation",
         "parameters": [
           {
@@ -441,8 +598,28 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -461,6 +638,9 @@
     },
     "/v1/parking/lots/{lot_id}/reserve": {
       "post": {
+        "tags": [
+          "SmartCityRestApi"
+        ],
         "operationId": "SmartCityRestApi.reserve_lot",
         "parameters": [
           {
@@ -522,8 +702,28 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -542,6 +742,9 @@
     },
     "/v1/stops/{stop_id}": {
       "get": {
+        "tags": [
+          "SmartCityRestApi"
+        ],
         "operationId": "SmartCityRestApi.get_stop_eta",
         "parameters": [
           {
@@ -598,8 +801,28 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -618,6 +841,9 @@
     },
     "/v1/stops/{stop_id}/nearby": {
       "get": {
+        "tags": [
+          "SmartCityRestApi"
+        ],
         "operationId": "SmartCityRestApi.list_nearby_stops",
         "parameters": [
           {
@@ -643,8 +869,28 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -694,5 +940,10 @@
         "scheme": "bearer"
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "SmartCityRestApi"
+    }
+  ]
 }
