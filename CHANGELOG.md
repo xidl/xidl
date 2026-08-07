@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.87.0](https://github.com/xidl/xidl/compare/v0.86.1...v0.87.0) (2026-08-07)
+
+
+### Features
+
+* **openapi:** document error responses and tag operations by interface ([d81aa69](https://github.com/xidl/xidl/commit/d81aa699deb04896179a012b19f446ae0e9dfda6))
+
 ## [0.86.1](https://github.com/xidl/xidl/compare/v0.86.0...v0.86.1) (2026-08-04)
 
 
