@@ -10,7 +10,7 @@ mod stream;
 mod tests;
 
 use crate::jsonrpc::{Artifact, ArtifactFile};
-use crate::openapi::{InfoBuilder, OpenApi, OpenApiBuilder};
+use crate::openapi::{InfoBuilder, OpenApi, OpenApiBuilder, Tag};
 use serde_json::Value;
 use std::collections::HashMap;
 use xidl_parser::hir;
@@ -92,11 +92,13 @@ pub fn render_openapi(spec: &hir::Specification, rest_hir: &RestHirDocument) -> 
     let title = ctx.info_title.as_deref().unwrap_or("xidl");
     let version = ctx.info_version.as_deref().unwrap_or("0.1.0");
     let servers = (!ctx.servers.is_empty()).then_some(ctx.servers);
+    let tags = (!ctx.tags.is_empty()).then(|| ctx.tags.iter().map(Tag::new).collect::<Vec<_>>());
     let document = OpenApiBuilder::new()
         .info(InfoBuilder::new().title(title).version(version).build())
         .paths(ctx.paths.build())
         .components(Some(components.build()))
         .servers(servers)
+        .tags(tags)
         .build();
 
     RenderedOpenApi {

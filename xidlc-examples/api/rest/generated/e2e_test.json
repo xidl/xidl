@@ -17,6 +17,9 @@
   "paths": {
     "/attribute/attr1": {
       "get": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.get_attribute_attr1",
         "responses": {
           "200": {
@@ -30,7 +33,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -42,6 +45,9 @@
         }
       },
       "post": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.set_attribute_attr1",
         "requestBody": {
           "content": {
@@ -56,8 +62,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -71,6 +87,9 @@
     },
     "/attribute/attr10": {
       "get": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.get_attribute_attr10",
         "responses": {
           "200": {
@@ -87,7 +106,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -99,6 +118,9 @@
         }
       },
       "post": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.set_attribute_attr10",
         "requestBody": {
           "content": {
@@ -116,8 +138,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -131,6 +163,9 @@
     },
     "/attribute/attr11": {
       "get": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.get_attribute_attr11",
         "responses": {
           "200": {
@@ -147,7 +182,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -159,6 +194,9 @@
         }
       },
       "post": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.set_attribute_attr11",
         "requestBody": {
           "content": {
@@ -176,8 +214,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -191,6 +239,9 @@
     },
     "/attribute/attr12": {
       "get": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.get_attribute_attr12",
         "responses": {
           "200": {
@@ -209,7 +260,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -221,6 +272,9 @@
         }
       },
       "post": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.set_attribute_attr12",
         "requestBody": {
           "content": {
@@ -240,8 +294,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -255,6 +319,9 @@
     },
     "/attribute/attr13": {
       "get": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.get_attribute_attr13",
         "responses": {
           "200": {
@@ -268,7 +335,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -280,6 +347,9 @@
         }
       },
       "post": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.set_attribute_attr13",
         "requestBody": {
           "content": {
@@ -294,8 +364,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -309,6 +389,9 @@
     },
     "/attribute/attr14": {
       "get": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.get_attribute_attr14",
         "responses": {
           "200": {
@@ -325,7 +408,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -337,6 +420,9 @@
         }
       },
       "post": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.set_attribute_attr14",
         "requestBody": {
           "content": {
@@ -354,8 +440,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -369,6 +465,9 @@
     },
     "/attribute/attr15": {
       "get": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.get_attribute_attr15",
         "responses": {
           "200": {
@@ -385,7 +484,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -397,6 +496,9 @@
         }
       },
       "post": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.set_attribute_attr15",
         "requestBody": {
           "content": {
@@ -414,8 +516,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -429,6 +541,9 @@
     },
     "/attribute/attr16": {
       "get": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "description": "Deprecated. Since 2026-01-01T00:00:00Z.",
         "operationId": "E2eAttribute.get_attribute_attr16",
         "responses": {
@@ -443,7 +558,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -458,6 +573,9 @@
     },
     "/attribute/attr2": {
       "get": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.get_attribute_attr2",
         "responses": {
           "200": {
@@ -474,7 +592,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -488,6 +606,9 @@
     },
     "/attribute/attr3": {
       "get": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.get_attribute_attr3",
         "responses": {
           "200": {
@@ -501,7 +622,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -513,6 +634,9 @@
         }
       },
       "post": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.set_attribute_attr3",
         "requestBody": {
           "content": {
@@ -527,8 +651,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -542,6 +676,9 @@
     },
     "/attribute/attr4": {
       "get": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.get_attribute_attr4",
         "responses": {
           "200": {
@@ -555,7 +692,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -567,6 +704,9 @@
         }
       },
       "post": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.set_attribute_attr4",
         "requestBody": {
           "content": {
@@ -581,8 +721,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -596,6 +746,9 @@
     },
     "/attribute/attr5": {
       "get": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.get_attribute_attr5",
         "responses": {
           "200": {
@@ -609,7 +762,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -621,6 +774,9 @@
         }
       },
       "post": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.set_attribute_attr5",
         "requestBody": {
           "content": {
@@ -635,8 +791,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -650,6 +816,9 @@
     },
     "/attribute/attr6": {
       "get": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.get_attribute_attr6",
         "responses": {
           "200": {
@@ -663,7 +832,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -675,6 +844,9 @@
         }
       },
       "post": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.set_attribute_attr6",
         "requestBody": {
           "content": {
@@ -689,8 +861,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -704,6 +886,9 @@
     },
     "/attribute/attr61": {
       "get": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.get_attribute_attr61",
         "responses": {
           "200": {
@@ -717,7 +902,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -729,6 +914,9 @@
         }
       },
       "post": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.set_attribute_attr61",
         "requestBody": {
           "content": {
@@ -743,8 +931,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -758,6 +956,9 @@
     },
     "/attribute/attr7": {
       "get": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.get_attribute_attr7",
         "responses": {
           "200": {
@@ -774,7 +975,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -786,6 +987,9 @@
         }
       },
       "post": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.set_attribute_attr7",
         "requestBody": {
           "content": {
@@ -803,8 +1007,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -818,6 +1032,9 @@
     },
     "/attribute/attr8": {
       "get": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.get_attribute_attr8",
         "responses": {
           "200": {
@@ -834,7 +1051,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -846,6 +1063,9 @@
         }
       },
       "post": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.set_attribute_attr8",
         "requestBody": {
           "content": {
@@ -863,8 +1083,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -878,6 +1108,9 @@
     },
     "/attribute/attr9": {
       "get": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.get_attribute_attr9",
         "responses": {
           "200": {
@@ -894,7 +1127,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -906,6 +1139,9 @@
         }
       },
       "post": {
+        "tags": [
+          "E2eAttribute"
+        ],
         "operationId": "E2eAttribute.set_attribute_attr9",
         "requestBody": {
           "content": {
@@ -923,8 +1159,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -938,6 +1184,9 @@
     },
     "/attribute/scope_bare_attr": {
       "get": {
+        "tags": [
+          "E2eHttpScopeMatrix"
+        ],
         "description": "Deprecated.",
         "operationId": "E2eHttpScopeMatrix.get_attribute_scope_bare_attr",
         "responses": {
@@ -952,7 +1201,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -967,6 +1216,9 @@
     },
     "/attribute/scope_inherited_attr": {
       "get": {
+        "tags": [
+          "E2eHttpScopeMatrix"
+        ],
         "description": "Deprecated. Since 2026-01-15T00:00:00Z.",
         "operationId": "E2eHttpScopeMatrix.get_attribute_scope_inherited_attr",
         "responses": {
@@ -981,7 +1233,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -996,6 +1248,9 @@
     },
     "/attribute/type_attr1": {
       "get": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.get_attribute_type_attr1",
         "responses": {
           "200": {
@@ -1009,7 +1264,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1021,6 +1276,9 @@
         }
       },
       "post": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.set_attribute_type_attr1",
         "requestBody": {
           "content": {
@@ -1035,8 +1293,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1050,6 +1318,9 @@
     },
     "/attribute/type_attr2": {
       "get": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.get_attribute_type_attr2",
         "responses": {
           "200": {
@@ -1066,7 +1337,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1080,6 +1351,9 @@
     },
     "/healthz": {
       "post": {
+        "tags": [
+          "E2eHttpSecurity"
+        ],
         "description": "Deprecated. Since 2026-01-01T00:00:00Z. After 2026-06-01T23:59:59Z.",
         "operationId": "E2eHttpSecurity.healthz",
         "responses": {
@@ -1094,7 +1368,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1110,6 +1384,9 @@
     },
     "/parameter_op": {
       "post": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.parameter_op",
         "requestBody": {
           "content": {
@@ -1124,8 +1401,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1139,6 +1426,9 @@
     },
     "/parameter_op2": {
       "post": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.parameter_op2",
         "requestBody": {
           "content": {
@@ -1153,8 +1443,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1168,6 +1468,9 @@
     },
     "/parameter_op3": {
       "post": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.parameter_op3",
         "requestBody": {
           "content": {
@@ -1221,8 +1524,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1236,6 +1549,9 @@
     },
     "/parameter_op4": {
       "post": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.parameter_op4",
         "requestBody": {
           "content": {
@@ -1281,8 +1597,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1296,6 +1622,9 @@
     },
     "/parameter_op5": {
       "post": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.parameter_op5",
         "requestBody": {
           "content": {
@@ -1348,8 +1677,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1363,6 +1702,9 @@
     },
     "/parameter_op6": {
       "post": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.parameter_op6",
         "requestBody": {
           "content": {
@@ -1415,8 +1757,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1430,6 +1782,9 @@
     },
     "/r/{id}": {
       "get": {
+        "tags": [
+          "E2eHttpRouteAndBody"
+        ],
         "operationId": "E2eHttpRouteAndBody.get_resource",
         "parameters": [
           {
@@ -1468,8 +1823,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1483,6 +1848,9 @@
     },
     "/resources/{id}": {
       "get": {
+        "tags": [
+          "E2eHttpRouteAndBody"
+        ],
         "operationId": "E2eHttpRouteAndBody.get_resource",
         "parameters": [
           {
@@ -1521,8 +1889,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1536,6 +1914,9 @@
     },
     "/return_with_any": {
       "post": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.return_with_any",
         "responses": {
           "200": {
@@ -1549,7 +1930,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1563,6 +1944,9 @@
     },
     "/return_with_any_map": {
       "post": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.return_with_any_map",
         "responses": {
           "200": {
@@ -1579,7 +1963,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1593,6 +1977,9 @@
     },
     "/return_with_any_sequence": {
       "post": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.return_with_any_sequence",
         "responses": {
           "200": {
@@ -1609,7 +1996,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1623,6 +2010,9 @@
     },
     "/return_with_map": {
       "post": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.return_with_map",
         "responses": {
           "200": {
@@ -1641,7 +2031,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1655,6 +2045,9 @@
     },
     "/return_with_sequence1": {
       "post": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.return_with_sequence1",
         "responses": {
           "200": {
@@ -1671,7 +2064,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1685,6 +2078,9 @@
     },
     "/return_with_sequence2": {
       "post": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.return_with_sequence2",
         "responses": {
           "200": {
@@ -1701,7 +2097,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1715,6 +2111,9 @@
     },
     "/return_with_sequence3": {
       "post": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.return_with_sequence3",
         "responses": {
           "200": {
@@ -1731,7 +2130,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1745,6 +2144,9 @@
     },
     "/return_with_sequence4": {
       "post": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.return_with_sequence4",
         "responses": {
           "200": {
@@ -1761,7 +2163,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1775,6 +2177,9 @@
     },
     "/return_with_sequence5": {
       "post": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.return_with_sequence5",
         "responses": {
           "200": {
@@ -1791,7 +2196,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1805,13 +2210,16 @@
     },
     "/simple_op": {
       "post": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.simple_op",
         "responses": {
           "204": {
             "description": "OK"
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1825,6 +2233,9 @@
     },
     "/simple_op_with_return1": {
       "post": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.simple_op_with_return1",
         "responses": {
           "200": {
@@ -1838,7 +2249,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1852,6 +2263,9 @@
     },
     "/simple_op_with_return2": {
       "post": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.simple_op_with_return2",
         "responses": {
           "200": {
@@ -1865,7 +2279,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1879,6 +2293,9 @@
     },
     "/simple_op_with_return3": {
       "post": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.simple_op_with_return3",
         "responses": {
           "200": {
@@ -1892,7 +2309,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1906,6 +2323,9 @@
     },
     "/simple_op_with_return4": {
       "post": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.simple_op_with_return4",
         "responses": {
           "200": {
@@ -1919,7 +2339,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1933,6 +2353,9 @@
     },
     "/simple_op_with_return5": {
       "post": {
+        "tags": [
+          "E2eTypeServer"
+        ],
         "operationId": "E2eTypeServer.simple_op_with_return5",
         "responses": {
           "200": {
@@ -1946,7 +2369,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1960,6 +2383,9 @@
     },
     "/v1/op_with_params/{path}": {
       "post": {
+        "tags": [
+          "E2ePathSever"
+        ],
         "operationId": "E2ePathSever.op_with_params",
         "parameters": [
           {
@@ -2021,8 +2447,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2036,6 +2472,9 @@
     },
     "/v1/op_with_path/{param1}": {
       "get": {
+        "tags": [
+          "E2ePathSever"
+        ],
         "operationId": "E2ePathSever.op_with_path",
         "parameters": [
           {
@@ -2061,8 +2500,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2076,6 +2525,9 @@
     },
     "/v1/op_with_query/{param1}": {
       "get": {
+        "tags": [
+          "E2ePathSever"
+        ],
         "operationId": "E2ePathSever.op_with_query",
         "parameters": [
           {
@@ -2109,8 +2561,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2124,6 +2586,9 @@
     },
     "/v1/op_with_query_wildcard/{all}": {
       "get": {
+        "tags": [
+          "E2ePathSever"
+        ],
         "operationId": "E2ePathSever.op_with_query2",
         "parameters": [
           {
@@ -2162,8 +2627,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2177,6 +2652,9 @@
     },
     "/v2/dedup/{id}": {
       "get": {
+        "tags": [
+          "E2eHttpRouteAndBody"
+        ],
         "operationId": "E2eHttpRouteAndBody.dedup_resource",
         "parameters": [
           {
@@ -2207,8 +2685,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2222,6 +2710,9 @@
     },
     "/v2/defaults/resources": {
       "delete": {
+        "tags": [
+          "E2eHttpDefaultsMatrix"
+        ],
         "operationId": "E2eHttpDefaultsMatrix.delete_resource_default_query",
         "parameters": [
           {
@@ -2254,8 +2745,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2269,6 +2770,9 @@
     },
     "/v2/defaults/resources/head": {
       "head": {
+        "tags": [
+          "E2eHttpDefaultsMatrix"
+        ],
         "operationId": "E2eHttpDefaultsMatrix.probe_resource_default_query",
         "parameters": [
           {
@@ -2294,8 +2798,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2309,6 +2823,9 @@
     },
     "/v2/defaults/resources/options": {
       "options": {
+        "tags": [
+          "E2eHttpDefaultsMatrix"
+        ],
         "operationId": "E2eHttpDefaultsMatrix.resource_options_default_query",
         "parameters": [
           {
@@ -2334,8 +2851,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2349,6 +2876,9 @@
     },
     "/v2/defaults/resources/{id}": {
       "put": {
+        "tags": [
+          "E2eHttpDefaultsMatrix"
+        ],
         "operationId": "E2eHttpDefaultsMatrix.replace_resource_default_body",
         "parameters": [
           {
@@ -2391,8 +2921,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2404,6 +2944,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "E2eHttpDefaultsMatrix"
+        ],
         "operationId": "E2eHttpDefaultsMatrix.patch_resource_default_body",
         "parameters": [
           {
@@ -2446,8 +2989,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2461,6 +3014,9 @@
     },
     "/v2/files/{path}": {
       "get": {
+        "tags": [
+          "E2eHttpRouteAndBody"
+        ],
         "operationId": "E2eHttpRouteAndBody.get_file",
         "parameters": [
           {
@@ -2499,8 +3055,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2514,6 +3080,9 @@
     },
     "/v2/forms/profile": {
       "post": {
+        "tags": [
+          "E2eHttpForm"
+        ],
         "operationId": "E2eHttpForm.submit_profile",
         "requestBody": {
           "content": {
@@ -2560,8 +3129,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2575,6 +3154,9 @@
     },
     "/v2/msgpack/resources/{id}": {
       "get": {
+        "tags": [
+          "E2eHttpRouteAndBody"
+        ],
         "operationId": "E2eHttpRouteAndBody.get_msgpack_resource",
         "parameters": [
           {
@@ -2611,8 +3193,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2626,6 +3218,9 @@
     },
     "/v2/resources": {
       "post": {
+        "tags": [
+          "E2eHttpRouteAndBody"
+        ],
         "operationId": "E2eHttpRouteAndBody.create_resource",
         "requestBody": {
           "content": {
@@ -2647,8 +3242,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2662,6 +3267,9 @@
     },
     "/v2/resources/preview": {
       "get": {
+        "tags": [
+          "E2eHttpRouteAndBody"
+        ],
         "operationId": "E2eHttpRouteAndBody.preview_resource",
         "requestBody": {
           "content": {
@@ -2683,8 +3291,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2698,6 +3316,9 @@
     },
     "/v2/resources/{id}": {
       "get": {
+        "tags": [
+          "E2eHttpRouteAndBody"
+        ],
         "operationId": "E2eHttpRouteAndBody.get_resource",
         "parameters": [
           {
@@ -2736,8 +3357,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2749,6 +3380,9 @@
         }
       },
       "put": {
+        "tags": [
+          "E2eHttpRouteAndBody"
+        ],
         "operationId": "E2eHttpRouteAndBody.replace_resource",
         "parameters": [
           {
@@ -2781,8 +3415,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2794,6 +3438,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "E2eHttpRouteAndBody"
+        ],
         "operationId": "E2eHttpRouteAndBody.delete_resource",
         "parameters": [
           {
@@ -2817,8 +3464,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2830,6 +3487,9 @@
         }
       },
       "options": {
+        "tags": [
+          "E2eHttpRouteAndBody"
+        ],
         "operationId": "E2eHttpRouteAndBody.resource_options",
         "parameters": [
           {
@@ -2845,8 +3505,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2858,6 +3528,9 @@
         }
       },
       "head": {
+        "tags": [
+          "E2eHttpRouteAndBody"
+        ],
         "operationId": "E2eHttpRouteAndBody.probe_resource",
         "parameters": [
           {
@@ -2881,8 +3554,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2894,6 +3577,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "E2eHttpRouteAndBody"
+        ],
         "operationId": "E2eHttpRouteAndBody.patch_resource",
         "parameters": [
           {
@@ -2947,8 +3633,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2962,6 +3658,9 @@
     },
     "/v2/scope/default": {
       "post": {
+        "tags": [
+          "E2eHttpScopeMatrix"
+        ],
         "description": "Deprecated. Since 2026-01-15T00:00:00Z.",
         "operationId": "E2eHttpScopeMatrix.default_scope",
         "requestBody": {
@@ -2984,8 +3683,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3000,6 +3709,9 @@
     },
     "/v2/scope/deprecated/plain/{id}": {
       "get": {
+        "tags": [
+          "E2eHttpScopeMatrix"
+        ],
         "description": "Deprecated.",
         "operationId": "E2eHttpScopeMatrix.deprecated_plain",
         "parameters": [
@@ -3023,8 +3735,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3039,6 +3761,9 @@
     },
     "/v2/scope/deprecated/since/{id}": {
       "get": {
+        "tags": [
+          "E2eHttpScopeMatrix"
+        ],
         "description": "Deprecated. Since 2026-02-01T00:00:00Z.",
         "operationId": "E2eHttpScopeMatrix.deprecated_since_only",
         "parameters": [
@@ -3062,8 +3787,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3078,6 +3813,9 @@
     },
     "/v2/scope/deprecated/window/{id}": {
       "get": {
+        "tags": [
+          "E2eHttpScopeMatrix"
+        ],
         "description": "Deprecated. Since 2026-03-01T00:00:00Z. After 2026-12-31T23:59:59Z.",
         "operationId": "E2eHttpScopeMatrix.deprecated_window",
         "parameters": [
@@ -3101,8 +3839,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3117,6 +3865,9 @@
     },
     "/v2/scope/override-both": {
       "post": {
+        "tags": [
+          "E2eHttpScopeMatrix"
+        ],
         "description": "Deprecated. Since 2026-01-15T00:00:00Z.",
         "operationId": "E2eHttpScopeMatrix.override_both_media",
         "requestBody": {
@@ -3164,8 +3915,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3180,6 +3941,9 @@
     },
     "/v2/scope/override-consumes": {
       "post": {
+        "tags": [
+          "E2eHttpScopeMatrix"
+        ],
         "description": "Deprecated. Since 2026-01-15T00:00:00Z.",
         "operationId": "E2eHttpScopeMatrix.override_consumes_only",
         "requestBody": {
@@ -3227,8 +3991,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3243,6 +4017,9 @@
     },
     "/v2/scope/override-produces/{id}": {
       "get": {
+        "tags": [
+          "E2eHttpScopeMatrix"
+        ],
         "description": "Deprecated. Since 2026-01-15T00:00:00Z.",
         "operationId": "E2eHttpScopeMatrix.override_produces_only",
         "parameters": [
@@ -3280,8 +4057,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3296,6 +4083,9 @@
     },
     "/v2/secure/search": {
       "post": {
+        "tags": [
+          "E2eHttpSecurity"
+        ],
         "operationId": "E2eHttpSecurity.search_secure_user",
         "requestBody": {
           "content": {
@@ -3330,8 +4120,28 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3353,6 +4163,9 @@
     },
     "/v2/secure/users/{id}": {
       "get": {
+        "tags": [
+          "E2eHttpSecurity"
+        ],
         "description": "Deprecated. Since 2026-01-01T00:00:00Z.",
         "operationId": "E2eHttpSecurity.get_secure_user",
         "parameters": [
@@ -3392,8 +4205,28 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3416,6 +4249,9 @@
     },
     "/v2/security/alternatives/{id}": {
       "get": {
+        "tags": [
+          "E2eHttpSecurityMatrix"
+        ],
         "operationId": "E2eHttpSecurityMatrix.alternative_security",
         "parameters": [
           {
@@ -3446,8 +4282,28 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3469,6 +4325,9 @@
     },
     "/v2/security/bearer-cookie": {
       "post": {
+        "tags": [
+          "E2eHttpSecurityMatrix"
+        ],
         "operationId": "E2eHttpSecurityMatrix.bearer_or_cookie_security",
         "requestBody": {
           "content": {
@@ -3501,8 +4360,28 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3524,6 +4403,9 @@
     },
     "/v2/security/inherited/{id}": {
       "get": {
+        "tags": [
+          "E2eHttpSecurityMatrix"
+        ],
         "operationId": "E2eHttpSecurityMatrix.inherited_security",
         "parameters": [
           {
@@ -3554,8 +4436,28 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3577,6 +4479,9 @@
     },
     "/v2/security/oauth-search": {
       "post": {
+        "tags": [
+          "E2eHttpSecurityMatrix"
+        ],
         "operationId": "E2eHttpSecurityMatrix.oauth_security",
         "requestBody": {
           "content": {
@@ -3611,8 +4516,28 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3634,6 +4559,9 @@
     },
     "/v2/security/public/ping": {
       "get": {
+        "tags": [
+          "E2eHttpSecurityMatrix"
+        ],
         "operationId": "E2eHttpSecurityMatrix.public_ping",
         "responses": {
           "200": {
@@ -3647,7 +4575,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3850,5 +4778,34 @@
         }
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "E2eAttribute"
+    },
+    {
+      "name": "E2eHttpDefaultsMatrix"
+    },
+    {
+      "name": "E2eHttpForm"
+    },
+    {
+      "name": "E2eHttpRouteAndBody"
+    },
+    {
+      "name": "E2eHttpScopeMatrix"
+    },
+    {
+      "name": "E2eHttpSecurity"
+    },
+    {
+      "name": "E2eHttpSecurityMatrix"
+    },
+    {
+      "name": "E2ePathSever"
+    },
+    {
+      "name": "E2eTypeServer"
+    }
+  ]
 }

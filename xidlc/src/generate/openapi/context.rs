@@ -11,7 +11,7 @@ use crate::openapi::RefOr;
 use crate::openapi::path::PathItem;
 use crate::openapi::schema::{ObjectBuilder, Schema, Type};
 use crate::openapi::server::Server;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::mem;
 use xidl_parser::hir;
 use xidl_parser::rest_hir::RestHirDocument;
@@ -24,6 +24,7 @@ pub(crate) struct OpenApiContext {
     pub(crate) info_title: Option<String>,
     pub(crate) info_version: Option<String>,
     pub(crate) servers: Vec<Server>,
+    pub(crate) tags: BTreeSet<String>,
     pub(crate) stream_patches: Vec<OpenApiStreamPatch>,
 }
 
@@ -186,6 +187,7 @@ impl OpenApiContext {
         let Some(http_interface) = rest_hir.find_interface(module_path, &def.header.ident) else {
             return;
         };
+        self.tags.insert(def.header.ident.clone());
         let mut route_bindings = HashMap::new();
         for method in http_interface
             .operations

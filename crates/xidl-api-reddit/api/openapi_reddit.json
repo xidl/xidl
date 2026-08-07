@@ -13,6 +13,9 @@
   "paths": {
     "/about/log": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_about_log",
         "parameters": [
           {
@@ -92,8 +95,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -107,6 +120,9 @@
     },
     "/about/{location}": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_about_location",
         "parameters": [
           {
@@ -186,8 +202,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -201,6 +227,9 @@
     },
     "/about/{where}": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_about_where",
         "parameters": [
           {
@@ -280,8 +309,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -295,6 +334,9 @@
     },
     "/api/accept/moderator/invite": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_accept_moderator_invite",
         "requestBody": {
           "content": {
@@ -316,8 +358,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -331,6 +383,9 @@
     },
     "/api/announcements/v1": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_announcements_v1",
         "parameters": [
           {
@@ -370,8 +425,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -385,6 +450,9 @@
     },
     "/api/announcements/v1/hide": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_announcements_v1_hide",
         "requestBody": {
           "content": {
@@ -406,8 +474,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -421,6 +499,9 @@
     },
     "/api/announcements/v1/read": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_announcements_v1_read",
         "requestBody": {
           "content": {
@@ -442,8 +523,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -457,6 +548,9 @@
     },
     "/api/announcements/v1/read/all": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_announcements_v1_read_all",
         "responses": {
           "200": {
@@ -470,7 +564,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -484,6 +578,9 @@
     },
     "/api/approve": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_approve",
         "requestBody": {
           "content": {
@@ -505,8 +602,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -520,6 +627,9 @@
     },
     "/api/block/user": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_block_user",
         "requestBody": {
           "content": {
@@ -541,8 +651,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -556,6 +676,9 @@
     },
     "/api/clearflairtemplates": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_clearflairtemplates",
         "requestBody": {
           "content": {
@@ -577,8 +700,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -592,6 +725,9 @@
     },
     "/api/comment": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_comment",
         "requestBody": {
           "content": {
@@ -613,8 +749,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -628,6 +774,9 @@
     },
     "/api/compose": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_compose",
         "requestBody": {
           "content": {
@@ -649,8 +798,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -664,6 +823,9 @@
     },
     "/api/del": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_del",
         "requestBody": {
           "content": {
@@ -685,8 +847,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -700,6 +872,9 @@
     },
     "/api/del/msg": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_del_msg",
         "requestBody": {
           "content": {
@@ -721,8 +896,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -736,6 +921,9 @@
     },
     "/api/delete/sr/banner": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_delete_sr_banner",
         "requestBody": {
           "content": {
@@ -757,8 +945,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -772,6 +970,9 @@
     },
     "/api/delete/sr/header": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_delete_sr_header",
         "requestBody": {
           "content": {
@@ -793,8 +994,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -808,6 +1019,9 @@
     },
     "/api/delete/sr/icon": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_delete_sr_icon",
         "requestBody": {
           "content": {
@@ -829,8 +1043,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -844,6 +1068,9 @@
     },
     "/api/delete/sr/img": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_delete_sr_img",
         "requestBody": {
           "content": {
@@ -865,8 +1092,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -880,6 +1117,9 @@
     },
     "/api/deleteflair": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_deleteflair",
         "requestBody": {
           "content": {
@@ -901,8 +1141,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -916,6 +1166,9 @@
     },
     "/api/deleteflairtemplate": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_deleteflairtemplate",
         "requestBody": {
           "content": {
@@ -937,8 +1190,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -952,6 +1215,9 @@
     },
     "/api/distinguish": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_distinguish",
         "requestBody": {
           "content": {
@@ -973,8 +1239,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -988,6 +1264,9 @@
     },
     "/api/editusertext": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_editusertext",
         "requestBody": {
           "content": {
@@ -1009,8 +1288,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1024,6 +1313,9 @@
     },
     "/api/flair": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_flair",
         "requestBody": {
           "content": {
@@ -1045,8 +1337,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1060,6 +1362,9 @@
     },
     "/api/flair/template/order": {
       "patch": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.patch_flair_template_order",
         "requestBody": {
           "content": {
@@ -1081,8 +1386,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1096,6 +1411,9 @@
     },
     "/api/flairconfig": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_flairconfig",
         "requestBody": {
           "content": {
@@ -1117,8 +1435,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1132,6 +1460,9 @@
     },
     "/api/flaircsv": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_flaircsv",
         "requestBody": {
           "content": {
@@ -1153,8 +1484,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1168,6 +1509,9 @@
     },
     "/api/flairlist": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_flairlist",
         "parameters": [
           {
@@ -1239,8 +1583,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1254,6 +1608,9 @@
     },
     "/api/flairselector": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_flairselector",
         "requestBody": {
           "content": {
@@ -1275,8 +1632,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1290,6 +1657,9 @@
     },
     "/api/flairtemplate": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_flairtemplate",
         "requestBody": {
           "content": {
@@ -1311,8 +1681,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1326,6 +1706,9 @@
     },
     "/api/flairtemplate/v2": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_flairtemplate_v2",
         "requestBody": {
           "content": {
@@ -1347,8 +1730,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1362,6 +1755,9 @@
     },
     "/api/follow/post": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_follow_post",
         "requestBody": {
           "content": {
@@ -1383,8 +1779,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1398,6 +1804,9 @@
     },
     "/api/friend": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_friend",
         "requestBody": {
           "content": {
@@ -1419,8 +1828,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1434,6 +1853,9 @@
     },
     "/api/hide": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_hide",
         "requestBody": {
           "content": {
@@ -1455,8 +1877,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1470,6 +1902,9 @@
     },
     "/api/ignore/reports": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_ignore_reports",
         "requestBody": {
           "content": {
@@ -1491,8 +1926,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1506,6 +1951,9 @@
     },
     "/api/info": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_info",
         "parameters": [
           {
@@ -1544,8 +1992,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1559,6 +2017,9 @@
     },
     "/api/leavecontributor": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_leavecontributor",
         "requestBody": {
           "content": {
@@ -1580,8 +2041,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1595,6 +2066,9 @@
     },
     "/api/leavemoderator": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_leavemoderator",
         "requestBody": {
           "content": {
@@ -1616,8 +2090,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1631,6 +2115,9 @@
     },
     "/api/link/flair": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_link_flair",
         "responses": {
           "200": {
@@ -1644,7 +2131,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1658,6 +2145,9 @@
     },
     "/api/link/flair/v2": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_link_flair_v2",
         "responses": {
           "200": {
@@ -1671,7 +2161,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1685,6 +2175,9 @@
     },
     "/api/live/by/id/{names}": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_live_by_id_names",
         "parameters": [
           {
@@ -1707,8 +2200,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1722,6 +2225,9 @@
     },
     "/api/live/create": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_live_create",
         "requestBody": {
           "content": {
@@ -1743,8 +2249,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1758,6 +2274,9 @@
     },
     "/api/live/happening/now": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_live_happening_now",
         "parameters": [
           {
@@ -1780,8 +2299,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1795,6 +2324,9 @@
     },
     "/api/live/{thread}/accept/contributor/invite": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_live_thread_accept_contributor_invite",
         "parameters": [
           {
@@ -1826,8 +2358,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1841,6 +2383,9 @@
     },
     "/api/live/{thread}/close/thread": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_live_thread_close_thread",
         "parameters": [
           {
@@ -1872,8 +2417,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1887,6 +2442,9 @@
     },
     "/api/live/{thread}/delete/update": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_live_thread_delete_update",
         "parameters": [
           {
@@ -1918,8 +2476,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1933,6 +2501,9 @@
     },
     "/api/live/{thread}/edit": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_live_thread_edit",
         "parameters": [
           {
@@ -1964,8 +2535,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1979,6 +2560,9 @@
     },
     "/api/live/{thread}/hide/discussion": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_live_thread_hide_discussion",
         "parameters": [
           {
@@ -2010,8 +2594,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2025,6 +2619,9 @@
     },
     "/api/live/{thread}/invite/contributor": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_live_thread_invite_contributor",
         "parameters": [
           {
@@ -2056,8 +2653,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2071,6 +2678,9 @@
     },
     "/api/live/{thread}/leave/contributor": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_live_thread_leave_contributor",
         "parameters": [
           {
@@ -2102,8 +2712,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2117,6 +2737,9 @@
     },
     "/api/live/{thread}/report": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_live_thread_report",
         "parameters": [
           {
@@ -2148,8 +2771,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2163,6 +2796,9 @@
     },
     "/api/live/{thread}/rm/contributor": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_live_thread_rm_contributor",
         "parameters": [
           {
@@ -2194,8 +2830,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2209,6 +2855,9 @@
     },
     "/api/live/{thread}/rm/contributor/invite": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_live_thread_rm_contributor_invite",
         "parameters": [
           {
@@ -2240,8 +2889,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2255,6 +2914,9 @@
     },
     "/api/live/{thread}/set/contributor/permissions": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_live_thread_set_contributor_permissions",
         "parameters": [
           {
@@ -2286,8 +2948,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2301,6 +2973,9 @@
     },
     "/api/live/{thread}/strike/update": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_live_thread_strike_update",
         "parameters": [
           {
@@ -2332,8 +3007,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2347,6 +3032,9 @@
     },
     "/api/live/{thread}/unhide/discussion": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_live_thread_unhide_discussion",
         "parameters": [
           {
@@ -2378,8 +3066,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2393,6 +3091,9 @@
     },
     "/api/live/{thread}/update": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_live_thread_update",
         "parameters": [
           {
@@ -2424,8 +3125,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2439,6 +3150,9 @@
     },
     "/api/lock": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_lock",
         "requestBody": {
           "content": {
@@ -2460,8 +3174,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2475,6 +3199,9 @@
     },
     "/api/marknsfw": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_marknsfw",
         "requestBody": {
           "content": {
@@ -2496,8 +3223,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2511,6 +3248,9 @@
     },
     "/api/mod/bulk/read": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_mod_bulk_read",
         "requestBody": {
           "content": {
@@ -2532,8 +3272,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2547,6 +3297,9 @@
     },
     "/api/mod/conversations": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_mod_conversations",
         "parameters": [
           {
@@ -2602,8 +3355,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2615,6 +3378,9 @@
         }
       },
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_mod_conversations",
         "requestBody": {
           "content": {
@@ -2636,8 +3402,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2651,6 +3427,9 @@
     },
     "/api/mod/conversations/:conversation/id": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_mod_conversations_conversation_id",
         "parameters": [
           {
@@ -2681,8 +3460,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2694,6 +3483,9 @@
         }
       },
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_mod_conversations_conversation_id",
         "requestBody": {
           "content": {
@@ -2715,8 +3507,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2730,6 +3532,9 @@
     },
     "/api/mod/conversations/:conversation/id/approve": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_mod_conversations_conversation_id_approve",
         "requestBody": {
           "content": {
@@ -2751,8 +3556,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2766,6 +3581,9 @@
     },
     "/api/mod/conversations/:conversation/id/archive": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_mod_conversations_conversation_id_archive",
         "requestBody": {
           "content": {
@@ -2787,8 +3605,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2802,6 +3630,9 @@
     },
     "/api/mod/conversations/:conversation/id/disapprove": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_mod_conversations_conversation_id_disapprove",
         "requestBody": {
           "content": {
@@ -2823,8 +3654,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2838,6 +3679,9 @@
     },
     "/api/mod/conversations/:conversation/id/highlight": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_mod_conversations_conversation_id_highlight",
         "requestBody": {
           "content": {
@@ -2859,8 +3703,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2872,6 +3726,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.delete_mod_conversations_conversation_id_highlight",
         "parameters": [
           {
@@ -2894,8 +3751,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2909,6 +3776,9 @@
     },
     "/api/mod/conversations/:conversation/id/mute": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_mod_conversations_conversation_id_mute",
         "requestBody": {
           "content": {
@@ -2930,8 +3800,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2945,6 +3825,9 @@
     },
     "/api/mod/conversations/:conversation/id/temp/ban": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_mod_conversations_conversation_id_temp_ban",
         "requestBody": {
           "content": {
@@ -2966,8 +3849,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2981,6 +3874,9 @@
     },
     "/api/mod/conversations/:conversation/id/unarchive": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_mod_conversations_conversation_id_unarchive",
         "requestBody": {
           "content": {
@@ -3002,8 +3898,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3017,6 +3923,9 @@
     },
     "/api/mod/conversations/:conversation/id/unban": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_mod_conversations_conversation_id_unban",
         "requestBody": {
           "content": {
@@ -3038,8 +3947,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3053,6 +3972,9 @@
     },
     "/api/mod/conversations/:conversation/id/unmute": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_mod_conversations_conversation_id_unmute",
         "requestBody": {
           "content": {
@@ -3074,8 +3996,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3089,6 +4021,9 @@
     },
     "/api/mod/conversations/read": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_mod_conversations_read",
         "requestBody": {
           "content": {
@@ -3110,8 +4045,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3125,6 +4070,9 @@
     },
     "/api/mod/conversations/subreddits": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_mod_conversations_subreddits",
         "responses": {
           "200": {
@@ -3138,7 +4086,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3152,6 +4100,9 @@
     },
     "/api/mod/conversations/unread": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_mod_conversations_unread",
         "requestBody": {
           "content": {
@@ -3173,8 +4124,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3188,6 +4149,9 @@
     },
     "/api/mod/conversations/unread/count": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_mod_conversations_unread_count",
         "responses": {
           "200": {
@@ -3201,7 +4165,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3215,6 +4179,9 @@
     },
     "/api/mod/notes": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_mod_notes",
         "parameters": [
           {
@@ -3269,8 +4236,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3282,6 +4259,9 @@
         }
       },
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_mod_notes",
         "requestBody": {
           "content": {
@@ -3303,8 +4283,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3316,6 +4306,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.delete_mod_notes",
         "parameters": [
           {
@@ -3354,8 +4347,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3369,6 +4372,9 @@
     },
     "/api/mod/notes/recent": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_mod_notes_recent",
         "parameters": [
           {
@@ -3399,8 +4405,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3414,6 +4430,9 @@
     },
     "/api/morechildren": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_morechildren",
         "parameters": [
           {
@@ -3485,8 +4504,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3500,6 +4529,9 @@
     },
     "/api/multi/copy": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_multi_copy",
         "requestBody": {
           "content": {
@@ -3521,8 +4553,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3536,6 +4578,9 @@
     },
     "/api/multi/mine": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_multi_mine",
         "parameters": [
           {
@@ -3558,8 +4603,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3573,6 +4628,9 @@
     },
     "/api/multi/user/{username}": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_multi_user_username",
         "parameters": [
           {
@@ -3603,8 +4661,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3618,6 +4686,9 @@
     },
     "/api/multi/{multipath}": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_multi_multipath",
         "parameters": [
           {
@@ -3648,8 +4719,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3661,6 +4742,9 @@
         }
       },
       "put": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.put_multi_multipath",
         "parameters": [
           {
@@ -3692,8 +4776,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3705,6 +4799,9 @@
         }
       },
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_multi_multipath",
         "parameters": [
           {
@@ -3736,8 +4833,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3749,6 +4856,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.delete_multi_multipath",
         "parameters": [
           {
@@ -3779,8 +4889,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3794,6 +4914,9 @@
     },
     "/api/multi/{multipath}/description": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_multi_multipath_description",
         "parameters": [
           {
@@ -3816,8 +4939,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3829,6 +4962,9 @@
         }
       },
       "put": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.put_multi_multipath_description",
         "parameters": [
           {
@@ -3860,8 +4996,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3875,6 +5021,9 @@
     },
     "/api/multi/{multipath}/r/{srname}": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_multi_multipath_r_srname",
         "parameters": [
           {
@@ -3905,8 +5054,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3918,6 +5077,9 @@
         }
       },
       "put": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.put_multi_multipath_r_srname",
         "parameters": [
           {
@@ -3957,8 +5119,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3970,6 +5142,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.delete_multi_multipath_r_srname",
         "parameters": [
           {
@@ -4008,8 +5183,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4023,6 +5208,9 @@
     },
     "/api/needs/captcha": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_needs_captcha",
         "responses": {
           "200": {
@@ -4036,7 +5224,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4050,6 +5238,9 @@
     },
     "/api/read/all/messages": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_read_all_messages",
         "requestBody": {
           "content": {
@@ -4071,8 +5262,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4086,6 +5287,9 @@
     },
     "/api/read/message": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_read_message",
         "requestBody": {
           "content": {
@@ -4107,8 +5311,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4122,6 +5336,9 @@
     },
     "/api/recommend/sr/{srnames}": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_recommend_sr_srnames",
         "parameters": [
           {
@@ -4160,8 +5377,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4175,6 +5402,9 @@
     },
     "/api/remove": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_remove",
         "requestBody": {
           "content": {
@@ -4196,8 +5426,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4211,6 +5451,9 @@
     },
     "/api/report": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_report",
         "requestBody": {
           "content": {
@@ -4232,8 +5475,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4247,6 +5500,9 @@
     },
     "/api/report/user": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_report_user",
         "requestBody": {
           "content": {
@@ -4268,8 +5524,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4283,6 +5549,9 @@
     },
     "/api/save": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_save",
         "requestBody": {
           "content": {
@@ -4304,8 +5573,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4319,6 +5598,9 @@
     },
     "/api/saved/categories": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_saved_categories",
         "responses": {
           "200": {
@@ -4332,7 +5614,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4346,6 +5628,9 @@
     },
     "/api/search/reddit/names": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_search_reddit_names",
         "parameters": [
           {
@@ -4408,8 +5693,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4421,6 +5716,9 @@
         }
       },
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_search_reddit_names",
         "requestBody": {
           "content": {
@@ -4442,8 +5740,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4457,6 +5765,9 @@
     },
     "/api/search/subreddits": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_search_subreddits",
         "requestBody": {
           "content": {
@@ -4478,8 +5789,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4493,6 +5814,9 @@
     },
     "/api/selectflair": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_selectflair",
         "requestBody": {
           "content": {
@@ -4514,8 +5838,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4529,6 +5863,9 @@
     },
     "/api/sendreplies": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_sendreplies",
         "requestBody": {
           "content": {
@@ -4550,8 +5887,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4565,6 +5912,9 @@
     },
     "/api/set/contest/mode": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_set_contest_mode",
         "requestBody": {
           "content": {
@@ -4586,8 +5936,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4601,6 +5961,9 @@
     },
     "/api/set/subreddit/sticky": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_set_subreddit_sticky",
         "requestBody": {
           "content": {
@@ -4622,8 +5985,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4637,6 +6010,9 @@
     },
     "/api/set/suggested/sort": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_set_suggested_sort",
         "requestBody": {
           "content": {
@@ -4658,8 +6034,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4673,6 +6059,9 @@
     },
     "/api/setflairenabled": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_setflairenabled",
         "requestBody": {
           "content": {
@@ -4694,8 +6083,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4709,6 +6108,9 @@
     },
     "/api/setpermissions": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_setpermissions",
         "requestBody": {
           "content": {
@@ -4730,8 +6132,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4745,6 +6157,9 @@
     },
     "/api/show/comment": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_show_comment",
         "requestBody": {
           "content": {
@@ -4766,8 +6181,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4781,6 +6206,9 @@
     },
     "/api/site/admin": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_site_admin",
         "requestBody": {
           "content": {
@@ -4802,8 +6230,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4817,6 +6255,9 @@
     },
     "/api/snooze/reports": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_snooze_reports",
         "requestBody": {
           "content": {
@@ -4838,8 +6279,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4853,6 +6304,9 @@
     },
     "/api/spoiler": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_spoiler",
         "requestBody": {
           "content": {
@@ -4874,8 +6328,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4889,6 +6353,9 @@
     },
     "/api/store/visits": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_store_visits",
         "requestBody": {
           "content": {
@@ -4910,8 +6377,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4925,6 +6402,9 @@
     },
     "/api/submit": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_submit",
         "requestBody": {
           "content": {
@@ -4946,8 +6426,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4961,6 +6451,9 @@
     },
     "/api/submit/text": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_submit_text",
         "responses": {
           "200": {
@@ -4974,7 +6467,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4988,6 +6481,9 @@
     },
     "/api/subreddit/autocomplete": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_subreddit_autocomplete",
         "parameters": [
           {
@@ -5026,8 +6522,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5041,6 +6547,9 @@
     },
     "/api/subreddit/autocomplete/v2": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_subreddit_autocomplete_v2",
         "parameters": [
           {
@@ -5104,8 +6613,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5119,6 +6638,9 @@
     },
     "/api/subreddit/stylesheet": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_subreddit_stylesheet",
         "requestBody": {
           "content": {
@@ -5140,8 +6662,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5155,6 +6687,9 @@
     },
     "/api/subscribe": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_subscribe",
         "requestBody": {
           "content": {
@@ -5176,8 +6711,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5191,6 +6736,9 @@
     },
     "/api/unfriend": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_unfriend",
         "requestBody": {
           "content": {
@@ -5212,8 +6760,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5227,6 +6785,9 @@
     },
     "/api/unhide": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_unhide",
         "requestBody": {
           "content": {
@@ -5248,8 +6809,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5263,6 +6834,9 @@
     },
     "/api/unignore/reports": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_unignore_reports",
         "requestBody": {
           "content": {
@@ -5284,8 +6858,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5299,6 +6883,9 @@
     },
     "/api/unlock": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_unlock",
         "requestBody": {
           "content": {
@@ -5320,8 +6907,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5335,6 +6932,9 @@
     },
     "/api/unmarknsfw": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_unmarknsfw",
         "requestBody": {
           "content": {
@@ -5356,8 +6956,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5371,6 +6981,9 @@
     },
     "/api/unsave": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_unsave",
         "requestBody": {
           "content": {
@@ -5392,8 +7005,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5407,6 +7030,9 @@
     },
     "/api/unsnooze/reports": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_unsnooze_reports",
         "requestBody": {
           "content": {
@@ -5428,8 +7054,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5443,6 +7079,9 @@
     },
     "/api/unspoiler": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_unspoiler",
         "requestBody": {
           "content": {
@@ -5464,8 +7103,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5479,6 +7128,9 @@
     },
     "/api/update/crowd/control/level": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_update_crowd_control_level",
         "requestBody": {
           "content": {
@@ -5500,8 +7152,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5515,6 +7177,9 @@
     },
     "/api/upload/sr/img": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_upload_sr_img",
         "requestBody": {
           "content": {
@@ -5536,8 +7201,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5551,6 +7226,9 @@
     },
     "/api/user/data/by/account/ids": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_user_data_by_account_ids",
         "parameters": [
           {
@@ -5573,8 +7251,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5588,6 +7276,9 @@
     },
     "/api/user/flair": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_user_flair",
         "responses": {
           "200": {
@@ -5601,7 +7292,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5615,6 +7306,9 @@
     },
     "/api/user/flair/v2": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_user_flair_v2",
         "responses": {
           "200": {
@@ -5628,7 +7322,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5642,6 +7336,9 @@
     },
     "/api/username/available": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_username_available",
         "parameters": [
           {
@@ -5664,8 +7361,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5679,6 +7386,9 @@
     },
     "/api/v1/me": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_me",
         "responses": {
           "200": {
@@ -5692,7 +7402,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5706,6 +7416,9 @@
     },
     "/api/v1/me/friends/{username}": {
       "put": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.put_me_friends_username",
         "parameters": [
           {
@@ -5728,8 +7441,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5741,6 +7464,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.delete_me_friends_username",
         "parameters": [
           {
@@ -5771,8 +7497,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5786,6 +7522,9 @@
     },
     "/api/v1/me/karma": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_me_karma",
         "responses": {
           "200": {
@@ -5799,7 +7538,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5813,6 +7552,9 @@
     },
     "/api/v1/me/prefs": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_me_prefs",
         "parameters": [
           {
@@ -5835,8 +7577,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5848,6 +7600,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.patch_me_prefs",
         "responses": {
           "200": {
@@ -5861,7 +7616,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5875,6 +7630,9 @@
     },
     "/api/v1/me/trophies": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_me_trophies",
         "responses": {
           "200": {
@@ -5888,7 +7646,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5902,6 +7660,9 @@
     },
     "/api/v1/scopes": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_scopes",
         "parameters": [
           {
@@ -5924,8 +7685,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5939,6 +7710,9 @@
     },
     "/api/v1/user/{username}/trophies": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_user_username_trophies",
         "parameters": [
           {
@@ -5969,8 +7743,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5984,6 +7768,9 @@
     },
     "/api/v1/{subreddit}/emoji.json": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_subreddit_emoji_json",
         "parameters": [
           {
@@ -6015,8 +7802,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6030,6 +7827,9 @@
     },
     "/api/v1/{subreddit}/emoji/asset/upload/s3.json": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_subreddit_emoji_asset_upload_s3_json",
         "parameters": [
           {
@@ -6061,8 +7861,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6076,6 +7886,9 @@
     },
     "/api/v1/{subreddit}/emoji/custom/size": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_subreddit_emoji_custom_size",
         "parameters": [
           {
@@ -6107,8 +7920,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6122,6 +7945,9 @@
     },
     "/api/v1/{subreddit}/emoji/{emoji_name}": {
       "delete": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.delete_subreddit_emoji_emoji_name",
         "parameters": [
           {
@@ -6152,8 +7978,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6167,6 +8003,9 @@
     },
     "/api/v1/{subreddit}/emojis/all": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_subreddit_emojis_all",
         "parameters": [
           {
@@ -6189,8 +8028,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6204,6 +8053,9 @@
     },
     "/api/v1/{subreddit}/post/requirements": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_subreddit_post_requirements",
         "parameters": [
           {
@@ -6226,8 +8078,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6241,6 +8103,9 @@
     },
     "/api/vote": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_vote",
         "requestBody": {
           "content": {
@@ -6262,8 +8127,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6277,6 +8152,9 @@
     },
     "/api/widget": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_widget",
         "requestBody": {
           "content": {
@@ -6298,8 +8176,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6313,6 +8201,9 @@
     },
     "/api/widget/image/upload/s3": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_widget_image_upload_s3",
         "requestBody": {
           "content": {
@@ -6334,8 +8225,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6349,6 +8250,9 @@
     },
     "/api/widget/order/{section}": {
       "patch": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.patch_widget_order_section",
         "parameters": [
           {
@@ -6380,8 +8284,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6395,6 +8309,9 @@
     },
     "/api/widget/{widget_id}": {
       "put": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.put_widget_widget_id",
         "parameters": [
           {
@@ -6426,8 +8343,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6439,6 +8366,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.delete_widget_widget_id",
         "parameters": [
           {
@@ -6461,8 +8391,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6476,6 +8416,9 @@
     },
     "/api/widgets": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_widgets",
         "parameters": [
           {
@@ -6498,8 +8441,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6513,6 +8466,9 @@
     },
     "/api/wiki/alloweditor/{act}": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_wiki_alloweditor_act",
         "parameters": [
           {
@@ -6544,8 +8500,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6559,6 +8525,9 @@
     },
     "/api/wiki/edit": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_wiki_edit",
         "requestBody": {
           "content": {
@@ -6580,8 +8549,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6595,6 +8574,9 @@
     },
     "/api/wiki/hide": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_wiki_hide",
         "requestBody": {
           "content": {
@@ -6616,8 +8598,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6631,6 +8623,9 @@
     },
     "/api/wiki/revert": {
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_wiki_revert",
         "requestBody": {
           "content": {
@@ -6652,8 +8647,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6667,6 +8672,9 @@
     },
     "/best": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_best",
         "responses": {
           "200": {
@@ -6680,7 +8688,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6694,6 +8702,9 @@
     },
     "/by/id/{names}": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_by_id_names",
         "parameters": [
           {
@@ -6716,8 +8727,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6731,6 +8752,9 @@
     },
     "/comments/{article}": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_comments_article",
         "parameters": [
           {
@@ -6861,8 +8885,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6876,6 +8910,9 @@
     },
     "/duplicates/{article}": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_duplicates_article",
         "parameters": [
           {
@@ -6971,8 +9008,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6986,6 +9033,9 @@
     },
     "/hot": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_hot",
         "parameters": [
           {
@@ -7008,8 +9058,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7023,6 +9083,9 @@
     },
     "/live/{thread}": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_live_thread",
         "parameters": [
           {
@@ -7094,8 +9157,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7109,6 +9182,9 @@
     },
     "/live/{thread}/about": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_live_thread_about",
         "parameters": [
           {
@@ -7131,8 +9207,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7146,6 +9232,9 @@
     },
     "/live/{thread}/contributors": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_live_thread_contributors",
         "parameters": [
           {
@@ -7168,8 +9257,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7183,6 +9282,9 @@
     },
     "/live/{thread}/discussions": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_live_thread_discussions",
         "parameters": [
           {
@@ -7254,8 +9356,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7269,6 +9381,9 @@
     },
     "/live/{thread}/updates/{update_id}": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_live_thread_updates_update_id",
         "parameters": [
           {
@@ -7299,8 +9414,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7314,6 +9439,9 @@
     },
     "/message/{where}": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_message_where",
         "parameters": [
           {
@@ -7360,8 +9488,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7375,6 +9513,9 @@
     },
     "/new": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_new",
         "responses": {
           "200": {
@@ -7388,7 +9529,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7402,6 +9543,9 @@
     },
     "/prefs/{where}": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_prefs_where",
         "parameters": [
           {
@@ -7473,8 +9617,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7488,6 +9642,9 @@
     },
     "/r/{subreddit}/about": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_r_subreddit_about",
         "parameters": [
           {
@@ -7510,8 +9667,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7525,6 +9692,9 @@
     },
     "/r/{subreddit}/about/edit": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_r_subreddit_about_edit",
         "parameters": [
           {
@@ -7563,8 +9733,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7578,6 +9758,9 @@
     },
     "/r/{subreddit}/about/rules": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_r_subreddit_about_rules",
         "parameters": [
           {
@@ -7600,8 +9783,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7615,6 +9808,9 @@
     },
     "/r/{subreddit}/about/traffic": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_r_subreddit_about_traffic",
         "parameters": [
           {
@@ -7637,8 +9833,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7652,6 +9858,9 @@
     },
     "/rising": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_rising",
         "responses": {
           "200": {
@@ -7665,7 +9874,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7679,6 +9888,9 @@
     },
     "/search": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_search",
         "parameters": [
           {
@@ -7798,8 +10010,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7813,6 +10035,9 @@
     },
     "/sidebar": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_sidebar",
         "responses": {
           "200": {
@@ -7826,7 +10051,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7840,6 +10065,9 @@
     },
     "/sticky": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_sticky",
         "parameters": [
           {
@@ -7863,8 +10091,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7878,6 +10116,9 @@
     },
     "/stylesheet": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_stylesheet",
         "responses": {
           "200": {
@@ -7891,7 +10132,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7905,6 +10146,9 @@
     },
     "/subreddits/mine/{where}": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_subreddits_mine_where",
         "parameters": [
           {
@@ -7927,8 +10171,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7942,6 +10196,9 @@
     },
     "/subreddits/search": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_subreddits_search",
         "parameters": [
           {
@@ -8045,8 +10302,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8060,6 +10327,9 @@
     },
     "/subreddits/{where}": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_subreddits_where",
         "parameters": [
           {
@@ -8082,8 +10352,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8097,6 +10377,9 @@
     },
     "/user/{username}/about": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_user_username_about",
         "parameters": [
           {
@@ -8119,8 +10402,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8134,6 +10427,9 @@
     },
     "/user/{username}/{where}": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_user_username_where",
         "parameters": [
           {
@@ -8205,8 +10501,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8220,6 +10526,9 @@
     },
     "/users/search": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_users_search",
         "parameters": [
           {
@@ -8315,8 +10624,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8330,6 +10649,9 @@
     },
     "/users/{where}": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_users_where",
         "parameters": [
           {
@@ -8352,8 +10674,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8367,6 +10699,9 @@
     },
     "/wiki/discussions/{page}": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_wiki_discussions_page",
         "parameters": [
           {
@@ -8438,8 +10773,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8453,6 +10798,9 @@
     },
     "/wiki/pages": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_wiki_pages",
         "responses": {
           "200": {
@@ -8466,7 +10814,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8480,6 +10828,9 @@
     },
     "/wiki/revisions": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_wiki_revisions",
         "parameters": [
           {
@@ -8543,8 +10894,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8558,6 +10919,9 @@
     },
     "/wiki/revisions/{page}": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_wiki_revisions_page",
         "parameters": [
           {
@@ -8629,8 +10993,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8644,6 +11018,9 @@
     },
     "/wiki/settings/{page}": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_wiki_settings_page",
         "parameters": [
           {
@@ -8666,8 +11043,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8679,6 +11066,9 @@
         }
       },
       "post": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.post_wiki_settings_page",
         "parameters": [
           {
@@ -8710,8 +11100,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8725,6 +11125,9 @@
     },
     "/{sort}": {
       "get": {
+        "tags": [
+          "RedditApi"
+        ],
         "operationId": "RedditApi.get_sort",
         "parameters": [
           {
@@ -8755,8 +11158,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8790,5 +11203,10 @@
         }
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "RedditApi"
+    }
+  ]
 }

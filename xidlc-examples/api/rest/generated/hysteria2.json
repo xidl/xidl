@@ -7,6 +7,9 @@
   "paths": {
     "/auth": {
       "post": {
+        "tags": [
+          "Hysteria2"
+        ],
         "operationId": "Hysteria2.auth",
         "parameters": [
           {
@@ -40,8 +43,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -75,5 +88,10 @@
         }
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "Hysteria2"
+    }
+  ]
 }

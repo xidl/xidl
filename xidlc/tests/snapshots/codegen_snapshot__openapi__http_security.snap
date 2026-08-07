@@ -81,10 +81,13 @@ openapi_http_security.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
         },
-        "security": []
+        "security": [],
+        "tags": [
+          "HttpSecurityService"
+        ]
       }
     },
     "/users/search": {
@@ -123,6 +126,26 @@ openapi_http_security.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -131,7 +154,7 @@ openapi_http_security.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -141,6 +164,9 @@ openapi_http_security.json
               "read:users"
             ]
           }
+        ],
+        "tags": [
+          "HttpSecurityService"
         ]
       }
     },
@@ -188,6 +214,26 @@ openapi_http_security.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -196,7 +242,7 @@ openapi_http_security.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -206,8 +252,16 @@ openapi_http_security.json
           {
             "api_key-header-x-api-key": []
           }
+        ],
+        "tags": [
+          "HttpSecurityService"
         ]
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "HttpSecurityService"
+    }
+  ]
 }

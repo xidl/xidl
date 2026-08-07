@@ -80,6 +80,26 @@ openapi_http_hir_shared_semantics.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -88,13 +108,16 @@ openapi_http_hir_shared_semantics.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
         },
         "security": [
           {
             "http_bearer": []
           }
+        ],
+        "tags": [
+          "ReportApi"
         ]
       }
     },
@@ -122,6 +145,26 @@ openapi_http_hir_shared_semantics.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -130,13 +173,16 @@ openapi_http_hir_shared_semantics.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
         },
         "security": [
           {
             "http_bearer": []
           }
+        ],
+        "tags": [
+          "ReportApi"
         ]
       }
     }
@@ -145,6 +191,11 @@ openapi_http_hir_shared_semantics.json
     {
       "description": "production",
       "url": "https://api.example.com"
+    }
+  ],
+  "tags": [
+    {
+      "name": "ReportApi"
     }
   ]
 }

@@ -85,6 +85,16 @@ openapi_http_response_shape.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -93,9 +103,12 @@ openapi_http_response_shape.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpResponseShapeService"
+        ]
       }
     },
     "/bump": {
@@ -136,6 +149,16 @@ openapi_http_response_shape.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -144,9 +167,12 @@ openapi_http_response_shape.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpResponseShapeService"
+        ]
       }
     },
     "/get_count": {
@@ -172,9 +198,12 @@ openapi_http_response_shape.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpResponseShapeService"
+        ]
       }
     },
     "/hello": {
@@ -199,9 +228,12 @@ openapi_http_response_shape.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpResponseShapeService"
+        ]
       }
     },
     "/ping": {
@@ -219,10 +251,18 @@ openapi_http_response_shape.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpResponseShapeService"
+        ]
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "HttpResponseShapeService"
+    }
+  ]
 }

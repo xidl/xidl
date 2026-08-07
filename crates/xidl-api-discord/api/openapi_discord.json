@@ -13,6 +13,9 @@
   "paths": {
     "/applications/@me": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_my_application",
         "responses": {
           "200": {
@@ -26,7 +29,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -38,6 +41,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_my_application",
         "requestBody": {
           "content": {
@@ -59,8 +65,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -74,6 +90,9 @@
     },
     "/applications/{application_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_application",
         "parameters": [
           {
@@ -96,8 +115,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -109,6 +138,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_application",
         "parameters": [
           {
@@ -140,8 +172,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -155,6 +197,9 @@
     },
     "/applications/{application_id}/activity-instances/{instance_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.applications_get_activity_instance",
         "parameters": [
           {
@@ -185,8 +230,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -200,6 +255,9 @@
     },
     "/applications/{application_id}/attachment": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.upload_application_attachment",
         "parameters": [
           {
@@ -222,8 +280,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -237,6 +305,9 @@
     },
     "/applications/{application_id}/commands": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_application_commands",
         "parameters": [
           {
@@ -270,8 +341,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -283,6 +364,9 @@
         }
       },
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.bulk_set_application_commands",
         "parameters": [
           {
@@ -320,8 +404,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -333,6 +427,9 @@
         }
       },
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_application_command",
         "parameters": [
           {
@@ -364,8 +461,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -379,6 +486,9 @@
     },
     "/applications/{application_id}/commands/{command_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_application_command",
         "parameters": [
           {
@@ -409,8 +519,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -422,6 +542,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_application_command",
         "parameters": [
           {
@@ -445,8 +568,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -458,6 +591,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_application_command",
         "parameters": [
           {
@@ -497,8 +633,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -512,6 +658,9 @@
     },
     "/applications/{application_id}/emojis": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_application_emojis",
         "parameters": [
           {
@@ -534,8 +683,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -547,6 +706,9 @@
         }
       },
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_application_emoji",
         "parameters": [
           {
@@ -578,8 +740,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -593,6 +765,9 @@
     },
     "/applications/{application_id}/emojis/{emoji_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_application_emoji",
         "parameters": [
           {
@@ -623,8 +798,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -636,6 +821,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_application_emoji",
         "parameters": [
           {
@@ -659,8 +847,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -672,6 +870,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_application_emoji",
         "parameters": [
           {
@@ -711,8 +912,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -726,6 +937,9 @@
     },
     "/applications/{application_id}/entitlements": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_entitlements",
         "parameters": [
           {
@@ -824,8 +1038,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -837,6 +1061,9 @@
         }
       },
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_entitlement",
         "parameters": [
           {
@@ -868,8 +1095,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -883,6 +1120,9 @@
     },
     "/applications/{application_id}/entitlements/{entitlement_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_entitlement",
         "parameters": [
           {
@@ -913,8 +1153,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -926,6 +1176,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_entitlement",
         "parameters": [
           {
@@ -949,8 +1202,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -964,6 +1227,9 @@
     },
     "/applications/{application_id}/entitlements/{entitlement_id}/consume": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.consume_entitlement",
         "parameters": [
           {
@@ -987,8 +1253,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1002,6 +1278,9 @@
     },
     "/applications/{application_id}/guilds/{guild_id}/commands": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_guild_application_commands",
         "parameters": [
           {
@@ -1043,8 +1322,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1056,6 +1345,9 @@
         }
       },
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.bulk_set_guild_application_commands",
         "parameters": [
           {
@@ -1101,8 +1393,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1114,6 +1416,9 @@
         }
       },
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_guild_application_command",
         "parameters": [
           {
@@ -1153,8 +1458,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1168,6 +1483,9 @@
     },
     "/applications/{application_id}/guilds/{guild_id}/commands/permissions": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_guild_application_command_permissions",
         "parameters": [
           {
@@ -1201,8 +1519,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1216,6 +1544,9 @@
     },
     "/applications/{application_id}/guilds/{guild_id}/commands/{command_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_guild_application_command",
         "parameters": [
           {
@@ -1254,8 +1585,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1267,6 +1608,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_guild_application_command",
         "parameters": [
           {
@@ -1298,8 +1642,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1311,6 +1665,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_guild_application_command",
         "parameters": [
           {
@@ -1358,8 +1715,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1373,6 +1740,9 @@
     },
     "/applications/{application_id}/guilds/{guild_id}/commands/{command_id}/permissions": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_guild_application_command_permissions",
         "parameters": [
           {
@@ -1411,8 +1781,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1424,6 +1804,9 @@
         }
       },
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.set_guild_application_command_permissions",
         "parameters": [
           {
@@ -1471,8 +1854,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1486,6 +1879,9 @@
     },
     "/applications/{application_id}/role-connections/metadata": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_application_role_connections_metadata",
         "parameters": [
           {
@@ -1511,8 +1907,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1524,6 +1930,9 @@
         }
       },
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_application_role_connections_metadata",
         "parameters": [
           {
@@ -1561,8 +1970,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1576,6 +1995,9 @@
     },
     "/channels/{channel_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_channel",
         "parameters": [
           {
@@ -1598,8 +2020,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1611,6 +2043,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_channel",
         "parameters": [
           {
@@ -1633,8 +2068,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1646,6 +2091,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_channel",
         "parameters": [
           {
@@ -1677,8 +2125,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1692,6 +2150,9 @@
     },
     "/channels/{channel_id}/followers": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.follow_channel",
         "parameters": [
           {
@@ -1723,8 +2184,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1738,6 +2209,9 @@
     },
     "/channels/{channel_id}/invites": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_channel_invites",
         "parameters": [
           {
@@ -1763,8 +2237,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1776,6 +2260,9 @@
         }
       },
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_channel_invite",
         "parameters": [
           {
@@ -1807,8 +2294,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1822,6 +2319,9 @@
     },
     "/channels/{channel_id}/messages": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_messages",
         "parameters": [
           {
@@ -1880,8 +2380,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1893,6 +2403,9 @@
         }
       },
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_message",
         "parameters": [
           {
@@ -1924,8 +2437,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1939,6 +2462,9 @@
     },
     "/channels/{channel_id}/messages/bulk-delete": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.bulk_delete_messages",
         "parameters": [
           {
@@ -1963,8 +2489,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1978,6 +2514,9 @@
     },
     "/channels/{channel_id}/messages/pins": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_pins",
         "parameters": [
           {
@@ -2017,8 +2556,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2032,6 +2581,9 @@
     },
     "/channels/{channel_id}/messages/pins/{message_id}": {
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_pin",
         "parameters": [
           {
@@ -2055,8 +2607,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2068,6 +2630,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_pin",
         "parameters": [
           {
@@ -2091,8 +2656,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2106,6 +2681,9 @@
     },
     "/channels/{channel_id}/messages/{message_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_message",
         "parameters": [
           {
@@ -2136,8 +2714,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2149,6 +2737,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_message",
         "parameters": [
           {
@@ -2172,8 +2763,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2185,6 +2786,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_message",
         "parameters": [
           {
@@ -2224,8 +2828,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2239,6 +2853,9 @@
     },
     "/channels/{channel_id}/messages/{message_id}/crosspost": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.crosspost_message",
         "parameters": [
           {
@@ -2269,8 +2886,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2284,6 +2911,9 @@
     },
     "/channels/{channel_id}/messages/{message_id}/reactions": {
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_all_message_reactions",
         "parameters": [
           {
@@ -2307,8 +2937,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2322,6 +2962,9 @@
     },
     "/channels/{channel_id}/messages/{message_id}/reactions/{emoji_name}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_message_reactions_by_emoji",
         "parameters": [
           {
@@ -2388,8 +3031,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2401,6 +3054,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_all_message_reactions_by_emoji",
         "parameters": [
           {
@@ -2432,8 +3088,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2447,6 +3113,9 @@
     },
     "/channels/{channel_id}/messages/{message_id}/reactions/{emoji_name}/@me": {
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.add_my_message_reaction",
         "parameters": [
           {
@@ -2478,8 +3147,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2491,6 +3170,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_my_message_reaction",
         "parameters": [
           {
@@ -2522,8 +3204,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2537,6 +3229,9 @@
     },
     "/channels/{channel_id}/messages/{message_id}/reactions/{emoji_name}/{user_id}": {
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_user_message_reaction",
         "parameters": [
           {
@@ -2576,8 +3271,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2591,6 +3296,9 @@
     },
     "/channels/{channel_id}/messages/{message_id}/threads": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_thread_from_message",
         "parameters": [
           {
@@ -2630,8 +3338,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2645,6 +3363,9 @@
     },
     "/channels/{channel_id}/permissions/{overwrite_id}": {
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.set_channel_permission_overwrite",
         "parameters": [
           {
@@ -2677,8 +3398,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2690,6 +3421,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_channel_permission_overwrite",
         "parameters": [
           {
@@ -2713,8 +3447,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2728,6 +3472,9 @@
     },
     "/channels/{channel_id}/pins": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.deprecated_list_pins",
         "parameters": [
           {
@@ -2753,8 +3500,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2768,6 +3525,9 @@
     },
     "/channels/{channel_id}/pins/{message_id}": {
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.deprecated_create_pin",
         "parameters": [
           {
@@ -2791,8 +3551,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2804,6 +3574,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.deprecated_delete_pin",
         "parameters": [
           {
@@ -2827,8 +3600,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2842,6 +3625,9 @@
     },
     "/channels/{channel_id}/polls/{message_id}/answers/{answer_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_answer_voters",
         "parameters": [
           {
@@ -2898,8 +3684,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2913,6 +3709,9 @@
     },
     "/channels/{channel_id}/polls/{message_id}/expire": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.poll_expire",
         "parameters": [
           {
@@ -2943,8 +3742,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -2958,6 +3767,9 @@
     },
     "/channels/{channel_id}/recipients/{user_id}": {
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.add_group_dm_user",
         "parameters": [
           {
@@ -2997,8 +3809,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3010,6 +3832,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_group_dm_user",
         "parameters": [
           {
@@ -3033,8 +3858,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3048,6 +3883,9 @@
     },
     "/channels/{channel_id}/send-soundboard-sound": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.send_soundboard_sound",
         "parameters": [
           {
@@ -3072,8 +3910,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3087,6 +3935,9 @@
     },
     "/channels/{channel_id}/thread-members": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_thread_members",
         "parameters": [
           {
@@ -3137,8 +3988,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3152,6 +4013,9 @@
     },
     "/channels/{channel_id}/thread-members/@me": {
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.join_thread",
         "parameters": [
           {
@@ -3167,8 +4031,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3180,6 +4054,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.leave_thread",
         "parameters": [
           {
@@ -3195,8 +4072,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3210,6 +4097,9 @@
     },
     "/channels/{channel_id}/thread-members/{user_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_thread_member",
         "parameters": [
           {
@@ -3248,8 +4138,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3261,6 +4161,9 @@
         }
       },
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.add_thread_member",
         "parameters": [
           {
@@ -3284,8 +4187,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3297,6 +4210,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_thread_member",
         "parameters": [
           {
@@ -3320,8 +4236,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3335,6 +4261,9 @@
     },
     "/channels/{channel_id}/threads": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_thread",
         "parameters": [
           {
@@ -3366,8 +4295,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3381,6 +4320,9 @@
     },
     "/channels/{channel_id}/threads/archived/private": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_private_archived_threads",
         "parameters": [
           {
@@ -3420,8 +4362,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3435,6 +4387,9 @@
     },
     "/channels/{channel_id}/threads/archived/public": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_public_archived_threads",
         "parameters": [
           {
@@ -3474,8 +4429,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3489,6 +4454,9 @@
     },
     "/channels/{channel_id}/threads/search": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.thread_search",
         "parameters": [
           {
@@ -3602,8 +4570,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3617,6 +4595,9 @@
     },
     "/channels/{channel_id}/typing": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.trigger_typing_indicator",
         "parameters": [
           {
@@ -3639,8 +4620,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3654,6 +4645,9 @@
     },
     "/channels/{channel_id}/users/@me/threads/archived/private": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_my_private_archived_threads",
         "parameters": [
           {
@@ -3693,8 +4687,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3708,6 +4712,9 @@
     },
     "/channels/{channel_id}/voice-status": {
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_voice_channel_status",
         "parameters": [
           {
@@ -3732,8 +4739,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3747,6 +4764,9 @@
     },
     "/channels/{channel_id}/webhooks": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_channel_webhooks",
         "parameters": [
           {
@@ -3772,8 +4792,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3785,6 +4815,9 @@
         }
       },
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_webhook",
         "parameters": [
           {
@@ -3816,8 +4849,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3831,6 +4874,9 @@
     },
     "/gateway": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_gateway",
         "responses": {
           "200": {
@@ -3844,7 +4890,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3858,6 +4904,9 @@
     },
     "/gateway/bot": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_bot_gateway",
         "responses": {
           "200": {
@@ -3871,7 +4920,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3885,6 +4934,9 @@
     },
     "/guilds/templates/{code}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_guild_template",
         "parameters": [
           {
@@ -3907,8 +4959,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3922,6 +4984,9 @@
     },
     "/guilds/{guild_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_guild",
         "parameters": [
           {
@@ -3952,8 +5017,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -3965,6 +5040,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_guild",
         "parameters": [
           {
@@ -3996,8 +5074,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4011,6 +5099,9 @@
     },
     "/guilds/{guild_id}/audit-logs": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_guild_audit_log_entries",
         "parameters": [
           {
@@ -4082,8 +5173,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4097,6 +5198,9 @@
     },
     "/guilds/{guild_id}/auto-moderation/rules": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_auto_moderation_rules",
         "parameters": [
           {
@@ -4122,8 +5226,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4135,6 +5249,9 @@
         }
       },
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_auto_moderation_rule",
         "parameters": [
           {
@@ -4166,8 +5283,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4181,6 +5308,9 @@
     },
     "/guilds/{guild_id}/auto-moderation/rules/{rule_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_auto_moderation_rule",
         "parameters": [
           {
@@ -4211,8 +5341,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4224,6 +5364,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_auto_moderation_rule",
         "parameters": [
           {
@@ -4247,8 +5390,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4260,6 +5413,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_auto_moderation_rule",
         "parameters": [
           {
@@ -4299,8 +5455,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4314,6 +5480,9 @@
     },
     "/guilds/{guild_id}/bans": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_guild_bans",
         "parameters": [
           {
@@ -4364,8 +5533,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4379,6 +5558,9 @@
     },
     "/guilds/{guild_id}/bans/{user_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_guild_ban",
         "parameters": [
           {
@@ -4409,8 +5591,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4422,6 +5614,9 @@
         }
       },
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.ban_user_from_guild",
         "parameters": [
           {
@@ -4454,8 +5649,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4467,6 +5672,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.unban_user_from_guild",
         "parameters": [
           {
@@ -4499,8 +5707,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4514,6 +5732,9 @@
     },
     "/guilds/{guild_id}/bulk-ban": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.bulk_ban_users_from_guild",
         "parameters": [
           {
@@ -4545,8 +5766,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4560,6 +5791,9 @@
     },
     "/guilds/{guild_id}/channels": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_guild_channels",
         "parameters": [
           {
@@ -4585,8 +5819,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4598,6 +5842,9 @@
         }
       },
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_guild_channel",
         "parameters": [
           {
@@ -4629,8 +5876,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4642,6 +5899,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.bulk_update_guild_channels",
         "parameters": [
           {
@@ -4669,8 +5929,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4684,6 +5954,9 @@
     },
     "/guilds/{guild_id}/emojis": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_guild_emojis",
         "parameters": [
           {
@@ -4709,8 +5982,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4722,6 +6005,9 @@
         }
       },
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_guild_emoji",
         "parameters": [
           {
@@ -4753,8 +6039,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4768,6 +6064,9 @@
     },
     "/guilds/{guild_id}/emojis/{emoji_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_guild_emoji",
         "parameters": [
           {
@@ -4798,8 +6097,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4811,6 +6120,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_guild_emoji",
         "parameters": [
           {
@@ -4834,8 +6146,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4847,6 +6169,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_guild_emoji",
         "parameters": [
           {
@@ -4886,8 +6211,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4901,6 +6236,9 @@
     },
     "/guilds/{guild_id}/integrations": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_guild_integrations",
         "parameters": [
           {
@@ -4926,8 +6264,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4941,6 +6289,9 @@
     },
     "/guilds/{guild_id}/integrations/{integration_id}": {
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_guild_integration",
         "parameters": [
           {
@@ -4964,8 +6315,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4979,6 +6340,9 @@
     },
     "/guilds/{guild_id}/invites": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_guild_invites",
         "parameters": [
           {
@@ -5004,8 +6368,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5019,6 +6393,9 @@
     },
     "/guilds/{guild_id}/members": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_guild_members",
         "parameters": [
           {
@@ -5062,8 +6439,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5077,6 +6464,9 @@
     },
     "/guilds/{guild_id}/members/@me": {
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_my_guild_member",
         "parameters": [
           {
@@ -5108,8 +6498,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5123,6 +6523,9 @@
     },
     "/guilds/{guild_id}/members/search": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.search_guild_members",
         "parameters": [
           {
@@ -5165,8 +6568,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5180,6 +6593,9 @@
     },
     "/guilds/{guild_id}/members/{user_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_guild_member",
         "parameters": [
           {
@@ -5210,8 +6626,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5223,6 +6649,9 @@
         }
       },
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.add_guild_member",
         "parameters": [
           {
@@ -5262,8 +6691,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5275,6 +6714,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_guild_member",
         "parameters": [
           {
@@ -5298,8 +6740,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5311,6 +6763,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_guild_member",
         "parameters": [
           {
@@ -5350,8 +6805,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5365,6 +6830,9 @@
     },
     "/guilds/{guild_id}/members/{user_id}/roles/{role_id}": {
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.add_guild_member_role",
         "parameters": [
           {
@@ -5396,8 +6864,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5409,6 +6887,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_guild_member_role",
         "parameters": [
           {
@@ -5440,8 +6921,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5455,6 +6946,9 @@
     },
     "/guilds/{guild_id}/messages/search": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.guild_search",
         "parameters": [
           {
@@ -5711,8 +7205,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5726,6 +7230,9 @@
     },
     "/guilds/{guild_id}/new-member-welcome": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_guild_new_member_welcome",
         "parameters": [
           {
@@ -5748,8 +7255,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5763,6 +7280,9 @@
     },
     "/guilds/{guild_id}/onboarding": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_guilds_onboarding",
         "parameters": [
           {
@@ -5785,8 +7305,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5798,6 +7328,9 @@
         }
       },
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.put_guilds_onboarding",
         "parameters": [
           {
@@ -5829,8 +7362,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5844,6 +7387,9 @@
     },
     "/guilds/{guild_id}/preview": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_guild_preview",
         "parameters": [
           {
@@ -5866,8 +7412,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5881,6 +7437,9 @@
     },
     "/guilds/{guild_id}/prune": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.preview_prune_guild",
         "parameters": [
           {
@@ -5920,8 +7479,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5933,6 +7502,9 @@
         }
       },
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.prune_guild",
         "parameters": [
           {
@@ -5964,8 +7536,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5979,6 +7561,9 @@
     },
     "/guilds/{guild_id}/regions": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_guild_voice_regions",
         "parameters": [
           {
@@ -6004,8 +7589,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6019,6 +7614,9 @@
     },
     "/guilds/{guild_id}/requests": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_guild_join_requests",
         "parameters": [
           {
@@ -6074,8 +7672,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6089,6 +7697,9 @@
     },
     "/guilds/{guild_id}/requests/{request_id}": {
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.action_guild_join_request",
         "parameters": [
           {
@@ -6128,8 +7739,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6143,6 +7764,9 @@
     },
     "/guilds/{guild_id}/roles": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_guild_roles",
         "parameters": [
           {
@@ -6168,8 +7792,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6181,6 +7815,9 @@
         }
       },
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_guild_role",
         "parameters": [
           {
@@ -6212,8 +7849,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6225,6 +7872,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.bulk_update_guild_roles",
         "parameters": [
           {
@@ -6262,8 +7912,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6277,6 +7937,9 @@
     },
     "/guilds/{guild_id}/roles/member-counts": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.guild_role_member_counts",
         "parameters": [
           {
@@ -6303,8 +7966,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6318,6 +7991,9 @@
     },
     "/guilds/{guild_id}/roles/{role_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_guild_role",
         "parameters": [
           {
@@ -6348,8 +8024,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6361,6 +8047,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_guild_role",
         "parameters": [
           {
@@ -6384,8 +8073,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6397,6 +8096,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_guild_role",
         "parameters": [
           {
@@ -6436,8 +8138,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6451,6 +8163,9 @@
     },
     "/guilds/{guild_id}/scheduled-events": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_guild_scheduled_events",
         "parameters": [
           {
@@ -6484,8 +8199,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6497,6 +8222,9 @@
         }
       },
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_guild_scheduled_event",
         "parameters": [
           {
@@ -6528,8 +8256,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6543,6 +8281,9 @@
     },
     "/guilds/{guild_id}/scheduled-events/{guild_scheduled_event_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_guild_scheduled_event",
         "parameters": [
           {
@@ -6581,8 +8322,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6594,6 +8345,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_guild_scheduled_event",
         "parameters": [
           {
@@ -6617,8 +8371,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6630,6 +8394,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_guild_scheduled_event",
         "parameters": [
           {
@@ -6669,8 +8436,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6684,6 +8461,9 @@
     },
     "/guilds/{guild_id}/scheduled-events/{guild_scheduled_event_id}/users": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_guild_scheduled_event_users",
         "parameters": [
           {
@@ -6750,8 +8530,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6765,6 +8555,9 @@
     },
     "/guilds/{guild_id}/soundboard-sounds": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_guild_soundboard_sounds",
         "parameters": [
           {
@@ -6787,8 +8580,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6800,6 +8603,9 @@
         }
       },
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_guild_soundboard_sound",
         "parameters": [
           {
@@ -6831,8 +8637,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6846,6 +8662,9 @@
     },
     "/guilds/{guild_id}/soundboard-sounds/{sound_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_guild_soundboard_sound",
         "parameters": [
           {
@@ -6876,8 +8695,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6889,6 +8718,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_guild_soundboard_sound",
         "parameters": [
           {
@@ -6912,8 +8744,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6925,6 +8767,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_guild_soundboard_sound",
         "parameters": [
           {
@@ -6964,8 +8809,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -6979,6 +8834,9 @@
     },
     "/guilds/{guild_id}/stickers": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_guild_stickers",
         "parameters": [
           {
@@ -7004,8 +8862,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7017,6 +8885,9 @@
         }
       },
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_guild_sticker",
         "parameters": [
           {
@@ -7039,8 +8910,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7054,6 +8935,9 @@
     },
     "/guilds/{guild_id}/stickers/{sticker_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_guild_sticker",
         "parameters": [
           {
@@ -7084,8 +8968,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7097,6 +8991,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_guild_sticker",
         "parameters": [
           {
@@ -7120,8 +9017,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7133,6 +9040,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_guild_sticker",
         "parameters": [
           {
@@ -7172,8 +9082,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7187,6 +9107,9 @@
     },
     "/guilds/{guild_id}/templates": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_guild_templates",
         "parameters": [
           {
@@ -7212,8 +9135,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7225,6 +9158,9 @@
         }
       },
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_guild_template",
         "parameters": [
           {
@@ -7256,8 +9192,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7271,6 +9217,9 @@
     },
     "/guilds/{guild_id}/templates/{code}": {
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.sync_guild_template",
         "parameters": [
           {
@@ -7301,8 +9250,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7314,6 +9273,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_guild_template",
         "parameters": [
           {
@@ -7344,8 +9306,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7357,6 +9329,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_guild_template",
         "parameters": [
           {
@@ -7396,8 +9371,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7411,6 +9396,9 @@
     },
     "/guilds/{guild_id}/threads/active": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_active_guild_threads",
         "parameters": [
           {
@@ -7433,8 +9421,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7448,6 +9446,9 @@
     },
     "/guilds/{guild_id}/vanity-url": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_guild_vanity_url",
         "parameters": [
           {
@@ -7470,8 +9471,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7485,6 +9496,9 @@
     },
     "/guilds/{guild_id}/voice-states/@me": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_self_voice_state",
         "parameters": [
           {
@@ -7507,8 +9521,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7520,6 +9544,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_self_voice_state",
         "parameters": [
           {
@@ -7544,8 +9571,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7559,6 +9596,9 @@
     },
     "/guilds/{guild_id}/voice-states/{user_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_voice_state",
         "parameters": [
           {
@@ -7589,8 +9629,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7602,6 +9652,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_voice_state",
         "parameters": [
           {
@@ -7634,8 +9687,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7649,6 +9712,9 @@
     },
     "/guilds/{guild_id}/webhooks": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_guild_webhooks",
         "parameters": [
           {
@@ -7674,8 +9740,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7689,6 +9765,9 @@
     },
     "/guilds/{guild_id}/welcome-screen": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_guild_welcome_screen",
         "parameters": [
           {
@@ -7711,8 +9790,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7724,6 +9813,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_guild_welcome_screen",
         "parameters": [
           {
@@ -7755,8 +9847,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7770,6 +9872,9 @@
     },
     "/guilds/{guild_id}/widget": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_guild_widget_settings",
         "parameters": [
           {
@@ -7792,8 +9897,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7805,6 +9920,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_guild_widget_settings",
         "parameters": [
           {
@@ -7836,8 +9954,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7851,6 +9979,9 @@
     },
     "/guilds/{guild_id}/widget.json": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_guild_widget",
         "parameters": [
           {
@@ -7873,8 +10004,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7888,6 +10029,9 @@
     },
     "/guilds/{guild_id}/widget.png": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_guild_widget_png",
         "parameters": [
           {
@@ -7911,8 +10055,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7926,6 +10080,9 @@
     },
     "/interactions/{interaction_id}/{interaction_token}/callback": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_interaction_response",
         "parameters": [
           {
@@ -7973,8 +10130,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -7988,6 +10155,9 @@
     },
     "/invites/{code}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.invite_resolve",
         "parameters": [
           {
@@ -8026,8 +10196,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8039,6 +10219,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.invite_revoke",
         "parameters": [
           {
@@ -8061,8 +10244,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8076,6 +10269,9 @@
     },
     "/invites/{code}/target-users": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_invite_target_users",
         "parameters": [
           {
@@ -8091,8 +10287,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8104,6 +10310,9 @@
         }
       },
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_invite_target_users",
         "parameters": [
           {
@@ -8119,8 +10328,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8134,6 +10353,9 @@
     },
     "/invites/{code}/target-users/job-status": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_invite_target_users_job_status",
         "parameters": [
           {
@@ -8156,8 +10378,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8171,6 +10403,9 @@
     },
     "/lobbies": {
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_or_join_lobby",
         "requestBody": {
           "content": {
@@ -8192,8 +10427,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8205,6 +10450,9 @@
         }
       },
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_lobby",
         "requestBody": {
           "content": {
@@ -8226,8 +10474,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8241,6 +10499,9 @@
     },
     "/lobbies/{lobby_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_lobby",
         "parameters": [
           {
@@ -8263,8 +10524,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8276,6 +10547,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.edit_lobby",
         "parameters": [
           {
@@ -8307,8 +10581,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8322,6 +10606,9 @@
     },
     "/lobbies/{lobby_id}/channel-linking": {
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.edit_lobby_channel_link",
         "parameters": [
           {
@@ -8353,8 +10640,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8368,6 +10665,9 @@
     },
     "/lobbies/{lobby_id}/members/@me": {
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.leave_lobby",
         "parameters": [
           {
@@ -8383,8 +10683,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8398,6 +10708,9 @@
     },
     "/lobbies/{lobby_id}/members/@me/invites": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_linked_lobby_guild_invite_for_self",
         "parameters": [
           {
@@ -8420,8 +10733,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8435,6 +10758,9 @@
     },
     "/lobbies/{lobby_id}/members/bulk": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.bulk_update_lobby_members",
         "parameters": [
           {
@@ -8472,8 +10798,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8487,6 +10823,9 @@
     },
     "/lobbies/{lobby_id}/members/{user_id}": {
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.add_lobby_member",
         "parameters": [
           {
@@ -8526,8 +10865,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8539,6 +10888,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_lobby_member",
         "parameters": [
           {
@@ -8562,8 +10914,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8577,6 +10939,9 @@
     },
     "/lobbies/{lobby_id}/members/{user_id}/invites": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_linked_lobby_guild_invite_for_user",
         "parameters": [
           {
@@ -8607,8 +10972,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8622,6 +10997,9 @@
     },
     "/lobbies/{lobby_id}/messages": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_lobby_messages",
         "parameters": [
           {
@@ -8656,8 +11034,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8669,6 +11057,9 @@
         }
       },
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_lobby_message",
         "parameters": [
           {
@@ -8700,8 +11091,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8715,6 +11116,9 @@
     },
     "/lobbies/{lobby_id}/messages/{message_id}/moderation-metadata": {
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_lobby_message_external_moderation_metadata",
         "parameters": [
           {
@@ -8750,8 +11154,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8765,6 +11179,9 @@
     },
     "/oauth2/@me": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_my_oauth2_authorization",
         "responses": {
           "200": {
@@ -8778,7 +11195,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8792,6 +11209,9 @@
     },
     "/oauth2/applications/@me": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_my_oauth2_application",
         "responses": {
           "200": {
@@ -8805,7 +11225,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8819,6 +11239,9 @@
     },
     "/oauth2/keys": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_public_keys",
         "responses": {
           "200": {
@@ -8832,7 +11255,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8846,6 +11269,9 @@
     },
     "/oauth2/userinfo": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_openid_connect_userinfo",
         "responses": {
           "200": {
@@ -8859,7 +11285,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8873,6 +11299,9 @@
     },
     "/partner-sdk/dms/{user_id_1}/{user_id_2}/messages/{message_id}/moderation-metadata": {
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_user_message_external_moderation_metadata",
         "parameters": [
           {
@@ -8916,8 +11345,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8931,6 +11370,9 @@
     },
     "/partner-sdk/provisional-accounts/unmerge": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.partner_sdk_unmerge_provisional_account",
         "requestBody": {
           "content": {
@@ -8945,8 +11387,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8960,6 +11412,9 @@
     },
     "/partner-sdk/provisional-accounts/unmerge/bot": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.bot_partner_sdk_unmerge_provisional_account",
         "requestBody": {
           "content": {
@@ -8974,8 +11429,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8989,6 +11454,9 @@
     },
     "/partner-sdk/token": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.partner_sdk_token",
         "requestBody": {
           "content": {
@@ -9010,8 +11478,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9025,6 +11503,9 @@
     },
     "/partner-sdk/token/bot": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.bot_partner_sdk_token",
         "requestBody": {
           "content": {
@@ -9046,8 +11527,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9061,6 +11552,9 @@
     },
     "/soundboard-default-sounds": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_soundboard_default_sounds",
         "responses": {
           "200": {
@@ -9077,7 +11571,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9091,6 +11585,9 @@
     },
     "/stage-instances": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_stage_instance",
         "requestBody": {
           "content": {
@@ -9112,8 +11609,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9127,6 +11634,9 @@
     },
     "/stage-instances/{channel_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_stage_instance",
         "parameters": [
           {
@@ -9149,8 +11659,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9162,6 +11682,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_stage_instance",
         "parameters": [
           {
@@ -9177,8 +11700,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9190,6 +11723,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_stage_instance",
         "parameters": [
           {
@@ -9221,8 +11757,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9236,6 +11782,9 @@
     },
     "/sticker-packs": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_sticker_packs",
         "responses": {
           "200": {
@@ -9249,7 +11798,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9263,6 +11812,9 @@
     },
     "/sticker-packs/{pack_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_sticker_pack",
         "parameters": [
           {
@@ -9285,8 +11837,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9300,6 +11862,9 @@
     },
     "/stickers/{sticker_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_sticker",
         "parameters": [
           {
@@ -9322,8 +11887,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9337,6 +11912,9 @@
     },
     "/users/@me": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_my_user",
         "responses": {
           "200": {
@@ -9350,7 +11928,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9362,6 +11940,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_my_user",
         "requestBody": {
           "content": {
@@ -9383,8 +11964,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9398,6 +11989,9 @@
     },
     "/users/@me/applications/{application_id}/entitlements": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_current_user_application_entitlements",
         "parameters": [
           {
@@ -9439,8 +12033,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9454,6 +12058,9 @@
     },
     "/users/@me/applications/{application_id}/role-connection": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_application_user_role_connection",
         "parameters": [
           {
@@ -9476,8 +12083,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9489,6 +12106,9 @@
         }
       },
       "put": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_application_user_role_connection",
         "parameters": [
           {
@@ -9520,8 +12140,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9533,6 +12163,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_application_user_role_connection",
         "parameters": [
           {
@@ -9548,8 +12181,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9563,6 +12206,9 @@
     },
     "/users/@me/channels": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.create_dm",
         "requestBody": {
           "content": {
@@ -9584,8 +12230,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9599,6 +12255,9 @@
     },
     "/users/@me/connections": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_my_connections",
         "responses": {
           "200": {
@@ -9615,7 +12274,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9629,6 +12288,9 @@
     },
     "/users/@me/guilds": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_my_guilds",
         "parameters": [
           {
@@ -9679,8 +12341,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9694,6 +12366,9 @@
     },
     "/users/@me/guilds/{guild_id}": {
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.leave_guild",
         "parameters": [
           {
@@ -9709,8 +12384,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9724,6 +12409,9 @@
     },
     "/users/@me/guilds/{guild_id}/member": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_my_guild_member",
         "parameters": [
           {
@@ -9746,8 +12434,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9761,6 +12459,9 @@
     },
     "/users/{user_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_user",
         "parameters": [
           {
@@ -9783,8 +12484,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9798,6 +12509,9 @@
     },
     "/voice/regions": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.list_voice_regions",
         "responses": {
           "200": {
@@ -9814,7 +12528,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9828,6 +12542,9 @@
     },
     "/webhooks/{webhook_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_webhook",
         "parameters": [
           {
@@ -9850,8 +12567,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9863,6 +12590,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_webhook",
         "parameters": [
           {
@@ -9878,8 +12608,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9891,6 +12631,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_webhook",
         "parameters": [
           {
@@ -9922,8 +12665,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9937,6 +12690,9 @@
     },
     "/webhooks/{webhook_id}/{webhook_token}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_webhook_by_token",
         "parameters": [
           {
@@ -9967,8 +12723,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -9980,6 +12746,9 @@
         }
       },
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.execute_webhook",
         "parameters": [
           {
@@ -10043,8 +12812,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -10056,6 +12835,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_webhook_by_token",
         "parameters": [
           {
@@ -10079,8 +12861,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -10092,6 +12884,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_webhook_by_token",
         "parameters": [
           {
@@ -10131,8 +12926,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -10146,6 +12951,9 @@
     },
     "/webhooks/{webhook_id}/{webhook_token}/github": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.execute_github_compatible_webhook",
         "parameters": [
           {
@@ -10194,8 +13002,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -10209,6 +13027,9 @@
     },
     "/webhooks/{webhook_id}/{webhook_token}/messages/@original": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_original_webhook_message",
         "parameters": [
           {
@@ -10247,8 +13068,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -10260,6 +13091,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_original_webhook_message",
         "parameters": [
           {
@@ -10291,8 +13125,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -10304,6 +13148,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_original_webhook_message",
         "parameters": [
           {
@@ -10359,8 +13206,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -10374,6 +13231,9 @@
     },
     "/webhooks/{webhook_id}/{webhook_token}/messages/{message_id}": {
       "get": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.get_webhook_message",
         "parameters": [
           {
@@ -10420,8 +13280,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -10433,6 +13303,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.delete_webhook_message",
         "parameters": [
           {
@@ -10472,8 +13345,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -10485,6 +13368,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.update_webhook_message",
         "parameters": [
           {
@@ -10548,8 +13434,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -10563,6 +13459,9 @@
     },
     "/webhooks/{webhook_id}/{webhook_token}/slack": {
       "post": {
+        "tags": [
+          "DiscordApi"
+        ],
         "operationId": "DiscordApi.execute_slack_compatible_webhook",
         "parameters": [
           {
@@ -10618,8 +13517,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -24740,5 +27649,10 @@
         "type": "string"
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "DiscordApi"
+    }
+  ]
 }

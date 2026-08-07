@@ -13,6 +13,9 @@
   "paths": {
     "/attribute/host": {
       "get": {
+        "tags": [
+          "RestServer"
+        ],
         "operationId": "RestServer.get_attribute_host",
         "responses": {
           "200": {
@@ -26,7 +29,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -38,6 +41,9 @@
         }
       },
       "post": {
+        "tags": [
+          "RestServer"
+        ],
         "operationId": "RestServer.set_attribute_host",
         "requestBody": {
           "content": {
@@ -52,8 +58,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -67,6 +83,9 @@
     },
     "/attribute/port": {
       "get": {
+        "tags": [
+          "RestServer"
+        ],
         "operationId": "RestServer.get_attribute_port",
         "responses": {
           "200": {
@@ -82,7 +101,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -96,6 +115,9 @@
     },
     "/get_server_name": {
       "post": {
+        "tags": [
+          "RestServer"
+        ],
         "operationId": "RestServer.get_server_name",
         "responses": {
           "200": {
@@ -109,7 +131,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -123,6 +145,9 @@
     },
     "/get_timestamp": {
       "post": {
+        "tags": [
+          "RestServer"
+        ],
         "operationId": "RestServer.get_timestamp",
         "responses": {
           "200": {
@@ -136,7 +161,7 @@
             }
           },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -150,6 +175,9 @@
     },
     "/is_admin": {
       "post": {
+        "tags": [
+          "RestServer"
+        ],
         "operationId": "RestServer.is_admin",
         "requestBody": {
           "content": {
@@ -164,8 +192,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -179,6 +217,9 @@
     },
     "/is_logined": {
       "post": {
+        "tags": [
+          "RestServer"
+        ],
         "operationId": "RestServer.is_logined",
         "parameters": [
           {
@@ -201,8 +242,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -216,6 +267,9 @@
     },
     "/legacy/user/{id}": {
       "get": {
+        "tags": [
+          "RestServer"
+        ],
         "operationId": "RestServer.get_user_info",
         "parameters": [
           {
@@ -240,8 +294,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -255,13 +319,26 @@
     },
     "/login": {
       "post": {
+        "tags": [
+          "RestServer"
+        ],
         "operationId": "RestServer.login",
         "responses": {
           "204": {
             "description": "OK"
           },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -280,13 +357,26 @@
     },
     "/login_bearer": {
       "post": {
+        "tags": [
+          "RestServer"
+        ],
         "operationId": "RestServer.login_bearer",
         "responses": {
           "204": {
             "description": "OK"
           },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -305,13 +395,26 @@
     },
     "/login_realm": {
       "post": {
+        "tags": [
+          "RestServer"
+        ],
         "operationId": "RestServer.login_realm",
         "responses": {
           "204": {
             "description": "OK"
           },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -330,6 +433,9 @@
     },
     "/set_server_name": {
       "post": {
+        "tags": [
+          "RestServer"
+        ],
         "operationId": "RestServer.set_server_name",
         "requestBody": {
           "content": {
@@ -344,8 +450,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -359,6 +475,9 @@
     },
     "/user/{id}": {
       "get": {
+        "tags": [
+          "RestServer"
+        ],
         "operationId": "RestServer.get_user_info",
         "parameters": [
           {
@@ -383,8 +502,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -398,6 +527,9 @@
     },
     "/v1/database/deprecated/1/{key}": {
       "get": {
+        "tags": [
+          "RestServer"
+        ],
         "description": "Deprecated.",
         "operationId": "RestServer.get_key_1",
         "parameters": [
@@ -421,8 +553,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -437,6 +579,9 @@
     },
     "/v1/database/deprecated/2/{key}": {
       "get": {
+        "tags": [
+          "RestServer"
+        ],
         "description": "Deprecated.",
         "operationId": "RestServer.get_key_2",
         "parameters": [
@@ -460,8 +605,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -476,6 +631,9 @@
     },
     "/v1/database/deprecated/3/{key}": {
       "get": {
+        "tags": [
+          "RestServer"
+        ],
         "description": "Deprecated. Since 2025-01-01T00:00:00Z.",
         "operationId": "RestServer.get_key_3",
         "parameters": [
@@ -499,8 +657,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -515,6 +683,9 @@
     },
     "/v1/database/deprecated/4/{key}": {
       "get": {
+        "tags": [
+          "RestServer"
+        ],
         "description": "Deprecated. Since 2025-01-01T00:00:00Z. After 2025-01-02T23:59:59Z.",
         "operationId": "RestServer.get_key_4",
         "parameters": [
@@ -538,8 +709,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -554,6 +735,9 @@
     },
     "/v1/database/{key}": {
       "delete": {
+        "tags": [
+          "RestServer"
+        ],
         "operationId": "RestServer.delete_key",
         "parameters": [
           {
@@ -569,8 +753,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -582,6 +776,9 @@
         }
       },
       "options": {
+        "tags": [
+          "RestServer"
+        ],
         "operationId": "RestServer.get_key_options",
         "parameters": [
           {
@@ -604,8 +801,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -617,6 +824,9 @@
         }
       },
       "head": {
+        "tags": [
+          "RestServer"
+        ],
         "operationId": "RestServer.is_key_exists",
         "parameters": [
           {
@@ -632,8 +842,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -645,6 +865,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "RestServer"
+        ],
         "operationId": "RestServer.patch_key",
         "parameters": [
           {
@@ -669,8 +892,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -684,6 +917,9 @@
     },
     "/v1/database/{key}/{value}": {
       "put": {
+        "tags": [
+          "RestServer"
+        ],
         "operationId": "RestServer.put_key_value",
         "parameters": [
           {
@@ -718,8 +954,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -733,6 +979,9 @@
     },
     "/v1/user": {
       "post": {
+        "tags": [
+          "RestServer"
+        ],
         "operationId": "RestServer.post_user_info",
         "requestBody": {
           "content": {
@@ -761,8 +1010,18 @@
           "204": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -776,6 +1035,9 @@
     },
     "/v1/user/{id}": {
       "get": {
+        "tags": [
+          "RestServer"
+        ],
         "operationId": "RestServer.get_user_info",
         "parameters": [
           {
@@ -800,8 +1062,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -815,6 +1087,9 @@
     },
     "/v2/user": {
       "get": {
+        "tags": [
+          "RestServer"
+        ],
         "operationId": "RestServer.query_user_info",
         "parameters": [
           {
@@ -839,8 +1114,18 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Error",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -933,5 +1218,10 @@
         "scheme": "bearer"
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "RestServer"
+    }
+  ]
 }

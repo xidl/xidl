@@ -116,9 +116,12 @@ openapi_http_scope_matrix.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpScopeMatrixService"
+        ]
       }
     },
     "/attribute/inherited_attr": {
@@ -145,9 +148,12 @@ openapi_http_scope_matrix.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpScopeMatrixService"
+        ]
       }
     },
     "/v2/scope/default": {
@@ -175,6 +181,16 @@ openapi_http_scope_matrix.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -183,9 +199,12 @@ openapi_http_scope_matrix.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpScopeMatrixService"
+        ]
       }
     },
     "/v2/scope/deprecated/plain/{id}": {
@@ -214,6 +233,16 @@ openapi_http_scope_matrix.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -222,9 +251,12 @@ openapi_http_scope_matrix.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpScopeMatrixService"
+        ]
       }
     },
     "/v2/scope/deprecated/since/{id}": {
@@ -253,6 +285,16 @@ openapi_http_scope_matrix.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -261,9 +303,12 @@ openapi_http_scope_matrix.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpScopeMatrixService"
+        ]
       }
     },
     "/v2/scope/deprecated/window/{id}": {
@@ -292,6 +337,16 @@ openapi_http_scope_matrix.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -300,9 +355,12 @@ openapi_http_scope_matrix.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpScopeMatrixService"
+        ]
       }
     },
     "/v2/scope/override-both": {
@@ -355,6 +413,16 @@ openapi_http_scope_matrix.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -363,9 +431,12 @@ openapi_http_scope_matrix.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpScopeMatrixService"
+        ]
       }
     },
     "/v2/scope/override-consumes": {
@@ -418,6 +489,16 @@ openapi_http_scope_matrix.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -426,9 +507,12 @@ openapi_http_scope_matrix.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpScopeMatrixService"
+        ]
       }
     },
     "/v2/scope/override-produces/{id}": {
@@ -471,6 +555,16 @@ openapi_http_scope_matrix.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -479,9 +573,12 @@ openapi_http_scope_matrix.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpScopeMatrixService"
+        ]
       }
     },
     "/v2/security/alternatives/{id}": {
@@ -516,6 +613,26 @@ openapi_http_scope_matrix.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -524,7 +641,7 @@ openapi_http_scope_matrix.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -534,6 +651,9 @@ openapi_http_scope_matrix.json
           {
             "api_key-header-x-alt-key": []
           }
+        ],
+        "tags": [
+          "HttpSecurityMatrixService"
         ]
       }
     },
@@ -571,6 +691,26 @@ openapi_http_scope_matrix.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -579,7 +719,7 @@ openapi_http_scope_matrix.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -589,6 +729,9 @@ openapi_http_scope_matrix.json
           {
             "api_key-cookie-session_key": []
           }
+        ],
+        "tags": [
+          "HttpSecurityMatrixService"
         ]
       }
     },
@@ -624,6 +767,26 @@ openapi_http_scope_matrix.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -632,7 +795,7 @@ openapi_http_scope_matrix.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -642,6 +805,9 @@ openapi_http_scope_matrix.json
           {
             "api_key-query-org_key": []
           }
+        ],
+        "tags": [
+          "HttpSecurityMatrixService"
         ]
       }
     },
@@ -681,6 +847,26 @@ openapi_http_scope_matrix.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -689,7 +875,7 @@ openapi_http_scope_matrix.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -699,6 +885,9 @@ openapi_http_scope_matrix.json
               "reports:read"
             ]
           }
+        ],
+        "tags": [
+          "HttpSecurityMatrixService"
         ]
       }
     },
@@ -724,11 +913,22 @@ openapi_http_scope_matrix.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
         },
-        "security": []
+        "security": [],
+        "tags": [
+          "HttpSecurityMatrixService"
+        ]
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "HttpScopeMatrixService"
+    },
+    {
+      "name": "HttpSecurityMatrixService"
+    }
+  ]
 }

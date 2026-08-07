@@ -85,6 +85,16 @@ openapi_http_annotations.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -93,9 +103,12 @@ openapi_http_annotations.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpAnnoService"
+        ]
       }
     },
     "/bump": {
@@ -136,6 +149,16 @@ openapi_http_annotations.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -144,9 +167,12 @@ openapi_http_annotations.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpAnnoService"
+        ]
       }
     },
     "/create_user": {
@@ -186,6 +212,16 @@ openapi_http_annotations.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -194,9 +230,12 @@ openapi_http_annotations.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpAnnoService"
+        ]
       }
     },
     "/get_count": {
@@ -222,9 +261,12 @@ openapi_http_annotations.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpAnnoService"
+        ]
       }
     },
     "/get_name": {
@@ -251,6 +293,16 @@ openapi_http_annotations.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -259,9 +311,12 @@ openapi_http_annotations.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpAnnoService"
+        ]
       }
     },
     "/get_user_alias/{id}": {
@@ -298,6 +353,16 @@ openapi_http_annotations.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -306,9 +371,12 @@ openapi_http_annotations.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpAnnoService"
+        ]
       }
     },
     "/ping": {
@@ -326,9 +394,12 @@ openapi_http_annotations.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpAnnoService"
+        ]
       }
     },
     "/search_user": {
@@ -365,6 +436,16 @@ openapi_http_annotations.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -373,9 +454,12 @@ openapi_http_annotations.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpAnnoService"
+        ]
       }
     },
     "/u/{id}": {
@@ -412,6 +496,16 @@ openapi_http_annotations.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -420,9 +514,12 @@ openapi_http_annotations.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpAnnoService"
+        ]
       }
     },
     "/users/{id}": {
@@ -459,6 +556,16 @@ openapi_http_annotations.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -467,9 +574,12 @@ openapi_http_annotations.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpAnnoService"
+        ]
       }
     },
     "/v1/users/{id}": {
@@ -506,6 +616,16 @@ openapi_http_annotations.json
             },
             "description": "OK"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -514,10 +634,18 @@ openapi_http_annotations.json
                 }
               }
             },
-            "description": "Error"
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "HttpAnnoService"
+        ]
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "HttpAnnoService"
+    }
+  ]
 }
