@@ -1,22 +1,141 @@
 ---
 title: "RESTful Streaming"
-description: "XIDL RESTful Streaming"
-sidebar:
-  badge: PREVIEW
+description: "XIDL RESTful Streaming: structured NDJSON/SSE streams and raw byte streams over sequence<octet>."
 ---
 
-HTTP Stream extends normal HTTP mapping with long-connection streaming interactions.
+HTTP streaming extends normal HTTP mapping with long-connection interactions.
+Streaming is declared with annotations, and XIDL generates the server, client,
+and protocol handling for each target.
 
-Common annotations:
+## Stream Annotations
 
-- `@server_stream`
-- `@client_stream`
-- `@bidi_stream`
-- `@stream_codec("ndjson" | "sse")`
+- `@server_stream`: the server streams responses to the client (server push).
+- `@client_stream`: the client streams requests to the server (client upload).
+- `@bidi_stream`: full-duplex communication, typically over WebSocket.
+- `@stream_codec("ndjson" | "sse")`: choose the framed encoding.
 
 In practice:
 
 - Server push streaming is the most common.
-- `ndjson` is the default stream encoding.
-- `sse` is mainly used for server-side streaming.
-- These capabilities exist but are more implementation-driven than standard HTTP mapping.
+- `ndjson` is the default stream encoding; each chunk is a JSON line.
+- `sse` (Server-Sent Events) is mainly used for server-side streaming.
+
+```idl
+interface StreamApi {
+    @server_stream
+    @stream_codec("sse")
+    @get(path = "/v1/events")
+    sequence<LogEntry> watch_logs();
+
+    @client_stream
+    @post(path = "/v1/logs")
+    void upload_logs(in sequence<LogEntry> logs);
+};
+```
+
+## Raw Byte Streams (`sequence<octet>`)
+
+When a streaming method has `sequence<octet>` as its **sole** parameter
+(`@client_stream`) or **sole** return type (`@server_stream`), the stream
+operates as a raw byte stream instead of a framed encoding:
+
+- The HTTP body is the raw bytes, with `Content-Type: application/octet-stream`.
+- There is no JSON encoding, line framing, or base64 overhead per chunk.
+- This is the efficient choice for large files and media chunks.
+
+```idl
+interface ByteStreamService {
+    @server_stream
+    @get(path = "/download")
+    sequence<octet> download_bytes();
+
+    @client_stream
+    @post(path = "/upload")
+    string upload_bytes(in sequence<octet> chunk);
+};
+```
+
+The rule applies only when the byte sequence is the entire stream payload.
+If the method has other parameters alongside `sequence<octet>`, or the
+parameter/return type is any other sequence (for example
+`sequence<uint8>`), the stream falls back to the configured framed encoding
+(`ndjson` or `sse`).
+
+### Rust (`rust-axum`)
+
+The generated service operates on byte streams directly. Server responses use
+`ByteStream`; request bodies are read with `ByteReader`:
+
+```rust
+use futures_util::StreamExt;
+use xidl_rust_axum::stream::{ByteReader, ByteStream, boxed_bytes};
+
+#[async_trait]
+impl gen::ByteStreamService for ByteStreamServiceImpl {
+    async fn download_bytes<'a>(
+        &'a self,
+        _req: xidl_rust_axum::Request<()>,
+    ) -> Result<ByteStream, xidl_rust_axum::Error> {
+        let stream = futures_util::stream::iter(vec![
+            Ok(axum::body::Bytes::from("hello ")),
+            Ok(axum::body::Bytes::from("world")),
+        ]);
+        Ok(boxed_bytes(stream))
+    }
+
+    async fn upload_bytes<'a>(
+        &'a self,
+        req: xidl_rust_axum::Request<ByteStream>,
+    ) -> Result<String, xidl_rust_axum::Error> {
+        let mut reader = ByteReader::new(req.into_inner());
+        let mut result = String::new();
+        while let Some(bytes) = reader.read().await {
+            result.push_str(std::str::from_utf8(&bytes?)?);
+        }
+        Ok(result)
+    }
+}
+```
+
+Runtime helpers in `xidl_rust_axum::stream`:
+
+- `ByteStream`: boxed `Stream<Item = Result<Bytes>>` for server responses.
+- `ByteReader`: client-side reader for download streams; `read()` yields the
+  next chunk.
+- `boxed_bytes`, `decode_bytes_body`, `byte_stream_response`: build, decode,
+  and serialize raw byte streams on the server side.
+- `open_byte_stream` (client feature): opens a download stream from an HTTP GET.
+
+### TypeScript (`typescript-rest`)
+
+Generated services receive and produce `AsyncIterable<number[]>` chunks.
+The runtime (`xidl-typescript-server`) encodes and decodes
+`application/octet-stream` bodies, so both `createRouter` and the Next.js
+adapter handle byte streams transparently:
+
+```ts
+export class MyByteStreamService implements ByteStreamService {
+  async *download_bytes(): AsyncIterable<number[]> {
+    yield Array.from(new TextEncoder().encode('hello '));
+    yield Array.from(new TextEncoder().encode('world'));
+  }
+
+  async upload_bytes(stream: AsyncIterable<number[]>): Promise<string> {
+    const bytes: number[] = [];
+    for await (const chunk of stream) {
+      bytes.push(...chunk);
+    }
+    return new TextDecoder().decode(Uint8Array.from(bytes));
+  }
+}
+```
+
+The generated OpenAPI documents byte stream operations with
+`application/octet-stream`.
+
+## Recommended Reading
+
+- [RESTful Basics](../)
+- [Next.js Server Integration](../nextjs/)
+- [TypeScript REST Server](../typescript-server/)
+- [HTTP Security](../security/)
