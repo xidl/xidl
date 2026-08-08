@@ -1,2 +1,5 @@
 # Local Netlify folder
 .netlify
+
+# Copied from the repository root at build time
+public/changelog.md

@@ -102,6 +102,10 @@ export default defineConfig({
           autogenerate: { directory: 'ai' },
           label: 'AI',
         },
+        {
+          label: 'Changelog',
+          link: '/changelog.md',
+        },
       ],
       social: [
         {

@@ -25,7 +25,7 @@
   "private": true,
   "scripts": {
     "astro": "astro",
-    "build": "astro build",
+    "build": "node scripts/copy-changelog.mjs && astro build",
     "check": "astro check",
     "dev": "astro dev",
     "format": "biome format --write .",
