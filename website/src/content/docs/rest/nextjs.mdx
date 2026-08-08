@@ -1,0 +1,172 @@
+---
+title: "Next.js Server Integration"
+description: "Expose XIDL-defined REST APIs from a Next.js App Router project using the generated TypeScript server contract and the xidl-typescript-server Next.js adapter."
+---
+
+XIDL's `typescript-rest` target generates a TypeScript server contract, and
+the `xidl-typescript-server` runtime ships a Next.js App Router adapter.
+`createNextRoute` turns one generated operation into a Route Handler, so each
+IDL route becomes a `route.ts` file that exports standard HTTP method handlers.
+
+## Generate the Server Contract
+
+```bash
+xidlc gen -o src/generated typescript-rest --server api.idl
+```
+
+This emits `src/generated/api.server.ts` containing the service interfaces and
+per-operation descriptors, plus shared models and Zod schemas. Generate both
+sides with `--client --server` if the Next.js app also calls the API.
+
+## Install the Runtime
+
+```bash
+pnpm add xidl-typescript-server xidl-typescript-codec zod
+```
+
+Import the Next.js adapter from the `xidl-typescript-server/next` subpath.
+
+## Implement the Service
+
+Assume the IDL declares this service:
+
+```idl
+struct User {
+    uint32 id;
+    string name;
+};
+
+interface UserService {
+    @get(path = "/api/users/{id}")
+    User get_user(@path uint32 id);
+
+    @post(path = "/api/users")
+    User create_user(User user);
+};
+```
+
+Implement the interface generated in `api.server.ts` once, and share it across
+all route handlers:
+
+```ts
+// src/service.ts
+import { XidlServerError } from 'xidl-typescript-server';
+import type { User } from './generated/api';
+import type { UserService } from './generated/api.server';
+
+export class AppUserService implements UserService {
+  private readonly users = new Map<number, User>();
+
+  async get_user(request: { id: number }): Promise<User> {
+    const user = this.users.get(request.id);
+    if (!user) {
+      throw new XidlServerError('user not found', 404);
+    }
+    return user;
+  }
+
+  async create_user(request: { user: User }): Promise<User> {
+    this.users.set(request.user.id, request.user);
+    return request.user;
+  }
+}
+
+export const userService = new AppUserService();
+```
+
+## Create Route Handlers
+
+For `POST /api/users`, create `app/api/users/route.ts`:
+
+```ts
+import { createNextRoute } from 'xidl-typescript-server/next';
+import { UserServiceOperations } from '../../../src/generated/api.server';
+import { userService } from '../../../src/service';
+
+export const POST = createNextRoute(
+  UserServiceOperations.create_user,
+  userService,
+);
+```
+
+For `GET /api/users/{id}`, create `app/api/users/[id]/route.ts`:
+
+```ts
+import { createNextRoute } from 'xidl-typescript-server/next';
+import { UserServiceOperations } from '../../../../src/generated/api.server';
+import { userService } from '../../../../src/service';
+
+export const GET = createNextRoute(
+  UserServiceOperations.get_user,
+  userService,
+);
+```
+
+The dynamic segment name must match the IDL route parameter: `[id]` maps to
+`{id}`. The same pattern works for `PUT`, `PATCH`, and `DELETE` when the
+generated operation uses that method.
+
+## Route Handler Semantics
+
+`createNextRoute` returns a handler with the signature
+`(request: Request, context: { params }) => Promise<Response>`, matching the
+Next.js Route Handler contract:
+
+- In current Next.js versions, `context.params` is a Promise; `createNextRoute`
+  awaits it internally before invoking the service.
+- Path, query, header, cookie, and body values are extracted, coerced, and
+  validated against the generated Zod schema before the service method runs.
+- Invalid requests produce HTTP 400 responses, unsupported media types produce
+  415/406, and unhandled service errors produce HTTP 500.
+- Return the handler as a named export from `route.ts`; never call it manually.
+
+## Errors and Options
+
+Pass `ServerOptions` as the third argument to `createNextRoute`:
+
+```ts
+export const POST = createNextRoute(
+  UserServiceOperations.create_user,
+  userService,
+  {
+    authorize: async (request, requirements) => {
+      // inspect headers/cookies, throw XidlServerError to reject
+    },
+    onError: async (error, context) => {
+      // map unexpected errors to a custom response
+    },
+    codecs: {
+      'application/msgpack': {
+        decode: async (response, schema) => { /* ... */ },
+        encode: (value, schema) => { /* ... */ },
+      },
+    },
+  },
+);
+```
+
+- Throw `XidlServerError(status, message)` from the service for an explicit
+  HTTP status and typed JSON error body.
+- `authorize` receives the original request, the operation's security
+  requirements, and a `ServerContext`; throw to reject the request.
+- `codecs` overrides request/response encoding per media type.
+- `onError` handles unexpected errors, for example to add logging; the default
+  hides the error details behind a generic 500 response.
+
+## Streaming
+
+Operations declared with streaming media types are handled by the runtime
+according to the generated operation metadata:
+
+- SSE server streams and NDJSON client streams work through the same
+  `createNextRoute` handler.
+- `sequence<octet>` mapped to raw byte streams is served as `Response` bodies.
+
+No per-operation streaming code is needed in `route.ts`.
+
+## Recommended Reading
+
+- [TypeScript REST Server](../typescript-server/)
+- [RESTful Basics](../)
+- [HTTP Stream](../stream/)
+- [HTTP Security](../security/)
