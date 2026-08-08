@@ -5,19 +5,14 @@ This is the new documentation site for XIDL, built with
 
 ## Project Structure
 
-- `src/content/docs/`: Main documentation content.
-  - `en/`: English documentation (Default locale, root `/`).
-  - `zh-cn/`: Chinese documentation (Locale `/zh-cn/`).
+- `src/content/docs/`: Main documentation content (English, root `/`).
 - `public/`: Static assets.
 
 ## Workflow
 
-1. **Write in Chinese**: New content should be authored first in
-   `src/content/docs/zh-cn/`.
-2. **Translate to English**: Use AI to translate the Chinese content into
-   English and place it in the corresponding `src/content/docs/en/` path.
-3. **Update Status**: Maintain the `status` and `translationStatus` in the
-   frontmatter.
+1. **Write content**: New content should be authored in `src/content/docs/`.
+2. **Maintain Status**: Keep the `status` and `translationStatus` in the
+   frontmatter up to date.
 
 ## Frontmatter Fields
 
