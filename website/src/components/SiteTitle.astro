@@ -4,7 +4,6 @@ import type { Props } from '@astrojs/starlight/props';
 
 const locale = Astro.locals.starlightRoute.locale;
 const prefix = locale ? `/${locale}` : '';
-const isZhCn = locale === 'zh-cn';
 ---
 
 <div class="flex items-center gap-8">
@@ -14,19 +13,19 @@ const isZhCn = locale === 'zh-cn';
 			href={`${prefix}/guide/`}
 			class="text-sm font-normal text-[var(--sl-color-gray-3)] no-underline hover:text-[var(--sl-color-white)] transition-colors"
 		>
-			{isZhCn ? '指南' : 'Guide'}
+			Guide
 		</a>
 		<a
 			href={`${prefix}/docs/`}
 			class="text-sm font-normal text-[var(--sl-color-gray-3)] no-underline hover:text-[var(--sl-color-white)] transition-colors"
 		>
-			{isZhCn ? '文档' : 'Docs'}
+			Docs
 		</a>
 		<a
 			href={`${prefix}/rfc/`}
 			class="text-sm font-normal text-[var(--sl-color-gray-3)] no-underline hover:text-[var(--sl-color-white)] transition-colors"
 		>
-			{isZhCn ? '规范' : 'RFC'}
+			RFC
 		</a>
 	</nav>
 </div>

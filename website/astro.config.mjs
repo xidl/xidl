@@ -59,10 +59,6 @@ export default defineConfig({
           label: 'English',
           lang: 'en',
         },
-        'zh-cn': {
-          label: '简体中文',
-          lang: 'zh-CN',
-        },
       },
       sidebar: [
         {
@@ -70,57 +66,33 @@ export default defineConfig({
             {
               label: 'Install',
               link: '/guide/',
-              translations: {
-                'zh-CN': '安装',
-              },
             },
             {
               label: 'First HTTP API',
               link: '/guide/first-http-api/',
-              translations: {
-                'zh-CN': '第一个 HTTP API',
-              },
             },
             {
               label: 'Editor',
               link: '/guide/editor/',
-              translations: {
-                'zh-CN': '编辑器',
-              },
             },
             {
               label: 'Rust Integration',
               link: '/guide/rust-integration/',
-              translations: {
-                'zh-CN': 'Rust 集成',
-              },
             },
           ],
           label: 'Guide',
-          translations: {
-            'zh-CN': '指南',
-          },
         },
         {
           autogenerate: { directory: 'docs' },
           label: 'Docs',
-          translations: {
-            'zh-CN': 'IDL 语言',
-          },
         },
         {
           autogenerate: { directory: 'rest' },
           label: 'xidl_for_rest',
-          translations: {
-            'zh-CN': 'XIDL REST 支持',
-          },
         },
         {
           autogenerate: { directory: 'jsonrpc' },
           label: 'xidl_for_jsonrpc',
-          translations: {
-            'zh-CN': 'XIDL JSON-RPC 支持',
-          },
         },
         {
           autogenerate: { directory: 'rfc' },
@@ -129,9 +101,6 @@ export default defineConfig({
         {
           autogenerate: { directory: 'ai' },
           label: 'AI',
-          translations: {
-            'zh-CN': 'AI',
-          },
         },
       ],
       social: [
