@@ -9,10 +9,6 @@ members = [
   "xidlc",
   "xidl-parser",
   "xidl-typeobject",
-  "crates/xidl-api-keycloak",
-  "crates/xidl-api-discord",
-  "crates/xidl-api-reddit",
-  "crates/xidl-api-github",
 ]
 
 [workspace.package]
