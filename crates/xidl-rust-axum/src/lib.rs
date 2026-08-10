@@ -17,7 +17,7 @@ pub use error::{Error, ErrorBody, Result};
 mod client;
 #[cfg(feature = "client")]
 /// Client-side HTTP helpers and auth application utilities.
-pub use client::{ApiKeyAuth, Client, ClientApiKeyLocation, ClientAuth, ClientAuthRequirement};
+pub use client::{Client, ClientAuth, ClientAuthRequirement};
 
 mod server;
 /// Server-side traits and builders for mounting generated services.
@@ -38,6 +38,8 @@ pub mod stream;
 
 /// Authentication helpers shared by generated handlers and clients.
 pub mod auth;
+/// API key auth types, available without the `client` feature for server use.
+pub use auth::api_key::{ApiKeyAuth, ApiKeyAuthError, ApiKeyLocation, extract_api_key};
 
 /// HTTP connection upgrade helpers.
 pub mod upgrade;

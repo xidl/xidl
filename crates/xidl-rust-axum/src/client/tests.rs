@@ -1,5 +1,5 @@
-use super::Client;
-use super::{ApiKeyAuth, ClientApiKeyLocation, ClientAuth, ClientAuthRequirement};
+use super::{Client, ClientAuth, ClientAuthRequirement};
+use crate::auth::api_key::{ApiKeyAuth, ApiKeyLocation};
 use crate::auth::basic::BasicAuth;
 
 #[test]
@@ -76,7 +76,7 @@ fn apply_api_key_query_sets_query_param() {
         basic: None,
         bearer: None,
         api_keys: vec![ApiKeyAuth {
-            location: ClientApiKeyLocation::Query,
+            location: ApiKeyLocation::Query,
             name: "api_key".to_string(),
             value: "secret".to_string(),
         }],
@@ -91,7 +91,7 @@ fn apply_api_key_query_sets_query_param() {
         .apply_auth(
             &mut req,
             ClientAuthRequirement::ApiKey {
-                location: ClientApiKeyLocation::Query,
+                location: ApiKeyLocation::Query,
                 name: "api_key",
             },
         )

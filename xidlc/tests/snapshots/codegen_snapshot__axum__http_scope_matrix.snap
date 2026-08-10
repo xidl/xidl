@@ -2021,18 +2021,13 @@ where
         let basic = xidl_rust_axum::auth::basic::extract_basic_auth(&headers).ok();
         let bearer = None;
         let mut api_keys = ::std::vec![];
-        if let Some(value) = ::xidl_rust_axum::serde_urlencoded::from_str::<
-            ::std::collections::HashMap<String, String>,
-        >(uri.query().unwrap_or(""))
-            .ok()
-            .and_then(|map| map.get("org_key").cloned())
-        {
-            api_keys
-                .push(::xidl_rust_axum::ApiKeyAuth {
-                    location: ::xidl_rust_axum::ClientApiKeyLocation::Query,
-                    name: "org_key".to_string(),
-                    value,
-                });
+        if let Ok(key) = ::xidl_rust_axum::auth::api_key::extract_api_key(
+            &headers,
+            &uri,
+            ::xidl_rust_axum::ApiKeyLocation::Query,
+            "org_key",
+        ) {
+            api_keys.push(key);
         }
         let xidl_auth = ::xidl_rust_axum::ClientAuth {
             basic,
@@ -2105,26 +2100,13 @@ where
                 xidl_rust_axum::auth::bearer::BearerAuth::from_header(h.clone()).token
             });
         let mut api_keys = ::std::vec![];
-        if let Some(cookie_header) = headers.get("cookie") {
-            if let Ok(cookie_str) = cookie_header.to_str() {
-                for part in cookie_str.split(';') {
-                    let part = part.trim();
-                    if !part.is_empty() {
-                        let mut iter = part.splitn(2, '=');
-                        let c_name = iter.next().unwrap_or("").trim();
-                        if c_name == "session_key" {
-                            let c_val = iter.next().unwrap_or("").trim().to_string();
-                            api_keys
-                                .push(::xidl_rust_axum::ApiKeyAuth {
-                                    location: ::xidl_rust_axum::ClientApiKeyLocation::Cookie,
-                                    name: "session_key".to_string(),
-                                    value: c_val,
-                                });
-                            break;
-                        }
-                    }
-                }
-            }
+        if let Ok(key) = ::xidl_rust_axum::auth::api_key::extract_api_key(
+            &headers,
+            &uri,
+            ::xidl_rust_axum::ApiKeyLocation::Cookie,
+            "session_key",
+        ) {
+            api_keys.push(key);
         }
         let xidl_auth = ::xidl_rust_axum::ClientAuth {
             basic,
@@ -2198,15 +2180,13 @@ where
                 xidl_rust_axum::auth::bearer::BearerAuth::from_header(h.clone()).token
             });
         let mut api_keys = ::std::vec![];
-        if let Some(header_val) = headers.get("X-Alt-Key") {
-            if let Ok(value) = header_val.to_str() {
-                api_keys
-                    .push(::xidl_rust_axum::ApiKeyAuth {
-                        location: ::xidl_rust_axum::ClientApiKeyLocation::Header,
-                        name: "X-Alt-Key".to_string(),
-                        value: value.to_string(),
-                    });
-            }
+        if let Ok(key) = ::xidl_rust_axum::auth::api_key::extract_api_key(
+            &headers,
+            &uri,
+            ::xidl_rust_axum::ApiKeyLocation::Header,
+            "X-Alt-Key",
+        ) {
+            api_keys.push(key);
         }
         let xidl_auth = ::xidl_rust_axum::ClientAuth {
             basic,
@@ -2439,7 +2419,7 @@ impl HttpSecurityMatrixServiceClient {
             .apply_auth(
                 &mut req,
                 xidl_rust_axum::ClientAuthRequirement::ApiKey {
-                    location: xidl_rust_axum::ClientApiKeyLocation::Query,
+                    location: xidl_rust_axum::ApiKeyLocation::Query,
                     name: "org_key",
                 },
             )?;
@@ -2491,7 +2471,7 @@ impl HttpSecurityMatrixServiceClient {
             .apply_auth(
                 &mut req,
                 xidl_rust_axum::ClientAuthRequirement::ApiKey {
-                    location: xidl_rust_axum::ClientApiKeyLocation::Cookie,
+                    location: xidl_rust_axum::ApiKeyLocation::Cookie,
                     name: "session_key",
                 },
             )?;
@@ -2567,7 +2547,7 @@ impl HttpSecurityMatrixServiceClient {
             .apply_auth(
                 &mut req,
                 xidl_rust_axum::ClientAuthRequirement::ApiKey {
-                    location: xidl_rust_axum::ClientApiKeyLocation::Header,
+                    location: xidl_rust_axum::ApiKeyLocation::Header,
                     name: "X-Alt-Key",
                 },
             )?;
