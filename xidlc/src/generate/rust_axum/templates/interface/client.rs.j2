@@ -227,7 +227,7 @@ impl {{ ident }}Client {
                     auth_target.apply_auth(
                     &mut req,
                     xidl_rust_axum::ClientAuthRequirement::ApiKey {
-                        location: xidl_rust_axum::ClientApiKeyLocation::{{ api_key.location }},
+                        location: xidl_rust_axum::ApiKeyLocation::{{ api_key.location }},
                         name: "{{ api_key.name }}",
                     },
                     )?;
@@ -243,7 +243,7 @@ impl {{ ident }}Client {
                     auth_target.apply_auth(
                     &mut req,
                     xidl_rust_axum::ClientAuthRequirement::ApiKey {
-                        location: xidl_rust_axum::ClientApiKeyLocation::{{ api_key.location }},
+                        location: xidl_rust_axum::ApiKeyLocation::{{ api_key.location }},
                         name: "{{ api_key.name }}",
                     },
                     )?;
@@ -270,7 +270,7 @@ impl {{ ident }}Client {
                             auth_target.apply_auth_to_ws_url(
                             &mut ws_url,
                             xidl_rust_axum::ClientAuthRequirement::ApiKey {
-                                location: xidl_rust_axum::ClientApiKeyLocation::{{ api_key.location }},
+                                location: xidl_rust_axum::ApiKeyLocation::{{ api_key.location }},
                                 name: "{{ api_key.name }}",
                             },
                             )?;
@@ -293,7 +293,7 @@ impl {{ ident }}Client {
                         auth_target.apply_auth_headers(
                         &mut auth_headers,
                         xidl_rust_axum::ClientAuthRequirement::ApiKey {
-                            location: xidl_rust_axum::ClientApiKeyLocation::{{ api_key.location }},
+                            location: xidl_rust_axum::ApiKeyLocation::{{ api_key.location }},
                             name: "{{ api_key.name }}",
                         },
                         )?;
@@ -305,7 +305,7 @@ impl {{ ident }}Client {
                             auth_target.apply_auth_to_ws_url(
                             &mut ws_url,
                             xidl_rust_axum::ClientAuthRequirement::ApiKey {
-                                location: xidl_rust_axum::ClientApiKeyLocation::{{ api_key.location }},
+                                location: xidl_rust_axum::ApiKeyLocation::{{ api_key.location }},
                                 name: "{{ api_key.name }}",
                             },
                             )?;
@@ -328,7 +328,7 @@ impl {{ ident }}Client {
                         auth_target.apply_auth_headers(
                         &mut auth_headers,
                         xidl_rust_axum::ClientAuthRequirement::ApiKey {
-                            location: xidl_rust_axum::ClientApiKeyLocation::{{ api_key.location }},
+                            location: xidl_rust_axum::ApiKeyLocation::{{ api_key.location }},
                             name: "{{ api_key.name }}",
                         },
                         )?;

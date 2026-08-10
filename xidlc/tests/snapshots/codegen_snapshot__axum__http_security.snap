@@ -219,15 +219,13 @@ where
         let basic = xidl_rust_axum::auth::basic::extract_basic_auth(&headers).ok();
         let bearer = None;
         let mut api_keys = ::std::vec![];
-        if let Some(header_val) = headers.get("X-API-Key") {
-            if let Ok(value) = header_val.to_str() {
-                api_keys
-                    .push(::xidl_rust_axum::ApiKeyAuth {
-                        location: ::xidl_rust_axum::ClientApiKeyLocation::Header,
-                        name: "X-API-Key".to_string(),
-                        value: value.to_string(),
-                    });
-            }
+        if let Ok(key) = ::xidl_rust_axum::auth::api_key::extract_api_key(
+            &headers,
+            &uri,
+            ::xidl_rust_axum::ApiKeyLocation::Header,
+            "X-API-Key",
+        ) {
+            api_keys.push(key);
         }
         let xidl_auth = ::xidl_rust_axum::ClientAuth {
             basic,
@@ -497,7 +495,7 @@ impl HttpSecurityServiceClient {
             .apply_auth(
                 &mut req,
                 xidl_rust_axum::ClientAuthRequirement::ApiKey {
-                    location: xidl_rust_axum::ClientApiKeyLocation::Header,
+                    location: xidl_rust_axum::ApiKeyLocation::Header,
                     name: "X-API-Key",
                 },
             )?;

@@ -1,29 +1,8 @@
 use crate::Error;
+use crate::auth::api_key::{ApiKeyAuth, ApiKeyLocation};
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
 use reqwest::header::{AUTHORIZATION, COOKIE, HeaderMap, HeaderValue};
-
-/// Location of an API key credential in an outgoing request.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum ClientApiKeyLocation {
-    /// Send the API key in a request header.
-    Header,
-    /// Send the API key in the query string.
-    Query,
-    /// Send the API key in the `Cookie` header.
-    Cookie,
-}
-
-/// API key credential available to a generated client.
-#[derive(Clone, Debug)]
-pub struct ApiKeyAuth {
-    /// Where the API key should be written.
-    pub location: ClientApiKeyLocation,
-    /// Header, query parameter, or cookie name.
-    pub name: String,
-    /// Credential value.
-    pub value: String,
-}
 
 /// Authentication material that generated clients can apply automatically.
 #[derive(Clone, Debug, Default)]
@@ -38,7 +17,7 @@ pub struct ClientAuth {
 
 impl ClientAuth {
     /// Finds an API key matching the required location and name.
-    pub fn api_key(&self, location: ClientApiKeyLocation, name: &str) -> Option<&ApiKeyAuth> {
+    pub fn api_key(&self, location: ApiKeyLocation, name: &str) -> Option<&ApiKeyAuth> {
         self.api_keys
             .iter()
             .find(|key| key.location == location && key.name == name)
@@ -55,7 +34,7 @@ pub enum ClientAuthRequirement<'a> {
     /// API key auth in a specific location.
     ApiKey {
         /// Where the API key must be written.
-        location: ClientApiKeyLocation,
+        location: ApiKeyLocation,
         /// Name of the required header, query parameter, or cookie.
         name: &'a str,
     },
@@ -141,7 +120,7 @@ impl Client {
     ) -> crate::Result<()> {
         match requirement {
             ClientAuthRequirement::ApiKey { location, name } => {
-                if location == ClientApiKeyLocation::Query {
+                if location == ApiKeyLocation::Query {
                     self.apply_api_key_query(req, name)
                 } else {
                     self.apply_auth_headers(req.headers_mut(), requirement)
@@ -155,7 +134,7 @@ impl Client {
         let auth = self
             .auth
             .as_ref()
-            .and_then(|auth| auth.api_key(ClientApiKeyLocation::Query, name))
+            .and_then(|auth| auth.api_key(ApiKeyLocation::Query, name))
             .ok_or_else(Error::unauthorized)?;
         req.url_mut()
             .query_pairs_mut()
@@ -199,7 +178,7 @@ impl Client {
                     .and_then(|auth| auth.api_key(location, name))
                     .ok_or_else(Error::unauthorized)?;
                 match auth.location {
-                    ClientApiKeyLocation::Header => {
+                    ApiKeyLocation::Header => {
                         let header_name =
                             reqwest::header::HeaderName::from_bytes(auth.name.as_bytes())
                                 .map_err(|err| Error::new(400, format!("{err:?}")))?;
@@ -208,7 +187,7 @@ impl Client {
                         headers.insert(header_name, header_value);
                         Ok(())
                     }
-                    ClientApiKeyLocation::Cookie => {
+                    ApiKeyLocation::Cookie => {
                         let cookie_pair = format!("{}={}", auth.name, auth.value);
                         let merged = match headers.get(COOKIE) {
                             Some(existing) => {
@@ -228,7 +207,7 @@ impl Client {
                         headers.insert(COOKIE, header_value);
                         Ok(())
                     }
-                    ClientApiKeyLocation::Query => Ok(()),
+                    ApiKeyLocation::Query => Ok(()),
                 }
             }
         }
@@ -241,7 +220,7 @@ impl Client {
         requirement: ClientAuthRequirement<'_>,
     ) -> crate::Result<()> {
         if let ClientAuthRequirement::ApiKey { location, name } = requirement {
-            if location == ClientApiKeyLocation::Query {
+            if location == ApiKeyLocation::Query {
                 let auth = self
                     .auth
                     .as_ref()

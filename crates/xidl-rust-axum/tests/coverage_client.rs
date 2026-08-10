@@ -1,6 +1,6 @@
 use reqwest::header::{COOKIE, HeaderMap, HeaderValue};
 use xidl_rust_axum::auth::basic::BasicAuth;
-use xidl_rust_axum::{ApiKeyAuth, Client, ClientApiKeyLocation, ClientAuth, ClientAuthRequirement};
+use xidl_rust_axum::{ApiKeyAuth, ApiKeyLocation, Client, ClientAuth, ClientAuthRequirement};
 
 fn sample_auth() -> ClientAuth {
     ClientAuth {
@@ -11,17 +11,17 @@ fn sample_auth() -> ClientAuth {
         bearer: Some("bearer-token".to_string()),
         api_keys: vec![
             ApiKeyAuth {
-                location: ClientApiKeyLocation::Header,
+                location: ApiKeyLocation::Header,
                 name: "x-api-key".to_string(),
                 value: "header-secret".to_string(),
             },
             ApiKeyAuth {
-                location: ClientApiKeyLocation::Cookie,
+                location: ApiKeyLocation::Cookie,
                 name: "session".to_string(),
                 value: "cookie-secret".to_string(),
             },
             ApiKeyAuth {
-                location: ClientApiKeyLocation::Query,
+                location: ApiKeyLocation::Query,
                 name: "api_key".to_string(),
                 value: "query-secret".to_string(),
             },
@@ -54,13 +54,10 @@ fn constructors_and_accessors_preserve_state() {
 fn api_key_lookup_returns_matching_entry() {
     let auth = sample_auth();
     let key = auth
-        .api_key(ClientApiKeyLocation::Header, "x-api-key")
+        .api_key(ApiKeyLocation::Header, "x-api-key")
         .expect("missing api key");
     assert_eq!(key.value, "header-secret");
-    assert!(
-        auth.api_key(ClientApiKeyLocation::Header, "missing")
-            .is_none()
-    );
+    assert!(auth.api_key(ApiKeyLocation::Header, "missing").is_none());
 }
 
 #[test]
@@ -80,7 +77,7 @@ fn apply_auth_headers_covers_basic_header_cookie_and_query_variants() {
         .apply_auth_headers(
             &mut headers,
             ClientAuthRequirement::ApiKey {
-                location: ClientApiKeyLocation::Header,
+                location: ApiKeyLocation::Header,
                 name: "x-api-key",
             },
         )
@@ -92,7 +89,7 @@ fn apply_auth_headers_covers_basic_header_cookie_and_query_variants() {
         .apply_auth_headers(
             &mut headers,
             ClientAuthRequirement::ApiKey {
-                location: ClientApiKeyLocation::Cookie,
+                location: ApiKeyLocation::Cookie,
                 name: "session",
             },
         )
@@ -107,7 +104,7 @@ fn apply_auth_headers_covers_basic_header_cookie_and_query_variants() {
         .apply_auth_headers(
             &mut headers,
             ClientAuthRequirement::ApiKey {
-                location: ClientApiKeyLocation::Cookie,
+                location: ApiKeyLocation::Cookie,
                 name: "session",
             },
         )
@@ -118,7 +115,7 @@ fn apply_auth_headers_covers_basic_header_cookie_and_query_variants() {
         .apply_auth_headers(
             &mut headers,
             ClientAuthRequirement::ApiKey {
-                location: ClientApiKeyLocation::Query,
+                location: ApiKeyLocation::Query,
                 name: "api_key",
             },
         )
@@ -144,7 +141,7 @@ fn apply_auth_reports_missing_and_invalid_credentials() {
             basic: None,
             bearer: None,
             api_keys: vec![ApiKeyAuth {
-                location: ClientApiKeyLocation::Header,
+                location: ApiKeyLocation::Header,
                 name: "bad header".to_string(),
                 value: "value".to_string(),
             }],
@@ -154,7 +151,7 @@ fn apply_auth_reports_missing_and_invalid_credentials() {
         .apply_auth_headers(
             &mut HeaderMap::new(),
             ClientAuthRequirement::ApiKey {
-                location: ClientApiKeyLocation::Header,
+                location: ApiKeyLocation::Header,
                 name: "bad header",
             },
         )
@@ -167,7 +164,7 @@ fn apply_auth_reports_missing_and_invalid_credentials() {
             basic: None,
             bearer: None,
             api_keys: vec![ApiKeyAuth {
-                location: ClientApiKeyLocation::Cookie,
+                location: ApiKeyLocation::Cookie,
                 name: "session".to_string(),
                 value: "bad\ncookie".to_string(),
             }],
@@ -177,7 +174,7 @@ fn apply_auth_reports_missing_and_invalid_credentials() {
         .apply_auth_headers(
             &mut HeaderMap::new(),
             ClientAuthRequirement::ApiKey {
-                location: ClientApiKeyLocation::Cookie,
+                location: ApiKeyLocation::Cookie,
                 name: "session",
             },
         )
@@ -193,7 +190,7 @@ fn apply_auth_reports_missing_and_invalid_credentials() {
         .apply_auth(
             &mut req,
             ClientAuthRequirement::ApiKey {
-                location: ClientApiKeyLocation::Header,
+                location: ApiKeyLocation::Header,
                 name: "bad header",
             },
         )
@@ -209,7 +206,7 @@ fn apply_auth_to_ws_url_updates_query_and_surfaces_errors() {
         .apply_auth_to_ws_url(
             &mut ws_url,
             ClientAuthRequirement::ApiKey {
-                location: ClientApiKeyLocation::Query,
+                location: ApiKeyLocation::Query,
                 name: "api_key",
             },
         )
@@ -221,7 +218,7 @@ fn apply_auth_to_ws_url_updates_query_and_surfaces_errors() {
         .apply_auth_to_ws_url(
             &mut ws_url,
             ClientAuthRequirement::ApiKey {
-                location: ClientApiKeyLocation::Query,
+                location: ApiKeyLocation::Query,
                 name: "api_key",
             },
         )
@@ -234,7 +231,7 @@ fn apply_auth_to_ws_url_updates_query_and_surfaces_errors() {
         .apply_auth_to_ws_url(
             &mut ws_url,
             ClientAuthRequirement::ApiKey {
-                location: ClientApiKeyLocation::Query,
+                location: ApiKeyLocation::Query,
                 name: "missing",
             },
         )

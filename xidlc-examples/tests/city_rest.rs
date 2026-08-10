@@ -1,5 +1,5 @@
 use xidl_rust_axum::auth::bearer::BearerAuth;
-use xidl_rust_axum::{ApiKeyAuth, ClientApiKeyLocation};
+use xidl_rust_axum::{ApiKeyAuth, ApiKeyLocation};
 use xidlc_examples::city_rest::SmartCityRestApiClient;
 use xidlc_examples::city_rest::SmartCityRestApiServer;
 use xidlc_examples::city_rest::SmartCityRestService;
@@ -70,7 +70,7 @@ async fn http_client_calls_all_endpoints() {
             "A-12345".to_string(),
             30,
             ApiKeyAuth {
-                location: ClientApiKeyLocation::Header,
+                location: ApiKeyLocation::Header,
                 name: "X-Reserve-Key".to_string(),
                 value: "reserve-test".to_string(),
             },
