@@ -104,7 +104,7 @@ export default defineConfig({
         },
         {
           label: 'Changelog',
-          link: '/changelog.md',
+          link: '/changelog/',
         },
       ],
       social: [
