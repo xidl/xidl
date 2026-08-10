@@ -1,10 +1,21 @@
-import { cpSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const websiteDir = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-cpSync(
-  join(websiteDir, '..', 'CHANGELOG.md'),
-  join(websiteDir, 'public', 'changelog.md'),
+const changelog = readFileSync(join(websiteDir, '..', 'CHANGELOG.md'), 'utf8');
+const body = changelog.replace(/^# Changelog\s*\n+/, '');
+
+const target = join(websiteDir, 'src', 'content', 'docs', 'changelog.md');
+mkdirSync(dirname(target), { recursive: true });
+writeFileSync(
+  target,
+  `---
+title: Changelog
+sidebar:
+  hidden: true
+---
+
+${body}`,
 );
