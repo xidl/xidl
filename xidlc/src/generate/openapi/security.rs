@@ -1,5 +1,5 @@
 use crate::openapi::security::{
-    ApiKey, ApiKeyValue, Http, HttpAuthScheme, OAuth2, Scopes, SecurityRequirement, SecurityScheme,
+    ApiKey, ApiKeyValue, Http, HttpAuthScheme, SecurityRequirement, SecurityScheme,
 };
 use std::collections::BTreeMap;
 use xidl_parser::rest_hir::semantics::{HttpApiKeyLocation, HttpSecurityRequirement};
@@ -17,7 +17,6 @@ pub(crate) fn openapi_security_requirement(
         HttpSecurityRequirement::ApiKey { location, name } => {
             SecurityRequirement::new(api_key_scheme_name(&location, &name), Vec::<String>::new())
         }
-        HttpSecurityRequirement::OAuth2 { scopes } => SecurityRequirement::new("oauth2", scopes),
     }
 }
 
@@ -49,22 +48,6 @@ pub(crate) fn register_security_schemes(
                     HttpApiKeyLocation::Cookie => {
                         SecurityScheme::ApiKey(ApiKey::Cookie(ApiKeyValue::new(name.clone())))
                     }
-                });
-            }
-            HttpSecurityRequirement::OAuth2 { scopes } => {
-                store.entry("oauth2".to_string()).or_insert_with(|| {
-                    let scopes = scopes
-                        .iter()
-                        .map(|scope| (scope.clone(), scope.clone()))
-                        .collect::<Vec<_>>();
-                    SecurityScheme::OAuth2(OAuth2::new([
-                        crate::openapi::security::Flow::ClientCredentials(
-                            crate::openapi::security::ClientCredentials::new(
-                                "https://example.invalid/token",
-                                Scopes::from_iter(scopes),
-                            ),
-                        ),
-                    ]))
                 });
             }
         }

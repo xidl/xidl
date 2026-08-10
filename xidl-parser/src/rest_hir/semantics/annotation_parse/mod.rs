@@ -4,16 +4,6 @@ use convert_case::{Case, Casing};
 #[cfg(test)]
 mod tests;
 
-pub(super) fn parse_string_array(raw: &str) -> Vec<String> {
-    let trimmed = raw.trim();
-    let unquoted = trim_quotes(trimmed).unwrap_or_else(|| trimmed.to_string());
-    split_top_level(&unquoted, ',')
-        .into_iter()
-        .map(|value| value.trim().to_string())
-        .filter(|value| !value.is_empty())
-        .collect()
-}
-
 pub(super) fn parse_raw_params(raw: &str) -> Vec<(String, String)> {
     let trimmed = raw.trim();
     if trimmed.is_empty() {

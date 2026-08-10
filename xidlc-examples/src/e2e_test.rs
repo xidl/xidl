@@ -168,6 +168,7 @@ impl E2eHttpSecurity for LogicE2eHttpSecurity {
         &self,
         keyword: String,
         page: Option<u32>,
+        _xidl_auth: xidl_rust_axum::ClientAuth,
     ) -> Result<String, xidl_rust_axum::Error> {
         Ok(format!("keyword:{keyword},page:{:?}", page))
     }
@@ -591,6 +592,7 @@ impl E2eHttpSecurityMatrix for LogicE2eHttpSecurityMatrix {
         &self,
         keyword: String,
         page: Option<u32>,
+        _xidl_auth: xidl_rust_axum::ClientAuth,
     ) -> Result<String, xidl_rust_axum::Error> {
         Ok(format!("{keyword}:{page:?}"))
     }

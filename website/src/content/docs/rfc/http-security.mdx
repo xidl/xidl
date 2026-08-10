@@ -8,7 +8,7 @@ description: "Security annotations and inheritance rules for XIDL HTTP mapping."
 This page defines the security supplementary model for HTTP mapping, used to describe:
 
 - Interface-level and method-level security declarations.
-- Mapping for Basic / Bearer / API Key / OAuth2.
+- Mapping for Basic / Bearer / API Key.
 - Inheritance and overriding rules for security requirements.
 
 ## Goals
@@ -28,7 +28,6 @@ This RFC focuses on "how to declare security requirements," rather than:
 - `@api_key(in = "header", name = "X-API-Key")`
 - `@api_key(in = "cookie", name = "sid")`
 - `@api_key(in = "query", name = "api_key")`
-- `@oauth2(scopes = ["scope1", "scope2"])`
 
 ## Interface-level and Method-level Declarations
 
@@ -73,24 +72,11 @@ Semantics:
 - `name` determines the field name used.
 - The API Key is treated as an opaque string.
 
-## OAuth2
-
-```idl
-@oauth2(scopes = ["read:users"])
-```
-
-Semantics:
-
-- Used to express authorization requirements with scopes.
-- Defines scope semantics; does not define the full authorization flow.
-- Details such as token URL and authorization URL are typically supplemented by external documentation or generators.
-
 ## Combining Multiple Security Requirements
 
 The default semantics are an "alternative set":
 
 - When multiple security annotations are declared on the same target, they are typically interpreted as a logical OR.
-- Multiple scopes within a single `@oauth2(scopes = [...])` are understood as a logical AND.
 
 ## Relationship with Standard HTTP Mapping
 

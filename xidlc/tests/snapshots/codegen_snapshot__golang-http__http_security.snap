@@ -86,12 +86,6 @@ func RegisterHttpSecurityServiceHandler(r gin.IRouter, svc HttpSecurityServiceSe
 		}
 	})
 	r.POST("/users/search", func(c *gin.Context) {
-		ctx, err := xidlgohttp.RequireAuth(c.Request, HttpSecurityServiceSearchUserSecurityRequirements())
-		if err != nil {
-			xidlgohttp.Unauthorized(c.Writer, HttpSecurityServiceSearchUserSecurityRequirements())
-			return
-		}
-		c.Request = c.Request.WithContext(ctx)
 
 		req := &HttpSecurityServiceSearchUserRequest{}
 		body := HttpSecurityServiceSearchUserRequestBody{}
@@ -196,7 +190,6 @@ func (c *HttpSecurityServiceClient) SearchUser(ctx context.Context, req *HttpSec
 	}
 	httpReq.Header.Set("Content-Type", "application/json")
 	httpReq.Header.Set("Accept", "text/plain")
-	xidlgohttp.ApplyClientAuth(httpReq, c.auth, HttpSecurityServiceSearchUserSecurityRequirements())
 	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
 		return nil, err
@@ -290,9 +283,7 @@ type HttpSecurityServiceSearchUserResponse struct {
 }
 
 func HttpSecurityServiceSearchUserSecurityRequirements() []xidlgohttp.SecurityRequirement {
-	return []xidlgohttp.SecurityRequirement{
-		{Kind: xidlgohttp.SecurityOAuth2, Scopes: []string{"write:users", "read:users"}},
-	}
+	return []xidlgohttp.SecurityRequirement{}
 }
 
 func HttpSecurityServiceSearchUserDeprecated() xidlgohttp.DeprecatedInfo {

@@ -9,18 +9,7 @@ fn int(value: &str) -> ConstExpr {
 }
 
 #[test]
-fn parse_string_array_and_raw_params_handle_nested_values() {
-    assert_eq!(
-        parse_string_array(r#""a,b", call(x,y), [left,right], plain, 'x,y'"#),
-        vec![
-            "\"a,b\"".to_string(),
-            "call(x,y)".to_string(),
-            "[left,right]".to_string(),
-            "plain".to_string(),
-            "'x,y'".to_string(),
-        ]
-    );
-
+fn parse_raw_params_handles_nested_values() {
     assert_eq!(parse_raw_params(""), Vec::<(String, String)>::new());
     assert_eq!(
         parse_raw_params(r#""city-id""#),

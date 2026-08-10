@@ -1,5 +1,5 @@
 use super::*;
-use crate::hir::{Annotation, AnnotationParam, AnnotationParams, ConstExpr, Literal};
+use crate::hir::{Annotation, AnnotationParams};
 
 fn builtin(name: &str, raw: &str) -> Annotation {
     Annotation::Builtin {
@@ -12,23 +12,6 @@ fn bare(name: &str) -> Annotation {
     Annotation::Builtin {
         name: name.to_string(),
         params: None,
-    }
-}
-
-fn builtin_params(name: &str, values: &[(&str, &str)]) -> Annotation {
-    Annotation::Builtin {
-        name: name.to_string(),
-        params: Some(AnnotationParams::Params(
-            values
-                .iter()
-                .map(|(ident, value)| AnnotationParam {
-                    ident: (*ident).to_string(),
-                    value: Some(ConstExpr::Literal(Literal::StringLiteral(format!(
-                        "\"{value}\""
-                    )))),
-                })
-                .collect(),
-        )),
     }
 }
 
@@ -95,30 +78,5 @@ fn parse_api_key_validates_location_and_name() {
         parse_api_key(&bare("api_key"))
             .expect_err("missing in")
             .contains("requires in=... and name=...")
-    );
-}
-
-#[test]
-fn parse_oauth2_and_collection_preserve_scope_lists() {
-    assert_eq!(
-        parse_oauth2(&builtin_params("oauth2", &[("scopes", "read,write")])),
-        HttpSecurityRequirement::OAuth2 {
-            scopes: vec!["read".to_string(), "write".to_string()],
-        }
-    );
-
-    let collection = collect_security(&[
-        bare("http_bearer"),
-        builtin_params("oauth2", &[("scopes", "admin")]),
-    ])
-    .expect("collection");
-    assert_eq!(
-        collection.requirements,
-        vec![
-            HttpSecurityRequirement::HttpBearer,
-            HttpSecurityRequirement::OAuth2 {
-                scopes: vec!["admin".to_string()],
-            },
-        ]
     );
 }

@@ -102,7 +102,6 @@ interface HttpSecurityMatrixService {
         string locale
     );
 
-    @oauth2(scopes = "reports:write,reports:read")
     @post(path = "/v2/security/oauth-search")
     string oauth_security(
         string keyword,

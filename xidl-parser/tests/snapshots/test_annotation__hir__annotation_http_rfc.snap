@@ -1254,14 +1254,6 @@ Specification(
                                                         ),
                                                     ),
                                                 },
-                                                Builtin {
-                                                    name: "oauth2",
-                                                    params: Some(
-                                                        Raw(
-                                                            "scopes = [\"read:users\", \"write:users\"]",
-                                                        ),
-                                                    ),
-                                                },
                                             ],
                                             ty: TypeSpec(
                                                 StringType(

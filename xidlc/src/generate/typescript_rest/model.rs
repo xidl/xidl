@@ -57,7 +57,6 @@ pub(super) struct SecurityContext {
     pub(super) location: Option<String>,
     pub(super) name: Option<String>,
     pub(super) realm: Option<String>,
-    pub(super) scopes: Vec<String>,
 }
 
 #[derive(Serialize)]

@@ -1,9 +1,7 @@
 use crate::hir;
 use std::collections::HashMap;
 
-use super::annotation_parse::{
-    parse_raw_params, parse_string_array as parse_string_array_impl, render_const_expr, trim_quotes,
-};
+use super::annotation_parse::{parse_raw_params, render_const_expr, trim_quotes};
 
 #[cfg(test)]
 mod tests;
@@ -142,8 +140,4 @@ fn media_type_annotation_matches(name: &str, target: &str) -> bool {
 
 fn media_type_annotation_param_keys(target: &str) -> &'static [&'static str] {
     media_type_annotation_aliases(target)
-}
-
-pub(crate) fn parse_string_array(raw: &str) -> Vec<String> {
-    parse_string_array_impl(raw)
 }

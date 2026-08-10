@@ -66,10 +66,10 @@ T: {{ ident }} + Send + Sync + 'static,
             {% elif method.auth_ty == "xidl_rust_axum::ApiKeyAuth" %}
                 {% set api_key_req = method.api_key_requirements[0] %}
                 let xidl_auth = match ::xidl_rust_axum::auth::api_key::extract_api_key(
-                    &headers,
-                    &uri,
-                    ::xidl_rust_axum::ApiKeyLocation::{{ api_key_req.location }},
-                    "{{ api_key_req.name }}",
+                &headers,
+                &uri,
+                ::xidl_rust_axum::ApiKeyLocation::{{ api_key_req.location }},
+                "{{ api_key_req.name }}",
                 ) {
                     Ok(auth) => auth,
                     Err(_) => return Err(::xidl_rust_axum::Error::unauthorized()),
@@ -86,10 +86,10 @@ T: {{ ident }} + Send + Sync + 'static,
                 let mut api_keys = ::std::vec![];
                 {% for api_key_req in method.api_key_requirements %}
                     if let Ok(key) = ::xidl_rust_axum::auth::api_key::extract_api_key(
-                        &headers,
-                        &uri,
-                        ::xidl_rust_axum::ApiKeyLocation::{{ api_key_req.location }},
-                        "{{ api_key_req.name }}",
+                    &headers,
+                    &uri,
+                    ::xidl_rust_axum::ApiKeyLocation::{{ api_key_req.location }},
+                    "{{ api_key_req.name }}",
                     ) {
                         api_keys.push(key);
                     }

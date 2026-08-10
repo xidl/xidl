@@ -25,7 +25,7 @@ export class {{ client_name }}Client {
             {% endfor %}const cookies: string[] = [];
             {% for param in method.cookie_params %}appendCookie(cookies, "{{ param.raw_name }}", {{ param.access }}, {{ param.optional | lower }}, {{ param.is_multi | lower }});
             {% endfor %}applyCookies(headers, cookies);
-            applyClientAuth(path, query, headers, this.auth, [{% for security in method.security %}{ kind: "{{ security.kind }}"{% if security.location %}, location: "{{ security.location }}"{% endif %}{% if security.name %}, name: "{{ security.name }}"{% endif %}{% if security.realm %}, realm: "{{ security.realm }}"{% endif %}, scopes: [{% for scope in security.scopes %}"{{ scope }}"{% if not loop.last %}, {% endif %}{% endfor %}] }{% if not loop.last %}, {% endif %}{% endfor %}]);
+            applyClientAuth(path, query, headers, this.auth, [{% for security in method.security %}{ kind: "{{ security.kind }}"{% if security.location %}, location: "{{ security.location }}"{% endif %}{% if security.name %}, name: "{{ security.name }}"{% endif %}{% if security.realm %}, realm: "{{ security.realm }}"{% endif %} }{% if not loop.last %}, {% endif %}{% endfor %}]);
             const queryString = query.toString();
             if (queryString.length > 0) {
                 path = `${path}?${queryString}`;

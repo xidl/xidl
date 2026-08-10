@@ -71,18 +71,6 @@ openapi_http_scope_matrix.json
       "http_bearer": {
         "scheme": "bearer",
         "type": "http"
-      },
-      "oauth2": {
-        "flows": {
-          "clientCredentials": {
-            "scopes": {
-              "reports:read": "reports:read",
-              "reports:write": "reports:write"
-            },
-            "tokenUrl": "https://example.invalid/token"
-          }
-        },
-        "type": "oauth2"
       }
     }
   },
@@ -880,10 +868,10 @@ openapi_http_scope_matrix.json
         },
         "security": [
           {
-            "oauth2": [
-              "reports:write",
-              "reports:read"
-            ]
+            "http_basic": []
+          },
+          {
+            "api_key-query-org_key": []
           }
         ],
         "tags": [

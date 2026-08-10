@@ -36,17 +36,6 @@ openapi_http_security_inheritance.json
       "http_basic": {
         "scheme": "basic",
         "type": "http"
-      },
-      "oauth2": {
-        "flows": {
-          "clientCredentials": {
-            "scopes": {
-              "reports:write": "reports:write"
-            },
-            "tokenUrl": "https://example.invalid/token"
-          }
-        },
-        "type": "oauth2"
       }
     }
   },
@@ -219,9 +208,10 @@ openapi_http_security_inheritance.json
         },
         "security": [
           {
-            "oauth2": [
-              "reports:write"
-            ]
+            "http_basic": []
+          },
+          {
+            "api_key-header-x-org-key": []
           }
         ],
         "tags": [

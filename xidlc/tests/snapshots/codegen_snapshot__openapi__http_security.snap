@@ -36,18 +36,6 @@ openapi_http_security.json
       "http_basic": {
         "scheme": "basic",
         "type": "http"
-      },
-      "oauth2": {
-        "flows": {
-          "clientCredentials": {
-            "scopes": {
-              "read:users": "read:users",
-              "write:users": "write:users"
-            },
-            "tokenUrl": "https://example.invalid/token"
-          }
-        },
-        "type": "oauth2"
       }
     }
   },
@@ -136,16 +124,6 @@ openapi_http_security.json
             },
             "description": "Bad Request"
           },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
           "500": {
             "content": {
               "application/json": {
@@ -157,14 +135,6 @@ openapi_http_security.json
             "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "oauth2": [
-              "write:users",
-              "read:users"
-            ]
-          }
-        ],
         "tags": [
           "HttpSecurityService"
         ]

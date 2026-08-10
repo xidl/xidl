@@ -123,18 +123,6 @@ fn render_security_requirements(out: &mut String, method: &MethodMeta) {
                 };
                 writeln!(out, "\t\t{{Kind: xidlgohttp.SecurityAPIKey, Location: xidlgohttp.{loc}, Name: {:?}}},", name).unwrap();
             }
-            HttpSecurityRequirement::OAuth2 { scopes } => {
-                writeln!(
-                    out,
-                    "\t\t{{Kind: xidlgohttp.SecurityOAuth2, Scopes: []string{{{}}}}},",
-                    scopes
-                        .iter()
-                        .map(|scope| format!("{scope:?}"))
-                        .collect::<Vec<_>>()
-                        .join(", ")
-                )
-                .unwrap();
-            }
         }
     }
     writeln!(out, "\t}}").unwrap();

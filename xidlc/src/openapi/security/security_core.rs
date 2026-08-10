@@ -4,7 +4,6 @@ use crate::openapi::extensions::Extensions;
 use serde::{Deserialize, Serialize};
 
 use super::security_http::{Http, OpenIdConnect};
-use super::security_oauth::OAuth2;
 
 #[non_exhaustive]
 #[derive(Serialize, Deserialize, Default, Clone, PartialEq, Eq)]
@@ -47,8 +46,6 @@ impl SecurityRequirement {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum SecurityScheme {
-    #[serde(rename = "oauth2")]
-    OAuth2(OAuth2),
     ApiKey(ApiKey),
     Http(Http),
     OpenIdConnect(OpenIdConnect),
