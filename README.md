@@ -123,12 +123,12 @@ xidlc gen --out-dir generated openapi api.idl
 
 ## Documentation
 
-- [Quickstart](website/src/content/docs/guide/quickstart.mdx)
-- [Installation](website/src/content/docs/guide/quickstart.mdx)
+- [Install & Quickstart](website/src/content/docs/guide/index.mdx)
+- [Your First HTTP API](website/src/content/docs/guide/first-http-api.mdx)
 - [Using xidlc](website/src/content/docs/docs/xidlc.mdx)
-- [HTTP Guide](website/src/content/docs/docs/http.mdx)
-- [TypeScript REST Server and Next.js](website/src/content/docs/rest/typescript-server.mdx)
-- [JSON-RPC Guide](website/src/content/docs/docs/jsonrpc.mdx)
+- [HTTP & REST Basics](website/src/content/docs/rest/index.mdx)
+- [TypeScript REST Server](website/src/content/docs/rest/typescript-server.mdx)
+- [JSON-RPC Basics](website/src/content/docs/jsonrpc/index.mdx)
 - [Targets Reference](website/src/content/docs/docs/targets.mdx)
 - [HTTP RFC](website/src/content/docs/rfc/http.mdx)
 - [JSON-RPC RFC](website/src/content/docs/rfc/jsonrpc.mdx)

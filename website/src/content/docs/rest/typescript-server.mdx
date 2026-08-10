@@ -1,6 +1,8 @@
 ---
 title: "TypeScript REST Server"
 description: "Generate TypeScript REST server contracts and integrate them with Fetch API runtimes or Next.js App Router."
+sidebar:
+  order: 5
 ---
 
 The `typescript-rest` target can generate a client, a server contract, or both.
@@ -42,7 +44,8 @@ pnpm add xidl-typescript-server xidl-typescript-codec zod
 
 `xidl-typescript-server` uses the standard Fetch API `Request` and `Response`
 types, so the service implementation is independent of a particular Node.js
-framework.
+framework. The Next.js App Router adapter is available from the
+`xidl-typescript-server/next` subpath.
 
 ## Implement the Generated Service
 
@@ -63,7 +66,8 @@ interface UserService {
 };
 ```
 
-Implement the interface generated in `api.server.ts`:
+Implement the interface generated in `api.server.ts` once, and share it across
+all routers and route handlers:
 
 ```ts
 import { XidlServerError } from 'xidl-typescript-server';
@@ -153,25 +157,70 @@ export const GET = createNextRoute(
 The dynamic segment name must match the IDL route parameter: `[id]` maps to
 `{id}`. In current Next.js versions, Route Handler parameters are promises;
 `createNextRoute` awaits `context.params` internally before invoking the
-service.
+service. The same pattern works for `PUT`, `PATCH`, and `DELETE` when the
+generated operation uses that method.
 
-The same pattern works for `PUT`, `PATCH`, and `DELETE` when the generated
-operation uses that method.
+### Route Handler Semantics
+
+`createNextRoute` returns a handler with the signature
+`(request: Request, context: { params }) => Promise<Response>`, matching the
+Next.js Route Handler contract:
+
+- Path, query, header, cookie, and body values are extracted, coerced, and
+  validated against the generated Zod schema before the service method runs.
+- Invalid requests produce HTTP 400 responses, unsupported media types produce
+  415/406, and unhandled service errors produce HTTP 500.
+- Return the handler as a named export from `route.ts`; never call it manually.
 
 ## Errors, Authorization, and Codecs
 
-- Throw `XidlServerError` for an explicit HTTP status and typed JSON error.
+Pass `ServerOptions` as the optional third argument of `createRouter` or
+`createNextRoute`:
+
+```ts
+export const POST = createNextRoute(
+  UserServiceOperations.create_user,
+  userService,
+  {
+    authorize: async (request, requirements) => {
+      // inspect headers/cookies, throw XidlServerError to reject
+    },
+    onError: async (error, context) => {
+      // map unexpected errors to a custom response
+    },
+    codecs: {
+      'application/msgpack': {
+        decode: async (response, schema) => { /* ... */ },
+        encode: (value, schema) => { /* ... */ },
+      },
+    },
+  },
+);
+```
+
+- Throw `XidlServerError(status, message)` from the service for an explicit
+  HTTP status and typed JSON error body.
 - Invalid generated request schemas return HTTP 400 responses.
 - Unsupported request and response media types return HTTP 415 and 406.
-- Pass `authorize`, `codecs`, or `onError` through the optional third argument
-  of `createRouter` or `createNextRoute`.
-- SSE server streams, NDJSON client streams, and raw byte streams are handled by
-  the runtime according to the generated operation metadata.
+- `authorize` receives the original request, the operation's security
+  requirements, and a `ServerContext`; throw to reject the request.
+- `codecs` overrides request/response encoding per media type.
+- `onError` handles unexpected errors, for example to add logging; the default
+  hides the error details behind a generic 500 response.
+
+## Streaming
+
+Operations declared with streaming media types are handled by the runtime
+according to the generated operation metadata, with no per-operation code in
+the service or route handler:
+
+- SSE server streams and NDJSON client streams work through the same
+  `createRouter` / `createNextRoute` handlers.
+- `sequence<octet>` mapped to raw byte streams is served as `Response` bodies.
 
 ## Recommended Reading
 
-- [Next.js Server Integration](../nextjs/)
-- [RESTful Basics](../)
-- [HTTP Stream](../stream/)
-- [HTTP Security](../security/)
+- [HTTP & REST Basics](../)
+- [HTTP Streaming](../stream/)
+- [HTTP Authentication](../security/)
 - [Target Generators](../../docs/targets/)

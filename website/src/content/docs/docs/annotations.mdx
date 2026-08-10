@@ -1,0 +1,71 @@
+---
+title: "Annotations"
+description: "XIDL built-in annotations: rename, rename_all, skip, and optional."
+sidebar:
+  order: 3
+---
+
+This page is the single reference for annotations that are built into the XIDL
+language. Protocol-specific annotations (HTTP verbs, streams, security, ...)
+are documented in their own sections.
+
+## `@rename`
+
+`@rename("...")` is used to rename the serialized name of a field or
+parameter.
+
+- Acts on `struct` / `union` members and method parameters.
+- Used as the wire / property name when generating HTTP / JSON mappings.
+- Typically maps to `#[serde(rename = "...")]` in Rust.
+
+Example:
+
+```idl
+struct User {
+  uint32 id;
+  @rename("new_name")
+  string name;
+};
+```
+
+## `@rename_all`
+
+`@rename_all("...")` renames all fields of a struct, or all parameters of a
+method, according to a naming rule.
+
+```idl
+@rename_all("snake_case")
+struct User {
+  uint32 id;
+  string name;
+};
+```
+
+Supported parameters:
+
+- lowercase
+- UPPERCASE
+- PascalCase
+- camelCase
+- snake_case
+- SCREAMING_SNAKE_CASE
+- kebab-case
+- SCREAMING-KEBAB-CASE
+
+## `@skip`
+
+`@skip` excludes a struct field from serialization and deserialization:
+
+```idl
+struct User {
+  uint32 id;
+  @skip
+  string internal_note;
+};
+```
+
+## `@optional`
+
+`@optional` marks a field or parameter that may be absent. In HTTP scenarios,
+optional query parameters and body fields can be omitted; path parameters
+cannot be optional. See the [HTTP RFC](../../rfc/http/) for details.

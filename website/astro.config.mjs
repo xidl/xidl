@@ -64,7 +64,7 @@ export default defineConfig({
         {
           items: [
             {
-              label: 'Install',
+              label: 'Install & Quickstart',
               link: '/guide/',
             },
             {
@@ -72,27 +72,31 @@ export default defineConfig({
               link: '/guide/first-http-api/',
             },
             {
+              label: 'Rust Integration',
+              link: '/guide/rust-integration/',
+            },
+            {
               label: 'Editor',
               link: '/guide/editor/',
             },
             {
-              label: 'Rust Integration',
-              link: '/guide/rust-integration/',
+              label: 'Language Support',
+              link: '/guide/language-support/',
             },
           ],
           label: 'Guide',
         },
         {
           autogenerate: { directory: 'docs' },
-          label: 'Docs',
+          label: 'Reference',
         },
         {
           autogenerate: { directory: 'rest' },
-          label: 'xidl_for_rest',
+          label: 'HTTP & REST',
         },
         {
           autogenerate: { directory: 'jsonrpc' },
-          label: 'xidl_for_jsonrpc',
+          label: 'JSON-RPC',
         },
         {
           autogenerate: { directory: 'rfc' },

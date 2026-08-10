@@ -1,6 +1,8 @@
 ---
 title: "Compiler Pragmas"
-description: "XIDL compiler pragmas"
+description: "XIDL compiler pragmas: package, version, and service declarations."
+sidebar:
+  order: 4
 ---
 
 # Compiler Pragmas
@@ -13,28 +15,45 @@ XIDL supports `#pragma xidlc ...` directives to provide extra configuration for 
 #pragma xidlc ...
 ```
 
-## OpenAPI Metadata
+## `package`
 
-Supported:
+Sets the package name, which maps to OpenAPI `info.title`:
 
 ```idl
 #pragma xidlc package rev-tunnel
 #pragma xidlc package "rev-tunnel"
 ```
 
-Effect:
+## `version`
 
-- Sets OpenAPI `info.title`.
-
-## OpenAPI Version
-
-Supported:
+Sets the package version, which maps to OpenAPI `info.version`:
 
 ```idl
 #pragma xidlc version v1.0.0
 #pragma xidlc version "1.0.0"
 ```
 
-Effect:
+## `service`
 
-- Sets OpenAPI `info.version`.
+Declares an API endpoint with a service name. The name is optional and defaults
+to the endpoint:
+
+```idl
+#pragma xidlc service <api-endpoint> [api-name]
+```
+
+Example:
+
+```idl
+#pragma xidlc package E2E HTTP Stream Test
+#pragma xidlc version v1.0.0
+#pragma xidlc service http://127.0.0.1:8080 dev server
+#pragma xidlc service http://127.0.0.1:8081 product
+```
+
+This defines a package named `E2E HTTP Stream Test` with version `v1.0.0`,
+containing two services: `dev` and `product`.
+
+## Related Pages
+
+- [OpenAPI Metadata](../../rest/openapi/)
