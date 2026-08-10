@@ -1,29 +1,15 @@
 ---
-title: "Serialization and Deserialization"
-description: "XIDL Serialization and Deserialization"
+title: "Serialization"
+description: "How XIDL maps method parameters and return values to HTTP request and response bodies."
+sidebar:
+  order: 1
 ---
 
-XIDL supports modifying serialization and deserialization behavior through annotations.
+This page describes how method parameters and return values are shaped into
+HTTP request and response bodies.
 
-| Annotation                            | Action                                       | Scope                             |
-| ---                                   | ---                                          | ---                               |
-| @rename("new_name")                   | Rename a parameter or field                  | Method parameters, struct fields  |
-| @rename_all("rule")                   | Bulk rename parameters or fields             | Method parameters, struct fields  |
-| @skip                                 | Skip serialization/deserialization of a field| Struct fields                     |
-
-## Rename All Fields
-
-The `@rename_all` annotation allows bulk renaming of method parameters or struct fields. Supported naming rules include:
-
-- None
-- lowercase
-- UPPERCASE
-- PascalCase
-- camelCase
-- snake_case
-- SCREAMINGSNAKECASE
-- kebab-case
-- SCREAMING-KEBAB-CASE
+Renaming and skipping annotations (`@rename`, `@rename_all`, `@skip`,
+`@optional`) are documented on the [Annotations](../../docs/annotations/) page.
 
 ## Parameter Encoding Methods
 
@@ -42,3 +28,8 @@ The `@rename_all` annotation allows bulk renaming of method parameters or struct
 ### Multi-return Value Encoding Method
 
 ![Multi-return Value Encoding Method](./serialize/multi-return.svg)
+
+## Recommended Reading
+
+- [HTTP & REST Basics](../)
+- [Annotations](../../docs/annotations/)
