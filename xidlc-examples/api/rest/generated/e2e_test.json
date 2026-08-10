@@ -4153,10 +4153,10 @@
         },
         "security": [
           {
-            "oauth2": [
-              "reports:write",
-              "reports:read"
-            ]
+            "http_basic": []
+          },
+          {
+            "api_key-header-x-org-key": []
           }
         ]
       }
@@ -4549,10 +4549,10 @@
         },
         "security": [
           {
-            "oauth2": [
-              "reports:write",
-              "reports:read"
-            ]
+            "http_basic": []
+          },
+          {
+            "api_key-query-org_key": []
           }
         ]
       }
@@ -4764,18 +4764,6 @@
       "http_bearer": {
         "type": "http",
         "scheme": "bearer"
-      },
-      "oauth2": {
-        "type": "oauth2",
-        "flows": {
-          "clientCredentials": {
-            "tokenUrl": "https://example.invalid/token",
-            "scopes": {
-              "reports:read": "reports:read",
-              "reports:write": "reports:write"
-            }
-          }
-        }
       }
     }
   },

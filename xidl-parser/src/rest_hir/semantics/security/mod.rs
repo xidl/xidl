@@ -2,9 +2,7 @@ use crate::hir;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
-use super::annotations::{
-    annotation_name, annotation_params, normalize_annotation_params, parse_string_array,
-};
+use super::annotations::{annotation_name, annotation_params, normalize_annotation_params};
 
 #[cfg(test)]
 mod tests;
@@ -23,9 +21,6 @@ pub enum HttpSecurityRequirement {
     ApiKey {
         location: HttpApiKeyLocation,
         name: String,
-    },
-    OAuth2 {
-        scopes: Vec<String>,
     },
 }
 
@@ -124,8 +119,6 @@ pub(crate) fn collect_security(
             Some(HttpSecurityRequirement::HttpBearer)
         } else if name.eq_ignore_ascii_case("api_key") {
             Some(parse_api_key(annotation)?)
-        } else if name.eq_ignore_ascii_case("oauth2") {
-            Some(parse_oauth2(annotation))
         } else {
             None
         };
@@ -170,15 +163,4 @@ fn parse_api_key(annotation: &hir::Annotation) -> Result<HttpSecurityRequirement
         .filter(|value| !value.is_empty())
         .ok_or_else(|| "@api_key requires non-empty name=...".to_string())?;
     Ok(HttpSecurityRequirement::ApiKey { location, name })
-}
-
-fn parse_oauth2(annotation: &hir::Annotation) -> HttpSecurityRequirement {
-    let params = annotation_params(annotation)
-        .map(normalize_annotation_params)
-        .unwrap_or_default();
-    let scopes = params
-        .get("scopes")
-        .map(|value| parse_string_array(value))
-        .unwrap_or_default();
-    HttpSecurityRequirement::OAuth2 { scopes }
 }

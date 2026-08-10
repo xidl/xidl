@@ -261,7 +261,8 @@ type HttpSecurityInheritanceServiceUpdateReportResponse struct {
 
 func HttpSecurityInheritanceServiceUpdateReportSecurityRequirements() []xidlgohttp.SecurityRequirement {
 	return []xidlgohttp.SecurityRequirement{
-		{Kind: xidlgohttp.SecurityOAuth2, Scopes: []string{"reports:write"}},
+		{Kind: xidlgohttp.SecurityBasic, Realm: "updatereport"},
+		{Kind: xidlgohttp.SecurityAPIKey, Location: xidlgohttp.ApiKeyHeader, Name: "X-Org-Key"},
 	}
 }
 

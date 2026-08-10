@@ -1724,6 +1724,7 @@ pub trait HttpSecurityMatrixService {
         &self,
         keyword: String,
         page: Option<u32>,
+        xidl_auth: xidl_rust_axum::ClientAuth,
     ) -> ::xidl_rust_axum::Result<String>;
     async fn public_ping(&self) -> ::xidl_rust_axum::Result<String>;
 }
@@ -2247,10 +2248,26 @@ where
         if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
+        let basic = xidl_rust_axum::auth::basic::extract_basic_auth(&headers).ok();
+        let bearer = None;
+        let mut api_keys = ::std::vec![];
+        if let Ok(key) = ::xidl_rust_axum::auth::api_key::extract_api_key(
+            &headers,
+            &uri,
+            ::xidl_rust_axum::ApiKeyLocation::Query,
+            "org_key",
+        ) {
+            api_keys.push(key);
+        }
+        let xidl_auth = ::xidl_rust_axum::ClientAuth {
+            basic,
+            bearer,
+            api_keys,
+        };
         let HttpSecurityMatrixServiceOauthSecurityRequest { keyword, page } = request;
         let keyword: String = keyword;
         let page: Option<u32> = page;
-        let mut resp = match svc.oauth_security(keyword, page).await {
+        let mut resp = match svc.oauth_security(keyword, page, xidl_auth).await {
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: String = resp_value;
@@ -2592,6 +2609,15 @@ impl HttpSecurityMatrixServiceClient {
             );
         let auth_target = &self.client;
         let _ = auth_target;
+        auth_target.apply_auth(&mut req, xidl_rust_axum::ClientAuthRequirement::Basic)?;
+        auth_target
+            .apply_auth(
+                &mut req,
+                xidl_rust_axum::ClientAuthRequirement::ApiKey {
+                    location: xidl_rust_axum::ApiKeyLocation::Query,
+                    name: "org_key",
+                },
+            )?;
         let body = HttpSecurityMatrixServiceOauthSecurityRequestOutBody {
             keyword,
             page,

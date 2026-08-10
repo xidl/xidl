@@ -258,28 +258,18 @@ pub(super) fn security_contexts(op: &HttpOperation) -> Vec<SecurityContext> {
                         location: None,
                         name: None,
                         realm: op.meta.basic_auth_realm.clone(),
-                        scopes: Vec::new(),
                     },
                     HttpSecurityRequirement::HttpBearer => SecurityContext {
                         kind: "http_bearer".to_string(),
                         location: None,
                         name: None,
                         realm: None,
-                        scopes: Vec::new(),
                     },
                     HttpSecurityRequirement::ApiKey { location, name } => SecurityContext {
                         kind: "api_key".to_string(),
                         location: Some(format!("{location:?}").to_ascii_lowercase()),
                         name: Some(name.clone()),
                         realm: None,
-                        scopes: Vec::new(),
-                    },
-                    HttpSecurityRequirement::OAuth2 { scopes } => SecurityContext {
-                        kind: "oauth2".to_string(),
-                        location: None,
-                        name: None,
-                        realm: None,
-                        scopes: scopes.clone(),
                     },
                 })
                 .collect()

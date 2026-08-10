@@ -440,7 +440,6 @@ interface E2eHttpSecurity {
         string trace_id
     );
 
-    @oauth2(scopes = "reports:write,reports:read")
     @post(path = "/v2/secure/search")
     string search_secure_user(
         string keyword,
@@ -489,7 +488,6 @@ interface E2eHttpSecurityMatrix {
         string locale
     );
 
-    @oauth2(scopes = "reports:write,reports:read")
     @post(path = "/v2/security/oauth-search")
     string oauth_security(
         string keyword,

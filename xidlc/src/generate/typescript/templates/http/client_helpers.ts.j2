@@ -11,8 +11,7 @@ export interface HttpCodec {
 export type ClientAuth =
 | { kind: "basic"; username: string; password: string }
 | { kind: "bearer"; token: string }
-| { kind: "api_key"; value: string; name?: string; location?: string }
-| { kind: "oauth2"; token: string; scopes?: string[] };
+| { kind: "api_key"; value: string; name?: string; location?: string };
 
 export interface ClientOptions {
     fetch?: FetchLike;
@@ -26,7 +25,6 @@ type SecurityRequirement = {
     location?: string;
     name?: string;
     realm?: string;
-    scopes: string[];
 };
 
 export class XidlClientError extends Error {
@@ -171,7 +169,6 @@ requirements: SecurityRequirement[],
         headers.set("Authorization", `Basic ${btoa(`${auth.username}:${auth.password}`)}`);
         break;
         case "bearer":
-        case "oauth2":
         headers.set("Authorization", `Bearer ${auth.token}`);
         break;
         case "api_key": {

@@ -1338,7 +1338,8 @@ type HttpSecurityMatrixServiceOauthSecurityResponse struct {
 
 func HttpSecurityMatrixServiceOauthSecuritySecurityRequirements() []xidlgohttp.SecurityRequirement {
 	return []xidlgohttp.SecurityRequirement{
-		{Kind: xidlgohttp.SecurityOAuth2, Scopes: []string{"reports:write", "reports:read"}},
+		{Kind: xidlgohttp.SecurityBasic, Realm: "matrix realm"},
+		{Kind: xidlgohttp.SecurityAPIKey, Location: xidlgohttp.ApiKeyQuery, Name: "org_key"},
 	}
 }
 

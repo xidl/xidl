@@ -1,6 +1,5 @@
 ---
 source: xidl-parser/tests/test-annotation.rs
-assertion_line: 64
 expression: ast
 ---
 Specification(
@@ -319,19 +318,6 @@ Specification(
                                                                     ),
                                                                 },
                                                             ],
-                                                        ),
-                                                    ),
-                                                    builtin: None,
-                                                    is_extend: false,
-                                                    extra: [],
-                                                },
-                                                AnnotationAppl {
-                                                    name: Builtin(
-                                                        "oauth2",
-                                                    ),
-                                                    params: Some(
-                                                        Raw(
-                                                            "scopes = [\"read:users\", \"write:users\"]",
                                                         ),
                                                     ),
                                                     builtin: None,

@@ -39,7 +39,7 @@ export const {{ service_name }}Operations = {
             {% if method.stream_item_schema_ref %}streamSchema: ifaceSchemas.{{ method.stream_item_schema_ref }}Schema,
             {% endif %}
         },
-        security: [{% for security in method.security %}{ kind: "{{ security.kind }}"{% if security.location %}, location: "{{ security.location }}"{% endif %}{% if security.name %}, name: "{{ security.name }}"{% endif %}{% if security.realm %}, realm: "{{ security.realm }}"{% endif %}, scopes: [{% for scope in security.scopes %}"{{ scope }}"{% if not loop.last %}, {% endif %}{% endfor %}] }{% if not loop.last %}, {% endif %}{% endfor %}],
+        security: [{% for security in method.security %}{ kind: "{{ security.kind }}"{% if security.location %}, location: "{{ security.location }}"{% endif %}{% if security.name %}, name: "{{ security.name }}"{% endif %}{% if security.realm %}, realm: "{{ security.realm }}"{% endif %} }{% if not loop.last %}, {% endif %}{% endfor %}],
     }),
     {% endfor %}
 } as const;

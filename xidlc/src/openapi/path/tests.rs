@@ -99,8 +99,8 @@ fn operation_new() {
 #[test]
 fn operation_builder_security() {
     let security_requirement1 =
-        SecurityRequirement::new("api_oauth2_flow", ["edit:items", "read:items"]);
-    let security_requirement2 = SecurityRequirement::new("api_oauth2_flow", ["remove:items"]);
+        SecurityRequirement::new("api_token_flow", ["edit:items", "read:items"]);
+    let security_requirement2 = SecurityRequirement::new("api_token_flow", ["remove:items"]);
     let operation = OperationBuilder::new()
         .security(security_requirement1)
         .security(security_requirement2)

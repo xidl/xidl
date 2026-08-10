@@ -14,7 +14,6 @@ export interface SecurityRequirement {
   location?: string;
   name?: string;
   realm?: string;
-  scopes: string[];
 }
 
 export interface ValueBinding {
