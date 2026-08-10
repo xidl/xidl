@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.0](https://github.com/xidl/xidl/compare/v0.87.0...v1.0.0) (2026-08-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove oauth2 authentication support
+
+### Features
+
+* remove oauth2 authentication support ([4f9bb76](https://github.com/xidl/xidl/commit/4f9bb76ddcbf53ceebd07a6c0e088da4a3dbff13))
+* **rust-axum:** move api_key auth into shared auth module ([fcf5479](https://github.com/xidl/xidl/commit/fcf54798b2283faeb293aab8ae2a3c8ecda9b813))
+
 ## [0.87.0](https://github.com/xidl/xidl/compare/v0.86.1...v0.87.0) (2026-08-07)
 
 

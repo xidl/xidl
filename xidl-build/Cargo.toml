@@ -32,4 +32,4 @@ gen-openrpc = ["xidlc/gen-openrpc"]
 
 [dependencies]
 tokio.workspace = true
-xidlc = { version = "0.87.0", path = "../xidlc", default-features = false }
+xidlc = { version = "1.0.0", path = "../xidlc", default-features = false }
