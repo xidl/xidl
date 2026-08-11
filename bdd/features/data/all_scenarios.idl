@@ -43,7 +43,7 @@ interface AllScenariosService {
 
     // Media Types
     @post(path = "/upload")
-    @Consumes("application/x-www-form-urlencoded")
+    @request("urlencoded")
     void upload_form(string key, string value);
 
     // Security (per-method override)

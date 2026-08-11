@@ -100,44 +100,44 @@ pub fn effective_media_type(
 ) -> Option<String> {
     annotation_value(method_annotations, target)
         .or_else(|| annotation_value(interface_annotations, target))
+        .and_then(|value| media_type_token_to_mime(&value).map(str::to_string))
 }
 
 pub(crate) fn annotation_value(annotations: &[hir::Annotation], target: &str) -> Option<String> {
     annotations.iter().find_map(|annotation| {
         let name = annotation_name(annotation)?;
-        if !media_type_annotation_matches(name, target) {
+        if !name.eq_ignore_ascii_case(target) {
             return None;
         }
         let params = annotation_params(annotation)?;
         let params = normalize_annotation_params(params);
         params.get("value").cloned().or_else(|| {
-            media_type_annotation_param_keys(target)
+            media_type_param_keys(target)
                 .iter()
-                .find_map(|alias| params.get(&alias.to_ascii_lowercase()).cloned())
+                .find_map(|key| params.get(&key.to_ascii_lowercase()).cloned())
         })
     })
 }
 
-pub(crate) fn media_type_annotation_aliases(target: &str) -> &'static [&'static str] {
-    if target.eq_ignore_ascii_case("Consumes") || target.eq_ignore_ascii_case("Consume") {
-        &["Consumes", "Consume"]
-    } else if target.eq_ignore_ascii_case("Produces") || target.eq_ignore_ascii_case("Produce") {
-        &["Produces", "Produce"]
+/// Translates a `@request`/`@response` format token into its canonical HTTP
+/// media type, or `None` when the token is not one of `json`, `urlencoded`,
+/// or `msgpack`.
+pub(crate) fn media_type_token_to_mime(token: &str) -> Option<&'static str> {
+    if token.eq_ignore_ascii_case("json") {
+        Some("application/json")
+    } else if token.eq_ignore_ascii_case("urlencoded") {
+        Some("application/x-www-form-urlencoded")
+    } else if token.eq_ignore_ascii_case("msgpack") {
+        Some("application/msgpack")
+    } else {
+        None
+    }
+}
+
+fn media_type_param_keys(target: &str) -> &'static [&'static str] {
+    if target.eq_ignore_ascii_case("request") || target.eq_ignore_ascii_case("response") {
+        &["format"]
     } else {
         &[]
     }
-}
-
-fn media_type_annotation_matches(name: &str, target: &str) -> bool {
-    if target.eq_ignore_ascii_case("Consumes") || target.eq_ignore_ascii_case("Consume") {
-        name.eq_ignore_ascii_case("Consumes") || name.eq_ignore_ascii_case("Consume")
-    } else if target.eq_ignore_ascii_case("Produces") || target.eq_ignore_ascii_case("Produce") {
-        name.eq_ignore_ascii_case("Produces") || name.eq_ignore_ascii_case("Produce")
-    } else {
-        name.eq_ignore_ascii_case(target)
-    }
-}
-
-fn media_type_annotation_param_keys(target: &str) -> &'static [&'static str] {
-    media_type_annotation_aliases(target)
 }

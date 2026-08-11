@@ -105,8 +105,6 @@ fn render_openapi_json_preserves_text_plain_content_types() {
         r#"
         interface PlainTextApi {
           @route(method="POST", path="/echo")
-          @Consumes("text/plain")
-          @Produces("text/plain")
           string echo(in string body);
         };
         "#,
@@ -131,12 +129,10 @@ fn render_openapi_json_preserves_text_plain_content_types() {
 }
 
 #[test]
-fn render_openapi_json_uses_produce_alias_for_get_response_content_type() {
+fn render_openapi_json_derives_text_plain_for_primitive_response() {
     let spec = parse_spec(
         r#"
         interface HttpService {
-          @Consume("text/plain")
-          @Produce("text/plain")
           @get(path = "/ip")
           string get_ip();
         };

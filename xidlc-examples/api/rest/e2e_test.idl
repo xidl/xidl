@@ -185,7 +185,7 @@ interface E2ePathSever {
 
 };
 
-@Consumes("application/x-www-form-urlencoded")
+@request("urlencoded")
 interface E2eHttpForm {
     @post(path = "/v2/forms/profile")
     string submit_profile(
@@ -198,8 +198,8 @@ interface E2eHttpForm {
 };
 
 @deprecated("2026-01-15")
-@Consumes("application/json")
-@Produces("application/json")
+@request("json")
+@response("json")
 interface E2eHttpScopeMatrix {
     readonly attribute string scope_inherited_attr;
     @deprecated
@@ -210,7 +210,7 @@ interface E2eHttpScopeMatrix {
     );
 
     @post(path = "/v2/scope/override-consumes")
-    @Consumes("application/x-www-form-urlencoded")
+    @request("urlencoded")
     string override_consumes_only(
         string name,
         @optional
@@ -219,7 +219,7 @@ interface E2eHttpScopeMatrix {
     );
 
     @get(path = "/v2/scope/override-produces/{id}")
-    @Produces("application/msgpack")
+    @response("msgpack")
     StructHttpBody override_produces_only(
         @path
         @rename("id")
@@ -228,8 +228,8 @@ interface E2eHttpScopeMatrix {
     );
 
     @post(path = "/v2/scope/override-both")
-    @Consumes("application/x-www-form-urlencoded")
-    @Produces("application/msgpack")
+    @request("urlencoded")
+    @response("msgpack")
     StructHttpBody override_both_media(
         string name,
         @optional
@@ -356,7 +356,7 @@ interface E2eHttpRouteAndBody {
     );
 
     @get(path = "/v2/msgpack/resources/{id}")
-    @Produces("application/msgpack")
+    @response("msgpack")
     StructHttpBody get_msgpack_resource(
         @path
         @rename("id")

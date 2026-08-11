@@ -90,21 +90,21 @@ interface UserApi {
 
 ## Media Type Inheritance and Overriding
 
-Use the `@Consumes` and `@Produces` annotations to specify the request and response media types. Both support interface-level defaults and method-level overrides.
+Use the `@request` and `@response` annotations to specify the request and response media types. Instead of a full MIME type, they take a format token: `json`, `urlencoded`, or `msgpack`. Both support interface-level defaults and method-level overrides.
 
 ```idl
-@Consumes("application/json")
-@Produces("application/json")
+@request("json")
+@response("json")
 interface ScopeApi {
     @post(path = "/v1/default")
     string defaultScope(string name);
 
     @post(path = "/v1/form")
-    @Consumes("application/x-www-form-urlencoded")
+    @request("urlencoded")
     string submitForm(string name, uint32 age);
 
     @get(path = "/v1/msgpack/{id}")
-    @Produces("application/msgpack")
+    @response("msgpack")
     string getPacked(@path @rename("id") string id);
 };
 ```

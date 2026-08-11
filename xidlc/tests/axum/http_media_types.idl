@@ -3,13 +3,13 @@
 
 interface HttpMediaService {
     @post
-    @Consumes("application/x-www-form-urlencoded")
+    @request("urlencoded")
     string submit_form(
         string name,
         uint32 age
     );
     @post
-    @Produces("application/msgpack")
+    @response("msgpack")
     string fetch_msgpack(
         @query
         string id

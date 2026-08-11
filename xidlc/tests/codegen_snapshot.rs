@@ -167,7 +167,7 @@ interface ContentTypeCheckService {
     );
 
     @post(path = "/explicit")
-    @Consumes("application/json")
+    @request("json")
     string explicit_create(
         CreatePayload req
     );
