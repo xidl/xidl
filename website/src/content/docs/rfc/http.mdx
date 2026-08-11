@@ -36,8 +36,8 @@ This RFC mainly covers:
 - `@head(path = "...")`
 - `@options(path = "...")`
 - `@path @rename("...")`
-- `@Consumes("mime/type")`
-- `@Produces("mime/type")`
+- `@request("json" | "urlencoded" | "msgpack")`
+- `@response("json" | "urlencoded" | "msgpack")`
 - `@cors(...)`
 - `@deprecated`
 
@@ -143,10 +143,21 @@ Common interpretation in HTTP mapping:
 
 ## Media Types
 
-`@Consumes` and `@Produces` respectively define:
+`@request` and `@response` respectively define:
 
 - Request body decoding format.
 - Response body encoding format.
+
+The format tokens map to concrete MIME types:
+
+- `json` -> `application/json`
+- `urlencoded` -> `application/x-www-form-urlencoded`
+- `msgpack` -> `application/msgpack`
+
+`text/plain` and `application/octet-stream` are derived automatically and must
+not be declared with these annotations: primitive values serialize as
+`text/plain`, and `sequence<octet>` stream payloads are raw byte streams
+(`application/octet-stream`).
 
 Serialization rules:
 

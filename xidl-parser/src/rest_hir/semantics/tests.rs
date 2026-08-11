@@ -63,18 +63,31 @@ fn validate_http_annotations_checks_security_and_media_type() {
                     string("https://admin.example.com"),
                 ],
             ),
-            builtin("Consume", r#""application/json""#),
-            builtin("Produce", r#""text/plain""#),
+            builtin("request", r#""json""#),
+            builtin("response", r#""msgpack""#),
         ],
     )
     .expect("valid annotation set");
 
+    let err = validate_http_annotations("operation 'bad'", &[builtin("response", r#""xml""#)])
+        .expect_err("bad media type");
+    assert!(err.contains(
+        "unsupported @response(\"xml\") format, expected 'json', 'urlencoded', or 'msgpack'"
+    ));
+
     let err = validate_http_annotations(
-        "operation 'bad'",
-        &[builtin("Produces", r#""application/xml""#)],
+        "operation 'mime'",
+        &[builtin("request", r#""application/json""#)],
     )
-    .expect_err("bad media type");
-    assert!(err.contains("unsupported @Produces(\"application/xml\") media type"));
+    .expect_err("mime string media type");
+    assert!(err.contains("unsupported @request(\"application/json\") format"));
+
+    let err = validate_http_annotations(
+        "operation 'plain'",
+        &[builtin("response", r#""text/plain""#)],
+    )
+    .expect_err("explicit text/plain");
+    assert!(err.contains("unsupported @response(\"text/plain\") format"));
 
     let err = validate_http_annotations(
         "operation 'secure'",
@@ -92,7 +105,7 @@ fn validate_http_annotations_checks_security_and_media_type() {
 
     validate_http_annotations(
         "operation 'empty'",
-        &[builtin("Produces", ""), Annotation::Final],
+        &[builtin("response", ""), Annotation::Final],
     )
     .expect("empty media annotation should be ignored");
 }

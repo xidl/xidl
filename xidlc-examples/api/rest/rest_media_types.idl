@@ -3,7 +3,7 @@
 
 interface RestMediaTypesApi {
     @post(path = "/v1/forms/profile")
-    @Consumes("application/x-www-form-urlencoded")
+    @request("urlencoded")
     string submit_profile(
         string name,
         uint32 age,
@@ -11,7 +11,7 @@ interface RestMediaTypesApi {
     );
 
     @get(path = "/v1/msgpack/users/{user_id}")
-    @Produces("application/msgpack")
+    @response("msgpack")
     string get_msgpack_user(
         @path
         @rename("user_id")

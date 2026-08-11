@@ -81,17 +81,14 @@ fn validate_rest_media_types(target: &str, annotations: &[hir::Annotation]) -> R
         let Some(name) = annotation_name(annotation) else {
             continue;
         };
-        let canonical = if annotations::media_type_annotation_aliases("Consumes")
-            .iter()
-            .any(|alias| name.eq_ignore_ascii_case(alias))
-        {
-            "Consumes"
-        } else if annotations::media_type_annotation_aliases("Produces")
-            .iter()
-            .any(|alias| name.eq_ignore_ascii_case(alias))
-        {
-            "Produces"
+        let canonical = if name.eq_ignore_ascii_case("request") {
+            Some("request")
+        } else if name.eq_ignore_ascii_case("response") {
+            Some("response")
         } else {
+            None
+        };
+        let Some(canonical) = canonical else {
             continue;
         };
         let Some(value) =
@@ -99,21 +96,14 @@ fn validate_rest_media_types(target: &str, annotations: &[hir::Annotation]) -> R
         else {
             continue;
         };
-        if is_supported_http_media_type(&value) {
+        if annotations::media_type_token_to_mime(&value).is_some() {
             continue;
         }
         return Err(format!(
-            "{target}: unsupported @{name}(\"{value}\") media type"
+            "{target}: unsupported @{name}(\"{value}\") format, expected 'json', 'urlencoded', or 'msgpack'"
         ));
     }
     Ok(())
-}
-
-fn is_supported_http_media_type(value: &str) -> bool {
-    value.eq_ignore_ascii_case("application/json")
-        || value.eq_ignore_ascii_case("application/x-www-form-urlencoded")
-        || value.eq_ignore_ascii_case("application/msgpack")
-        || value.eq_ignore_ascii_case("text/plain")
 }
 
 fn validate_deprecated_range(since: &str, after: &str) -> Result<(), String> {

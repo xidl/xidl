@@ -269,9 +269,9 @@ fn project_operation(
     .map_err(parse_err)?;
 
     let request_content_type =
-        effective_media_type(interface_annotations, &op.annotations, "Consumes");
+        effective_media_type(interface_annotations, &op.annotations, "request");
     let response_content_type =
-        effective_media_type(interface_annotations, &op.annotations, "Produces");
+        effective_media_type(interface_annotations, &op.annotations, "response");
     let cors =
         effective_cors(interface_annotations, &op.annotations).map_err(ParseError::Message)?;
     let security = effective_security_with_origin(interface_annotations, &op.annotations)

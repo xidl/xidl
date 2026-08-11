@@ -46,12 +46,14 @@
     string after default ""; // optional
 };
 
-@annotation Consumes {
-    string mime_type;
+// interface, op
+@annotation request {
+    string format;
 };
 
-@annotation Produces {
-    string mime_type;
+// interface, op
+@annotation response {
+    string format;
 };
 
 @annotation upgrade {

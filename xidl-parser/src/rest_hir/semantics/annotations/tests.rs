@@ -22,8 +22,8 @@ fn annotation_helpers_cover_names_presence_and_values() {
     assert_eq!(annotation_name(&scoped), Some("flag"));
     assert!(annotation_params(&scoped).is_some());
 
-    let annotations = vec![builtin("Optional", None), builtin("Consumes", None)];
-    assert!(has_annotation(&annotations, "consumes"));
+    let annotations = vec![builtin("Optional", None), builtin("request", None)];
+    assert!(has_annotation(&annotations, "request"));
     assert!(has_optional_annotation(&annotations));
     assert!(annotation_params(&Annotation::Final).is_none());
 }
@@ -54,37 +54,63 @@ fn normalize_annotation_params_handles_all_param_forms() {
 }
 
 #[test]
-fn media_type_resolution_prefers_method_and_returns_none_when_missing() {
+fn media_type_resolution_prefers_method_and_translates_tokens() {
     let interface = vec![builtin(
-        "Consume",
-        Some(AnnotationParams::Raw("\"application/msgpack\"".to_string())),
+        "request",
+        Some(AnnotationParams::Raw("\"msgpack\"".to_string())),
     )];
     let method = vec![builtin(
-        "Consumes",
-        Some(AnnotationParams::Raw("\"text/plain\"".to_string())),
+        "request",
+        Some(AnnotationParams::Raw("\"json\"".to_string())),
     )];
     assert_eq!(
-        effective_media_type(&interface, &method, "Consumes"),
-        Some("text/plain".to_string())
+        effective_media_type(&interface, &method, "request"),
+        Some("application/json".to_string())
     );
-    assert_eq!(effective_media_type(&[], &[], "Produces"), None);
+    assert_eq!(effective_media_type(&[], &[], "response"), None);
     assert_eq!(
-        annotation_value(&interface, "Consumes").as_deref(),
-        Some("application/msgpack")
+        annotation_value(&interface, "request").as_deref(),
+        Some("msgpack")
     );
     assert_eq!(
         annotation_value(
             &[builtin(
-                "Produce",
-                Some(AnnotationParams::Raw("\"text/plain\"".to_string()))
+                "response",
+                Some(AnnotationParams::Raw("urlencoded".to_string()))
             )],
-            "Produces"
+            "response"
         )
         .as_deref(),
-        Some("text/plain")
+        Some("urlencoded")
     );
-    assert!(media_type_annotation_aliases("Other").is_empty());
-    assert!(media_type_annotation_matches("X-Codec", "x-codec"));
+    assert_eq!(
+        annotation_value(
+            &[builtin(
+                "response",
+                Some(AnnotationParams::Params(vec![AnnotationParam {
+                    ident: "Format".to_string(),
+                    value: Some(ConstExpr::Literal(Literal::StringLiteral(
+                        "\"msgpack\"".to_string(),
+                    ))),
+                }]))
+            )],
+            "response"
+        )
+        .as_deref(),
+        Some("msgpack")
+    );
+    assert_eq!(media_type_token_to_mime("json"), Some("application/json"));
+    assert_eq!(
+        media_type_token_to_mime("urlencoded"),
+        Some("application/x-www-form-urlencoded")
+    );
+    assert_eq!(
+        media_type_token_to_mime("msgpack"),
+        Some("application/msgpack")
+    );
+    assert_eq!(media_type_token_to_mime("text/plain"), None);
+    assert_eq!(media_type_token_to_mime("octet"), None);
+    assert_eq!(media_type_token_to_mime("sse"), None);
     assert_eq!(
         annotation_value(
             &[builtin(

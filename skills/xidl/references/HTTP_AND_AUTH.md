@@ -64,13 +64,21 @@ interface PublicApi { ... };
 
 ## 5. Media Types
 
-Override default JSON serialization.
+Override the default JSON serialization with the `@request` / `@response`
+annotations. They take a format token: `json`, `urlencoded`, or `msgpack`.
 
 ```idl
-@Consumes("application/x-www-form-urlencoded")
-@Produces("application/octet-stream")
-void upload_data(sequence<uint8> data);
+@post(path = "/submit")
+@request("urlencoded")
+@response("msgpack")
+string submit(string name, uint32 age);
 ```
+
+Implicit media types are never declared with these annotations:
+
+- `text/plain` for primitive request/response bodies.
+- `application/octet-stream` for raw byte streams (`sequence<octet>` payloads,
+  typically under `@server_stream` / `@client_stream` / `@bidi_stream`).
 
 ## 6. HTTP Streams
 

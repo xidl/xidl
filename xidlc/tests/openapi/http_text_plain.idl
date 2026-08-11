@@ -3,7 +3,5 @@
 
 interface HttpTextPlainService {
     @route(method="POST", path="/echo")
-    @Consumes("text/plain")
-    @Produces("text/plain")
     string echo(in string body);
 };
