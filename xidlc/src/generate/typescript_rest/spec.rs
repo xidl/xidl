@@ -24,7 +24,6 @@ struct ZodFileContext {
 #[derive(Serialize)]
 struct ClientFileContext {
     file_stem: String,
-    helpers: Vec<String>,
     blocks: Vec<String>,
     imports: Vec<String>,
 }
@@ -107,7 +106,6 @@ pub(crate) fn render_spec(
             "http/client.ts.j2",
             &ClientFileContext {
                 file_stem: file_stem.to_string(),
-                helpers: vec![renderer.render_template("http/client_helpers.ts.j2", &())?],
                 blocks: blocks.client,
                 imports: zod_imports.clone(),
             },

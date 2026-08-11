@@ -27,6 +27,7 @@ jobs:
           cache: "pnpm"
           cache-dependency-path: |
             typescript/xidl-typescript-codec/pnpm-lock.yaml
+            typescript/xidl-typescript-client/pnpm-lock.yaml
             typescript/xidl-typescript-server/pnpm-lock.yaml
 
       - name: Install dependencies
@@ -39,6 +40,22 @@ jobs:
 
       - name: Publish package
         working-directory: typescript/xidl-typescript-codec/
+        run: |
+          cp ../../README.md .
+          cp ../../LICENSE .
+          npm publish --registry=https://registry.npmjs.org/
+
+      - name: Install client dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: typescript/xidl-typescript-client/
+
+      - name: Build client package
+        working-directory: typescript/xidl-typescript-client/
+        run: |
+          pnpm build
+
+      - name: Publish client package
+        working-directory: typescript/xidl-typescript-client/
         run: |
           cp ../../README.md .
           cp ../../LICENSE .

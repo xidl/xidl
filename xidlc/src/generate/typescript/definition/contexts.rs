@@ -24,7 +24,6 @@ pub(crate) struct TypesFileContext {
 #[derive(Serialize)]
 pub(crate) struct ClientFileContext {
     pub(crate) file_stem: String,
-    pub(crate) helpers: Vec<String>,
     pub(crate) blocks: Vec<String>,
 }
 

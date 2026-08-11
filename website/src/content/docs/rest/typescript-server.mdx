@@ -39,10 +39,12 @@ The important outputs are:
 ## Install the Runtime
 
 ```bash
-pnpm add xidl-typescript-server xidl-typescript-codec zod
+pnpm add xidl-typescript-server xidl-typescript-client xidl-typescript-codec zod
 ```
 
-`xidl-typescript-server` uses the standard Fetch API `Request` and `Response`
+When you generate the client only, `xidl-typescript-client` provides the
+Fetch API client runtime (request building, response decoding, SSE streams,
+and auth). `xidl-typescript-server` uses the standard Fetch API `Request` and `Response`
 types, so the service implementation is independent of a particular Node.js
 framework. The Next.js App Router adapter is available from the
 `xidl-typescript-server/next` subpath.
