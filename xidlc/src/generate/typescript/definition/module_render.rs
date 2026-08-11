@@ -50,12 +50,10 @@ impl TsGenerator {
         let zod =
             renderer.render_template("zod.ts.j2", &TypesFileContext { blocks: blocks.zod })?;
         let client = if mode.allows_interfaces() {
-            let helpers = renderer.render_template("client_helpers.ts.j2", &())?;
             renderer.render_template(
                 "client.ts.j2",
                 &ClientFileContext {
                     file_stem: self.file_stem.clone(),
-                    helpers: vec![helpers],
                     blocks: blocks.client,
                 },
             )?

@@ -6,7 +6,7 @@ export class {{ client_name }}Client {
 
     constructor(baseUrl: string, options: ClientOptions = {}) {
         this.baseUrl = baseUrl;
-        this.fetchImpl = resolveFetch(options.fetch);
+        this.fetchImpl = resolveFetchLegacy(options.fetch);
         this.defaultHeaders = options.headers ?? {};
     }
     {% for method in methods %}
@@ -63,11 +63,11 @@ export class {{ client_name }}Client {
         const url = joinUrl(this.baseUrl, path);
         {% if method.is_server_stream %}
             const itemSchema = zodSchemas.{{ method.return_schema_ref }}Schema;
-            return sseJsonStream<{{ render_type(method.stream_item_ty) }}>(this.fetchImpl, url, options, itemSchema);
+            return sseJsonStreamLegacy<{{ render_type(method.stream_item_ty) }}>(this.fetchImpl, url, options, itemSchema);
         {% elif method.is_client_stream %}
             headers.set("Content-Type", "application/x-ndjson");
             const itemSchema = zodSchemas.{{ method.request_schema_ref }}Schema;
-            const streamBody = ndjsonBody<{{ render_type(method.client_stream_item_ty) }}>(stream, itemSchema);
+            const streamBody = ndjsonBodyLegacy<{{ render_type(method.client_stream_item_ty) }}>(stream, itemSchema);
             const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers, body: streamBody });
             if (!resp.ok) {
                 throw await parseXidlError(resp);

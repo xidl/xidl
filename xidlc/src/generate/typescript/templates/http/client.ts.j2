@@ -5,9 +5,31 @@
 import type * as types from "./{{ file_stem }}";
 import type * as ifaceTypes from "./{{ file_stem }}.iface";
 import * as ifaceSchemas from "./{{ file_stem }}.iface.zod";
-{% for helper in helpers %}
-    {{ helper }}
-{% endfor %}
+import { deserialize } from "xidl-typescript-codec";
+import {
+    appendCookie,
+    appendHeader,
+    appendParam,
+    applyClientAuth,
+    applyCookies,
+    byteResponseStream,
+    buildResponsePayload,
+    byteStreamBody,
+    decodeOptionalResponseBody,
+    decodeResponseBody,
+    encodePathCatchAll,
+    encodePathSegment,
+    encodeRequestBody,
+    joinUrl,
+    ndjsonBody,
+    parseXidlError,
+    resolveFetch,
+    sseJsonStream,
+    type ClientAuth,
+    type ClientOptions,
+    type FetchLike,
+    type HttpCodec,
+} from "xidl-typescript-client";
 {% for block in blocks %}
     {{ block }}
 {% endfor %}
