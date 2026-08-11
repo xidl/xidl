@@ -231,3 +231,18 @@ Feature: REST API Generation and Communication
       | rust |
       | go   |
       | ts   |
+
+  Scenario Outline: REST Reserved Word Parameters (Issue 247)
+    Given a REST IDL file "bdd/features/data/reserved_word_params.idl"
+    When I generate <lang> code for the IDL
+    Then the generated <lang> code should be valid
+    And I can run the generated <lang> server and client
+    And the client can get a monitor for device "dev-42" of type "bandwidth"
+    And the client can search by type "ssd"
+
+    Examples:
+      | lang |
+      | rust |
+      | go   |
+      | ts   |
+      | nextjs |

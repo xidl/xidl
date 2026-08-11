@@ -67,7 +67,9 @@ jobs:
               bdd/features/rest.feature:196
           - shard: rest-serialization
             port-base: 18000
-            features: bdd/features/rest.feature:208
+            features: >-
+              bdd/features/rest.feature:208
+              bdd/features/rest.feature:235
     steps:
       - name: Checkout
         uses: actions/checkout@v7

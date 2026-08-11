@@ -1,0 +1,15 @@
+interface ReservedWordService {
+    @get(path = "/devices/{id}/{type}")
+    string get_monitor(
+        @path
+        string id,
+        @path
+        string type
+    );
+
+    @get(path = "/search")
+    string search(
+        @query
+        string type
+    );
+};

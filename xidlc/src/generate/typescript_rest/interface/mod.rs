@@ -76,6 +76,7 @@ pub(crate) fn render_interface(
                         response_cookie_params: method.response_cookie_params.clone(),
                         body_entries: method.body_entries.clone(),
                         body_single: method.body_single.clone(),
+                        body_single_key: method.body_single_key.clone(),
                         return_ty: method.return_ty.clone(),
                         response_body_mode: method.response_body_mode.clone(),
                         response_body_entries: method.response_body_entries.clone(),
@@ -183,11 +184,12 @@ fn build_method_model(
         .map(|p| RequestPayloadEntry {
             raw_name: p.name.clone(),
             access: ts_ident(&p.name),
+            key_name: p.name.clone(),
         })
         .collect();
 
-    let (body_entries, body_single) = match &op.http.request.body.shape {
-        HttpRequestBodyShape::Empty => (Vec::new(), None),
+    let (body_entries, body_single, body_single_key) = match &op.http.request.body.shape {
+        HttpRequestBodyShape::Empty => (Vec::new(), None, None),
         HttpRequestBodyShape::SingleValue {
             source_param,
             flatten,
@@ -196,13 +198,15 @@ fn build_method_model(
             let entries = vec![RequestPayloadEntry {
                 raw_name: source_param.clone(),
                 access: ts_ident(source_param),
+                key_name: source_param.clone(),
             }];
             let is_text = matches!(
                 op.http.request.body.codec,
                 Some(xidl_parser::rest_hir::HttpBodyCodec::Text)
             );
             let single = (*flatten || is_text).then(|| ts_ident(source_param));
-            (entries, single)
+            let single_key = (*flatten || is_text).then(|| source_param.clone());
+            (entries, single, single_key)
         }
         HttpRequestBodyShape::Object { fields } => {
             let entries = fields
@@ -210,16 +214,18 @@ fn build_method_model(
                 .map(|f| RequestPayloadEntry {
                     raw_name: f.source_param.clone(),
                     access: ts_ident(&f.source_param),
+                    key_name: f.source_param.clone(),
                 })
                 .collect();
-            (entries, None)
+            (entries, None, None)
         }
         HttpRequestBodyShape::Stream { source_param, .. } => {
             let entries = vec![RequestPayloadEntry {
                 raw_name: source_param.clone(),
                 access: ts_ident(source_param),
+                key_name: source_param.clone(),
             }];
-            (entries, None)
+            (entries, None, None)
         }
     };
 
@@ -228,6 +234,7 @@ fn build_method_model(
         HttpResponseBodyShape::ReturnOnly { .. } => vec![RequestPayloadEntry {
             raw_name: "return".to_string(),
             access: "return".to_string(),
+            key_name: "return".to_string(),
         }],
         HttpResponseBodyShape::SingleValue { source, .. } => {
             let name = match source {
@@ -237,6 +244,7 @@ fn build_method_model(
             vec![RequestPayloadEntry {
                 raw_name: name.clone(),
                 access: ts_ident(&name),
+                key_name: name.clone(),
             }]
         }
         HttpResponseBodyShape::Object { fields } => fields
@@ -249,6 +257,7 @@ fn build_method_model(
                 RequestPayloadEntry {
                     raw_name: field.field_name.clone(),
                     access: ts_ident(&name),
+                    key_name: name.clone(),
                 }
             })
             .collect(),
@@ -263,6 +272,7 @@ fn build_method_model(
             vec![RequestPayloadEntry {
                 raw_name: name.clone(),
                 access: ts_ident(&name),
+                key_name: name.clone(),
             }]
         }
     };
@@ -361,6 +371,7 @@ fn build_method_model(
         response_cookie_params: build_response_value_params(&op.http.response.cookie),
         body_entries,
         body_single,
+        body_single_key,
         return_ty,
         response_body_mode: build_response_body_mode(op).to_string(),
         response_body_entries,

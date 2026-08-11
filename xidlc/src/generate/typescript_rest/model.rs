@@ -32,6 +32,7 @@ impl TsHttpBlocks {
 pub(super) struct RequestPayloadEntry {
     pub(super) raw_name: String,
     pub(super) access: String,
+    pub(super) key_name: String,
 }
 
 #[derive(Clone, Serialize)]
@@ -154,6 +155,7 @@ pub(super) struct MethodModel {
     pub(super) response_cookie_params: Vec<ValueParamContext>,
     pub(super) body_entries: Vec<RequestPayloadEntry>,
     pub(super) body_single: Option<String>,
+    pub(super) body_single_key: Option<String>,
     pub(super) return_ty: TsType,
     pub(super) response_body_mode: String,
     pub(super) response_body_entries: Vec<RequestPayloadEntry>,
@@ -229,7 +231,7 @@ impl MethodModel {
             response_header_params: self.response_header_params,
             response_cookie_params: self.response_cookie_params,
             body_entries: self.body_entries,
-            body_single_key: self.body_single,
+            body_single_key: self.body_single_key,
             response_body_entries: self.response_body_entries,
             response_body_mode: self.response_body_mode,
             is_server_stream: self.is_server_stream,

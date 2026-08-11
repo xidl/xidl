@@ -633,7 +633,7 @@ export const HttpStreamSseBindingsServiceOperations = {
         response: {
             contentType: "text/event-stream",
             bodyMode: "return",
-            bodyFields: [{ wireName: "return", key: "_return" }],
+            bodyFields: [{ wireName: "return", key: "return" }],
             headers: [],
             cookies: [],
             stream: true,

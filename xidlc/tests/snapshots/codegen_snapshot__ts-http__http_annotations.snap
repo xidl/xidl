@@ -1107,7 +1107,7 @@ export const HttpAnnoServiceOperations = {
         response: {
             contentType: "application/json",
             bodyMode: "object",
-            bodyFields: [{ wireName: "return", key: "_return" }, { wireName: "sum", key: "sum" }],
+            bodyFields: [{ wireName: "return", key: "return" }, { wireName: "sum", key: "sum" }],
             headers: [],
             cookies: [],
             schema: ifaceSchemas.HttpAnnoServiceAddResponseSchema,
@@ -1141,7 +1141,7 @@ export const HttpAnnoServiceOperations = {
         response: {
             contentType: "application/json",
             bodyMode: "object",
-            bodyFields: [{ wireName: "return", key: "_return" }, { wireName: "value", key: "value" }],
+            bodyFields: [{ wireName: "return", key: "return" }, { wireName: "value", key: "value" }],
             headers: [],
             cookies: [],
             schema: ifaceSchemas.HttpAnnoServiceBumpResponseSchema,

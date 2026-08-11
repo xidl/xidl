@@ -1099,3 +1099,27 @@ def step_impl(context, key, value):
     url = f"http://127.0.0.1:{context.port}/flatten-struct-with-any"
     resp = requests.post(url, json={"field": {key: value}}, timeout=10)
     assert resp.status_code in (200, 204), f"Got {resp.status_code}: {resp.text}"
+
+
+@then('the client can get a monitor for device "{device_id}" of type "{type}"')
+def step_impl(context, device_id, type):
+    resp = requests.get(
+        f"http://127.0.0.1:{context.port}/devices/{device_id}/{type}", timeout=10
+    )
+    assert resp.status_code == 200, f"Got {resp.status_code}: {resp.text}"
+    body = resp.text.strip().strip('"')
+    assert f"monitor:{device_id}:{type}" in body, (
+        f"Expected monitor:{device_id}:{type}, got {resp.text}"
+    )
+
+
+@then('the client can search by type "{type}"')
+def step_impl(context, type):
+    resp = requests.get(
+        f"http://127.0.0.1:{context.port}/search",
+        params={"type": type},
+        timeout=10,
+    )
+    assert resp.status_code == 200, f"Got {resp.status_code}: {resp.text}"
+    body = resp.text.strip().strip('"')
+    assert f"search:{type}" in body, f"Expected search:{type}, got {resp.text}"

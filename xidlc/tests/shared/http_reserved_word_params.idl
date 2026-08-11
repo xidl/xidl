@@ -1,0 +1,24 @@
+#pragma xidlc package xidlc
+#pragma xidlc version v1.0.0
+
+interface HttpReservedWordParamsService {
+    @get(path = "/devices/{id}/{type}")
+    string get_monitor(
+        @path
+        string id,
+        @path
+        string type
+    );
+    @get(path = "/search")
+    string search(
+        @query
+        string type,
+        @query
+        string q
+    );
+    @get(path = "/renamed/{kind}")
+    string get_renamed(
+        @path @rename("kind")
+        string type
+    );
+};

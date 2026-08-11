@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "ignoreDeprecations": "6.0",
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ESNext"
+  }
+}
