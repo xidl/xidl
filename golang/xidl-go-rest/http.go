@@ -72,6 +72,30 @@ func GinEncodeBody(c *gin.Context, mime string, value any) error {
 	return codec.Encode(c.Writer, value)
 }
 
+// mediaRangeMatches reports whether an Accept media range (for example
+// "application/*" or "*/*") matches the required media type mime (for example
+// "application/json"). Wildcards are honored in both the type and subtype
+// positions, and comparison is case-insensitive.
+func mediaRangeMatches(mediaRange, mime string) bool {
+	rangeSlash := strings.IndexByte(mediaRange, '/')
+	if rangeSlash < 0 {
+		return false
+	}
+	mimeSlash := strings.IndexByte(mime, '/')
+	if mimeSlash < 0 {
+		return false
+	}
+	rangeType, rangeSubtype := mediaRange[:rangeSlash], mediaRange[rangeSlash+1:]
+	mimeType, mimeSubtype := mime[:mimeSlash], mime[mimeSlash+1:]
+	if rangeType != "*" && !strings.EqualFold(rangeType, mimeType) {
+		return false
+	}
+	if rangeSubtype != "*" && !strings.EqualFold(rangeSubtype, mimeSubtype) {
+		return false
+	}
+	return true
+}
+
 func RequireAccept(r *http.Request, mime string) error {
 	if mime == "" {
 		return nil
@@ -80,14 +104,14 @@ func RequireAccept(r *http.Request, mime string) error {
 	if accept == "" || accept == "*/*" {
 		return nil
 	}
-	// Simple split and check, including common JSON variants if mime is application/json
+	// Split on commas (browser compound headers, e.g.
+	// "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
+	// and match each media range against the required media type, honoring
+	// wildcards such as "*/*" and "application/*".
 	parts := strings.Split(accept, ",")
 	for _, part := range parts {
 		mediaType := strings.TrimSpace(strings.Split(part, ";")[0])
-		if strings.EqualFold(mediaType, mime) {
-			return nil
-		}
-		if mime == "application/json" && (strings.EqualFold(mediaType, "application/*") || strings.EqualFold(mediaType, "*/json")) {
+		if mediaRangeMatches(mediaType, mime) {
 			return nil
 		}
 	}
