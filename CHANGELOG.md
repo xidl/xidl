@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.88.1](https://github.com/xidl/xidl/compare/v0.88.0...v0.88.1) (2026-08-11)
+
+
+### Bug Fixes
+
+* **xidl-go-rest:** honor wildcard accept ranges in compound headers ([078000c](https://github.com/xidl/xidl/commit/078000c6455e25bb1326967056efcaccda9bb3a4))
+
 ## [0.88.0](https://github.com/xidl/xidl/compare/v0.87.0...v0.88.0) (2026-08-10)
 
 
