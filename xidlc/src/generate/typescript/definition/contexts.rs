@@ -1,4 +1,20 @@
+use std::collections::HashSet;
+
 use serde::Serialize;
+
+use crate::generate::typescript::TypescriptRenderer;
+
+/// Shared render state threaded through the TypeScript generator.
+///
+/// `recursive` holds the canonical HIR paths of every schema that
+/// participates in a recursive cycle; generators must defer those schemas
+/// (for example with `z.lazy`) so they are not evaluated before declaration.
+#[derive(Clone, Copy)]
+pub(crate) struct TsRenderCtx<'a> {
+    pub(crate) renderer: &'a TypescriptRenderer,
+    pub(crate) file_stem: &'a str,
+    pub(crate) recursive: &'a HashSet<Vec<String>>,
+}
 
 #[derive(Serialize)]
 pub(crate) struct TypesFileContext {
@@ -92,6 +108,9 @@ pub(crate) struct StructZodContext {
     pub(crate) ident: String,
     pub(crate) schema_name: String,
     pub(crate) fields: Vec<FieldZodContext>,
+    pub(crate) recursive: bool,
+    pub(crate) type_path: String,
+    pub(crate) file_stem: String,
 }
 
 #[derive(Serialize)]
@@ -120,6 +139,9 @@ pub(crate) struct UnionZodContext {
     pub(crate) ident: String,
     pub(crate) schema_name: String,
     pub(crate) variants: Vec<ZodSchema>,
+    pub(crate) recursive: bool,
+    pub(crate) type_path: String,
+    pub(crate) file_stem: String,
 }
 
 #[derive(Serialize)]
@@ -134,6 +156,9 @@ pub(crate) struct TypedefZodContext {
     pub(crate) name: String,
     pub(crate) schema_name: String,
     pub(crate) schema_expr: ZodSchema,
+    pub(crate) recursive: bool,
+    pub(crate) type_path: String,
+    pub(crate) file_stem: String,
 }
 
 #[derive(Serialize, Clone)]

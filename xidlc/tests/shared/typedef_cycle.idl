@@ -1,0 +1,8 @@
+struct Foo;
+
+typedef Foo FooAlias;
+
+struct Foo {
+    @optional FooAlias next;
+    sequence<FooAlias> more;
+};

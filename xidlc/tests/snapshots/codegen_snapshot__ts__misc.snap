@@ -1,5 +1,6 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
+assertion_line: 149
 expression: output
 ---
 ===============
@@ -58,28 +59,28 @@ import { xjson } from "xidl-typescript-codec";
 export const ColorSchema = z.enum(["red", "green", "blue"]);
 
     
-export const FooSeqSchema = z.array(FooSchema);
+export const FooSeqSchema: z.ZodType<import("./misc").FooSeq> = z.lazy(() => z.array(FooSchema));
 
     
-export const FooSeqSchema = z.array(FooSchema).length(12);
+export const FooSeqSchema: z.ZodType<import("./misc").FooSeq> = z.lazy(() => z.array(FooSchema).length(12));
 
     
-export const FooSeqSchema = z.array(FooSchema);
+export const FooSeqSchema: z.ZodType<import("./misc").FooSeq> = z.lazy(() => z.array(FooSchema));
 
     
-export const FooSchema = z.object({
+export const FooSchema: z.ZodType<import("./misc").Foo> = z.lazy(() => z.object({
     
         value: z.coerce.number().int(),
     
         chain: FooSeqSchema
     
-});
+}));
 
     
-export const BarSeqSchema = z.array(BarSchema);
+export const BarSeqSchema: z.ZodType<import("./misc").BarSeq> = z.lazy(() => z.array(BarSchema));
 
     
-export const BarSchema = z.union([z.object({ l_mem: z.coerce.number().int() }), z.object({ s_mem: z.object({ d_mem: z.coerce.number(), nested: BarSeqSchema }) })]);
+export const BarSchema: z.ZodType<import("./misc").Bar> = z.lazy(() => z.union([z.object({ l_mem: z.coerce.number().int() }), z.object({ s_mem: z.object({ d_mem: z.coerce.number(), nested: BarSeqSchema }) })]));
 
     export namespace M {
     export const SizeSchema = z.enum(["small", "medium", "large"]);
