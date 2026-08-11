@@ -170,6 +170,11 @@ def step_impl(context, lang):
                 os.path.dirname(__file__), "../../../typescript/xidl-typescript-server"
             )
         )
+        client_path = os.path.abspath(
+            os.path.join(
+                os.path.dirname(__file__), "../../../typescript/xidl-typescript-client"
+            )
+        )
         if not os.path.exists(os.path.join(codec_path, "dist")):
             subprocess.run(
                 ["pnpm", "install", "--ignore-scripts"],
@@ -190,6 +195,16 @@ def step_impl(context, lang):
             subprocess.run(
                 ["pnpm", "build"], cwd=server_path, check=True, capture_output=True
             )
+        if not os.path.exists(os.path.join(client_path, "dist")):
+            subprocess.run(
+                ["pnpm", "install", "--ignore-scripts"],
+                cwd=client_path,
+                check=True,
+                capture_output=True,
+            )
+            subprocess.run(
+                ["pnpm", "build"], cwd=client_path, check=True, capture_output=True
+            )
         subprocess.run(
             [
                 "npm",
@@ -198,6 +213,7 @@ def step_impl(context, lang):
                 "typescript",
                 codec_path,
                 server_path,
+                client_path,
             ],
             cwd=context.lang_dir,
             check=True,
@@ -232,6 +248,44 @@ def step_impl(context, lang):
                 is not None
             )
     assert found_iface_zod, f"iface.zod.ts file not found in {files}"
+
+
+@then("the generated ts recursive zod schema should load and parse at runtime")
+def step_impl(context):
+    zod_files = [f for f in os.listdir(context.lang_dir) if f.endswith(".zod.ts")]
+    assert zod_files, f"no *.zod.ts files in {os.listdir(context.lang_dir)}"
+
+    result = subprocess.run(
+        ["npx", "tsc", "-p", "."],
+        cwd=context.lang_dir,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        print(f"tsc emit stdout: {result.stdout}")
+        print(f"tsc emit stderr: {result.stderr}")
+    assert result.returncode == 0
+
+    script = (
+        "import('./recursive.zod.js').then((m) => {"
+        "const parsed = m.NodeSchema.parse({"
+        "id: 'root',"
+        "children: [{ id: 'child' }, { id: 'grand', children: [{ id: 'leaf' }] }],"
+        "});"
+        "if (parsed.children.length !== 2) process.exit(2);"
+        "console.log('PARSE_OK');"
+        "}).catch((e) => { console.error(e); process.exit(1); });"
+    )
+    result = subprocess.run(
+        ["node", "-e", script],
+        cwd=context.lang_dir,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        print(f"node stdout: {result.stdout}")
+        print(f"node stderr: {result.stderr}")
+    assert result.returncode == 0
 
 
 @then(

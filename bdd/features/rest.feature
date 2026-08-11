@@ -76,6 +76,12 @@ Feature: REST API Generation and Communication
     Then the generated ts code should be valid
     And the generated ts iface zod file should import the model schemas
 
+  Scenario: TypeScript recursive type schemas compile and load lazily
+    Given a REST IDL file "bdd/features/data/recursive.idl"
+    When I generate ts code for the IDL
+    Then the generated ts code should be valid
+    And the generated ts recursive zod schema should load and parse at runtime
+
   Scenario Outline: REST Flatten Any and StructWithAny (Issue 171)
     Given a REST IDL file "bdd/features/data/issue_171.idl"
     When I generate <lang> code for the IDL
