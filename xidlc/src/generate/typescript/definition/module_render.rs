@@ -2,7 +2,7 @@ use crate::error::IdlcResult;
 use crate::generate::typescript::{TsMode, TypescriptRenderOutput, TypescriptRenderer};
 use xidl_parser::hir;
 
-use super::contexts::{ClientFileContext, ModuleContext, TypesFileContext};
+use super::contexts::{ClientFileContext, ModuleContext, TsRenderCtx, TypesFileContext};
 use super::interface_render::render_interface;
 use super::names::{indent_block, ts_ident};
 use super::output::TsRenderOutput;
@@ -14,8 +14,9 @@ pub fn render_typescript(
     renderer: &TypescriptRenderer,
     mode: TsMode,
 ) -> IdlcResult<TypescriptRenderOutput> {
+    let recursive = xidl_parser::semantic::recursive_schema_types(spec);
     let mut generator = TsGenerator::new(file_stem.to_string());
-    generator.render(spec, renderer, mode)
+    generator.render(spec, renderer, mode, &recursive)
 }
 
 struct TsGenerator {
@@ -32,8 +33,14 @@ impl TsGenerator {
         spec: &hir::Specification,
         renderer: &TypescriptRenderer,
         mode: TsMode,
+        recursive: &std::collections::HashSet<Vec<String>>,
     ) -> IdlcResult<TypescriptRenderOutput> {
-        let blocks = render_module_body(&spec.0, &[], renderer, mode)?;
+        let ctx = TsRenderCtx {
+            renderer,
+            file_stem: &self.file_stem,
+            recursive,
+        };
+        let blocks = render_module_body(&spec.0, &[], mode, &ctx)?;
         let types = renderer.render_template(
             "types.d.ts.j2",
             &TypesFileContext {
@@ -62,8 +69,8 @@ impl TsGenerator {
 pub(crate) fn render_module_body(
     defs: &[hir::Definition],
     module_path: &[String],
-    renderer: &TypescriptRenderer,
     mode: TsMode,
+    ctx: &TsRenderCtx<'_>,
 ) -> IdlcResult<TsRenderOutput> {
     let mut out = TsRenderOutput::default();
     let mut module_order = Vec::new();
@@ -74,7 +81,7 @@ pub(crate) fn render_module_body(
             hir::Definition::ModuleDcl(module) => {
                 let mut next_path = module_path.to_vec();
                 next_path.push(module.ident.clone());
-                let body = render_module_body(&module.definition, &next_path, renderer, mode)?;
+                let body = render_module_body(&module.definition, &next_path, mode, ctx)?;
                 if !body.is_empty() {
                     let entry = module_map.entry(module.ident.clone()).or_insert_with(|| {
                         module_order.push(module.ident.clone());
@@ -84,16 +91,16 @@ pub(crate) fn render_module_body(
                 }
             }
             hir::Definition::ConstrTypeDcl(constr) if mode.allows_types() => {
-                out.extend(render_constr_type(constr, module_path, renderer)?);
+                out.extend(render_constr_type(constr, module_path, ctx)?);
             }
             hir::Definition::TypeDcl(ty) if mode.allows_types() => {
-                out.extend(render_type_dcl(ty, module_path, renderer)?);
+                out.extend(render_type_dcl(ty, module_path, ctx)?);
             }
             hir::Definition::ExceptDcl(except) if mode.allows_types() => {
-                out.extend(render_exception(except, module_path, renderer)?);
+                out.extend(render_exception(except, module_path, ctx)?);
             }
             hir::Definition::InterfaceDcl(interface) if mode.allows_interfaces() => {
-                out.extend(render_interface(interface, module_path, renderer)?);
+                out.extend(render_interface(interface, module_path, ctx.renderer)?);
             }
             hir::Definition::ConstDcl(_) | hir::Definition::Pragma(_) => {}
             _ => {}
@@ -104,17 +111,17 @@ pub(crate) fn render_module_body(
         let body = merge_blocks(&module_map.remove(&name).unwrap_or_default());
         let ident = ts_ident(&name);
         out.types.push(render_module_block(
-            renderer,
+            ctx.renderer,
             ident.clone(),
             body.types.join("\n"),
         )?);
         out.zod.push(render_module_block(
-            renderer,
+            ctx.renderer,
             ident.clone(),
             body.zod.join("\n"),
         )?);
         out.client.push(render_module_block(
-            renderer,
+            ctx.renderer,
             ident,
             body.client.join("\n"),
         )?);

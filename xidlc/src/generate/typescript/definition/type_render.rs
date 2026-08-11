@@ -1,5 +1,6 @@
 use crate::error::IdlcResult;
 use crate::generate::typescript::TypescriptRenderer;
+use crate::generate::typescript::definition::contexts::TsRenderCtx;
 use crate::generate::utils::doc_lines_from_annotations;
 use xidl_parser::hir;
 
@@ -20,17 +21,17 @@ use super::type_render_helpers::{render_bit_number, render_native};
 pub(crate) fn render_constr_type(
     constr: &hir::ConstrTypeDcl,
     module_path: &[String],
-    renderer: &TypescriptRenderer,
+    ctx: &TsRenderCtx<'_>,
 ) -> IdlcResult<TsRenderOutput> {
     let mut out = TsRenderOutput::default();
     match constr {
-        hir::ConstrTypeDcl::StructDcl(def) => {
-            out.extend(render_struct(def, module_path, renderer)?)
+        hir::ConstrTypeDcl::StructDcl(def) => out.extend(render_struct(def, module_path, ctx)?),
+        hir::ConstrTypeDcl::EnumDcl(def) => out.extend(render_enum(def, ctx.renderer)?),
+        hir::ConstrTypeDcl::UnionDef(def) => out.extend(render_union(def, module_path, ctx)?),
+        hir::ConstrTypeDcl::BitsetDcl(def) => out.extend(render_bit_number(&def.ident, ctx)?),
+        hir::ConstrTypeDcl::BitmaskDcl(def) => {
+            out.extend(render_bit_number(&def.ident, ctx)?)
         }
-        hir::ConstrTypeDcl::EnumDcl(def) => out.extend(render_enum(def, renderer)?),
-        hir::ConstrTypeDcl::UnionDef(def) => out.extend(render_union(def, module_path, renderer)?),
-        hir::ConstrTypeDcl::BitsetDcl(def) => out.extend(render_bit_number(&def.ident, renderer)?),
-        hir::ConstrTypeDcl::BitmaskDcl(def) => out.extend(render_bit_number(&def.ident, renderer)?),
         hir::ConstrTypeDcl::StructForwardDcl(_) | hir::ConstrTypeDcl::UnionForwardDcl(_) => {}
     }
     Ok(out)
@@ -39,7 +40,7 @@ pub(crate) fn render_constr_type(
 pub(crate) fn render_exception(
     except: &hir::ExceptDcl,
     module_path: &[String],
-    renderer: &TypescriptRenderer,
+    ctx: &TsRenderCtx<'_>,
 ) -> IdlcResult<TsRenderOutput> {
     render_struct(
         &hir::StructDcl {
@@ -49,24 +50,24 @@ pub(crate) fn render_exception(
             member: except.member.clone(),
         },
         module_path,
-        renderer,
+        ctx,
     )
 }
 
 pub(crate) fn render_type_dcl(
     ty: &hir::TypeDcl,
     module_path: &[String],
-    renderer: &TypescriptRenderer,
+    ctx: &TsRenderCtx<'_>,
 ) -> IdlcResult<TsRenderOutput> {
     let mut out = TsRenderOutput::default();
     match ty {
         hir::TypeDcl::ConstrTypeDcl(constr) => {
-            out.extend(render_constr_type(constr, module_path, renderer)?)
+            out.extend(render_constr_type(constr, module_path, ctx)?)
         }
         hir::TypeDcl::TypedefDcl(typedef) => {
-            render_typedefs(&mut out, typedef, module_path, renderer)?
+            render_typedefs(&mut out, typedef, module_path, ctx)?
         }
-        hir::TypeDcl::NativeDcl(native) => render_native(&mut out, native, renderer)?,
+        hir::TypeDcl::NativeDcl(native) => render_native(&mut out, native, ctx)?,
     }
     Ok(out)
 }
@@ -75,7 +76,7 @@ fn render_typedefs(
     out: &mut TsRenderOutput,
     typedef: &hir::TypedefDcl,
     module_path: &[String],
-    renderer: &TypescriptRenderer,
+    ctx: &TsRenderCtx<'_>,
 ) -> IdlcResult<()> {
     for decl in &typedef.decl {
         let name = ts_ident(declarator_name(decl));
@@ -88,7 +89,7 @@ fn render_typedefs(
                 apply_array_ts(base, decl)
             }
         };
-        out.types.push(renderer.render_template(
+        out.types.push(ctx.renderer.render_template(
             "typedef.d.ts.j2",
             &TypedefTypeContext {
                 name: name.clone(),
@@ -103,12 +104,15 @@ fn render_typedefs(
                 apply_array_zod(base, decl)
             }
         };
-        out.zod.push(renderer.render_template(
+        out.zod.push(ctx.renderer.render_template(
             "typedef.zod.ts.j2",
             &TypedefZodContext {
                 schema_name: name.clone(), // Template will add 'Schema' suffix
                 name,
                 schema_expr,
+                recursive: is_recursive(ctx, module_path, declarator_name(decl)),
+                type_path: type_path(module_path, declarator_name(decl)),
+                file_stem: ctx.file_stem.to_string(),
             },
         )?);
     }
@@ -118,7 +122,7 @@ fn render_typedefs(
 fn render_struct(
     def: &hir::StructDcl,
     module_path: &[String],
-    renderer: &TypescriptRenderer,
+    ctx: &TsRenderCtx<'_>,
 ) -> IdlcResult<TsRenderOutput> {
     let ident = ts_ident(&def.ident);
     let extends = if def.parent.is_empty() {
@@ -138,7 +142,7 @@ fn render_struct(
         )
     };
     let fields = struct_fields(&def.member, &def.annotations, module_path);
-    let types = renderer.render_template(
+    let types = ctx.renderer.render_template(
         "struct.d.ts.j2",
         &StructTypeContext {
             ident: ident.clone(),
@@ -155,7 +159,7 @@ fn render_struct(
                 .collect(),
         },
     )?;
-    let zod = renderer.render_template(
+    let zod = ctx.renderer.render_template(
         "struct.zod.ts.j2",
         &StructZodContext {
             schema_name: ident.clone(), // Template will add 'Schema' suffix
@@ -169,6 +173,9 @@ fn render_struct(
                     xjson_meta: field.xjson_meta,
                 })
                 .collect(),
+            recursive: is_recursive(ctx, module_path, &def.ident),
+            type_path: type_path(module_path, &def.ident),
+            file_stem: ctx.file_stem.to_string(),
         },
     )?;
     Ok(TsRenderOutput {
@@ -221,7 +228,7 @@ fn render_enum(def: &hir::EnumDcl, renderer: &TypescriptRenderer) -> IdlcResult<
 fn render_union(
     def: &hir::UnionDef,
     module_path: &[String],
-    renderer: &TypescriptRenderer,
+    ctx: &TsRenderCtx<'_>,
 ) -> IdlcResult<TsRenderOutput> {
     let ident = ts_ident(&def.ident);
     let variants = def
@@ -258,7 +265,7 @@ fn render_union(
         })
         .collect::<Vec<_>>();
     Ok(TsRenderOutput {
-        types: vec![renderer.render_template(
+        types: vec![ctx.renderer.render_template(
             "union.d.ts.j2",
             &UnionTypeContext {
                 ident: ident.clone(),
@@ -266,14 +273,32 @@ fn render_union(
                 doc: doc_lines_from_annotations(&def.annotations),
             },
         )?],
-        zod: vec![renderer.render_template(
+        zod: vec![ctx.renderer.render_template(
             "union.zod.ts.j2",
             &UnionZodContext {
                 schema_name: ident.clone(), // Template will add 'Schema' suffix
                 ident,
                 variants: schema_variants,
+                recursive: is_recursive(ctx, module_path, &def.ident),
+                type_path: type_path(module_path, &def.ident),
+                file_stem: ctx.file_stem.to_string(),
             },
         )?],
         client: Vec::new(),
     })
+}
+
+fn is_recursive(ctx: &TsRenderCtx<'_>, module_path: &[String], ident: &str) -> bool {
+    let mut path = module_path.to_vec();
+    path.push(ident.to_string());
+    ctx.recursive.contains(&path)
+}
+
+fn type_path(module_path: &[String], ident: &str) -> String {
+    let mut parts = module_path
+        .iter()
+        .map(|part| ts_ident(part))
+        .collect::<Vec<_>>();
+    parts.push(ts_ident(ident));
+    parts.join(".")
 }
