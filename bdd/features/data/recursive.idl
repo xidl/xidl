@@ -1,0 +1,13 @@
+#pragma xidlc package recursive
+#pragma xidlc version v0.0.1
+
+struct Node {
+    string id;
+    @optional
+    sequence<Node> children;
+};
+
+interface Service {
+    @get(path = "/nodes")
+    Node get_node();
+};
