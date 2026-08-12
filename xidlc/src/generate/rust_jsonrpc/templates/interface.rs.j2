@@ -449,16 +449,16 @@ S: xidl_jsonrpc::Stream + Unpin + Send + 'static,
                 if let Some(error) = ack.get("error").filter(|error| !error.is_null()) {
                     return Err(xidl_jsonrpc::Error::Rpc {
                         code: xidl_jsonrpc::ErrorCode::from(
-                            error
-                                .get("code")
-                                .and_then(::serde_json::Value::as_i64)
-                                .unwrap_or(-32603),
+                        error
+                        .get("code")
+                        .and_then(::serde_json::Value::as_i64)
+                        .unwrap_or(-32603),
                         ),
                         message: error
-                            .get("message")
-                            .and_then(::serde_json::Value::as_str)
-                            .unwrap_or("stream handshake failed")
-                            .to_string(),
+                        .get("message")
+                        .and_then(::serde_json::Value::as_str)
+                        .unwrap_or("stream handshake failed")
+                        .to_string(),
                         data: error.get("data").cloned(),
                     });
                 }
