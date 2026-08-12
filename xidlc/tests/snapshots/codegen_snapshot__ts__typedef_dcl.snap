@@ -36,13 +36,13 @@ import { z } from "zod";
 import { xjson } from "xidl-typescript-codec";
 
     
-export const FooSeqSchema = z.array(FooSchema);
+    export const FooSeqSchema = z.array(FooSchema);
 
     
-export const uint8_tSchema = u8Schema;
+    export const uint8_tSchema = u8Schema;
 
     
-export const u8stringSchema = z.coerce.string();
+    export const u8stringSchema = z.coerce.string();
 
     
-export const u16stringSchema = z.coerce.string();
+    export const u16stringSchema = z.coerce.string();
