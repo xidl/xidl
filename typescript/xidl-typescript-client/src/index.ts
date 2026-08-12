@@ -1,6 +1,6 @@
 export { XidlClientError } from './error.js';
 export { resolveFetch, resolveFetchLegacy } from './fetch.js';
-export { sseJsonStreamLegacy, ndjsonBodyLegacy } from './legacy.js';
+export { ndjsonBodyLegacy, sseJsonStreamLegacy } from './legacy.js';
 export {
   appendCookie,
   appendHeader,
@@ -28,7 +28,12 @@ export {
   normalizeMime,
   parseScalar,
 } from './scalar.js';
-export { byteResponseStream, byteStreamBody, ndjsonBody, sseJsonStream } from './stream.js';
+export {
+  byteResponseStream,
+  byteStreamBody,
+  ndjsonBody,
+  sseJsonStream,
+} from './stream.js';
 export type {
   ClientAuth,
   ClientOptions,

@@ -3,16 +3,48 @@ use xidl_parser::hir;
 
 use super::method::TypeRefTarget;
 
-pub(crate) fn ts_scoped_name(
-    value: &hir::ScopedName,
-    _module_path: &[String],
-    target: TypeRefTarget,
-) -> String {
-    let parts = value
+/// Builds the TypeScript parts for a scoped-name reference.
+///
+/// A bare name (single segment, not rooted with `::`) that resolves inside the
+/// current module is qualified with the enclosing module path, so generated
+/// files keep the namespace even when the reference crosses a file boundary.
+/// Multi-segment and root-qualified names keep their written form.
+pub(crate) fn scoped_name_parts(value: &hir::ScopedName, module_path: &[String]) -> Vec<String> {
+    let mut parts = value
         .name
         .iter()
         .map(|part| ts_ident(part))
         .collect::<Vec<_>>();
+    if !value.is_root && parts.len() == 1 && !module_path.is_empty() {
+        let mut qualified = module_path
+            .iter()
+            .map(|part| ts_ident(part))
+            .collect::<Vec<_>>();
+        qualified.append(&mut parts);
+        parts = qualified;
+    }
+    parts
+}
+
+pub(crate) fn ts_scoped_name(
+    value: &hir::ScopedName,
+    module_path: &[String],
+    target: TypeRefTarget,
+) -> String {
+    // Only cross-file contexts (Client target) need the full module path:
+    // model files wrap each module in `export namespace <ident>`, so refs
+    // inside that namespace must stay lexically bare (TS resolves them via
+    // the enclosing namespaces). Iface/client/server files import the model
+    // file through `import type * as types`, so they need `types.<path>`.
+    let parts = if matches!(target, TypeRefTarget::Client) {
+        scoped_name_parts(value, module_path)
+    } else {
+        value
+            .name
+            .iter()
+            .map(|part| ts_ident(part))
+            .collect::<Vec<_>>()
+    };
     if parts.is_empty() {
         return "unknown".to_string();
     }
@@ -25,14 +57,20 @@ pub(crate) fn ts_scoped_name(
 
 pub(crate) fn zod_schema_ref(
     value: &hir::ScopedName,
-    _module_path: &[String],
+    module_path: &[String],
     prefix: Option<&str>,
 ) -> String {
-    let mut parts = value
-        .name
-        .iter()
-        .map(|part| ts_ident(part))
-        .collect::<Vec<_>>();
+    // Same split as ts_scoped_name: only prefixed (cross-file `models.*`)
+    // refs get the full module path; model-file refs stay lexically bare.
+    let mut parts = if prefix.is_some() {
+        scoped_name_parts(value, module_path)
+    } else {
+        value
+            .name
+            .iter()
+            .map(|part| ts_ident(part))
+            .collect::<Vec<_>>()
+    };
     if parts.is_empty() {
         return "unknownSchema".to_string(); // Fallback
     }

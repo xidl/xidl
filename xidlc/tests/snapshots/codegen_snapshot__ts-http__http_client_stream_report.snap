@@ -107,13 +107,13 @@ http_client_stream_report.iface.d.ts
 
 
 
-    import { UploadChunk } from "./http_client_stream_report";
+    import type * as types from "./http_client_stream_report";
 
 
     
 
 export interface HttpClientStreamReportServiceUploadPartsRequest {
-        chunk: UploadChunk;
+        chunk: types.UploadChunk;
         }
 
 export {};

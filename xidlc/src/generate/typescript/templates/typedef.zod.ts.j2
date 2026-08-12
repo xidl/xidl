@@ -1,5 +1,5 @@
 {% from "macros.j2" import render_zod %}{% if recursive %}
 export const {{ schema_name }}Schema: z.ZodType<import("./{{ file_stem }}").{{ type_path }}> = z.lazy(() => {{ render_zod(schema_expr) }});
 {%- else %}
-export const {{ schema_name }}Schema = {{ render_zod(schema_expr) }};
+    export const {{ schema_name }}Schema = {{ render_zod(schema_expr) }};
 {%- endif %}

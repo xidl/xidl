@@ -23,7 +23,9 @@ pub(super) fn build_response_fields(
     if let Some(ty) = &op.signature.return_type {
         fields.push(ParamDeclContext {
             prop: "return".to_string(),
-            ty: ts_type_for_type_spec(ty, module_path, TypeRefTarget::Types),
+            // The iface file is separate from the model file, so model types are
+            // referenced through the `types` namespace import.
+            ty: ts_type_for_type_spec(ty, module_path, TypeRefTarget::Client),
             schema: zod_schema_for_type_spec_with_prefix(ty, module_path, Some("models")),
             optional: false,
             doc: Vec::new(),
@@ -37,7 +39,7 @@ pub(super) fn build_response_fields(
         ) {
             fields.push(ParamDeclContext {
                 prop: ts_prop_name(&param.name),
-                ty: ts_type_for_type_spec(&param.ty, module_path, TypeRefTarget::Types),
+                ty: ts_type_for_type_spec(&param.ty, module_path, TypeRefTarget::Client),
                 schema: zod_schema_for_type_spec_with_prefix(
                     &param.ty,
                     module_path,

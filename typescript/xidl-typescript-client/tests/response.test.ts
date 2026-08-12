@@ -5,8 +5,8 @@ import { z } from 'zod';
 
 import {
   buildResponsePayload,
-  decodeResponseBody,
   decodeOptionalResponseBody,
+  decodeResponseBody,
   joinUrl,
   parseScalar,
   parseXidlError,
@@ -36,11 +36,9 @@ test('decodeResponseBody decodes text', async () => {
 
 test('decodeResponseBody uses custom codec', async () => {
   const resp = new Response('cbor');
-  const value = await decodeResponseBody(
-    resp,
-    'application/cbor',
-    { 'application/cbor': { decode: async r => r.text() } },
-  );
+  const value = await decodeResponseBody(resp, 'application/cbor', {
+    'application/cbor': { decode: async r => r.text() },
+  });
   assert.equal(value, 'cbor');
 });
 
@@ -66,7 +64,7 @@ test('buildResponsePayload merges body, headers and cookies', () => {
     { id: 1 },
     resp,
     'object',
-    [{ name: 'X-Total', key: 'total', optional: true, isMulti: false }],
+    [{ isMulti: false, key: 'total', name: 'X-Total', optional: true }],
     [],
   );
   assert.deepEqual(payload, { id: 1, total: 10 });

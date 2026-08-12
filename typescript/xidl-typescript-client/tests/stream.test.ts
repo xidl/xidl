@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-
-import { z } from 'zod';
 import { xjson } from 'xidl-typescript-codec';
+import { z } from 'zod';
 
 import {
   byteResponseStream,
@@ -99,11 +98,10 @@ test('byteResponseStream yields byte chunks', async () => {
       }),
       { status: 200 },
     );
-  const chunks = await collect(byteResponseStream(fetchImpl, 'http://x/raw', {}));
-  assert.deepEqual(chunks, [
-    [97, 98],
-    [99],
-  ]);
+  const chunks = await collect(
+    byteResponseStream(fetchImpl, 'http://x/raw', {}),
+  );
+  assert.deepEqual(chunks, [[97, 98], [99]]);
 });
 
 test('ndjsonBody serializes items as ndjson', async () => {
@@ -140,10 +138,7 @@ test('byteStreamBody round-trips byte chunks', async () => {
     }
     chunks.push(Array.from(value));
   }
-  assert.deepEqual(chunks, [
-    [1, 2],
-    [3],
-  ]);
+  assert.deepEqual(chunks, [[1, 2], [3]]);
 });
 
 test('ndjsonBodyLegacy invokes cancel on the source', async () => {
@@ -152,7 +147,7 @@ test('ndjsonBodyLegacy invokes cancel on the source', async () => {
     [Symbol.asyncIterator]() {
       return {
         async next() {
-          return { value: { id: 1 }, done: false };
+          return { done: false, value: { id: 1 } };
         },
         async return() {
           cancelled = true;

@@ -288,6 +288,44 @@ def step_impl(context):
     assert result.returncode == 0
 
 
+@then("the generated module-scoped zod schemas should load and parse at runtime")
+def step_impl(context):
+    zod_files = [f for f in os.listdir(context.lang_dir) if f.endswith(".zod.ts")]
+    assert zod_files, f"no *.zod.ts files in {os.listdir(context.lang_dir)}"
+
+    result = subprocess.run(
+        ["npx", "tsc", "-p", "."],
+        cwd=context.lang_dir,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        print(f"tsc emit stdout: {result.stdout}")
+        print(f"tsc emit stderr: {result.stderr}")
+    assert result.returncode == 0
+
+    script = (
+        "import('./module_scope.zod.js').then((m) => {"
+        "const item = m.nm.ItemSchema.parse({"
+        "id: 'root',"
+        "children: [{ id: 'child' }],"
+        "});"
+        "if (item.children.length !== 1) process.exit(2);"
+        "console.log('PARSE_OK');"
+        "}).catch((e) => { console.error(e); process.exit(1); });"
+    )
+    result = subprocess.run(
+        ["node", "-e", script],
+        cwd=context.lang_dir,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        print(f"node stdout: {result.stdout}")
+        print(f"node stderr: {result.stderr}")
+    assert result.returncode == 0
+
+
 @then(
     "the generated {lang} code should contain correct User struct and UserService interface"
 )

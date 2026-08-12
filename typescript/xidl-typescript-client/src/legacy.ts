@@ -108,6 +108,11 @@ export function ndjsonBodyLegacy<T>(
   const encoder = new TextEncoder();
   const iterator = source[Symbol.asyncIterator]();
   return new ReadableStream<Uint8Array>({
+    async cancel() {
+      if (iterator.return) {
+        await iterator.return();
+      }
+    },
     async pull(controller) {
       const next = await iterator.next();
       if (next.done) {
@@ -116,11 +121,6 @@ export function ndjsonBodyLegacy<T>(
       }
       const serialized = schema ? serialize(next.value, schema) : next.value;
       controller.enqueue(encoder.encode(`${JSON.stringify(serialized)}\n`));
-    },
-    async cancel() {
-      if (iterator.return) {
-        await iterator.return();
-      }
     },
   });
 }
