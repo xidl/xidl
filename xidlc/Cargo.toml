@@ -69,13 +69,13 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = [
   "env-filter",
 ], optional = true }
-itertools = "0.14.0"
+itertools = "0.15.0"
 tree-sitter.workspace = true
 tree-sitter-highlight = { version = "=0.25.0", optional = true }
 owo-colors = { version = "4.2", optional = true }
 tree-sitter-idl.workspace = true
-prettyplease = { version = "0.2.37", optional = true }
-syn = { version = "2.0.117", optional = true }
+prettyplease = { version = "0.3.0", optional = true }
+syn = { version = "3.0", optional = true }
 md5.workspace = true
 indexmap = { version = "2", features = ["serde"] }
 
