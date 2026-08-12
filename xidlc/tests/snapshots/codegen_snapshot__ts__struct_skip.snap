@@ -28,10 +28,10 @@ import { z } from "zod";
 import { xjson } from "xidl-typescript-codec";
 
     
-export const SkipStructSchema = z.object({
-    
-        a: z.coerce.number().int(),
-    
-        c: z.coerce.number().int()
-    
-});
+    export const SkipStructSchema = z.object({
+        
+            a: z.coerce.number().int(),
+        
+            c: z.coerce.number().int()
+        
+    });

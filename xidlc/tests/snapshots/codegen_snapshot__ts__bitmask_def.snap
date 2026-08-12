@@ -32,10 +32,10 @@ import { z } from "zod";
 import { xjson } from "xidl-typescript-codec";
 
     
-export const EmptyBitmaskSchema = z.number().int();
+    export const EmptyBitmaskSchema = z.number().int();
 
     
-export const SimpleBitmaskSchema = z.number().int();
+    export const SimpleBitmaskSchema = z.number().int();
 
     
-export const PositionedBitmaskSchema = z.number().int();
+    export const PositionedBitmaskSchema = z.number().int();

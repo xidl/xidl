@@ -32,11 +32,11 @@ import { z } from "zod";
 import { xjson } from "xidl-typescript-codec";
 
     
-export const ASchema = z.object({
-    
-});
+    export const ASchema = z.object({
+        
+    });
 
     
-export const BSchema = z.object({
-    
-});
+    export const BSchema = z.object({
+        
+    });
