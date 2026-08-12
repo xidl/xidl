@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 import { createRouter } from 'xidl-typescript-server';
-import { type Status } from './{{MODULE_NAME}}.js';
+import type { Status } from './{{MODULE_NAME}}.js';
 import {
   type AllScenariosService,
   AllScenariosServiceOperations,

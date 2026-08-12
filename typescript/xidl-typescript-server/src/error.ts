@@ -5,11 +5,7 @@ export class XidlServerError extends Error {
   readonly msg: string;
   readonly headers?: Record<string, string>;
 
-  constructor(
-    code: number,
-    msg: string,
-    headers?: Record<string, string>,
-  ) {
+  constructor(code: number, msg: string, headers?: Record<string, string>) {
     super(msg);
     this.code = code;
     this.msg = msg;

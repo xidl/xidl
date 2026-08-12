@@ -56,11 +56,7 @@ class MyRestServer implements RestServer {
     this.userInfo.set(id, info);
   }
 
-  async put_key_value(
-    key: string,
-    value: string,
-    ttl: number,
-  ): Promise<void> {
+  async put_key_value(key: string, value: string, ttl: number): Promise<void> {
     this.keyStore.set(key, value);
   }
 

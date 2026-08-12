@@ -104,7 +104,9 @@ class MySmartCityRestService implements SmartCityRestApi {
     return this.maintenanceMode;
   }
 
-  async set_attribute_maintenance_mode(maintenance_mode: boolean): Promise<void> {
+  async set_attribute_maintenance_mode(
+    maintenance_mode: boolean,
+  ): Promise<void> {
     this.maintenanceMode = maintenance_mode;
   }
 }

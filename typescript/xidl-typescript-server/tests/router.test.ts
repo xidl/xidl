@@ -48,6 +48,7 @@ const createItem = defineOperation<ItemServer, 'createItem'>({
   method: 'POST',
   path: '/items',
   request: {
+    args: ['name'],
     body: {
       contentType: 'application/json',
       fields: [{ key: 'name', wireName: 'name' }],
@@ -59,7 +60,6 @@ const createItem = defineOperation<ItemServer, 'createItem'>({
     path: [],
     query: [],
     schema: z.object({ name: z.string() }),
-    args: ['name'],
   },
   response: {
     bodyFields: [{ key: 'return', wireName: 'return' }],
