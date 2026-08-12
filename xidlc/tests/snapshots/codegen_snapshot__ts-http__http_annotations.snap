@@ -440,29 +440,28 @@ import * as ifaceSchemas from "./http_annotations.iface.zod";
 import {
     defineOperation,
     type Awaitable,
-    type ServerContext,
 } from "xidl-typescript-server";
 
     
 export interface HttpAnnoService {
     
-        get_user(request: ifaceTypes.HttpAnnoServiceGetUserRequest, context: ServerContext): Awaitable<string>;
+        get_user(id: number, lang: string): Awaitable<string>;
     
-        create_user(request: ifaceTypes.HttpAnnoServiceCreateUserRequest, context: ServerContext): Awaitable<string>;
+        create_user(name: string, age: number): Awaitable<string>;
     
-        get_name(request: ifaceTypes.HttpAnnoServiceGetNameRequest, context: ServerContext): Awaitable<string>;
+        get_name(name: string): Awaitable<string>;
     
-        search_user(request: ifaceTypes.HttpAnnoServiceSearchUserRequest, context: ServerContext): Awaitable<string>;
+        search_user(keyword: string, page: number): Awaitable<string>;
     
-        get_user_alias(request: ifaceTypes.HttpAnnoServiceGetUserAliasRequest, context: ServerContext): Awaitable<string>;
+        get_user_alias(user_id: number, locale: string): Awaitable<string>;
     
-        add(request: ifaceTypes.HttpAnnoServiceAddRequest, context: ServerContext): Awaitable<ifaceTypes.HttpAnnoServiceAddResponse>;
+        add(a: number, b: number): Awaitable<ifaceTypes.HttpAnnoServiceAddResponse>;
     
-        bump(request: ifaceTypes.HttpAnnoServiceBumpRequest, context: ServerContext): Awaitable<ifaceTypes.HttpAnnoServiceBumpResponse>;
+        bump(value: number): Awaitable<ifaceTypes.HttpAnnoServiceBumpResponse>;
     
-        get_count(context: ServerContext): Awaitable<ifaceTypes.HttpAnnoServiceGetCountResponse>;
+        get_count(): Awaitable<ifaceTypes.HttpAnnoServiceGetCountResponse>;
     
-        ping(context: ServerContext): Awaitable<void>;
+        ping(): Awaitable<void>;
     
 }
 
@@ -475,6 +474,7 @@ export const HttpAnnoServiceOperations = {
             paths: ["/v1/users/{id}", "/users/{id}", "/u/{id}"],
             request: {
                 kind: "object",
+                args: ["id", "lang"],
                 schema: ifaceSchemas.HttpAnnoServiceGetUserRequestSchema,
                 path: [{ parameter: "id", wireName: "id", key: "id", multi: false, catchAll: false }],
                 query: [{ wireName: "lang", key: "lang", multi: false }],
@@ -506,6 +506,7 @@ export const HttpAnnoServiceOperations = {
             paths: ["/create_user"],
             request: {
                 kind: "object",
+                args: ["name", "age"],
                 schema: ifaceSchemas.HttpAnnoServiceCreateUserRequestSchema,
                 path: [],
                 query: [],
@@ -538,6 +539,7 @@ export const HttpAnnoServiceOperations = {
             paths: ["/get_name"],
             request: {
                 kind: "object",
+                args: ["name"],
                 schema: ifaceSchemas.HttpAnnoServiceGetNameRequestSchema,
                 path: [],
                 query: [{ wireName: "name", key: "name", multi: false }],
@@ -569,6 +571,7 @@ export const HttpAnnoServiceOperations = {
             paths: ["/search_user"],
             request: {
                 kind: "object",
+                args: ["keyword", "page"],
                 schema: ifaceSchemas.HttpAnnoServiceSearchUserRequestSchema,
                 path: [],
                 query: [{ wireName: "keyword", key: "keyword", multi: false }, { wireName: "page", key: "page", multi: false }],
@@ -600,6 +603,7 @@ export const HttpAnnoServiceOperations = {
             paths: ["/get_user_alias/{id}"],
             request: {
                 kind: "object",
+                args: ["user_id", "locale"],
                 schema: ifaceSchemas.HttpAnnoServiceGetUserAliasRequestSchema,
                 path: [{ parameter: "id", wireName: "id", key: "user_id", multi: false, catchAll: false }],
                 query: [{ wireName: "lang", key: "locale", multi: false }],
@@ -631,6 +635,7 @@ export const HttpAnnoServiceOperations = {
             paths: ["/add"],
             request: {
                 kind: "object",
+                args: ["a", "b"],
                 schema: ifaceSchemas.HttpAnnoServiceAddRequestSchema,
                 path: [],
                 query: [],
@@ -664,6 +669,7 @@ export const HttpAnnoServiceOperations = {
             paths: ["/bump"],
             request: {
                 kind: "object",
+                args: ["value"],
                 schema: ifaceSchemas.HttpAnnoServiceBumpRequestSchema,
                 path: [],
                 query: [],
@@ -698,6 +704,7 @@ export const HttpAnnoServiceOperations = {
             paths: ["/get_count"],
             request: {
                 kind: "none",
+                args: [],
                 path: [],
                 query: [],
                 headers: [],
@@ -729,6 +736,7 @@ export const HttpAnnoServiceOperations = {
             paths: ["/ping"],
             request: {
                 kind: "none",
+                args: [],
                 path: [],
                 query: [],
                 headers: [],

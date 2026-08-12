@@ -41,6 +41,7 @@ export interface RequestBodySpec {
 }
 
 export interface OperationRequestSpec {
+  args: string[];
   body: RequestBodySpec;
   cookies: ValueBinding[];
   headers: ValueBinding[];

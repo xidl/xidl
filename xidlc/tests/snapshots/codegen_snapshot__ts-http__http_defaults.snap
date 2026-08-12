@@ -598,37 +598,36 @@ import * as ifaceSchemas from "./http_defaults.iface.zod";
 import {
     defineOperation,
     type Awaitable,
-    type ServerContext,
 } from "xidl-typescript-server";
 
     
 export interface HttpDefaultsService {
     
-        get_name(request: ifaceTypes.HttpDefaultsServiceGetNameRequest, context: ServerContext): Awaitable<string>;
+        get_name(name: string): Awaitable<string>;
     
-        list_orders(request: ifaceTypes.HttpDefaultsServiceListOrdersRequest, context: ServerContext): Awaitable<string>;
+        list_orders(user_id: number, page: number, size: number): Awaitable<string>;
     
-        create_user(request: ifaceTypes.HttpDefaultsServiceCreateUserRequest, context: ServerContext): Awaitable<string>;
+        create_user(req: types.CreateUserRequest): Awaitable<string>;
     
-        create_user_flat(request: ifaceTypes.HttpDefaultsServiceCreateUserFlatRequest, context: ServerContext): Awaitable<string>;
+        create_user_flat(req: types.CreateUserRequest): Awaitable<string>;
     
-        search_user(request: ifaceTypes.HttpDefaultsServiceSearchUserRequest, context: ServerContext): Awaitable<string>;
+        search_user(name: string, age: number): Awaitable<string>;
     
-        preview_user(request: ifaceTypes.HttpDefaultsServicePreviewUserRequest, context: ServerContext): Awaitable<string>;
+        preview_user(req: types.CreateUserRequest): Awaitable<string>;
     
-        get_user(request: ifaceTypes.HttpDefaultsServiceGetUserRequest, context: ServerContext): Awaitable<string>;
+        get_user(id: number, lang: string): Awaitable<string>;
     
-        get_user_alias(request: ifaceTypes.HttpDefaultsServiceGetUserAliasRequest, context: ServerContext): Awaitable<string>;
+        get_user_alias(user_id: number, locale: string): Awaitable<string>;
     
-        delete_user(request: ifaceTypes.HttpDefaultsServiceDeleteUserRequest, context: ServerContext): Awaitable<string>;
+        delete_user(id: number, revision: number): Awaitable<string>;
     
-        probe_user(request: ifaceTypes.HttpDefaultsServiceProbeUserRequest, context: ServerContext): Awaitable<void>;
+        probe_user(id: number, revision: number): Awaitable<void>;
     
-        user_options(request: ifaceTypes.HttpDefaultsServiceUserOptionsRequest, context: ServerContext): Awaitable<void>;
+        user_options(id: number, revision: number): Awaitable<void>;
     
-        replace_user(request: ifaceTypes.HttpDefaultsServiceReplaceUserRequest, context: ServerContext): Awaitable<string>;
+        replace_user(user_id: number, name: string, age: number): Awaitable<string>;
     
-        patch_user(request: ifaceTypes.HttpDefaultsServicePatchUserRequest, context: ServerContext): Awaitable<string>;
+        patch_user(user_id: number, name: string, age: number): Awaitable<string>;
     
 }
 
@@ -641,6 +640,7 @@ export const HttpDefaultsServiceOperations = {
             paths: ["/get_name"],
             request: {
                 kind: "object",
+                args: ["name"],
                 schema: ifaceSchemas.HttpDefaultsServiceGetNameRequestSchema,
                 path: [],
                 query: [{ wireName: "name", key: "name", multi: false }],
@@ -672,6 +672,7 @@ export const HttpDefaultsServiceOperations = {
             paths: ["/list_orders/{uid}"],
             request: {
                 kind: "object",
+                args: ["user_id", "page", "size"],
                 schema: ifaceSchemas.HttpDefaultsServiceListOrdersRequestSchema,
                 path: [{ parameter: "uid", wireName: "uid", key: "user_id", multi: false, catchAll: false }],
                 query: [{ wireName: "page", key: "page", multi: false }, { wireName: "size", key: "size", multi: false }],
@@ -703,6 +704,7 @@ export const HttpDefaultsServiceOperations = {
             paths: ["/users"],
             request: {
                 kind: "object",
+                args: ["req"],
                 schema: ifaceSchemas.HttpDefaultsServiceCreateUserRequestSchema,
                 path: [],
                 query: [],
@@ -735,6 +737,7 @@ export const HttpDefaultsServiceOperations = {
             paths: ["/users/flat"],
             request: {
                 kind: "object",
+                args: ["req"],
                 schema: ifaceSchemas.HttpDefaultsServiceCreateUserFlatRequestSchema,
                 path: [],
                 query: [],
@@ -768,6 +771,7 @@ export const HttpDefaultsServiceOperations = {
             paths: ["/users/search"],
             request: {
                 kind: "object",
+                args: ["name", "age"],
                 schema: ifaceSchemas.HttpDefaultsServiceSearchUserRequestSchema,
                 path: [],
                 query: [],
@@ -800,6 +804,7 @@ export const HttpDefaultsServiceOperations = {
             paths: ["/users/preview"],
             request: {
                 kind: "object",
+                args: ["req"],
                 schema: ifaceSchemas.HttpDefaultsServicePreviewUserRequestSchema,
                 path: [],
                 query: [],
@@ -832,6 +837,7 @@ export const HttpDefaultsServiceOperations = {
             paths: ["/v1/users/{id}"],
             request: {
                 kind: "object",
+                args: ["id", "lang"],
                 schema: ifaceSchemas.HttpDefaultsServiceGetUserRequestSchema,
                 path: [{ parameter: "id", wireName: "id", key: "id", multi: false, catchAll: false }],
                 query: [{ wireName: "lang", key: "lang", multi: false }],
@@ -863,6 +869,7 @@ export const HttpDefaultsServiceOperations = {
             paths: ["/get_user_alias/{id}"],
             request: {
                 kind: "object",
+                args: ["user_id", "locale"],
                 schema: ifaceSchemas.HttpDefaultsServiceGetUserAliasRequestSchema,
                 path: [{ parameter: "id", wireName: "id", key: "user_id", multi: false, catchAll: false }],
                 query: [{ wireName: "lang", key: "locale", multi: false }],
@@ -894,6 +901,7 @@ export const HttpDefaultsServiceOperations = {
             paths: ["/users"],
             request: {
                 kind: "object",
+                args: ["id", "revision"],
                 schema: ifaceSchemas.HttpDefaultsServiceDeleteUserRequestSchema,
                 path: [],
                 query: [{ wireName: "id", key: "id", multi: false }, { wireName: "revision", key: "revision", multi: false }],
@@ -925,6 +933,7 @@ export const HttpDefaultsServiceOperations = {
             paths: ["/users/head"],
             request: {
                 kind: "object",
+                args: ["id", "revision"],
                 schema: ifaceSchemas.HttpDefaultsServiceProbeUserRequestSchema,
                 path: [],
                 query: [{ wireName: "id", key: "id", multi: false }, { wireName: "revision", key: "revision", multi: false }],
@@ -956,6 +965,7 @@ export const HttpDefaultsServiceOperations = {
             paths: ["/users/options"],
             request: {
                 kind: "object",
+                args: ["id", "revision"],
                 schema: ifaceSchemas.HttpDefaultsServiceUserOptionsRequestSchema,
                 path: [],
                 query: [{ wireName: "id", key: "id", multi: false }, { wireName: "revision", key: "revision", multi: false }],
@@ -987,6 +997,7 @@ export const HttpDefaultsServiceOperations = {
             paths: ["/users/{id}"],
             request: {
                 kind: "object",
+                args: ["user_id", "name", "age"],
                 schema: ifaceSchemas.HttpDefaultsServiceReplaceUserRequestSchema,
                 path: [{ parameter: "id", wireName: "id", key: "user_id", multi: false, catchAll: false }],
                 query: [],
@@ -1019,6 +1030,7 @@ export const HttpDefaultsServiceOperations = {
             paths: ["/users/{id}"],
             request: {
                 kind: "object",
+                args: ["user_id", "name", "age"],
                 schema: ifaceSchemas.HttpDefaultsServicePatchUserRequestSchema,
                 path: [{ parameter: "id", wireName: "id", key: "user_id", multi: false, catchAll: false }],
                 query: [],
@@ -1055,10 +1067,10 @@ import { z } from "zod";
 import { xjson } from "xidl-typescript-codec";
 
     
-export const CreateUserRequestSchema = z.object({
-    
-        name: z.coerce.string(),
-    
-        age: z.coerce.number().int().nonnegative()
-    
-});
+    export const CreateUserRequestSchema = z.object({
+        
+            name: z.coerce.string(),
+        
+            age: z.coerce.number().int().nonnegative()
+        
+    });

@@ -10,10 +10,7 @@ import type {
   ServerOptions,
 } from './types.js';
 
-type RuntimeMethod = (
-  inputOrContext?: unknown,
-  context?: ServerContext,
-) => Awaitable<unknown>;
+type RuntimeMethod = (input?: unknown) => Awaitable<unknown>;
 
 export async function executeOperation<
   TService,
@@ -50,10 +47,17 @@ export async function executeOperation<
       );
     }
     const invoke = method as RuntimeMethod;
-    const result =
-      operation.request.kind === 'none'
-        ? await invoke.call(service, context)
-        : await invoke.call(service, input, context);
+    let result: unknown;
+    if (operation.request.kind === 'none') {
+      result = await invoke.call(service);
+    } else if (operation.request.kind === 'stream') {
+      // For client streams the decoded input is the raw request stream.
+      result = await invoke.call(service, input);
+    } else {
+      const record = (input ?? {}) as Record<string, unknown>;
+      const args = (operation.request.args ?? []).map(key => record[key]);
+      result = await invoke.call(service, ...args);
+    }
     return encodeOperationResponse(operation, result, options.codecs ?? {});
   } catch (error) {
     if (options.onError) {

@@ -274,21 +274,20 @@ import * as ifaceSchemas from "./http_response_shape.iface.zod";
 import {
     defineOperation,
     type Awaitable,
-    type ServerContext,
 } from "xidl-typescript-server";
 
     
 export interface HttpResponseShapeService {
     
-        hello(context: ServerContext): Awaitable<string>;
+        hello(): Awaitable<string>;
     
-        get_count(context: ServerContext): Awaitable<ifaceTypes.HttpResponseShapeServiceGetCountResponse>;
+        get_count(): Awaitable<ifaceTypes.HttpResponseShapeServiceGetCountResponse>;
     
-        add(request: ifaceTypes.HttpResponseShapeServiceAddRequest, context: ServerContext): Awaitable<ifaceTypes.HttpResponseShapeServiceAddResponse>;
+        add(a: number, b: number): Awaitable<ifaceTypes.HttpResponseShapeServiceAddResponse>;
     
-        bump(request: ifaceTypes.HttpResponseShapeServiceBumpRequest, context: ServerContext): Awaitable<ifaceTypes.HttpResponseShapeServiceBumpResponse>;
+        bump(value: number): Awaitable<ifaceTypes.HttpResponseShapeServiceBumpResponse>;
     
-        ping(context: ServerContext): Awaitable<void>;
+        ping(): Awaitable<void>;
     
 }
 
@@ -301,6 +300,7 @@ export const HttpResponseShapeServiceOperations = {
             paths: ["/hello"],
             request: {
                 kind: "none",
+                args: [],
                 path: [],
                 query: [],
                 headers: [],
@@ -331,6 +331,7 @@ export const HttpResponseShapeServiceOperations = {
             paths: ["/get_count"],
             request: {
                 kind: "none",
+                args: [],
                 path: [],
                 query: [],
                 headers: [],
@@ -362,6 +363,7 @@ export const HttpResponseShapeServiceOperations = {
             paths: ["/add"],
             request: {
                 kind: "object",
+                args: ["a", "b"],
                 schema: ifaceSchemas.HttpResponseShapeServiceAddRequestSchema,
                 path: [],
                 query: [],
@@ -395,6 +397,7 @@ export const HttpResponseShapeServiceOperations = {
             paths: ["/bump"],
             request: {
                 kind: "object",
+                args: ["value"],
                 schema: ifaceSchemas.HttpResponseShapeServiceBumpRequestSchema,
                 path: [],
                 query: [],
@@ -429,6 +432,7 @@ export const HttpResponseShapeServiceOperations = {
             paths: ["/ping"],
             request: {
                 kind: "none",
+                args: [],
                 path: [],
                 query: [],
                 headers: [],

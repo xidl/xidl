@@ -15,8 +15,8 @@ export function assertRequestContentType(
   const expected = normalizeMime(expectedContentType);
   if (normalizeMime(actual) !== expected) {
     throw new XidlServerError(
-      `unsupported request content type: ${normalizeMime(actual)}`,
       415,
+      `unsupported request content type: ${normalizeMime(actual)}`,
     );
   }
 }
@@ -37,7 +37,7 @@ export function assertAccepts(headers: Headers, contentType: string): void {
   ) {
     return;
   }
-  throw new XidlServerError(`not acceptable: expected ${expected}`, 406);
+  throw new XidlServerError(406, `not acceptable: expected ${expected}`);
 }
 
 export function encodeScalar(value: unknown): string {

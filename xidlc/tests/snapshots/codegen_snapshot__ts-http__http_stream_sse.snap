@@ -191,19 +191,18 @@ import * as ifaceSchemas from "./http_stream_sse.iface.zod";
 import {
     defineOperation,
     type Awaitable,
-    type ServerContext,
 } from "xidl-typescript-server";
 
     
 export interface HttpStreamSseService {
     
-        watch_topic(request: ifaceTypes.HttpStreamSseServiceWatchTopicRequest, context: ServerContext): Awaitable<AsyncIterable<string>>;
+        watch_topic(topic: string, lang: string): Awaitable<AsyncIterable<string>>;
     
-        get_attribute_online(context: ServerContext): Awaitable<boolean>;
+        get_attribute_online(): Awaitable<boolean>;
     
-        set_attribute_online(request: ifaceTypes.HttpStreamSseServiceSetAttributeOnlineRequest, context: ServerContext): Awaitable<void>;
+        set_attribute_online(online: boolean): Awaitable<void>;
     
-        watch_attribute_online(context: ServerContext): Awaitable<AsyncIterable<boolean>>;
+        watch_attribute_online(): Awaitable<AsyncIterable<boolean>>;
     
 }
 
@@ -216,6 +215,7 @@ export const HttpStreamSseServiceOperations = {
             paths: ["/events/{topic}"],
             request: {
                 kind: "object",
+                args: ["topic", "lang"],
                 schema: ifaceSchemas.HttpStreamSseServiceWatchTopicRequestSchema,
                 path: [{ parameter: "topic", wireName: "topic", key: "topic", multi: false, catchAll: false }],
                 query: [{ wireName: "lang", key: "lang", multi: false }],
@@ -247,6 +247,7 @@ export const HttpStreamSseServiceOperations = {
             paths: ["/attribute/online"],
             request: {
                 kind: "none",
+                args: [],
                 path: [],
                 query: [],
                 headers: [],
@@ -277,6 +278,7 @@ export const HttpStreamSseServiceOperations = {
             paths: ["/attribute/online"],
             request: {
                 kind: "object",
+                args: ["online"],
                 schema: ifaceSchemas.HttpStreamSseServiceSetAttributeOnlineRequestSchema,
                 path: [],
                 query: [],
@@ -310,6 +312,7 @@ export const HttpStreamSseServiceOperations = {
             paths: ["/HttpStreamSseService/watch_attribute_online"],
             request: {
                 kind: "none",
+                args: [],
                 path: [],
                 query: [],
                 headers: [],

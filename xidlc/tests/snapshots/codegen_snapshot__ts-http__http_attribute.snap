@@ -169,17 +169,16 @@ import * as ifaceSchemas from "./http_attribute.iface.zod";
 import {
     defineOperation,
     type Awaitable,
-    type ServerContext,
 } from "xidl-typescript-server";
 
     
 export interface HttpAttributeService {
     
-        get_attribute_version(context: ServerContext): Awaitable<string>;
+        get_attribute_version(): Awaitable<string>;
     
-        get_attribute_name(context: ServerContext): Awaitable<string>;
+        get_attribute_name(): Awaitable<string>;
     
-        set_attribute_name(request: ifaceTypes.HttpAttributeServiceSetAttributeNameRequest, context: ServerContext): Awaitable<void>;
+        set_attribute_name(name: string): Awaitable<void>;
     
 }
 
@@ -192,6 +191,7 @@ export const HttpAttributeServiceOperations = {
             paths: ["/attribute/version"],
             request: {
                 kind: "none",
+                args: [],
                 path: [],
                 query: [],
                 headers: [],
@@ -222,6 +222,7 @@ export const HttpAttributeServiceOperations = {
             paths: ["/attribute/name"],
             request: {
                 kind: "none",
+                args: [],
                 path: [],
                 query: [],
                 headers: [],
@@ -252,6 +253,7 @@ export const HttpAttributeServiceOperations = {
             paths: ["/attribute/name"],
             request: {
                 kind: "object",
+                args: ["name"],
                 schema: ifaceSchemas.HttpAttributeServiceSetAttributeNameRequestSchema,
                 path: [],
                 query: [],

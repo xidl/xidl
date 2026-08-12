@@ -3,11 +3,11 @@ import { createRouter } from 'xidl-typescript-server';
 import { issue_171 } from './{{MODULE_NAME}}.server.js';
 
 class MyRepro implements issue_171.ReproService {
-  async flattenAny(req: { payload: any }): Promise<void> {
-    if (!req.payload || req.payload.foo !== 'bar') throw new Error('invalid');
+  async flattenAny(payload: any): Promise<void> {
+    if (!payload || payload.foo !== 'bar') throw new Error('invalid');
   }
-  async flattenStructWithAny(req: { payload: { field: any } }): Promise<void> {
-    if (!req.payload?.field || req.payload.field.foo !== 'bar')
+  async flattenStructWithAny(payload: { field: any }): Promise<void> {
+    if (!payload?.field || payload.field.foo !== 'bar')
       throw new Error('invalid');
   }
 }

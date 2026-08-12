@@ -120,13 +120,12 @@ import * as ifaceSchemas from "./http_client_stream_ndjson.iface.zod";
 import {
     defineOperation,
     type Awaitable,
-    type ServerContext,
 } from "xidl-typescript-server";
 
     
 export interface HttpClientStreamService {
     
-        upload_chunk(stream: AsyncIterable<ifaceTypes.HttpClientStreamServiceUploadChunkRequest>, context: ServerContext): Awaitable<string>;
+        upload_chunk(stream: AsyncIterable<ifaceTypes.HttpClientStreamServiceUploadChunkRequest>): Awaitable<string>;
     
 }
 
@@ -139,6 +138,7 @@ export const HttpClientStreamServiceOperations = {
             paths: ["/upload/chunks"],
             request: {
                 kind: "stream",
+                args: ["stream"],
                 path: [],
                 query: [],
                 headers: [],

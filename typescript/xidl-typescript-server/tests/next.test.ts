@@ -7,11 +7,8 @@ import { defineOperation, XidlServerError } from '../src/index.js';
 import { createNextRoute } from '../src/next.js';
 
 interface UserServer {
-  createUser(request: {
-    id: number;
-    name: string;
-  }): Promise<{ id: number; name: string }>;
-  getUser(request: { id: number }): Promise<{ id: number; name: string }>;
+  createUser(id: number, name: string): Promise<{ id: number; name: string }>;
+  getUser(id: number): Promise<{ id: number; name: string }>;
 }
 
 const userSchema = z.object({ id: z.number(), name: z.string() });
@@ -20,6 +17,7 @@ const getUser = defineOperation<UserServer, 'getUser'>({
   method: 'GET',
   path: '/users/{id}',
   request: {
+    args: ['id'],
     body: { contentType: '', fields: [], kind: 'none' },
     cookies: [],
     headers: [],
@@ -52,6 +50,7 @@ const createUser = defineOperation<UserServer, 'createUser'>({
   method: 'POST',
   path: '/users',
   request: {
+    args: ['id', 'name'],
     body: {
       contentType: 'application/json',
       fields: [
@@ -81,11 +80,11 @@ const createUser = defineOperation<UserServer, 'createUser'>({
 
 test('createNextRoute decodes Next.js params and returns JSON', async () => {
   const server: UserServer = {
-    async createUser(request) {
-      return request;
+    async createUser(id, name) {
+      return { id, name };
     },
-    async getUser(request) {
-      return { id: request.id, name: 'Alice' };
+    async getUser(id) {
+      return { id, name: 'Alice' };
     },
   };
   const handler = createNextRoute(getUser, server);
@@ -99,11 +98,11 @@ test('createNextRoute decodes Next.js params and returns JSON', async () => {
 
 test('createNextRoute decodes JSON request bodies', async () => {
   const server: UserServer = {
-    async createUser(request) {
-      return request;
+    async createUser(id, name) {
+      return { id, name };
     },
     async getUser() {
-      throw new XidlServerError('not found', 404);
+      throw new XidlServerError(404, 'not found');
     },
   };
   const handler = createNextRoute(createUser, server);
@@ -122,7 +121,7 @@ test('createNextRoute decodes JSON request bodies', async () => {
 
 test('createNextRoute preserves numeric-looking string params', async () => {
   interface StringIdServer {
-    getItem(request: { id: string }): { id: string };
+    getItem(id: string): { id: string };
   }
   const operation = defineOperation<StringIdServer, 'getItem'>({
     ...getUser,
@@ -133,7 +132,7 @@ test('createNextRoute preserves numeric-looking string params', async () => {
     },
   });
   const handler = createNextRoute(operation, {
-    getItem: request => request,
+    getItem: id => ({ id }),
   });
 
   const response = await handler(new Request('http://localhost/items/001'), {
@@ -145,7 +144,7 @@ test('createNextRoute preserves numeric-looking string params', async () => {
 
 test('createNextRoute maps body wire names to service keys', async () => {
   interface AliasServer {
-    createItem(request: { displayName: string }): { displayName: string };
+    createItem(displayName: string): { displayName: string };
   }
   const schema = z.object({ displayName: z.string() });
   const operation = defineOperation<AliasServer, 'createItem'>({
@@ -153,6 +152,7 @@ test('createNextRoute maps body wire names to service keys', async () => {
     method: 'POST',
     path: '/items',
     request: {
+      args: ['displayName'],
       body: {
         contentType: 'application/json',
         fields: [{ key: 'displayName', wireName: 'display_name' }],
@@ -177,7 +177,7 @@ test('createNextRoute maps body wire names to service keys', async () => {
     security: [],
   });
   const handler = createNextRoute(operation, {
-    createItem: request => request,
+    createItem: displayName => ({ displayName }),
   });
 
   const response = await handler(
@@ -201,8 +201,8 @@ test('createNextRoute passes the response schema to custom codecs', async () => 
   const handler = createNextRoute(
     operation,
     {
-      createUser: async request => request,
-      getUser: async request => ({ id: request.id, name: 'Alice' }),
+      createUser: async (id, name) => ({ id, name }),
+      getUser: async id => ({ id, name: 'Alice' }),
     },
     {
       codecs: {
@@ -230,11 +230,11 @@ test('createNextRoute passes the response schema to custom codecs', async () => 
 
 test('createNextRoute maps typed server errors', async () => {
   const server: UserServer = {
-    async createUser(request) {
-      return request;
+    async createUser(id, name) {
+      return { id, name };
     },
     async getUser() {
-      throw new XidlServerError('not found', 404);
+      throw new XidlServerError(404, 'not found');
     },
   };
   const handler = createNextRoute(getUser, server);
@@ -249,10 +249,10 @@ test('createNextRoute maps typed server errors', async () => {
   });
 });
 
-test('createNextRoute hides unexpected server errors', async () => {
+test('createNextRoute keeps unexpected server errors at 500', async () => {
   const server: UserServer = {
-    async createUser(request) {
-      return request;
+    async createUser(id, name) {
+      return { id, name };
     },
     async getUser() {
       throw new Error('database password leaked');
@@ -266,6 +266,27 @@ test('createNextRoute hides unexpected server errors', async () => {
   assert.equal(response.status, 500);
   assert.deepEqual(await response.json(), {
     code: 500,
-    msg: 'internal server error',
+    msg: 'Error: database password leaked',
+  });
+});
+
+test('createNextRoute maps XidlServerError code and msg to the HTTP response', async () => {
+  const server: UserServer = {
+    async createUser(id, name) {
+      return { id, name };
+    },
+    async getUser() {
+      throw new XidlServerError(418, 'teapot');
+    },
+  };
+  const handler = createNextRoute(getUser, server);
+  const response = await handler(new Request('http://localhost/users/9'), {
+    params: Promise.resolve({ id: '9' }),
+  });
+
+  assert.equal(response.status, 418);
+  assert.deepEqual(await response.json(), {
+    code: 418,
+    msg: 'teapot',
   });
 });

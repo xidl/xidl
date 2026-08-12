@@ -147,13 +147,12 @@ import * as ifaceSchemas from "./http_client_stream_report.iface.zod";
 import {
     defineOperation,
     type Awaitable,
-    type ServerContext,
 } from "xidl-typescript-server";
 
     
 export interface HttpClientStreamReportService {
     
-        upload_parts(stream: AsyncIterable<ifaceTypes.HttpClientStreamReportServiceUploadPartsRequest>, context: ServerContext): Awaitable<types.UploadSummary>;
+        upload_parts(stream: AsyncIterable<ifaceTypes.HttpClientStreamReportServiceUploadPartsRequest>): Awaitable<types.UploadSummary>;
     
 }
 
@@ -166,6 +165,7 @@ export const HttpClientStreamReportServiceOperations = {
             paths: ["/uploads/parts"],
             request: {
                 kind: "stream",
+                args: ["stream"],
                 path: [],
                 query: [],
                 headers: [],
@@ -201,19 +201,19 @@ import { z } from "zod";
 import { xjson } from "xidl-typescript-codec";
 
     
-export const UploadChunkSchema = z.object({
-    
-        part_id: z.coerce.string(),
-    
-        bytes: z.array(z.coerce.number().int().nonnegative())
-    
-});
+    export const UploadChunkSchema = z.object({
+        
+            part_id: z.coerce.string(),
+        
+            bytes: z.array(z.coerce.number().int().nonnegative())
+        
+    });
 
     
-export const UploadSummarySchema = z.object({
-    
-        upload_id: z.coerce.string(),
-    
-        accepted: z.coerce.number().int().nonnegative()
-    
-});
+    export const UploadSummarySchema = z.object({
+        
+            upload_id: z.coerce.string(),
+        
+            accepted: z.coerce.number().int().nonnegative()
+        
+    });

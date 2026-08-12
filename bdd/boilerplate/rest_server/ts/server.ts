@@ -1,6 +1,7 @@
 import { createServer } from 'node:http';
 import { createRouter, XidlServerError } from 'xidl-typescript-server';
 import type {
+  AdminInfo,
   RestServerGetKey1Response,
   RestServerGetKey2Response,
   RestServerGetKey3Response,
@@ -23,8 +24,8 @@ class MyRestServer implements RestServer {
     return this.host;
   }
 
-  async set_attribute_host(req: { host: string }): Promise<void> {
-    this.host = req.host;
+  async set_attribute_host(host: string): Promise<void> {
+    this.host = host;
   }
 
   async get_attribute_port(): Promise<number> {
@@ -35,70 +36,72 @@ class MyRestServer implements RestServer {
     return this.serverName;
   }
 
-  async set_server_name(req: { name: string }): Promise<void> {
-    this.serverName = req.name;
+  async set_server_name(name: string): Promise<void> {
+    this.serverName = name;
   }
 
-  async get_user_info(req: { id: number }): Promise<UserInfo> {
-    const user = this.userInfo.get(req.id);
+  async get_user_info(id: number): Promise<UserInfo> {
+    const user = this.userInfo.get(id);
     if (!user) {
-      throw new XidlServerError('Not Found', 404);
+      throw new XidlServerError(404, 'Not Found');
     }
     return user;
   }
 
-  async query_user_info(req: { id: number }): Promise<UserInfo> {
-    return this.get_user_info(req);
+  async query_user_info(id: number): Promise<UserInfo> {
+    return this.get_user_info(id);
   }
 
-  async post_user_info(req: { id: number; info: UserInfo }): Promise<void> {
-    this.userInfo.set(req.id, req.info);
+  async post_user_info(id: number, info: UserInfo): Promise<void> {
+    this.userInfo.set(id, info);
   }
 
-  async put_key_value(req: { key: string; value: string }): Promise<void> {
-    this.keyStore.set(req.key, req.value);
+  async put_key_value(
+    key: string,
+    value: string,
+    ttl: number,
+  ): Promise<void> {
+    this.keyStore.set(key, value);
   }
 
-  async delete_key(req: { key: string }): Promise<void> {
-    this.keyStore.delete(req.key);
+  async delete_key(key: string): Promise<void> {
+    this.keyStore.delete(key);
   }
 
-  async patch_key(req: { key: string; value: string }): Promise<void> {
-    this.keyStore.set(req.key, req.value);
+  async patch_key(key: string, value: string): Promise<void> {
+    this.keyStore.set(key, value);
   }
 
-  async is_key_exists(req: { key_alias: string }): Promise<void> {
-    if (!this.keyStore.has(req.key_alias)) {
-      throw new XidlServerError('Not Found', 404);
+  async is_key_exists(key_alias: string): Promise<void> {
+    if (!this.keyStore.has(key_alias)) {
+      throw new XidlServerError(404, 'Not Found');
     }
   }
 
-  async get_key_options(req: {
-    key: string;
-  }): Promise<RestServerGetKeyOptionsResponse> {
+  async get_key_options(key: string): Promise<RestServerGetKeyOptionsResponse> {
     return {
-      exists: this.keyStore.has(req.key),
+      exists: this.keyStore.has(key),
     };
   }
 
-  async get_key_1(req: { key: string }): Promise<RestServerGetKey1Response> {
-    const val = this.keyStore.get(req.key);
+  async get_key_1(key: string): Promise<RestServerGetKey1Response> {
+    const val = this.keyStore.get(key);
     if (val === undefined) {
-      throw new XidlServerError('Not Found', 404);
+      throw new XidlServerError(404, 'Not Found');
     }
     return { value: val };
   }
 
-  async get_key_2(req: { key: string }): Promise<RestServerGetKey2Response> {
-    return this.get_key_1(req);
+  async get_key_2(key: string): Promise<RestServerGetKey2Response> {
+    return this.get_key_1(key);
   }
 
-  async get_key_3(req: { key: string }): Promise<RestServerGetKey3Response> {
-    return this.get_key_1(req);
+  async get_key_3(key: string): Promise<RestServerGetKey3Response> {
+    return this.get_key_1(key);
   }
 
-  async get_key_4(req: { key: string }): Promise<RestServerGetKey4Response> {
-    return this.get_key_1(req);
+  async get_key_4(key: string): Promise<RestServerGetKey4Response> {
+    return this.get_key_1(key);
   }
 
   async login(): Promise<RestServerLoginResponse> {
@@ -113,8 +116,8 @@ class MyRestServer implements RestServer {
     };
   }
 
-  async is_logined(req: { session_id: string }): Promise<boolean> {
-    return req.session_id !== '';
+  async is_logined(session_id: string): Promise<boolean> {
+    return session_id !== '';
   }
 
   async login_bearer(): Promise<void> {}
@@ -123,7 +126,7 @@ class MyRestServer implements RestServer {
     throw new Error('unimplemented');
   }
 
-  async is_admin(): Promise<void> {
+  async is_admin(info: AdminInfo): Promise<void> {
     throw new Error('unimplemented');
   }
 }
@@ -136,7 +139,7 @@ const handler = createRouter(Object.values(RestServerOperations), myServer, {
       if (!authHeader) {
         const basic = requirements.find(r => r.kind === 'http_basic');
         const realm = (basic as any)?.realm || 'login';
-        throw new XidlServerError('Unauthorized', 401, 401, {
+        throw new XidlServerError(401, 'Unauthorized', {
           'WWW-Authenticate': `Basic realm="${realm}"`,
         });
       }
@@ -145,7 +148,7 @@ const handler = createRouter(Object.values(RestServerOperations), myServer, {
         requirements.some(r => r.kind === 'http_bearer') &&
         authHeader === 'Bearer'
       ) {
-        throw new XidlServerError('Unauthorized', 401, 401);
+        throw new XidlServerError(401, 'Unauthorized');
       }
     }
   },

@@ -18,11 +18,11 @@ class MySerializationTest implements SerializationTest {
   async get_struct(): Promise<any> {
     return { name: 'world' };
   }
-  async echo_string(req: { value: string }): Promise<string> {
-    return req.value;
+  async echo_string(value: string): Promise<string> {
+    return value;
   }
-  async echo_struct(req: { value: any }): Promise<any> {
-    return req.value;
+  async echo_struct(value: any): Promise<any> {
+    return value;
   }
 }
 const service = new MySerializationTest();

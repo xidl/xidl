@@ -6,8 +6,8 @@ import {
 } from './{{MODULE_NAME}}.server.js';
 
 class MyStreaming implements StreamingService {
-  async *ticks(req: { count: number }): AsyncIterable<number> {
-    for (let i = 0; i < req.count; i++) {
+  async *ticks(count: number): AsyncIterable<number> {
+    for (let i = 0; i < count; i++) {
       yield i;
     }
   }

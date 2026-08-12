@@ -14,7 +14,7 @@ use crate::generate::typescript::definition::type_expr::{
     ts_type_for_type_spec, zod_schema_for_type_spec_with_prefix,
 };
 use helpers::{
-    build_client_params, build_client_stream_ty, build_response_body_mode, build_response_fields,
+    build_client_params, build_response_body_mode, build_response_fields,
     build_response_value_params, build_server_stream_ty, build_value_params, http_method_name,
     only_direct_return, security_contexts, validate_stream_support,
 };
@@ -81,7 +81,6 @@ pub(crate) fn render_interface(
                         response_body_entries: method.response_body_entries.clone(),
                         stream_item_ty: method.stream_item_ty.clone(),
                         stream_item_schema_ref: method.stream_item_schema_ref.clone(),
-                        client_stream_item_ty: method.client_stream_item_ty.clone(),
                         is_server_stream: method.is_server_stream,
                         is_client_stream: method.is_client_stream,
                         security: method.security.clone(),
@@ -162,7 +161,6 @@ fn build_method_model(
         return_ty = TsType::AsyncIterable(Box::new(return_ty));
     }
 
-    let client_stream_item_ty = build_client_stream_ty(op, module_path, &request_name);
     let paths = op
         .meta
         .routes
@@ -364,7 +362,6 @@ fn build_method_model(
         response_body_entries,
         stream_item_ty: build_server_stream_ty(op, module_path),
         stream_item_schema_ref,
-        client_stream_item_ty,
         is_server_stream: matches!(op.meta.stream.kind, Some(HttpStreamKind::Server)),
         is_client_stream: matches!(op.meta.stream.kind, Some(HttpStreamKind::Client)),
         security: security_contexts(op),

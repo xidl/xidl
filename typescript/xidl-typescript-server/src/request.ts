@@ -138,7 +138,7 @@ async function decodeRequestBody(
   if (mime.startsWith('text/')) {
     return request.text();
   }
-  throw new XidlServerError(`unsupported request content type: ${mime}`, 415);
+  throw new XidlServerError(415, `unsupported request content type: ${mime}`);
 }
 
 function applyBody(

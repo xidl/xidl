@@ -199,15 +199,14 @@ import * as ifaceSchemas from "./http_header.iface.zod";
 import {
     defineOperation,
     type Awaitable,
-    type ServerContext,
 } from "xidl-typescript-server";
 
     export namespace test {
     export interface HeaderService {
         
-            get_user(request: ifaceTypes.test.HeaderServiceGetUserRequest, context: ServerContext): Awaitable<types.test.User>;
+            get_user(id: number, req_id: string, flags: Array<string>, age: number, session_id: string, prefs: Array<string>): Awaitable<types.test.User>;
         
-            create_user(request: ifaceTypes.test.HeaderServiceCreateUserRequest, context: ServerContext): Awaitable<void>;
+            create_user(token: string, session_id: string, name: string): Awaitable<void>;
         
     }
 
@@ -220,6 +219,7 @@ import {
                 paths: ["/v1/headers/{id}"],
                 request: {
                     kind: "object",
+                    args: ["id", "req_id", "flags", "age", "session_id", "prefs"],
                     schema: ifaceSchemas.test.HeaderServiceGetUserRequestSchema,
                     path: [{ parameter: "id", wireName: "id", key: "id", multi: false, catchAll: false }],
                     query: [],
@@ -251,6 +251,7 @@ import {
                 paths: ["/v1/headers"],
                 request: {
                     kind: "object",
+                    args: ["token", "session_id", "name"],
                     schema: ifaceSchemas.test.HeaderServiceCreateUserRequestSchema,
                     path: [],
                     query: [],
@@ -291,13 +292,13 @@ import { xjson } from "xidl-typescript-codec";
     export namespace test {
     export const StatusSchema = z.enum(["ok", "FAILED"]);
 
-    export const UserSchema = z.object({
-        
-            id: z.coerce.number().int().nonnegative(),
-        
-            name: z.coerce.string(),
-        
-            status: StatusSchema
-        
-    });
+        export const UserSchema = z.object({
+            
+                id: z.coerce.number().int().nonnegative(),
+            
+                name: z.coerce.string(),
+            
+                status: StatusSchema
+            
+        });
 }

@@ -4,28 +4,28 @@ import { createRouter } from 'xidl-typescript-server';
 import type {
   RestMediaTypesApiGetMsgpackUserResponse,
   RestMediaTypesApiSubmitProfileResponse,
-} from './rest_media_types.js';
+} from './rest_media_types.iface.js';
 import {
   type RestMediaTypesApi,
   RestMediaTypesApiOperations,
 } from './rest_media_types.server.js';
 
 class MyRestMediaTypesService implements RestMediaTypesApi {
-  async submit_profile(req: {
-    name: string;
-    age: number;
-  }): Promise<RestMediaTypesApiSubmitProfileResponse> {
+  async submit_profile(
+    name: string,
+    age: number,
+  ): Promise<RestMediaTypesApiSubmitProfileResponse> {
     return {
-      normalized_name: req.name.toUpperCase(),
-      return: `${req.name}:${req.age}`,
+      normalized_name: name.toUpperCase(),
+      return: `${name}:${age}`,
     };
   }
 
-  async get_msgpack_user(req: {
-    user_id: string;
-  }): Promise<RestMediaTypesApiGetMsgpackUserResponse> {
+  async get_msgpack_user(
+    user_id: string,
+  ): Promise<RestMediaTypesApiGetMsgpackUserResponse> {
     return {
-      return: `user:${req.user_id}`,
+      return: `user:${user_id}`,
       score: 95,
     };
   }
