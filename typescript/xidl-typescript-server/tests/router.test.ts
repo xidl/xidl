@@ -6,8 +6,8 @@ import { z } from 'zod';
 import { createRouter, defineOperation } from '../src/index.js';
 
 interface ItemServer {
-  createItem(request: { name: string }): { name: string };
-  getItem(request: { id: number }): { id: number };
+  createItem(name: string): { name: string };
+  getItem(id: number): { id: number };
 }
 
 const getItem = defineOperation<ItemServer, 'getItem'>({
@@ -15,6 +15,7 @@ const getItem = defineOperation<ItemServer, 'getItem'>({
   method: 'GET',
   path: '/items/{id}',
   request: {
+    args: ['id'],
     body: { contentType: '', fields: [], kind: 'none' },
     cookies: [],
     headers: [],
@@ -58,6 +59,7 @@ const createItem = defineOperation<ItemServer, 'createItem'>({
     path: [],
     query: [],
     schema: z.object({ name: z.string() }),
+    args: ['name'],
   },
   response: {
     bodyFields: [{ key: 'return', wireName: 'return' }],
@@ -71,8 +73,8 @@ const createItem = defineOperation<ItemServer, 'createItem'>({
 });
 
 const router = createRouter([getItem, createItem], {
-  createItem: request => request,
-  getItem: request => request,
+  createItem: name => ({ name }),
+  getItem: id => ({ id }),
 });
 
 test('createRouter dispatches by method and path', async () => {
@@ -83,11 +85,11 @@ test('createRouter dispatches by method and path', async () => {
 });
 
 test('createRouter dispatches operation route aliases', async () => {
-  const handler = createRouter(
+  const handler = createRouter<ItemServer>(
     [{ ...getItem, paths: ['/items/{id}', '/legacy/items/{id}'] }],
     {
-      createItem: request => request,
-      getItem: request => request,
+      createItem: name => ({ name }),
+      getItem: id => ({ id }),
     },
   );
 
@@ -146,7 +148,7 @@ test('createRouter enforces request content types', async () => {
 
 test('createRouter falls back to primitive return values', async () => {
   interface PrimitiveServer {
-    getValue(request: { id: number }): number;
+    getValue(id: number): number;
   }
   const operation = defineOperation<PrimitiveServer, 'getValue'>({
     ...getItem,
@@ -158,7 +160,7 @@ test('createRouter falls back to primitive return values', async () => {
     },
   });
   const handler = createRouter([operation], {
-    getValue: request => request.id,
+    getValue: id => id,
   });
 
   const response = await handler(new Request('http://localhost/items/7'));
@@ -176,6 +178,7 @@ test('createRouter handles raw byte request and response streams', async () => {
     handler: 'download',
     path: '/download',
     request: {
+      args: [],
       body: { contentType: '', fields: [], kind: 'none' },
       cookies: [],
       headers: [],
@@ -197,6 +200,7 @@ test('createRouter handles raw byte request and response streams', async () => {
     handler: 'upload',
     path: '/upload',
     request: {
+      args: [],
       body: {
         contentType: 'application/octet-stream',
         fields: [],

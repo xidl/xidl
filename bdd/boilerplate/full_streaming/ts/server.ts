@@ -7,9 +7,9 @@ import {
 } from './{{MODULE_NAME}}.server.js';
 
 class MyHttpStreamApi implements HttpStreamApi {
-  async *alerts(request: { district: string }): AsyncIterable<string> {
-    yield `${request.district}:1`;
-    yield `${request.district}:2`;
+  async *alerts(district: string): AsyncIterable<string> {
+    yield `${district}:1`;
+    yield `${district}:2`;
   }
 
   async upload_asset(
@@ -31,13 +31,13 @@ const handler = createRouter(Object.values(HttpStreamApiOperations), service, {
       requirements.some(requirement => requirement.kind === 'http_basic') &&
       !authorization?.startsWith('Basic ')
     ) {
-      throw new XidlServerError('Unauthorized', 401);
+      throw new XidlServerError(401, 'Unauthorized');
     }
     if (
       requirements.some(requirement => requirement.kind === 'http_bearer') &&
       !authorization?.startsWith('Bearer ')
     ) {
-      throw new XidlServerError('Unauthorized', 401);
+      throw new XidlServerError(401, 'Unauthorized');
     }
   },
 });

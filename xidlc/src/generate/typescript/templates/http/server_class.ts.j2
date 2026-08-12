@@ -1,7 +1,7 @@
 {% from "macros.j2" import render_type %}
 export interface {{ service_name }} {
     {% for method in methods %}
-        {{ method.name }}({% if method.is_client_stream %}stream: {{ render_type(method.client_stream_item_ty) }}, {% elif method.request_ty %}request: ifaceTypes.{{ method.request_ty }}, {% endif %}context: ServerContext): Awaitable<{% if method.is_server_stream %}AsyncIterable<{{ render_type(method.stream_item_ty) }}>{% else %}{{ render_type(method.response_ty) }}{% endif %}>;
+        {{ method.name }}({% for param in method.params %}{{ param.name }}: {{ render_type(param.ty) }}{% if not loop.last %}, {% endif %}{% endfor %}): Awaitable<{% if method.is_server_stream %}AsyncIterable<{{ render_type(method.stream_item_ty) }}>{% else %}{{ render_type(method.response_ty) }}{% endif %}>;
     {% endfor %}
 }
 
@@ -13,7 +13,8 @@ export const {{ service_name }}Operations = {
             path: "{{ method.path }}",
             paths: [{% for path in method.paths %}"{{ path }}"{% if not loop.last %}, {% endif %}{% endfor %}],
             request: {
-                kind: "{% if method.is_client_stream %}stream{% elif method.request_ty %}object{% else %}none{% endif %}",
+                kind: "{% if method.is_client_stream %}stream{% elif method.params | length > 0 %}object{% else %}none{% endif %}",
+                args: [{% for param in method.params %}"{{ param.name }}"{% if not loop.last %}, {% endif %}{% endfor %}],
                 {% if method.request_schema_ref %}schema: ifaceSchemas.{{ method.request_schema_ref }}Schema,
                 {% endif %}path: [{% for param in method.path_params %}{ parameter: "{{ param.template_name }}", wireName: "{{ param.template_name }}", key: "{{ param.access }}", multi: false, catchAll: {{ param.catch_all | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}],
                 query: [{% for param in method.query_params %}{ wireName: "{{ param.raw_name }}", key: "{{ param.access }}", multi: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}],

@@ -79,26 +79,26 @@ import type { UserService } from './generated/api.server';
 export class AppUserService implements UserService {
   private readonly users = new Map<number, User>();
 
-  async get_user(request: { id: number }): Promise<User> {
-    const user = this.users.get(request.id);
+  async get_user(id: number): Promise<User> {
+    const user = this.users.get(id);
     if (!user) {
-      throw new XidlServerError('user not found', 404);
+      throw new XidlServerError(404, 'user not found');
     }
     return user;
   }
 
-  async create_user(request: { user: User }): Promise<User> {
-    this.users.set(request.user.id, request.user);
-    return request.user;
+  async create_user(user: User): Promise<User> {
+    this.users.set(user.id, user);
+    return user;
   }
 }
 
 export const userService = new AppUserService();
 ```
 
-Generated methods also accept a second `ServerContext` argument when the
-implementation needs the original request, matched route parameters, or
-operation metadata.
+Generated methods receive one positional argument per IDL parameter, in
+declaration order. Path, query, header, cookie, and body values are extracted
+and validated by the runtime before the service method runs.
 
 ## Use the Fetch API Router
 
@@ -200,15 +200,16 @@ export const POST = createNextRoute(
 );
 ```
 
-- Throw `XidlServerError(status, message)` from the service for an explicit
-  HTTP status and typed JSON error body.
+- Throw `XidlServerError(code, msg)` from the service for an explicit
+  HTTP status and typed JSON error body. The HTTP status is set from `code`.
 - Invalid generated request schemas return HTTP 400 responses.
 - Unsupported request and response media types return HTTP 415 and 406.
 - `authorize` receives the original request, the operation's security
   requirements, and a `ServerContext`; throw to reject the request.
 - `codecs` overrides request/response encoding per media type.
-- `onError` handles unexpected errors, for example to add logging; the default
-  hides the error details behind a generic 500 response.
+- `onError` handles unexpected errors, for example to add logging; by default
+  errors that are not `XidlServerError` produce HTTP 500 with `msg` set to
+  `String(error)`.
 
 ## Streaming
 

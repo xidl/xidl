@@ -139,13 +139,12 @@ import * as ifaceSchemas from "./http_stream_sse_bindings.iface.zod";
 import {
     defineOperation,
     type Awaitable,
-    type ServerContext,
 } from "xidl-typescript-server";
 
     
 export interface HttpStreamSseBindingsService {
     
-        watch_project(request: ifaceTypes.HttpStreamSseBindingsServiceWatchProjectRequest, context: ServerContext): Awaitable<AsyncIterable<types.ProjectEvent>>;
+        watch_project(project_id: string, cursor: string | undefined, trace_id: string): Awaitable<AsyncIterable<types.ProjectEvent>>;
     
 }
 
@@ -158,6 +157,7 @@ export const HttpStreamSseBindingsServiceOperations = {
             paths: ["/projects/{project_id}/events"],
             request: {
                 kind: "object",
+                args: ["project_id", "cursor", "trace_id"],
                 schema: ifaceSchemas.HttpStreamSseBindingsServiceWatchProjectRequestSchema,
                 path: [{ parameter: "project_id", wireName: "project_id", key: "project_id", multi: false, catchAll: false }],
                 query: [{ wireName: "cursor", key: "cursor", multi: false }],
@@ -194,10 +194,10 @@ import { z } from "zod";
 import { xjson } from "xidl-typescript-codec";
 
     
-export const ProjectEventSchema = z.object({
-    
-        id: z.coerce.string(),
-    
-        payload: z.coerce.string()
-    
-});
+    export const ProjectEventSchema = z.object({
+        
+            id: z.coerce.string(),
+        
+            payload: z.coerce.string()
+        
+    });

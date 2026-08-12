@@ -46,12 +46,12 @@ export function createRouter<TService>(
       }
       if (allowedMethods.size > 0) {
         return errorResponse(
-          new XidlServerError('method not allowed', 405, 405, {
+          new XidlServerError(405, 'method not allowed', {
             Allow: [...allowedMethods].sort().join(', '),
           }),
         );
       }
-      return errorResponse(new XidlServerError('route not found', 404));
+      return errorResponse(new XidlServerError(404, 'route not found'));
     } catch (error) {
       return errorResponse(error);
     }
@@ -103,6 +103,6 @@ function decodeSegment(value: string): string {
   try {
     return decodeURIComponent(value);
   } catch {
-    throw new XidlServerError(`invalid route segment: ${value}`, 400);
+    throw new XidlServerError(400, `invalid route segment: ${value}`);
   }
 }

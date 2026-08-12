@@ -1,35 +1,34 @@
 import { createServer } from 'node:http';
 import { createRouter } from 'xidl-typescript-server';
+import { type Status } from './{{MODULE_NAME}}.js';
 import {
   type AllScenariosService,
   AllScenariosServiceOperations,
 } from './{{MODULE_NAME}}.server.js';
 
 class MyAllScenarios implements AllScenariosService {
-  private status = 'ACTIVE';
-  async get_item(req: {
-    id: number;
-    filter: string;
-    trace_id: string;
-  }): Promise<string> {
-    return `Item ${req.id} with ${req.filter} and ${req.trace_id}`;
+  private status: Status = 'ACTIVE';
+  async get_item(
+    id: number,
+    filter: string,
+    trace_id: string,
+  ): Promise<string> {
+    return `Item ${id} with ${filter} and ${trace_id}`;
   }
-  async create_item(req: { name: string; payload: any }): Promise<number> {
+  async create_item(name: string, payload: any): Promise<number> {
     return 42;
   }
-  async update_item(req: { id: number; metadata: any[] }): Promise<void> {}
-  async delete_item(req: { id: number }): Promise<void> {}
-  async upload_form(req: { key: string; value: string }): Promise<void> {}
-  async secure_data(req: { auth: any }): Promise<string> {
+  async update_item(id: number, metadata: any[]): Promise<void> {}
+  async delete_item(id: number): Promise<void> {}
+  async upload_form(key: string, value: string): Promise<void> {}
+  async secure_data(): Promise<string> {
     return 'Secret';
   }
-  async get_attribute_system_status(): Promise<string> {
+  async get_attribute_system_status(): Promise<Status> {
     return this.status;
   }
-  async set_attribute_system_status(req: {
-    system_status: string;
-  }): Promise<void> {
-    this.status = req.system_status;
+  async set_attribute_system_status(system_status: Status): Promise<void> {
+    this.status = system_status;
   }
   async get_attribute_version(): Promise<string> {
     return '1.0.0';

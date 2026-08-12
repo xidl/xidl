@@ -267,17 +267,16 @@ import * as ifaceSchemas from "./http_module_scope.iface.zod";
 import {
     defineOperation,
     type Awaitable,
-    type ServerContext,
 } from "xidl-typescript-server";
 
     export namespace nm {
     export interface ItemService {
         
-            get_item(request: ifaceTypes.nm.ItemServiceGetItemRequest, context: ServerContext): Awaitable<types.nm.Item>;
+            get_item(id: string): Awaitable<types.nm.Item>;
         
-            put_item(request: ifaceTypes.nm.ItemServicePutItemRequest, context: ServerContext): Awaitable<void>;
+            put_item(item: types.nm.Item): Awaitable<void>;
         
-            get_wrapper(context: ServerContext): Awaitable<types.nm.Wrapper>;
+            get_wrapper(): Awaitable<types.nm.Wrapper>;
         
     }
 
@@ -290,6 +289,7 @@ import {
                 paths: ["/item/{id}"],
                 request: {
                     kind: "object",
+                    args: ["id"],
                     schema: ifaceSchemas.nm.ItemServiceGetItemRequestSchema,
                     path: [{ parameter: "id", wireName: "id", key: "id", multi: false, catchAll: false }],
                     query: [],
@@ -321,6 +321,7 @@ import {
                 paths: ["/items"],
                 request: {
                     kind: "object",
+                    args: ["item"],
                     schema: ifaceSchemas.nm.ItemServicePutItemRequestSchema,
                     path: [],
                     query: [],
@@ -353,6 +354,7 @@ import {
                 paths: ["/wrapper"],
                 request: {
                     kind: "none",
+                    args: [],
                     path: [],
                     query: [],
                     headers: [],
@@ -382,7 +384,7 @@ import {
     export namespace outer {    export namespace inner {
         export interface InnerService {
             
-                get_leaf(context: ServerContext): Awaitable<types.outer.inner.Leaf>;
+                get_leaf(): Awaitable<types.outer.inner.Leaf>;
             
         }
 
@@ -395,6 +397,7 @@ import {
                     paths: ["/leaf"],
                     request: {
                         kind: "none",
+                        args: [],
                         path: [],
                         query: [],
                         headers: [],
@@ -439,24 +442,24 @@ import { xjson } from "xidl-typescript-codec";
         
     }));
 
-    export const WrapperSchema = z.object({
-        
-            item: ItemSchema
-        
-    });
+        export const WrapperSchema = z.object({
+            
+                item: ItemSchema
+            
+        });
 }
 
     export namespace outer {    export namespace inner {
-        export const LeafSchema = z.object({
-            
-                id: z.coerce.string()
-            
-        });
+            export const LeafSchema = z.object({
+                
+                    id: z.coerce.string()
+                
+            });
 
-        export const HolderSchema = z.object({
-            
-                leaf: LeafSchema
-            
-        });
+            export const HolderSchema = z.object({
+                
+                    leaf: LeafSchema
+                
+            });
     }
 }

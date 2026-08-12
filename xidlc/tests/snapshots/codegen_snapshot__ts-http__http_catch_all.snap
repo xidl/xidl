@@ -164,15 +164,14 @@ import * as ifaceSchemas from "./http_catch_all.iface.zod";
 import {
     defineOperation,
     type Awaitable,
-    type ServerContext,
 } from "xidl-typescript-server";
 
     
 export interface HttpCatchAllService {
     
-        read_file(request: ifaceTypes.HttpCatchAllServiceReadFileRequest, context: ServerContext): Awaitable<string>;
+        read_file(rel_path: string): Awaitable<string>;
     
-        read_asset(request: ifaceTypes.HttpCatchAllServiceReadAssetRequest, context: ServerContext): Awaitable<string>;
+        read_asset(key: string, version: string): Awaitable<string>;
     
 }
 
@@ -185,6 +184,7 @@ export const HttpCatchAllServiceOperations = {
             paths: ["/files/{*path}"],
             request: {
                 kind: "object",
+                args: ["rel_path"],
                 schema: ifaceSchemas.HttpCatchAllServiceReadFileRequestSchema,
                 path: [{ parameter: "path", wireName: "path", key: "rel_path", multi: false, catchAll: true }],
                 query: [],
@@ -216,6 +216,7 @@ export const HttpCatchAllServiceOperations = {
             paths: ["/assets/{*key}"],
             request: {
                 kind: "object",
+                args: ["key", "version"],
                 schema: ifaceSchemas.HttpCatchAllServiceReadAssetRequestSchema,
                 path: [{ parameter: "key", wireName: "key", key: "key", multi: false, catchAll: true }],
                 query: [{ wireName: "v", key: "version", multi: false }],

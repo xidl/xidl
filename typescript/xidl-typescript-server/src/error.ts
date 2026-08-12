@@ -2,30 +2,29 @@ import { ZodError } from 'zod';
 
 export class XidlServerError extends Error {
   readonly code: number;
+  readonly msg: string;
   readonly headers?: Record<string, string>;
-  readonly status: number;
 
   constructor(
-    message: string,
-    status = 500,
-    code = status,
+    code: number,
+    msg: string,
     headers?: Record<string, string>,
   ) {
-    super(message);
-    this.status = status;
+    super(msg);
     this.code = code;
+    this.msg = msg;
     this.headers = headers;
   }
 }
 
 export function errorResponse(error: unknown): Response {
   if (error instanceof XidlServerError) {
-    return jsonError(error.status, error.code, error.message, error.headers);
+    return jsonError(error.code, error.code, error.msg, error.headers);
   }
   if (error instanceof ZodError) {
     return jsonError(400, 400, 'invalid request', undefined, error.issues);
   }
-  return jsonError(500, 500, 'internal server error');
+  return jsonError(500, 500, String(error));
 }
 
 function jsonError(

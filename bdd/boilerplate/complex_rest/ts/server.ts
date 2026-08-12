@@ -9,26 +9,26 @@ import {
 class MyUserService implements UserService {
   private users = new Map<number, User>();
 
-  async get_user(req: { id: number }): Promise<User> {
-    const user = this.users.get(req.id);
+  async get_user(id: number): Promise<User> {
+    const user = this.users.get(id);
     if (!user) {
-      throw new XidlServerError('Not Found', 404);
+      throw new XidlServerError(404, 'Not Found');
     }
     return user;
   }
 
-  async create_user(req: { user: User }): Promise<User> {
-    this.users.set(req.user.id, req.user);
-    return req.user;
+  async create_user(user: User): Promise<User> {
+    this.users.set(user.id, user);
+    return user;
   }
 
-  async list_users(req: { filter: string }): Promise<User[]> {
+  async list_users(filter: string): Promise<User[]> {
     const result: User[] = [];
     for (const user of this.users.values()) {
       if (
-        !req.filter ||
-        user.roles.includes(req.filter) ||
-        user.name.includes(req.filter)
+        !filter ||
+        user.roles.includes(filter) ||
+        user.name.includes(filter)
       ) {
         result.push(user);
       }

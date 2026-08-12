@@ -171,15 +171,14 @@ import * as ifaceSchemas from "./http_query_template.iface.zod";
 import {
     defineOperation,
     type Awaitable,
-    type ServerContext,
 } from "xidl-typescript-server";
 
     
 export interface HttpQueryTemplateService {
     
-        get_user(request: ifaceTypes.HttpQueryTemplateServiceGetUserRequest, context: ServerContext): Awaitable<string>;
+        get_user(id: number, lang: string, region: string): Awaitable<string>;
     
-        search(request: ifaceTypes.HttpQueryTemplateServiceSearchRequest, context: ServerContext): Awaitable<string>;
+        search(keyword: string, payload: string): Awaitable<string>;
     
 }
 
@@ -192,6 +191,7 @@ export const HttpQueryTemplateServiceOperations = {
             paths: ["/users/{id}"],
             request: {
                 kind: "object",
+                args: ["id", "lang", "region"],
                 schema: ifaceSchemas.HttpQueryTemplateServiceGetUserRequestSchema,
                 path: [{ parameter: "id", wireName: "id", key: "id", multi: false, catchAll: false }],
                 query: [{ wireName: "lang", key: "lang", multi: false }, { wireName: "region", key: "region", multi: false }],
@@ -223,6 +223,7 @@ export const HttpQueryTemplateServiceOperations = {
             paths: ["/search"],
             request: {
                 kind: "object",
+                args: ["keyword", "payload"],
                 schema: ifaceSchemas.HttpQueryTemplateServiceSearchRequestSchema,
                 path: [],
                 query: [{ wireName: "keyword", key: "keyword", multi: false }],

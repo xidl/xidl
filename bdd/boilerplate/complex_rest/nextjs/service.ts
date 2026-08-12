@@ -5,25 +5,25 @@ import type { UserService } from './complex_rest.server';
 class MyUserService implements UserService {
   private readonly users = new Map<number, User>();
 
-  async get_user(request: { id: number }): Promise<User> {
-    const user = this.users.get(request.id);
+  async get_user(id: number): Promise<User> {
+    const user = this.users.get(id);
     if (!user) {
-      throw new XidlServerError('Not Found', 404);
+      throw new XidlServerError(404, 'Not Found');
     }
     return user;
   }
 
-  async create_user(request: { user: User }): Promise<User> {
-    this.users.set(request.user.id, request.user);
-    return request.user;
+  async create_user(user: User): Promise<User> {
+    this.users.set(user.id, user);
+    return user;
   }
 
-  async list_users(request: { filter: string }): Promise<User[]> {
+  async list_users(filter: string): Promise<User[]> {
     return [...this.users.values()].filter(
       user =>
-        !request.filter ||
-        user.name.includes(request.filter) ||
-        user.roles.includes(request.filter),
+        !filter ||
+        user.name.includes(filter) ||
+        user.roles.includes(filter),
     );
   }
 }

@@ -7,7 +7,7 @@ import type {
   SmartCityRestApiGetStopEtaResponse,
   SmartCityRestApiReserveLotResponse,
   SmartCityRestApiUpdateProfileResponse,
-} from './city_rest.js';
+} from './city_rest.iface.js';
 import {
   type SmartCityRestApi,
   SmartCityRestApiOperations,
@@ -16,74 +16,83 @@ import {
 class MySmartCityRestService implements SmartCityRestApi {
   private maintenanceMode = false;
 
-  async get_stop_eta(req: {
-    stop_id: string;
-    line: string;
-    locale: string;
-  }): Promise<SmartCityRestApiGetStopEtaResponse> {
+  async get_stop_eta(
+    stop_id: string,
+    line: string,
+    locale: string,
+  ): Promise<SmartCityRestApiGetStopEtaResponse> {
     return {
       destination: 'Central Station',
       eta_seconds: 240,
-      return: req.stop_id,
+      return: stop_id,
     };
   }
 
-  async list_nearby_stops(req: { stop_id: string }): Promise<string[]> {
-    return [`${req.stop_id}-A`, `${req.stop_id}-B`];
+  async list_nearby_stops(stop_id: string): Promise<string[]> {
+    return [`${stop_id}-A`, `${stop_id}-B`];
   }
 
-  async download_asset(req: {
-    asset_path: string;
-    version: string;
-  }): Promise<SmartCityRestApiDownloadAssetResponse> {
+  async download_asset(
+    asset_path: string,
+    version: string,
+  ): Promise<SmartCityRestApiDownloadAssetResponse> {
     return {
       content_type: 'text/plain',
       etag: 'etag-demo',
-      return: Array.from(new TextEncoder().encode(`asset:${req.asset_path}`)),
+      return: Array.from(new TextEncoder().encode(`asset:${asset_path}`)),
     };
   }
 
-  async probe_lot(): Promise<void> {}
+  async probe_lot(lot_id: string, trace_id: string): Promise<void> {}
 
-  async reserve_lot(req: {
-    lot_id: string;
-  }): Promise<SmartCityRestApiReserveLotResponse> {
+  async reserve_lot(
+    lot_id: string,
+    plate_number: string,
+    minutes: number,
+  ): Promise<SmartCityRestApiReserveLotResponse> {
     return {
       expires_at: '2026-03-08T10:00:00Z',
       reservation_state: 'CONFIRMED',
-      return: `resv-${req.lot_id}`,
+      return: `resv-${lot_id}`,
     };
   }
 
-  async cancel_reservation(): Promise<void> {}
+  async cancel_reservation(
+    lot_id: string,
+    reservation_id: string,
+  ): Promise<void> {}
 
-  async get_profile(req: {
-    citizen_id: string;
-  }): Promise<SmartCityRestApiGetProfileResponse> {
+  async get_profile(
+    citizen_id: string,
+  ): Promise<SmartCityRestApiGetProfileResponse> {
     return {
       display_name: 'Taylor',
       language: 'en-US',
       phone_number: '+1-555-0101',
-      return: req.citizen_id,
+      return: citizen_id,
     };
   }
 
-  async update_profile(): Promise<SmartCityRestApiUpdateProfileResponse> {
+  async update_profile(
+    citizen_id: string,
+    display_name: string,
+    phone_number: string,
+  ): Promise<SmartCityRestApiUpdateProfileResponse> {
     return {
       audit_id: 'audit-20260307-001',
     };
   }
 
-  async get_device_status(req: {
-    device_id: string;
-    trace_id: string;
-    session_id: string;
-    locale: string;
-  }): Promise<SmartCityRestApiGetDeviceStatusResponse> {
+  async get_device_status(
+    device_id: string,
+    trace_id: string,
+    session_id: string,
+    locale: string,
+  ): Promise<SmartCityRestApiGetDeviceStatusResponse> {
     return {
-      return: `device:${req.device_id}`,
-      session_echo: req.session_id,
-      trace_echo: req.trace_id,
+      return: `device:${device_id}`,
+      session_echo: session_id,
+      trace_echo: trace_id,
     };
   }
 
@@ -95,8 +104,8 @@ class MySmartCityRestService implements SmartCityRestApi {
     return this.maintenanceMode;
   }
 
-  async set_attribute_maintenance_mode(req: { value: boolean }): Promise<void> {
-    this.maintenanceMode = req.value;
+  async set_attribute_maintenance_mode(maintenance_mode: boolean): Promise<void> {
+    this.maintenanceMode = maintenance_mode;
   }
 }
 

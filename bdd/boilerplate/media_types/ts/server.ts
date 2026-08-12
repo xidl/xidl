@@ -6,8 +6,8 @@ import {
 } from './{{MODULE_NAME}}.server.js';
 
 class MyForm implements FormService {
-  async submit(req: { name: string; age: number }): Promise<string> {
-    return `Received ${req.name} age ${req.age}`;
+  async submit(name: string, age: number): Promise<string> {
+    return `Received ${name} age ${age}`;
   }
 }
 const service = new MyForm();

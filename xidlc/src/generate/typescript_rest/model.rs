@@ -91,7 +91,6 @@ pub(super) struct ClientMethodContext {
     pub(super) is_client_stream: bool,
     pub(super) stream_item_ty: Option<TsType>,
     pub(super) stream_item_schema_ref: Option<String>,
-    pub(super) client_stream_item_ty: Option<TsType>,
     pub(super) security: Vec<SecurityContext>,
 }
 
@@ -104,7 +103,7 @@ pub(super) struct ServerClassContext {
 #[derive(Serialize)]
 pub(super) struct ServerMethodContext {
     pub(super) name: String,
-    pub(super) request_ty: Option<String>,
+    pub(super) params: Vec<ClientParamContext>,
     pub(super) response_ty: TsType,
     pub(super) request_schema_ref: Option<String>,
     pub(super) body_schema_ref: Option<String>,
@@ -128,7 +127,6 @@ pub(super) struct ServerMethodContext {
     pub(super) is_client_stream: bool,
     pub(super) stream_item_ty: Option<TsType>,
     pub(super) stream_item_schema_ref: Option<String>,
-    pub(super) client_stream_item_ty: Option<TsType>,
     pub(super) security: Vec<SecurityContext>,
 }
 
@@ -159,7 +157,6 @@ pub(super) struct MethodModel {
     pub(super) response_body_entries: Vec<RequestPayloadEntry>,
     pub(super) stream_item_ty: Option<TsType>,
     pub(super) stream_item_schema_ref: Option<String>,
-    pub(super) client_stream_item_ty: Option<TsType>,
     pub(super) is_server_stream: bool,
     pub(super) is_client_stream: bool,
     pub(super) security: Vec<SecurityContext>,
@@ -194,7 +191,6 @@ impl MethodModel {
             is_client_stream: self.is_client_stream,
             stream_item_ty: self.stream_item_ty,
             stream_item_schema_ref: self.stream_item_schema_ref,
-            client_stream_item_ty: self.client_stream_item_ty,
             security: self.security,
         }
     }
@@ -209,10 +205,7 @@ impl MethodModel {
             .unwrap_or(self.return_ty);
         ServerMethodContext {
             name: self.name,
-            request_ty: self
-                .request_name
-                .as_ref()
-                .map(|name| scoped_name(module_path, name)),
+            params: self.params,
             response_ty,
             request_schema_ref: self.request_schema_ref,
             body_schema_ref: self.body_schema_ref,
@@ -236,7 +229,6 @@ impl MethodModel {
             is_client_stream: self.is_client_stream,
             stream_item_ty: self.stream_item_ty,
             stream_item_schema_ref: self.stream_item_schema_ref,
-            client_stream_item_ty: self.client_stream_item_ty,
             security: self.security,
         }
     }
