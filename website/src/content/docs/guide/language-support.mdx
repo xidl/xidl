@@ -5,6 +5,12 @@ description: "Language support"
 
 ## Language Support
 
+XIDL generates data types and service bindings for Rust, Go, and TypeScript.
+Rust is the most complete target: it supports HTTP (`rust-axum`), JSON-RPC
+(`rust-jsonrpc`), and streaming. Go and TypeScript currently provide REST
+(client and server) and data types, but JSON-RPC generators are not yet
+available for them.
+
 |            | Basic Types | REST Server | REST Client | JSONRPC Server | JSONRPC Client |
 | --- | --- | --- | --- | --- | --- |
 | Rust | ✅ | ✅ | ✅ | ✅ | ✅ |
