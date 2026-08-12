@@ -39,6 +39,9 @@ pub enum Error {
     Io(#[from] std::io::Error),
     #[error("json error: {0}")]
     Json(#[from] serde_json::Error),
+    #[cfg(feature = "msgpack")]
+    #[error("msgpack error: {0}")]
+    Msgpack(String),
     #[error("rpc error {code}: {message}")]
     Rpc {
         code: ErrorCode,

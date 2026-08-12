@@ -35,7 +35,7 @@ impl Handler for SessionHandler {
 #[tokio::test]
 async fn run_handles_success_and_error_responses() {
     let (mut client, server) = tokio::io::duplex(1024);
-    let mut session = ServerSession::new(server, SessionHandler);
+    let mut session = ServerSession::with_codec(server, SessionHandler, crate::codec::Codec::Json);
 
     let task = tokio::spawn(async move { session.run().await.unwrap() });
     client
@@ -68,7 +68,7 @@ async fn run_handles_success_and_error_responses() {
 #[tokio::test]
 async fn run_handles_parse_and_protocol_errors() {
     let (mut client, server) = tokio::io::duplex(512);
-    let mut session = ServerSession::new(server, SessionHandler);
+    let mut session = ServerSession::with_codec(server, SessionHandler, crate::codec::Codec::Json);
     let task = tokio::spawn(async move { session.run().await.unwrap() });
 
     client.write_all(b"not-json\n").await.unwrap();
@@ -96,7 +96,7 @@ async fn run_handles_parse_and_protocol_errors() {
 #[tokio::test]
 async fn bidi_requests_take_over_the_stream() {
     let (mut client, server) = tokio::io::duplex(512);
-    let mut session = ServerSession::new(server, SessionHandler);
+    let mut session = ServerSession::with_codec(server, SessionHandler, crate::codec::Codec::Json);
     let task = tokio::spawn(async move { session.run().await.unwrap() });
 
     client
@@ -116,7 +116,7 @@ async fn bidi_requests_take_over_the_stream() {
 #[tokio::test]
 async fn private_helpers_map_errors_and_missing_streams() {
     let (_client, server) = tokio::io::duplex(64);
-    let mut session = ServerSession::new(server, SessionHandler);
+    let mut session = ServerSession::with_codec(server, SessionHandler, crate::codec::Codec::Json);
     type TestSession = ServerSession<tokio::io::DuplexStream, SessionHandler>;
 
     assert_eq!(TestSession::success_response(Some(9), json!(1)).id, Some(9));
@@ -141,8 +141,13 @@ async fn private_helpers_map_errors_and_missing_streams() {
         session.write_result(Some(1), Value::Null).await,
         Err(Error::Protocol("missing stream"))
     ));
+    let request = crate::RpcRequestOwned {
+        id: Some(1),
+        method: Some("bidi".to_string()),
+        params: None,
+    };
     assert!(matches!(
-        session.handle_line(r#"{"id":1,"method":"bidi"}"#).await,
+        session.handle_request(request).await,
         Err(Error::Protocol("missing stream"))
     ));
     session.run().await.unwrap();

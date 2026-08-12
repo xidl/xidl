@@ -1,11 +1,12 @@
-use crate::line_io::write_json_line;
+use crate::codec::Codec;
 use crate::{Error, ErrorCode, Handler, JSONRPC_VERSION, RpcError, RpcRequestOwned, RpcResponse};
 use serde_json::Value;
-use tokio::io::{AsyncBufReadExt, AsyncRead, AsyncWrite, BufStream};
+use tokio::io::{AsyncRead, AsyncWrite, BufStream};
 
 pub(crate) struct ServerSession<RW, H> {
     stream: Option<BufStream<RW>>,
     handler: H,
+    codec: Codec,
 }
 
 impl<RW, H> ServerSession<RW, H>
@@ -13,40 +14,46 @@ where
     H: Handler,
     RW: AsyncRead + AsyncWrite + Unpin + Send + 'static,
 {
-    pub(crate) fn new(stream: RW, handler: H) -> Self {
+    pub(crate) fn with_codec(stream: RW, handler: H, codec: Codec) -> Self {
         let stream = tokio::io::BufStream::new(stream);
         Self {
             stream: Some(stream),
             handler,
+            codec,
         }
     }
 
     pub(crate) async fn run(&mut self) -> Result<(), Error> {
-        let mut line = String::new();
         loop {
-            line.clear();
             let Some(stream) = self.stream.as_mut() else {
                 break;
             };
-            let bytes = stream.read_line(&mut line).await?;
-            if bytes == 0 {
-                break;
-            }
-            if !self.handle_line(&line).await? {
+            let request = match self.codec.read::<_, RpcRequestOwned>(stream).await {
+                Ok(Some(request)) => request,
+                Ok(None) => break,
+                Err(err) if Self::is_decode_error(&err) => {
+                    self.write_error(None, err).await?;
+                    continue;
+                }
+                Err(err) => return Err(err),
+            };
+            if !self.handle_request(request).await? {
                 break;
             }
         }
         Ok(())
     }
 
-    async fn handle_line(&mut self, line: &str) -> Result<bool, Error> {
-        let request: RpcRequestOwned = match serde_json::from_str(line) {
-            Ok(value) => value,
-            Err(err) => {
-                self.write_error(None, Error::Json(err)).await?;
-                return Ok(true);
-            }
-        };
+    fn is_decode_error(error: &Error) -> bool {
+        match error {
+            Error::Json(_) => true,
+            #[cfg(feature = "msgpack")]
+            Error::Msgpack(_) => true,
+            _ => false,
+        }
+    }
+
+    async fn handle_request(&mut self, request: RpcRequestOwned) -> Result<bool, Error> {
         let id = request.id;
         let method = match request.method {
             Some(method) => method,
@@ -63,7 +70,7 @@ where
                 .stream
                 .take()
                 .ok_or(Error::Protocol("missing stream"))?;
-            let bidi = crate::stream::open_bidi_server(stream);
+            let bidi = crate::stream::open_bidi_server_with(stream, self.codec);
             self.handler.handle_bidi(&method, params, bidi).await?;
             return Ok(false);
         }
@@ -118,6 +125,12 @@ where
                 message: err.to_string(),
                 data: None,
             },
+            #[cfg(feature = "msgpack")]
+            Error::Msgpack(message) => RpcError {
+                code: ErrorCode::ParseError.code(),
+                message,
+                data: None,
+            },
             Error::Protocol(message) => RpcError {
                 code: ErrorCode::InvalidRequest.code(),
                 message: message.to_string(),
@@ -136,7 +149,7 @@ where
             .stream
             .as_mut()
             .ok_or(Error::Protocol("missing stream"))?;
-        write_json_line(stream, &response).await
+        self.codec.write(stream, &response).await
     }
 }
 

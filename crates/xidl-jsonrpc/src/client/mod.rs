@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod test;
 
-use crate::line_io::{read_json_line, write_json_line};
+use crate::codec::Codec;
 use crate::transport::Stream;
 use crate::{Error, ErrorCode, JSONRPC_VERSION, RpcRequest, RpcResponse};
 use serde::Serialize;
@@ -12,16 +12,29 @@ use tokio::io::BufStream;
 pub struct Client<S> {
     stream: BufStream<S>,
     next_id: u64,
+    codec: Codec,
 }
 
 impl<S> Client<S>
 where
     S: Stream + Unpin,
 {
+    /// Creates a client using newline-delimited JSON framing.
     pub fn new(stream: S) -> Self {
+        Self::with_codec(stream, Codec::Json)
+    }
+
+    /// Creates a client using length-prefixed MessagePack framing.
+    #[cfg(feature = "msgpack")]
+    pub fn new_msgpack(stream: S) -> Self {
+        Self::with_codec(stream, Codec::Msgpack)
+    }
+
+    fn with_codec(stream: S, codec: Codec) -> Self {
         Self {
             stream: BufStream::new(stream),
             next_id: 1,
+            codec,
         }
     }
 
@@ -39,9 +52,9 @@ where
             method,
             params,
         };
-        write_json_line(&mut self.stream, &request).await?;
+        self.codec.write(&mut self.stream, &request).await?;
 
-        let Some(response) = read_json_line::<_, RpcResponse>(&mut self.stream).await? else {
+        let Some(response) = self.codec.read::<_, RpcResponse>(&mut self.stream).await? else {
             return Err(Error::Protocol("no response"));
         };
         if response.id != Some(id) {

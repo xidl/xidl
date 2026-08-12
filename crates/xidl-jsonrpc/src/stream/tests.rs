@@ -159,11 +159,91 @@ async fn open_server_stream_client_reads_streamed_values() {
 }
 
 #[tokio::test]
-async fn json_value_reader_reads_until_eof() {
+async fn value_reader_reads_until_eof() {
     let (mut writer, reader) = tokio::io::duplex(256);
-    let mut reader = super::json_value_reader(reader);
+    let mut reader = super::value_reader(reader, super::Codec::Json);
 
     writer.write_all(b"{\"a\":1}\n{\"b\":2}\n").await.unwrap();
+    writer.shutdown().await.unwrap();
+
+    assert_eq!(reader.read().await.unwrap().unwrap(), json!({"a": 1}));
+    assert_eq!(reader.read().await.unwrap().unwrap(), json!({"b": 2}));
+    assert!(reader.read().await.is_none());
+}
+
+#[cfg(feature = "msgpack")]
+#[tokio::test]
+async fn open_bidi_client_msgpack_round_trips() {
+    let (client, mut server) = tokio::io::duplex(512);
+    let mut bidi = super::open_bidi_client_msgpack(client, "stream")
+        .await
+        .unwrap();
+
+    let mut len = [0_u8; 4];
+    server.read_exact(&mut len).await.unwrap();
+    let payload_len = u32::from_be_bytes(len) as usize;
+    let mut payload = vec![0_u8; payload_len];
+    server.read_exact(&mut payload).await.unwrap();
+    let request: serde_json::Value = rmp_serde::from_slice(&payload).unwrap();
+    assert_eq!(request["method"], "stream");
+
+    let reply = rmp_serde::to_vec(&json!({"reply": 1})).unwrap();
+    server
+        .write_all(&(reply.len() as u32).to_be_bytes())
+        .await
+        .unwrap();
+    server.write_all(&reply).await.unwrap();
+    server.shutdown().await.unwrap();
+    assert_eq!(bidi.read().await.unwrap().unwrap(), json!({"reply": 1}));
+    bidi.cancel().await.unwrap();
+}
+
+#[cfg(feature = "msgpack")]
+#[tokio::test]
+async fn open_server_stream_client_msgpack_reads_streamed_values() {
+    let (client, mut server) = tokio::io::duplex(512);
+    let mut reader =
+        super::open_server_stream_client_msgpack(client, "events", json!({"start": true}))
+            .await
+            .unwrap();
+
+    let mut len = [0_u8; 4];
+    server.read_exact(&mut len).await.unwrap();
+    let payload_len = u32::from_be_bytes(len) as usize;
+    let mut payload = vec![0_u8; payload_len];
+    server.read_exact(&mut payload).await.unwrap();
+    let request: serde_json::Value = rmp_serde::from_slice(&payload).unwrap();
+    assert_eq!(request["method"], "events");
+
+    let tick = rmp_serde::to_vec(&json!({"tick": 1})).unwrap();
+    server
+        .write_all(&(tick.len() as u32).to_be_bytes())
+        .await
+        .unwrap();
+    server.write_all(&tick).await.unwrap();
+    server.shutdown().await.unwrap();
+    assert_eq!(reader.read().await.unwrap().unwrap(), json!({"tick": 1}));
+    assert!(reader.read().await.is_none());
+}
+
+#[cfg(feature = "msgpack")]
+#[tokio::test]
+async fn msgpack_value_reader_reads_until_eof() {
+    let (mut writer, reader) = tokio::io::duplex(256);
+    let mut reader = super::value_reader(reader, super::Codec::Msgpack);
+
+    let a = rmp_serde::to_vec(&json!({"a": 1})).unwrap();
+    writer
+        .write_all(&(a.len() as u32).to_be_bytes())
+        .await
+        .unwrap();
+    writer.write_all(&a).await.unwrap();
+    let b = rmp_serde::to_vec(&json!({"b": 2})).unwrap();
+    writer
+        .write_all(&(b.len() as u32).to_be_bytes())
+        .await
+        .unwrap();
+    writer.write_all(&b).await.unwrap();
     writer.shutdown().await.unwrap();
 
     assert_eq!(reader.read().await.unwrap().unwrap(), json!({"a": 1}));
