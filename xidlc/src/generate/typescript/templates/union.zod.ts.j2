@@ -1,5 +1,5 @@
 {% from "macros.j2" import render_zod %}{% if recursive %}
 export const {{ schema_name }}Schema: z.ZodType<import("./{{ file_stem }}").{{ type_path }}> = z.lazy(() => {% if variants | length == 0 %}z.never(){% elif variants | length == 1 %}{{ render_zod(variants[0]) }}{% else %}z.union([{% for variant in variants %}{{ render_zod(variant) }}{% if not loop.last %}, {% endif %}{% endfor %}]){% endif %});
 {%- else %}
-export const {{ schema_name }}Schema = {% if variants | length == 0 %}z.never(){% elif variants | length == 1 %}{{ render_zod(variants[0]) }}{% else %}z.union([{% for variant in variants %}{{ render_zod(variant) }}{% if not loop.last %}, {% endif %}{% endfor %}]);{% endif %}
+    export const {{ schema_name }}Schema = {% if variants | length == 0 %}z.never(){% elif variants | length == 1 %}{{ render_zod(variants[0]) }}{% else %}z.union([{% for variant in variants %}{{ render_zod(variant) }}{% if not loop.last %}, {% endif %}{% endfor %}]);{% endif %}
 {%- endif %}

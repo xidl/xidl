@@ -29,9 +29,7 @@ pub(crate) fn render_constr_type(
         hir::ConstrTypeDcl::EnumDcl(def) => out.extend(render_enum(def, ctx.renderer)?),
         hir::ConstrTypeDcl::UnionDef(def) => out.extend(render_union(def, module_path, ctx)?),
         hir::ConstrTypeDcl::BitsetDcl(def) => out.extend(render_bit_number(&def.ident, ctx)?),
-        hir::ConstrTypeDcl::BitmaskDcl(def) => {
-            out.extend(render_bit_number(&def.ident, ctx)?)
-        }
+        hir::ConstrTypeDcl::BitmaskDcl(def) => out.extend(render_bit_number(&def.ident, ctx)?),
         hir::ConstrTypeDcl::StructForwardDcl(_) | hir::ConstrTypeDcl::UnionForwardDcl(_) => {}
     }
     Ok(out)
@@ -64,9 +62,7 @@ pub(crate) fn render_type_dcl(
         hir::TypeDcl::ConstrTypeDcl(constr) => {
             out.extend(render_constr_type(constr, module_path, ctx)?)
         }
-        hir::TypeDcl::TypedefDcl(typedef) => {
-            render_typedefs(&mut out, typedef, module_path, ctx)?
-        }
+        hir::TypeDcl::TypedefDcl(typedef) => render_typedefs(&mut out, typedef, module_path, ctx)?,
         hir::TypeDcl::NativeDcl(native) => render_native(&mut out, native, ctx)?,
     }
     Ok(out)

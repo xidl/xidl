@@ -119,7 +119,9 @@ fn build_method_model(
         })
         .map(|p| ParamDeclContext {
             prop: crate::generate::typescript::definition::names::ts_prop_name(&p.name),
-            ty: ts_type_for_type_spec(&p.ty, module_path, TypeRefTarget::Types),
+            // The iface file is separate from the model file, so model types are
+            // referenced through the `types` namespace import.
+            ty: ts_type_for_type_spec(&p.ty, module_path, TypeRefTarget::Client),
             schema: zod_schema_for_type_spec_with_prefix(&p.ty, module_path, Some("models")),
             optional: p.annotations.iter().any(|a| {
                 matches!(
@@ -273,13 +275,11 @@ fn build_method_model(
             if *flatten {
                 match ty {
                     hir::TypeSpec::ScopedName(scoped) => {
-                        let parts = scoped
-                            .name
-                            .iter()
-                            .map(|part| {
-                                crate::generate::typescript::definition::names::ts_ident(part)
-                            })
-                            .collect::<Vec<_>>();
+                        let parts =
+                            crate::generate::typescript::definition::names::scoped_name_parts(
+                                scoped,
+                                module_path,
+                            );
                         Some(format!("models.{}", parts.join(".")))
                     }
                     _ => None,
@@ -291,11 +291,10 @@ fn build_method_model(
         HttpRequestBodyShape::Object { .. } => request_schema_ref.clone(),
         HttpRequestBodyShape::Stream { item_ty, .. } => match item_ty {
             hir::TypeSpec::ScopedName(scoped) => {
-                let parts = scoped
-                    .name
-                    .iter()
-                    .map(|part| crate::generate::typescript::definition::names::ts_ident(part))
-                    .collect::<Vec<_>>();
+                let parts = crate::generate::typescript::definition::names::scoped_name_parts(
+                    scoped,
+                    module_path,
+                );
                 Some(format!("models.{}", parts.join(".")))
             }
             _ => None,
@@ -306,11 +305,10 @@ fn build_method_model(
         if let HttpResponseBodyShape::Stream { item_ty, .. } = &op.http.response.body.shape {
             match item_ty {
                 hir::TypeSpec::ScopedName(scoped) => {
-                    let parts = scoped
-                        .name
-                        .iter()
-                        .map(|part| crate::generate::typescript::definition::names::ts_ident(part))
-                        .collect::<Vec<_>>();
+                    let parts = crate::generate::typescript::definition::names::scoped_name_parts(
+                        scoped,
+                        module_path,
+                    );
                     Some(format!("models.{}", parts.join(".")))
                 }
                 _ => None,

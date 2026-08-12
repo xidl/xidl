@@ -48,14 +48,11 @@ test('applyClientAuth applies basic auth', () => {
     '',
     new URLSearchParams(),
     headers,
-    { kind: 'basic', username: 'u', password: 'p' },
+    { kind: 'basic', password: 'p', username: 'u' },
     [{ kind: 'basic' }],
   );
   assert.match(headers.get('Authorization') ?? '', /^Basic /);
-  assert.equal(
-    atob((headers.get('Authorization') ?? '').slice(6)),
-    'u:p',
-  );
+  assert.equal(atob((headers.get('Authorization') ?? '').slice(6)), 'u:p');
 });
 
 test('applyClientAuth applies bearer auth', () => {
@@ -88,8 +85,8 @@ test('applyClientAuth applies api_key in query', () => {
     '',
     query,
     new Headers(),
-    { kind: 'api_key', value: 'k', name: 'key', location: 'query' },
-    [{ kind: 'api_key', name: 'key', location: 'query' }],
+    { kind: 'api_key', location: 'query', name: 'key', value: 'k' },
+    [{ kind: 'api_key', location: 'query', name: 'key' }],
   );
   assert.equal(query.get('key'), 'k');
 });
@@ -100,8 +97,8 @@ test('applyClientAuth applies api_key in cookie', () => {
     '',
     new URLSearchParams(),
     headers,
-    { kind: 'api_key', value: 'v', name: 'sid', location: 'cookie' },
-    [{ kind: 'api_key', name: 'sid', location: 'cookie' }],
+    { kind: 'api_key', location: 'cookie', name: 'sid', value: 'v' },
+    [{ kind: 'api_key', location: 'cookie', name: 'sid' }],
   );
   assert.equal(headers.get('Cookie'), 'sid=v');
 });
@@ -135,7 +132,9 @@ test('encodeRequestBody encodes form data', () => {
 
 test('encodeRequestBody uses custom codec', () => {
   const body = encodeRequestBody('raw', 'application/cbor', {
-    'application/cbor': { encode: value => new TextEncoder().encode(String(value)) },
+    'application/cbor': {
+      encode: value => new TextEncoder().encode(String(value)),
+    },
   });
   assert.ok(body instanceof Uint8Array);
 });

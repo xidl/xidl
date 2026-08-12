@@ -100,8 +100,8 @@ export function readResponseHeader(
 export function readResponseCookies(headers: Headers): Map<string, string[]> {
   const out = new Map<string, string[]>();
   const raw =
-    typeof (headers as Headers & { getSetCookie?: () => string[] }).getSetCookie ===
-    'function'
+    typeof (headers as Headers & { getSetCookie?: () => string[] })
+      .getSetCookie === 'function'
       ? (headers as Headers & { getSetCookie: () => string[] }).getSetCookie()
       : headers.get('Set-Cookie')
         ? [headers.get('Set-Cookie') as string]

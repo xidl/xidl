@@ -35,10 +35,7 @@ pub(crate) fn render_native(
     Ok(())
 }
 
-pub(crate) fn render_bit_number(
-    ident: &str,
-    ctx: &TsRenderCtx<'_>,
-) -> IdlcResult<TsRenderOutput> {
+pub(crate) fn render_bit_number(ident: &str, ctx: &TsRenderCtx<'_>) -> IdlcResult<TsRenderOutput> {
     let name = ts_ident(ident);
     Ok(TsRenderOutput {
         types: vec![ctx.renderer.render_template(

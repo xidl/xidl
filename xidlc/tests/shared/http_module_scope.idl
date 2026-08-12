@@ -1,0 +1,39 @@
+#pragma xidlc package xidlc
+#pragma xidlc version v1.0.0
+
+module nm {
+    struct Item {
+        string id;
+        @optional
+        sequence<Item> children;
+    };
+    struct Wrapper {
+        Item item;
+    };
+
+    interface ItemService {
+        @get(path = "/item/{id}")
+        Item get_item(string id);
+
+        @put(path = "/items")
+        void put_item(Item item);
+
+        @get(path = "/wrapper")
+        Wrapper get_wrapper();
+    };
+};
+
+module outer {
+    module inner {
+        struct Leaf {
+            string id;
+        };
+        struct Holder {
+            Leaf leaf;
+        };
+        interface InnerService {
+            @get(path = "/leaf")
+            Leaf get_leaf();
+        };
+    };
+};

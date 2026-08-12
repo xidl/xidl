@@ -3,7 +3,7 @@
 
 {% endif %}
 {% if imports and imports | length > 0 %}
-    import { {{ imports | join(", ") }} } from "./{{ file_stem }}";
+    import type * as types from "./{{ file_stem }}";
 {% endif %}
 {% for block in blocks %}
     {{ block }}

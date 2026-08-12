@@ -53,7 +53,7 @@ import {
             this.codecs = options.codecs ?? {};
         }
         
-            async get_user(id: number, req_id: string, flags: Array<string>, age: number, session_id: string, prefs: Array<string>): Promise<types.User> {
+            async get_user(id: number, req_id: string, flags: Array<string>, age: number, session_id: string, prefs: Array<string>): Promise<types.test.User> {
                 const parsed = ifaceSchemas.test.HeaderServiceGetUserRequestSchema.parse({ "id": id, "req_id": req_id, "flags": flags, "age": age, "session_id": session_id, "prefs": prefs });
                 let path = "/v1/headers/{id}";
                 path = path.replace("{" + "id" + "}", encodePathSegment(id));
@@ -77,7 +77,7 @@ import {
             if (!resp.ok) {
                 throw await parseXidlError(resp);
             }
-            return await decodeResponseBody<types.User>(resp, "application/json", this.codecs);
+            return await decodeResponseBody<types.test.User>(resp, "application/json", this.codecs);
             
         }
         
@@ -205,7 +205,7 @@ import {
     export namespace test {
     export interface HeaderService {
         
-            get_user(request: ifaceTypes.test.HeaderServiceGetUserRequest, context: ServerContext): Awaitable<types.User>;
+            get_user(request: ifaceTypes.test.HeaderServiceGetUserRequest, context: ServerContext): Awaitable<types.test.User>;
         
             create_user(request: ifaceTypes.test.HeaderServiceCreateUserRequest, context: ServerContext): Awaitable<void>;
         
