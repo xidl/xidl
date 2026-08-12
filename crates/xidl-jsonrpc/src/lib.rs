@@ -3,9 +3,9 @@ use serde_json::Value;
 
 #[cfg(feature = "tokio")]
 mod client;
-mod error;
 #[cfg(feature = "tokio")]
-mod line_io;
+mod codec;
+mod error;
 #[cfg(feature = "tokio")]
 mod server;
 pub mod stream;

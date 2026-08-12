@@ -2,7 +2,7 @@
 mod tests;
 
 use crate::Error;
-use crate::line_io::{read_json_line, write_json_line};
+use crate::codec::Codec;
 use futures_core::Stream;
 use futures_util::StreamExt;
 use serde_json::Value;
@@ -138,39 +138,103 @@ impl<TIn, TOut> DuplexStream<TIn, TOut> {
     }
 }
 
+/// Opens a server-side bidirectional stream using newline-delimited JSON framing.
 pub fn open_bidi_server<S>(io: S) -> ReaderWriter<Value, Value>
 where
     S: AsyncRead + AsyncWrite + Unpin + Send + 'static,
 {
-    open_bidi_io(io)
+    open_bidi_server_with(io, Codec::Json)
 }
 
-pub async fn open_bidi_client<S>(
-    mut io: S,
+/// Opens a server-side bidirectional stream using length-prefixed MessagePack framing.
+#[cfg(feature = "msgpack")]
+pub fn open_bidi_server_msgpack<S>(io: S) -> ReaderWriter<Value, Value>
+where
+    S: AsyncRead + AsyncWrite + Unpin + Send + 'static,
+{
+    open_bidi_server_with(io, Codec::Msgpack)
+}
+
+pub(crate) fn open_bidi_server_with<S>(io: S, codec: Codec) -> ReaderWriter<Value, Value>
+where
+    S: AsyncRead + AsyncWrite + Unpin + Send + 'static,
+{
+    open_bidi_io(io, codec)
+}
+
+/// Opens a client-side bidirectional stream using newline-delimited JSON framing.
+pub async fn open_bidi_client<S>(io: S, method: &str) -> Result<ReaderWriter<Value, Value>, Error>
+where
+    S: AsyncRead + AsyncWrite + Unpin + Send + 'static,
+{
+    open_bidi_client_with(io, method, Codec::Json).await
+}
+
+/// Opens a client-side bidirectional stream using length-prefixed MessagePack framing.
+#[cfg(feature = "msgpack")]
+pub async fn open_bidi_client_msgpack<S>(
+    io: S,
     method: &str,
 ) -> Result<ReaderWriter<Value, Value>, Error>
 where
     S: AsyncRead + AsyncWrite + Unpin + Send + 'static,
 {
-    write_request_line(&mut io, method, Value::Null).await?;
-    Ok(open_bidi_io(io))
+    open_bidi_client_with(io, method, Codec::Msgpack).await
 }
 
-pub async fn open_server_stream_client<S>(
+async fn open_bidi_client_with<S>(
     mut io: S,
+    method: &str,
+    codec: Codec,
+) -> Result<ReaderWriter<Value, Value>, Error>
+where
+    S: AsyncRead + AsyncWrite + Unpin + Send + 'static,
+{
+    write_request_line(&mut io, method, Value::Null, codec).await?;
+    Ok(open_bidi_io(io, codec))
+}
+
+/// Opens a client-side server stream using newline-delimited JSON framing.
+pub async fn open_server_stream_client<S>(
+    io: S,
     method: &str,
     params: Value,
 ) -> Result<Reader<'static, Value>, Error>
 where
     S: AsyncRead + AsyncWrite + Unpin + Send + 'static,
 {
-    write_request_line(&mut io, method, params).await?;
-
-    let (read_half, _write_half) = tokio::io::split(io);
-    Ok(json_value_reader(read_half))
+    open_server_stream_client_with(io, method, params, Codec::Json).await
 }
 
-fn open_bidi_io<S>(io: S) -> ReaderWriter<Value, Value>
+/// Opens a client-side server stream using length-prefixed MessagePack framing.
+#[cfg(feature = "msgpack")]
+pub async fn open_server_stream_client_msgpack<S>(
+    io: S,
+    method: &str,
+    params: Value,
+) -> Result<Reader<'static, Value>, Error>
+where
+    S: AsyncRead + AsyncWrite + Unpin + Send + 'static,
+{
+    open_server_stream_client_with(io, method, params, Codec::Msgpack).await
+}
+
+async fn open_server_stream_client_with<S>(
+    mut io: S,
+    method: &str,
+    params: Value,
+    codec: Codec,
+) -> Result<Reader<'static, Value>, Error>
+where
+    S: AsyncRead + AsyncWrite + Unpin + Send + 'static,
+{
+    write_request_line(&mut io, method, params, codec).await?;
+
+    let (read_half, _write_half) = tokio::io::split(io);
+    Ok(value_reader(read_half, codec))
+}
+
+fn open_bidi_io<S>(io: S, codec: Codec) -> ReaderWriter<Value, Value>
 where
     S: AsyncRead + AsyncWrite + Unpin + Send + 'static,
 {
@@ -180,18 +244,23 @@ where
         let mut writer = BufWriter::new(write_half);
         while let Some(item) = rx.recv().await {
             let value = item?;
-            write_json_line(&mut writer, &value).await?;
+            codec.write(&mut writer, &value).await?;
         }
         writer.shutdown().await?;
         Ok(())
     });
     let writer = Writer::new(tx, writer_task);
 
-    let reader = json_value_reader(read_half);
+    let reader = value_reader(read_half, codec);
     ReaderWriter::new(writer, reader)
 }
 
-async fn write_request_line<W>(writer: &mut W, method: &str, params: Value) -> Result<(), Error>
+async fn write_request_line<W>(
+    writer: &mut W,
+    method: &str,
+    params: Value,
+    codec: Codec,
+) -> Result<(), Error>
 where
     W: AsyncWrite + Unpin,
 {
@@ -201,18 +270,18 @@ where
         "method": method,
         "params": params,
     });
-    write_json_line(writer, &request).await
+    codec.write(writer, &request).await
 }
 
 #[cfg(not(tarpaulin_include))]
-fn json_value_reader<R>(reader: R) -> Reader<'static, Value>
+fn value_reader<R>(reader: R, codec: Codec) -> Reader<'static, Value>
 where
     R: AsyncRead + Unpin + Send + 'static,
 {
     let reader_stream = boxed(async_stream::try_stream! {
         let mut reader = BufReader::new(reader);
         loop {
-            let Some(value) = read_json_line::<_, Value>(&mut reader).await? else {
+            let Some(value) = codec.read::<_, Value>(&mut reader).await? else {
                 break;
             };
             yield value;
@@ -222,7 +291,7 @@ where
 }
 
 #[cfg(tarpaulin_include)]
-fn json_value_reader<R>(reader: R) -> Reader<'static, Value>
+fn value_reader<R>(reader: R, codec: Codec) -> Reader<'static, Value>
 where
     R: AsyncRead + Unpin + Send + 'static,
 {
@@ -230,7 +299,7 @@ where
     let reader_stream = boxed(futures_util::stream::try_unfold(
         reader,
         |mut reader| async move {
-            match read_json_line::<_, Value>(&mut reader).await? {
+            match codec.read::<_, Value>(&mut reader).await? {
                 Some(value) => Ok(Some((value, reader))),
                 None => Ok(None),
             }

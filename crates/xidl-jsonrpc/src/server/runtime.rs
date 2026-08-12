@@ -1,4 +1,5 @@
 use crate::Error;
+use crate::codec::Codec;
 use crate::server::handler::MultiHandler;
 use crate::transport::{IoListener, Listener, Stream};
 use std::sync::Arc;
@@ -13,6 +14,7 @@ pub struct ServerBuilder {
     listener: Option<Box<dyn Listener>>,
     endpoint: Option<String>,
     services: Vec<Arc<dyn crate::Handler>>,
+    codec: Codec,
 }
 
 /// JSON-RPC server bound to a transport listener.
@@ -20,6 +22,7 @@ pub struct Server {
     listener: Box<dyn Listener>,
     endpoint: Option<String>,
     services: Vec<Arc<dyn crate::Handler>>,
+    codec: Codec,
 }
 
 impl Server {
@@ -29,6 +32,7 @@ impl Server {
             listener: None,
             endpoint: None,
             services: Vec::new(),
+            codec: Codec::Json,
         }
     }
 
@@ -49,7 +53,8 @@ impl Server {
             let handler = handler.clone();
             #[cfg(not(tarpaulin_include))]
             tokio::spawn(async move {
-                let mut session = super::session::ServerSession::new(stream, handler);
+                let mut session =
+                    super::session::ServerSession::with_codec(stream, handler, self.codec);
                 let _ = session.run().await;
             });
             #[cfg(tarpaulin_include)]
@@ -94,6 +99,13 @@ impl ServerBuilder {
         self.with_listener(IoListener::from_stream(stream))
     }
 
+    /// Serves requests using length-prefixed MessagePack framing.
+    #[cfg(feature = "msgpack")]
+    pub fn with_msgpack(mut self) -> Self {
+        self.codec = Codec::Msgpack;
+        self
+    }
+
     async fn resolve_binding(self) -> Result<(ServerBinding, Vec<Arc<dyn crate::Handler>>), Error> {
         if self.listener.is_some() && self.endpoint.is_some() {
             return Err(Error::Protocol("listener already set"));
@@ -119,12 +131,14 @@ impl ServerBuilder {
 
     /// Builds a server from the configured listener or endpoint.
     pub async fn build(self) -> Result<Server, Error> {
+        let codec = self.codec;
         let (binding, services) = self.resolve_binding().await?;
 
         Ok(Server {
             listener: binding.listener,
             endpoint: binding.endpoint,
             services,
+            codec,
         })
     }
 

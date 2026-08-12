@@ -3317,6 +3317,7 @@ dependencies = [
  "dashmap",
  "futures-core",
  "futures-util",
+ "rmp-serde",
  "rustls",
  "rustls-pemfile",
  "s2n-quic",
