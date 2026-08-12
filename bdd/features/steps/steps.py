@@ -798,6 +798,110 @@ def step_impl(context):
         assert result.returncode == 0
 
 
+def _jsonrpc_send_raw(context, raw):
+    s = socket.create_connection(("127.0.0.1", context.port))
+    s.sendall(raw.encode())
+    response = ""
+    while True:
+        chunk = s.recv(4096).decode()
+        response += chunk
+        if not chunk or "\n" in chunk:
+            break
+    s.close()
+    if response.strip():
+        try:
+            return json.loads(response)
+        except Exception:
+            return {"_raw": response}
+    return {}
+
+
+def _jsonrpc_call(context, method, params):
+    return _jsonrpc_send_raw(
+        context,
+        json.dumps({"jsonrpc": "2.0", "method": method, "params": params, "id": 1})
+        + "\n",
+    )
+
+
+@then('the client can call jsonrpc method "Calculator.get_history" and get an empty list')
+def step_impl(context):
+    res = _jsonrpc_call(context, "Calculator.get_history", {})
+    result = res.get("result") or {}
+    value = (
+        result.get("return")
+        if isinstance(result, dict) and "return" in result
+        else result
+    )
+    assert value == [], f"expected empty list, got {value!r} in {res}"
+
+
+@then(
+    'the client can call jsonrpc method "Calculator.get_history" and get the values "{values}"'
+)
+def step_impl(context, values):
+    res = _jsonrpc_call(context, "Calculator.get_history", {})
+    result = res.get("result") or {}
+    value = (
+        result.get("return")
+        if isinstance(result, dict) and "return" in result
+        else result
+    )
+    expected = [int(v.strip()) for v in values.split(",")]
+    assert value == expected, f"expected {expected}, got {value!r} in {res}"
+
+
+@then("the client can call Calculator.add with a={a:d} and b={b:d} to get {expected:d}")
+def step_impl(context, a, b, expected):
+    res = _jsonrpc_call(context, "Calculator.add", {"a": a, "b": b})
+    result = res.get("result") or {}
+    value = (
+        result.get("return")
+        if isinstance(result, dict) and "return" in result
+        else result
+    )
+    assert value == expected, f"expected {expected}, got {value!r} in {res}"
+
+
+@then("the client can call Calculator.subtract with a={a:d} and b={b:d} to get {expected:d}")
+def step_impl(context, a, b, expected):
+    res = _jsonrpc_call(context, "Calculator.subtract", {"a": a, "b": b})
+    result = res.get("result") or {}
+    value = (
+        result.get("return")
+        if isinstance(result, dict) and "return" in result
+        else result
+    )
+    assert value == expected, f"expected {expected}, got {value!r} in {res}"
+
+
+@when("the client sends the jsonrpc request")
+def step_impl(context):
+    raw = (context.text or "").strip()
+    assert raw, "missing jsonrpc request docstring"
+    context.jsonrpc_response = _jsonrpc_send_raw(context, raw + "\n")
+
+
+@then("the client receives a jsonrpc error with code {code:d}")
+def step_impl(context, code):
+    resp = context.jsonrpc_response
+    assert resp.get("error") is not None, f"expected jsonrpc error, got {resp}"
+    assert resp["error"].get("code") == code, f"expected code {code}, got {resp}"
+
+
+@then(
+    'the client receives a jsonrpc error with code {code:d} and message containing "{expected_msg}"'
+)
+def step_impl(context, code, expected_msg):
+    resp = context.jsonrpc_response
+    assert resp.get("error") is not None, f"expected jsonrpc error, got {resp}"
+    assert resp["error"].get("code") == code, f"expected code {code}, got {resp}"
+    msg = resp["error"].get("message") or ""
+    assert expected_msg.lower() in msg.lower(), (
+        f"expected message containing '{expected_msg}', got '{msg}'"
+    )
+
+
 @then("the client can call math.add({a:d}, {b:d}) to get {expected:d}")
 def step_impl(context, a, b, expected):
     import socket, json
