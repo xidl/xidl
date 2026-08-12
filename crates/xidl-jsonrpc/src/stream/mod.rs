@@ -9,7 +9,7 @@ use serde_json::Value;
 use std::future::Future;
 use std::pin::Pin;
 use std::time::Duration;
-use tokio::io::{AsyncRead, AsyncWrite, AsyncWriteExt, BufReader, BufWriter};
+use tokio::io::{AsyncBufRead, AsyncRead, AsyncWrite, AsyncWriteExt, BufReader, BufWriter};
 use tokio::sync::mpsc;
 use tokio::task::JoinHandle;
 
@@ -191,7 +191,12 @@ where
     S: AsyncRead + AsyncWrite + Unpin + Send + 'static,
 {
     write_request_line(&mut io, method, Value::Null, codec).await?;
-    Ok(open_bidi_io(io, codec))
+    let (read_half, write_half) = tokio::io::split(io);
+    let mut reader = BufReader::new(read_half);
+    read_handshake(&mut reader, codec).await?;
+    let writer = spawn_stream_writer(write_half, codec);
+    let reader = value_reader_buf(reader, codec);
+    Ok(ReaderWriter::new(writer, reader))
 }
 
 /// Opens a client-side server stream using newline-delimited JSON framing.
@@ -231,7 +236,9 @@ where
     write_request_line(&mut io, method, params, codec).await?;
 
     let (read_half, _write_half) = tokio::io::split(io);
-    Ok(value_reader(read_half, codec))
+    let mut reader = BufReader::new(read_half);
+    read_handshake(&mut reader, codec).await?;
+    Ok(value_reader_buf(reader, codec))
 }
 
 fn open_bidi_io<S>(io: S, codec: Codec) -> ReaderWriter<Value, Value>
@@ -239,18 +246,7 @@ where
     S: AsyncRead + AsyncWrite + Unpin + Send + 'static,
 {
     let (read_half, write_half) = tokio::io::split(io);
-    let (tx, mut rx) = mpsc::channel::<Result<Value, Error>>(32);
-    let writer_task = tokio::spawn(async move {
-        let mut writer = BufWriter::new(write_half);
-        while let Some(item) = rx.recv().await {
-            let value = item?;
-            codec.write(&mut writer, &value).await?;
-        }
-        writer.shutdown().await?;
-        Ok(())
-    });
-    let writer = Writer::new(tx, writer_task);
-
+    let writer = spawn_stream_writer(write_half, codec);
     let reader = value_reader(read_half, codec);
     ReaderWriter::new(writer, reader)
 }
@@ -273,13 +269,18 @@ where
     codec.write(writer, &request).await
 }
 
-#[cfg(not(tarpaulin_include))]
 fn value_reader<R>(reader: R, codec: Codec) -> Reader<'static, Value>
 where
     R: AsyncRead + Unpin + Send + 'static,
 {
+    value_reader_buf(BufReader::new(reader), codec)
+}
+
+fn value_reader_buf<R>(mut reader: R, codec: Codec) -> Reader<'static, Value>
+where
+    R: AsyncBufRead + Unpin + Send + 'static,
+{
     let reader_stream = boxed(async_stream::try_stream! {
-        let mut reader = BufReader::new(reader);
         loop {
             let Some(value) = codec.read::<_, Value>(&mut reader).await? else {
                 break;
@@ -290,20 +291,45 @@ where
     Reader::new(reader_stream)
 }
 
-#[cfg(tarpaulin_include)]
-fn value_reader<R>(reader: R, codec: Codec) -> Reader<'static, Value>
+/// Spawns the background task that serializes stream writes onto `write_half`.
+fn spawn_stream_writer<W>(write_half: W, codec: Codec) -> ClientStreamWriter<Value, ()>
 where
-    R: AsyncRead + Unpin + Send + 'static,
+    W: AsyncWrite + Unpin + Send + 'static,
 {
-    let reader = BufReader::new(reader);
-    let reader_stream = boxed(futures_util::stream::try_unfold(
-        reader,
-        |mut reader| async move {
-            match codec.read::<_, Value>(&mut reader).await? {
-                Some(value) => Ok(Some((value, reader))),
-                None => Ok(None),
-            }
-        },
-    ));
-    Reader::new(reader_stream)
+    let (tx, mut rx) = mpsc::channel::<Result<Value, Error>>(32);
+    let writer_task = tokio::spawn(async move {
+        let mut writer = BufWriter::new(write_half);
+        while let Some(item) = rx.recv().await {
+            let value = item?;
+            codec.write(&mut writer, &value).await?;
+        }
+        writer.shutdown().await?;
+        Ok(())
+    });
+    ClientStreamWriter::new(tx, writer_task)
+}
+
+/// Reads and validates the server's acknowledgement of a stream request.
+///
+/// The server acknowledges an id-bearing stream request with a JSON-RPC
+/// response whose `id` matches and whose `error` is absent, so this validates
+/// the handshake before the caller sees any stream values.
+async fn read_handshake<R>(reader: &mut R, codec: Codec) -> Result<(), Error>
+where
+    R: AsyncBufRead + Unpin,
+{
+    let Some(response) = codec.read::<_, crate::RpcResponse>(reader).await? else {
+        return Err(Error::Protocol("missing stream handshake response"));
+    };
+    if let Some(error) = response.error {
+        return Err(Error::Rpc {
+            code: crate::ErrorCode::from(error.code),
+            message: error.message,
+            data: error.data,
+        });
+    }
+    if response.id.as_ref() != Some(&Value::from(1u64)) {
+        return Err(Error::Protocol("unexpected stream handshake id"));
+    }
+    Ok(())
 }

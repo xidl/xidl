@@ -8,6 +8,7 @@ mod codec;
 mod error;
 #[cfg(feature = "tokio")]
 mod server;
+#[cfg(feature = "tokio")]
 pub mod stream;
 
 #[cfg(feature = "tokio")]
@@ -26,11 +27,11 @@ pub use transport::{BoundListener, Listener, Stream, bind, connect, connect_inpr
 pub use transport::{InprocListener, IoListener};
 #[cfg(all(feature = "transport-ipc", unix))]
 pub use transport::{IpcListener, connect_ipc};
-#[cfg(all(feature = "transport-quic", not(tarpaulin_include)))]
+#[cfg(feature = "transport-quic")]
 pub use transport::{QuicListener, connect_quic};
-#[cfg(all(feature = "transport-tls", not(tarpaulin_include)))]
+#[cfg(feature = "transport-tls")]
 pub use transport::{TlsListener, connect_tls};
-#[cfg(all(feature = "transport-websocket", not(tarpaulin_include)))]
+#[cfg(feature = "transport-websocket")]
 pub use transport::{WebSocketListener, connect_websocket};
 
 const JSONRPC_VERSION: &str = "2.0";
@@ -43,18 +44,13 @@ pub(crate) struct RpcRequest<'a, P> {
     params: P,
 }
 
-#[derive(Deserialize)]
-pub(crate) struct RpcRequestOwned {
-    id: Option<u64>,
-    method: Option<String>,
-    params: Option<Value>,
-}
-
 #[derive(Serialize, Deserialize)]
 pub(crate) struct RpcResponse {
     jsonrpc: Option<String>,
-    id: Option<u64>,
+    id: Option<Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     result: Option<Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     error: Option<RpcError>,
 }
 
@@ -62,5 +58,6 @@ pub(crate) struct RpcResponse {
 pub(crate) struct RpcError {
     code: i64,
     message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     data: Option<Value>,
 }

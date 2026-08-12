@@ -65,7 +65,6 @@ impl Listener for SingleAcceptListener {
         *accepted = true;
 
         let (client, server) = tokio::io::duplex(128);
-        #[cfg(not(tarpaulin_include))]
         tokio::spawn(async move {
             use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
@@ -79,8 +78,6 @@ impl Listener for SingleAcceptListener {
             client.write_all(b"\n").await.unwrap();
             client.shutdown().await.unwrap();
         });
-        #[cfg(tarpaulin_include)]
-        drop(client);
 
         Ok((Box::new(server), SocketAddr::from(([127, 0, 0, 1], 0))))
     }

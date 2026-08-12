@@ -102,3 +102,84 @@ async fn msgpack_codec_reads_frames_and_reports_eof() {
             .is_none()
     );
 }
+
+#[tokio::test]
+async fn json_codec_rejects_oversized_frames_and_resyncs() {
+    let (mut writer, reader) = tokio::io::duplex(64 * 1024);
+    let oversized = format!("{}x\n", "x".repeat(super::MAX_FRAME_LEN + 1));
+    let writer_task = tokio::spawn(async move {
+        writer.write_all(oversized.as_bytes()).await.unwrap();
+        writer.write_all(b"{\"ok\":true}\n").await.unwrap();
+        writer.shutdown().await.unwrap();
+    });
+
+    let mut reader = BufReader::new(reader);
+    let err = Codec::Json
+        .read::<_, serde_json::Value>(&mut reader)
+        .await
+        .expect_err("oversized frame should be rejected");
+    assert!(matches!(
+        &err,
+        crate::Error::FrameTooLarge {
+            max,
+            framing: "json"
+        } if *max == super::MAX_FRAME_LEN
+    ));
+
+    let next = Codec::Json
+        .read::<_, serde_json::Value>(&mut reader)
+        .await
+        .unwrap()
+        .expect("line after oversized frame should parse");
+    assert_eq!(next, json!({"ok": true}));
+    writer_task.await.unwrap();
+}
+
+#[cfg(feature = "msgpack")]
+#[tokio::test]
+async fn msgpack_codec_rejects_oversized_frames_and_resyncs() {
+    let (mut writer, reader) = tokio::io::duplex(64 * 1024);
+    let payload_len = super::MAX_FRAME_LEN + 1;
+    let writer_task = tokio::spawn(async move {
+        writer
+            .write_all(&(payload_len as u32).to_be_bytes())
+            .await
+            .unwrap();
+        // Feed the declared oversized payload so the reader can realign.
+        let chunk = vec![0x00_u8; 4096];
+        let mut remaining = payload_len;
+        while remaining > 0 {
+            let n = remaining.min(chunk.len());
+            writer.write_all(&chunk[..n]).await.unwrap();
+            remaining -= n;
+        }
+        let small = rmp_serde::to_vec(&json!({"ok": true})).unwrap();
+        writer
+            .write_all(&(small.len() as u32).to_be_bytes())
+            .await
+            .unwrap();
+        writer.write_all(&small).await.unwrap();
+        writer.shutdown().await.unwrap();
+    });
+
+    let mut reader = BufReader::new(reader);
+    let err = Codec::Msgpack
+        .read::<_, serde_json::Value>(&mut reader)
+        .await
+        .expect_err("oversized msgpack frame should be rejected");
+    assert!(matches!(
+        &err,
+        crate::Error::FrameTooLarge {
+            max,
+            framing: "msgpack"
+        } if *max == super::MAX_FRAME_LEN
+    ));
+
+    let next = Codec::Msgpack
+        .read::<_, serde_json::Value>(&mut reader)
+        .await
+        .unwrap()
+        .expect("frame after oversized payload should parse");
+    assert_eq!(next, json!({"ok": true}));
+    writer_task.await.unwrap();
+}

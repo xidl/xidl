@@ -46,3 +46,28 @@ async fn bind_and_connect_quic_cover_feature_enabled_dispatch() {
         .expect("quic connect error");
     assert!(!connect_err.to_string().is_empty());
 }
+
+#[test]
+fn parse_marks_unknown_schemes_as_unsupported() {
+    match Endpoint::parse("foo://bar") {
+        Endpoint::Unsupported(endpoint) => assert_eq!(endpoint, "foo://bar"),
+        _ => panic!("expected unsupported endpoint"),
+    }
+}
+
+#[tokio::test]
+async fn bind_and_connect_report_unsupported_schemes_as_invalid_input() {
+    let bind_err = super::bind("foo://bar")
+        .await
+        .err()
+        .expect("unsupported bind should fail");
+    assert_eq!(bind_err.kind(), std::io::ErrorKind::InvalidInput);
+    assert_eq!(bind_err.to_string(), "unsupported scheme: foo://bar");
+
+    let connect_err = super::connect("foo://bar")
+        .await
+        .err()
+        .expect("unsupported connect should fail");
+    assert_eq!(connect_err.kind(), std::io::ErrorKind::InvalidInput);
+    assert_eq!(connect_err.to_string(), "unsupported scheme: foo://bar");
+}

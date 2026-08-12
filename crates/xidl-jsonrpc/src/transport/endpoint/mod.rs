@@ -8,6 +8,8 @@ enum Endpoint {
     Tls(String),
     WebSocket(String),
     Tcp(String),
+    /// A scheme that is not recognized by any transport.
+    Unsupported(String),
 }
 
 impl Endpoint {
@@ -24,6 +26,8 @@ impl Endpoint {
             Self::WebSocket(endpoint.to_string())
         } else if let Some(addr) = endpoint.strip_prefix("tcp://") {
             Self::Tcp(addr.to_string())
+        } else if endpoint.contains("://") {
+            Self::Unsupported(endpoint.to_string())
         } else {
             Self::Tcp(endpoint.to_string())
         }
@@ -111,6 +115,12 @@ impl Endpoint {
                         "tcp transport requires `transport-tcp` feature",
                     ));
                 }
+            }
+            Endpoint::Unsupported(endpoint) => {
+                return Err(std::io::Error::new(
+                    std::io::ErrorKind::InvalidInput,
+                    format!("unsupported scheme: {endpoint}"),
+                ));
             }
         };
 
@@ -201,6 +211,10 @@ impl Endpoint {
                     ))
                 }
             }
+            Endpoint::Unsupported(endpoint) => Err(std::io::Error::new(
+                std::io::ErrorKind::InvalidInput,
+                format!("unsupported scheme: {endpoint}"),
+            )),
         }
     }
 
@@ -212,6 +226,7 @@ impl Endpoint {
                 endpoint.clone()
             }
             Endpoint::Tcp(addr) => format!("tcp://{addr}"),
+            Endpoint::Unsupported(endpoint) => endpoint.clone(),
         }
     }
 }

@@ -1,5 +1,3 @@
-#![cfg(not(tarpaulin_include))]
-
 use futures_core::Stream as _;
 use futures_util::Sink;
 use std::net::SocketAddr;
@@ -177,18 +175,21 @@ where
     }
 
     fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<std::io::Result<()>> {
-        while let Some(idx) = self.write_buf.iter().position(|&b| b == b'\n') {
-            let payload = self.write_buf.drain(..idx).collect::<Vec<_>>();
-            self.write_buf.drain(..1);
+        if !self.write_buf.is_empty() {
+            // The buffered JSON-RPC lines form one contiguous payload, so
+            // ship them as a single Binary message instead of splitting on
+            // newlines; the reader's codec still parses per line.
+            let payload = std::mem::take(&mut self.write_buf);
             match Pin::new(&mut self.ws).poll_ready(cx) {
                 Poll::Pending => {
-                    let mut restored = payload;
-                    restored.push(b'\n');
-                    self.write_buf.splice(0..0, restored);
+                    self.write_buf = payload;
                     return Poll::Pending;
                 }
                 Poll::Ready(Ok(())) => {}
-                Poll::Ready(Err(err)) => return Poll::Ready(Err(super::tls_config::io_other(err))),
+                Poll::Ready(Err(err)) => {
+                    self.write_buf = payload;
+                    return Poll::Ready(Err(super::tls_config::io_other(err)));
+                }
             }
             if let Err(err) = Pin::new(&mut self.ws).start_send(Message::Binary(payload.into())) {
                 return Poll::Ready(Err(super::tls_config::io_other(err)));

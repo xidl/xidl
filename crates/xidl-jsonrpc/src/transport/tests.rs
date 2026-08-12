@@ -59,7 +59,6 @@ fn bound_listener_keeps_endpoint() {
     assert_eq!(endpoint, "inproc://kept");
 }
 
-#[cfg(not(tarpaulin_include))]
 #[tokio::test]
 async fn io_listener_accepts_once_and_then_breaks() {
     let (listener_stream, mut peer_stream) = tokio::io::duplex(64);
@@ -93,15 +92,6 @@ async fn io_listener_accepts_once_and_then_breaks() {
     };
     assert_eq!(err.kind(), std::io::ErrorKind::BrokenPipe);
     writer_task.await.unwrap();
-}
-
-#[cfg(tarpaulin_include)]
-#[tokio::test]
-async fn io_listener_tarpaulin_stub_reports_broken_pipe() {
-    let (stream, _peer) = tokio::io::duplex(16);
-    let listener = IoListener::from_stream(stream);
-    let err = listener.accept().await.unwrap_err();
-    assert_eq!(err.kind(), std::io::ErrorKind::BrokenPipe);
 }
 
 #[tokio::test]
@@ -236,4 +226,26 @@ async fn endpoint_bind_and_connect_cover_supported_and_unsupported_schemes() {
         };
         assert_eq!(err.kind(), std::io::ErrorKind::Unsupported);
     }
+}
+
+#[cfg(all(feature = "transport-ipc", unix))]
+#[tokio::test]
+async fn ipc_bind_rejects_live_listener_and_reclaims_stale_socket() {
+    let endpoint = unique_ipc_endpoint("bind");
+    let path = endpoint.trim_start_matches("ipc://");
+
+    // A live listener owns the path; a second bind must fail with AddrInUse.
+    let listener = super::IpcListener::bind(path).unwrap();
+    let err = match super::IpcListener::bind(path) {
+        Ok(_) => panic!("expected second bind to fail"),
+        Err(err) => err,
+    };
+    assert_eq!(err.kind(), std::io::ErrorKind::AddrInUse);
+    drop(listener);
+
+    // A leftover file with no live listener is reclaimed and bound.
+    std::fs::write(path, b"stale").unwrap();
+    let reclaimed = super::IpcListener::bind(path).unwrap();
+    assert_eq!(reclaimed.endpoint().as_deref(), Some(endpoint.as_str()));
+    drop(reclaimed);
 }

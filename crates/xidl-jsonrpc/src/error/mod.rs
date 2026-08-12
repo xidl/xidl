@@ -12,6 +12,8 @@ pub enum ErrorCode {
     InvalidParams,
     InternalError,
     ServerError,
+    /// A JSON-RPC error code outside the reserved range.
+    Custom(i64),
 }
 
 impl ErrorCode {
@@ -23,6 +25,7 @@ impl ErrorCode {
             Self::InvalidParams => -32602,
             Self::InternalError => -32603,
             Self::ServerError => -32000,
+            Self::Custom(code) => code,
         }
     }
 }
@@ -30,6 +33,21 @@ impl ErrorCode {
 impl std::fmt::Display for ErrorCode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.code())
+    }
+}
+
+/// Maps a raw JSON-RPC error code onto the closest known variant.
+impl From<i64> for ErrorCode {
+    fn from(code: i64) -> Self {
+        match code {
+            -32700 => Self::ParseError,
+            -32600 => Self::InvalidRequest,
+            -32601 => Self::MethodNotFound,
+            -32602 => Self::InvalidParams,
+            -32603 => Self::InternalError,
+            -32000 => Self::ServerError,
+            other => Self::Custom(other),
+        }
     }
 }
 
@@ -42,6 +60,9 @@ pub enum Error {
     #[cfg(feature = "msgpack")]
     #[error("msgpack error: {0}")]
     Msgpack(String),
+    /// Indicates a wire frame exceeded the configured maximum length.
+    #[error("frame exceeds maximum length {max} bytes ({framing})")]
+    FrameTooLarge { max: usize, framing: &'static str },
     #[error("rpc error {code}: {message}")]
     Rpc {
         code: ErrorCode,

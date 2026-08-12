@@ -110,20 +110,27 @@ async fn client_stream_writer_reports_double_close_and_join_failures() {
 
 #[tokio::test]
 async fn duplex_stream_round_trips_and_splits() {
-    let (client, mut server) = tokio::io::duplex(512);
+    let (client, server) = tokio::io::duplex(512);
+    let server_task = tokio::spawn(async move {
+        let mut server = server;
+        let mut request = [0_u8; 128];
+        let n = server.read(&mut request).await.unwrap();
+        assert_eq!(
+            std::str::from_utf8(&request[..n]).unwrap(),
+            "{\"id\":1,\"jsonrpc\":\"2.0\",\"method\":\"stream\",\"params\":null}\n"
+        );
+
+        server
+            .write_all(b"{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":null}\n")
+            .await
+            .unwrap();
+        server.write_all(b"{\"reply\":1}\n").await.unwrap();
+        server.shutdown().await.unwrap();
+    });
     let mut bidi = open_bidi_client(client, "stream").await.unwrap();
-
-    let mut request = [0_u8; 128];
-    let n = server.read(&mut request).await.unwrap();
-    assert_eq!(
-        std::str::from_utf8(&request[..n]).unwrap(),
-        "{\"id\":1,\"jsonrpc\":\"2.0\",\"method\":\"stream\",\"params\":null}\n"
-    );
-
-    server.write_all(b"{\"reply\":1}\n").await.unwrap();
-    server.shutdown().await.unwrap();
     assert_eq!(bidi.read().await.unwrap().unwrap(), json!({"reply": 1}));
     bidi.cancel().await.unwrap();
+    server_task.await.unwrap();
 
     let (tx, rx) = mpsc::channel(1);
     let response = tokio::spawn(async { Ok::<_, Error>(()) });
@@ -140,22 +147,29 @@ async fn duplex_stream_round_trips_and_splits() {
 
 #[tokio::test]
 async fn open_server_stream_client_reads_streamed_values() {
-    let (client, mut server) = tokio::io::duplex(512);
+    let (client, server) = tokio::io::duplex(512);
+    let server_task = tokio::spawn(async move {
+        let mut server = server;
+        let mut request = [0_u8; 128];
+        let n = server.read(&mut request).await.unwrap();
+        assert_eq!(
+            std::str::from_utf8(&request[..n]).unwrap(),
+            "{\"id\":1,\"jsonrpc\":\"2.0\",\"method\":\"events\",\"params\":{\"start\":true}}\n"
+        );
+
+        server
+            .write_all(b"{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":null}\n")
+            .await
+            .unwrap();
+        server.write_all(b"{\"tick\":1}\n").await.unwrap();
+        server.shutdown().await.unwrap();
+    });
     let mut reader = open_server_stream_client(client, "events", json!({"start": true}))
         .await
         .unwrap();
-
-    let mut request = [0_u8; 128];
-    let n = server.read(&mut request).await.unwrap();
-    assert_eq!(
-        std::str::from_utf8(&request[..n]).unwrap(),
-        "{\"id\":1,\"jsonrpc\":\"2.0\",\"method\":\"events\",\"params\":{\"start\":true}}\n"
-    );
-
-    server.write_all(b"{\"tick\":1}\n").await.unwrap();
-    server.shutdown().await.unwrap();
     assert_eq!(reader.read().await.unwrap().unwrap(), json!({"tick": 1}));
     assert!(reader.read().await.is_none());
+    server_task.await.unwrap();
 }
 
 #[tokio::test]
@@ -171,59 +185,139 @@ async fn value_reader_reads_until_eof() {
     assert!(reader.read().await.is_none());
 }
 
+#[tokio::test]
+async fn open_bidi_client_reports_handshake_rejection() {
+    let (client, mut server) = tokio::io::duplex(512);
+    let server_task = tokio::spawn(async move {
+        let mut request = [0_u8; 128];
+        let _ = server.read(&mut request).await.unwrap();
+        server
+            .write_all(
+                b"{\"jsonrpc\":\"2.0\",\"id\":1,\"error\":{\"code\":-32601,\"message\":\"method not found: nope\"}}\n",
+            )
+            .await
+            .unwrap();
+        server.shutdown().await.unwrap();
+    });
+    let result = super::open_bidi_client(client, "nope").await;
+    let err = match result {
+        Ok(_) => panic!("expected handshake rejection"),
+        Err(err) => err,
+    };
+    assert!(matches!(
+        &err,
+        Error::Rpc {
+            code: crate::ErrorCode::MethodNotFound,
+            message,
+            ..
+        } if message == "method not found: nope"
+    ));
+    server_task.await.unwrap();
+}
+
+#[tokio::test]
+async fn open_bidi_client_reports_missing_handshake_response() {
+    let (client, mut server) = tokio::io::duplex(512);
+    let server_task = tokio::spawn(async move {
+        let mut request = [0_u8; 128];
+        let _ = server.read(&mut request).await.unwrap();
+        server.shutdown().await.unwrap();
+    });
+    let result = super::open_bidi_client(client, "bidi").await;
+    let err = match result {
+        Ok(_) => panic!("expected missing handshake response"),
+        Err(err) => err,
+    };
+    assert!(matches!(
+        err,
+        Error::Protocol("missing stream handshake response")
+    ));
+    server_task.await.unwrap();
+}
+
 #[cfg(feature = "msgpack")]
 #[tokio::test]
 async fn open_bidi_client_msgpack_round_trips() {
-    let (client, mut server) = tokio::io::duplex(512);
+    let (client, server) = tokio::io::duplex(512);
+    let server_task = tokio::spawn(async move {
+        let mut server = server;
+        let mut len = [0_u8; 4];
+        server.read_exact(&mut len).await.unwrap();
+        let payload_len = u32::from_be_bytes(len) as usize;
+        let mut payload = vec![0_u8; payload_len];
+        server.read_exact(&mut payload).await.unwrap();
+        let request: serde_json::Value = rmp_serde::from_slice(&payload).unwrap();
+        assert_eq!(request["method"], "stream");
+
+        let ack = rmp_serde::to_vec(&json!({
+            "jsonrpc": "2.0",
+            "id": 1,
+            "result": null
+        }))
+        .unwrap();
+        server
+            .write_all(&(ack.len() as u32).to_be_bytes())
+            .await
+            .unwrap();
+        server.write_all(&ack).await.unwrap();
+
+        let reply = rmp_serde::to_vec(&json!({"reply": 1})).unwrap();
+        server
+            .write_all(&(reply.len() as u32).to_be_bytes())
+            .await
+            .unwrap();
+        server.write_all(&reply).await.unwrap();
+        server.shutdown().await.unwrap();
+    });
     let mut bidi = super::open_bidi_client_msgpack(client, "stream")
         .await
         .unwrap();
-
-    let mut len = [0_u8; 4];
-    server.read_exact(&mut len).await.unwrap();
-    let payload_len = u32::from_be_bytes(len) as usize;
-    let mut payload = vec![0_u8; payload_len];
-    server.read_exact(&mut payload).await.unwrap();
-    let request: serde_json::Value = rmp_serde::from_slice(&payload).unwrap();
-    assert_eq!(request["method"], "stream");
-
-    let reply = rmp_serde::to_vec(&json!({"reply": 1})).unwrap();
-    server
-        .write_all(&(reply.len() as u32).to_be_bytes())
-        .await
-        .unwrap();
-    server.write_all(&reply).await.unwrap();
-    server.shutdown().await.unwrap();
     assert_eq!(bidi.read().await.unwrap().unwrap(), json!({"reply": 1}));
     bidi.cancel().await.unwrap();
+    server_task.await.unwrap();
 }
 
 #[cfg(feature = "msgpack")]
 #[tokio::test]
 async fn open_server_stream_client_msgpack_reads_streamed_values() {
-    let (client, mut server) = tokio::io::duplex(512);
+    let (client, server) = tokio::io::duplex(512);
+    let server_task = tokio::spawn(async move {
+        let mut server = server;
+        let mut len = [0_u8; 4];
+        server.read_exact(&mut len).await.unwrap();
+        let payload_len = u32::from_be_bytes(len) as usize;
+        let mut payload = vec![0_u8; payload_len];
+        server.read_exact(&mut payload).await.unwrap();
+        let request: serde_json::Value = rmp_serde::from_slice(&payload).unwrap();
+        assert_eq!(request["method"], "events");
+
+        let ack = rmp_serde::to_vec(&json!({
+            "jsonrpc": "2.0",
+            "id": 1,
+            "result": null
+        }))
+        .unwrap();
+        server
+            .write_all(&(ack.len() as u32).to_be_bytes())
+            .await
+            .unwrap();
+        server.write_all(&ack).await.unwrap();
+
+        let tick = rmp_serde::to_vec(&json!({"tick": 1})).unwrap();
+        server
+            .write_all(&(tick.len() as u32).to_be_bytes())
+            .await
+            .unwrap();
+        server.write_all(&tick).await.unwrap();
+        server.shutdown().await.unwrap();
+    });
     let mut reader =
         super::open_server_stream_client_msgpack(client, "events", json!({"start": true}))
             .await
             .unwrap();
-
-    let mut len = [0_u8; 4];
-    server.read_exact(&mut len).await.unwrap();
-    let payload_len = u32::from_be_bytes(len) as usize;
-    let mut payload = vec![0_u8; payload_len];
-    server.read_exact(&mut payload).await.unwrap();
-    let request: serde_json::Value = rmp_serde::from_slice(&payload).unwrap();
-    assert_eq!(request["method"], "events");
-
-    let tick = rmp_serde::to_vec(&json!({"tick": 1})).unwrap();
-    server
-        .write_all(&(tick.len() as u32).to_be_bytes())
-        .await
-        .unwrap();
-    server.write_all(&tick).await.unwrap();
-    server.shutdown().await.unwrap();
     assert_eq!(reader.read().await.unwrap().unwrap(), json!({"tick": 1}));
     assert!(reader.read().await.is_none());
+    server_task.await.unwrap();
 }
 
 #[cfg(feature = "msgpack")]
