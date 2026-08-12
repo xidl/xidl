@@ -824,7 +824,9 @@ def _jsonrpc_call(context, method, params):
     )
 
 
-@then('the client can call jsonrpc method "Calculator.get_history" and get an empty list')
+@then(
+    'the client can call jsonrpc method "Calculator.get_history" and get an empty list'
+)
 def step_impl(context):
     res = _jsonrpc_call(context, "Calculator.get_history", {})
     result = res.get("result") or {}
@@ -863,7 +865,9 @@ def step_impl(context, a, b, expected):
     assert value == expected, f"expected {expected}, got {value!r} in {res}"
 
 
-@then("the client can call Calculator.subtract with a={a:d} and b={b:d} to get {expected:d}")
+@then(
+    "the client can call Calculator.subtract with a={a:d} and b={b:d} to get {expected:d}"
+)
 def step_impl(context, a, b, expected):
     res = _jsonrpc_call(context, "Calculator.subtract", {"a": a, "b": b})
     result = res.get("result") or {}
