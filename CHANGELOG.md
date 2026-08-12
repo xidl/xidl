@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.89.0](https://github.com/xidl/xidl/compare/v0.88.1...v0.89.0) (2026-08-12)
+
+
+### Features
+
+* **rest:** rename consumes/produces to request/response format tokens ([ae966a8](https://github.com/xidl/xidl/commit/ae966a82f57b12aefd427f04c238f0b33e8e557f))
+* **xidl-typescript-client:** extract generated ts client runtime ([608f8a8](https://github.com/xidl/xidl/commit/608f8a810b1e24e2c61637a35e9263f6888d3668))
+* **xidl-typescript-server:** flatten ts server handlers and code-first errors ([5f2cbdc](https://github.com/xidl/xidl/commit/5f2cbdcf74abab249541eb591741a726d4195829))
+* **xidlc:** emit z.lazy for recursive typescript schemas ([671ba6c](https://github.com/xidl/xidl/commit/671ba6ccc3b64e83ff34203e91913264d57499d1))
+
+
+### Bug Fixes
+
+* **xidlc/typescript-rest:** qualify module-scoped type references ([526ea60](https://github.com/xidl/xidl/commit/526ea60ef10ca3c0dcd1beb659ba38f2805e8345))
+
 ## [0.88.1](https://github.com/xidl/xidl/compare/v0.88.0...v0.88.1) (2026-08-11)
 
 
