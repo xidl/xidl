@@ -21,9 +21,7 @@ class MyUserService implements UserService {
   async list_users(filter: string): Promise<User[]> {
     return [...this.users.values()].filter(
       user =>
-        !filter ||
-        user.name.includes(filter) ||
-        user.roles.includes(filter),
+        !filter || user.name.includes(filter) || user.roles.includes(filter),
     );
   }
 }

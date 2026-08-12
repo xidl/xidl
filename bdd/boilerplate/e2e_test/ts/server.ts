@@ -93,7 +93,9 @@ class MyE2eHttpRouteAndBody implements E2eHttpRouteAndBody {
     }
     return `file:${filePath},download:${download},version:${formatOpt(version)}`;
   }
-  async create_resource(resource_body: StructHttpBody): Promise<StructHttpBody> {
+  async create_resource(
+    resource_body: StructHttpBody,
+  ): Promise<StructHttpBody> {
     return resource_body;
   }
   async replace_resource(
