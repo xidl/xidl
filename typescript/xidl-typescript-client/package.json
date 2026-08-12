@@ -16,7 +16,7 @@
   "main": "dist/index.js",
   "name": "xidl-typescript-client",
   "peerDependencies": {
-    "xidl-typescript-codec": "^0.89.1",
+    "xidl-typescript-codec": "^0.90.0",
     "zod": "^4.4.3"
   },
   "publishConfig": {
@@ -31,5 +31,5 @@
   },
   "type": "module",
   "types": "dist/index.d.ts",
-  "version": "0.89.1"
+  "version": "0.90.0"
 }

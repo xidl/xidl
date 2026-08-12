@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.90.0](https://github.com/xidl/xidl/compare/v0.89.1...v0.90.0) (2026-08-12)
+
+
+### Features
+
+* **xidl-jsonrpc:** add msgpack codec support ([c444ea0](https://github.com/xidl/xidl/commit/c444ea063854c09186c80244629eef18708cc77a))
+
+
+### Bug Fixes
+
+* **xidl-jsonrpc:** harden framing, transport, and stream handling ([d510cdc](https://github.com/xidl/xidl/commit/d510cdc4bc2c191e593a97b65b71d27161c7f925))
+
 ## [0.89.1](https://github.com/xidl/xidl/compare/v0.89.0...v0.89.1) (2026-08-12)
 
 
