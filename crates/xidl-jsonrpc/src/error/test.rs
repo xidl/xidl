@@ -43,3 +43,15 @@ fn helper_constructors_build_expected_rpc_errors() {
 
     assert!(!Error::Protocol("oops").is_method_not_found());
 }
+
+#[test]
+fn error_code_from_i64_preserves_reserved_codes_and_maps_rest_to_custom() {
+    for raw in [-32700, -32600, -32601, -32602, -32603, -32000] {
+        assert_eq!(ErrorCode::from(raw).code(), raw);
+    }
+
+    let custom = ErrorCode::from(-32001);
+    assert!(matches!(custom, ErrorCode::Custom(code) if code == -32001));
+    assert_eq!(custom.code(), -32001);
+    assert_eq!(custom.to_string(), "-32001");
+}

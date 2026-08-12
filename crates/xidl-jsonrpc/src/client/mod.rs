@@ -57,12 +57,12 @@ where
         let Some(response) = self.codec.read::<_, RpcResponse>(&mut self.stream).await? else {
             return Err(Error::Protocol("no response"));
         };
-        if response.id != Some(id) {
+        if response.id.as_ref() != Some(&Value::from(id)) {
             return Err(Error::Protocol("unexpected JSON-RPC id"));
         }
         if let Some(error) = response.error {
             return Err(Error::Rpc {
-                code: ErrorCode::ServerError,
+                code: ErrorCode::from(error.code),
                 message: error.message,
                 data: error.data,
             });

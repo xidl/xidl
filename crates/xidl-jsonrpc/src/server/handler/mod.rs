@@ -58,6 +58,9 @@ impl MultiHandler {
 
     async fn dispatch(&self, method: &str, params: Value) -> Result<Value, Error> {
         for service in &self.services {
+            if service.accepts_bidi(method) {
+                continue;
+            }
             match service.handle(method, params.clone()).await {
                 Ok(value) => return Ok(value),
                 Err(err) if err.is_method_not_found() => continue,

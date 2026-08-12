@@ -1,5 +1,3 @@
-#![cfg(not(tarpaulin_include))]
-
 use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4};
 use std::sync::{Arc, LazyLock};
 
@@ -118,8 +116,36 @@ struct QuicClientConnection {
 type ConnectionCache = DashMap<String, Arc<QuicClientConnection>>;
 static CONNECTIONS: LazyLock<ConnectionCache> = LazyLock::new(DashMap::new);
 
+/// Per-endpoint locks that serialize first-time QUIC connects.
+///
+/// Without this, concurrent `connect_quic` calls for an uncached endpoint
+/// would each establish a separate QUIC connection.
+static CONNECT_LOCKS: LazyLock<DashMap<String, Arc<Mutex<()>>>> = LazyLock::new(DashMap::new);
+
 pub async fn connect_quic(endpoint: &str) -> std::io::Result<DynStream> {
     let key = endpoint.to_string();
+
+    // Fast path: reuse an established QUIC connection when it can still open
+    // streams. A dead connection is evicted so a later call reconnects.
+    if let Some(entry) = CONNECTIONS.get(&key) {
+        let mut connection = entry.connection.lock().await;
+        match connection.open_bidirectional_stream().await {
+            Ok(stream) => return Ok(Box::new(stream)),
+            Err(_) => {
+                drop(connection);
+                CONNECTIONS.remove(&key);
+            }
+        }
+    }
+
+    // Serialize concurrent first-time connects to the same endpoint.
+    let endpoint_lock = CONNECT_LOCKS
+        .entry(key.clone())
+        .or_insert_with(|| Arc::new(Mutex::new(())))
+        .clone();
+    let _guard = endpoint_lock.lock().await;
+
+    // Another task may have established the connection while we waited.
     if let Some(entry) = CONNECTIONS.get(&key) {
         let mut connection = entry.connection.lock().await;
         let stream = connection

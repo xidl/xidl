@@ -63,3 +63,37 @@ async fn empty_multi_handler_reports_method_not_found() {
     let err = handler.handle("missing", Value::Null).await.unwrap_err();
     assert!(err.is_method_not_found());
 }
+
+struct BidiFirst;
+
+#[async_trait::async_trait]
+impl Handler for BidiFirst {
+    async fn handle(&self, method: &str, _params: Value) -> Result<Value, Error> {
+        Ok(Value::String(format!("unary-{method}")))
+    }
+
+    fn accepts_bidi(&self, method: &str) -> bool {
+        method == "bidi"
+    }
+
+    async fn handle_bidi(
+        &self,
+        _method: &str,
+        _params: Value,
+        stream: crate::stream::ReaderWriter<Value, Value>,
+    ) -> Result<(), Error> {
+        stream.cancel().await
+    }
+}
+
+#[tokio::test]
+async fn dispatch_skips_methods_owned_by_bidi_handlers() {
+    let handler = MultiHandler::new(vec![Arc::new(BidiFirst)]);
+    // A method claimed by the bidi stream path must not be answered by the
+    // unary dispatch, even when the service could handle it unary.
+    let err = handler.handle("bidi", Value::Null).await.unwrap_err();
+    assert!(err.is_method_not_found());
+    // Other methods still dispatch normally.
+    let value = handler.handle("other", Value::Null).await.unwrap();
+    assert_eq!(value, Value::String("unary-other".to_string()));
+}

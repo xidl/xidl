@@ -118,3 +118,29 @@ async fn call_errors_when_response_is_missing() {
     assert!(matches!(err, Error::Protocol("no response")));
     server.await.unwrap();
 }
+
+#[tokio::test]
+async fn call_preserves_custom_server_error_codes() {
+    let (client_side, server_side) = duplex(512);
+    let (_server_read, mut server_write) = tokio::io::split(server_side);
+    let server = tokio::spawn(async move {
+        server_write
+            .write_all(
+                br#"{"jsonrpc":"2.0","id":1,"error":{"code":-32001,"message":"custom boom"}}"#,
+            )
+            .await
+            .unwrap();
+        server_write.write_all(b"\n").await.unwrap();
+    });
+
+    let mut client = Client::new(client_side);
+    assert!(matches!(
+        client.call::<_, serde_json::Value>("sum", json!({})).await,
+        Err(Error::Rpc {
+            code: crate::ErrorCode::Custom(-32001),
+            message,
+            ..
+        }) if message == "custom boom"
+    ));
+    server.await.unwrap();
+}
