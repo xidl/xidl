@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.89.1](https://github.com/xidl/xidl/compare/v0.89.0...v0.89.1) (2026-08-12)
+
+
+### Bug Fixes
+
+* **typescript:** fix import ([9f3fb28](https://github.com/xidl/xidl/commit/9f3fb289ccb2216672617816446241024b9e2b77))
+
 ## [0.89.0](https://github.com/xidl/xidl/compare/v0.88.1...v0.89.0) (2026-08-12)
 
 
