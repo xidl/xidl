@@ -1,19 +1,19 @@
 import { deserialize } from 'xidl-typescript-codec';
 import type { ZodType } from 'zod';
 
-import { XidlServerError } from './error.js';
+import { XidlServerError } from './error.ts';
 import {
   assertRequestContentType,
   normalizeMime,
   readRequestCookies,
-} from './scalar.js';
-import { byteRequestStream, ndjsonRequestStream } from './stream.js';
+} from './scalar.ts';
+import { byteRequestStream, ndjsonRequestStream } from './stream.ts';
 import type {
   HttpCodec,
   OperationDescriptor,
   RouteParams,
   ValueBinding,
-} from './types.js';
+} from './types.ts';
 
 export async function decodeOperationRequest<TService>(
   operation: OperationDescriptor<TService>,

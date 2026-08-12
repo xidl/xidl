@@ -1,9 +1,9 @@
 import { deserialize, serialize } from 'xidl-typescript-codec';
 import type { z } from 'zod';
 
-import { XidlClientError } from './error.js';
-import { parseXidlError } from './response.js';
-import type { FetchLike } from './types.js';
+import { XidlClientError } from './error.ts';
+import { parseXidlError } from './response.ts';
+import type { FetchLike } from './types.ts';
 
 export async function* sseJsonStream<T>(
   fetchImpl: FetchLike,

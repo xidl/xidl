@@ -1,9 +1,9 @@
 import { serialize } from 'xidl-typescript-codec';
 import type { z } from 'zod';
 
-import { XidlClientError } from './error.js';
-import { encodeScalar, normalizeMime } from './scalar.js';
-import type { ClientAuth, HttpCodec, SecurityRequirement } from './types.js';
+import { XidlClientError } from './error.ts';
+import { encodeScalar, normalizeMime } from './scalar.ts';
+import type { ClientAuth, HttpCodec, SecurityRequirement } from './types.ts';
 
 export function appendParam(
   query: URLSearchParams,

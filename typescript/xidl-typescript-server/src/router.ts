@@ -1,11 +1,11 @@
-import { errorResponse, XidlServerError } from './error.js';
-import { executeOperation } from './execute.js';
+import { errorResponse, XidlServerError } from './error.ts';
+import { executeOperation } from './execute.ts';
 import type {
   OperationDescriptor,
   RouteParams,
   ServerOptions,
   WebHandler,
-} from './types.js';
+} from './types.ts';
 
 interface Route<TService> {
   operation: OperationDescriptor<TService>;

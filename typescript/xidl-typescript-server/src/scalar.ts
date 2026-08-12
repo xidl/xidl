@@ -1,4 +1,4 @@
-import { XidlServerError } from './error.js';
+import { XidlServerError } from './error.ts';
 
 export function normalizeMime(value: string): string {
   return value.split(';')[0]?.trim().toLowerCase() || 'application/json';

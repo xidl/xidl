@@ -1,4 +1,4 @@
-import type { FetchLike } from './types.js';
+import type { FetchLike } from './types.ts';
 
 export function resolveFetch(fetchImpl?: FetchLike): FetchLike {
   if (fetchImpl) {

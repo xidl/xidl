@@ -1,14 +1,14 @@
-import { errorResponse } from './error.js';
-import { decodeOperationRequest } from './request.js';
-import { encodeOperationResponse } from './response.js';
-import { assertAccepts } from './scalar.js';
+import { errorResponse } from './error.ts';
+import { decodeOperationRequest } from './request.ts';
+import { encodeOperationResponse } from './response.ts';
+import { assertAccepts } from './scalar.ts';
 import type {
   Awaitable,
   OperationDescriptor,
   RouteParams,
   ServerContext,
   ServerOptions,
-} from './types.js';
+} from './types.ts';
 
 type RuntimeMethod = (input?: unknown) => Awaitable<unknown>;
 
