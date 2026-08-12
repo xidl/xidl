@@ -1,14 +1,14 @@
 import { serialize } from 'xidl-typescript-codec';
 import type { ZodType } from 'zod';
 
-import { encodeScalar, normalizeMime } from './scalar.js';
-import { byteStreamResponse, sseResponse } from './stream.js';
+import { encodeScalar, normalizeMime } from './scalar.ts';
+import { byteStreamResponse, sseResponse } from './stream.ts';
 import type {
   BodyField,
   HttpCodec,
   OperationDescriptor,
   ValueBinding,
-} from './types.js';
+} from './types.ts';
 
 export function encodeOperationResponse<TService>(
   operation: OperationDescriptor<TService>,

@@ -1,9 +1,9 @@
-import { executeOperation } from './execute.js';
+import { executeOperation } from './execute.ts';
 import type {
   NextRouteHandler,
   OperationDescriptor,
   ServerOptions,
-} from './types.js';
+} from './types.ts';
 
 export function createNextRoute<TService, THandler extends keyof TService>(
   operation: OperationDescriptor<TService, THandler>,

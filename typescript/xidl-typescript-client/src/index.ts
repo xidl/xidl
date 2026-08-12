@@ -1,6 +1,6 @@
-export { XidlClientError } from './error.js';
-export { resolveFetch, resolveFetchLegacy } from './fetch.js';
-export { ndjsonBodyLegacy, sseJsonStreamLegacy } from './legacy.js';
+export { XidlClientError } from './error.ts';
+export { resolveFetch, resolveFetchLegacy } from './fetch.ts';
+export { ndjsonBodyLegacy, sseJsonStreamLegacy } from './legacy.ts';
 export {
   appendCookie,
   appendHeader,
@@ -8,7 +8,7 @@ export {
   applyClientAuth,
   applyCookies,
   encodeRequestBody,
-} from './request.js';
+} from './request.ts';
 export {
   buildResponsePayload,
   decodeOptionalResponseBody,
@@ -16,7 +16,7 @@ export {
   parseXidlError,
   readResponseCookies,
   readResponseHeader,
-} from './response.js';
+} from './response.ts';
 export {
   encodeCookieValue,
   encodeHeaderValue,
@@ -27,13 +27,13 @@ export {
   joinUrl,
   normalizeMime,
   parseScalar,
-} from './scalar.js';
+} from './scalar.ts';
 export {
   byteResponseStream,
   byteStreamBody,
   ndjsonBody,
   sseJsonStream,
-} from './stream.js';
+} from './stream.ts';
 export type {
   ClientAuth,
   ClientOptions,
@@ -41,4 +41,4 @@ export type {
   HttpCodec,
   ResponseValueSpec,
   SecurityRequirement,
-} from './types.js';
+} from './types.ts';

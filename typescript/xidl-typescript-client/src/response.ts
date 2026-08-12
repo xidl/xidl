@@ -1,9 +1,9 @@
 import { deserialize } from 'xidl-typescript-codec';
 import type { z } from 'zod';
 
-import { XidlClientError } from './error.js';
-import { normalizeMime, parseScalar } from './scalar.js';
-import type { HttpCodec, ResponseValueSpec } from './types.js';
+import { XidlClientError } from './error.ts';
+import { normalizeMime, parseScalar } from './scalar.ts';
+import type { HttpCodec, ResponseValueSpec } from './types.ts';
 
 export async function decodeResponseBody<T>(
   resp: Response,

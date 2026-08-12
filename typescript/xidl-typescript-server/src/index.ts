@@ -1,5 +1,5 @@
-export { XidlServerError } from './error.js';
-export { createRouter } from './router.js';
+export { XidlServerError } from './error.ts';
+export { createRouter } from './router.ts';
 export type {
   Awaitable,
   BodyField,
@@ -17,5 +17,5 @@ export type {
   ServerOptions,
   ValueBinding,
   WebHandler,
-} from './types.js';
-export { defineOperation } from './types.js';
+} from './types.ts';
+export { defineOperation } from './types.ts';
