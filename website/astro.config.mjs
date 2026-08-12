@@ -113,7 +113,7 @@ export default defineConfig({
       ],
       social: [
         {
-          href: 'https://github.com/loongtao/xidl',
+          href: 'https://github.com/xidl/xidl',
           icon: 'github',
           label: 'GitHub',
         },

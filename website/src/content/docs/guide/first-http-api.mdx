@@ -25,7 +25,7 @@ interface HelloWorld {
 ## 2. Generate Rust Server Code
 
 ```bash
-xidlc gen --output-dir server rust-axum hello_world.idl
+xidlc gen --out-dir server rust-axum hello_world.idl
 ```
 
 Now `xidlc` will generate server-side code in the `server` directory.
@@ -62,7 +62,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 ## 4. Generate Client Interface
 
 ```bash
-xidlc gen --output-dir client rust-axum --client hello_world.idl
+xidlc gen --out-dir client rust-axum --client hello_world.idl
 ```
 
 This will generate the client in the `client` directory.
@@ -86,4 +86,16 @@ Additionally, you can generate OpenAPI documentation:
 
 ```bash
 xidlc gen openapi hello_world.idl
+```
+
+## Runnable Example
+
+A runnable version of this tutorial lives in the repository under
+`xidlc-examples/` — see `api/rest/hello_world.idl`,
+`examples/hello_world_server.rs`, and `examples/hello_world_client.rs`:
+
+```bash
+cargo run -p xidlc-examples --example hello_world_server
+# in another terminal
+cargo run -p xidlc-examples --example hello_world_client
 ```

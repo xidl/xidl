@@ -37,7 +37,7 @@ lint, and keep in sync.
 
 - Interface-first development with OMG IDL-compatible foundations and XIDL extensions.
 - Protocol mappings for HTTP and JSON-RPC, plus stream-oriented workflows.
-- Generated outputs for Rust, TypeScript, C, C++, OpenAPI, and OpenRPC.
+- Generated outputs for Rust, TypeScript, Go, OpenAPI, and OpenRPC.
 - Security-aware contracts including HTTP auth and API key mappings.
 - Formatting support through `xidlc fmt`.
 - Editor and language tooling through [`idl-language-server`](https://github.com/xidl/idl-language-server).
@@ -86,7 +86,7 @@ Use this repository as a `pre-commit` hook:
 ```yaml
 repos:
   - repo: https://github.com/xidl/xidl
-    rev: v0.31.0
+    rev: v0.89.1
     hooks:
       - id: xidlc-fmt
 ```
@@ -123,15 +123,21 @@ xidlc gen --out-dir generated openapi api.idl
 
 ## Documentation
 
+The full documentation site is live at [xidl.netlify.app](https://xidl.netlify.app/).
+
 - [Install & Quickstart](website/src/content/docs/guide/index.mdx)
 - [Your First HTTP API](website/src/content/docs/guide/first-http-api.mdx)
+- [Rust Integration](website/src/content/docs/guide/rust-integration.mdx)
 - [Using xidlc](website/src/content/docs/docs/xidlc.mdx)
+- [Targets Reference](website/src/content/docs/docs/targets.mdx)
 - [HTTP & REST Basics](website/src/content/docs/rest/index.mdx)
 - [TypeScript REST Server](website/src/content/docs/rest/typescript-server.mdx)
 - [JSON-RPC Basics](website/src/content/docs/jsonrpc/index.mdx)
-- [Targets Reference](website/src/content/docs/docs/targets.mdx)
 - [HTTP RFC](website/src/content/docs/rfc/http.mdx)
 - [JSON-RPC RFC](website/src/content/docs/rfc/jsonrpc.mdx)
+- [RFC Index](website/src/content/docs/rfc/index.mdx)
+- [AI & Agent Guide](website/src/content/docs/ai/index.mdx)
+- [Changelog](website/src/content/docs/changelog.md)
 
 ## Links
 
