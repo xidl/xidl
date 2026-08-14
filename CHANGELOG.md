@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.91.0](https://github.com/xidl/xidl/compare/v0.90.0...v0.91.0) (2026-08-14)
+
+
+### Features
+
+* **xidl-jsonrpc:** add concurrent rpc client with request correlation ([cba9fc2](https://github.com/xidl/xidl/commit/cba9fc2b6c83b3cb8981f5fa5fd4aede759c9c92))
+
 ## [0.90.0](https://github.com/xidl/xidl/compare/v0.89.1...v0.90.0) (2026-08-12)
 
 
