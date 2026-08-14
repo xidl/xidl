@@ -69,6 +69,9 @@ pub enum Error {
         message: String,
         data: Option<Value>,
     },
+    /// A request did not receive a response before its deadline.
+    #[error("rpc request timed out")]
+    RequestTimeout,
     #[error("protocol error: {0}")]
     Protocol(&'static str),
 }
