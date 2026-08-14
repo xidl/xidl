@@ -250,6 +250,11 @@ where
                 message: message.to_string(),
                 data: None,
             },
+            Error::RequestTimeout => RpcError {
+                code: ErrorCode::ServerError.code(),
+                message: error.to_string(),
+                data: None,
+            },
             Error::Io(err) => RpcError {
                 code: ErrorCode::InternalError.code(),
                 message: err.to_string(),

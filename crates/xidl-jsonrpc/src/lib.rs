@@ -7,6 +7,8 @@ mod client;
 mod codec;
 mod error;
 #[cfg(feature = "tokio")]
+mod rpc;
+#[cfg(feature = "tokio")]
 mod server;
 #[cfg(feature = "tokio")]
 pub mod stream;
@@ -14,6 +16,8 @@ pub mod stream;
 #[cfg(feature = "tokio")]
 pub use client::Client;
 pub use error::{Error, ErrorCode};
+#[cfg(feature = "tokio")]
+pub use rpc::RpcClient;
 #[cfg(feature = "tokio")]
 pub use server::{Handler, Server, ServerBuilder};
 #[cfg(feature = "tokio")]
