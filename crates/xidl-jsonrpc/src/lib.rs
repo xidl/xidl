@@ -14,7 +14,7 @@ mod server;
 pub mod stream;
 
 #[cfg(feature = "tokio")]
-pub use client::Client;
+pub use client::{Client, ConcurrentClient};
 pub use error::{Error, ErrorCode};
 #[cfg(feature = "tokio")]
 pub use rpc::RpcClient;
@@ -40,6 +40,15 @@ pub use transport::{WebSocketListener, connect_websocket};
 
 const JSONRPC_VERSION: &str = "2.0";
 
+/// Payload representation used by message-oriented transports.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum FrameKind {
+    /// UTF-8 text, used by JSON transports.
+    Text,
+    /// Opaque bytes, used by MessagePack transports.
+    Binary,
+}
+
 #[derive(Serialize)]
 pub(crate) struct RpcRequest<'a, P> {
     jsonrpc: &'static str,
@@ -52,10 +61,44 @@ pub(crate) struct RpcRequest<'a, P> {
 pub(crate) struct RpcResponse {
     jsonrpc: Option<String>,
     id: Option<Value>,
+    #[serde(default, deserialize_with = "deserialize_present_value")]
     #[serde(skip_serializing_if = "Option::is_none")]
     result: Option<Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
     error: Option<RpcError>,
+}
+
+fn deserialize_present_value<'de, D>(deserializer: D) -> Result<Option<Value>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    Value::deserialize(deserializer).map(Some)
+}
+
+impl RpcResponse {
+    pub(crate) fn validate(&self) -> Result<(), Error> {
+        if self.jsonrpc.as_deref() != Some(JSONRPC_VERSION) {
+            return Err(Error::Protocol("invalid JSON-RPC response version"));
+        }
+        match (self.result.is_some(), self.error.is_some()) {
+            (true, false) | (false, true) => Ok(()),
+            _ => Err(Error::Protocol(
+                "JSON-RPC response must contain exactly one result or error",
+            )),
+        }
+    }
+
+    pub(crate) fn into_result(self) -> Result<Value, Error> {
+        self.validate()?;
+        if let Some(error) = self.error {
+            return Err(Error::Rpc {
+                code: ErrorCode::from(error.code),
+                message: error.message,
+                data: error.data,
+            });
+        }
+        Ok(self.result.unwrap_or(Value::Null))
+    }
 }
 
 #[derive(Serialize, Deserialize)]

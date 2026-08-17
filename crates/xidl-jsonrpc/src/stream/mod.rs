@@ -104,6 +104,9 @@ impl<T, R> ClientStreamWriter<T, R> {
 impl<T, R> Drop for ClientStreamWriter<T, R> {
     fn drop(&mut self) {
         let _ = self.tx.take();
+        if let Some(response) = self.response.take() {
+            response.abort();
+        }
     }
 }
 
@@ -321,6 +324,7 @@ where
     let Some(response) = codec.read::<_, crate::RpcResponse>(reader).await? else {
         return Err(Error::Protocol("missing stream handshake response"));
     };
+    response.validate()?;
     if let Some(error) = response.error {
         return Err(Error::Rpc {
             code: crate::ErrorCode::from(error.code),

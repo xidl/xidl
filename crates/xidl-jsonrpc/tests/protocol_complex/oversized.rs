@@ -64,15 +64,23 @@ async fn exact_max_json_frame_is_accepted() {
     .await
     .expect("write follow-up call");
 
-    let first = read_response(&mut reader).await;
-    assert_eq!(first["id"], json!(1));
+    let responses = [
+        read_response(&mut reader).await,
+        read_response(&mut reader).await,
+    ];
+    let padded = responses
+        .iter()
+        .find(|response| response["id"] == json!(1))
+        .expect("exact-max response must be present");
     assert_eq!(
-        first["result"].as_str().map(str::len),
+        padded["result"].as_str().map(str::len),
         Some(padding),
         "params padding must round-trip in full"
     );
 
-    let second = read_response(&mut reader).await;
-    assert_eq!(second["id"], json!(9));
-    assert_eq!(second["result"], json!("ok"));
+    let follow_up = responses
+        .iter()
+        .find(|response| response["id"] == json!(9))
+        .expect("follow-up response must be present");
+    assert_eq!(follow_up["result"], json!("ok"));
 }

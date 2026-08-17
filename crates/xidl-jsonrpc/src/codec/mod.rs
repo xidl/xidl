@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod test;
 
-use crate::Error;
+use crate::{Error, FrameKind};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 #[cfg(feature = "msgpack")]
@@ -22,6 +22,15 @@ pub(crate) enum Codec {
 }
 
 impl Codec {
+    /// Returns the payload kind expected by message-oriented transports.
+    pub(crate) const fn frame_kind(self) -> FrameKind {
+        match self {
+            Self::Json => FrameKind::Text,
+            #[cfg(feature = "msgpack")]
+            Self::Msgpack => FrameKind::Binary,
+        }
+    }
+
     /// Writes `value` to `writer` using this codec's framing.
     pub(crate) async fn write<W, T>(self, writer: &mut W, value: &T) -> Result<(), Error>
     where
