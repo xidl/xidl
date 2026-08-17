@@ -46,7 +46,7 @@ pub(crate) fn deprecated_context_from_http(http_op: &HttpOperation) -> Deprecate
 pub(crate) fn cors_layer(http_op: &HttpOperation) -> Option<String> {
     let cors = http_op.meta.cors.as_ref()?;
     Some(format!(
-        ".layer(::xidl_rust_axum::tower_http::cors::CorsLayer::new().allow_origin({}).allow_methods([::xidl_rust_axum::axum::http::Method::{}]))",
+        ".layer(::xidl_rust_axum::tower_http::cors::CorsLayer::new().allow_origin({}).allow_headers(::xidl_rust_axum::tower_http::cors::Any).allow_methods([::xidl_rust_axum::axum::http::Method::{}]))",
         cors_origin_value(cors),
         reqwest_method_code(http_method_from_hir(http_op.meta.method))
     ))
