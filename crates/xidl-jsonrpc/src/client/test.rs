@@ -144,3 +144,70 @@ async fn call_preserves_custom_server_error_codes() {
     ));
     server.await.unwrap();
 }
+
+#[tokio::test]
+async fn call_skips_notifications_and_accepts_null_result() {
+    let (client_side, server_side) = duplex(512);
+    let (_server_read, mut server_write) = tokio::io::split(server_side);
+    let server = tokio::spawn(async move {
+        server_write
+            .write_all(
+                br#"{"jsonrpc":"2.0","method":"notice","params":{"ready":true}}
+{"jsonrpc":"2.0","id":1,"result":null}
+"#,
+            )
+            .await
+            .unwrap();
+    });
+
+    let mut client = Client::new(client_side);
+    let result: serde_json::Value = client.call("sum", json!({})).await.unwrap();
+    assert_eq!(result, serde_json::Value::Null);
+    server.await.unwrap();
+}
+
+#[tokio::test]
+async fn call_rejects_invalid_response_version() {
+    let (client_side, server_side) = duplex(512);
+    let (_server_read, mut server_write) = tokio::io::split(server_side);
+    let server = tokio::spawn(async move {
+        server_write
+            .write_all(
+                br#"{"id":1,"result":true}
+"#,
+            )
+            .await
+            .unwrap();
+    });
+
+    let mut client = Client::new(client_side);
+    assert!(matches!(
+        client.call::<_, serde_json::Value>("sum", json!({})).await,
+        Err(Error::Protocol("invalid JSON-RPC response version"))
+    ));
+    server.await.unwrap();
+}
+
+#[tokio::test]
+async fn call_rejects_response_with_result_and_error() {
+    let (client_side, server_side) = duplex(512);
+    let (_server_read, mut server_write) = tokio::io::split(server_side);
+    let server = tokio::spawn(async move {
+        server_write
+            .write_all(
+                br#"{"jsonrpc":"2.0","id":1,"result":true,"error":{"code":-32000,"message":"boom"}}
+"#,
+            )
+            .await
+            .unwrap();
+    });
+
+    let mut client = Client::new(client_side);
+    assert!(matches!(
+        client.call::<_, serde_json::Value>("sum", json!({})).await,
+        Err(Error::Protocol(
+            "JSON-RPC response must contain exactly one result or error"
+        ))
+    ));
+    server.await.unwrap();
+}

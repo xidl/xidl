@@ -8,6 +8,11 @@ pub trait Handler: Send + Sync {
     /// Handles a unary JSON-RPC request.
     async fn handle(&self, method: &str, params: Value) -> Result<Value, Error>;
 
+    /// Validates a streaming request before the server acknowledges it.
+    async fn validate_bidi(&self, _method: &str, _params: &Value) -> Result<(), Error> {
+        Ok(())
+    }
+
     /// Returns whether the handler accepts bidirectional streaming for `method`.
     fn accepts_bidi(&self, _method: &str) -> bool {
         false
@@ -31,6 +36,10 @@ where
 {
     async fn handle(&self, method: &str, params: Value) -> Result<Value, Error> {
         (**self).handle(method, params).await
+    }
+
+    async fn validate_bidi(&self, method: &str, params: &Value) -> Result<(), Error> {
+        (**self).validate_bidi(method, params).await
     }
 
     fn accepts_bidi(&self, method: &str) -> bool {
@@ -82,6 +91,13 @@ impl MultiHandler {
 impl Handler for MultiHandler {
     async fn handle(&self, method: &str, params: Value) -> Result<Value, Error> {
         self.dispatch(method, params).await
+    }
+
+    async fn validate_bidi(&self, method: &str, params: &Value) -> Result<(), Error> {
+        if let Some(service) = self.bidi_service(method) {
+            return service.validate_bidi(method, params).await;
+        }
+        Err(Error::method_not_found(method))
     }
 
     fn accepts_bidi(&self, method: &str) -> bool {

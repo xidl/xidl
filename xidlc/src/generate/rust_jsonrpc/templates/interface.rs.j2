@@ -78,7 +78,9 @@ T: {{ ident }} + Send + Sync + 'static,
             {% for method in methods %}
                 {% if method.kind == "rpc" %}
                     "{{ method.rpc_name }}" => {
-                        let params: {{ method.params_struct }} = ::serde_json::from_value(params)
+                        let params: {{ method.params_struct }} = ::serde_json::from_value(
+                        if params.is_null() { ::serde_json::json!({}) } else { params }
+                        )
                         .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
                         {% if method.args | length > 0 %}
                             let result = self.inner.{{ method.name }}({% for arg in method.args %}params.{{ arg }}{% if not loop.last %}, {% endif %}{% endfor %}).await?;
@@ -119,6 +121,29 @@ T: {{ ident }} + Send + Sync + 'static,
         }
     }
 
+    #[allow(clippy::match_single_binding, unused_variables)]
+    async fn validate_bidi(
+    &self,
+    method: &str,
+    params: &::serde_json::Value,
+    ) -> Result<(), xidl_jsonrpc::Error> {
+        let _ = params;
+        match method {
+            {% for method in methods %}
+                {% if method.kind == "stream_op" and method.stream_mode == "server" %}
+                    "{{ method.rpc_name }}" => {
+                        let _: {{ method.params_struct }} = ::serde_json::from_value(
+                        if params.is_null() { ::serde_json::json!({}) } else { params.clone() }
+                        )
+                        .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
+                        Ok(())
+                    }
+                {% endif %}
+            {% endfor %}
+            _ => Ok(()),
+        }
+    }
+
     fn accepts_bidi(&self, _method: &str) -> bool {
         {% if bidi_method_names and bidi_method_names | length > 0 %}
             matches!(
@@ -143,7 +168,9 @@ T: {{ ident }} + Send + Sync + 'static,
             {% for method in methods %}
                 {% if method.kind == "stream_op" and method.stream_mode == "server" %}
                     "{{ method.rpc_name }}" => {
-                        let params: {{ method.params_struct }} = ::serde_json::from_value(params)
+                        let params: {{ method.params_struct }} = ::serde_json::from_value(
+                        if params.is_null() { ::serde_json::json!({}) } else { params }
+                        )
                         .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
                         let mut out = self.inner.{{ method.name }}({% for arg in method.args %}params.{{ arg }}{% if not loop.last %}, {% endif %}{% endfor %}).await?;
                         while let Some(item) = xidl_jsonrpc::futures_util::StreamExt::next(&mut out).await {
@@ -192,7 +219,7 @@ T: {{ ident }} + Send + Sync + 'static,
 }
 
 pub struct {{ ident }}Client<S> {
-    client: std::sync::Arc<tokio::sync::Mutex<xidl_jsonrpc::Client<S>>>,
+    client: std::sync::Arc<xidl_jsonrpc::ConcurrentClient<S>>,
     endpoint: Option<String>,
 }
 
@@ -249,7 +276,7 @@ S: xidl_jsonrpc::Stream + Unpin + Send + 'static,
 
     fn from_stream(stream: S, endpoint: Option<String>) -> Self {
         Self {
-            client: std::sync::Arc::new(tokio::sync::Mutex::new(xidl_jsonrpc::Client::new(stream))),
+            client: std::sync::Arc::new(xidl_jsonrpc::ConcurrentClient::new(stream)),
             endpoint,
         }
     }
@@ -270,15 +297,14 @@ S: xidl_jsonrpc::Stream + Unpin + Send + 'static,
                     {% endfor %}
                 };
 
-                let mut client = self.client.lock().await;
                 {% if method.response_kind == "empty" %}
-                    let _: ::serde_json::Value = client.call("{{ method.rpc_name }}", params).await?;
+                    let _: ::serde_json::Value = self.client.call("{{ method.rpc_name }}", params).await?;
                     Ok(())
                 {% elif method.response_kind == "single_return" or method.response_kind == "single_output" %}
-                    let result: {{ method.response_struct }} = client.call("{{ method.rpc_name }}", params).await?;
+                    let result: {{ method.response_struct }} = self.client.call("{{ method.rpc_name }}", params).await?;
                     Ok(result.{{ method.response_single_field }})
                 {% else %}
-                    client.call("{{ method.rpc_name }}", params).await
+                    self.client.call("{{ method.rpc_name }}", params).await
                 {% endif %}
             }
         {% elif method.kind == "stream_op" and method.stream_mode == "server" %}

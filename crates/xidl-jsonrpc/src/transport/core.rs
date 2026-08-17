@@ -29,6 +29,9 @@ pub trait Listener: Send + Sync {
     fn endpoint(&self) -> Option<String> {
         None
     }
+
+    /// Configures the payload kind used by message-oriented listeners.
+    fn set_frame_kind(&self, _kind: crate::FrameKind) {}
 }
 
 pub struct BoundListener {

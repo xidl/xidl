@@ -3,11 +3,14 @@ use crate::codec::Codec;
 use crate::server::handler::MultiHandler;
 use crate::transport::{IoListener, Listener, Stream};
 use std::sync::Arc;
+use tokio::sync::Semaphore;
 
 struct ServerBinding {
     listener: Box<dyn Listener>,
     endpoint: Option<String>,
 }
+
+const DEFAULT_MAX_IN_FLIGHT: usize = 256;
 
 /// Builder for composing one or more JSON-RPC handlers into a server.
 pub struct ServerBuilder {
@@ -15,6 +18,7 @@ pub struct ServerBuilder {
     endpoint: Option<String>,
     services: Vec<Arc<dyn crate::Handler>>,
     codec: Codec,
+    max_in_flight: usize,
 }
 
 /// JSON-RPC server bound to a transport listener.
@@ -23,6 +27,7 @@ pub struct Server {
     endpoint: Option<String>,
     services: Vec<Arc<dyn crate::Handler>>,
     codec: Codec,
+    max_in_flight: usize,
 }
 
 impl Server {
@@ -33,6 +38,7 @@ impl Server {
             endpoint: None,
             services: Vec::new(),
             codec: Codec::Json,
+            max_in_flight: DEFAULT_MAX_IN_FLIGHT,
         }
     }
 
@@ -44,6 +50,8 @@ impl Server {
     /// Serves incoming connections until the listener stops accepting streams.
     pub async fn serve(self) -> Result<(), Error> {
         let handler = Arc::new(MultiHandler::new(self.services));
+        let global_in_flight = Arc::new(Semaphore::new(self.max_in_flight));
+        self.listener.set_frame_kind(self.codec.frame_kind());
         loop {
             let (stream, _peer) = match self.listener.accept().await {
                 Ok(v) => v,
@@ -51,10 +59,17 @@ impl Server {
                 Err(err) => return Err(err.into()),
             };
             let handler = handler.clone();
+            let global_in_flight = global_in_flight.clone();
             tokio::spawn(async move {
-                let mut session =
-                    super::session::ServerSession::with_codec(stream, handler, self.codec);
-                let _ = session.run().await;
+                let mut session = super::session::ServerSession::with_limits(
+                    stream,
+                    handler,
+                    self.codec,
+                    global_in_flight,
+                );
+                if let Err(error) = session.run().await {
+                    eprintln!("xidl-jsonrpc session failed: {error}");
+                }
             });
         }
     }
@@ -82,6 +97,12 @@ impl ServerBuilder {
         S: crate::Handler + 'static,
     {
         self.services.push(Arc::new(service));
+        self
+    }
+
+    /// Sets the maximum number of in-flight requests across all connections.
+    pub fn with_max_in_flight(mut self, max_in_flight: usize) -> Self {
+        self.max_in_flight = max_in_flight.max(1);
         self
     }
 
@@ -126,6 +147,7 @@ impl ServerBuilder {
     /// Builds a server from the configured listener or endpoint.
     pub async fn build(self) -> Result<Server, Error> {
         let codec = self.codec;
+        let max_in_flight = self.max_in_flight;
         let (binding, services) = self.resolve_binding().await?;
 
         Ok(Server {
@@ -133,6 +155,7 @@ impl ServerBuilder {
             endpoint: binding.endpoint,
             services,
             codec,
+            max_in_flight,
         })
     }
 

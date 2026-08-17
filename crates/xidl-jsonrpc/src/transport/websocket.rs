@@ -2,6 +2,8 @@ use futures_core::Stream as _;
 use futures_util::Sink;
 use std::net::SocketAddr;
 use std::pin::Pin;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicU8, Ordering};
 use std::task::{Context, Poll};
 use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 use tokio::sync::{Mutex, mpsc};
@@ -9,6 +11,7 @@ use tokio_tungstenite::tungstenite::Message;
 
 use super::tls_config::{TransportUrl, build_client_config, build_server_acceptor};
 use super::{Listener, Stream};
+use crate::FrameKind;
 
 type DynStream = Box<dyn Stream + Unpin + Send + 'static>;
 
@@ -19,6 +22,7 @@ enum ServerTls {
 
 pub struct WebSocketListener {
     rx: Mutex<mpsc::UnboundedReceiver<(DynStream, SocketAddr)>>,
+    frame_kind: Arc<AtomicU8>,
     _accept_task: tokio::task::JoinHandle<()>,
 }
 
@@ -34,6 +38,8 @@ impl WebSocketListener {
         };
         let listener = tokio::net::TcpListener::bind(endpoint.bind_addr()?).await?;
         let (tx, rx) = mpsc::unbounded_channel::<(DynStream, SocketAddr)>();
+        let frame_kind = Arc::new(AtomicU8::new(0));
+        let accepted_frame_kind = frame_kind.clone();
         let task = tokio::spawn(async move {
             loop {
                 let (tcp, peer) = match listener.accept().await {
@@ -41,6 +47,7 @@ impl WebSocketListener {
                     Err(_) => break,
                 };
                 let tx = tx.clone();
+                let frame_kind = accepted_frame_kind.clone();
                 let tls = match &tls {
                     ServerTls::Disabled => ServerTls::Disabled,
                     ServerTls::Enabled(acceptor) => ServerTls::Enabled(acceptor.clone()),
@@ -52,7 +59,8 @@ impl WebSocketListener {
                                 Ok(ws) => ws,
                                 Err(_) => return,
                             };
-                            let stream = WebSocketIo::new(ws);
+                            let kind = frame_kind.load(Ordering::Relaxed);
+                            let stream = WebSocketIo::with_frame_kind(ws, decode_frame_kind(kind));
                             let _ = tx.send((Box::new(stream), peer));
                         }
                         ServerTls::Enabled(acceptor) => {
@@ -64,7 +72,8 @@ impl WebSocketListener {
                                 Ok(ws) => ws,
                                 Err(_) => return,
                             };
-                            let stream = WebSocketIo::new(ws);
+                            let kind = frame_kind.load(Ordering::Relaxed);
+                            let stream = WebSocketIo::with_frame_kind(ws, decode_frame_kind(kind));
                             let _ = tx.send((Box::new(stream), peer));
                         }
                     }
@@ -73,6 +82,7 @@ impl WebSocketListener {
         });
         Ok(Self {
             rx: Mutex::new(rx),
+            frame_kind,
             _accept_task: task,
         })
     }
@@ -85,6 +95,11 @@ impl Listener for WebSocketListener {
         rx.recv().await.ok_or_else(|| {
             std::io::Error::new(std::io::ErrorKind::BrokenPipe, "websocket listener closed")
         })
+    }
+
+    fn set_frame_kind(&self, kind: FrameKind) {
+        self.frame_kind
+            .store(encode_frame_kind(kind), Ordering::Relaxed);
     }
 }
 
@@ -107,14 +122,25 @@ pub async fn connect_websocket(endpoint: &str) -> std::io::Result<DynStream> {
 
 pub struct WebSocketIo<S> {
     ws: tokio_tungstenite::WebSocketStream<S>,
+    frame_kind: FrameKind,
     read_buf: Vec<u8>,
     write_buf: Vec<u8>,
 }
 
 impl<S> WebSocketIo<S> {
+    /// Wraps a WebSocket using JSON text framing.
     pub fn new(ws: tokio_tungstenite::WebSocketStream<S>) -> Self {
+        Self::with_frame_kind(ws, FrameKind::Text)
+    }
+
+    /// Wraps a WebSocket using the selected payload framing.
+    pub fn with_frame_kind(
+        ws: tokio_tungstenite::WebSocketStream<S>,
+        frame_kind: FrameKind,
+    ) -> Self {
         Self {
             ws,
+            frame_kind,
             read_buf: Vec::new(),
             write_buf: Vec::new(),
         }
@@ -142,11 +168,12 @@ where
                 Poll::Pending => return Poll::Pending,
                 Poll::Ready(Some(Ok(Message::Text(text)))) => {
                     self.read_buf.extend_from_slice(text.as_bytes());
-                    self.read_buf.push(b'\n');
+                    if !self.read_buf.ends_with(b"\n") {
+                        self.read_buf.push(b'\n');
+                    }
                 }
                 Poll::Ready(Some(Ok(Message::Binary(data)))) => {
                     self.read_buf.extend_from_slice(data.as_ref());
-                    self.read_buf.push(b'\n');
                 }
                 Poll::Ready(Some(Ok(Message::Ping(_))))
                 | Poll::Ready(Some(Ok(Message::Pong(_))))
@@ -176,9 +203,6 @@ where
 
     fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<std::io::Result<()>> {
         if !self.write_buf.is_empty() {
-            // The buffered JSON-RPC lines form one contiguous payload, so
-            // ship them as a single Binary message instead of splitting on
-            // newlines; the reader's codec still parses per line.
             let payload = std::mem::take(&mut self.write_buf);
             match Pin::new(&mut self.ws).poll_ready(cx) {
                 Poll::Pending => {
@@ -191,7 +215,19 @@ where
                     return Poll::Ready(Err(super::tls_config::io_other(err)));
                 }
             }
-            if let Err(err) = Pin::new(&mut self.ws).start_send(Message::Binary(payload.into())) {
+            let message = match self.frame_kind {
+                FrameKind::Text => match String::from_utf8(payload) {
+                    Ok(text) => Message::Text(text.into()),
+                    Err(err) => {
+                        return Poll::Ready(Err(std::io::Error::new(
+                            std::io::ErrorKind::InvalidData,
+                            err.to_string(),
+                        )));
+                    }
+                },
+                FrameKind::Binary => Message::Binary(payload.into()),
+            };
+            if let Err(err) = Pin::new(&mut self.ws).start_send(message) {
                 return Poll::Ready(Err(super::tls_config::io_other(err)));
             }
         }
@@ -215,5 +251,20 @@ where
             Poll::Ready(Ok(())) => Poll::Ready(Ok(())),
             Poll::Ready(Err(err)) => Poll::Ready(Err(super::tls_config::io_other(err))),
         }
+    }
+}
+
+fn encode_frame_kind(kind: FrameKind) -> u8 {
+    match kind {
+        FrameKind::Text => 0,
+        FrameKind::Binary => 1,
+    }
+}
+
+fn decode_frame_kind(value: u8) -> FrameKind {
+    if value == 1 {
+        FrameKind::Binary
+    } else {
+        FrameKind::Text
     }
 }

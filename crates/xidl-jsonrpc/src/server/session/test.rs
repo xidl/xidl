@@ -1,4 +1,4 @@
-use super::ServerSession;
+use super::{ServerSession, response::ResponseCodec};
 use crate::stream::ReaderWriter;
 
 const MAX_FRAME_LEN: usize = 4 * 1024 * 1024;
@@ -115,27 +115,26 @@ async fn bidi_requests_take_over_the_stream() {
 async fn private_helpers_map_errors_and_missing_streams() {
     let (_client, server) = tokio::io::duplex(64);
     let mut session = ServerSession::with_codec(server, SessionHandler, crate::codec::Codec::Json);
-    type TestSession = ServerSession<tokio::io::DuplexStream, SessionHandler>;
     assert_eq!(
-        TestSession::success_response(Some(json!(9)), json!(1)).id,
+        ResponseCodec::success(Some(json!(9)), json!(1)).id,
         Some(json!(9))
     );
     assert_eq!(
-        TestSession::error_response(Some(json!(2)), Error::Protocol("bad"))
+        ResponseCodec::error(Some(json!(2)), Error::Protocol("bad"))
             .error
             .unwrap()
             .code,
         -32600
     );
     assert_eq!(
-        TestSession::rpc_error(Error::Io(std::io::Error::other("io"))).code,
+        ResponseCodec::rpc_error(Error::Io(std::io::Error::other("io"))).code,
         -32603
     );
     assert_eq!(
-        TestSession::rpc_error(Error::invalid_params("bad")).code,
+        ResponseCodec::rpc_error(Error::invalid_params("bad")).code,
         -32602
     );
-    session.stream = None;
+    session.writer = None;
     assert!(matches!(
         session.write_result(Some(json!(1)), Value::Null).await,
         Err(Error::Protocol("missing stream"))
@@ -149,6 +148,7 @@ async fn private_helpers_map_errors_and_missing_streams() {
         session.handle_request(request).await,
         Err(Error::Protocol("missing stream"))
     ));
+    session.reader = None;
     session.run().await.unwrap();
 }
 
@@ -374,7 +374,7 @@ async fn run_propagates_non_decode_read_errors() {
 async fn write_responses_reports_missing_stream() {
     let (_client, server) = tokio::io::duplex(64);
     let mut session = ServerSession::with_codec(server, SessionHandler, crate::codec::Codec::Json);
-    session.stream = None;
+    session.writer = None;
     let items = vec![json!({"jsonrpc":"2.0","id":1,"method":"ok","params":null})];
     assert!(matches!(
         session.handle_batch(items).await,
@@ -384,8 +384,7 @@ async fn write_responses_reports_missing_stream() {
 
 #[tokio::test]
 async fn rpc_error_preserves_custom_rpc_payloads() {
-    type TestSession = ServerSession<tokio::io::DuplexStream, SessionHandler>;
-    let custom = TestSession::rpc_error(Error::Rpc {
+    let custom = ResponseCodec::rpc_error(Error::Rpc {
         code: crate::ErrorCode::Custom(42),
         message: "custom failure".to_string(),
         data: Some(json!({"detail": 1})),
