@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.91.1](https://github.com/xidl/xidl/compare/v0.91.0...v0.91.1) (2026-08-17)
+
+
+### Bug Fixes
+
+* **jsonrpc:** harden protocol handling and concurrency ([81b369c](https://github.com/xidl/xidl/commit/81b369c61c3743d7d8f10b2036787cbe8a1ac5e1))
+* **xidlc:** allow any headers in generated cors layers ([fae00f2](https://github.com/xidl/xidl/commit/fae00f2f8235b95f68e4f7a99b64402eb07f9f42))
+
 ## [0.91.0](https://github.com/xidl/xidl/compare/v0.90.0...v0.91.0) (2026-08-14)
 
 
