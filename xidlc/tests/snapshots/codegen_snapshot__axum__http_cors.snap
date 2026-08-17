@@ -133,6 +133,7 @@ where
                     .layer(
                         ::xidl_rust_axum::tower_http::cors::CorsLayer::new()
                             .allow_origin(::xidl_rust_axum::tower_http::cors::Any)
+                            .allow_headers(::xidl_rust_axum::tower_http::cors::Any)
                             .allow_methods([::xidl_rust_axum::axum::http::Method::GET]),
                     ),
             )
@@ -149,6 +150,7 @@ where
                                     "https://admin.example.com",
                                 ),
                             ])
+                            .allow_headers(::xidl_rust_axum::tower_http::cors::Any)
                             .allow_methods([::xidl_rust_axum::axum::http::Method::POST]),
                     ),
             )
