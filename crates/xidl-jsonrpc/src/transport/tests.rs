@@ -249,3 +249,137 @@ async fn ipc_bind_rejects_live_listener_and_reclaims_stale_socket() {
     assert_eq!(reclaimed.endpoint().as_deref(), Some(endpoint.as_str()));
     drop(reclaimed);
 }
+
+#[cfg(all(feature = "transport-ipc", unix))]
+#[test]
+fn ipc_bind_rejects_oversized_path() {
+    let long_path = format!("/tmp/{}", "x".repeat(300));
+    let err = match super::IpcListener::bind(&long_path) {
+        Ok(_) => panic!("expected oversized path to fail"),
+        Err(err) => err,
+    };
+    assert_ne!(err.kind(), std::io::ErrorKind::AddrInUse);
+}
+
+#[cfg(all(feature = "transport-ipc", unix))]
+#[tokio::test]
+async fn ipc_drop_tolerates_missing_socket_file() {
+    let endpoint = unique_ipc_endpoint("drop-missing");
+    let path = endpoint.trim_start_matches("ipc://");
+    let listener = super::IpcListener::bind(path).unwrap();
+    std::fs::remove_file(path).unwrap();
+    drop(listener);
+}
+
+#[cfg(all(feature = "transport-ipc", unix))]
+#[tokio::test]
+async fn ipc_drop_tolerates_replaced_socket_file() {
+    let endpoint = unique_ipc_endpoint("drop-dir");
+    let path = endpoint.trim_start_matches("ipc://");
+    let listener = super::IpcListener::bind(path).unwrap();
+    std::fs::remove_file(path).unwrap();
+    std::fs::create_dir(path).unwrap();
+    drop(listener);
+    std::fs::remove_dir(path).unwrap();
+}
+
+#[cfg(any(feature = "transport-tls", feature = "transport-websocket"))]
+#[test]
+fn tls_config_rejects_unsupported_scheme_and_missing_parts() {
+    let err = super::tls_config::TransportUrl::parse("tcp://127.0.0.1:1", &["tls"])
+        .err()
+        .expect("unsupported scheme");
+    assert_eq!(err.kind(), std::io::ErrorKind::InvalidInput);
+    assert!(err.to_string().contains("unsupported scheme"));
+
+    let no_host = super::tls_config::TransportUrl::parse("tls:foo", &["tls"]).expect("parse");
+    let err = no_host.host_port().expect_err("missing host");
+    assert!(err.to_string().contains("missing host"));
+
+    let no_port =
+        super::tls_config::TransportUrl::parse("tls://localhost", &["tls"]).expect("parse");
+    let err = no_port.host_port().expect_err("missing port");
+    assert!(err.to_string().contains("missing port"));
+}
+
+#[cfg(any(feature = "transport-tls", feature = "transport-websocket"))]
+#[test]
+fn tls_config_wraps_ipv6_hosts_in_socket_bind_addr() {
+    assert_eq!(
+        super::tls_config::socket_bind_addr("::1", 8443),
+        "[::1]:8443"
+    );
+}
+
+#[cfg(feature = "transport-websocket")]
+async fn free_ws_port() -> u16 {
+    let probe = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let port = probe.local_addr().unwrap().port();
+    drop(probe);
+    port
+}
+
+#[cfg(feature = "transport-websocket")]
+#[tokio::test]
+async fn websocket_round_trip_exchanges_text_and_binary_frames() {
+    let port = free_ws_port().await;
+    let endpoint = format!("ws://127.0.0.1:{port}");
+    let listener = super::websocket::WebSocketListener::bind(&endpoint)
+        .await
+        .unwrap();
+    listener.set_frame_kind(crate::FrameKind::Binary);
+
+    let server_task = tokio::spawn(async move {
+        let (mut stream, _peer) = listener.accept().await.unwrap();
+        let mut buf = [0_u8; 4];
+        stream.read_exact(&mut buf).await.unwrap();
+        stream.write_all(b"pong").await.unwrap();
+        stream.flush().await.unwrap();
+    });
+
+    let mut client = super::websocket::connect_websocket(&endpoint)
+        .await
+        .unwrap();
+    client.write_all(b"ping").await.unwrap();
+    client.flush().await.unwrap();
+    let mut echo = [0_u8; 4];
+    client.read_exact(&mut echo).await.unwrap();
+    assert_eq!(&echo, b"pong");
+    client.shutdown().await.unwrap();
+    server_task.await.unwrap();
+}
+
+#[cfg(feature = "transport-websocket")]
+#[tokio::test]
+async fn wss_round_trip_with_self_signed_cert() {
+    let probe = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let port = probe.local_addr().unwrap().port();
+    drop(probe);
+
+    let bind_url = format!(
+        "wss://localhost:{port}?cert=/tmp/xidl-server-cert.pem&key=/tmp/xidl-server-key.pem"
+    );
+    let listener = super::websocket::WebSocketListener::bind(&bind_url)
+        .await
+        .unwrap();
+
+    let server_task = tokio::spawn(async move {
+        let (mut stream, _peer) = listener.accept().await.unwrap();
+        let mut buf = [0_u8; 4];
+        stream.read_exact(&mut buf).await.unwrap();
+        stream.write_all(b"pong").await.unwrap();
+        stream.flush().await.unwrap();
+    });
+
+    let connect_url = format!("wss://localhost:{port}?ca=/tmp/xidl-ca-cert.pem");
+    let mut client = super::websocket::connect_websocket(&connect_url)
+        .await
+        .unwrap();
+    client.write_all(b"ping").await.unwrap();
+    client.flush().await.unwrap();
+    let mut echo = [0_u8; 4];
+    client.read_exact(&mut echo).await.unwrap();
+    assert_eq!(&echo, b"pong");
+    client.shutdown().await.unwrap();
+    server_task.await.unwrap();
+}

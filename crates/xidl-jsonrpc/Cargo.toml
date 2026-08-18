@@ -79,4 +79,4 @@ required-features = ["transport-all"]
 
 [dev-dependencies]
 clap = { workspace = true, features = ["derive"] }
-tokio = { workspace = true, features = ["full"] }
+tokio = { workspace = true, features = ["full", "test-util"] }

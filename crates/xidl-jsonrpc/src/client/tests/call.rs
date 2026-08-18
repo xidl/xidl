@@ -1,8 +1,7 @@
-use super::Client;
-use super::ConcurrentClient;
+use super::super::Client;
 use crate::Error;
 use serde_json::json;
-use tokio::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader, duplex};
+use tokio::io::{AsyncReadExt, AsyncWriteExt, duplex};
 
 #[tokio::test]
 async fn call_sends_request_and_parses_result() {
@@ -211,54 +210,4 @@ async fn call_rejects_response_with_result_and_error() {
         ))
     ));
     server.await.unwrap();
-}
-
-#[tokio::test]
-async fn concurrent_client_multiplexes_calls_and_notifications() {
-    let (client_side, server_side) = duplex(1024);
-    let (server_read, mut server_write) = tokio::io::split(server_side);
-    let server = tokio::spawn(async move {
-        let mut server_read = BufReader::new(server_read);
-        let mut line = Vec::new();
-        server_read.read_until(b'\n', &mut line).await.unwrap();
-        assert!(String::from_utf8_lossy(&line).contains("\"method\":\"sum\""));
-        server_write
-            .write_all(
-                br#"{"jsonrpc":"2.0","id":1,"result":{"total":2}}
-"#,
-            )
-            .await
-            .unwrap();
-
-        line.clear();
-        server_read.read_until(b'\n', &mut line).await.unwrap();
-        assert!(String::from_utf8_lossy(&line).contains("\"method\":\"notice\""));
-    });
-
-    let client = ConcurrentClient::new(client_side);
-    let result: serde_json::Value = client.call("sum", json!({"a": 1})).await.unwrap();
-    assert_eq!(result, json!({"total": 2}));
-    client
-        .notify("notice", json!({"ready": true}))
-        .await
-        .unwrap();
-    server.await.unwrap();
-
-    for _ in 0..16 {
-        if client.closed.load(std::sync::atomic::Ordering::Acquire) {
-            break;
-        }
-        tokio::task::yield_now().await;
-    }
-    assert!(client.closed.load(std::sync::atomic::Ordering::Acquire));
-    assert!(matches!(
-        client
-            .call::<_, serde_json::Value>("after-close", json!({}))
-            .await,
-        Err(Error::Protocol("rpc client closed"))
-    ));
-    assert!(matches!(
-        client.notify("after-close", json!({})).await,
-        Err(Error::Protocol("rpc client closed"))
-    ));
 }

@@ -233,4 +233,4 @@ impl RpcClient {
 }
 
 #[cfg(test)]
-mod test;
+mod tests;

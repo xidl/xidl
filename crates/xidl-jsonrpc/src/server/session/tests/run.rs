@@ -1,37 +1,8 @@
-use super::{ServerSession, response::ResponseCodec};
-use crate::stream::ReaderWriter;
-
-const MAX_FRAME_LEN: usize = 4 * 1024 * 1024;
-
-use crate::{Error, Handler};
+use super::super::{ServerSession, response::ResponseCodec};
+use super::{ErrorReader, MAX_FRAME_LEN, SessionHandler};
+use crate::Error;
 use serde_json::{Value, json};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
-
-struct SessionHandler;
-
-#[async_trait::async_trait]
-impl Handler for SessionHandler {
-    async fn handle(&self, method: &str, params: Value) -> Result<Value, Error> {
-        match method {
-            "ok" => Ok(json!({ "echo": params })),
-            "rpc" => Err(Error::invalid_params("bad params")),
-            "io" => Err(Error::Io(std::io::Error::other("disk"))),
-            _ => Err(Error::method_not_found(method)),
-        }
-    }
-    fn accepts_bidi(&self, method: &str) -> bool {
-        method == "bidi"
-    }
-    async fn handle_bidi(
-        &self,
-        _method: &str,
-        params: Value,
-        mut stream: ReaderWriter<Value, Value>,
-    ) -> Result<(), Error> {
-        stream.write(json!({ "stream": params })).await?;
-        stream.close().await
-    }
-}
 
 #[tokio::test]
 async fn run_handles_success_and_error_responses() {
@@ -139,7 +110,7 @@ async fn private_helpers_map_errors_and_missing_streams() {
         session.write_result(Some(json!(1)), Value::Null).await,
         Err(Error::Protocol("missing stream"))
     ));
-    let request = super::ParsedRequest {
+    let request = super::super::ParsedRequest {
         id: Some(json!(1)),
         method: "bidi".to_string(),
         params: Value::Null,
@@ -325,71 +296,10 @@ async fn run_silences_bidi_notifications_in_batches() {
     );
 }
 
-struct ErrorReader;
-
-impl tokio::io::AsyncRead for ErrorReader {
-    fn poll_read(
-        self: std::pin::Pin<&mut Self>,
-        _cx: &mut std::task::Context<'_>,
-        _buf: &mut tokio::io::ReadBuf<'_>,
-    ) -> std::task::Poll<std::io::Result<()>> {
-        std::task::Poll::Ready(Err(std::io::Error::new(
-            std::io::ErrorKind::BrokenPipe,
-            "read failure",
-        )))
-    }
-}
-
-impl tokio::io::AsyncWrite for ErrorReader {
-    fn poll_write(
-        self: std::pin::Pin<&mut Self>,
-        _cx: &mut std::task::Context<'_>,
-        _buf: &[u8],
-    ) -> std::task::Poll<Result<usize, std::io::Error>> {
-        std::task::Poll::Ready(Ok(0))
-    }
-    fn poll_flush(
-        self: std::pin::Pin<&mut Self>,
-        _cx: &mut std::task::Context<'_>,
-    ) -> std::task::Poll<Result<(), std::io::Error>> {
-        std::task::Poll::Ready(Ok(()))
-    }
-    fn poll_shutdown(
-        self: std::pin::Pin<&mut Self>,
-        _cx: &mut std::task::Context<'_>,
-    ) -> std::task::Poll<Result<(), std::io::Error>> {
-        std::task::Poll::Ready(Ok(()))
-    }
-}
-
 #[tokio::test]
 async fn run_propagates_non_decode_read_errors() {
     let mut session =
         ServerSession::with_codec(ErrorReader, SessionHandler, crate::codec::Codec::Json);
     let err = session.run().await.unwrap_err();
     assert!(matches!(err, Error::Io(_)));
-}
-
-#[tokio::test]
-async fn write_responses_reports_missing_stream() {
-    let (_client, server) = tokio::io::duplex(64);
-    let mut session = ServerSession::with_codec(server, SessionHandler, crate::codec::Codec::Json);
-    session.writer = None;
-    let items = vec![json!({"jsonrpc":"2.0","id":1,"method":"ok","params":null})];
-    assert!(matches!(
-        session.handle_batch(items).await,
-        Err(Error::Protocol("missing stream"))
-    ));
-}
-
-#[tokio::test]
-async fn rpc_error_preserves_custom_rpc_payloads() {
-    let custom = ResponseCodec::rpc_error(Error::Rpc {
-        code: crate::ErrorCode::Custom(42),
-        message: "custom failure".to_string(),
-        data: Some(json!({"detail": 1})),
-    });
-    assert_eq!(custom.code, 42);
-    assert_eq!(custom.message, "custom failure");
-    assert_eq!(custom.data, Some(json!({"detail": 1})));
 }

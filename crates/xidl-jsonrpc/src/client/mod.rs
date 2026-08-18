@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod test;
+mod tests;
 
 use crate::codec::Codec;
 use crate::transport::Stream;
