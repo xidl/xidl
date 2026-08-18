@@ -58,6 +58,22 @@ async fn default_and_arc_handler_paths_are_covered() {
 }
 
 #[tokio::test]
+async fn unary_handle_and_accepts_bidi_paths_are_covered() {
+    let handler = UnaryOnly;
+    let err = handler.handle("missing", Value::Null).await.unwrap_err();
+    assert!(err.is_method_not_found());
+    handler
+        .validate_bidi("missing", &Value::Null)
+        .await
+        .unwrap();
+
+    let arc = Arc::new(BidiOnly);
+    assert!(arc.accepts_bidi("bidi"));
+    assert!(!arc.accepts_bidi("other"));
+    arc.validate_bidi("bidi", &Value::Null).await.unwrap();
+}
+
+#[tokio::test]
 async fn empty_multi_handler_reports_method_not_found() {
     let handler = MultiHandler::new(Vec::new());
     let err = handler.handle("missing", Value::Null).await.unwrap_err();
