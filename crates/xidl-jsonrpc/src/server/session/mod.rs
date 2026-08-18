@@ -1,7 +1,7 @@
 mod buffered_stream;
 mod response;
 #[cfg(test)]
-mod test;
+mod tests;
 
 use crate::codec::Codec;
 use crate::{Error, Handler, JSONRPC_VERSION, RpcResponse};

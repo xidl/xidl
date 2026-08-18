@@ -1,6 +1,46 @@
 use super::Codec;
 use serde_json::json;
-use tokio::io::{AsyncReadExt, AsyncWriteExt, BufReader};
+use std::io;
+use std::pin::Pin;
+use std::task::{Context, Poll};
+use tokio::io::{AsyncBufRead, AsyncRead, AsyncReadExt, AsyncWriteExt, BufReader, ReadBuf};
+
+/// Serves one oversized chunk (no newline) on the first `fill_buf`, then
+/// reports EOF on every later call. Exercises the drain path where the
+/// reader has nothing buffered between the oversize detection and the drain.
+struct OversizedChunkThenEof {
+    chunk: Vec<u8>,
+    served: bool,
+}
+
+impl AsyncRead for OversizedChunkThenEof {
+    fn poll_read(
+        mut self: Pin<&mut Self>,
+        _cx: &mut Context<'_>,
+        buf: &mut ReadBuf<'_>,
+    ) -> Poll<io::Result<()>> {
+        if self.served {
+            return Poll::Ready(Ok(()));
+        }
+        self.served = true;
+        let n = self.chunk.len().min(buf.remaining());
+        buf.put_slice(&self.chunk[..n]);
+        Poll::Ready(Ok(()))
+    }
+}
+
+impl AsyncBufRead for OversizedChunkThenEof {
+    fn poll_fill_buf(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<io::Result<&[u8]>> {
+        let this = self.get_mut();
+        if this.served {
+            return Poll::Ready(Ok(&[]));
+        }
+        this.served = true;
+        Poll::Ready(Ok(&this.chunk))
+    }
+
+    fn consume(self: Pin<&mut Self>, _amt: usize) {}
+}
 
 #[tokio::test]
 async fn json_codec_serializes_and_terminates_with_newline() {
@@ -246,6 +286,47 @@ async fn msgpack_codec_reports_frame_too_large_when_payload_is_truncated() {
         crate::Error::FrameTooLarge {
             max,
             framing: "msgpack"
+        } if *max == super::MAX_FRAME_LEN
+    ));
+}
+
+#[tokio::test]
+async fn json_codec_reads_frame_split_across_chunks() {
+    // A 4-byte duplex forces the writer to dribble the frame in pieces, so the
+    // reader must reassemble it across several fill_buf calls.
+    let (mut writer, reader) = tokio::io::duplex(4);
+    let writer_task = tokio::spawn(async move {
+        writer.write_all(br#"{"value":"#).await.unwrap();
+        writer.write_all(br#"1}"#).await.unwrap();
+        writer.write_all(b"\n").await.unwrap();
+        writer.shutdown().await.unwrap();
+    });
+
+    let mut reader = BufReader::new(reader);
+    let value = Codec::Json
+        .read::<_, serde_json::Value>(&mut reader)
+        .await
+        .unwrap()
+        .expect("a frame split across chunks must be reassembled");
+    assert_eq!(value, json!({"value": 1}));
+    writer_task.await.unwrap();
+}
+
+#[tokio::test]
+async fn json_codec_reports_frame_too_large_when_reader_drains_to_eof() {
+    let mut reader = OversizedChunkThenEof {
+        chunk: vec![b'x'; super::MAX_FRAME_LEN + 1],
+        served: false,
+    };
+    let err = Codec::Json
+        .read::<_, serde_json::Value>(&mut reader)
+        .await
+        .expect_err("an oversized chunk followed by EOF must be rejected");
+    assert!(matches!(
+        &err,
+        crate::Error::FrameTooLarge {
+            max,
+            framing: "json"
         } if *max == super::MAX_FRAME_LEN
     ));
 }

@@ -1,144 +1,11 @@
-use super::RpcClient;
+use super::super::RpcClient;
+use super::{open_test_pair, open_test_pair_with_timeout};
 use crate::Error;
-use crate::Handler;
-use crate::stream::ReaderWriter;
+use crate::stream::{ClientStreamWriter, Reader, ReaderWriter, boxed};
 use serde_json::{Value, json};
 use std::sync::Arc;
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
-use tokio::sync::Mutex;
-
-/// Server handler that echoes sums, pushes notifications, and closes streams.
-struct TestHandler {
-    notifications: Arc<Mutex<Vec<Value>>>,
-}
-
-#[async_trait::async_trait]
-impl Handler for TestHandler {
-    async fn handle(&self, method: &str, _params: Value) -> Result<Value, Error> {
-        Err(Error::method_not_found(method))
-    }
-
-    fn accepts_bidi(&self, _method: &str) -> bool {
-        true
-    }
-
-    async fn handle_bidi(
-        &self,
-        _method: &str,
-        _params: Value,
-        stream: ReaderWriter<Value, Value>,
-    ) -> Result<(), Error> {
-        let (writer, mut reader) = stream.into_parts();
-        let writer = Arc::new(Mutex::new(writer));
-        loop {
-            let Some(result) = reader.read().await else {
-                break;
-            };
-            let value = result?;
-            let Some(request_id) = value.get("id").cloned() else {
-                self.notifications.lock().await.push(value);
-                continue;
-            };
-            let Some(method) = value
-                .get("method")
-                .and_then(Value::as_str)
-                .map(str::to_string)
-            else {
-                continue;
-            };
-            match method.as_str() {
-                "sum" => {
-                    let a = value["params"]["a"].as_i64().unwrap_or(0);
-                    let b = value["params"]["b"].as_i64().unwrap_or(0);
-                    let writer = writer.clone();
-                    tokio::spawn(async move {
-                        let mut writer = writer.lock().await;
-                        let _ = writer
-                            .write(json!({"jsonrpc":"2.0","id":request_id,"result":{"total":a+b}}))
-                            .await;
-                    });
-                }
-                "slow" => {
-                    let writer = writer.clone();
-                    tokio::spawn(async move {
-                        tokio::time::sleep(Duration::from_millis(100)).await;
-                        let mut writer = writer.lock().await;
-                        let _ = writer
-                            .write(json!({"jsonrpc":"2.0","id":request_id,"result":"slow-done"}))
-                            .await;
-                    });
-                }
-                "fail" => {
-                    let writer = writer.clone();
-                    tokio::spawn(async move {
-                        let mut writer = writer.lock().await;
-                        let _ = writer
-                            .write(json!({"jsonrpc":"2.0","id":request_id,"error":{"code":-32000,"message":"boom"}}))
-                            .await;
-                    });
-                }
-                "push" => {
-                    let writer = writer.clone();
-                    tokio::spawn(async move {
-                        let mut writer = writer.lock().await;
-                        let _ = writer
-                            .write(json!({"jsonrpc":"2.0","method":"pushed","params":{"n":7}}))
-                            .await;
-                        let _ = writer
-                            .write(json!({"jsonrpc":"2.0","id":request_id,"result":null}))
-                            .await;
-                    });
-                }
-                "close" => break,
-                "never" => {}
-                _ => {}
-            }
-        }
-        Ok(())
-    }
-}
-
-fn unique_endpoint(label: &str) -> String {
-    static NEXT: AtomicU64 = AtomicU64::new(1);
-    let sequence = NEXT.fetch_add(1, Ordering::Relaxed);
-    format!("rpc-client-{label}-{sequence}")
-}
-
-async fn open_test_pair() -> (
-    Arc<RpcClient>,
-    tokio::sync::mpsc::UnboundedReceiver<Value>,
-    Arc<Mutex<Vec<Value>>>,
-) {
-    open_test_pair_with_timeout(Duration::from_secs(30)).await
-}
-
-async fn open_test_pair_with_timeout(
-    request_timeout: Duration,
-) -> (
-    Arc<RpcClient>,
-    tokio::sync::mpsc::UnboundedReceiver<Value>,
-    Arc<Mutex<Vec<Value>>>,
-) {
-    let endpoint = unique_endpoint("pair");
-    let uri = format!("inproc://{endpoint}");
-    let notifications = Arc::new(Mutex::new(Vec::new()));
-    let handler = TestHandler {
-        notifications: notifications.clone(),
-    };
-    tokio::spawn(async move {
-        let _ = crate::Server::builder()
-            .with_service(handler)
-            .serve_on(&uri)
-            .await;
-    });
-    let stream = crate::connect_inproc(&endpoint).expect("connect inproc");
-    let session = crate::stream::open_bidi_client(stream, "stream")
-        .await
-        .expect("open bidi stream");
-    let (rpc, rx) = RpcClient::with_timeout(session, request_timeout);
-    (Arc::new(rpc), rx, notifications)
-}
+use tokio::sync::{mpsc, oneshot};
 
 #[tokio::test]
 async fn concurrent_calls_and_notifications_route_by_id() {
@@ -310,4 +177,79 @@ async fn batch_responses_route_out_of_order() {
     assert_eq!(alpha.await.expect("join alpha").expect("alpha call"), "a");
     assert_eq!(beta.await.expect("join beta").expect("beta call"), "b");
     server.await.expect("server task");
+}
+
+#[tokio::test]
+async fn write_failure_marks_closed_and_fails_pending() {
+    // A session whose writer channel receiver is already gone: every write
+    // fails with "stream writer is closed".
+    let (tx, rx) = mpsc::channel::<Result<Value, Error>>(32);
+    drop(rx);
+    let response = tokio::spawn(async { Ok::<(), Error>(()) });
+    let writer = ClientStreamWriter::new(tx, response);
+    // The reader never produces data and never ends, so the read task cannot
+    // mark the client closed before the write failure is observed.
+    let reader = Reader::new(boxed(
+        futures_util::stream::pending::<Result<Value, Error>>(),
+    ));
+    let session = ReaderWriter::new(writer, reader);
+    let (rpc, _notifications) = RpcClient::new(session);
+
+    let error = rpc
+        .call::<_, Value>("sum", json!({}))
+        .await
+        .expect_err("write failure must surface");
+    assert!(matches!(error, Error::Protocol("stream writer is closed")));
+
+    // The failed write marked the client closed; later calls refuse quickly.
+    let error = rpc
+        .call::<_, Value>("mul", json!({}))
+        .await
+        .expect_err("call after write failure must refuse");
+    assert!(matches!(error, Error::Protocol("rpc client closed")));
+}
+
+#[tokio::test]
+async fn read_error_marks_closed_and_fails_pending() {
+    let (tx, mut rx) = mpsc::channel::<Result<Value, Error>>(32);
+    let (request_seen_tx, request_seen_rx) = oneshot::channel::<()>();
+    let response = tokio::spawn(async move {
+        // Consume the request so the call's write succeeds, then park forever.
+        let _ = rx.recv().await;
+        let _ = request_seen_tx.send(());
+        std::future::pending::<()>().await;
+        Ok::<(), Error>(())
+    });
+    let writer = ClientStreamWriter::new(tx, response);
+    let (fail_tx, fail_rx) = oneshot::channel::<()>();
+    let reader = Reader::new(boxed(futures_util::stream::once(async {
+        // Wait until the pending call is registered, then fail the read stream
+        // so the dispatch loop breaks and fails that call.
+        fail_rx.await.expect("fail signal");
+        Err::<Value, Error>(Error::Protocol("stream read failed"))
+    })));
+    let session = ReaderWriter::new(writer, reader);
+    let (rpc, _notifications) = RpcClient::new(session);
+    let rpc = Arc::new(rpc);
+
+    let call = tokio::spawn({
+        let rpc = rpc.clone();
+        async move { rpc.call::<_, Value>("sum", json!({})).await }
+    });
+    // The pending entry is registered before the request is written, so once
+    // the writer task observes the request, fail_all is guaranteed to fail it.
+    request_seen_rx.await.expect("request seen");
+    fail_tx.send(()).expect("fail signal");
+
+    let error = call
+        .await
+        .expect("join call")
+        .expect_err("read error must fail the pending call");
+    assert!(matches!(error, Error::Protocol("rpc stream closed")));
+
+    let error = rpc
+        .call::<_, Value>("mul", json!({}))
+        .await
+        .expect_err("call after read error must refuse");
+    assert!(matches!(error, Error::Protocol("rpc client closed")));
 }
