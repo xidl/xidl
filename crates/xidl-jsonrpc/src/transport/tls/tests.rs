@@ -1,4 +1,5 @@
 use super::*;
+use crate::transport::test_certs;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 async fn free_tcp_port() -> u16 {
@@ -12,9 +13,12 @@ async fn free_tcp_port() -> u16 {
 
 #[tokio::test]
 async fn tls_round_trip_exchanges_data_over_encrypted_stream() {
+    let certs = test_certs::generate();
     let port = free_tcp_port().await;
     let bind_url = format!(
-        "tls://127.0.0.1:{port}?cert=/tmp/xidl-server-cert.pem&key=/tmp/xidl-server-key.pem"
+        "tls://127.0.0.1:{port}?cert={}&key={}",
+        certs.cert_path(),
+        certs.key_path()
     );
     let listener = TlsListener::bind(&bind_url).await.expect("tls bind");
 
@@ -27,7 +31,7 @@ async fn tls_round_trip_exchanges_data_over_encrypted_stream() {
     });
 
     let connect_url =
-        format!("tls://127.0.0.1:{port}?ca=/tmp/xidl-ca-cert.pem&server_name=localhost");
+        format!("tls://127.0.0.1:{port}?ca={}&server_name=localhost", certs.ca_path());
     let mut client = connect_tls(&connect_url).await.expect("tls connect");
     client.write_all(b"ping").await.expect("client write");
     client.flush().await.expect("client flush");
