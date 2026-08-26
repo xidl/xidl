@@ -352,12 +352,15 @@ async fn websocket_round_trip_exchanges_text_and_binary_frames() {
 #[cfg(feature = "transport-websocket")]
 #[tokio::test]
 async fn wss_round_trip_with_self_signed_cert() {
+    let certs = super::test_certs::generate();
     let probe = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
     let port = probe.local_addr().unwrap().port();
     drop(probe);
 
     let bind_url = format!(
-        "wss://localhost:{port}?cert=/tmp/xidl-server-cert.pem&key=/tmp/xidl-server-key.pem"
+        "wss://localhost:{port}?cert={}&key={}",
+        certs.cert_path(),
+        certs.key_path()
     );
     let listener = super::websocket::WebSocketListener::bind(&bind_url)
         .await
@@ -371,7 +374,7 @@ async fn wss_round_trip_with_self_signed_cert() {
         stream.flush().await.unwrap();
     });
 
-    let connect_url = format!("wss://localhost:{port}?ca=/tmp/xidl-ca-cert.pem");
+    let connect_url = format!("wss://localhost:{port}?ca={}", certs.ca_path());
     let mut client = super::websocket::connect_websocket(&connect_url)
         .await
         .unwrap();

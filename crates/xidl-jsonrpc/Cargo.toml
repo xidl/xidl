@@ -79,4 +79,5 @@ required-features = ["transport-all"]
 
 [dev-dependencies]
 clap = { workspace = true, features = ["derive"] }
+rcgen = "0.14"
 tokio = { workspace = true, features = ["full", "test-util"] }

@@ -20,6 +20,8 @@ mod tls_config;
 mod websocket;
 
 #[cfg(test)]
+mod test_certs;
+#[cfg(test)]
 mod tests;
 
 pub(crate) use core::loopback_peer_addr;
