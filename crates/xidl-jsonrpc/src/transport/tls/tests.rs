@@ -30,8 +30,10 @@ async fn tls_round_trip_exchanges_data_over_encrypted_stream() {
         stream.flush().await.expect("server flush");
     });
 
-    let connect_url =
-        format!("tls://127.0.0.1:{port}?ca={}&server_name=localhost", certs.ca_path());
+    let connect_url = format!(
+        "tls://127.0.0.1:{port}?ca={}&server_name=localhost",
+        certs.ca_path()
+    );
     let mut client = connect_tls(&connect_url).await.expect("tls connect");
     client.write_all(b"ping").await.expect("client write");
     client.flush().await.expect("client flush");
