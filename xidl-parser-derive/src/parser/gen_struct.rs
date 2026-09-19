@@ -1,5 +1,4 @@
-use crate::parser::{DeriveField, DeriveInput};
-use darling::ast::Fields;
+use crate::parser::{Data, DeriveField, DeriveInput, Fields};
 use proc_macro2::Span;
 use quote::quote;
 use syn::Ident;
@@ -37,15 +36,15 @@ impl DeriveInput {
     ///   (identifier) ; [0, 11] - [0, 12]
     fn is_generate_unit_transparent(&self) -> bool {
         match &self.data {
-            darling::ast::Data::Struct(f) => f.len() == 1 && self.transparent,
+            Data::Struct(f) => f.len() == 1 && self.transparent,
             _ => false,
         }
     }
 
     pub fn is_mark(&self) -> bool {
         let is_marked_type = match &self.data {
-            darling::ast::Data::Enum(_) => false,
-            darling::ast::Data::Struct(fields) => fields.is_empty(),
+            Data::Enum(_) => false,
+            Data::Struct(fields) => fields.is_empty(),
         };
         is_marked_type || self.mark
     }

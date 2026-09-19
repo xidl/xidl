@@ -1,4 +1,4 @@
-use crate::parser::{DeriveInput, DerivedVariant};
+use crate::parser::{DeriveInput, DerivedVariant, Style};
 use quote::{ToTokens, quote};
 
 impl DeriveInput {
@@ -9,10 +9,10 @@ impl DeriveInput {
 
         let has_unit = fields
             .iter()
-            .any(|v| v.fields.style == darling::ast::Style::Unit);
+            .any(|v| v.fields.style == Style::Unit);
         let has_tuple = fields
             .iter()
-            .any(|v| v.fields.style == darling::ast::Style::Tuple);
+            .any(|v| v.fields.style == Style::Tuple);
 
         let using_id = !has_unit;
 
@@ -27,12 +27,12 @@ impl DeriveInput {
             };
 
             match &variant.fields.style {
-                darling::ast::Style::Unit => {
+                Style::Unit => {
                     gen_variants.extend(quote! {
                         #ts_node_id => Ok(Self::#variant_ident),
                     });
                 }
-                darling::ast::Style::Tuple => {
+                Style::Tuple => {
                     let fields = &variant.fields.fields;
                     if fields.len() == 1 {
                         let field = &fields[0];
@@ -53,7 +53,7 @@ impl DeriveInput {
                         }
                     }
                 }
-                darling::ast::Style::Struct => {}
+                Style::Struct => {}
             }
         }
 
