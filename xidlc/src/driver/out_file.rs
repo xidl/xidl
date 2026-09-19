@@ -1,20 +1,25 @@
-use enum_dispatch::enum_dispatch;
-
 use super::File;
 use crate::error::IdlcResult;
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
-#[enum_dispatch]
 pub trait OutputTargetTrait {
     fn write_files(&self, files: Vec<File>) -> IdlcResult<()>;
 }
 
-#[enum_dispatch(OutputTargetTrait)]
 pub enum OutputTarget {
     Dummy(DummyOutputTarget),
     Real(RealOutputTarget),
+}
+
+impl OutputTargetTrait for OutputTarget {
+    fn write_files(&self, files: Vec<File>) -> IdlcResult<()> {
+        match self {
+            Self::Dummy(inner) => inner.write_files(files),
+            Self::Real(inner) => inner.write_files(files),
+        }
+    }
 }
 
 impl OutputTarget {
