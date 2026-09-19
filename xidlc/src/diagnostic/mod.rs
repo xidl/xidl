@@ -9,17 +9,24 @@ mod highlight;
 pub use highlight::TreeSitterMietteHighlighter;
 
 use crate::error::{DiagnosticError, IdlcError, IdlcResult};
-use miette::LabeledSpan;
 use tree_sitter::{Language, Parser, Query, QueryCursor, StreamingIterator, Tree};
 
 const IDL_ERROR_QUERY: &str = "[(ERROR) (MISSING)] @error";
 
+/// Runner for tree-sitter diagnostics.
 pub struct DiagnosticRunner {
     language: Language,
     label: &'static str,
 }
 
+struct SpanLabel {
+    offset: usize,
+    len: usize,
+    label: String,
+}
+
 impl DiagnosticRunner {
+    /// Create a runner for IDL.
     pub fn new_idl() -> Self {
         Self {
             language: tree_sitter_idl::language(),
@@ -27,6 +34,7 @@ impl DiagnosticRunner {
         }
     }
 
+    /// Parse and validate source, returning diagnostics on error.
     pub fn run(&self, source: &str, filename: &str) -> IdlcResult<()> {
         let tree = self.parse(source)?;
         self.ensure_tree(tree, source, filename)
@@ -53,12 +61,20 @@ impl DiagnosticRunner {
         let mut labels = self.collect_error_labels(root, source);
 
         if !labels.is_empty() {
-            labels.sort_by_key(|label| (label.offset(), label.len()));
-            labels.dedup_by_key(|label| (label.offset(), label.len()));
+            labels.sort_by_key(|label| (label.offset, label.len));
+            labels.dedup_by_key(|label| (label.offset, label.len));
 
             let diagnostics = labels
                 .into_iter()
-                .map(|label| DiagnosticError::from_label(filename, source, label))
+                .map(|label| {
+                    DiagnosticError::from_span(
+                        filename,
+                        source,
+                        label.offset,
+                        label.len,
+                        label.label,
+                    )
+                })
                 .collect();
             return Err(IdlcError::diagnostics(diagnostics));
         }
@@ -66,7 +82,7 @@ impl DiagnosticRunner {
         Ok(())
     }
 
-    fn collect_error_labels(&self, root: tree_sitter::Node<'_>, source: &str) -> Vec<LabeledSpan> {
+    fn collect_error_labels(&self, root: tree_sitter::Node<'_>, source: &str) -> Vec<SpanLabel> {
         let Ok(query) = Query::new(&self.language, IDL_ERROR_QUERY) else {
             return vec![];
         };
@@ -103,7 +119,11 @@ impl DiagnosticRunner {
                 } else {
                     "syntax error".to_string()
                 };
-                labels.push(LabeledSpan::at(offset..offset + len, message));
+                labels.push(SpanLabel {
+                    offset,
+                    len,
+                    label: message,
+                });
             }
         }
 
