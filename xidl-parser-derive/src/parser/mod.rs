@@ -5,7 +5,6 @@ mod gen_struct;
 mod gen_variant;
 
 use convert_case::{Case, Casing};
-use darling::{FromDeriveInput, FromField, FromVariant};
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::ToTokens;
@@ -13,33 +12,147 @@ use syn::{LitStr, parse_macro_input};
 
 pub fn tree_sitter_parser(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as syn::DeriveInput);
-    let input = DeriveInput::from_derive_input(&input).unwrap();
-    input.generate().into()
+    let derived = match DeriveInput::from_derive_input(&input) {
+        Ok(v) => v,
+        Err(err) => return err.to_compile_error().into(),
+    };
+    derived.generate().into()
 }
 
-#[derive(FromDeriveInput)]
-#[darling(attributes(ts), supports(any))]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Style {
+    Unit,
+    Tuple,
+    Struct,
+}
+
+#[derive(Debug)]
+pub struct Fields<T> {
+    pub style: Style,
+    pub fields: Vec<T>,
+}
+
+impl<T> Fields<T> {
+    pub fn len(&self) -> usize {
+        self.fields.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.fields.is_empty()
+    }
+
+    pub fn iter(&self) -> std::slice::Iter<'_, T> {
+        self.fields.iter()
+    }
+}
+
+#[derive(Debug)]
+pub enum Data<V, F> {
+    Enum(Vec<V>),
+    Struct(Fields<F>),
+}
+
+#[derive(Debug)]
 struct DeriveInput {
     ident: syn::Ident,
-    data: darling::ast::Data<DerivedVariant, DeriveField>,
-    #[darling(default)]
+    data: Data<DerivedVariant, DeriveField>,
     id: Option<String>,
-
-    #[darling(default)]
     name: Option<String>,
-
-    #[darling(default)]
     text: bool,
-
-    /// enum
-    #[darling(default)]
     transparent: bool,
-
-    #[darling(default)]
     mark: bool,
 }
 
 impl DeriveInput {
+    fn from_derive_input(input: &syn::DeriveInput) -> syn::Result<Self> {
+        let ident = input.ident.clone();
+        let mut id: Option<String> = None;
+        let mut name: Option<String> = None;
+        let mut text = false;
+        let mut transparent = false;
+        let mut mark = false;
+
+        for attr in &input.attrs {
+            if !attr.path().is_ident("ts") {
+                continue;
+            }
+            attr.parse_nested_meta(|meta| {
+                if meta.path.is_ident("id") {
+                    let value = meta.value()?;
+                    let lit: LitStr = value.parse()?;
+                    id = Some(lit.value());
+                } else if meta.path.is_ident("name") {
+                    let value = meta.value()?;
+                    let lit: LitStr = value.parse()?;
+                    name = Some(lit.value());
+                } else if meta.path.is_ident("text") {
+                    if meta.input.peek(syn::Token![=]) {
+                        let value = meta.value()?;
+                        let lit: syn::LitBool = value.parse()?;
+                        text = lit.value();
+                    } else {
+                        text = true;
+                    }
+                } else if meta.path.is_ident("transparent") {
+                    if meta.input.peek(syn::Token![=]) {
+                        let value = meta.value()?;
+                        let lit: syn::LitBool = value.parse()?;
+                        transparent = lit.value();
+                    } else {
+                        transparent = true;
+                    }
+                } else if meta.path.is_ident("mark") {
+                    if meta.input.peek(syn::Token![=]) {
+                        let value = meta.value()?;
+                        let lit: syn::LitBool = value.parse()?;
+                        mark = lit.value();
+                    } else {
+                        mark = true;
+                    }
+                } else {
+                    return Err(meta.error(format!(
+                        "unknown ts attribute `{}`",
+                        meta.path
+                            .get_ident()
+                            .map(|i| i.to_string())
+                            .unwrap_or_default()
+                    )));
+                }
+                Ok(())
+            })?;
+        }
+
+        let data = match &input.data {
+            syn::Data::Enum(data_enum) => {
+                let mut variants = Vec::new();
+                for variant in &data_enum.variants {
+                    variants.push(DerivedVariant::from_variant(variant)?);
+                }
+                Data::Enum(variants)
+            }
+            syn::Data::Struct(data_struct) => {
+                let fields = Fields::from_syn_fields(&data_struct.fields)?;
+                Data::Struct(fields)
+            }
+            syn::Data::Union(_) => {
+                return Err(syn::Error::new_spanned(
+                    &input.ident,
+                    "union not supported for Parser derive",
+                ));
+            }
+        };
+
+        Ok(Self {
+            ident,
+            data,
+            id,
+            name,
+            text,
+            transparent,
+            mark,
+        })
+    }
+
     pub fn ts_node_name(&self) -> LitStr {
         let name = self
             .id
@@ -50,34 +163,80 @@ impl DeriveInput {
 
     pub fn generate(&self) -> proc_macro2::TokenStream {
         match &self.data {
-            darling::ast::Data::Enum(fields) => self.generate_variant(fields),
-            darling::ast::Data::Struct(fields) => self.generate_struct(fields),
+            Data::Enum(fields) => self.generate_variant(fields),
+            Data::Struct(fields) => self.generate_struct(fields),
         }
     }
 }
 
-#[derive(FromVariant)]
-#[darling(attributes(ts))]
+#[derive(Debug)]
 struct DerivedVariant {
     ident: syn::Ident,
-    fields: darling::ast::Fields<DeriveField>,
-    /// enum A {
-    ///     #[text]
-    ///     field(String) => node_id!(field) =>  Ok(Self::A(field.node_text()))
-    /// }
-    ///
-    /// enum A {
-    ///     #[text]
-    ///     B => node => Ok(Self::B)
-    /// }
-    ///
-    #[darling(default)]
+    fields: Fields<DeriveField>,
     text: bool,
-    #[darling(default)]
     id: Option<String>,
 }
 
 impl DerivedVariant {
+    fn from_variant(variant: &syn::Variant) -> syn::Result<Self> {
+        let ident = variant.ident.clone();
+        let mut text = false;
+        let mut id: Option<String> = None;
+
+        for attr in &variant.attrs {
+            if !attr.path().is_ident("ts") {
+                continue;
+            }
+            attr.parse_nested_meta(|meta| {
+                if meta.path.is_ident("text") {
+                    if meta.input.peek(syn::Token![=]) {
+                        let value = meta.value()?;
+                        let lit: syn::LitBool = value.parse()?;
+                        text = lit.value();
+                    } else {
+                        text = true;
+                    }
+                } else if meta.path.is_ident("id") {
+                    let value = meta.value()?;
+                    let lit: LitStr = value.parse()?;
+                    id = Some(lit.value());
+                } else if meta.path.is_ident("name") {
+                    // accepted for compatibility, ignored for codegen (like DeriveInput::name)
+                    let value = meta.value()?;
+                    let _: LitStr = value.parse()?;
+                } else if meta.path.is_ident("transparent") {
+                    if meta.input.peek(syn::Token![=]) {
+                        let value = meta.value()?;
+                        let _: syn::LitBool = value.parse()?;
+                    }
+                    // variant-level transparent is not used; accept for compatibility
+                } else if meta.path.is_ident("mark") {
+                    if meta.input.peek(syn::Token![=]) {
+                        let value = meta.value()?;
+                        let _: syn::LitBool = value.parse()?;
+                    }
+                } else {
+                    return Err(meta.error(format!(
+                        "unknown ts attribute `{}` on variant",
+                        meta.path
+                            .get_ident()
+                            .map(|i| i.to_string())
+                            .unwrap_or_default()
+                    )));
+                }
+                Ok(())
+            })?;
+        }
+
+        let fields = Fields::from_syn_fields(&variant.fields)?;
+        Ok(Self {
+            ident,
+            fields,
+            text,
+            id,
+        })
+    }
+
     #[inline(always)]
     pub fn ts_node_name(&self) -> LitStr {
         let id = self.id.clone().unwrap_or_else(|| {
@@ -89,20 +248,78 @@ impl DerivedVariant {
     }
 }
 
-#[derive(Debug, FromField)]
-#[darling(attributes(ts))]
+#[derive(Debug)]
 struct DeriveField {
     ident: Option<syn::Ident>,
     ty: syn::Type,
-    #[darling(default)]
     text: bool,
-    #[darling(default)]
     id: Option<String>,
-    #[darling(default)]
     transparent: bool,
 }
 
 impl DeriveField {
+    fn from_field(field: &syn::Field) -> syn::Result<Self> {
+        let ident = field.ident.clone();
+        let ty = field.ty.clone();
+        let mut text = false;
+        let mut id: Option<String> = None;
+        let mut transparent = false;
+
+        for attr in &field.attrs {
+            if !attr.path().is_ident("ts") {
+                continue;
+            }
+            attr.parse_nested_meta(|meta| {
+                if meta.path.is_ident("text") {
+                    if meta.input.peek(syn::Token![=]) {
+                        let value = meta.value()?;
+                        let lit: syn::LitBool = value.parse()?;
+                        text = lit.value();
+                    } else {
+                        text = true;
+                    }
+                } else if meta.path.is_ident("id") {
+                    let value = meta.value()?;
+                    let lit: LitStr = value.parse()?;
+                    id = Some(lit.value());
+                } else if meta.path.is_ident("transparent") {
+                    if meta.input.peek(syn::Token![=]) {
+                        let value = meta.value()?;
+                        let lit: syn::LitBool = value.parse()?;
+                        transparent = lit.value();
+                    } else {
+                        transparent = true;
+                    }
+                } else if meta.path.is_ident("name") {
+                    let value = meta.value()?;
+                    let _: LitStr = value.parse()?;
+                } else if meta.path.is_ident("mark") {
+                    if meta.input.peek(syn::Token![=]) {
+                        let value = meta.value()?;
+                        let _: syn::LitBool = value.parse()?;
+                    }
+                } else {
+                    return Err(meta.error(format!(
+                        "unknown ts attribute `{}` on field",
+                        meta.path
+                            .get_ident()
+                            .map(|i| i.to_string())
+                            .unwrap_or_default()
+                    )));
+                }
+                Ok(())
+            })?;
+        }
+
+        Ok(Self {
+            ident,
+            ty,
+            text,
+            id,
+            transparent,
+        })
+    }
+
     #[inline(always)]
     pub fn ts_node_name(&self) -> LitStr {
         let mut id = self.id.clone().unwrap_or_else(|| {
@@ -205,5 +422,49 @@ impl DeriveField {
             syn::Type::Path(ref path) => Some(path.path.segments[1].ident.to_string()),
             _ => None,
         }
+    }
+}
+
+impl<T> Fields<T>
+where
+    T: FromSynField,
+{
+    fn from_syn_fields(fields: &syn::Fields) -> syn::Result<Self> {
+        match fields {
+            syn::Fields::Unit => Ok(Self {
+                style: Style::Unit,
+                fields: Vec::new(),
+            }),
+            syn::Fields::Named(named) => {
+                let mut vec = Vec::new();
+                for field in &named.named {
+                    vec.push(T::from_syn_field(field)?);
+                }
+                Ok(Self {
+                    style: Style::Struct,
+                    fields: vec,
+                })
+            }
+            syn::Fields::Unnamed(unnamed) => {
+                let mut vec = Vec::new();
+                for field in &unnamed.unnamed {
+                    vec.push(T::from_syn_field(field)?);
+                }
+                Ok(Self {
+                    style: Style::Tuple,
+                    fields: vec,
+                })
+            }
+        }
+    }
+}
+
+pub(crate) trait FromSynField: Sized {
+    fn from_syn_field(field: &syn::Field) -> syn::Result<Self>;
+}
+
+impl FromSynField for DeriveField {
+    fn from_syn_field(field: &syn::Field) -> syn::Result<Self> {
+        Self::from_field(field)
     }
 }

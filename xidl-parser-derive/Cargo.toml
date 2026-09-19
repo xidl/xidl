@@ -17,8 +17,7 @@ workspace = true
 
 [dependencies]
 convert_case.workspace = true
-darling = "0.24.0"
 proc-macro2 = "1.0"
 quote = "1.0"
-syn = { version = "3.0", features = ["full"] }
+syn = { version = "3.0", features = ["full", "extra-traits"] }
 tree-sitter-idl.workspace = true
