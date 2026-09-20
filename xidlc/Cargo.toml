@@ -56,7 +56,6 @@ async-trait.workspace = true
 xidl-parser.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-thiserror.workspace = true
 
 xidl-jsonrpc = { version = "0.91.1", path = "../crates/xidl-jsonrpc", default-features = false, features = [
   "tokio",

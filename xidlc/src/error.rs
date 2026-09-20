@@ -1,6 +1,5 @@
-#![allow(unused_assignments)]
-
-use thiserror::Error;
+use std::error::Error;
+use std::fmt;
 
 #[cfg(feature = "cli")]
 use miette::{Diagnostic, NamedSource, SourceSpan};
@@ -9,29 +8,74 @@ use miette::{Diagnostic, NamedSource, SourceSpan};
 pub type IdlcResult<T> = std::result::Result<T, IdlcError>;
 
 /// Errors produced by the IDL compiler driver.
-#[derive(Debug, Error)]
+#[derive(Debug)]
 pub enum IdlcError {
     /// IO error.
-    #[error(transparent)]
-    Io(#[from] std::io::Error),
+    Io(std::io::Error),
     /// Parse error from the IDL parser.
-    #[error(transparent)]
-    Parse(#[from] xidl_parser::error::ParseError),
+    Parse(xidl_parser::error::ParseError),
     /// JSON serialization error.
-    #[error(transparent)]
-    Json(#[from] serde_json::Error),
+    Json(serde_json::Error),
     /// Template rendering error.
-    #[error("{0}")]
     Template(String),
     /// RPC/validation error.
-    #[error("{0}")]
     Rpc(String),
     /// Formatting error.
-    #[error("{0}")]
     Fmt(String),
     /// Collection of diagnostics.
-    #[error("{0}")]
-    Diagnostics(#[from] DiagnosticListError),
+    Diagnostics(DiagnosticListError),
+}
+
+impl fmt::Display for IdlcError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Io(err) => write!(f, "{err}"),
+            Self::Parse(err) => write!(f, "{err}"),
+            Self::Json(err) => write!(f, "{err}"),
+            Self::Template(message) | Self::Rpc(message) | Self::Fmt(message) => {
+                f.write_str(message)
+            }
+            Self::Diagnostics(err) => write!(f, "{err}"),
+        }
+    }
+}
+
+impl Error for IdlcError {
+    // The wrapping variants stay transparent: they forward the wrapped error's own
+    // source chain instead of reporting the wrapper as the source.
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match self {
+            Self::Io(err) => err.source(),
+            Self::Parse(err) => err.source(),
+            Self::Json(err) => err.source(),
+            Self::Diagnostics(err) => Some(err),
+            Self::Template(_) | Self::Rpc(_) | Self::Fmt(_) => None,
+        }
+    }
+}
+
+impl From<std::io::Error> for IdlcError {
+    fn from(err: std::io::Error) -> Self {
+        Self::Io(err)
+    }
+}
+
+impl From<xidl_parser::error::ParseError> for IdlcError {
+    fn from(err: xidl_parser::error::ParseError) -> Self {
+        Self::Parse(err)
+    }
+}
+
+impl From<serde_json::Error> for IdlcError {
+    fn from(err: serde_json::Error) -> Self {
+        Self::Json(err)
+    }
+}
+
+impl From<DiagnosticListError> for IdlcError {
+    fn from(err: DiagnosticListError) -> Self {
+        Self::Diagnostics(err)
+    }
 }
 
 impl IdlcError {
@@ -64,16 +108,22 @@ impl IdlcError {
 }
 
 /// Collection of diagnostics.
-#[derive(Debug, Error)]
-#[error("{} diagnostics found", diagnostics.len())]
+#[derive(Debug)]
 pub struct DiagnosticListError {
     /// Diagnostics in the collection.
     pub diagnostics: Vec<DiagnosticError>,
 }
 
+impl fmt::Display for DiagnosticListError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} diagnostics found", self.diagnostics.len())
+    }
+}
+
+impl Error for DiagnosticListError {}
+
 /// Diagnostic emitted for a source span.
-#[derive(Debug, Error)]
-#[error("{message}")]
+#[derive(Debug)]
 pub struct DiagnosticError {
     /// Human readable message.
     pub message: String,
@@ -92,6 +142,14 @@ pub struct DiagnosticError {
     #[cfg(feature = "cli")]
     miette_span: SourceSpan,
 }
+
+impl fmt::Display for DiagnosticError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.message)
+    }
+}
+
+impl Error for DiagnosticError {}
 
 impl DiagnosticError {
     /// Create a diagnostic from a byte span.
