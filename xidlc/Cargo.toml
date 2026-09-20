@@ -38,6 +38,7 @@ gen-openapi = []
 gen-openrpc = []
 cli = [
   "dep:clap",
+  "dep:tracing",
   "dep:tracing-subscriber",
   "dep:tree-sitter-highlight",
   "dep:owo-colors",
@@ -66,7 +67,7 @@ convert_case.workspace = true
 clap = { workspace = true, features = ["derive"], optional = true }
 include_dir = "0.7"
 scopeguard = "1.2.0"
-tracing = "0.1"
+tracing = { version = "0.1", optional = true }
 tracing-subscriber = { version = "0.3", features = [
   "env-filter",
 ], optional = true }

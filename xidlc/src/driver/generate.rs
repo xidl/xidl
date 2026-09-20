@@ -3,7 +3,7 @@ use crate::diagnostic::DiagnosticRunner;
 use crate::driver::generate_session::CodegenSession;
 use crate::error::{IdlcError, IdlcResult};
 use crate::jsonrpc::{Artifact, ArtifactKind, Codegen, CodegenInput};
-use crate::macros::hashmap;
+use crate::macros::{hashmap, log_info};
 use std::collections::HashMap;
 use std::path::Path;
 
@@ -22,7 +22,7 @@ impl Generator {
         path: &Path,
         props: HashMap<String, serde_json::Value>,
     ) -> IdlcResult<Vec<File>> {
-        tracing::info!("generate for idl");
+        log_info!("generate for idl");
         DiagnosticRunner::new_idl().run(source, path.to_string_lossy().as_ref())?;
 
         let mut target_props = self.get_properties_for_lang().await?;
@@ -55,7 +55,7 @@ impl Generator {
         input: &Path,
         base: HashMap<String, serde_json::Value>,
     ) -> IdlcResult<Vec<File>> {
-        tracing::info!("generate for lang: {lang}");
+        log_info!("generate for lang: {lang}");
         let input_str = input.to_string_lossy();
         let session = CodegenSession::spawn(lang).await?;
         let properties = session
@@ -172,7 +172,7 @@ impl Generator {
     }
 
     async fn get_properties_for_lang(&mut self) -> IdlcResult<HashMap<String, serde_json::Value>> {
-        tracing::info!("get properties for {}", self.lang);
+        log_info!("get properties for {}", self.lang);
         let session = CodegenSession::spawn(&self.lang).await?;
         let props = session
             .client

@@ -1,6 +1,7 @@
 use crate::driver::lang::Plugin;
 use crate::error::IdlcResult;
 use crate::jsonrpc::CodegenClient;
+use crate::macros::log_info;
 use tokio::task::JoinHandle;
 
 mod support;
@@ -117,7 +118,7 @@ impl CodegenSession {
         endpoint: String,
     ) -> IdlcResult<JoinHandle<IdlcResult<()>>> {
         let exe = format!("xidl-{lang}");
-        tracing::info!("{lang} is not a builtin supported language, try spawn {exe}");
+        log_info!("{lang} is not a builtin supported language, try spawn {exe}");
         let mut child = std::process::Command::new(&exe)
             .arg("--endpoint")
             .arg(&endpoint)

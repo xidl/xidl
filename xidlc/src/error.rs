@@ -133,11 +133,7 @@ impl DiagnosticError {
 
     /// Create a diagnostic from a `miette::LabeledSpan`.
     #[cfg(feature = "cli")]
-    pub fn from_label(
-        filename: &str,
-        source: &str,
-        label: miette::LabeledSpan,
-    ) -> Self {
+    pub fn from_label(filename: &str, source: &str, label: miette::LabeledSpan) -> Self {
         let offset = label.offset();
         let len = label.len();
         let label_text = label.label().unwrap_or("error").to_string();
