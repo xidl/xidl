@@ -1,5 +1,4 @@
-import { serialize } from 'xidl-typescript-codec';
-import type { z } from 'zod';
+import { serialize, type XidlSchema } from 'xidl-typescript-codec';
 
 import { XidlClientError } from './error.ts';
 import { encodeScalar, normalizeMime } from './scalar.ts';
@@ -121,7 +120,7 @@ export function encodeRequestBody(
   value: unknown,
   contentType: string,
   codecs: Record<string, HttpCodec>,
-  schema?: z.ZodTypeAny,
+  schema?: XidlSchema,
 ): BodyInit | null {
   const mime = normalizeMime(contentType);
   const custom = codecs[mime]?.encode;

@@ -1,5 +1,4 @@
-import { deserialize } from 'xidl-typescript-codec';
-import type { ZodType } from 'zod';
+import { deserialize, type XidlSchema } from 'xidl-typescript-codec';
 
 import { XidlServerError } from './error.ts';
 import {
@@ -111,7 +110,7 @@ async function decodeRequestBody(
   request: Request,
   contentType: string,
   codecs: Record<string, HttpCodec>,
-  schema?: ZodType,
+  schema?: XidlSchema,
 ): Promise<unknown> {
   const mime = normalizeMime(
     contentType || request.headers.get('Content-Type') || 'application/json',

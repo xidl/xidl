@@ -1,5 +1,4 @@
-import { deserialize, serialize } from 'xidl-typescript-codec';
-import type { z } from 'zod';
+import { deserialize, serialize, type XidlSchema } from 'xidl-typescript-codec';
 
 import { XidlClientError } from './error.ts';
 import { parseXidlError } from './response.ts';
@@ -9,7 +8,7 @@ export async function* sseJsonStream<T>(
   fetchImpl: FetchLike,
   url: string,
   options: RequestInit,
-  schema?: z.ZodTypeAny,
+  schema?: XidlSchema,
 ): AsyncIterable<T> {
   const resp = await fetchImpl(url, options);
   if (!resp.ok) {
@@ -101,7 +100,7 @@ export async function* byteResponseStream(
 
 export function ndjsonBody<T>(
   source: AsyncIterable<T>,
-  schema?: z.ZodTypeAny,
+  schema?: XidlSchema,
 ): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder();
   const iterator = source[Symbol.asyncIterator]();

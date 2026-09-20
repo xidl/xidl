@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import type { XidlSchema } from 'xidl-typescript-codec';
 
 export type FetchLike = (
   input: RequestInfo | URL,
@@ -6,8 +6,8 @@ export type FetchLike = (
 ) => Promise<Response>;
 
 export interface HttpCodec {
-  encode?: (value: unknown, schema?: z.ZodTypeAny) => BodyInit | null;
-  decode?: <T>(resp: Response, schema?: z.ZodTypeAny) => Promise<T>;
+  encode?: (value: unknown, schema?: XidlSchema) => BodyInit | null;
+  decode?: <T>(resp: Response, schema?: XidlSchema) => Promise<T>;
 }
 
 export type ClientAuth =

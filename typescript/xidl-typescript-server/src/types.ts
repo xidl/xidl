@@ -1,12 +1,12 @@
-import type { ZodType } from 'zod';
+import type { XidlSchema } from 'xidl-typescript-codec';
 
 export type Awaitable<T> = T | Promise<T>;
 
 export type RouteParams = Record<string, string | string[] | undefined>;
 
 export interface HttpCodec {
-  encode?: (value: unknown, schema?: ZodType) => BodyInit | null;
-  decode?: <T>(response: Response, schema?: ZodType) => Promise<T>;
+  encode?: (value: unknown, schema?: XidlSchema) => BodyInit | null;
+  decode?: <T>(response: Response, schema?: XidlSchema) => Promise<T>;
 }
 
 export interface SecurityRequirement {
@@ -36,7 +36,7 @@ export interface RequestBodySpec {
   contentType: string;
   fields: BodyField[];
   kind: 'none' | 'value' | 'stream';
-  schema?: ZodType;
+  schema?: XidlSchema;
   singleKey?: string;
 }
 
@@ -48,7 +48,7 @@ export interface OperationRequestSpec {
   kind: 'none' | 'object' | 'stream';
   path: PathBinding[];
   query: ValueBinding[];
-  schema?: ZodType;
+  schema?: XidlSchema;
 }
 
 export interface OperationResponseSpec {
@@ -57,9 +57,9 @@ export interface OperationResponseSpec {
   contentType: string;
   cookies: ValueBinding[];
   headers: ValueBinding[];
-  schema?: ZodType;
+  schema?: XidlSchema;
   stream: boolean;
-  streamSchema?: ZodType;
+  streamSchema?: XidlSchema;
 }
 
 export interface OperationDescriptor<
