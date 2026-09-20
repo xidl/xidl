@@ -2,13 +2,13 @@ use crate::parser::{DeriveInput, DerivedVariant, Style};
 use quote::{ToTokens, quote};
 
 impl DeriveInput {
+    /// Generate the `FromTreeSitter` implementation for enums.
     pub fn generate_variant(&self, fields: &[DerivedVariant]) -> proc_macro2::TokenStream {
         assert!(!self.mark, "variant cannot be marked");
 
         let ident = self.ident.clone();
 
         let has_unit = fields.iter().any(|v| v.fields.style == Style::Unit);
-        let has_tuple = fields.iter().any(|v| v.fields.style == Style::Tuple);
 
         let using_id = !has_unit;
 

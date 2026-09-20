@@ -4,7 +4,7 @@ use quote::quote;
 use syn::Ident;
 
 impl DeriveInput {
-    fn generate_mark(&self, fields: &Fields<DeriveField>) -> proc_macro2::TokenStream {
+    fn generate_mark(&self) -> proc_macro2::TokenStream {
         let ident = self.ident.clone();
         let ts_node_name = self.ts_node_name();
 
@@ -18,7 +18,7 @@ impl DeriveInput {
         }
     }
 
-    fn generate_unit_transparent(&self, fields: &Fields<DeriveField>) -> proc_macro2::TokenStream {
+    fn generate_unit_transparent(&self) -> proc_macro2::TokenStream {
         let ident = self.ident.clone();
         let ts_node_name = self.ts_node_name();
 
@@ -41,6 +41,7 @@ impl DeriveInput {
         }
     }
 
+    /// Whether this struct is a transparent newtype.
     pub fn is_mark(&self) -> bool {
         let is_marked_type = match &self.data {
             Data::Enum(_) => false,
@@ -49,20 +50,20 @@ impl DeriveInput {
         is_marked_type || self.mark
     }
 
+    /// Generate the `FromTreeSitter` implementation for structs.
     pub fn generate_struct(&self, fields: &Fields<DeriveField>) -> proc_macro2::TokenStream {
         // if fields.transparent | count > 1 => panic
         // if fields.transparent | count > 1 && fields.last.transparent == false => panic
-        let ident = self.ident.clone();
         // struct M {};
         // or
         // #[ts(mark)]
         // struct N;
         if self.is_mark() {
-            return self.generate_mark(fields);
+            return self.generate_mark();
         }
 
         if self.is_generate_unit_transparent() {
-            return self.generate_unit_transparent(fields);
+            return self.generate_unit_transparent();
         }
 
         let mut gen_declare = quote! {};
