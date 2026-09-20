@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.92.0](https://github.com/xidl/xidl/compare/v0.91.1...v0.92.0) (2026-09-20)
+
+
+### Features
+
+* remove thiserror dep ([6dae574](https://github.com/xidl/xidl/commit/6dae574afa6018ffc04ffcb41bd8295292025513))
+* **xidlc:** make tracing optional ([a309266](https://github.com/xidl/xidl/commit/a309266aa1b8b1dee73a4a92cb9690cb80583d58))
+
+
+### Bug Fixes
+
+* **typescript:** accept cross-version zod schemas in runtime ([d4f952d](https://github.com/xidl/xidl/commit/d4f952d091ea3ab9264f4cc916885cbbf8fcb3a4))
+
 ## [0.91.1](https://github.com/xidl/xidl/compare/v0.91.0...v0.91.1) (2026-08-17)
 
 
