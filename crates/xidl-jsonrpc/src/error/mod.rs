@@ -2,7 +2,6 @@
 mod test;
 
 use serde_json::Value;
-use thiserror::Error;
 
 #[derive(Debug, Clone, Copy)]
 pub enum ErrorCode {
@@ -51,29 +50,64 @@ impl From<i64> for ErrorCode {
     }
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug)]
 pub enum Error {
-    #[error("io error: {0}")]
-    Io(#[from] std::io::Error),
-    #[error("json error: {0}")]
-    Json(#[from] serde_json::Error),
+    Io(std::io::Error),
+    Json(serde_json::Error),
     #[cfg(feature = "msgpack")]
-    #[error("msgpack error: {0}")]
     Msgpack(String),
     /// Indicates a wire frame exceeded the configured maximum length.
-    #[error("frame exceeds maximum length {max} bytes ({framing})")]
-    FrameTooLarge { max: usize, framing: &'static str },
-    #[error("rpc error {code}: {message}")]
+    FrameTooLarge {
+        max: usize,
+        framing: &'static str,
+    },
     Rpc {
         code: ErrorCode,
         message: String,
         data: Option<Value>,
     },
     /// A request did not receive a response before its deadline.
-    #[error("rpc request timed out")]
     RequestTimeout,
-    #[error("protocol error: {0}")]
     Protocol(&'static str),
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Io(err) => write!(f, "io error: {err}"),
+            Self::Json(err) => write!(f, "json error: {err}"),
+            #[cfg(feature = "msgpack")]
+            Self::Msgpack(message) => write!(f, "msgpack error: {message}"),
+            Self::FrameTooLarge { max, framing } => {
+                write!(f, "frame exceeds maximum length {max} bytes ({framing})")
+            }
+            Self::Rpc { code, message, .. } => write!(f, "rpc error {code}: {message}"),
+            Self::RequestTimeout => f.write_str("rpc request timed out"),
+            Self::Protocol(message) => write!(f, "protocol error: {message}"),
+        }
+    }
+}
+
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Self::Io(err) => Some(err),
+            Self::Json(err) => Some(err),
+            _ => None,
+        }
+    }
+}
+
+impl From<std::io::Error> for Error {
+    fn from(err: std::io::Error) -> Self {
+        Self::Io(err)
+    }
+}
+
+impl From<serde_json::Error> for Error {
+    fn from(err: serde_json::Error) -> Self {
+        Self::Json(err)
+    }
 }
 
 impl Error {
