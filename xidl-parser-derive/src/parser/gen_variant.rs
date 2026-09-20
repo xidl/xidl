@@ -7,12 +7,8 @@ impl DeriveInput {
 
         let ident = self.ident.clone();
 
-        let has_unit = fields
-            .iter()
-            .any(|v| v.fields.style == Style::Unit);
-        let has_tuple = fields
-            .iter()
-            .any(|v| v.fields.style == Style::Tuple);
+        let has_unit = fields.iter().any(|v| v.fields.style == Style::Unit);
+        let has_tuple = fields.iter().any(|v| v.fields.style == Style::Tuple);
 
         let using_id = !has_unit;
 

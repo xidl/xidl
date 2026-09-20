@@ -1,5 +1,6 @@
 use super::File;
 use crate::error::IdlcResult;
+use crate::macros::log_info;
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
@@ -88,7 +89,7 @@ impl OutputTargetTrait for RealOutputTarget {
             {
                 fs::create_dir_all(parent)?;
             }
-            tracing::info!("write file: {}", out_path.display());
+            log_info!("write file: {}", out_path.display());
             if self.out_dir == "-" {
                 println!("{}", content);
             } else {
