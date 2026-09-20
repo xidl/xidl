@@ -1,5 +1,4 @@
-import { serialize } from 'xidl-typescript-codec';
-import type { ZodType } from 'zod';
+import { serialize, type XidlSchema } from 'xidl-typescript-codec';
 
 import { encodeScalar, normalizeMime } from './scalar.ts';
 import { byteStreamResponse, sseResponse } from './stream.ts';
@@ -123,7 +122,7 @@ function encodeBody(
   value: unknown,
   contentType: string,
   codecs: Record<string, HttpCodec>,
-  schema?: ZodType,
+  schema?: XidlSchema,
 ): BodyInit | null {
   const custom = codecs[contentType]?.encode;
   if (custom) {

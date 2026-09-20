@@ -1,9 +1,8 @@
-import { deserialize, serialize } from 'xidl-typescript-codec';
-import type { ZodType } from 'zod';
+import { deserialize, serialize, type XidlSchema } from 'xidl-typescript-codec';
 
 export async function* ndjsonRequestStream<T>(
   request: Request,
-  schema?: ZodType,
+  schema?: XidlSchema,
 ): AsyncIterable<T> {
   if (!request.body) {
     return;
@@ -53,7 +52,7 @@ export async function* byteRequestStream(
 
 export function sseResponse<T>(
   source: AsyncIterable<T>,
-  schema?: ZodType,
+  schema?: XidlSchema,
 ): Response {
   const encoder = new TextEncoder();
   return new Response(

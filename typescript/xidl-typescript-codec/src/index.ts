@@ -1,6 +1,16 @@
 // biome-ignore-all lint/suspicious/noExplicitAny: JSON serialization library needs to handle arbitrary object structures.
-import { z } from 'zod';
+/**
+ * Minimal structural schema accepted by the codec.
+ *
+ * Only `parse` is required so schemas produced by any Zod 4.x copy
+ * remain assignable even when the runtime and generated code resolve
+ * different Zod versions with incompatible `_zod.version` literals.
+ */
+export interface XidlSchema {
+  parse(value: unknown): unknown;
+}
 
+/** JSON wire metadata attached to a field schema. */
 export interface XidlJsonMeta {
   name?: string;
   flatten?: boolean;
@@ -8,20 +18,21 @@ export interface XidlJsonMeta {
   omitempty?: boolean;
 }
 
-const metaMap = new WeakMap<z.ZodTypeAny, XidlJsonMeta>();
+const metaMap = new WeakMap<object, XidlJsonMeta>();
 
-export function getMeta(schema: z.ZodTypeAny): XidlJsonMeta | undefined {
-  let current = schema;
+/** Read Zod metadata attached via {@link setMeta}. */
+export function getMeta(schema: XidlSchema): XidlJsonMeta | undefined {
+  let current: any = schema;
   while (current) {
     const meta = metaMap.get(current);
     if (meta) return meta;
 
-    if (current instanceof z.ZodArray) break;
+    if (isArraySchema(current)) break;
 
-    if ('unwrap' in current && typeof (current as any).unwrap === 'function') {
-      current = (current as any).unwrap();
-    } else if ('_def' in current && (current as any)._def.innerType) {
-      current = (current as any)._def.innerType;
+    if (typeof current.unwrap === 'function') {
+      current = current.unwrap();
+    } else if (defOf(current)?.innerType) {
+      current = defOf(current).innerType;
     } else {
       break;
     }
@@ -29,7 +40,8 @@ export function getMeta(schema: z.ZodTypeAny): XidlJsonMeta | undefined {
   return undefined;
 }
 
-export function setMeta<T extends z.ZodTypeAny>(
+/** Attach JSON metadata to a schema without changing its type. */
+export function setMeta<T extends XidlSchema>(
   schema: T,
   meta: XidlJsonMeta,
 ): T {
@@ -37,23 +49,45 @@ export function setMeta<T extends z.ZodTypeAny>(
   return schema;
 }
 
-// Convenient alias for setMeta
-export function xjson<T extends z.ZodTypeAny>(
-  schema: T,
-  meta: XidlJsonMeta,
-): T {
+/** Convenient alias for {@link setMeta}. */
+export function xjson<T extends XidlSchema>(schema: T, meta: XidlJsonMeta): T {
   return setMeta(schema, meta);
 }
 
-function unwrapSchema(schema: z.ZodTypeAny): z.ZodTypeAny {
-  let current = schema;
-  while (true) {
-    if (current instanceof z.ZodArray) break;
+function defOf(schema: any): any {
+  return schema?._zod?.def ?? schema?._def ?? schema?.def;
+}
 
-    if ('unwrap' in current && typeof (current as any).unwrap === 'function') {
-      current = (current as any).unwrap();
-    } else if ('_def' in current && (current as any)._def.innerType) {
-      current = (current as any)._def.innerType;
+function shapeOf(schema: any): Record<string, any> | undefined {
+  const shape = schema?.shape;
+  return shape && typeof shape === 'object' ? shape : undefined;
+}
+
+function elementOf(schema: any): any {
+  return schema?.element ?? defOf(schema)?.element;
+}
+
+function defTypeOf(schema: any): string | undefined {
+  return defOf(schema)?.type;
+}
+
+function isObjectSchema(schema: any): boolean {
+  return defTypeOf(schema) === 'object' && shapeOf(schema) !== undefined;
+}
+
+function isArraySchema(schema: any): boolean {
+  return defTypeOf(schema) === 'array';
+}
+
+function unwrapSchema(schema: XidlSchema): any {
+  let current: any = schema;
+  while (true) {
+    if (isArraySchema(current)) break;
+
+    if (typeof current?.unwrap === 'function') {
+      current = current.unwrap();
+    } else if (defOf(current)?.innerType) {
+      current = defOf(current).innerType;
     } else {
       break;
     }
@@ -61,28 +95,30 @@ function unwrapSchema(schema: z.ZodTypeAny): z.ZodTypeAny {
   return current;
 }
 
-function isZeroValue(val: any, schema: z.ZodTypeAny): boolean {
+function isZeroValue(val: any, schema: XidlSchema): boolean {
   if (val === null || val === undefined) return true;
   const unwrapped = unwrapSchema(schema);
-  if (unwrapped instanceof z.ZodString) {
+  const kind = defTypeOf(unwrapped);
+  if (kind === 'string') {
     return val === '';
   }
-  if (unwrapped instanceof z.ZodNumber) {
+  if (kind === 'number') {
     return val === 0;
   }
-  if (unwrapped instanceof z.ZodBoolean) {
+  if (kind === 'boolean') {
     return val === false;
   }
-  if (unwrapped instanceof z.ZodArray) {
+  if (isArraySchema(unwrapped)) {
     return Array.isArray(val) && val.length === 0;
   }
-  if (unwrapped instanceof z.ZodObject) {
+  if (isObjectSchema(unwrapped)) {
     return typeof val === 'object' && Object.keys(val).length === 0;
   }
   return false;
 }
 
-export function serializeZodObject(obj: any, schema: z.ZodObject<any>): any {
+/** Serialize a Zod object using attached {@link XidlJsonMeta}. */
+export function serializeZodObject(obj: any, schema: XidlSchema): any {
   if (obj === null || typeof obj !== 'object') {
     return obj;
   }
@@ -91,10 +127,11 @@ export function serializeZodObject(obj: any, schema: z.ZodObject<any>): any {
   const usedKeys = new Set<string>();
 
   // Collect all non-catch-all fields in first pass
-  const catchAllFields: { key: string; fieldSchema: z.ZodTypeAny }[] = [];
+  const catchAllFields: { key: string; fieldSchema: XidlSchema }[] = [];
 
-  for (const key in schema.shape) {
-    const fieldSchema = schema.shape[key];
+  const shape = shapeOf(schema) ?? {};
+  for (const key in shape) {
+    const fieldSchema = shape[key] as XidlSchema;
     const meta = getMeta(fieldSchema) || {};
     if (meta.ignore) continue;
 
@@ -108,7 +145,7 @@ export function serializeZodObject(obj: any, schema: z.ZodObject<any>): any {
     const unwrapped = unwrapSchema(fieldSchema);
 
     if (meta.flatten) {
-      if (unwrapped instanceof z.ZodObject) {
+      if (isObjectSchema(unwrapped)) {
         if (value !== undefined && value !== null) {
           const innerSerialized = serializeZodObject(value, unwrapped);
           for (const innerKey in innerSerialized) {
@@ -162,26 +199,25 @@ export function serializeZodObject(obj: any, schema: z.ZodObject<any>): any {
   return result;
 }
 
-export function serialize(value: any, schema: z.ZodTypeAny): any {
+/** Serialize a value using attached {@link XidlJsonMeta}. */
+export function serialize(value: any, schema: XidlSchema): any {
   if (value === null || value === undefined) return value;
   const unwrapped = unwrapSchema(schema);
 
-  if (unwrapped instanceof z.ZodObject) {
+  if (isObjectSchema(unwrapped)) {
     return serializeZodObject(value, unwrapped);
   }
-  if (unwrapped instanceof z.ZodArray) {
+  if (isArraySchema(unwrapped)) {
     if (!Array.isArray(value)) return value;
-    const elementSchema = unwrapped.element as z.ZodTypeAny;
+    const elementSchema = elementOf(unwrapped) as XidlSchema;
     return value.map(item => serialize(item, elementSchema));
   }
 
   return value;
 }
 
-export function deserializeZodObject(
-  jsonObj: any,
-  schema: z.ZodObject<any>,
-): any {
+/** Deserialize JSON into a Zod object using attached {@link XidlJsonMeta}. */
+export function deserializeZodObject(jsonObj: any, schema: XidlSchema): any {
   if (jsonObj === null || typeof jsonObj !== 'object') {
     return jsonObj;
   }
@@ -189,18 +225,19 @@ export function deserializeZodObject(
   const result: Record<string, any> = {};
   const matchedKeys = new Set<string>();
 
-  const catchAllFields: { key: string; fieldSchema: z.ZodTypeAny }[] = [];
+  const catchAllFields: { key: string; fieldSchema: XidlSchema }[] = [];
 
   // First pass: extract all named fields
-  for (const key in schema.shape) {
-    const fieldSchema = schema.shape[key];
+  const shape = shapeOf(schema) ?? {};
+  for (const key in shape) {
+    const fieldSchema = shape[key] as XidlSchema;
     const meta = getMeta(fieldSchema) || {};
     if (meta.ignore) continue;
 
     const unwrapped = unwrapSchema(fieldSchema);
 
     if (meta.flatten) {
-      if (unwrapped instanceof z.ZodObject) {
+      if (isObjectSchema(unwrapped)) {
         // Struct flatten
         const subResult = deserializeZodObject(jsonObj, unwrapped);
         result[key] = subResult;
@@ -245,33 +282,35 @@ export function deserializeZodObject(
   return result;
 }
 
-export function deserialize(value: any, schema: z.ZodTypeAny): any {
+/** Deserialize a value using attached {@link XidlJsonMeta}. */
+export function deserialize(value: any, schema: XidlSchema): any {
   if (value === null || value === undefined) return value;
   const unwrapped = unwrapSchema(schema);
 
-  if (unwrapped instanceof z.ZodObject) {
+  if (isObjectSchema(unwrapped)) {
     return deserializeZodObject(value, unwrapped);
   }
-  if (unwrapped instanceof z.ZodArray) {
+  if (isArraySchema(unwrapped)) {
     if (!Array.isArray(value)) return value;
-    const elementSchema = unwrapped.element as z.ZodTypeAny;
+    const elementSchema = elementOf(unwrapped) as XidlSchema;
     return value.map(item => deserialize(item, elementSchema));
   }
 
   return value;
 }
 
-function getExpectedJsonKeys(schema: z.ZodObject<any>): Set<string> {
+function getExpectedJsonKeys(schema: XidlSchema): Set<string> {
   const keys = new Set<string>();
-  for (const key in schema.shape) {
-    const fieldSchema = schema.shape[key];
+  const shape = shapeOf(schema) ?? {};
+  for (const key in shape) {
+    const fieldSchema = shape[key] as XidlSchema;
     const meta = getMeta(fieldSchema) || {};
     if (meta.ignore) continue;
 
     const unwrapped = unwrapSchema(fieldSchema);
 
     if (meta.flatten) {
-      if (unwrapped instanceof z.ZodObject) {
+      if (isObjectSchema(unwrapped)) {
         const subKeys = getExpectedJsonKeys(unwrapped);
         for (const k of subKeys) {
           keys.add(k);

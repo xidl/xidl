@@ -1,3 +1,4 @@
+export type { XidlSchema } from 'xidl-typescript-codec';
 export { XidlServerError } from './error.ts';
 export { createRouter } from './router.ts';
 export type {

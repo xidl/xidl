@@ -1,5 +1,4 @@
-import { deserialize } from 'xidl-typescript-codec';
-import type { z } from 'zod';
+import { deserialize, type XidlSchema } from 'xidl-typescript-codec';
 
 import { XidlClientError } from './error.ts';
 import { normalizeMime, parseScalar } from './scalar.ts';
@@ -9,7 +8,7 @@ export async function decodeResponseBody<T>(
   resp: Response,
   contentType: string,
   codecs: Record<string, HttpCodec>,
-  schema?: z.ZodTypeAny,
+  schema?: XidlSchema,
 ): Promise<T> {
   const mime = normalizeMime(
     contentType || resp.headers.get('Content-Type') || 'application/json',
@@ -36,7 +35,7 @@ export async function decodeOptionalResponseBody(
   resp: Response,
   contentType: string,
   codecs: Record<string, HttpCodec>,
-  schema?: z.ZodTypeAny,
+  schema?: XidlSchema,
 ): Promise<unknown> {
   if (resp.status === 204 || resp.status === 205 || !resp.body) {
     return undefined;

@@ -1,5 +1,4 @@
-import { deserialize, serialize } from 'xidl-typescript-codec';
-import type { z } from 'zod';
+import { deserialize, serialize, type XidlSchema } from 'xidl-typescript-codec';
 
 import { XidlClientError } from './error.ts';
 import { parseXidlError } from './response.ts';
@@ -9,7 +8,7 @@ export async function* sseJsonStreamLegacy<T>(
   fetchImpl: FetchLike,
   url: string,
   options: RequestInit,
-  schema?: z.ZodTypeAny,
+  schema?: XidlSchema,
 ): AsyncIterable<T> {
   const headers = new Headers(options.headers ?? {});
   if (!headers.has('Accept')) {
@@ -103,7 +102,7 @@ export async function* sseJsonStreamLegacy<T>(
 
 export function ndjsonBodyLegacy<T>(
   source: AsyncIterable<T>,
-  schema?: z.ZodTypeAny,
+  schema?: XidlSchema,
 ): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder();
   const iterator = source[Symbol.asyncIterator]();
