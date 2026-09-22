@@ -167,11 +167,7 @@ impl Builder {
             dry_run: false,
         };
 
-        tokio::runtime::Builder::new_current_thread()
-            .enable_all()
-            .build()
-            .unwrap()
-            .block_on(async { xidlc::driver::Driver::run(args).await })?;
+        xidlc::driver::Driver::run(args)?;
 
         if let Some(custom_name) = &self.output_filename {
             self.apply_output_filename(&out_dir, custom_name, &inputs_paths)?;

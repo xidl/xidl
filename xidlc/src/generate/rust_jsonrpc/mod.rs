@@ -61,13 +61,12 @@ pub fn generate(
 
 pub(crate) struct RustJsonRpcCodegen;
 
-#[async_trait::async_trait]
 impl crate::jsonrpc::Codegen for RustJsonRpcCodegen {
-    async fn get_engine_version(&self) -> Result<String, xidl_jsonrpc::Error> {
+    fn get_engine_version(&self) -> Result<String, crate::jsonrpc::RpcError> {
         Ok("*".to_string())
     }
 
-    async fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
+    fn get_properties(&self) -> Result<ParserProperties, crate::jsonrpc::RpcError> {
         Ok(hashmap! {
             "hir_kind" => "jsonrpc",
             "expand_interface" => false,
@@ -78,18 +77,15 @@ impl crate::jsonrpc::Codegen for RustJsonRpcCodegen {
         })
     }
 
-    async fn generate(
+    fn generate(
         &self,
         input_hir: crate::jsonrpc::CodegenInput,
         path: String,
         props: ::xidl_parser::hir::ParserProperties,
-    ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
+    ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
         let jsonrpc_hir = input_hir.into_jsonrpc_hir();
-        generate(jsonrpc_hir, Path::new(&path), props).map_err(|err| xidl_jsonrpc::Error::Rpc {
-            code: xidl_jsonrpc::ErrorCode::ServerError,
-            message: err.to_string(),
-            data: None,
-        })
+        generate(jsonrpc_hir, Path::new(&path), props)
+            .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))
     }
 }
 

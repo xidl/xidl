@@ -78,7 +78,7 @@ fn case_props(folder: &str, case_name: &str) -> HashMap<String, serde_json::Valu
     props
 }
 
-async fn generate_go_rest_with_props(props: HashMap<String, serde_json::Value>) -> String {
+fn generate_go_rest_with_props(props: HashMap<String, serde_json::Value>) -> String {
     let path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("golang-http")
@@ -87,12 +87,11 @@ async fn generate_go_rest_with_props(props: HashMap<String, serde_json::Value>) 
     let mut generator = xidlc::driver::Generator::new(String::from("go-rest"));
     let files = generator
         .generate_from_idl(&source, &path, props)
-        .await
         .expect("generate go-rest");
     render_output(files)
 }
 
-async fn generate_typescript_rest_with_props(props: HashMap<String, serde_json::Value>) -> String {
+fn generate_typescript_rest_with_props(props: HashMap<String, serde_json::Value>) -> String {
     let path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("ts-http")
@@ -101,12 +100,11 @@ async fn generate_typescript_rest_with_props(props: HashMap<String, serde_json::
     let mut generator = xidlc::driver::Generator::new(String::from("typescript-rest"));
     let files = generator
         .generate_from_idl(&source, &path, props)
-        .await
         .expect("generate typescript-rest");
     render_output(files)
 }
 
-async fn generate_go_rest_source(source: &str) -> String {
+fn generate_go_rest_source(source: &str) -> String {
     let path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("golang-http")
@@ -114,13 +112,12 @@ async fn generate_go_rest_source(source: &str) -> String {
     let mut generator = xidlc::driver::Generator::new(String::from("go-rest"));
     let files = generator
         .generate_from_idl(source, &path, case_props("golang-http", "inline"))
-        .await
         .expect("generate go-rest");
     render_output(files)
 }
 
-#[tokio::test(flavor = "current_thread")]
-async fn codegen_snapshots_from_idl_folders() {
+#[test]
+fn codegen_snapshots_from_idl_folders() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests");
     let cases = collect_idl_cases(&root);
     assert!(!cases.is_empty(), "no idl cases found under xidlc/tests/*");
@@ -142,7 +139,6 @@ async fn codegen_snapshots_from_idl_folders() {
                     .unwrap_or(&case_path),
                 props,
             )
-            .await
             .expect("generate");
         let output = render_output(files);
         let snapshot_name = format!("{folder}__{case_name}");
@@ -150,8 +146,8 @@ async fn codegen_snapshots_from_idl_folders() {
     }
 }
 
-#[tokio::test(flavor = "current_thread")]
-async fn go_rest_content_type_check_requires_explicit_consumes() {
+#[test]
+fn go_rest_content_type_check_requires_explicit_consumes() {
     let output = generate_go_rest_source(
         r#"
 #pragma xidlc package xidlc
@@ -173,15 +169,14 @@ interface ContentTypeCheckService {
     );
 };
 "#,
-    )
-    .await;
+    );
 
     assert_eq!(output.matches("GinRequireContentType").count(), 1);
     assert!(output.contains(r#"GinRequireContentType(c, "application/json")"#));
 }
 
-#[tokio::test(flavor = "current_thread")]
-async fn generated_header_uses_compiler_metadata_overrides() {
+#[test]
+fn generated_header_uses_compiler_metadata_overrides() {
     let path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("shared")
@@ -190,7 +185,6 @@ async fn generated_header_uses_compiler_metadata_overrides() {
     let mut generator = xidlc::driver::Generator::new(String::from("rust"));
     let files = generator
         .generate_from_idl(&source, &path, case_props("rust", "basic"))
-        .await
         .expect("generate");
     let output = render_output(files);
     let expected = format!(
@@ -204,13 +198,12 @@ async fn generated_header_uses_compiler_metadata_overrides() {
     );
 }
 
-#[tokio::test(flavor = "current_thread")]
-async fn go_rest_server_flag_omits_client_code() {
+#[test]
+fn go_rest_server_flag_omits_client_code() {
     let output = generate_go_rest_with_props(HashMap::from([
         (String::from("enable_client"), false.into()),
         (String::from("enable_server"), true.into()),
-    ]))
-    .await;
+    ]));
 
     assert!(output.contains("type HttpDefaultsServiceService interface"));
     assert!(output.contains("func RegisterHttpDefaultsServiceHandler"));
@@ -218,13 +211,12 @@ async fn go_rest_server_flag_omits_client_code() {
     assert!(!output.contains("func NewHttpDefaultsServiceClient"));
 }
 
-#[tokio::test(flavor = "current_thread")]
-async fn go_rest_client_flag_omits_server_code() {
+#[test]
+fn go_rest_client_flag_omits_server_code() {
     let output = generate_go_rest_with_props(HashMap::from([
         (String::from("enable_client"), true.into()),
         (String::from("enable_server"), false.into()),
-    ]))
-    .await;
+    ]));
 
     assert!(output.contains("type HttpDefaultsServiceClient struct"));
     assert!(output.contains("func NewHttpDefaultsServiceClient"));
@@ -233,24 +225,22 @@ async fn go_rest_client_flag_omits_server_code() {
     assert!(!output.contains("\"github.com/gin-gonic/gin\""));
 }
 
-#[tokio::test(flavor = "current_thread")]
-async fn go_rest_rejects_empty_client_server_mode() {
+#[test]
+fn go_rest_rejects_empty_client_server_mode() {
     let path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("golang-http")
         .join("http_defaults.idl");
     let source = fs::read_to_string(&path).expect("read idl");
     let mut generator = xidlc::driver::Generator::new(String::from("go-rest"));
-    let result = generator
-        .generate_from_idl(
-            &source,
-            &path,
-            HashMap::from([
-                (String::from("enable_client"), false.into()),
-                (String::from("enable_server"), false.into()),
-            ]),
-        )
-        .await;
+    let result = generator.generate_from_idl(
+        &source,
+        &path,
+        HashMap::from([
+            (String::from("enable_client"), false.into()),
+            (String::from("enable_server"), false.into()),
+        ]),
+    );
     let err = match result {
         Ok(_) => panic!("empty go-rest mode should fail"),
         Err(err) => err,
@@ -259,59 +249,55 @@ async fn go_rest_rejects_empty_client_server_mode() {
     assert!(err.to_string().contains("enable_client or enable_server"));
 }
 
-#[tokio::test(flavor = "current_thread")]
-async fn typescript_rest_server_flag_omits_client_code() {
+#[test]
+fn typescript_rest_server_flag_omits_client_code() {
     let output = generate_typescript_rest_with_props(HashMap::from([
         (String::from("enable_client"), false.into()),
         (String::from("enable_server"), true.into()),
-    ]))
-    .await;
+    ]));
 
     assert!(output.contains("http_defaults.server.ts"));
     assert!(output.contains("HttpDefaultsServiceOperations"));
     assert!(!output.contains("http_defaults.client.ts"));
 }
 
-#[tokio::test(flavor = "current_thread")]
-async fn typescript_rest_client_flag_omits_server_code() {
+#[test]
+fn typescript_rest_client_flag_omits_server_code() {
     let output = generate_typescript_rest_with_props(HashMap::from([
         (String::from("enable_client"), true.into()),
         (String::from("enable_server"), false.into()),
-    ]))
-    .await;
+    ]));
 
     assert!(output.contains("http_defaults.client.ts"));
     assert!(!output.contains("http_defaults.server.ts"));
     assert!(!output.contains("HttpDefaultsServiceOperations"));
 }
 
-#[tokio::test(flavor = "current_thread")]
-async fn typescript_rest_defaults_to_client_only() {
-    let output = generate_typescript_rest_with_props(HashMap::new()).await;
+#[test]
+fn typescript_rest_defaults_to_client_only() {
+    let output = generate_typescript_rest_with_props(HashMap::new());
 
     assert!(output.contains("http_defaults.client.ts"));
     assert!(!output.contains("http_defaults.server.ts"));
     assert!(!output.contains("HttpDefaultsServiceOperations"));
 }
 
-#[tokio::test(flavor = "current_thread")]
-async fn typescript_rest_rejects_empty_client_server_mode() {
+#[test]
+fn typescript_rest_rejects_empty_client_server_mode() {
     let path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("ts-http")
         .join("http_defaults.idl");
     let source = fs::read_to_string(&path).expect("read idl");
     let mut generator = xidlc::driver::Generator::new(String::from("typescript-rest"));
-    let result = generator
-        .generate_from_idl(
-            &source,
-            &path,
-            HashMap::from([
-                (String::from("enable_client"), false.into()),
-                (String::from("enable_server"), false.into()),
-            ]),
-        )
-        .await;
+    let result = generator.generate_from_idl(
+        &source,
+        &path,
+        HashMap::from([
+            (String::from("enable_client"), false.into()),
+            (String::from("enable_server"), false.into()),
+        ]),
+    );
     let err = match result {
         Ok(_) => panic!("empty typescript-rest mode should fail"),
         Err(err) => err,

@@ -1,155 +1,110 @@
 use crate::driver::lang::Plugin;
 use crate::error::IdlcResult;
-use crate::jsonrpc::CodegenClient;
+use crate::jsonrpc::{Artifact, Codegen, CodegenInput, GenerateParams, PluginClient, RpcError};
 use crate::macros::log_info;
-use tokio::task::JoinHandle;
+use xidl_parser::hir::ParserProperties;
 
 mod support;
 
-type RpcStream = Box<dyn xidl_jsonrpc::transport::Stream + Unpin + Send + 'static>;
-
-struct SessionParts {
-    client: CodegenClient<RpcStream>,
-    server: JoinHandle<IdlcResult<()>>,
+enum Inner {
+    Builtin(Box<dyn Codegen + Send + Sync>),
+    External(PluginClient),
 }
 
+/// One generator stage. Built-ins are called in-process; external plugins are
+/// spoken to over the NDJSON stdio protocol.
 pub struct CodegenSession {
-    pub client: CodegenClient<RpcStream>,
-    server: JoinHandle<IdlcResult<()>>,
+    inner: Inner,
 }
 
 impl CodegenSession {
-    pub async fn spawn(lang: &str) -> IdlcResult<Self> {
+    pub fn spawn(lang: &str) -> IdlcResult<Self> {
         let plugin = Plugin::from(lang);
-        let session = match plugin {
-            Plugin::Custom(custom_lang) => Self::spawn_custom_session(lang, &custom_lang).await?,
-            plugin => Self::spawn_builtin_session(lang, plugin).await?,
+        let mut session = match plugin {
+            Plugin::Custom(custom_lang) => Self::spawn_custom_session(&custom_lang)?,
+            plugin => Self::spawn_builtin_session(plugin)?,
         };
-        support::verify_engine_version(&session.client).await?;
-        Ok(Self {
-            client: session.client,
-            server: session.server,
-        })
+        support::verify_engine_version(&mut session)?;
+        Ok(session)
     }
 
-    pub async fn finish(self) {
-        drop(self.client);
-        self.server.abort();
-    }
-
-    async fn spawn_custom_session(lang: &str, custom_lang: &str) -> IdlcResult<SessionParts> {
-        let endpoint = support::rpc_endpoint(lang)?;
-        let server = Self::spawn_custom_codegen_server(custom_lang, endpoint.clone())?;
-        let stream = Self::connect_with_retry(&endpoint).await?;
-        Ok(SessionParts {
-            client: Self::client_from_stream(stream),
-            server,
-        })
-    }
-
-    async fn spawn_builtin_session(lang: &str, plugin: Plugin) -> IdlcResult<SessionParts> {
-        let endpoint = support::random_inproc_endpoint(lang);
-        let server = Self::spawn_builtin_codegen_server(plugin, endpoint.clone()).await?;
-        let stream = Self::connect_inproc_with_retry(&endpoint).await?;
-        Ok(SessionParts {
-            client: Self::client_from_stream(stream),
-            server,
-        })
-    }
-
-    fn client_from_stream(stream: RpcStream) -> CodegenClient<RpcStream> {
-        CodegenClient::new(stream)
-    }
-
-    async fn spawn_builtin_codegen_server(
-        lang: Plugin,
-        endpoint: String,
-    ) -> IdlcResult<JoinHandle<IdlcResult<()>>> {
-        macro_rules! run_server {
-            ($obj:expr) => {{
-                let handler = crate::jsonrpc::CodegenServer::new($obj);
-                let server = xidl_jsonrpc::Server::builder()
-                    .with_service(handler)
-                    .with_endpoint(format!("inproc://{endpoint}"))
-                    .build()
-                    .await
-                    .map_err(|err| crate::error::IdlcError::rpc(err.to_string()))?;
-                Ok(tokio::spawn(async move {
-                    server
-                        .serve()
-                        .await
-                        .map_err(|err| crate::error::IdlcError::rpc(err.to_string()))
-                }))
-            }};
+    pub fn get_engine_version(&mut self) -> Result<String, RpcError> {
+        match &mut self.inner {
+            Inner::Builtin(generator) => generator.get_engine_version(),
+            Inner::External(client) => client.call("get_engine_version", serde_json::Value::Null),
         }
+    }
 
-        #[allow(unreachable_patterns)]
-        match lang {
-            Plugin::Hir => run_server!(crate::generate::hir_gen::HirGen),
-            Plugin::RestHir => run_server!(crate::generate::rest_hir_gen::RestHirCodegen),
-            Plugin::TypedAst => run_server!(crate::generate::typed_ast_gen::TypedAstGen),
-            #[cfg(feature = "gen-go")]
-            Plugin::Go => run_server!(crate::generate::go::GoCodegen),
-            #[cfg(feature = "gen-go-rest")]
-            Plugin::GoRest => run_server!(crate::generate::go_rest::GoRestCodegen),
-            #[cfg(feature = "gen-rust")]
-            Plugin::Rust => run_server!(crate::generate::rust::RustCodegen),
-            #[cfg(feature = "gen-rust-jsonrpc")]
-            Plugin::RustJsonRpc => run_server!(crate::generate::rust_jsonrpc::RustJsonRpcCodegen),
-            #[cfg(feature = "gen-rust-axum")]
-            Plugin::Axum => run_server!(crate::generate::rust_axum::RustAxumCodegen),
-            #[cfg(feature = "gen-openapi")]
-            Plugin::Openapi => run_server!(crate::generate::openapi::OpenApiCodegen),
-            #[cfg(feature = "gen-openrpc")]
-            Plugin::Openrpc => run_server!(crate::generate::openrpc::OpenRpcCodegen),
-            #[cfg(feature = "gen-typescript")]
-            Plugin::Typescript => run_server!(crate::generate::typescript::TypescriptCodegen),
-            #[cfg(feature = "gen-typescript-rest")]
-            Plugin::TypescriptRest => {
-                run_server!(crate::generate::typescript_rest::TypescriptRestCodegen)
+    pub fn get_properties(&mut self) -> Result<ParserProperties, RpcError> {
+        match &mut self.inner {
+            Inner::Builtin(generator) => generator.get_properties(),
+            Inner::External(client) => client.call("get_properties", serde_json::Value::Null),
+        }
+    }
+
+    pub fn generate(
+        &mut self,
+        input: CodegenInput,
+        path: String,
+        props: ParserProperties,
+    ) -> Result<Vec<Artifact>, RpcError> {
+        match &mut self.inner {
+            Inner::Builtin(generator) => generator.generate(input, path, props),
+            Inner::External(client) => {
+                let params = GenerateParams { input, path, props };
+                client.call("generate", serde_json::to_value(params)?)
             }
-            Plugin::Custom(_) => unreachable!("custom plugins use spawn_custom_codegen_server"),
-            var => panic!("does not support {var:?}"),
         }
     }
 
-    fn spawn_custom_codegen_server(
-        lang: &str,
-        endpoint: String,
-    ) -> IdlcResult<JoinHandle<IdlcResult<()>>> {
+    pub fn finish(self) {
+        match self.inner {
+            Inner::Builtin(_) => {}
+            Inner::External(mut client) => client.shutdown(),
+        }
+    }
+
+    fn spawn_custom_session(lang: &str) -> IdlcResult<Self> {
         let exe = format!("xidl-{lang}");
         log_info!("{lang} is not a builtin supported language, try spawn {exe}");
-        let mut child = std::process::Command::new(&exe)
-            .arg("--endpoint")
-            .arg(&endpoint)
-            .spawn()
+        let client = PluginClient::spawn(&exe)
             .map_err(|err| std::io::Error::other(format!("cannot find plugin: {lang}, {err}")))?;
-
-        let server = tokio::task::spawn_blocking(move || {
-            child.wait()?;
-            Ok(())
-        });
-        Ok(server)
+        Ok(Self {
+            inner: Inner::External(client),
+        })
     }
 
-    async fn connect_with_retry(endpoint: &str) -> IdlcResult<RpcStream> {
-        support::retry_connect(
-            || xidl_jsonrpc::connect(endpoint),
-            format!("failed to connect rpc endpoint: {endpoint}"),
-        )
-        .await
-    }
-
-    async fn connect_inproc_with_retry(endpoint: &str) -> IdlcResult<RpcStream> {
-        support::retry_connect(
-            || {
-                std::future::ready(
-                    xidl_jsonrpc::connect_inproc(endpoint)
-                        .map(|stream| Box::new(stream) as RpcStream),
-                )
-            },
-            "failed to connect inproc endpoint".to_string(),
-        )
-        .await
+    fn spawn_builtin_session(plugin: Plugin) -> IdlcResult<Self> {
+        #[allow(unreachable_patterns)]
+        let generator: Box<dyn Codegen + Send + Sync> = match plugin {
+            Plugin::Hir => Box::new(crate::generate::hir_gen::HirGen),
+            Plugin::RestHir => Box::new(crate::generate::rest_hir_gen::RestHirCodegen),
+            Plugin::TypedAst => Box::new(crate::generate::typed_ast_gen::TypedAstGen),
+            #[cfg(feature = "gen-go")]
+            Plugin::Go => Box::new(crate::generate::go::GoCodegen),
+            #[cfg(feature = "gen-go-rest")]
+            Plugin::GoRest => Box::new(crate::generate::go_rest::GoRestCodegen),
+            #[cfg(feature = "gen-rust")]
+            Plugin::Rust => Box::new(crate::generate::rust::RustCodegen),
+            #[cfg(feature = "gen-rust-jsonrpc")]
+            Plugin::RustJsonRpc => Box::new(crate::generate::rust_jsonrpc::RustJsonRpcCodegen),
+            #[cfg(feature = "gen-rust-axum")]
+            Plugin::Axum => Box::new(crate::generate::rust_axum::RustAxumCodegen),
+            #[cfg(feature = "gen-openapi")]
+            Plugin::Openapi => Box::new(crate::generate::openapi::OpenApiCodegen),
+            #[cfg(feature = "gen-openrpc")]
+            Plugin::Openrpc => Box::new(crate::generate::openrpc::OpenRpcCodegen),
+            #[cfg(feature = "gen-typescript")]
+            Plugin::Typescript => Box::new(crate::generate::typescript::TypescriptCodegen),
+            #[cfg(feature = "gen-typescript-rest")]
+            Plugin::TypescriptRest => {
+                Box::new(crate::generate::typescript_rest::TypescriptRestCodegen)
+            }
+            Plugin::Custom(_) => unreachable!("custom plugins use spawn_custom_session"),
+            var => panic!("does not support {var:?}"),
+        };
+        Ok(Self {
+            inner: Inner::Builtin(generator),
+        })
     }
 }

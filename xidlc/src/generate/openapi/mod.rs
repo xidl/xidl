@@ -19,25 +19,24 @@ use xidl_parser::rest_hir::RestHirDocument;
 
 pub(crate) struct OpenApiCodegen;
 
-#[async_trait::async_trait]
 impl crate::jsonrpc::Codegen for OpenApiCodegen {
-    async fn get_engine_version(&self) -> Result<String, xidl_jsonrpc::Error> {
+    fn get_engine_version(&self) -> Result<String, crate::jsonrpc::RpcError> {
         Ok("*".to_string())
     }
 
-    async fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
+    fn get_properties(&self) -> Result<ParserProperties, crate::jsonrpc::RpcError> {
         Ok(HashMap::from([(
             "hir_kind".to_string(),
             serde_json::Value::String("http".to_string()),
         )]))
     }
 
-    async fn generate(
+    fn generate(
         &self,
         input_hir: crate::jsonrpc::CodegenInput,
         input: String,
         _props: ParserProperties,
-    ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
+    ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
         let rest_hir = input_hir.into_rest_hir();
         let openapi = render_openapi_json(&rest_hir.spec, &rest_hir)?;
         let content = serde_json::to_string_pretty(&openapi)?;

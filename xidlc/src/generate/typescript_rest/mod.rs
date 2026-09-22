@@ -80,13 +80,12 @@ pub fn generate(
 
 pub(crate) struct TypescriptRestCodegen;
 
-#[async_trait::async_trait]
 impl crate::jsonrpc::Codegen for TypescriptRestCodegen {
-    async fn get_engine_version(&self) -> Result<String, xidl_jsonrpc::Error> {
+    fn get_engine_version(&self) -> Result<String, crate::jsonrpc::RpcError> {
         Ok("*".to_string())
     }
 
-    async fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
+    fn get_properties(&self) -> Result<ParserProperties, crate::jsonrpc::RpcError> {
         Ok(hashmap! {
             "expand_interface" => false,
             "hir_kind" => "http",
@@ -96,18 +95,15 @@ impl crate::jsonrpc::Codegen for TypescriptRestCodegen {
         })
     }
 
-    async fn generate(
+    fn generate(
         &self,
         input_hir: crate::jsonrpc::CodegenInput,
         path: String,
         props: ::xidl_parser::hir::ParserProperties,
-    ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
+    ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
         let rest_hir = input_hir.into_rest_hir();
-        generate(rest_hir, Path::new(&path), props).map_err(|err| xidl_jsonrpc::Error::Rpc {
-            code: xidl_jsonrpc::ErrorCode::ServerError,
-            message: err.to_string(),
-            data: None,
-        })
+        generate(rest_hir, Path::new(&path), props)
+            .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))
     }
 }
 

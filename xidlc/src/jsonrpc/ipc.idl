@@ -1,56 +1,48 @@
-@derive(Debug, Serialize, Deserialize)
+// xidlc codegen plugin contract
+//
+// This file documents the semantic payload and methods exchanged between the
+// xidlc driver and a generator stage (built-in or external plugin).
+//
+// Wire protocol (external plugins): newline-delimited JSON on stdio,
+// strictly request/response, one call in flight.
+//
+//   → {"id":1,"method":"get_engine_version"}
+//   ← {"id":1,"result":"*"}
+//   → {"id":2,"method":"get_properties"}
+//   ← {"id":2,"result":{...}}
+//   → {"id":3,"method":"generate","params":{"input":{...},"path":"a.idl","props":{...}}}
+//   ← {"id":3,"result":[...]}
+//   ← {"id":3,"error":{"message":"..."}}
+//
+// Discriminated payloads use serde externally-tagged enums:
+//   {"kind":"Hir","value":{...}} / {"kind":"File","value":{...}}
+@derive(Debug, Clone, Serialize, Deserialize)
 struct ArtifactHir {
     string lang;
     ::xidl_parser::hir::Specification hir;
     ::xidl_parser::hir::ParserProperties props;
 };
 
-@derive(Debug, Serialize, Deserialize)
+@derive(Debug, Clone, Serialize, Deserialize)
 struct ArtifactRestHir {
     string lang;
     ::xidl_parser::rest_hir::RestHirDocument rest_hir;
     ::xidl_parser::hir::ParserProperties props;
 };
 
-@derive(Debug, Serialize, Deserialize)
+@derive(Debug, Clone, Serialize, Deserialize)
 struct ArtifactJsonRpcHir {
     string lang;
     ::xidl_parser::jsonrpc_hir::JsonRpcHirDocument jsonrpc_hir;
     ::xidl_parser::hir::ParserProperties props;
 };
 
-@derive(Debug, Serialize, Deserialize)
-enum CodegenInputKind {
-    RpcHir,
-    RestHir,
-    JsonRpcHir
-};
-
-@derive(Serialize, Deserialize)
-union CodegenInput switch (CodegenInputKind) {
-    case CodegenInputKind::RpcHir:
-        ::xidl_parser::hir::Specification rpc_hir;
-    case CodegenInputKind::RestHir:
-        ::xidl_parser::rest_hir::RestHirDocument rest_hir;
-    case CodegenInputKind::JsonRpcHir:
-        ::xidl_parser::jsonrpc_hir::JsonRpcHirDocument jsonrpc_hir;
-};
-
-@derive(Debug, Serialize, Deserialize)
+@derive(Debug, Clone, Serialize, Deserialize)
 struct ArtifactFile {
     string path;
     string content;
 };
-
-@derive(Debug, Serialize, Deserialize)
-enum ArtifactKind {
-    Hir,
-    RestHir,
-    JsonRpcHir,
-    File
-};
-
-@derive(Serialize, Deserialize)
+// kind: Hir | RestHir | JsonRpcHir | File  (serde tag = "kind", content = "value")
 union Artifact switch (ArtifactKind) {
     case ArtifactKind::Hir:
         ArtifactHir hir;
@@ -60,6 +52,21 @@ union Artifact switch (ArtifactKind) {
         ArtifactJsonRpcHir jsonrpc_hir;
     case ArtifactKind::File:
         ArtifactFile file;
+};
+// kind: RpcHir | RestHir | JsonRpcHir  (serde tag = "kind", content = "value")
+union CodegenInput switch (CodegenInputKind) {
+    case CodegenInputKind::RpcHir:
+        ::xidl_parser::hir::Specification rpc_hir;
+    case CodegenInputKind::RestHir:
+        ::xidl_parser::rest_hir::RestHirDocument rest_hir;
+    case CodegenInputKind::JsonRpcHir:
+        ::xidl_parser::jsonrpc_hir::JsonRpcHirDocument jsonrpc_hir;
+};
+
+struct GenerateParams {
+    CodegenInput input;
+    string path;
+    ::xidl_parser::hir::ParserProperties props;
 };
 
 interface Codegen {

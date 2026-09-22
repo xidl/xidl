@@ -3447,7 +3447,6 @@ dependencies = [
 name = "xidl-build"
 version = "0.92.1"
 dependencies = [
- "tokio",
  "xidlc",
 ]
 
@@ -3538,7 +3537,6 @@ dependencies = [
 name = "xidlc"
 version = "0.92.1"
 dependencies = [
- "async-trait",
  "clap",
  "convert_case",
  "include_dir",
@@ -3556,13 +3554,11 @@ dependencies = [
  "serde",
  "serde_json",
  "syn 3.0.3",
- "tokio",
  "tracing",
  "tracing-subscriber",
  "tree-sitter",
  "tree-sitter-highlight",
  "tree-sitter-idl",
- "xidl-jsonrpc",
  "xidl-parser",
 ]
 

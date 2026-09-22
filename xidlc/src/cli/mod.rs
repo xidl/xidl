@@ -245,7 +245,7 @@ fn parse_external(shared: SharedGenArgs, values: Vec<OsString>) -> IdlcResult<Ar
 }
 
 impl Cli {
-    pub async fn run(self) -> IdlcResult<()> {
+    pub fn run(self) -> IdlcResult<()> {
         match self.command {
             Command::Gen(args) => {
                 let help_command = args.lang.help_command();
@@ -255,7 +255,7 @@ impl Cli {
                     println!();
                     return Ok(());
                 }
-                driver::Driver::run(args).await
+                driver::Driver::run(args)
             }
             Command::Fmt(args) => args.execute(),
             Command::Import(args) => {

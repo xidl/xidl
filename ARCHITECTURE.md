@@ -86,8 +86,9 @@ and prevents language-specific divergence.
 
 - `xidlc` uses a plugin architecture.
 - Built-in generators and external generators follow the same driver model.
-- Plugins communicate through the `Codegen` RPC contract defined in
-  `xidlc/src/jsonrpc/ipc.idl`.
+- Plugins communicate through the `Codegen` contract defined in
+  `xidlc/src/jsonrpc/ipc.idl` (built-ins call it in-process; external plugins
+  speak a small NDJSON stdio protocol).
 - External generators replace the rendering stage, not parsing or HIR creation.
 
 ### 7. Tests protect semantics, not just code paths
@@ -121,8 +122,8 @@ The normal generation path is:
 2. Build `typed_ast`.
 3. Lower `typed_ast` into `hir`.
 4. Start a generator session in `xidlc`.
-5. Run a built-in generator or an external plugin through the same IPC-shaped
-   contract.
+5. Run a built-in generator (direct call) or an external plugin (NDJSON stdio
+   RPC) through the same `Codegen` contract.
 6. Either emit files directly, or emit another intermediate artifact and
    continue the pipeline.
 7. Write the final artifacts to disk.
@@ -348,7 +349,8 @@ Important subtrees:
 ### Runtime and Support Crates
 
 - `xidl-build/`: `build.rs` integration for generation during Cargo builds
-- `xidl-jsonrpc/`: runtime and transport support for JSON-RPC-based workflows
+- `xidl-jsonrpc/`: runtime and transport support for generated JSON-RPC clients
+  and servers (not used by the xidlc compiler itself)
 - `xidl-rust-axum/`: runtime support for generated Rust Axum code
 - `xidl-typeobject/`: type-object related assets and generation targets
 
@@ -495,7 +497,8 @@ Stable properties of the plugin model:
 - built-ins are started in-process over an inproc transport
 - external plugins are started as child processes
 - communication is done through the `Codegen` interface in
-  `xidlc/src/jsonrpc/ipc.idl`
+  `xidlc/src/jsonrpc/ipc.idl` (in-process calls for built-ins, NDJSON over stdio
+  for external plugins)
 - artifacts are passed forward as `Hir`, `RestHir`, or `File`
 
 This means a plugin can:
@@ -511,10 +514,11 @@ isolated monoliths.
 
 `xidlc` starts every generator through `CodegenSession`.
 
-- built-in generators are hosted in-process and exposed over an inproc RPC
-  transport
-- external plugins are started as child processes such as `xidl-<lang>`
-- both kinds of generators are wrapped as the same `Codegen` client from the
+- built-in generators are hosted in-process and called directly through the
+  `Codegen` trait (no transport)
+- external plugins are started as child processes such as `xidl-<lang>` and
+  speak newline-delimited JSON request/response on stdio
+- both kinds of generators are wrapped as the same `CodegenSession` from the
   driver's point of view
 - version compatibility is checked through `get_engine_version()`
 
