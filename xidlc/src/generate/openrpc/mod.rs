@@ -17,25 +17,24 @@ use context::OpenRpcContext;
 
 pub(crate) struct OpenRpcCodegen;
 
-#[async_trait::async_trait]
 impl crate::jsonrpc::Codegen for OpenRpcCodegen {
-    async fn get_engine_version(&self) -> Result<String, xidl_jsonrpc::Error> {
+    fn get_engine_version(&self) -> Result<String, crate::jsonrpc::RpcError> {
         Ok("*".to_string())
     }
 
-    async fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
+    fn get_properties(&self) -> Result<ParserProperties, crate::jsonrpc::RpcError> {
         Ok(std::collections::HashMap::from([(
             "hir_kind".to_string(),
             serde_json::Value::String("jsonrpc".to_string()),
         )]))
     }
 
-    async fn generate(
+    fn generate(
         &self,
         input_hir: crate::jsonrpc::CodegenInput,
         _path: String,
         _props: ParserProperties,
-    ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
+    ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
         let hir = input_hir.into_jsonrpc_hir();
         let openrpc = render_openrpc(&hir);
         let content = serde_json::to_string_pretty(&openrpc)?;

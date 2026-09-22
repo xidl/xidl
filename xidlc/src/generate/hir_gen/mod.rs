@@ -1,4 +1,3 @@
-use xidl_jsonrpc::{Error, ErrorCode};
 use xidl_parser::hir::ParserProperties;
 use xidl_parser::rest_hir::ProjectedHir;
 
@@ -6,24 +5,23 @@ use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir, ArtifactJsonRpcHir};
 
 pub struct HirGen;
 
-#[async_trait::async_trait]
 impl crate::jsonrpc::Codegen for HirGen {
-    async fn get_engine_version(&self) -> Result<String, xidl_jsonrpc::Error> {
+    fn get_engine_version(&self) -> Result<String, crate::jsonrpc::RpcError> {
         Ok("*".to_string())
     }
 
-    async fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
+    fn get_properties(&self) -> Result<ParserProperties, crate::jsonrpc::RpcError> {
         Ok(crate::macros::hashmap! {
             "enable_metadata" => true
         })
     }
 
-    async fn generate(
+    fn generate(
         &self,
         _input_hir: crate::jsonrpc::CodegenInput,
         _input: String,
         props: ::xidl_parser::hir::ParserProperties,
-    ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
+    ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
         let source: String = serde_json::from_value(props.get("idl").unwrap().clone()).unwrap();
         let target_lang: String =
             serde_json::from_value(props.get("target_lang").unwrap().clone()).unwrap();
@@ -33,22 +31,14 @@ impl crate::jsonrpc::Codegen for HirGen {
             Some(&_input),
             &mut xidl_parser::hir::FsIncludeResolver,
         )
-        .map_err(|err| Error::Rpc {
-            code: ErrorCode::InternalError,
-            message: err.to_string(),
-            data: None,
-        })?;
+        .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
         let projected =
             xidl_parser::hir::Specification::project_typed_ast_with_properties_and_path(
                 typed,
                 props.clone(),
                 std::path::Path::new(&_input),
             )
-            .map_err(|err| Error::Rpc {
-                code: ErrorCode::InternalError,
-                message: err.to_string(),
-                data: None,
-            })?;
+            .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
 
         match projected {
             ProjectedHir::Rpc(hir) => {

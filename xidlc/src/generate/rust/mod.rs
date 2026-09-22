@@ -44,35 +44,27 @@ pub fn generate_with_properties(
 
 pub(crate) struct RustCodegen;
 
-#[async_trait::async_trait]
 impl crate::jsonrpc::Codegen for RustCodegen {
-    async fn get_engine_version(&self) -> Result<String, xidl_jsonrpc::Error> {
+    fn get_engine_version(&self) -> Result<String, crate::jsonrpc::RpcError> {
         Ok("*".to_string())
     }
 
-    async fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
+    fn get_properties(&self) -> Result<ParserProperties, crate::jsonrpc::RpcError> {
         Ok(crate::macros::hashmap! {
             "enable_render_header" => true,
             "enable_metadata" => true
         })
     }
 
-    async fn generate(
+    fn generate(
         &self,
         input_hir: crate::jsonrpc::CodegenInput,
         input: String,
         props: ::xidl_parser::hir::ParserProperties,
-    ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
+    ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
         let hir = input_hir.into_rpc_hir();
-        generate_with_properties(&hir, Path::new(&input), &props).map_err(map_codegen_error)
-    }
-}
-
-fn map_codegen_error(err: crate::error::IdlcError) -> xidl_jsonrpc::Error {
-    xidl_jsonrpc::Error::Rpc {
-        code: xidl_jsonrpc::ErrorCode::ServerError,
-        message: err.to_string(),
-        data: None,
+        generate_with_properties(&hir, Path::new(&input), &props)
+            .map_err(crate::jsonrpc::RpcError::from)
     }
 }
 

@@ -4,24 +4,23 @@ use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir};
 
 pub struct TypedAstGen;
 
-#[async_trait::async_trait]
 impl crate::jsonrpc::Codegen for TypedAstGen {
-    async fn get_engine_version(&self) -> Result<String, xidl_jsonrpc::Error> {
+    fn get_engine_version(&self) -> Result<String, crate::jsonrpc::RpcError> {
         Ok("*".to_string())
     }
 
-    async fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
+    fn get_properties(&self) -> Result<ParserProperties, crate::jsonrpc::RpcError> {
         Ok(crate::macros::hashmap! {
             "enable_metadata" => true
         })
     }
 
-    async fn generate(
+    fn generate(
         &self,
         input_hir: crate::jsonrpc::CodegenInput,
         input: String,
         props: ParserProperties,
-    ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
+    ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
         let hir = input_hir.into_rpc_hir();
         let source: String = serde_json::from_value(props.get("idl").unwrap().clone()).unwrap();
         let target_lang: String =

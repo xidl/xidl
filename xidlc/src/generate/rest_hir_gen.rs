@@ -6,32 +6,31 @@ use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactRestHir};
 
 pub(crate) struct RestHirCodegen;
 
-#[async_trait::async_trait]
 impl crate::jsonrpc::Codegen for RestHirCodegen {
-    async fn get_engine_version(&self) -> Result<String, xidl_jsonrpc::Error> {
+    fn get_engine_version(&self) -> Result<String, crate::jsonrpc::RpcError> {
         Ok("*".to_string())
     }
 
-    async fn get_properties(&self) -> Result<hir::ParserProperties, xidl_jsonrpc::Error> {
+    fn get_properties(&self) -> Result<hir::ParserProperties, crate::jsonrpc::RpcError> {
         Ok(HashMap::from([(
             "hir_kind".to_string(),
             serde_json::Value::String("http".to_string()),
         )]))
     }
 
-    async fn generate(
+    fn generate(
         &self,
         input_hir: crate::jsonrpc::CodegenInput,
         path: String,
         props: hir::ParserProperties,
-    ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
+    ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
         let target_lang: String = serde_json::from_value(
             props
                 .get("target_lang")
                 .cloned()
                 .unwrap_or_else(|| serde_json::Value::String("rest-hir".to_string())),
         )
-        .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
+        .map_err(|err| crate::jsonrpc::RpcError::invalid_params(err.to_string()))?;
         let rest_hir = input_hir.into_rest_hir();
 
         if target_lang == "rest-hir" {

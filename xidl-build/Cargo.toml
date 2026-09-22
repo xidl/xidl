@@ -31,5 +31,4 @@ gen-openapi = ["xidlc/gen-openapi"]
 gen-openrpc = ["xidlc/gen-openrpc"]
 
 [dependencies]
-tokio.workspace = true
 xidlc = { version = "0.92.1", path = "../xidlc", default-features = false }

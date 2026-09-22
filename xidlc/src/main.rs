@@ -1,5 +1,4 @@
-#[tokio::main]
-async fn main() {
+fn main() {
     use clap::Parser;
     use xidlc::cli::Cli;
     use xidlc::diagnostic::TreeSitterMietteHighlighter;
@@ -18,7 +17,7 @@ async fn main() {
         .with_writer(std::io::stderr)
         .init();
 
-    if let Err(err) = Cli::parse().run().await {
+    if let Err(err) = Cli::parse().run() {
         match err {
             IdlcError::Diagnostics(DiagnosticListError { diagnostics }) => {
                 for (index, diagnostic) in diagnostics.into_iter().enumerate() {

@@ -53,18 +53,18 @@ pub struct Driver {
 }
 
 impl Driver {
-    pub async fn run(args: ArgsGenerate) -> IdlcResult<()> {
-        Self::run_with_props(args, HashMap::new()).await
+    pub fn run(args: ArgsGenerate) -> IdlcResult<()> {
+        Self::run_with_props(args, HashMap::new())
     }
 
-    pub async fn run_with_props(
+    pub fn run_with_props(
         args: ArgsGenerate,
         extra_props: HashMap<String, serde_json::Value>,
     ) -> IdlcResult<()> {
-        Self { args, extra_props }.execute().await
+        Self { args, extra_props }.execute()
     }
 
-    async fn execute(self) -> IdlcResult<()> {
+    fn execute(self) -> IdlcResult<()> {
         let output = match self.args.dry_run {
             true => out_file::OutputTarget::new_dummy(),
             false => out_file::OutputTarget::new_real(&self.args.out_dir)?,
@@ -76,9 +76,7 @@ impl Driver {
 
         for input in self.args.files {
             let source = fs::read_to_string(&input)?;
-            let files = generator
-                .generate_from_idl(&source, &input, props.clone())
-                .await?;
+            let files = generator.generate_from_idl(&source, &input, props.clone())?;
             output.write_files(files)?;
         }
 

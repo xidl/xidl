@@ -45,8 +45,8 @@ fn merge_generated_files(files: Vec<xidlc::driver::File>) -> BTreeMap<String, St
     merged
 }
 
-#[tokio::test(flavor = "current_thread")]
-async fn generated_headers_include_current_version_and_git_hash_for_code_targets() {
+#[test]
+fn generated_headers_include_current_version_and_git_hash_for_code_targets() {
     let cases = [
         HeaderCase {
             lang: "rust",
@@ -91,7 +91,6 @@ async fn generated_headers_include_current_version_and_git_hash_for_code_targets
         let mut generator = xidlc::driver::Generator::new(case.lang.to_string());
         let files = generator
             .generate_from_idl(&source, &path, HashMap::new())
-            .await
             .expect("generate files");
         assert!(
             !files.is_empty(),
