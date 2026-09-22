@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.92.1](https://github.com/xidl/xidl/compare/v0.92.0...v0.92.1) (2026-09-22)
+
+
+### Bug Fixes
+
+* **typescript-rest:** emit ClientAuth kinds so Authorization is sent ([296c466](https://github.com/xidl/xidl/commit/296c4664524ce7e291dbf74a3143980137563a24)), closes [#274](https://github.com/xidl/xidl/issues/274)
+
 ## [0.92.0](https://github.com/xidl/xidl/compare/v0.91.1...v0.92.0) (2026-09-20)
 
 
