@@ -127,9 +127,6 @@ where
         ws: ::xidl_rust_axum::axum::extract::ws::WebSocketUpgrade,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         let _ = &headers;
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/x-ndjson") {
-            return Err(xidl_rust_axum::Error::not_acceptable());
-        }
         let req_headers = headers.clone();
         let svc = svc.clone();
         let mut resp = ws
