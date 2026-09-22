@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.94.0](https://github.com/xidl/xidl/compare/v0.93.1...v0.94.0) (2026-09-22)
+
+
+### Features
+
+* support RFC 6455 WebSocket via [@upgrade](https://github.com/upgrade)(protocol="websocket") ([df480f3](https://github.com/xidl/xidl/commit/df480f33f5941a8ad31173dee193d1ca4e422c90))
+* support WebSocket mode on go-rest, typescript-rest, and OpenAPI ([007e883](https://github.com/xidl/xidl/commit/007e883dafd84a3cfddcee8e1dc1dfdeb311813b))
+
+
+### Bug Fixes
+
+* keep typescript_rest interface mod under 400-line limit ([9bb85a8](https://github.com/xidl/xidl/commit/9bb85a83b8f83a47c47c0ab9e20c90d6d5d822b1))
+* restore non-bidi stream request shapes and clippy clean ([d1bc8c2](https://github.com/xidl/xidl/commit/d1bc8c2dfcc13820c0bcb0d87d6fd3f8ac53e641))
+* **typescript-rest:** keep reserved-word binding keys aligned with schema fields ([006c8ae](https://github.com/xidl/xidl/commit/006c8ae0be945b70dc0b0d1941a8e74a0e649b74)), closes [#283](https://github.com/xidl/xidl/issues/283)
+
 ## [0.93.1](https://github.com/xidl/xidl/compare/v0.93.0...v0.93.1) (2026-09-22)
 
 
