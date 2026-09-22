@@ -66,6 +66,7 @@ pub(super) fn build_client_params(
     if matches!(op.meta.stream.kind, Some(HttpStreamKind::Client)) {
         return vec![ClientParamContext {
             name: "stream".to_string(),
+            key_name: "stream".to_string(),
             ty: build_client_stream_ty(op, module_path, request_name).unwrap_or(TsType::Void),
         }];
     }
@@ -94,6 +95,7 @@ pub(super) fn build_client_params(
             };
             ClientParamContext {
                 name: ts_ident(&p.name),
+                key_name: p.name.clone(),
                 ty,
             }
         })
@@ -125,7 +127,7 @@ pub(super) fn build_response_value_params(
             };
             ValueParamContext {
                 raw_name: b.wire_name.clone(),
-                access: ts_prop_name(&name),
+                access: ts_ident(&name),
                 key_name: name,
                 optional: false,
                 is_multi: matches!(b.ty, hir::TypeSpec::SequenceType(_)),

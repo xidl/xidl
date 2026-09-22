@@ -105,6 +105,7 @@ impl MethodInfo {
                 .unwrap_or(TsType::Void);
             return vec![ClientParamContext {
                 name: "stream".to_string(),
+                key_name: "stream".to_string(),
                 ty: TsType::AsyncIterable(Box::new(item_ty)),
             }];
         }
@@ -112,6 +113,7 @@ impl MethodInfo {
             .iter()
             .map(|param| ClientParamContext {
                 name: param.name.clone(),
+                key_name: param.raw_name.clone(),
                 ty: {
                     let ty = ts_type_for_type_spec(&param.ty, module_path, TypeRefTarget::Client);
                     if param.optional {

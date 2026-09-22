@@ -305,3 +305,129 @@ fn typescript_rest_rejects_empty_client_server_mode() {
 
     assert!(err.to_string().contains("enable_client or enable_server"));
 }
+
+fn generate_typescript_rest_source(source: &str) -> String {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("ts-http")
+        .join("inline.idl");
+    let mut generator = xidlc::driver::Generator::new(String::from("typescript-rest"));
+    let files = generator
+        .generate_from_idl(
+            source,
+            &path,
+            HashMap::from([
+                (String::from("enable_client"), true.into()),
+                (String::from("enable_server"), true.into()),
+            ]),
+        )
+        .expect("generate typescript-rest");
+    render_output(files)
+}
+
+#[test]
+fn typescript_rest_reserved_word_query_param_keys_match_schema() {
+    let output = generate_typescript_rest_source(
+        r#"
+#pragma xidlc package xidlc
+
+interface PanelApi {
+    @get(path = "/api/v1/usage/hour")
+    any getUsageHour(
+        @query string userId,
+        @query string from,
+        @query string to
+    );
+};
+"#,
+    );
+
+    // Server binding keys must use the schema field name, not the TS-escaped ident.
+    assert!(
+        output.contains("{ wireName: \"from\", key: \"from\", multi: false }"),
+        "server query binding should keep schema key from:\n{output}"
+    );
+    assert!(
+        !output.contains("key: \"_from\""),
+        "server binding must not escape reserved-word keys:\n{output}"
+    );
+
+    // args are looked up on the schema-parsed payload.
+    assert!(
+        output.contains("args: [\"userId\", \"from\", \"to\"]"),
+        "server args should use schema field names:\n{output}"
+    );
+
+    // Zod request schema field stays the raw IDL name.
+    assert!(
+        output.contains("\"from\": z.coerce.string()")
+            || output.contains("from: z.coerce.string()"),
+        "request schema should expose field from:\n{output}"
+    );
+
+    // Handler parameter remains TS-escaped so generated code compiles.
+    assert!(
+        output.contains("userId: string, _from: string, to: string"),
+        "handler signature should escape reserved-word params:\n{output}"
+    );
+}
+
+#[test]
+fn typescript_rest_reserved_word_body_param_keys_match_schema() {
+    let output = generate_typescript_rest_source(
+        r#"
+#pragma xidlc package xidlc
+
+struct CreatePayload {
+    string name;
+};
+
+interface PanelApi {
+    @post(path = "/api/v1/usage")
+    any createUsage(
+        @query string from,
+        CreatePayload req
+    );
+};
+"#,
+    );
+
+    assert!(
+        output.contains("{ wireName: \"from\", key: \"from\", multi: false }"),
+        "server query binding should keep schema key from:\n{output}"
+    );
+    assert!(
+        !output.contains("key: \"_from\"") && !output.contains("key: \"_req\""),
+        "server bindings must not escape reserved-word keys:\n{output}"
+    );
+    assert!(
+        output.contains("args: [\"from\", \"req\"]"),
+        "server args should use schema field names:\n{output}"
+    );
+}
+
+#[test]
+fn typescript_rest_reserved_word_response_keys_match_schema() {
+    let output = generate_typescript_rest_source(
+        r#"
+#pragma xidlc package xidlc
+
+interface PanelApi {
+    @get(path = "/api/v1/usage")
+    any getUsage(
+        out string from,
+        out string to
+    );
+};
+"#,
+    );
+
+    assert!(
+        !output.contains("key: \"_from\"") && !output.contains("key: \"\"from\""),
+        "response binding keys must be the schema field name:\n{output}"
+    );
+    assert!(
+        output.contains("key: \"from\""),
+        "response binding should expose key from:\n{output}"
+    );
+}

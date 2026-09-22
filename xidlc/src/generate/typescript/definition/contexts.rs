@@ -216,6 +216,7 @@ pub(crate) struct ClientMethodContext {
 #[derive(Serialize, Clone)]
 pub(crate) struct ClientParamContext {
     pub(crate) name: String,
+    pub(crate) key_name: String,
     pub(crate) ty: TsType,
 }
 
