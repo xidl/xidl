@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use crate::openapi::{builder, extensions::Extensions, set_value};
 
@@ -6,7 +6,8 @@ builder! {
     ServerVariableBuilder;
 
     #[non_exhaustive]
-    #[derive(Serialize, Deserialize, Default, Clone, PartialEq, Eq)]
+    #[derive(Serialize, Default, Clone, PartialEq, Eq)]
+    #[cfg_attr(test, derive(serde::Deserialize))]
     pub struct ServerVariable {
         #[serde(rename = "default")]
         pub default_value: String,

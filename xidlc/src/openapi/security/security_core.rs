@@ -1,12 +1,13 @@
 use std::{collections::BTreeMap, iter};
 
 use crate::openapi::extensions::Extensions;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use super::security_http::{Http, OpenIdConnect};
 
 #[non_exhaustive]
-#[derive(Serialize, Deserialize, Default, Clone, PartialEq, Eq)]
+#[derive(Serialize, Default, Clone, PartialEq, Eq)]
+#[cfg_attr(test, derive(serde::Deserialize))]
 pub struct SecurityRequirement {
     #[serde(flatten)]
     value: BTreeMap<String, Vec<String>>,
@@ -43,7 +44,8 @@ impl SecurityRequirement {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[derive(Serialize, Clone, PartialEq, Eq)]
+#[cfg_attr(test, derive(serde::Deserialize))]
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum SecurityScheme {
     ApiKey(ApiKey),
@@ -59,7 +61,8 @@ pub enum SecurityScheme {
     },
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[derive(Serialize, Clone, PartialEq, Eq)]
+#[cfg_attr(test, derive(serde::Deserialize))]
 #[serde(tag = "in", rename_all = "lowercase")]
 pub enum ApiKey {
     Header(ApiKeyValue),
@@ -68,7 +71,8 @@ pub enum ApiKey {
 }
 
 #[non_exhaustive]
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[derive(Serialize, Clone, PartialEq, Eq)]
+#[cfg_attr(test, derive(serde::Deserialize))]
 pub struct ApiKeyValue {
     pub name: String,
     #[serde(skip_serializing_if = "Option::is_none")]

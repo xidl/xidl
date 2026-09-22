@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use super::Parameter;
 use crate::openapi::{
@@ -10,7 +10,8 @@ builder! {
     OperationBuilder;
 
     #[non_exhaustive]
-    #[derive(Serialize, Deserialize, Default, Clone, PartialEq)]
+    #[derive(Serialize, Default, Clone, PartialEq)]
+    #[cfg_attr(test, derive(serde::Deserialize))]
     #[serde(rename_all = "camelCase")]
     pub struct Operation {
         #[serde(skip_serializing_if = "Option::is_none")]

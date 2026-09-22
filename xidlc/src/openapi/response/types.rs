@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use indexmap::IndexMap;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use crate::IntoResponses;
 use crate::openapi::{Ref, RefOr};
@@ -14,7 +14,8 @@ builder! {
     ResponsesBuilder;
 
     #[non_exhaustive]
-    #[derive(Serialize, Deserialize, Default, Clone, PartialEq)]
+    #[derive(Serialize, Default, Clone, PartialEq)]
+    #[cfg_attr(test, derive(serde::Deserialize))]
     #[serde(rename_all = "camelCase")]
     pub struct Responses {
         #[serde(flatten)]
@@ -91,7 +92,8 @@ builder! {
     ResponseBuilder;
 
     #[non_exhaustive]
-    #[derive(Serialize, Deserialize, Default, Clone, PartialEq)]
+    #[derive(Serialize, Default, Clone, PartialEq)]
+    #[cfg_attr(test, derive(serde::Deserialize))]
     #[serde(rename_all = "camelCase")]
     pub struct Response {
         pub description: String,

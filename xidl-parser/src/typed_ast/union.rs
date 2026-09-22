@@ -1,13 +1,13 @@
 use super::*;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
-#[derive(Debug, Parser, Serialize, Deserialize)]
+#[derive(Debug, Parser, Serialize)]
 pub struct EnumDcl {
     pub ident: Identifier,
     pub member: Vec<Enumerator>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize)]
 pub struct Enumerator {
     pub annotations: Vec<AnnotationAppl>,
     pub ident: Identifier,
@@ -48,28 +48,28 @@ impl<'a> crate::parser::FromTreeSitter<'a> for Enumerator {
     }
 }
 
-#[derive(Debug, Parser, Serialize, Deserialize)]
+#[derive(Debug, Parser, Serialize)]
 pub enum UnionDcl {
     UnionDef(UnionDef),
     UnionForwardDcl(UnionForwardDcl),
 }
 
-#[derive(Debug, Parser, Serialize, Deserialize)]
+#[derive(Debug, Parser, Serialize)]
 pub struct UnionDef {
     pub ident: Identifier,
     pub switch_type_spec: SwitchTypeSpec,
     pub case: Vec<Case>,
 }
-#[derive(Debug, Parser, Serialize, Deserialize)]
+#[derive(Debug, Parser, Serialize)]
 pub struct UnionForwardDcl(pub Identifier);
 
-#[derive(Debug, Parser, Serialize, Deserialize)]
+#[derive(Debug, Parser, Serialize)]
 pub struct Case {
     pub label: Vec<CaseLabel>,
     pub element: ElementSpec,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize)]
 pub enum CaseLabel {
     Case(ConstExpr),
     Default,
@@ -99,7 +99,7 @@ impl<'a> crate::parser::FromTreeSitter<'a> for CaseLabel {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize)]
 pub struct ElementSpec {
     pub annotations: Vec<AnnotationAppl>,
     pub ty: ElementSpecTy,
@@ -142,14 +142,14 @@ impl<'a> crate::parser::FromTreeSitter<'a> for ElementSpec {
     }
 }
 
-#[derive(Debug, Parser, Serialize, Deserialize)]
+#[derive(Debug, Parser, Serialize)]
 #[ts(transparent)]
 pub enum ElementSpecTy {
     TypeSpec(TypeSpec),
     ConstrTypeDcl(ConstrTypeDcl),
 }
 
-#[derive(Debug, Parser, Serialize, Deserialize)]
+#[derive(Debug, Parser, Serialize)]
 pub enum SwitchTypeSpec {
     IntegerType(IntegerType),
     CharType(CharType),

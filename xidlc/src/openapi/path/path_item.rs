@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use super::{HttpMethod, Operation, Parameter};
 use crate::openapi::{Server, builder, extensions::Extensions, set_value};
@@ -7,7 +7,8 @@ builder! {
     PathItemBuilder;
 
     #[non_exhaustive]
-    #[derive(Serialize, Deserialize, Default, Clone, PartialEq)]
+    #[derive(Serialize, Default, Clone, PartialEq)]
+    #[cfg_attr(test, derive(serde::Deserialize))]
     #[serde(rename_all = "camelCase")]
     pub struct PathItem {
         #[serde(skip_serializing_if = "Option::is_none")]

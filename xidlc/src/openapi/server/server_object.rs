@@ -1,6 +1,6 @@
 use std::{collections::BTreeMap, iter};
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use super::ServerVariable;
 use crate::openapi::{builder, extensions::Extensions, set_value};
@@ -9,7 +9,8 @@ builder! {
     ServerBuilder;
 
     #[non_exhaustive]
-    #[derive(Serialize, Deserialize, Default, Clone, PartialEq, Eq)]
+    #[derive(Serialize, Default, Clone, PartialEq, Eq)]
+    #[cfg_attr(test, derive(serde::Deserialize))]
     #[serde(rename_all = "camelCase")]
     pub struct Server {
         pub url: String,

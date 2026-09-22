@@ -1,8 +1,8 @@
 use super::*;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use xidl_parser_derive::Parser;
 
-#[derive(Debug, Parser, Serialize, Deserialize)]
+#[derive(Debug, Parser, Serialize)]
 pub struct TemplateModuleDcl {
     pub ident: Identifier,
     pub parameter: FormalParameters,
@@ -10,23 +10,23 @@ pub struct TemplateModuleDcl {
     pub definition: Vec<TplDefinition>,
 }
 
-#[derive(Debug, Parser, Serialize, Deserialize)]
+#[derive(Debug, Parser, Serialize)]
 pub struct TemplateModuleInst {
     pub name: ScopedName,
     pub parameter: ActualParameters,
     pub ident: Identifier,
 }
 
-#[derive(Debug, Parser, Serialize, Deserialize)]
+#[derive(Debug, Parser, Serialize)]
 pub struct FormalParameters(pub Vec<FormalParameter>);
 
-#[derive(Debug, Parser, Serialize, Deserialize)]
+#[derive(Debug, Parser, Serialize)]
 pub struct FormalParameter {
     pub ty: FormalParameterType,
     pub ident: Identifier,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize)]
 pub enum FormalParameterType {
     Typename,
     Interface,
@@ -91,27 +91,27 @@ impl<'a> crate::parser::FromTreeSitter<'a> for FormalParameterType {
     }
 }
 
-#[derive(Debug, Parser, Serialize, Deserialize)]
+#[derive(Debug, Parser, Serialize)]
 #[allow(clippy::large_enum_variant)]
 pub enum TplDefinition {
     Definition(Definition),
     TemplateModuleRef(TemplateModuleRef),
 }
 
-#[derive(Debug, Parser, Serialize, Deserialize)]
+#[derive(Debug, Parser, Serialize)]
 pub struct TemplateModuleRef {
     pub name: ScopedName,
     pub parameter: FormalParameterNames,
     pub ident: Identifier,
 }
 
-#[derive(Debug, Parser, Serialize, Deserialize)]
+#[derive(Debug, Parser, Serialize)]
 pub struct FormalParameterNames(pub Vec<Identifier>);
 
-#[derive(Debug, Parser, Serialize, Deserialize)]
+#[derive(Debug, Parser, Serialize)]
 pub struct ActualParameters(pub Vec<ActualParameter>);
 
-#[derive(Debug, Parser, Serialize, Deserialize)]
+#[derive(Debug, Parser, Serialize)]
 pub enum ActualParameter {
     TypeSpec(TypeSpec),
     ConstExpr(ConstExpr),

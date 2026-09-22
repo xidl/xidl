@@ -151,7 +151,8 @@ impl<'de> Deserialize<'de> for Required {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[derive(Serialize, Clone, PartialEq, Eq)]
+#[cfg_attr(test, derive(serde::Deserialize))]
 #[serde(untagged)]
 pub enum RefOr<T> {
     Ref(Ref),

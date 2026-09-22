@@ -2,7 +2,7 @@
 //!
 //! [header]: https://spec.openapis.org/oas/latest.html#header-object
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use super::{Object, RefOr, Schema, Type, builder, set_value};
 
@@ -13,7 +13,8 @@ builder! {
     ///
     /// [header]: https://spec.openapis.org/oas/latest.html#header-object
     #[non_exhaustive]
-    #[derive(Serialize, Deserialize, Clone, PartialEq)]
+    #[derive(Serialize, Clone, PartialEq)]
+    #[cfg_attr(test, derive(serde::Deserialize))]
     pub struct Header {
         /// Schema of header type.
         pub schema: RefOr<Schema>,
