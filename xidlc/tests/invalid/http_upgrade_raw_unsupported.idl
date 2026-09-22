@@ -1,0 +1,5 @@
+interface RawUpgradeApi {
+    @upgrade(protocol = "xidl-raw")
+    @get(path = "/raw")
+    void connect();
+};

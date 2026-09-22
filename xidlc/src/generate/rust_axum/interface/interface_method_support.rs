@@ -106,6 +106,7 @@ pub(crate) fn response_ty(http_op: &HttpOperation, struct_prefix: &str, ret_ty: 
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub(crate) fn ensure_streaming_constraints(
     op: &hir::OpDcl,
     is_client_stream: bool,

@@ -124,9 +124,15 @@
     {% if method.request_struct is defined and method.request_struct and (method.is_server_stream or method.is_client_stream or method.is_bidi_stream) %}
         #[derive({% if opt.enable_client %}::serde::Serialize{% if opt.enable_server %}, {% endif %}{% endif %}{% if opt.enable_server %}::serde::Deserialize{% endif %})]
         pub struct {{ method.request_struct }} {
-            {% for param in method.body_params %}
-                pub {{ param.name }}: {{ param.ty }},
-            {% endfor %}
+            {% if method.is_bidi_stream %}
+                {% for param in method.body_params %}
+                    pub {{ param.name }}: {{ param.ty }},
+                {% endfor %}
+            {% else %}
+                {% for param in method.request_params %}
+                    pub {{ param.name }}: {{ param.ty }},
+                {% endfor %}
+            {% endif %}
             {% if method.auth_in_request_struct %}
                 pub xidl_auth: {{ method.auth_ty }},
             {% endif %}

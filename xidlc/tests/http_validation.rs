@@ -65,9 +65,25 @@ fn rejects_invalid_server_stream_methods_for_http_targets() {
 }
 
 #[test]
-fn rejects_typescript_bidi_stream_fixture() {
-    let err = generate_error("ts-rest", "http_stream_bidi_typescript.idl");
-    assert!(err.contains("does not support @bidi_stream"), "{err}");
+fn accepts_typescript_bidi_stream_fixture() {
+    // typescript-rest now generates typed WebSocket sessions for @bidi_stream.
+    let _guard = test_lock().lock().expect("lock validation tests");
+    let (_path, source) = invalid_case_source("http_stream_bidi_typescript.idl");
+    let result = xidlc::generate_from_source("ts-rest", &source, HashMap::new());
+    if let Err(err) = result {
+        panic!("ts-rest should support @bidi_stream: {err}");
+    }
+}
+
+#[test]
+fn rejects_raw_upgrade_on_typescript_and_go() {
+    for lang in ["ts-rest", "go-rest"] {
+        let err = generate_error(lang, "http_upgrade_raw_unsupported.idl");
+        assert!(
+            err.contains("does not support raw @upgrade"),
+            "{lang}: {err}"
+        );
+    }
 }
 
 #[test]

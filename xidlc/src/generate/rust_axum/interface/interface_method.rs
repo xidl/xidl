@@ -129,11 +129,8 @@ pub(crate) fn render_op_from_http(
         || !matches!(http_op.http.request.body.shape, HttpRequestBodyShape::Empty);
 
     let request_struct = if auth_in_request_struct || has_inputs {
-        // Stream item structs only carry body items.
-        if (is_client_stream || is_bidi_stream)
-            && params.body_params.is_empty()
-            && !auth_in_request_struct
-        {
+        // Bidi stream item structs only carry body items.
+        if is_bidi_stream && params.body_params.is_empty() && !auth_in_request_struct {
             None
         } else {
             Some(format!("{struct_prefix}Request"))
@@ -142,8 +139,9 @@ pub(crate) fn render_op_from_http(
         None
     };
 
-    // Stream item type is body-only so handshake params never leak into TIn.
-    let request_ty = if is_client_stream || is_bidi_stream {
+    // Bidi stream items are body-only so handshake params never leak into TIn.
+    // Server/client streams keep the full request struct (path/query/body/auth).
+    let request_ty = if is_bidi_stream {
         if params.body_params.is_empty() {
             "()".to_string()
         } else {
@@ -156,7 +154,7 @@ pub(crate) fn render_op_from_http(
     // Handshake-scope params are passed separately on WebSocket/stream methods.
     let mut handshake_params = Vec::new();
     let mut handshake_param_names = Vec::new();
-    if is_client_stream || is_bidi_stream {
+    if is_bidi_stream {
         for ctx in params
             .path_params
             .iter()

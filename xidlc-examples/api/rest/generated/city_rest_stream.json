@@ -309,7 +309,8 @@
           {
             "http_basic": []
           }
-        ]
+        ],
+        "x-protocol": "websocket"
       }
     },
     "/ticker": {
