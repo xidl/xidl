@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.93.1](https://github.com/xidl/xidl/compare/v0.93.0...v0.93.1) (2026-09-22)
+
+
+### Bug Fixes
+
+* **xidlc:** gate unused openapi array_items deserializer behind cfg(test) ([e7b84cf](https://github.com/xidl/xidl/commit/e7b84cf0c90ecd34a2186283444c2561b25a0aed))
+
 ## [0.93.0](https://github.com/xidl/xidl/compare/v0.92.1...v0.93.0) (2026-09-22)
 
 
