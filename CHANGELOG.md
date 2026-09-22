@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.93.0](https://github.com/xidl/xidl/compare/v0.92.1...v0.93.0) (2026-09-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* **xidlc:** external codegen plugins now read/write NDJSON on stdio instead of serving JSON-RPC on --endpoint.
+
+### Code Refactoring
+
+* **xidlc:** drop tokio and xidl-jsonrpc from the compiler ([edd5368](https://github.com/xidl/xidl/commit/edd536821b43e93fe8114a72624010ca6174d8dd))
+
 ## [0.92.1](https://github.com/xidl/xidl/compare/v0.92.0...v0.92.1) (2026-09-22)
 
 
