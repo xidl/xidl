@@ -22,7 +22,8 @@
             {%- endif %}
             async fn {{ method.name }}(
             &self{% if method.is_server_stream or method.is_client_stream or method.is_bidi_stream %},
-            req: ::xidl_rust_axum::Request<{{ method.request_payload_ty }}>{% else %}{% if method.server_params | length > 0 %},
+            req: ::xidl_rust_axum::Request<{{ method.request_payload_ty }}>{% if method.handshake_params | length > 0 %},
+            {{ method.handshake_params | join(", ") }}{% endif %}{% else %}{% if method.server_params | length > 0 %},
             {{ method.server_params | join(", ") }}{% endif %}{% if method.is_upgrade %},
             upgrade: ::xidl_rust_axum::upgrade::Upgrade{% endif %}{% endif %}
             ) -> ::xidl_rust_axum::Result<{% if method.is_server_stream %}{% if method.is_byte_stream %}xidl_rust_axum::stream::ByteStream{% else %}xidl_rust_axum::stream::SseStream<{{ method.response_ty }}>{% endif %}{% elif method.is_bidi_stream %}(){% elif method.is_upgrade %}::xidl_rust_axum::axum::response::Response{% else %}{{ method.response_ty }}{% endif %}>;
@@ -123,7 +124,7 @@
     {% if method.request_struct is defined and method.request_struct and (method.is_server_stream or method.is_client_stream or method.is_bidi_stream) %}
         #[derive({% if opt.enable_client %}::serde::Serialize{% if opt.enable_server %}, {% endif %}{% endif %}{% if opt.enable_server %}::serde::Deserialize{% endif %})]
         pub struct {{ method.request_struct }} {
-            {% for param in method.request_params %}
+            {% for param in method.body_params %}
                 pub {{ param.name }}: {{ param.ty }},
             {% endfor %}
             {% if method.auth_in_request_struct %}

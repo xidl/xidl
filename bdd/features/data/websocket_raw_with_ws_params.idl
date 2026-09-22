@@ -1,0 +1,5 @@
+interface BadRaw {
+    @upgrade(protocol = "fastnet", codec = "json")
+    @get(path = "/raw")
+    void connect();
+};

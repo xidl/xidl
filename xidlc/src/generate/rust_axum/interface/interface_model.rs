@@ -88,6 +88,12 @@ pub(crate) struct MethodContext {
     pub(crate) response_status: String,
     pub(crate) is_upgrade: bool,
     pub(crate) upgrade_protocol: Option<String>,
+    pub(crate) is_upgrade_websocket: bool,
+    pub(crate) websocket_subprotocol: Option<String>,
+    pub(crate) websocket_heartbeat_ms: Option<u64>,
+    pub(crate) websocket_max_message_bytes: Option<u64>,
+    pub(crate) handshake_params: Vec<String>,
+    pub(crate) handshake_param_names: Vec<String>,
 }
 
 #[derive(Serialize, Clone)]

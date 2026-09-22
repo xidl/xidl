@@ -43,7 +43,7 @@ T: {{ ident }} + Send + Sync + 'static,
         request: {{ method.request_struct }}{% endif %}
         ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
             let _ = &headers;
-            {% if method.response_content_type and method.response_content_type != "" %}
+            {% if method.response_content_type and method.response_content_type != "" and not method.is_bidi_stream and not method.is_upgrade %}
                 if !xidl_rust_axum::http::accepts_media_type(&headers, "{{ method.response_content_type }}") {
                     return Err(xidl_rust_axum::Error::not_acceptable());
                 }
@@ -226,7 +226,10 @@ T: {{ ident }} + Send + Sync + 'static,
                     {% if method.has_basic_auth or method.has_bearer_auth %}
                         let xidl_auth = xidl_auth.clone();
                     {% endif %}
-                    let mut resp = ws.on_upgrade(move |socket| async move {
+                    {% for name in method.handshake_param_names %}
+                        let {{ name }} = {{ name }}.clone();
+                    {% endfor %}
+                    let mut resp = {% if method.websocket_subprotocol %}ws.protocols(["{{ method.websocket_subprotocol }}"]){% else %}ws{% endif %}.on_upgrade(move |socket| async move {
                         let bidi = xidl_rust_axum::stream::open_bidi_server::<{{ method.request_item_ty }}, {{ method.response_ty }}>(socket);
                         let error_sender = bidi.error_sender();
                         let req = ::xidl_rust_axum::Request::new(
@@ -237,7 +240,7 @@ T: {{ ident }} + Send + Sync + 'static,
                             bidi
                         {% endif %}
                         );
-                        if let Err(err) = svc.{{ method.name }}(req).await {
+                        if let Err(err) = svc.{{ method.name }}(req{% for name in method.handshake_param_names %}, {{ name }}{% endfor %}).await {
                             if let Some(tx) = error_sender {
                                 let _ = tx.send(Err(err)).await;
                             }

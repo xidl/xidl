@@ -1,0 +1,5 @@
+interface BadWs {
+    @upgrade(protocol = "ws")
+    @get(path = "/ctrl")
+    void control(in string msg, out string reply);
+};

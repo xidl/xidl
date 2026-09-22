@@ -175,10 +175,15 @@ fn validates_route_bindings_request_shape_and_head_constraints() {
         param("a", HttpParamKind::Body),
         param("b", HttpParamKind::Header),
     ];
-    let err = validate_request_shape("upload", Some(HttpStreamKind::Client), &request_params)
-        .expect_err("non-body request");
+    let err = validate_request_shape(
+        "upload",
+        Some(HttpStreamKind::Client),
+        &request_params,
+        false,
+    )
+    .expect_err("non-body request");
     assert!(err.contains("body parameters only"));
-    let err = validate_request_shape("chat", Some(HttpStreamKind::Bidi), &request_params)
+    let err = validate_request_shape("chat", Some(HttpStreamKind::Bidi), &request_params, false)
         .expect_err("bidi non-body request");
     assert!(err.contains("@bidi_stream"));
 
@@ -189,7 +194,8 @@ fn validates_route_bindings_request_shape_and_head_constraints() {
         },
         param("b", HttpParamKind::Body),
     ];
-    let err = validate_request_shape("upload", None, &flattened).expect_err("flattened body");
+    let err =
+        validate_request_shape("upload", None, &flattened, false).expect_err("flattened body");
     assert!(err.contains("requires exactly one request-side body parameter"));
 
     let head_err = validate_head_constraints(
@@ -210,53 +216,66 @@ fn validates_route_bindings_request_shape_and_head_constraints() {
 
 #[test]
 fn test_validate_upgrade_constraints() {
-    // 1. Not an upgrade method
-    assert!(validate_upgrade_constraints("op", false, None, HttpMethod::Get, &[], None).is_ok());
+    use super::super::semantics::UpgradeMode;
 
-    // 2. Protocol not supplied
-    let err =
-        validate_upgrade_constraints("op", true, None, HttpMethod::Get, &[], None).unwrap_err();
-    assert!(err.contains("requires a 'protocol' parameter"));
+    assert!(validate_upgrade_constraints("op", None, HttpMethod::Get, &[], None).is_ok());
 
-    // 3. Protocol is empty
-    let err =
-        validate_upgrade_constraints("op", true, Some(""), HttpMethod::Get, &[], None).unwrap_err();
-    assert!(err.contains("cannot be empty"));
-
-    // 4. Returns non-void
     let err = validate_upgrade_constraints(
         "op",
-        true,
-        Some("xidl-raw"),
+        Some(UpgradeMode::Raw),
         HttpMethod::Get,
         &[],
         Some(&TypeSpec::Boolean),
     )
     .unwrap_err();
-    assert!(err.contains("must return void"));
+    assert!(err.contains("must return void"), "{err}");
 
-    // 5. Has body parameter
-    let request_params = vec![param("payload", HttpParamKind::Body)];
+    let err =
+        validate_upgrade_constraints("op", Some(UpgradeMode::Raw), HttpMethod::Post, &[], None)
+            .unwrap_err();
+    assert!(err.contains("must use GET"), "{err}");
+
     let err = validate_upgrade_constraints(
         "op",
-        true,
-        Some("xidl-raw"),
+        Some(UpgradeMode::Raw),
         HttpMethod::Get,
-        &request_params,
+        &[HttpParam {
+            name: "body".into(),
+            wire_name: "body".into(),
+            ty: TypeSpec::Boolean,
+            kind: HttpParamKind::Body,
+            optional: false,
+            flatten: false,
+        }],
         None,
     )
     .unwrap_err();
-    assert!(err.contains("cannot have @body parameters"));
+    assert!(err.contains("cannot have @body"), "{err}");
 
-    // 6. Uses non-GET method
-    let err =
-        validate_upgrade_constraints("op", true, Some("xidl-raw"), HttpMethod::Post, &[], None)
-            .unwrap_err();
-    assert!(err.contains("must use GET"));
-
-    // 7. Successful validation
     assert!(
-        validate_upgrade_constraints("op", true, Some("xidl-raw"), HttpMethod::Get, &[], None)
-            .is_ok()
+        validate_upgrade_constraints(
+            "op",
+            Some(UpgradeMode::WebSocket),
+            HttpMethod::Get,
+            &[],
+            None
+        )
+        .is_ok()
     );
+}
+
+#[test]
+fn test_validate_websocket_stream_items() {
+    let err = validate_websocket_stream_items("op", &[], &[]).unwrap_err();
+    assert!(err.contains("at least one in or out"), "{err}");
+
+    let item = HttpParam {
+        name: "msg".into(),
+        wire_name: "msg".into(),
+        ty: TypeSpec::Boolean,
+        kind: HttpParamKind::Body,
+        optional: false,
+        flatten: false,
+    };
+    assert!(validate_websocket_stream_items("op", &[item], &[]).is_ok());
 }

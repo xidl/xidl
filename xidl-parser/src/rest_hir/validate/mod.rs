@@ -234,6 +234,7 @@ pub(super) fn validate_request_shape(
     op_name: &str,
     stream_kind: Option<HttpStreamKind>,
     request_params: &[HttpParam],
+    allow_handshake_params: bool,
 ) -> RestHirResult<()> {
     let request_body_params = request_params
         .iter()
@@ -246,6 +247,7 @@ pub(super) fn validate_request_shape(
         stream_kind,
         Some(HttpStreamKind::Client | HttpStreamKind::Bidi)
     ) && has_non_body_request_params
+        && !allow_handshake_params
     {
         let label = if matches!(stream_kind, Some(HttpStreamKind::Bidi)) {
             "@bidi_stream"
@@ -294,41 +296,48 @@ pub(super) fn http_method_name(method: HttpMethod) -> &'static str {
 
 pub(super) fn validate_upgrade_constraints(
     op_name: &str,
-    has_upgrade: bool,
-    upgrade_protocol: Option<&str>,
+    upgrade_mode: Option<super::semantics::UpgradeMode>,
     method: HttpMethod,
     request_params: &[HttpParam],
     return_type: Option<&hir::TypeSpec>,
 ) -> RestHirResult<()> {
-    if !has_upgrade {
+    use super::semantics::UpgradeMode;
+    let Some(mode) = upgrade_mode else {
         return Ok(());
-    }
-    let Some(proto) = upgrade_protocol else {
-        return Err(format!(
-            "@upgrade annotation on method '{}' requires a 'protocol' parameter (e.g. @upgrade(protocol=\"xidl-raw\"))",
-            op_name
-        ));
     };
-    if proto.is_empty() {
-        return Err(format!(
-            "@upgrade 'protocol' parameter on method '{}' cannot be empty",
-            op_name
-        ));
-    }
     if return_type.is_some() {
         return Err(format!("@upgrade method '{}' must return void", op_name));
     }
-    let has_body_param = request_params
-        .iter()
-        .any(|param| matches!(param.kind, HttpParamKind::Body));
-    if has_body_param {
-        return Err(format!(
-            "@upgrade method '{}' cannot have @body parameters",
-            op_name
-        ));
-    }
     if method != HttpMethod::Get {
         return Err(format!("@upgrade method '{}' must use GET", op_name));
+    }
+    if mode == UpgradeMode::Raw {
+        let has_body_param = request_params
+            .iter()
+            .any(|param| matches!(param.kind, HttpParamKind::Body));
+        if has_body_param {
+            return Err(format!(
+                "@upgrade method '{}' cannot have @body parameters",
+                op_name
+            ));
+        }
+    }
+    Ok(())
+}
+
+pub(super) fn validate_websocket_stream_items(
+    op_name: &str,
+    request_params: &[HttpParam],
+    response_params: &[HttpParam],
+) -> RestHirResult<()> {
+    let has_in_item = request_params
+        .iter()
+        .any(|param| matches!(param.kind, HttpParamKind::Body));
+    let has_out_item = !response_params.is_empty();
+    if !has_in_item && !has_out_item {
+        return Err(format!(
+            "@upgrade(protocol = \"websocket\") method '{op_name}' must declare at least one in or out stream item"
+        ));
     }
     Ok(())
 }

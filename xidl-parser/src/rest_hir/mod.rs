@@ -13,6 +13,7 @@ use serde::{Deserialize, Serialize};
 
 pub use model::*;
 pub use project::project;
+pub use semantics::{UpgradeMode, WebSocketCodec, WebSocketConfig};
 
 /// Selects the projected HIR shape produced from typed AST input.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

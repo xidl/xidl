@@ -28,6 +28,7 @@ async fn bidi_server_stream_write_close_and_error_sender_follow_state() {
     let mut stream = BidiServerStream {
         inbound: in_rx,
         outbound: Some(out_tx),
+        task: None,
     };
 
     in_tx.send(Ok(Payload { value: 9 })).await.unwrap();

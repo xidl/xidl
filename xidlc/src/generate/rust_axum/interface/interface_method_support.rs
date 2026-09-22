@@ -110,6 +110,7 @@ pub(crate) fn ensure_streaming_constraints(
     op: &hir::OpDcl,
     is_client_stream: bool,
     is_bidi_stream: bool,
+    allow_handshake_params: bool,
     path_params: &[ParamContext],
     query_params: &[ParamContext],
     header_params: &[ParamContext],
@@ -125,7 +126,7 @@ pub(crate) fn ensure_streaming_constraints(
             op.ident
         )));
     }
-    if is_bidi_stream && has_non_body {
+    if is_bidi_stream && has_non_body && !allow_handshake_params {
         return Err(IdlcError::rpc(format!(
             "@bidi_stream method '{}' currently supports body parameters only",
             op.ident
