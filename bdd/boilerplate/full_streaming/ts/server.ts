@@ -28,13 +28,13 @@ const handler = createRouter(Object.values(HttpStreamApiOperations), service, {
   authorize(request, requirements) {
     const authorization = request.headers.get('Authorization');
     if (
-      requirements.some(requirement => requirement.kind === 'http_basic') &&
+      requirements.some(requirement => requirement.kind === 'basic') &&
       !authorization?.startsWith('Basic ')
     ) {
       throw new XidlServerError(401, 'Unauthorized');
     }
     if (
-      requirements.some(requirement => requirement.kind === 'http_bearer') &&
+      requirements.some(requirement => requirement.kind === 'bearer') &&
       !authorization?.startsWith('Bearer ')
     ) {
       throw new XidlServerError(401, 'Unauthorized');

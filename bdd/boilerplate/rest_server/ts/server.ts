@@ -133,7 +133,7 @@ const handler = createRouter(Object.values(RestServerOperations), myServer, {
     const authHeader = req.headers.get('Authorization');
     if (requirements.length > 0) {
       if (!authHeader) {
-        const basic = requirements.find(r => r.kind === 'http_basic');
+        const basic = requirements.find(r => r.kind === 'basic');
         const realm = (basic as any)?.realm || 'login';
         throw new XidlServerError(401, 'Unauthorized', {
           'WWW-Authenticate': `Basic realm="${realm}"`,
@@ -141,7 +141,7 @@ const handler = createRouter(Object.values(RestServerOperations), myServer, {
       }
 
       if (
-        requirements.some(r => r.kind === 'http_bearer') &&
+        requirements.some(r => r.kind === 'bearer') &&
         authHeader === 'Bearer'
       ) {
         throw new XidlServerError(401, 'Unauthorized');

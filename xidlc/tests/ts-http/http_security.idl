@@ -1,0 +1,19 @@
+#pragma xidlc package xidlc
+#pragma xidlc version v1.0.0
+
+interface HttpSecurityService {
+    @http_basic
+    @api_key(in = "header", name = "X-API-Key")
+    @get(path = "/users/{id}")
+    string get_user(@path uint32 id);
+
+    @http_bearer
+    @get(path = "/whoami")
+    string whoami();
+
+    @post(path = "/users/search")
+    string search_user(string keyword);
+
+    @no_security
+    string health();
+};
