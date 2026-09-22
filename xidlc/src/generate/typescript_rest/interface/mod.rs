@@ -1,5 +1,6 @@
 mod helpers;
 mod render_types;
+mod websocket_helpers;
 
 use super::model::{
     ClientClassContext, MethodModel, PathParamContext, RequestPayloadEntry, TsHttpBlocks,
@@ -83,6 +84,10 @@ pub(crate) fn render_interface(
                         stream_item_schema_ref: method.stream_item_schema_ref.clone(),
                         is_server_stream: method.is_server_stream,
                         is_client_stream: method.is_client_stream,
+                        is_websocket: method.is_websocket,
+                        websocket_subprotocol: method.websocket_subprotocol.clone(),
+                        stream_in_ty: method.stream_in_ty.clone(),
+                        stream_out_ty: method.stream_out_ty.clone(),
                         security: method.security.clone(),
                         request_fields: method.request_fields.clone(),
                         response_fields: method.response_fields.clone(),
@@ -92,8 +97,13 @@ pub(crate) fn render_interface(
             },
         )?,
     );
+    let (ws_client_helpers, ws_server_helpers) =
+        websocket_helpers::render_websocket_helpers(&methods);
+    out.client.extend(ws_client_helpers);
+    out.server.extend(ws_server_helpers);
     out.server
         .push(ServerClass::new(&def.header.ident, module_path, methods).render(renderer)?);
+
     Ok(out)
 }
 
@@ -104,6 +114,14 @@ fn build_method_model(
 ) -> IdlcResult<MethodModel> {
     validate_stream_support(op)?;
     let prefix = method_struct_prefix(interface_name, &op.meta.name);
+    let is_websocket = matches!(op.meta.stream.kind, Some(HttpStreamKind::Bidi));
+    let websocket_subprotocol = op
+        .meta
+        .websocket
+        .as_ref()
+        .and_then(|cfg| cfg.subprotocol.clone());
+    let stream_in_name = format!("{prefix}Request");
+    let stream_out_name = format!("{prefix}Response");
 
     let request_fields = op
         .signature
@@ -372,6 +390,10 @@ fn build_method_model(
         stream_item_schema_ref,
         is_server_stream: matches!(op.meta.stream.kind, Some(HttpStreamKind::Server)),
         is_client_stream: matches!(op.meta.stream.kind, Some(HttpStreamKind::Client)),
+        is_websocket,
+        websocket_subprotocol,
+        stream_in_ty: stream_in_name.clone(),
+        stream_out_ty: stream_out_name.clone(),
         security: security_contexts(op),
         request_fields,
         response_fields,

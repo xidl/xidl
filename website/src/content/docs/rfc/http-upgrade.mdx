@@ -230,8 +230,11 @@ limited to 123 bytes by RFC 6455.
 - Targets that cannot generate WebSocket mode MUST fail codegen with an
   explicit unsupported-target error.
 
-## Relationship to Other RFCs
+### Target support
 
-- HTTP routing, parameters, security: HTTP RFC / HTTP Security RFC.
-- `@server_stream` / `@client_stream` codecs (SSE / NDJSON): HTTP Stream RFC.
-- JSON-RPC over `ws://` transports: JSON-RPC / JSON-RPC Stream RFCs.
+| Target | WebSocket mode / `@bidi_stream` | Raw `@upgrade` |
+|---|---|---|
+| `rust-axum` | Supported (typed bidi session, subprotocol, ping/pong) | Supported (upgrade handle) |
+| `go-rest` | Supported (`WSBidiStream`, subprotocol, ping/pong), `codec = json` | Not yet (explicit error) |
+| `typescript-rest` | Supported (`open_*Session` / `create_*Handler`, `codec = json`) | Not yet (explicit error) |
+| `openapi` | Described with `x-protocol: websocket` and optional `x-websocket-subprotocol` | Not described as WebSocket |

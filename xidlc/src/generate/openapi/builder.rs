@@ -49,6 +49,16 @@ pub(crate) fn build_operation(method: &MethodInfo) -> crate::openapi::path::Oper
     if let Some(request_body) = &method.request_body {
         operation = operation.request_body(Some(request_body.clone()));
     }
+    if method.is_websocket {
+        use crate::openapi::extensions::Extensions;
+        use serde_json::json;
+        let mut ext = Extensions::default();
+        ext.insert("x-protocol".to_string(), json!("websocket"));
+        if let Some(sub) = &method.websocket_subprotocol {
+            ext.insert("x-websocket-subprotocol".to_string(), json!(sub.clone()));
+        }
+        operation = operation.extensions(Some(ext));
+    }
     operation.build()
 }
 
