@@ -1,7 +1,7 @@
 //! Implements content object for request body and response.
 use std::collections::BTreeMap;
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use serde_json::Value;
 
@@ -19,7 +19,8 @@ builder! {
     /// [`Content`] implements OpenAPI spec [Media Type Object][media_type]
     ///
     /// [media_type]: <https://spec.openapis.org/oas/latest.html#media-type-object>
-    #[derive(Serialize, Deserialize, Default, Clone, PartialEq)]
+    #[derive(Serialize, Default, Clone, PartialEq)]
+    #[cfg_attr(test, derive(serde::Deserialize))]
     #[non_exhaustive]
     pub struct Content {
         /// Schema used in response body or request body.

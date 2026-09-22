@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use super::{Contact, License};
 use crate::openapi::{builder, extensions::Extensions, set_value};
@@ -7,7 +7,8 @@ builder! {
     InfoBuilder;
 
     #[non_exhaustive]
-    #[derive(Serialize, Deserialize, Default, Clone, PartialEq, Eq)]
+    #[derive(Serialize, Default, Clone, PartialEq, Eq)]
+    #[cfg_attr(test, derive(serde::Deserialize))]
     #[serde(rename_all = "camelCase")]
     pub struct Info {
         pub title: String,

@@ -16,7 +16,7 @@ pub use self::{
     paths::{Paths, PathsBuilder},
 };
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 #[allow(missing_docs)]
 #[doc(hidden)]
@@ -25,7 +25,8 @@ pub type PathsMap<K, V> = std::collections::BTreeMap<K, V>;
 /// HTTP method of the operation.
 ///
 /// List of supported HTTP methods <https://spec.openapis.org/oas/latest.html#path-item-object>
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Hash, PartialOrd, Ord, Clone)]
+#[derive(Debug, Serialize, PartialEq, Eq, Hash, PartialOrd, Ord, Clone)]
+#[cfg_attr(test, derive(serde::Deserialize))]
 #[serde(rename_all = "lowercase")]
 pub enum HttpMethod {
     /// Type mapping for HTTP _GET_ request.

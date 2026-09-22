@@ -3,7 +3,7 @@
 //! [link_object]: https://spec.openapis.org/oas/latest.html#link-object
 use std::collections::BTreeMap;
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use super::extensions::Extensions;
 use super::{Server, builder};
@@ -23,7 +23,8 @@ builder! {
     ///
     /// [expression]: https://spec.openapis.org/oas/latest.html#runtime-expressions
     /// [link_object]: https://spec.openapis.org/oas/latest.html#link-object
-    #[derive(Serialize, Deserialize, Clone, PartialEq, Default)]
+    #[derive(Serialize, Clone, PartialEq, Default)]
+    #[cfg_attr(test, derive(serde::Deserialize))]
     #[non_exhaustive]
     pub struct Link {
         /// A relative or absolute URI reference to an OAS operation. This field is

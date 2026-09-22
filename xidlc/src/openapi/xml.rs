@@ -3,7 +3,7 @@
 //! [xml_object]: https://spec.openapis.org/oas/latest.html#xml-object
 use std::borrow::Cow;
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use super::{builder, set_value};
 
@@ -28,7 +28,8 @@ builder! {
     /// [schema_object]: https://spec.openapis.org/oas/latest.html#schema-object
     /// [schema]: ../schema/index.html
     #[non_exhaustive]
-    #[derive(Serialize, Deserialize, Default, Clone, PartialEq, Eq)]
+    #[derive(Serialize, Default, Clone, PartialEq, Eq)]
+    #[cfg_attr(test, derive(serde::Deserialize))]
     pub struct Xml {
         /// Used to replace the name of attribute or type used in schema property.
         /// When used with [`Xml::wrapped`] attribute the name will be used as a wrapper name

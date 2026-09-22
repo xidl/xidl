@@ -4,7 +4,7 @@
 //! [example]: https://spec.openapis.org/oas/latest.html#example-object
 //! [response]: response/struct.Response.html
 //! [request_body]: request_body/struct.RequestBody.html
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use super::{RefOr, builder, set_value};
 
@@ -27,7 +27,8 @@ builder! {
     ///
     /// [example]: https://spec.openapis.org/oas/latest.html#example-object
     #[non_exhaustive]
-    #[derive(Serialize, Deserialize, Default, Clone, PartialEq, Eq)]
+    #[derive(Serialize, Default, Clone, PartialEq, Eq)]
+    #[cfg_attr(test, derive(serde::Deserialize))]
     #[serde(rename_all = "camelCase")]
     pub struct Example {
         /// Short description for the [`Example`].

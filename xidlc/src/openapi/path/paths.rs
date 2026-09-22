@@ -1,5 +1,5 @@
 use crate::Path;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use super::{HttpMethod, Operation, PathItem, PathItemBuilder, PathsMap};
 use crate::openapi::{builder, extensions::Extensions, set_value};
@@ -8,7 +8,8 @@ builder! {
     PathsBuilder;
 
     #[non_exhaustive]
-    #[derive(Serialize, Deserialize, Default, Clone, PartialEq)]
+    #[derive(Serialize, Default, Clone, PartialEq)]
+    #[cfg_attr(test, derive(serde::Deserialize))]
     pub struct Paths {
         #[serde(flatten)]
         pub paths: PathsMap<String, PathItem>,

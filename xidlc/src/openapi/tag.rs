@@ -1,7 +1,7 @@
 //! Implements [OpenAPI Tag Object][tag] types.
 //!
 //! [tag]: https://spec.openapis.org/oas/latest.html#tag-object
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use super::{builder, extensions::Extensions, external_docs::ExternalDocs, set_value};
 
@@ -14,7 +14,8 @@ builder! {
     ///
     /// [tag]: https://spec.openapis.org/oas/latest.html#tag-object
     #[non_exhaustive]
-    #[derive(Serialize, Deserialize, Default, Clone, PartialEq, Eq)]
+    #[derive(Serialize, Default, Clone, PartialEq, Eq)]
+    #[cfg_attr(test, derive(serde::Deserialize))]
     #[serde(rename_all = "camelCase")]
     pub struct Tag {
         /// Name of the tag. Should match to tag of **operation**.

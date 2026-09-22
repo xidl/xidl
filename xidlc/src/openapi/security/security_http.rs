@@ -1,5 +1,5 @@
 use crate::openapi::extensions::Extensions;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use crate::openapi::builder;
 
@@ -7,7 +7,8 @@ builder! {
     HttpBuilder;
 
     #[non_exhaustive]
-    #[derive(Serialize, Deserialize, Clone, Default, PartialEq, Eq)]
+    #[derive(Serialize, Clone, Default, PartialEq, Eq)]
+    #[cfg_attr(test, derive(serde::Deserialize))]
     #[serde(rename_all = "camelCase")]
     pub struct Http {
         pub scheme: HttpAuthScheme,
@@ -50,7 +51,8 @@ impl HttpBuilder {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Default)]
+#[derive(Serialize, Clone, PartialEq, Eq, Default)]
+#[cfg_attr(test, derive(serde::Deserialize))]
 #[serde(rename_all = "lowercase")]
 #[allow(missing_docs)]
 pub enum HttpAuthScheme {
@@ -70,7 +72,8 @@ pub enum HttpAuthScheme {
 }
 
 #[non_exhaustive]
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[derive(Serialize, Clone, PartialEq, Eq)]
+#[cfg_attr(test, derive(serde::Deserialize))]
 #[serde(rename_all = "camelCase")]
 pub struct OpenIdConnect {
     pub open_id_connect_url: String,

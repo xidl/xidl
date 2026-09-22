@@ -1,9 +1,9 @@
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use xidl_parser_derive::Parser;
 
 use crate::typed_ast::Identifier;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ConstExpr(pub OrExpr);
 
 impl<'a> crate::parser::FromTreeSitter<'a> for ConstExpr {
@@ -22,7 +22,7 @@ impl<'a> crate::parser::FromTreeSitter<'a> for ConstExpr {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 pub enum OrExpr {
     XorExpr(XorExpr),
     OrExpr(Box<OrExpr>, XorExpr),
@@ -53,33 +53,33 @@ impl<'a> crate::parser::FromTreeSitter<'a> for OrExpr {
     }
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser, Serialize)]
 pub enum XorExpr {
     AndExpr(AndExpr),
     XorExpr(Box<XorExpr>, AndExpr),
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser, Serialize)]
 pub enum AndExpr {
     ShiftExpr(ShiftExpr),
     AndExpr(Box<AndExpr>, ShiftExpr),
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser, Serialize)]
 pub enum ShiftExpr {
     AddExpr(AddExpr),
     LeftShiftExpr(Box<ShiftExpr>, AddExpr),
     RightShiftExpr(Box<ShiftExpr>, AddExpr),
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser, Serialize)]
 pub enum AddExpr {
     MultExpr(MultExpr),
     AddExpr(Box<AddExpr>, MultExpr),
     SubExpr(Box<AddExpr>, MultExpr),
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser, Serialize)]
 pub enum MultExpr {
     UnaryExpr(UnaryExpr),
     MultExpr(Box<MultExpr>, UnaryExpr),
@@ -87,20 +87,20 @@ pub enum MultExpr {
     ModExpr(Box<MultExpr>, UnaryExpr),
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser, Serialize)]
 pub enum UnaryExpr {
     UnaryExpr(UnaryOperator, PrimaryExpr),
     PrimaryExpr(PrimaryExpr),
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser, Serialize)]
 pub enum PrimaryExpr {
     ScopedName(ScopedName),
     Literal(Literal),
     ConstExpr(Box<ConstExpr>),
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 pub enum UnaryOperator {
     Add,
     Sub,
@@ -129,7 +129,7 @@ impl<'a> crate::parser::FromTreeSitter<'a> for UnaryOperator {
     }
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser, Serialize)]
 pub struct ScopedName {
     #[ts(id = "scoped_name")]
     pub scoped_name: Option<Box<ScopedName>>,
@@ -138,7 +138,7 @@ pub struct ScopedName {
     pub node_text: String,
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser, Serialize)]
 pub enum Literal {
     IntegerLiteral(IntegerLiteral),
     FloatingPtLiteral(FloatingPtLiteral),
@@ -150,7 +150,7 @@ pub enum Literal {
     BooleanLiteral(BooleanLiteral),
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 pub enum BooleanLiteral {
     True,
     False,
@@ -179,7 +179,7 @@ impl<'a> crate::parser::FromTreeSitter<'a> for BooleanLiteral {
     }
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser, Serialize)]
 pub enum IntegerLiteral {
     BinNumber(String),
     OctNumber(String),
@@ -187,7 +187,7 @@ pub enum IntegerLiteral {
     HexNumber(String),
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct FloatingPtLiteral {
     pub sign: Option<IntegerSign>,
     pub integer: DecNumber,
@@ -231,7 +231,7 @@ impl<'a> crate::parser::FromTreeSitter<'a> for FloatingPtLiteral {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 pub enum IntegerSign {
     Plus,
     Minus,
@@ -264,6 +264,6 @@ impl<'a> crate::parser::FromTreeSitter<'a> for IntegerSign {
     }
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser, Serialize)]
 #[ts(transparent)]
 pub struct DecNumber(pub String);

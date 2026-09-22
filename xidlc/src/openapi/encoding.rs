@@ -2,7 +2,7 @@
 
 use std::collections::BTreeMap;
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use super::extensions::Extensions;
 use super::{Header, builder, path::ParameterStyle, set_value};
@@ -12,7 +12,8 @@ builder! {
 
     /// A single encoding definition applied to a single schema [`Object
     /// property`](crate::openapi::schema::Object::properties).
-    #[derive(Serialize, Deserialize, Default, Clone, PartialEq)]
+    #[derive(Serialize, Default, Clone, PartialEq)]
+    #[cfg_attr(test, derive(serde::Deserialize))]
     #[serde(rename_all = "camelCase")]
     #[non_exhaustive]
     pub struct Encoding {

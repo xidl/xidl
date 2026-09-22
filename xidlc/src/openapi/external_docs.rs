@@ -1,7 +1,7 @@
 //! Implements [OpenAPI External Docs Object][external_docs] types.
 //!
 //! [external_docs]: https://spec.openapis.org/oas/latest.html#xml-object
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use super::extensions::Extensions;
 use super::{builder, set_value};
@@ -11,7 +11,8 @@ builder! {
 
     /// Reference of external resource allowing extended documentation.
     #[non_exhaustive]
-    #[derive(Serialize, Deserialize, Default, Clone, PartialEq, Eq)]
+    #[derive(Serialize, Default, Clone, PartialEq, Eq)]
+    #[cfg_attr(test, derive(serde::Deserialize))]
     #[serde(rename_all = "camelCase")]
     pub struct ExternalDocs {
         /// Target url for external documentation location.

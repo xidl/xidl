@@ -1,9 +1,9 @@
 use super::*;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 mod parse;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 pub enum BuiltinAnnotation {
     Id {
         value: IntegerLiteral,
@@ -105,20 +105,20 @@ pub enum BuiltinAnnotation {
     },
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub enum AutoIdKind {
     Sequential,
     Hash,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub enum ExtensibilityKind {
     Final,
     Appendable,
     Mutable,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub enum VerbatimLanguage {
     C,
     Cpp,
@@ -127,7 +127,7 @@ pub enum VerbatimLanguage {
     Any,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub enum PlacementKind {
     BeginFile,
     BeforeDeclaration,
@@ -137,26 +137,26 @@ pub enum PlacementKind {
     EndFile,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub enum ServicePlatform {
     Corba,
     Dds,
     Any,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub enum TryConstructFailAction {
     Discard,
     UseDefault,
     Trim,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub enum DataRepresentationKind {
     Xml,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub enum TopicPlatform {
     Dds,
     Any,

@@ -1,7 +1,7 @@
 use super::*;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct AnnotationAppl {
     pub name: AnnotationName,
     pub params: Option<AnnotationParams>,
@@ -10,19 +10,19 @@ pub struct AnnotationAppl {
     pub extra: Vec<AnnotationAppl>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 pub enum AnnotationName {
     ScopedName(ScopedName),
     Builtin(String),
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 pub enum AnnotationParams {
     Params(Vec<AnnotationApplParam>),
     Raw(String),
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 pub enum AnnotationApplParam {
     Positional(ConstExpr),
     Named { ident: Identifier, value: ConstExpr },

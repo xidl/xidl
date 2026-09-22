@@ -3,7 +3,7 @@
 //! [request_body]: https://spec.openapis.org/oas/latest.html#request-body-object
 use std::collections::BTreeMap;
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use super::extensions::Extensions;
 use super::{Content, Required, builder, set_value};
@@ -15,7 +15,8 @@ builder! {
     ///
     /// [request_body]: https://spec.openapis.org/oas/latest.html#request-body-object
     #[non_exhaustive]
-    #[derive(Serialize, Deserialize, Default, Clone, PartialEq)]
+    #[derive(Serialize, Default, Clone, PartialEq)]
+    #[cfg_attr(test, derive(serde::Deserialize))]
     #[serde(rename_all = "camelCase")]
     pub struct RequestBody {
         /// Additional description of [`RequestBody`] supporting markdown syntax.

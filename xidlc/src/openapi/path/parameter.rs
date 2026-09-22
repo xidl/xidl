@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use serde_json::Value;
 
 use crate::openapi::{
@@ -9,7 +9,8 @@ builder! {
     ParameterBuilder;
 
     #[non_exhaustive]
-    #[derive(Serialize, Deserialize, Default, Clone, PartialEq)]
+    #[derive(Serialize, Default, Clone, PartialEq)]
+    #[cfg_attr(test, derive(serde::Deserialize))]
     #[serde(rename_all = "camelCase")]
     pub struct Parameter {
         pub name: String,
@@ -95,7 +96,8 @@ impl ParameterBuilder {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Default)]
+#[derive(Serialize, PartialEq, Eq, Clone, Default)]
+#[cfg_attr(test, derive(serde::Deserialize))]
 #[serde(rename_all = "lowercase")]
 pub enum ParameterIn {
     Query,
@@ -105,7 +107,8 @@ pub enum ParameterIn {
     Cookie,
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[derive(Serialize, Clone, PartialEq, Eq)]
+#[cfg_attr(test, derive(serde::Deserialize))]
 #[serde(rename_all = "camelCase")]
 pub enum ParameterStyle {
     Matrix,
