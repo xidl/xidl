@@ -182,6 +182,7 @@ fn build_method_model(
         })
         .map(|p| RequestPayloadEntry {
             raw_name: p.name.clone(),
+            key_name: p.name.clone(),
             access: ts_ident(&p.name),
         })
         .collect();
@@ -195,20 +196,22 @@ fn build_method_model(
         } => {
             let entries = vec![RequestPayloadEntry {
                 raw_name: source_param.clone(),
+                key_name: source_param.clone(),
                 access: ts_ident(source_param),
             }];
             let is_text = matches!(
                 op.http.request.body.codec,
                 Some(xidl_parser::rest_hir::HttpBodyCodec::Text)
             );
-            let single = (*flatten || is_text).then(|| ts_ident(source_param));
+            let single = (*flatten || is_text).then(|| source_param.clone());
             (entries, single)
         }
         HttpRequestBodyShape::Object { fields } => {
             let entries = fields
                 .iter()
                 .map(|f| RequestPayloadEntry {
-                    raw_name: f.source_param.clone(),
+                    raw_name: f.field_name.clone(),
+                    key_name: f.source_param.clone(),
                     access: ts_ident(&f.source_param),
                 })
                 .collect();
@@ -217,6 +220,7 @@ fn build_method_model(
         HttpRequestBodyShape::Stream { source_param, .. } => {
             let entries = vec![RequestPayloadEntry {
                 raw_name: source_param.clone(),
+                key_name: source_param.clone(),
                 access: ts_ident(source_param),
             }];
             (entries, None)
@@ -227,6 +231,7 @@ fn build_method_model(
         HttpResponseBodyShape::Empty => Vec::new(),
         HttpResponseBodyShape::ReturnOnly { .. } => vec![RequestPayloadEntry {
             raw_name: "return".to_string(),
+            key_name: "return".to_string(),
             access: "return".to_string(),
         }],
         HttpResponseBodyShape::SingleValue { source, .. } => {
@@ -236,6 +241,7 @@ fn build_method_model(
             };
             vec![RequestPayloadEntry {
                 raw_name: name.clone(),
+                key_name: name.clone(),
                 access: ts_ident(&name),
             }]
         }
@@ -249,6 +255,7 @@ fn build_method_model(
                 RequestPayloadEntry {
                     raw_name: field.field_name.clone(),
                     access: ts_ident(&name),
+                    key_name: name,
                 }
             })
             .collect(),
@@ -262,6 +269,7 @@ fn build_method_model(
             };
             vec![RequestPayloadEntry {
                 raw_name: name.clone(),
+                key_name: name.clone(),
                 access: ts_ident(&name),
             }]
         }

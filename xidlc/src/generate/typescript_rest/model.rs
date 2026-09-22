@@ -31,6 +31,7 @@ impl TsHttpBlocks {
 #[derive(Clone, Serialize)]
 pub(super) struct RequestPayloadEntry {
     pub(super) raw_name: String,
+    pub(super) key_name: String,
     pub(super) access: String,
 }
 
