@@ -1,0 +1,237 @@
+---
+title: "HTTP Upgrade / WebSocket RFC"
+description: "Dual-mode @upgrade semantics: raw connection upgrade and RFC 6455 WebSocket."
+---
+
+# XIDL HTTP Upgrade / WebSocket Mapping Specification
+
+This page defines the dual-mode semantics of `@upgrade`:
+
+- **WebSocket mode** (`protocol = "websocket"`): a full RFC 6455 WebSocket
+  session with typed stream items and WebSocket-specific options.
+- **Raw upgrade mode** (any other protocol name): HTTP 101 followed by a raw
+  byte stream for private protocols.
+
+## Scope
+
+This RFC defines:
+
+- Mode selection from `protocol`.
+- Signature and parameter rules per mode.
+- Handshake requirements.
+- WebSocket wire profile (framing, close codes, heartbeat, backpressure).
+- Compatibility with `@bidi_stream`.
+
+This RFC does not define:
+
+- Private byte protocols carried in raw upgrade mode.
+- JSON-RPC over WebSocket (see the JSON-RPC Stream RFC).
+- Broker-level delivery guarantees.
+
+## Mode Selection
+
+```
+protocol (ASCII case-insensitive) == "websocket"  ->  WebSocket mode
+otherwise (non-empty)                            ->  Raw upgrade mode
+```
+
+| `protocol` | Mode |
+|---|---|
+| `"websocket"`, `"WebSocket"`, `"WEBSOCKET"` | WebSocket |
+| `"fastnet"`, `"xidl-raw"`, ... | Raw upgrade |
+| `"ws"`, `"wss"` | **Invalid** — use `protocol = "websocket"` |
+| empty / missing | **Invalid** |
+
+TLS is an endpoint concern (`https` / `wss` at the transport layer), not a
+protocol name.
+
+## Annotation Syntax
+
+### Raw upgrade mode
+
+```idl
+@upgrade(protocol = "xidl-raw")
+@path("/raw{?token}")
+void connect_raw(@query @rename("token") string token);
+```
+
+### WebSocket mode
+
+```idl
+@upgrade(protocol = "websocket")
+@upgrade(protocol = "websocket", codec = "json")
+@upgrade(protocol = "websocket", subprotocol = "fastnet.v1")
+@upgrade(protocol = "websocket", heartbeat = "20s")
+@upgrade(protocol = "websocket", max_message = 1048576)
+```
+
+Combined form:
+
+```idl
+@upgrade(
+    protocol = "websocket",
+    codec = "json",
+    subprotocol = "fastnet.v1",
+    heartbeat = "15s"
+)
+@get(path = "/ctrl/{session}")
+void control(
+    @path string session,
+    in string opcode,
+    in sequence<octet> payload,
+    out string event,
+    out sequence<octet> data
+);
+```
+
+## Parameters
+
+| Parameter | Modes | Type | Default | Constraints |
+|---|---|---|---|---|
+| `protocol` | both | string | **required** | non-empty; `websocket` selects WebSocket mode |
+| `codec` | WebSocket | string | `"json"` | `json` \| `msgpack` \| `bytes` |
+| `subprotocol` | WebSocket | string | none | RFC 6455 token; non-empty |
+| `heartbeat` | WebSocket | duration string | none (no active ping) | `"500ms"` / `"20s"` / `"1m"`; `"0"` disables |
+| `max_message` | WebSocket | integer bytes | implementation default (1 MiB recommended) | `>= 1` |
+
+WebSocket-only parameters must not appear on a raw upgrade method.
+
+Allowed companion annotations: HTTP verb/path, HTTP security annotations,
+`@cors`, `@deprecated`, `@rename`, `@rename_all`, `@optional`, `@flatten`,
+and handshake-scope `@path` / `@query` / `@header` / `@cookie`.
+
+Forbidden: `@stream_codec(...)`, and combining `@upgrade` with
+`@bidi_stream` / `@server_stream` / `@client_stream` on the same method.
+
+## Signature Rules
+
+### Raw upgrade mode
+
+- The method must return `void`.
+- Body / stream-item parameters are forbidden.
+- Only handshake-scope parameters (`@path` / `@query` / `@header` / `@cookie`)
+  are allowed.
+- The generated server handler receives an upgrade handle and owns the byte
+  protocol after 101.
+
+### WebSocket mode
+
+Same shape as `@bidi_stream`:
+
+- The method must return `void`.
+- `in` / `inout` parameters that are not handshake-scope form the inbound
+  stream item `TIn` (0 params -> unit, 1 param -> that type, N params ->
+  generated item struct).
+- `out` / `inout` parameters form the outbound stream item `TOut`.
+- `TIn` and `TOut` must not both be empty.
+- Handshake-scope parameters are bound during the HTTP request and never
+  appear in stream messages.
+- With `codec = "bytes"`, both item types must be `sequence<octet>`.
+
+## HTTP Mapping
+
+- HTTP method is **GET**.
+- Route templates follow the HTTP RFC.
+- The upgrade request **must** match one of the method routes; otherwise
+  respond `404`.
+
+### Raw upgrade handshake
+
+1. Authenticate and bind handshake parameters first; on failure return a
+   normal HTTP error without upgrading.
+2. Respond `101` with `Upgrade: <protocol>` and `Connection: upgrade`.
+3. The implementation **should** reject requests whose `Upgrade` header does
+   not match the declared protocol (`400`).
+4. After 101, expose a raw upgraded byte stream.
+
+### WebSocket handshake (RFC 6455)
+
+Required request headers:
+
+- `Upgrade: websocket`
+- `Connection: Upgrade`
+- `Sec-WebSocket-Key`
+- `Sec-WebSocket-Version: 13`
+- `Sec-WebSocket-Protocol: <subprotocol>` when a subprotocol is declared
+
+Server steps:
+
+1. Route match, auth, handshake parameter binding. Failures return normal
+   HTTP errors (`401` / `403` / `404` / `400`) without upgrading.
+2. Validate WebSocket upgrade headers and key.
+3. If `subprotocol` is declared, select it from the request offer; if it
+   cannot be selected, respond `400`.
+4. Respond `101` with `Upgrade: websocket`, `Connection: Upgrade`,
+   `Sec-WebSocket-Accept: base64(SHA-1(key + GUID))`, and
+   `Sec-WebSocket-Protocol` when negotiated.
+
+`Sec-WebSocket-Accept` MUST be computed. Blind 101 responses without RFC 6455
+handshake headers are not a valid WebSocket mode implementation.
+
+Security follows the HTTP Security RFC: credentials are checked before
+upgrade and never appear in stream payloads.
+
+## WebSocket Wire Profile
+
+### Application messages
+
+One application message equals one WebSocket message.
+
+| `codec` | Frame | Payload |
+|---|---|---|
+| `json` | Text | UTF-8 JSON of `TIn` / `TOut` |
+| `msgpack` | Binary | MessagePack of `TIn` / `TOut` |
+| `bytes` | Binary | raw `sequence<octet>` content |
+
+Application payloads are bare typed values (no mandatory envelope). Line
+delimiters (`\n`) are not injected or required.
+
+### Close and errors
+
+| Event | Close code | Reason |
+|---|---|---|
+| normal end | `1000` | optional short text |
+| application error | `4000` | UTF-8 JSON `{"code":<i32>,"msg":"..."}` |
+| protocol error | `1002` | optional |
+| message too big | `1009` | optional |
+| internal error | `4001` | same JSON shape as application error |
+
+Codes `4000`–`4999` are reserved for XIDL application errors. Reasons are
+limited to 123 bytes by RFC 6455.
+
+### Heartbeat
+
+1. Implementations MUST answer Ping with Pong and MUST flush the Pong promptly
+   (before waiting for the next application write).
+2. When `heartbeat = D` (`D > 0`), both peers SHOULD ping every `D`.
+3. Missing heartbeat / no frames for two intervals MAY close the connection.
+
+### Backpressure and limits
+
+- Send queues MUST be bounded; `send` waits or fails when full.
+- Payloads larger than `max_message` close with `1009`.
+- Implementations SHOULD bound concurrent sessions and handshake timeouts.
+
+## Compatibility with `@bidi_stream`
+
+- `@bidi_stream` remains valid and projects to a bidirectional stream with the
+  default WebSocket profile (`codec = json`, no subprotocol, no active
+  heartbeat).
+- Its wire profile is bit-compatible with `@upgrade(protocol = "websocket")`
+  using default parameters.
+- New contracts SHOULD prefer `@upgrade(protocol = "websocket", ...)` when they
+  need WebSocket-specific options.
+
+## Generator Notes
+
+- `protocol = "websocket"` is projected as a bidirectional HTTP stream plus a
+  WebSocket configuration object.
+- Raw upgrade methods keep the upgrade-handle API shape.
+- Targets that cannot generate WebSocket mode MUST fail codegen with an
+  explicit unsupported-target error.
+
+## Relationship to Other RFCs
+
+- HTTP routing, parameters, security: HTTP RFC / HTTP Security RFC.
+- `@server_stream` / `@client_stream` codecs (SSE / NDJSON): HTTP Stream RFC.
+- JSON-RPC over `ws://` transports: JSON-RPC / JSON-RPC Stream RFCs.

@@ -3,6 +3,7 @@ mod annotations;
 mod cors;
 mod security;
 mod stream;
+mod upgrade;
 
 #[cfg(test)]
 mod tests;
@@ -23,6 +24,10 @@ pub use self::security::{
 pub use self::stream::{
     HttpStreamCodec, HttpStreamConfig, HttpStreamKind, HttpStreamTargetSupport, http_stream_config,
     validate_http_stream_method, validate_http_stream_target,
+};
+pub use self::upgrade::{
+    UpgradeMode, WebSocketCodec, WebSocketConfig, classify_upgrade_protocol, parse_duration_ms,
+    parse_upgrade_protocol, parse_websocket_config, validate_websocket_subprotocol,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

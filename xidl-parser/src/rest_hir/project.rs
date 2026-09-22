@@ -9,13 +9,14 @@ use super::route::{
     auto_default_method_path, operation_id, parse_route_template, route_from_annotations,
 };
 use super::semantics::{
-    HttpStreamKind, effective_cors, effective_media_type, effective_security_with_origin,
-    has_annotation, http_stream_config, validate_http_annotations,
+    HttpStreamKind, UpgradeMode, classify_upgrade_protocol, effective_cors, effective_media_type,
+    effective_security_with_origin, has_annotation, http_stream_config, parse_upgrade_protocol,
+    parse_websocket_config, validate_http_annotations,
 };
 use super::validate::{
     effective_basic_auth_realm, effective_deprecated, validate_head_constraints,
     validate_request_shape, validate_route_bindings, validate_stream_method, validate_stream_shape,
-    validate_upgrade_constraints,
+    validate_upgrade_constraints, validate_websocket_stream_items,
 };
 use super::{
     HttpDocumentMetadata, HttpDocumentServer, HttpInterface, HttpOperation, HttpOperationMeta,
@@ -190,9 +191,34 @@ fn project_operation(
 ) -> ParserResult<HttpOperation> {
     validate_http_annotations(&format!("operation '{}'", op.ident), &op.annotations)
         .map_err(ParseError::Message)?;
-    let stream = http_stream_config(&op.annotations).map_err(ParseError::Message)?;
+    let mut stream = http_stream_config(&op.annotations).map_err(ParseError::Message)?;
     validate_stream_shape(&op.ident, stream).map_err(parse_err)?;
     let has_upgrade = has_annotation(&op.annotations, "upgrade");
+    let has_stream_annotation = has_annotation(&op.annotations, "server_stream")
+        || has_annotation(&op.annotations, "client_stream")
+        || has_annotation(&op.annotations, "bidi_stream");
+    if has_upgrade && has_stream_annotation {
+        return Err(parse_err(
+            "@upgrade cannot be combined with @server_stream/@client_stream/@bidi_stream"
+                .to_string(),
+        ));
+    }
+
+    let upgrade_protocol = parse_upgrade_protocol(&op.annotations).map_err(parse_err)?;
+    let upgrade_mode = upgrade_protocol
+        .as_deref()
+        .map(classify_upgrade_protocol)
+        .transpose()
+        .map_err(parse_err)?;
+    let websocket = match upgrade_mode {
+        Some(mode) => parse_websocket_config(&op.annotations, mode).map_err(parse_err)?,
+        None => None,
+    };
+    // WebSocket mode is projected as a bidirectional stream plus WS config.
+    if upgrade_mode == Some(UpgradeMode::WebSocket) {
+        stream.kind = Some(HttpStreamKind::Bidi);
+    }
+
     let default_method = if matches!(
         stream.kind,
         Some(HttpStreamKind::Server) | Some(HttpStreamKind::Bidi)
@@ -238,7 +264,14 @@ fn project_operation(
         &query_binding_count,
     )
     .map_err(parse_err)?;
-    validate_request_shape(&op.ident, stream.kind, &request_params).map_err(parse_err)?;
+    let allow_handshake_params = upgrade_mode == Some(UpgradeMode::WebSocket);
+    validate_request_shape(
+        &op.ident,
+        stream.kind,
+        &request_params,
+        allow_handshake_params,
+    )
+    .map_err(parse_err)?;
     validate_head_constraints(
         &op.ident,
         method,
@@ -250,15 +283,9 @@ fn project_operation(
     )
     .map_err(parse_err)?;
 
-    let upgrade_protocol = super::semantics::find_annotation(&op.annotations, "upgrade")
-        .and_then(super::semantics::annotation_params)
-        .map(super::semantics::normalize_annotation_params)
-        .and_then(|params| params.get("protocol").cloned());
-
     validate_upgrade_constraints(
         &op.ident,
-        has_upgrade,
-        upgrade_protocol.as_deref(),
+        upgrade_mode,
         method,
         &request_params,
         match &op.ty {
@@ -267,6 +294,10 @@ fn project_operation(
         },
     )
     .map_err(parse_err)?;
+    if upgrade_mode == Some(UpgradeMode::WebSocket) {
+        validate_websocket_stream_items(&op.ident, &request_params, &response_params)
+            .map_err(parse_err)?;
+    }
 
     let request_content_type =
         effective_media_type(interface_annotations, &op.annotations, "request");
@@ -309,6 +340,8 @@ fn project_operation(
             basic_auth_realm,
             deprecated,
             upgrade_protocol,
+            upgrade_mode,
+            websocket,
         },
         signature,
         http,

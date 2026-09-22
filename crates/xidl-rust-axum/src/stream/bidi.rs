@@ -17,6 +17,7 @@ use tokio_tungstenite::tungstenite::client::IntoClientRequest;
 pub struct BidiServerStream<TIn, TOut> {
     pub(super) inbound: mpsc::Receiver<Result<TIn>>,
     pub(super) outbound: Option<mpsc::Sender<Result<TOut>>>,
+    pub(super) task: Option<tokio::task::JoinHandle<()>>,
 }
 
 impl<TIn, TOut> BidiServerStream<TIn, TOut> {
@@ -49,7 +50,11 @@ impl<TIn, TOut> BidiServerStream<TIn, TOut> {
 
 impl<TIn, TOut> Drop for BidiServerStream<TIn, TOut> {
     fn drop(&mut self) {
+        // Dropping the outbound sender ends the write half, which lets the
+        // session task send a Close frame and exit cleanly. Detach the task
+        // instead of aborting so the close handshake can complete.
         let _ = self.outbound.take();
+        let _ = self.task.take();
     }
 }
 
@@ -108,80 +113,84 @@ where
     TIn: DeserializeOwned + Send + 'static,
     TOut: Serialize + Send + 'static,
 {
-    let (mut ws_tx, mut ws_rx) = socket.split();
     let (in_tx, in_rx) = mpsc::channel::<Result<TIn>>(32);
     let (out_tx, mut out_rx) = mpsc::channel::<Result<TOut>>(32);
 
-    let _read_task = tokio::spawn(async move {
-        while let Some(msg) = ws_rx.next().await {
-            let msg = match msg {
-                Ok(value) => value,
-                Err(err) => {
-                    let _ = in_tx.send(Err(Error::new(500, err.to_string()))).await;
-                    break;
-                }
-            };
-            match msg {
-                AxumWsMessage::Text(text) => match serde_json::from_str::<TIn>(&text) {
-                    Ok(value) => {
-                        if in_tx.send(Ok(value)).await.is_err() {
+    let read_write_task = tokio::spawn(async move {
+        let mut ws = socket;
+        loop {
+            tokio::select! {
+                msg = ws.next() => {
+                    let Some(msg) = msg else { break };
+                    let msg = match msg {
+                        Ok(value) => value,
+                        Err(err) => {
+                            let _ = in_tx.send(Err(Error::new(500, err.to_string()))).await;
                             break;
                         }
+                    };
+                    match msg {
+                        AxumWsMessage::Text(text) => match serde_json::from_str::<TIn>(&text) {
+                            Ok(value) => {
+                                if in_tx.send(Ok(value)).await.is_err() {
+                                    break;
+                                }
+                            }
+                            Err(err) => {
+                                let _ = in_tx
+                                    .send(Err(Error::new(400, format!("invalid ws payload: {err}"))))
+                                    .await;
+                                break;
+                            }
+                        },
+                        // RFC 6455: answer Ping with Pong immediately so idle
+                        // connections stay alive through LBs and browsers.
+                        AxumWsMessage::Ping(payload) => {
+                            if ws.send(AxumWsMessage::Pong(payload)).await.is_err() {
+                                break;
+                            }
+                        }
+                        AxumWsMessage::Pong(_) => {}
+                        AxumWsMessage::Close(_) => break,
+                        _ => {}
                     }
-                    Err(err) => {
-                        let _ = in_tx
-                            .send(Err(Error::new(400, format!("invalid ws payload: {err}"))))
-                            .await;
-                        break;
-                    }
-                },
-                AxumWsMessage::Close(_) => break,
-                _ => {}
-            }
-        }
-    });
-
-    let _write_task = tokio::spawn(async move {
-        while let Some(item) = out_rx.recv().await {
-            let item = match item {
-                Ok(value) => value,
-                Err(err) => {
-                    let _ = ws_tx
-                        .send(AxumWsMessage::Text(
-                            serde_json::to_string(&ErrorBody::from(err))
-                                .unwrap_or_else(|_| r#"{"code":500,"msg":"stream error"}"#.into())
-                                .into(),
-                        ))
-                        .await;
-                    break;
                 }
-            };
-            let text = match serde_json::to_string(&item) {
-                Ok(value) => value,
-                Err(err) => {
-                    let _ = ws_tx
-                        .send(AxumWsMessage::Text(
-                            serde_json::to_string(&ErrorBody::from(Error::new(
+                item = out_rx.recv() => {
+                    let Some(item) = item else { break };
+                    let item = match item {
+                        Ok(value) => value,
+                        Err(err) => {
+                            let body = serde_json::to_string(&ErrorBody::from(err))
+                                .unwrap_or_else(|_| "{\"code\":500,\"msg\":\"stream error\"}".into());
+                            let _ = ws.send(AxumWsMessage::Text(body.into())).await;
+                            break;
+                        }
+                    };
+                    let text = match serde_json::to_string(&item) {
+                        Ok(value) => value,
+                        Err(err) => {
+                            let body = serde_json::to_string(&ErrorBody::from(Error::new(
                                 500,
                                 err.to_string(),
                             )))
-                            .unwrap_or_else(|_| r#"{"code":500,"msg":"stream error"}"#.into())
-                            .into(),
-                        ))
-                        .await;
-                    break;
+                            .unwrap_or_else(|_| "{\"code\":500,\"msg\":\"stream error\"}".into());
+                            let _ = ws.send(AxumWsMessage::Text(body.into())).await;
+                            break;
+                        }
+                    };
+                    if ws.send(AxumWsMessage::Text(text.into())).await.is_err() {
+                        break;
+                    }
                 }
-            };
-            if ws_tx.send(AxumWsMessage::Text(text.into())).await.is_err() {
-                break;
             }
         }
-        let _ = ws_tx.send(AxumWsMessage::Close(None)).await;
+        let _ = ws.send(AxumWsMessage::Close(None)).await;
     });
 
     BidiServerStream {
         inbound: in_rx,
         outbound: Some(out_tx),
+        task: Some(read_write_task),
     }
 }
 

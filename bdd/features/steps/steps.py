@@ -1299,3 +1299,92 @@ def step_impl(context, key, value):
     url = f"http://127.0.0.1:{context.port}/flatten-struct-with-any"
     resp = requests.post(url, json={"field": {key: value}}, timeout=10)
     assert resp.status_code in (200, 204), f"Got {resp.status_code}: {resp.text}"
+
+
+@when('I generate {lang} code for the IDL and expect failure containing "{snippet}"')
+def step_impl(context, lang, snippet):
+    cmd_lang = "rust-axum" if lang == "rust" else lang
+    cmd = [
+        "cargo",
+        "run",
+        "-p",
+        "xidlc",
+        "--features",
+        "cli,fmt",
+        "--",
+        "gen",
+        "-o",
+        context.lang_dir,
+        cmd_lang,
+        "--client",
+        "--server",
+        context.idl_file,
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True, cwd=os.getcwd())
+    assert result.returncode != 0, "expected codegen to fail"
+    combined = f"{result.stdout}\n{result.stderr}"
+    assert snippet in combined, f"missing {snippet!r} in:\n{combined}"
+
+
+@then(
+    'the websocket client can send opcode "{opcode}" and payload "{payload}" and receive event "{event}" and data "{data}"'
+)
+def step_impl(context, opcode, payload, event, data):
+    import json
+
+    try:
+        from websocket import create_connection
+    except ImportError:
+        import subprocess as sp
+
+        sp.run([sys.executable, "-m", "pip", "install", "websocket-client"], check=True)
+        from websocket import create_connection
+
+    url = f"ws://127.0.0.1:{context.port}/ctrl"
+    ws = create_connection(url, subprotocols=["fastnet.v1"], timeout=10)
+    try:
+        ws.send(json.dumps({"opcode": opcode, "payload": payload}))
+        raw = ws.recv()
+        msg = json.loads(raw)
+        assert msg.get("event") == event, msg
+        assert msg.get("data") == data, msg
+    finally:
+        ws.close()
+
+
+@then('the websocket handshake negotiates subprotocol "{subprotocol}"')
+def step_impl(context, subprotocol):
+    try:
+        from websocket import create_connection
+    except ImportError:
+        import subprocess as sp
+
+        sp.run([sys.executable, "-m", "pip", "install", "websocket-client"], check=True)
+        from websocket import create_connection
+
+    url = f"ws://127.0.0.1:{context.port}/ctrl"
+    ws = create_connection(url, subprotocols=["fastnet.v1"], timeout=10)
+    try:
+        assert ws.getsubprotocol() == subprotocol, ws.getsubprotocol()
+    finally:
+        ws.close()
+
+
+@then("the websocket connection answers ping with pong")
+def step_impl(context):
+    try:
+        from websocket import create_connection
+    except ImportError:
+        import subprocess as sp
+
+        sp.run([sys.executable, "-m", "pip", "install", "websocket-client"], check=True)
+        from websocket import create_connection
+
+    url = f"ws://127.0.0.1:{context.port}/ctrl"
+    ws = create_connection(url, subprotocols=["fastnet.v1"], timeout=10)
+    try:
+        # websocket-client ping() waits for the pong control frame
+        ws.ping(b"hb")
+        assert ws.connected
+    finally:
+        ws.close()

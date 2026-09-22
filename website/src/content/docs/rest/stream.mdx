@@ -14,6 +14,9 @@ and protocol handling for each target.
 - `@server_stream`: the server streams responses to the client (server push).
 - `@client_stream`: the client streams requests to the server (client upload).
 - `@bidi_stream`: full-duplex communication, typically over WebSocket.
+- `@upgrade(protocol = "websocket", ...)`: explicit RFC 6455 WebSocket with
+  optional `codec` / `subprotocol` / `heartbeat` / `max_message` (see the
+  [HTTP Upgrade / WebSocket RFC](../../rfc/http-upgrade/)).
 - `@stream_codec("ndjson" | "sse")`: choose the framed encoding.
 
 In practice:

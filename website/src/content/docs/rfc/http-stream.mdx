@@ -23,6 +23,15 @@ This page does not define:
 - Reliability semantics beyond HTTP itself.
 - Exactly-once delivery.
 
+## Relationship to WebSocket Upgrade
+
+`@bidi_stream` is the abstract bidirectional stream. On HTTP it maps to a
+WebSocket session with the default profile defined by the
+[HTTP Upgrade / WebSocket RFC](../http-upgrade/).
+
+For explicit RFC 6455 options (`codec`, `subprotocol`, `heartbeat`,
+`max_message`), use `@upgrade(protocol = "websocket", ...)` instead.
+
 ## Streaming Method Annotations
 
 A method is considered a streaming method if it carries one of the following annotations:

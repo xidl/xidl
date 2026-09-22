@@ -1,0 +1,10 @@
+interface WsControl {
+    @upgrade(protocol = "websocket", codec = "json", subprotocol = "fastnet.v1", heartbeat = "20s")
+    @get(path = "/ctrl")
+    void control(
+        in string opcode,
+        in string payload,
+        out string event,
+        out string data
+    );
+};

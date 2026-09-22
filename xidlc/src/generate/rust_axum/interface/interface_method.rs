@@ -31,7 +31,31 @@ pub(crate) fn render_op_from_http(
     let is_client_stream = matches!(stream.kind, Some(HttpStreamKind::Client));
     let is_bidi_stream = matches!(stream.kind, Some(HttpStreamKind::Bidi));
     let upgrade_protocol = http_op.meta.upgrade_protocol.clone();
-    let is_upgrade = upgrade_protocol.is_some();
+    let is_upgrade_websocket = matches!(
+        http_op.meta.upgrade_mode,
+        Some(xidl_parser::rest_hir::UpgradeMode::WebSocket)
+    );
+    // Raw upgrade keeps the Upgrade-handle API; WebSocket mode uses the bidi path.
+    let is_upgrade = matches!(
+        http_op.meta.upgrade_mode,
+        Some(xidl_parser::rest_hir::UpgradeMode::Raw)
+    );
+    let websocket_subprotocol = http_op
+        .meta
+        .websocket
+        .as_ref()
+        .and_then(|cfg| cfg.subprotocol.clone());
+    let websocket_heartbeat_ms = http_op
+        .meta
+        .websocket
+        .as_ref()
+        .and_then(|cfg| cfg.heartbeat_ms);
+    let websocket_max_message_bytes = http_op
+        .meta
+        .websocket
+        .as_ref()
+        .and_then(|cfg| cfg.max_message_bytes);
+    let allow_handshake_params = is_upgrade_websocket;
     let deprecated = deprecated_context_from_http(http_op);
     let security = security_context(&http_op.meta.security);
     if security.has_basic_auth && security.has_bearer_auth {
@@ -75,6 +99,7 @@ pub(crate) fn render_op_from_http(
         op,
         is_client_stream,
         is_bidi_stream,
+        allow_handshake_params,
         &params.path_params,
         &params.query_params,
         &params.header_params,
@@ -104,10 +129,45 @@ pub(crate) fn render_op_from_http(
         || !matches!(http_op.http.request.body.shape, HttpRequestBodyShape::Empty);
 
     let request_struct = if auth_in_request_struct || has_inputs {
-        Some(format!("{struct_prefix}Request"))
+        // Stream item structs only carry body items.
+        if (is_client_stream || is_bidi_stream)
+            && params.body_params.is_empty()
+            && !auth_in_request_struct
+        {
+            None
+        } else {
+            Some(format!("{struct_prefix}Request"))
+        }
     } else {
         None
     };
+
+    // Stream item type is body-only so handshake params never leak into TIn.
+    let request_ty = if is_client_stream || is_bidi_stream {
+        if params.body_params.is_empty() {
+            "()".to_string()
+        } else {
+            request_struct.clone().unwrap_or_else(|| "()".to_string())
+        }
+    } else {
+        request_struct.clone().unwrap_or_else(|| "()".to_string())
+    };
+
+    // Handshake-scope params are passed separately on WebSocket/stream methods.
+    let mut handshake_params = Vec::new();
+    let mut handshake_param_names = Vec::new();
+    if is_client_stream || is_bidi_stream {
+        for ctx in params
+            .path_params
+            .iter()
+            .chain(params.query_params.iter())
+            .chain(params.header_params.iter())
+            .chain(params.cookie_params.iter())
+        {
+            handshake_params.push(format!("{}: {}", ctx.name, ctx.ty));
+            handshake_param_names.push(ctx.name.clone());
+        }
+    }
 
     let is_byte_stream = matches!(
         http_op.http.request.body.shape,
@@ -123,7 +183,6 @@ pub(crate) fn render_op_from_http(
         }
     );
 
-    let request_ty = request_struct.clone().unwrap_or_else(|| "()".to_string());
     let response_ty_str = response_ty(http_op, &struct_prefix, &ret);
     let request_payload_ty = request_payload_ty(
         &request_ty,
@@ -255,6 +314,12 @@ pub(crate) fn render_op_from_http(
         is_byte_stream,
         is_upgrade,
         upgrade_protocol,
+        is_upgrade_websocket,
+        websocket_subprotocol,
+        websocket_heartbeat_ms,
+        websocket_max_message_bytes,
+        handshake_params,
+        handshake_param_names,
         request_item_ty: request_ty,
         ret_in_ty,
         ret_out_ty,
