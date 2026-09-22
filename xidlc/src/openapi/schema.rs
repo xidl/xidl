@@ -1529,13 +1529,14 @@ pub enum ArrayItems {
 }
 
 mod array_items_false {
-    use serde::de::Visitor;
-
     pub fn serialize<S: serde::Serializer>(serializer: S) -> Result<S::Ok, S::Error> {
         serializer.serialize_bool(false)
     }
 
+    // Only used when ArrayItems derives Deserialize under cfg(test).
+    #[cfg(test)]
     pub fn deserialize<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<(), D::Error> {
+        use serde::de::Visitor;
         struct ItemsFalseVisitor;
 
         impl<'de> Visitor<'de> for ItemsFalseVisitor {
