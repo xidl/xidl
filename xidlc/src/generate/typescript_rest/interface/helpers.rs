@@ -212,12 +212,25 @@ pub(super) fn validate_stream_support(op: &HttpOperation) -> IdlcResult<()> {
                 op.meta.name
             )))
         }
-        Some(HttpStreamKind::Bidi) => Err(IdlcError::rpc(format!(
-            "typescript-rest currently does not support @bidi_stream methods: '{}'",
-            op.meta.name
-        ))),
+        Some(HttpStreamKind::Bidi) => match op.meta.websocket.as_ref().map(|cfg| cfg.codec) {
+            None | Some(xidl_parser::rest_hir::WebSocketCodec::Json) => Ok(()),
+            Some(_) => Err(IdlcError::rpc(format!(
+                "typescript-rest currently supports only codec = \"json\" for WebSocket methods: '{}'",
+                op.meta.name
+            ))),
+        },
         _ => Ok(()),
+    }?;
+    if matches!(
+        op.meta.upgrade_mode,
+        Some(xidl_parser::rest_hir::UpgradeMode::Raw)
+    ) {
+        return Err(IdlcError::rpc(format!(
+            "typescript-rest currently does not support raw @upgrade methods: '{}'",
+            op.meta.name
+        )));
     }
+    Ok(())
 }
 
 pub(super) fn only_direct_return(op: &HttpOperation) -> bool {

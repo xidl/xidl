@@ -19,3 +19,12 @@ Feature: WebSocket Upgrade Generation and Communication
   Scenario: Reject websocket-only params on raw upgrade
     Given a REST IDL file "bdd/features/data/websocket_raw_with_ws_params.idl"
     When I generate rust code for the IDL and expect failure containing "only valid with protocol"
+
+  Scenario: Go WebSocket control channel round-trip
+    Given a REST IDL file "bdd/features/data/websocket_upgrade.idl"
+    When I generate go code for the IDL
+    Then the generated go code should be valid
+    And I can run the generated go server using boilerplate
+    And the websocket client can send opcode "ping" and payload "hello" and receive event "ping:ack" and data "hello"
+    And the websocket handshake negotiates subprotocol "fastnet.v1"
+    And the websocket connection answers ping with pong

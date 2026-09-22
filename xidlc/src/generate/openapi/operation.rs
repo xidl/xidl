@@ -29,6 +29,8 @@ pub(crate) struct MethodInfo {
     pub(crate) security: Option<Vec<SecurityRequirement>>,
     pub(crate) response_content_type: String,
     pub(crate) tag: String,
+    pub(crate) is_websocket: bool,
+    pub(crate) websocket_subprotocol: Option<String>,
 }
 
 pub(crate) fn render_http_operation(
@@ -179,6 +181,12 @@ pub(crate) fn render_http_operation(
         security,
         response_content_type,
         tag: interface_name.to_string(),
+        is_websocket: matches!(op.meta.stream.kind, Some(HttpStreamKind::Bidi)),
+        websocket_subprotocol: op
+            .meta
+            .websocket
+            .as_ref()
+            .and_then(|cfg| cfg.subprotocol.clone()),
     }
 }
 

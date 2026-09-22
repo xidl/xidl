@@ -201,3 +201,53 @@ pub(super) fn render_unary_handler(
     }
     Ok(())
 }
+
+pub(super) fn render_bidi_stream_handler(out: &mut String, method: &MethodMeta) {
+    let subproto = method
+        .websocket_subprotocol
+        .as_deref()
+        .map(|value| format!("{value:?}"))
+        .unwrap_or_else(|| "\"\"".to_string());
+    writeln!(out, "\t\tvar subprotocols []string").unwrap();
+    writeln!(
+        out,
+        "\t\tif {subproto} != \"\" {{ subprotocols = []string{{{subproto}}} }}"
+    )
+    .unwrap();
+    writeln!(
+        out,
+        "\t\tconn, err := xidlgohttp.UpgradeWebSocket(c, subprotocols)"
+    )
+    .unwrap();
+    writeln!(out, "\t\tif err != nil {{").unwrap();
+    writeln!(
+        out,
+        "\t\t\txidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())"
+    )
+    .unwrap();
+    writeln!(out, "\t\t\treturn").unwrap();
+    writeln!(out, "\t\t}}").unwrap();
+    writeln!(
+        out,
+        "\t\tstream := xidlgohttp.NewWSBidiServer[{}, {}](conn)",
+        method.stream_in_ty, method.stream_out_ty
+    )
+    .unwrap();
+    let mut args = String::from("c.Request.Context(), stream");
+    for param in &method.handshake_params {
+        args.push_str(&format!(", {}", param.field_name.to_ascii_lowercase()));
+    }
+    writeln!(
+        out,
+        "\t\tif err := svc.{}({args}); err != nil {{",
+        method.method_name
+    )
+    .unwrap();
+    writeln!(
+        out,
+        "\t\t\txidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())"
+    )
+    .unwrap();
+    writeln!(out, "\t\t}}").unwrap();
+    writeln!(out, "\t\t_ = stream.Close()").unwrap();
+}

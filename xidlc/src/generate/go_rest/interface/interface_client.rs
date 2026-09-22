@@ -42,7 +42,7 @@ pub(super) fn render_client(
             Some(HttpStreamKind::Client) => {
                 render_client_client_stream(out, interface_name, method)?
             }
-            Some(HttpStreamKind::Bidi) => {}
+            Some(HttpStreamKind::Bidi) => render_client_bidi_stream(out, interface_name, method)?,
             None => render_client_unary(out, interface_name, method, renderer)?,
         }
     }
@@ -180,6 +180,80 @@ fn render_client_client_stream(
     writeln!(out, "\t\treturn decoded, err").unwrap();
     writeln!(out, "\t}})").unwrap();
     writeln!(out, "\treturn stream, nil").unwrap();
+    writeln!(out, "}}").unwrap();
+    writeln!(out).unwrap();
+    Ok(())
+}
+
+fn render_client_bidi_stream(
+    out: &mut String,
+    interface_name: &str,
+    method: &MethodMeta,
+) -> IdlcResult<()> {
+    let mut params = vec!["ctx context.Context".to_string()];
+    let mut req_fields = Vec::new();
+    for param in &method.handshake_params {
+        let ty = if param.optional {
+            format!("*{}", param.ty)
+        } else {
+            param.ty.clone()
+        };
+        let name = param.field_name.to_ascii_lowercase();
+        params.push(format!("{name} {ty}"));
+        req_fields.push(format!("{}: {name},", param.field_name));
+    }
+    writeln!(
+        out,
+        "func (c *{interface_name}Client) {}({}) (*xidlgohttp.WSBidiStream[{}, {}], error) {{",
+        method.method_name,
+        params.join(", "),
+        method.stream_out_ty,
+        method.stream_in_ty
+    )
+    .unwrap();
+    writeln!(
+        out,
+        "\treq := &{}{{{}}}",
+        method.request_struct,
+        req_fields.join(" ")
+    )
+    .unwrap();
+    writeln!(out, "\tpath := format{}Path(req)", method.struct_prefix).unwrap();
+    writeln!(out, "\tbase := strings.TrimRight(c.baseURL, \"/\")").unwrap();
+    writeln!(
+        out,
+        "\tbase = strings.Replace(base, \"http://\", \"ws://\", 1)"
+    )
+    .unwrap();
+    writeln!(
+        out,
+        "\tbase = strings.Replace(base, \"https://\", \"wss://\", 1)"
+    )
+    .unwrap();
+    writeln!(out, "\tendpoint := base + path").unwrap();
+    let subproto = method
+        .websocket_subprotocol
+        .as_deref()
+        .map(|value| format!("{value:?}"))
+        .unwrap_or_else(|| "\"\"".to_string());
+    writeln!(out, "\tvar subprotocols []string").unwrap();
+    writeln!(
+        out,
+        "\tif {subproto} != \"\" {{ subprotocols = []string{{{subproto}}} }}"
+    )
+    .unwrap();
+    writeln!(
+        out,
+        "\tconn, err := xidlgohttp.DialWebSocket(ctx, endpoint, subprotocols)"
+    )
+    .unwrap();
+    writeln!(out, "\tif err != nil {{ return nil, err }}").unwrap();
+    writeln!(
+        out,
+        "\treturn xidlgohttp.NewWSBidiClient[{}, {}](conn), nil",
+        method.stream_in_ty, method.stream_out_ty
+    )
+    .unwrap();
     writeln!(out, "}}").unwrap();
     writeln!(out).unwrap();
     Ok(())

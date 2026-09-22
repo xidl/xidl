@@ -119,9 +119,39 @@ pub(crate) fn build_method_meta(
             _ => (None, None, None),
         };
 
+    let is_websocket = matches!(
+        op.meta.stream.kind,
+        Some(xidl_parser::rest_hir::semantics::HttpStreamKind::Bidi)
+    );
+    let websocket_subprotocol = op
+        .meta
+        .websocket
+        .as_ref()
+        .and_then(|cfg| cfg.subprotocol.clone());
+    let stream_in_ty = if body_params.is_empty() {
+        "struct{}".to_string()
+    } else {
+        format!("{struct_prefix}StreamIn")
+    };
+    let stream_out_ty = if response_body_params.is_empty() && return_ty.is_none() {
+        "struct{}".to_string()
+    } else {
+        format!("{struct_prefix}StreamOut")
+    };
+    let handshake_params = request_params
+        .iter()
+        .filter(|param| !matches!(param.source, ParamSource::Body))
+        .cloned()
+        .collect::<Vec<_>>();
+
     Ok(MethodMeta {
         method_name: op.meta.name.to_case(Case::Pascal),
         struct_prefix,
+        is_websocket,
+        websocket_subprotocol,
+        stream_in_ty,
+        stream_out_ty,
+        handshake_params,
         http_method,
         paths: op
             .meta

@@ -7,8 +7,9 @@ use xidl_parser::rest_hir::semantics::HttpStreamKind;
 use super::GoRestRenderer;
 use super::interface_binding::render_request_binding;
 use super::interface_server_support::{
-    render_accept_check, render_auth_check, render_client_stream_handler,
-    render_content_type_check, render_server_stream_handler, render_unary_handler,
+    render_accept_check, render_auth_check, render_bidi_stream_handler,
+    render_client_stream_handler, render_content_type_check, render_server_stream_handler,
+    render_unary_handler,
 };
 
 pub(super) fn render_server(
@@ -102,14 +103,23 @@ fn register_route(
     }
 
     writeln!(out, "func(c *gin.Context) {{").unwrap();
-    render_accept_check(out, method);
+    if !matches!(method.stream_kind, Some(HttpStreamKind::Bidi)) {
+        render_accept_check(out, method);
+    }
     render_auth_check(out, method);
     render_content_type_check(out, method);
-    render_request_binding(out, method, renderer)?;
+    if matches!(method.stream_kind, Some(HttpStreamKind::Bidi)) {
+        // Handshake params are bound by the framework extractor below; skip unary body binding.
+        for param in &method.handshake_params {
+            writeln!(out, "		_ = c.Param({:?})", param.wire_name).unwrap();
+        }
+    } else {
+        render_request_binding(out, method, renderer)?;
+    }
     match method.stream_kind {
         Some(HttpStreamKind::Server) => render_server_stream_handler(out, method),
         Some(HttpStreamKind::Client) => render_client_stream_handler(out, method, renderer)?,
-        Some(HttpStreamKind::Bidi) => {}
+        Some(HttpStreamKind::Bidi) => render_bidi_stream_handler(out, method),
         None => render_unary_handler(out, method, renderer)?,
     }
     writeln!(out, "\t}})").unwrap();

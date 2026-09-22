@@ -22,6 +22,39 @@ pub(super) fn render_method_types(
 }
 
 fn render_request_types(out: &mut String, method: &MethodMeta) {
+    if method.is_websocket {
+        writeln!(out, "type {} struct {{", method.stream_in_ty).unwrap();
+        for param in &method.body_params {
+            let ty = if param.optional {
+                format!("*{}", param.ty)
+            } else {
+                param.ty.clone()
+            };
+            writeln!(
+                out,
+                "\t{} {} `xjson:\"{}\"`",
+                param.field_name, ty, param.raw_name
+            )
+            .unwrap();
+        }
+        writeln!(out, "}}").unwrap();
+        writeln!(out).unwrap();
+        writeln!(out, "type {} struct {{", method.stream_out_ty).unwrap();
+        if let Some(return_ty) = &method.return_ty {
+            writeln!(out, "\tReturn {return_ty} `xjson:\"return\"`").unwrap();
+        }
+        for param in response_params(method) {
+            writeln!(
+                out,
+                "\t{} {} `xjson:\"{}\"`",
+                param.field_name, param.ty, param.raw_name
+            )
+            .unwrap();
+        }
+        writeln!(out, "}}").unwrap();
+        writeln!(out).unwrap();
+    }
+
     writeln!(out, "type {} struct {{", method.request_struct).unwrap();
     for param in &method.request_params {
         let ty = if param.optional {

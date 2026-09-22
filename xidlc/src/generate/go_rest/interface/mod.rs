@@ -90,7 +90,25 @@ fn render_service_method(out: &mut String, method: &MethodMeta) {
             method.method_name, method.request_struct, method.response_struct
         )
         .unwrap(),
-        Some(HttpStreamKind::Bidi) => {}
+        Some(HttpStreamKind::Bidi) => {
+            let mut args = format!(
+                "ctx context.Context, stream *xidlgohttp.WSBidiStream[{}, {}]",
+                method.stream_in_ty, method.stream_out_ty
+            );
+            for param in &method.handshake_params {
+                let ty = if param.optional {
+                    format!("*{}", param.ty)
+                } else {
+                    param.ty.clone()
+                };
+                args.push_str(&format!(
+                    ", {} {}",
+                    param.field_name.to_ascii_lowercase(),
+                    ty
+                ));
+            }
+            writeln!(out, "\t{}({}) error", method.method_name, args).unwrap()
+        }
         None => writeln!(
             out,
             "\t{}(ctx context.Context, req *{}) (*{}, error)",

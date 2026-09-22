@@ -20,3 +20,9 @@ export type {
   WebHandler,
 } from './types.ts';
 export { defineOperation } from './types.ts';
+export type {
+  UpgradeWebSocketOptions,
+  WsBidiServerSession,
+  WsLikeSocket,
+} from './websocket.ts';
+export { selectWsSubprotocol, wrapWsBidiServer } from './websocket.ts';
