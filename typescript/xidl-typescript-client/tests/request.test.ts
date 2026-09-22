@@ -103,14 +103,30 @@ test('applyClientAuth applies api_key in cookie', () => {
   assert.equal(headers.get('Cookie'), 'sid=v');
 });
 
-test('applyClientAuth ignores auth when no requirement matches', () => {
+test('applyClientAuth throws when auth kind does not match requirements', () => {
+  const headers = new Headers();
+  assert.throws(
+    () =>
+      applyClientAuth(
+        '/api/v1/whoami',
+        new URLSearchParams(),
+        headers,
+        { kind: 'bearer', token: 'tok' },
+        [{ kind: 'http_bearer' }],
+      ),
+    /does not satisfy security requirement/,
+  );
+  assert.equal(headers.get('Authorization'), null);
+});
+
+test('applyClientAuth ignores auth when operation has no requirements', () => {
   const headers = new Headers();
   applyClientAuth(
     '',
     new URLSearchParams(),
     headers,
     { kind: 'bearer', token: 'tok' },
-    [{ kind: 'basic' }],
+    [],
   );
   assert.equal(headers.get('Authorization'), null);
 });

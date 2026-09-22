@@ -86,7 +86,15 @@ export function applyClientAuth(
   }
   const match = requirements.find(item => item.kind === auth.kind);
   if (!match) {
-    return;
+    if (requirements.length === 0) {
+      return;
+    }
+    const expected = requirements.map(item => item.kind).join(', ');
+    throw new XidlClientError(
+      `client auth kind "${auth.kind}" does not satisfy security requirement(s) [${expected}] for ${path}`,
+      500,
+      500,
+    );
   }
   switch (auth.kind) {
     case 'basic':

@@ -256,13 +256,13 @@ pub(super) fn security_contexts(op: &HttpOperation) -> Vec<SecurityContext> {
                 .iter()
                 .map(|value| match value {
                     HttpSecurityRequirement::HttpBasic => SecurityContext {
-                        kind: "http_basic".to_string(),
+                        kind: "basic".to_string(),
                         location: None,
                         name: None,
                         realm: op.meta.basic_auth_realm.clone(),
                     },
                     HttpSecurityRequirement::HttpBearer => SecurityContext {
-                        kind: "http_bearer".to_string(),
+                        kind: "bearer".to_string(),
                         location: None,
                         name: None,
                         realm: None,
