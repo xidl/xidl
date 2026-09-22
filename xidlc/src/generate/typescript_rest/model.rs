@@ -139,6 +139,7 @@ pub(super) struct ServerMethodContext {
     pub(super) security: Vec<SecurityContext>,
 }
 
+#[derive(Clone)]
 pub(super) struct MethodModel {
     pub(super) name: String,
     pub(super) params: Vec<ClientParamContext>,
