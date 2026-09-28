@@ -1,6 +1,18 @@
 #pragma xidlc package Smart City JSON-RPC Stream APIs
 #pragma xidlc version v1.0.0
 
+enum PacketKind {
+    HEARTBEAT,
+    DATA,
+};
+
+union Packet switch (PacketKind) {
+    case PacketKind::HEARTBEAT:
+        long seq;
+    case PacketKind::DATA:
+        string payload;
+};
+
 interface CityJsonrpcStreamApi {
     @server_stream
     void alerts(
@@ -21,6 +33,9 @@ interface CityJsonrpcStreamApi {
         out string from,
         out string text
     );
+
+    @bidi_stream
+    Packet packet_stream(in Packet req);
 
     @server_stream
     readonly attribute string ops_notice;

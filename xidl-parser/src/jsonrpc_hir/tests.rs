@@ -65,10 +65,12 @@ fn projects_stream_method_kinds() {
     let spec = parse(
         r#"
         interface Feed {
-          @server_stream string watch();
+          @server_stream Message subscribe(in Request req);
           @client_stream void upload(in string value);
           @bidi_stream void chat(in string input, out string output);
         };
+        struct Message { long seq; };
+        struct Request { string topic; };
         "#,
     );
     let doc = super::project(&spec).expect("jsonrpc hir");

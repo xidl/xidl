@@ -1303,7 +1303,11 @@ def step_impl(context, key, value):
 
 @when('I generate {lang} code for the IDL and expect failure containing "{snippet}"')
 def step_impl(context, lang, snippet):
-    cmd_lang = "rust-axum" if lang == "rust" else lang
+    cmd_lang = lang
+    if lang == "rust" and getattr(context, "protocol", None) == "jsonrpc":
+        cmd_lang = "rust-jsonrpc"
+    elif lang == "rust":
+        cmd_lang = "rust-axum"
     cmd = [
         "cargo",
         "run",
@@ -1388,3 +1392,205 @@ def step_impl(context):
         assert ws.connected
     finally:
         ws.close()
+
+
+@then(
+    "the generated {lang} code should contain a typed server stream for Feed.messages"
+)
+def step_impl(context, lang):
+    assert lang == "rust", f"unsupported lang for server stream check: {lang}"
+    files = [
+        open(os.path.join(context.lang_dir, f)).read()
+        for f in os.listdir(context.lang_dir)
+        if f.endswith(".rs")
+    ]
+    joined = "\n".join(files)
+    assert "fn messages" in joined, (
+        f"missing Feed.messages in generated code: {joined[:500]}"
+    )
+    assert "BoxStream" in joined, (
+        f"missing typed BoxStream return in generated code: {joined[:500]}"
+    )
+    assert "struct Message" in joined, (
+        f"missing Message stream item type in generated code: {joined[:500]}"
+    )
+
+
+@then(
+    "the generated {lang} code should contain a typed bidi stream for {interface}.{method}"
+)
+def step_impl(context, lang, interface, method):
+    assert lang == "rust", f"unsupported lang for bidi stream check: {lang}"
+    files = [
+        open(os.path.join(context.lang_dir, f)).read()
+        for f in os.listdir(context.lang_dir)
+        if f.endswith(".rs")
+    ]
+    joined = "\n".join(files)
+    assert f"fn {method}" in joined, (
+        f"missing {interface}.{method} in generated code: {joined[:500]}"
+    )
+    assert "BoxStream" in joined, f"missing BoxStream in generated code: {joined[:500]}"
+
+
+def _jsonrpc_open_bidi_stream_and_exchange(context, method, send_items):
+    """Open a bidi stream the same way open_bidi_client does."""
+    s = socket.create_connection(("127.0.0.1", context.port))
+    try:
+        s.sendall(
+            (
+                json.dumps(
+                    {"jsonrpc": "2.0", "id": 1, "method": method, "params": None}
+                )
+                + "\n"
+            ).encode()
+        )
+        s.settimeout(10)
+        f = s.makefile("r", encoding="utf-8")
+        handshake_line = f.readline()
+        assert handshake_line, "missing bidi stream handshake ack"
+        handshake = json.loads(handshake_line.strip())
+        assert handshake.get("id") == 1, f"unexpected handshake id: {handshake}"
+
+        for item in send_items:
+            s.sendall((json.dumps(item) + "\n").encode())
+        s.shutdown(socket.SHUT_WR)
+
+        replies = []
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            replies.append(json.loads(line))
+        return replies
+    finally:
+        s.close()
+
+
+@then("the client can bidirectional stream Feed.echo with {count:d} messages")
+def step_impl(context, count):
+    send_items = [{"seq": i, "body": f"ping-{i}"} for i in range(count)]
+    replies = _jsonrpc_open_bidi_stream_and_exchange(context, "Feed.echo", send_items)
+    assert len(replies) == count, (
+        f"expected {count} replies, got {len(replies)}: {replies}"
+    )
+    for i, reply in enumerate(replies):
+        assert reply.get("seq") == i + 100, f"unexpected reply seq: {reply}"
+        assert reply.get("body") == f"echo:ping-{i}", f"unexpected reply body: {reply}"
+
+
+@then("the client can bidirectional stream Feed.converse with union events")
+def step_impl(context):
+    send_items = [
+        {"tag": "PING", "data": 42},
+        {"tag": "TEXT", "data": "hello union"},
+    ]
+    replies = _jsonrpc_open_bidi_stream_and_exchange(
+        context, "Feed.converse", send_items
+    )
+    assert len(replies) == 2, f"expected 2 replies, got {len(replies)}: {replies}"
+    assert replies[0].get("tag") == "PING", f"unexpected tag in reply 0: {replies[0]}"
+    assert replies[0].get("data") == 43, f"unexpected data in reply 0: {replies[0]}"
+    assert replies[1].get("tag") == "TEXT", f"unexpected tag in reply 1: {replies[1]}"
+    assert replies[1].get("data") == "reply:hello union", (
+        f"unexpected data in reply 1: {replies[1]}"
+    )
+
+
+def _jsonrpc_open_stream_and_read_items(context, method, params, expected):
+    """Open a server-stream the same way `open_server_stream_client` does."""
+    s = socket.create_connection(("127.0.0.1", context.port))
+    try:
+        s.sendall(
+            (
+                json.dumps(
+                    {"jsonrpc": "2.0", "id": 1, "method": method, "params": params}
+                )
+                + "\n"
+            ).encode()
+        )
+        s.settimeout(10)
+        buf = ""
+        items = []
+        handshake = None
+        while True:
+            chunk = s.recv(4096)
+            if not chunk:
+                break
+            buf += chunk.decode()
+            while "\n" in buf:
+                line, buf = buf.split("\n", 1)
+                line = line.strip()
+                if not line:
+                    continue
+                value = json.loads(line)
+                if handshake is None:
+                    handshake = value
+                    assert "error" not in handshake or handshake.get("error") in (
+                        None,
+                        {},
+                    ), f"stream handshake failed: {handshake}"
+                    assert handshake.get("id") == 1, (
+                        f"unexpected handshake id: {handshake}"
+                    )
+                    continue
+                items.append(value)
+        assert handshake is not None, "missing stream handshake ack"
+        assert len(items) == expected, (
+            f"expected {expected} stream items, got {len(items)}: {items}"
+        )
+        return items
+    finally:
+        s.close()
+
+
+@then(
+    "the client can subscribe {method} with count {count:d} and receive {expected:d} stream items"
+)
+def step_impl(context, method, count, expected):
+    items = _jsonrpc_open_stream_and_read_items(
+        context, method, {"count": count}, expected
+    )
+    for index, item in enumerate(items):
+        # Typed Message stream items are serialized as {seq, body}.
+        assert item.get("seq") == index, f"item {index} has unexpected seq: {item}"
+        assert item.get("body") == f"body-{index}", (
+            f"item {index} has unexpected body: {item}"
+        )
+
+
+@then('the client can call Feed.ping to get "{expected}"')
+def step_impl(context, expected):
+    res = _jsonrpc_call(context, "Feed.ping", {})
+    result = res.get("result") or {}
+    value = (
+        result.get("return")
+        if isinstance(result, dict) and "return" in result
+        else result
+    )
+    assert value == expected, f"expected {expected!r}, got {value!r} in {res}"
+
+
+@when("the client sends the jsonrpc notification")
+def step_impl(context):
+    raw = (context.text or "").strip()
+    assert raw, "missing jsonrpc notification docstring"
+    payload = json.loads(raw)
+    assert "id" not in payload, f"notification payload must omit id: {payload}"
+    s = socket.create_connection(("127.0.0.1", context.port))
+    try:
+        s.sendall((raw + "\n").encode())
+        s.settimeout(0.5)
+        try:
+            data = s.recv(4096)
+        except socket.timeout:
+            data = b""
+        context.jsonrpc_notification_response = data
+    finally:
+        s.close()
+
+
+@then("the client receives no jsonrpc response within {seconds:g} seconds")
+def step_impl(context, seconds):
+    data = getattr(context, "jsonrpc_notification_response", b"")
+    assert data == b"", f"expected no response to notification, got {data!r}"

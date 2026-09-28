@@ -128,3 +128,45 @@ Feature: JSON-RPC API Generation and Communication
     Examples:
       | lang |
       | rust |
+
+  Scenario Outline: JSON-RPC Server Stream Typed Push Stream
+    Given a JSON-RPC IDL file "bdd/features/data/server_stream.idl"
+    When I generate <lang> code for the IDL
+    Then the generated <lang> code should be valid
+    And the generated <lang> code should contain a typed server stream for Feed.messages
+    And the generated <lang> code should contain a typed bidi stream for Feed.echo
+    And the generated <lang> code should contain a typed bidi stream for Feed.converse
+    And I can run the generated <lang> server and client
+    And the client can subscribe Feed.messages with count 3 and receive 3 stream items
+    And the client can call Feed.ping to get "pong"
+    And the client can bidirectional stream Feed.echo with 2 messages
+    And the client can bidirectional stream Feed.converse with union events
+
+    Examples:
+      | lang |
+      | rust |
+
+  Scenario Outline: JSON-RPC Stream Annotation Conflicts
+    Given a JSON-RPC IDL file "bdd/features/data/server_stream_conflict.idl"
+    When I generate <lang> code for the IDL and expect failure containing "mutually exclusive"
+
+    Examples:
+      | lang |
+      | rust |
+
+  Scenario Outline: JSON-RPC Id-less Messages Are Silenced
+    Given a JSON-RPC IDL file "bdd/features/data/server_stream.idl"
+    When I generate <lang> code for the IDL
+    Then the generated <lang> code should be valid
+    And I can run the generated <lang> server and client
+    When the client sends the jsonrpc notification
+      """
+      {"jsonrpc": "2.0", "method": "Feed.ping", "params": {}}
+      """
+    Then the client receives no jsonrpc response within 0.5 seconds
+    And the client can call Feed.ping to get "pong"
+    And the client can subscribe Feed.messages with count 2 and receive 2 stream items
+
+    Examples:
+      | lang |
+      | rust |

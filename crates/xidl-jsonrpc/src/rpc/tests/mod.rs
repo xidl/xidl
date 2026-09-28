@@ -108,21 +108,13 @@ fn unique_endpoint(label: &str) -> String {
     format!("rpc-client-{label}-{sequence}")
 }
 
-async fn open_test_pair() -> (
-    Arc<RpcClient>,
-    tokio::sync::mpsc::UnboundedReceiver<Value>,
-    Arc<Mutex<Vec<Value>>>,
-) {
+async fn open_test_pair() -> (Arc<RpcClient>, Arc<Mutex<Vec<Value>>>) {
     open_test_pair_with_timeout(Duration::from_secs(30)).await
 }
 
 async fn open_test_pair_with_timeout(
     request_timeout: Duration,
-) -> (
-    Arc<RpcClient>,
-    tokio::sync::mpsc::UnboundedReceiver<Value>,
-    Arc<Mutex<Vec<Value>>>,
-) {
+) -> (Arc<RpcClient>, Arc<Mutex<Vec<Value>>>) {
     let endpoint = unique_endpoint("pair");
     let uri = format!("inproc://{endpoint}");
     let notifications = Arc::new(Mutex::new(Vec::new()));
@@ -139,6 +131,6 @@ async fn open_test_pair_with_timeout(
     let session = crate::stream::open_bidi_client(stream, "stream")
         .await
         .expect("open bidi stream");
-    let (rpc, rx) = RpcClient::with_timeout(session, request_timeout);
-    (Arc::new(rpc), rx, notifications)
+    let rpc = RpcClient::with_timeout(session, request_timeout);
+    (Arc::new(rpc), notifications)
 }

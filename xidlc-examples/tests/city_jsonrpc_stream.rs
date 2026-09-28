@@ -1,7 +1,7 @@
 use xidl_jsonrpc::futures_util::StreamExt;
 use xidlc_examples::city_jsonrpc_stream::{
     CityJsonrpcStreamApi, CityJsonrpcStreamApiClient, CityJsonrpcStreamApiServer,
-    CityJsonrpcStreamService,
+    CityJsonrpcStreamApichatParams, CityJsonrpcStreamService, Packet, PacketKind,
 };
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -31,28 +31,54 @@ async fn jsonrpc_client_calls_stream_endpoints() {
         .expect("write upload chunk");
     upload.close().await.expect("close upload sensor writer");
 
-    let mut chat = client.chat().await.expect("open chat duplex");
-    chat.write(serde_json::json!({ "room_id": "ops", "text": "hello" }))
-        .await
-        .expect("write chat item");
-    chat.write(serde_json::json!({ "room_id": "ops", "text": "world" }))
-        .await
-        .expect("write second chat item");
+    let in_stream = xidl_jsonrpc::stream::boxed(async_stream::try_stream! {
+        yield CityJsonrpcStreamApichatParams {
+            room_id: "ops".to_string(),
+            text: "hello".to_string(),
+        };
+        yield CityJsonrpcStreamApichatParams {
+            room_id: "ops".to_string(),
+            text: "world".to_string(),
+        };
+    });
+    let mut chat = client.chat(in_stream).await.expect("open chat duplex");
     let first = chat
-        .read()
+        .next()
         .await
         .expect("first chat item")
         .expect("first chat payload");
-    assert_eq!(first["from"], "server");
-    assert_eq!(first["text"], "echo:ops:hello");
+    assert_eq!(first.from, "server");
+    assert_eq!(first.text, "echo:ops:hello");
     let second = chat
-        .read()
+        .next()
         .await
         .expect("second chat item")
         .expect("second chat payload");
-    assert_eq!(second["from"], "server");
-    assert_eq!(second["text"], "echo:ops:world");
-    chat.close().await.expect("close chat duplex");
+    assert_eq!(second.from, "server");
+    assert_eq!(second.text, "echo:ops:world");
+
+    let packet_in = xidl_jsonrpc::stream::boxed(async_stream::try_stream! {
+        yield Packet::new_seq(10);
+        yield Packet::new_payload("sensor-reading".to_string());
+    });
+    let mut packet_out = client
+        .packet_stream(packet_in)
+        .await
+        .expect("open packet duplex");
+    let p1 = packet_out
+        .next()
+        .await
+        .expect("first packet item")
+        .expect("first packet payload");
+    assert_eq!(*p1.tag(), PacketKind::HEARTBEAT);
+    assert_eq!(*p1.as_seq(), 11);
+    let p2 = packet_out
+        .next()
+        .await
+        .expect("second packet item")
+        .expect("second packet payload");
+    assert_eq!(*p2.tag(), PacketKind::DATA);
+    assert_eq!(p2.as_payload(), "echo:sensor-reading");
 
     let mut alerts = client
         .alerts("pudong".to_string())
@@ -68,8 +94,8 @@ async fn jsonrpc_client_calls_stream_endpoints() {
         .await
         .expect("second alert item")
         .expect("second alert payload");
-    assert_eq!(first_alert["message"], "pudong:alert-0");
-    assert_eq!(second_alert["message"], "pudong:alert-1");
+    assert_eq!(first_alert, "pudong:alert-0");
+    assert_eq!(second_alert, "pudong:alert-1");
 
     let mut notice_stream = client
         .get_attribute_ops_notice()
@@ -129,20 +155,37 @@ async fn jsonrpc_bidi_stream_works_over_inproc_transport() {
         .await
         .expect("first alert item")
         .expect("first alert payload");
-    assert_eq!(first_alert["message"], "pudong:alert-0");
+    assert_eq!(first_alert, "pudong:alert-0");
 
-    let mut chat = client.chat().await.expect("open chat duplex");
-    chat.write(serde_json::json!({ "room_id": "ops", "text": "inproc" }))
-        .await
-        .expect("write chat item");
+    let in_stream = xidl_jsonrpc::stream::boxed(async_stream::try_stream! {
+        yield CityJsonrpcStreamApichatParams {
+            room_id: "ops".to_string(),
+            text: "inproc".to_string(),
+        };
+    });
+    let mut chat = client.chat(in_stream).await.expect("open chat duplex");
     let reply = chat
-        .read()
+        .next()
         .await
         .expect("chat reply item")
         .expect("chat reply payload");
-    assert_eq!(reply["from"], "server");
-    assert_eq!(reply["text"], "echo:ops:inproc");
-    chat.close().await.expect("close chat duplex");
+    assert_eq!(reply.from, "server");
+    assert_eq!(reply.text, "echo:ops:inproc");
+
+    let packet_in = xidl_jsonrpc::stream::boxed(async_stream::try_stream! {
+        yield Packet::new_seq(99);
+    });
+    let mut packet_out = client
+        .packet_stream(packet_in)
+        .await
+        .expect("open inproc packet duplex");
+    let p = packet_out
+        .next()
+        .await
+        .expect("inproc packet item")
+        .expect("inproc packet payload");
+    assert_eq!(*p.tag(), PacketKind::HEARTBEAT);
+    assert_eq!(*p.as_seq(), 100);
 
     let mut notice_stream = client
         .get_attribute_ops_notice()

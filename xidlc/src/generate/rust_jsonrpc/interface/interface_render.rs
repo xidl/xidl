@@ -31,12 +31,16 @@ pub(super) fn render_interface_def(
         .filter(|method| matches!(method.kind.as_str(), "stream_op" | "stream_source"))
         .map(|method| method.rpc_name.clone())
         .collect::<Vec<_>>();
+    let has_bidi_stream = methods
+        .iter()
+        .any(|method| method.kind == "stream_op" && method.stream_mode == "bidi");
     let ctx = serde_json::json!({
         "ident": rust_ident(&interface.ident),
         "methods": methods,
         "bidi_method_names": bidi_method_names,
         "watch_methods": watch_methods,
         "rust_attrs": rust_passthrough_attrs_from_annotations(&interface.annotations),
+        "has_bidi_stream": has_bidi_stream,
     });
     Ok(JsonRpcRenderOutput {
         source: vec![renderer.render_template("interface.rs.j2", &ctx)?],
@@ -77,6 +81,15 @@ fn render_method(method: &JsonRpcMethod, interface_name: &str) -> MethodContext 
         interface_name,
         &method_name,
     );
+    let request_item_ty = if method.kind == JsonRpcMethodKind::BidiStream {
+        request_item_type(&request_fields, interface_name, &method_name)
+    } else {
+        String::new()
+    };
+    let response_item_ty = unary_ret.clone();
+    let request_is_unit = request_item_ty == "()";
+    let response_is_unit = unary_ret == "()";
+
     let (kind, stream_mode, params, params_fields, params_struct, ret, args, stream_item_ty) =
         match method.kind {
             JsonRpcMethodKind::Unary => (
@@ -85,12 +98,17 @@ fn render_method(method: &JsonRpcMethod, interface_name: &str) -> MethodContext 
                 request_params,
                 request_fields,
                 params_struct_name(interface_name, &method_name),
-                unary_ret,
+                unary_ret.clone(),
                 args,
                 String::new(),
             ),
             JsonRpcMethodKind::ServerStream => {
-                let (params, ret) = stream_signature(StreamKind::Server, request_params, unary_ret);
+                let (params, ret) = stream_signature(
+                    StreamKind::Server,
+                    request_params,
+                    unary_ret.clone(),
+                    String::new(),
+                );
                 (
                     "stream_op".to_string(),
                     "server".to_string(),
@@ -99,11 +117,16 @@ fn render_method(method: &JsonRpcMethod, interface_name: &str) -> MethodContext 
                     params_struct_name(interface_name, &method_name),
                     ret,
                     args,
-                    String::new(),
+                    unary_ret.clone(),
                 )
             }
             JsonRpcMethodKind::ClientStream => {
-                let (params, ret) = stream_signature(StreamKind::Client, request_params, unary_ret);
+                let (params, ret) = stream_signature(
+                    StreamKind::Client,
+                    request_params,
+                    unary_ret.clone(),
+                    String::new(),
+                );
                 (
                     "stream_op".to_string(),
                     "client".to_string(),
@@ -116,16 +139,21 @@ fn render_method(method: &JsonRpcMethod, interface_name: &str) -> MethodContext 
                 )
             }
             JsonRpcMethodKind::BidiStream => {
-                let (params, ret) = stream_signature(StreamKind::Bidi, request_params, unary_ret);
+                let (params, ret) = stream_signature(
+                    StreamKind::Bidi,
+                    request_params,
+                    unary_ret.clone(),
+                    request_item_ty.clone(),
+                );
                 (
                     "stream_op".to_string(),
                     "bidi".to_string(),
                     params,
-                    Vec::new(),
-                    String::new(),
+                    request_fields,
+                    params_struct_name(interface_name, &method_name),
                     ret,
                     Vec::new(),
-                    String::new(),
+                    request_item_ty.clone(),
                 )
             }
             JsonRpcMethodKind::StreamSource => (
@@ -164,6 +192,10 @@ fn render_method(method: &JsonRpcMethod, interface_name: &str) -> MethodContext 
             .map(|field| rust_ident(&field.name))
             .unwrap_or_default(),
         stream_item_ty,
+        request_item_ty,
+        response_item_ty,
+        request_is_unit,
+        response_is_unit,
     }
 }
 
@@ -196,5 +228,15 @@ fn response_return_type(
             fields[0].ty.clone()
         }
         JsonRpcResponseKind::MultiOutput => response_struct_name(interface_name, method_name),
+    }
+}
+
+fn request_item_type(fields: &[ParamField], interface_name: &str, method_name: &str) -> String {
+    if fields.is_empty() {
+        "()".to_string()
+    } else if fields.len() == 1 {
+        fields[0].ty.clone()
+    } else {
+        params_struct_name(interface_name, method_name)
     }
 }

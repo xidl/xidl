@@ -102,6 +102,37 @@
       }
     },
     {
+      "name": "CityJsonrpcStreamApi.packet_stream",
+      "params": [
+        {
+          "name": "req",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Packet"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "return": {
+              "$ref": "#/components/schemas/Packet"
+            }
+          },
+          "required": [
+            "return"
+          ]
+        }
+      },
+      "x-xidl-stream": {
+        "mode": "bidi",
+        "codec": "json",
+        "delivery": "direct"
+      }
+    },
+    {
       "name": "CityJsonrpcStreamApi.upload_sensor",
       "params": [
         {
@@ -133,5 +164,43 @@
         "delivery": "direct"
       }
     }
-  ]
+  ],
+  "components": {
+    "schemas": {
+      "Packet": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "seq": {
+                "type": "integer",
+                "format": "int32"
+              }
+            },
+            "required": [
+              "seq"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "payload": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "payload"
+            ]
+          }
+        ]
+      },
+      "PacketKind": {
+        "type": "string",
+        "enum": [
+          "HEARTBEAT",
+          "DATA"
+        ]
+      }
+    }
+  }
 }

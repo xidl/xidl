@@ -90,6 +90,87 @@ where
 }
 ```
 
+## Stream Methods
+
+Stream behavior is selected with method annotations (mutually exclusive):
+
+| Annotation       | Client API                                                               | Server API                                                               | Wire                                       |
+| ---------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------ | ------------------------------------------ |
+| `@server_stream` | `fn m(req) -> Result<BoxStream<'static, Item>, Error>`                   | `async fn m<'a>(&'a self, req) -> Result<BoxStream<'a, Item>, Error>`    | server stream (one request, N typed items) |
+| `@client_stream` | `fn m(BoxStream<'a, Value>) -> Result<Ret, Error>`                       | same                                                                     | client stream                              |
+| `@bidi_stream`   | `fn m(BoxStream<'static, Req>) -> Result<BoxStream<'static, Resp>, Err>` | `async fn m(&self, BoxStream<'static, Req>) -> Result<BoxStream, Error>` | typed bidirectional stream                 |
+
+`@server_stream` is a typed push stream: call once with the request, get back a
+stream of the IDL return type. The return type is the stream item type.
+
+```idl
+struct Message { long seq; string body; };
+struct Request { string topic; };
+
+interface Rpc {
+    @server_stream
+    Message subscribe(in Request req);
+};
+```
+
+```rust
+// server
+async fn subscribe(
+    &self,
+    req: Request,
+) -> Result<xidl_jsonrpc::stream::BoxStream<'static, Message>, xidl_jsonrpc::Error> {
+    let topic = req.topic;
+    Ok(Box::pin(async_stream::try_stream! {
+        for msg in self.bus.subscribe(topic) {
+            yield msg;
+        }
+    }))
+}
+
+// client
+let mut stream = rpc.subscribe(Request { topic: "t".into() }).await?;
+while let Some(msg) = stream.try_next().await? {
+    // msg: Message
+}
+```
+
+`@bidi_stream` is a fully typed bidirectional stream: pass an input stream of
+requests, get back an output stream of responses:
+
+```idl
+struct Message { string text; };
+struct Reply { string text; };
+
+interface Chat {
+    @bidi_stream
+    Reply echo(in Message req);
+};
+```
+
+```rust
+// server
+async fn echo(
+    &self,
+    mut stream: xidl_jsonrpc::stream::BoxStream<'static, Message>,
+) -> Result<xidl_jsonrpc::stream::BoxStream<'static, Reply>, xidl_jsonrpc::Error> {
+    Ok(xidl_jsonrpc::stream::boxed(async_stream::try_stream! {
+        while let Some(msg) = stream.next().await {
+            let msg = msg?;
+            yield Reply { text: format!("echo: {}", msg.text) };
+        }
+    }))
+}
+
+// client
+let in_stream = xidl_jsonrpc::stream::boxed(async_stream::try_stream! {
+    yield Message { text: "hello".into() };
+});
+let mut out_stream = client.echo(in_stream).await?;
+while let Some(reply) = out_stream.next().await {
+    let reply = reply?;
+}
+```
+
 ## Notes and Limitations
 
 - JSON-RPC output only includes interfaces; structs, enums, unions, etc. are

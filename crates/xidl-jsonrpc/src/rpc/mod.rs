@@ -2,9 +2,9 @@
 //!
 //! [`RpcClient`] multiplexes JSON-RPC requests over one [`ReaderWriter`]:
 //! every `call` allocates a unique id, a background dispatch loop matches
-//! incoming responses back to their pending request by id, and notifications
-//! pushed by the peer without an id are delivered through an unbounded
-//! channel. Request ids start after the id reserved by the stream handshake.
+//! incoming responses back to their pending request by id, and messages
+//! without an id are dropped. Request ids start after the id reserved by the
+//! stream handshake.
 
 use crate::stream::{ClientStreamWriter, Reader, ReaderWriter};
 use crate::{Error, ErrorCode, JSONRPC_VERSION};
@@ -15,7 +15,7 @@ use serde_json::{Value, json};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::time::Duration;
-use tokio::sync::{Mutex, mpsc, oneshot};
+use tokio::sync::{Mutex, oneshot};
 use tokio::task::JoinHandle;
 
 /// Default time a request waits for its response before timing out.
@@ -26,12 +26,10 @@ type Pending = DashMap<u64, oneshot::Sender<Result<Value, Error>>>;
 
 /// A concurrent JSON-RPC client multiplexing requests over one stream.
 ///
-/// Requests and notifications share the underlying bidirectional stream. Each
-/// in-flight request gets a unique id and its response is matched back by id;
-/// server pushes without an id are delivered through the notification receiver
-/// returned by [`RpcClient::new`]. After the stream closes or the client is
-/// dropped, every pending request fails immediately instead of waiting for its
-/// timeout.
+/// Each in-flight request gets a unique id and its response is matched back by
+/// id. Messages without an id are dropped. After the stream closes or the
+/// client is dropped, every pending request fails immediately instead of
+/// waiting for its timeout.
 pub struct RpcClient {
     writer: Mutex<ClientStreamWriter<Value, ()>>,
     pending: Arc<Pending>,
@@ -44,36 +42,27 @@ pub struct RpcClient {
 impl RpcClient {
     /// Creates a concurrent client over an established bidirectional stream.
     ///
-    /// Returns the client and the receiver for server-pushed notifications.
     /// Requests that do not get a response within 30 seconds fail with
     /// [`Error::RequestTimeout`].
-    pub fn new(session: ReaderWriter<Value, Value>) -> (Self, mpsc::UnboundedReceiver<Value>) {
+    pub fn new(session: ReaderWriter<Value, Value>) -> Self {
         Self::with_timeout(session, DEFAULT_REQUEST_TIMEOUT)
     }
 
     /// Creates a concurrent client with a custom per-request timeout.
-    pub fn with_timeout(
-        session: ReaderWriter<Value, Value>,
-        request_timeout: Duration,
-    ) -> (Self, mpsc::UnboundedReceiver<Value>) {
+    pub fn with_timeout(session: ReaderWriter<Value, Value>, request_timeout: Duration) -> Self {
         let (writer, reader) = session.into_parts();
         let pending = Arc::new(Pending::new());
         let closed = Arc::new(AtomicBool::new(false));
-        let (notifications_tx, notifications_rx) = mpsc::unbounded_channel();
-        let read_task =
-            Self::spawn_dispatch(reader, pending.clone(), notifications_tx, closed.clone());
+        let read_task = Self::spawn_dispatch(reader, pending.clone(), closed.clone());
         let next_request_id = AtomicU64::new(2);
-        (
-            Self {
-                writer: Mutex::new(writer),
-                pending,
-                next_request_id,
-                request_timeout,
-                read_task,
-                closed,
-            },
-            notifications_rx,
-        )
+        Self {
+            writer: Mutex::new(writer),
+            pending,
+            next_request_id,
+            request_timeout,
+            read_task,
+            closed,
+        }
     }
 
     /// Sends a JSON-RPC request and awaits its correlated response.
@@ -160,13 +149,12 @@ impl RpcClient {
     fn spawn_dispatch(
         mut reader: Reader<'static, Value>,
         pending: Arc<Pending>,
-        notifications: mpsc::UnboundedSender<Value>,
         closed: Arc<AtomicBool>,
     ) -> JoinHandle<()> {
         tokio::spawn(async move {
             while let Some(result) = reader.read().await {
                 match result {
-                    Ok(value) => Self::route_message(value, &pending, &notifications),
+                    Ok(value) => Self::route_message(value, &pending),
                     Err(_) => break,
                 }
             }
@@ -175,27 +163,20 @@ impl RpcClient {
         })
     }
 
-    /// Routes one incoming message to its pending request or the notifications.
-    fn route_message(
-        value: Value,
-        pending: &Pending,
-        notifications: &mpsc::UnboundedSender<Value>,
-    ) {
+    /// Routes one incoming message to its pending request; drops id-less ones.
+    fn route_message(value: Value, pending: &Pending) {
         if let Value::Array(items) = value {
             for item in items {
-                Self::route_message(item, pending, notifications);
+                Self::route_message(item, pending);
             }
             return;
         }
-        if value.get("id").is_some() {
-            if let Some(request_id) = value.get("id").and_then(Value::as_u64) {
-                if let Some((_, tx)) = pending.remove(&request_id) {
-                    let _ = tx.send(Self::classify_response(value));
-                }
-            }
+        let Some(request_id) = value.get("id").and_then(Value::as_u64) else {
             return;
+        };
+        if let Some((_, tx)) = pending.remove(&request_id) {
+            let _ = tx.send(Self::classify_response(value));
         }
-        let _ = notifications.send(value);
     }
 
     /// Turns a JSON-RPC response value into its result or error.

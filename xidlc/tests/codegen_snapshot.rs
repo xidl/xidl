@@ -12,6 +12,7 @@ fn lang_and_codegen(folder: &str) -> Option<&'static str> {
         "axum" => Some("axum"),
         "openapi" => Some("openapi"),
         "openrpc" => Some("openrpc"),
+        "rust-jsonrpc" => Some("rust-jsonrpc"),
         _ => None,
     }
 }

@@ -8,8 +8,8 @@ use std::time::Duration;
 use tokio::sync::{mpsc, oneshot};
 
 #[tokio::test]
-async fn concurrent_calls_and_notifications_route_by_id() {
-    let (rpc, mut notifications, _observed) = open_test_pair().await;
+async fn concurrent_calls_route_by_id_and_drop_idless_messages() {
+    let (rpc, _observed) = open_test_pair().await;
     let slow = tokio::spawn({
         let rpc = rpc.clone();
         async move { rpc.call::<_, String>("slow", json!({})).await }
@@ -23,13 +23,7 @@ async fn concurrent_calls_and_notifications_route_by_id() {
         async move { rpc.call::<_, Value>("sum", json!({"a": 1, "b": 2})).await }
     });
 
-    let pushed = tokio::time::timeout(Duration::from_secs(2), notifications.recv())
-        .await
-        .expect("pushed notification must arrive")
-        .expect("notification channel must stay open");
-    assert_eq!(pushed["method"], "pushed");
-    assert_eq!(pushed["params"]["n"], 7);
-
+    // The server's id-less "pushed" frame must not disturb id-based routing.
     let total = sum.await.expect("join sum").expect("sum call");
     assert_eq!(total["total"], 3);
     let pushed_result = push.await.expect("join push").expect("push call");
@@ -40,7 +34,7 @@ async fn concurrent_calls_and_notifications_route_by_id() {
 
 #[tokio::test]
 async fn server_error_maps_to_rpc_error() {
-    let (rpc, _notifications, _observed) = open_test_pair().await;
+    let (rpc, _observed) = open_test_pair().await;
     let error = rpc
         .call::<_, Value>("fail", json!({}))
         .await
@@ -53,8 +47,7 @@ async fn server_error_maps_to_rpc_error() {
 
 #[tokio::test]
 async fn request_times_out_when_peer_never_responds() {
-    let (rpc, _notifications, _observed) =
-        open_test_pair_with_timeout(Duration::from_millis(50)).await;
+    let (rpc, _observed) = open_test_pair_with_timeout(Duration::from_millis(50)).await;
     let error = rpc
         .call::<_, Value>("never", json!({}))
         .await
@@ -64,7 +57,7 @@ async fn request_times_out_when_peer_never_responds() {
 
 #[tokio::test]
 async fn stream_close_fails_pending_requests_fast() {
-    let (rpc, _notifications, _observed) = open_test_pair().await;
+    let (rpc, _observed) = open_test_pair().await;
     let closing = tokio::spawn({
         let rpc = rpc.clone();
         async move { rpc.call::<_, Value>("close", json!({})).await }
@@ -93,7 +86,7 @@ async fn stream_close_fails_pending_requests_fast() {
 
 #[tokio::test]
 async fn notify_sends_fire_and_forget() {
-    let (rpc, _notifications, observed) = open_test_pair().await;
+    let (rpc, observed) = open_test_pair().await;
     rpc.notify("ping", json!({"n": 3})).await.expect("notify");
     tokio::time::timeout(Duration::from_secs(2), async {
         loop {
@@ -163,7 +156,7 @@ async fn batch_responses_route_out_of_order() {
     let session = crate::stream::open_bidi_client(client_side, "stream")
         .await
         .expect("open bidi stream");
-    let (rpc, _notifications) = RpcClient::new(session);
+    let rpc = RpcClient::new(session);
     let rpc = Arc::new(rpc);
     let alpha = tokio::spawn({
         let rpc = rpc.clone();
@@ -193,7 +186,7 @@ async fn write_failure_marks_closed_and_fails_pending() {
         futures_util::stream::pending::<Result<Value, Error>>(),
     ));
     let session = ReaderWriter::new(writer, reader);
-    let (rpc, _notifications) = RpcClient::new(session);
+    let rpc = RpcClient::new(session);
 
     let error = rpc
         .call::<_, Value>("sum", json!({}))
@@ -229,7 +222,7 @@ async fn read_error_marks_closed_and_fails_pending() {
         Err::<Value, Error>(Error::Protocol("stream read failed"))
     })));
     let session = ReaderWriter::new(writer, reader);
-    let (rpc, _notifications) = RpcClient::new(session);
+    let rpc = RpcClient::new(session);
     let rpc = Arc::new(rpc);
 
     let call = tokio::spawn({

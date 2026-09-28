@@ -1,0 +1,49 @@
+module chat {
+    enum ClientEventType {
+        HEARTBEAT,
+        PAYLOAD,
+    };
+
+    union ClientEvent switch (ClientEventType) {
+        case ClientEventType::HEARTBEAT:
+            long ping_id;
+        case ClientEventType::PAYLOAD:
+            string data;
+    };
+
+    enum ServerEventType {
+        ACK,
+        EVENT,
+    };
+
+    union ServerEvent switch (ServerEventType) {
+        case ServerEventType::ACK:
+            long pong_id;
+        case ServerEventType::EVENT:
+            string data;
+    };
+
+    struct Message {
+        string text;
+    };
+
+    struct Reply {
+        string text;
+    };
+
+    interface Channel {
+        @bidi_stream
+        Reply echo(in Message req);
+
+        @bidi_stream
+        void dialogue(
+            in string user,
+            in string text,
+            out string sender,
+            out string reply
+        );
+
+        @bidi_stream
+        ServerEvent converse(in ClientEvent event);
+    };
+};

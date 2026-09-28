@@ -1,0 +1,18 @@
+module feed {
+    struct Message {
+        long seq;
+        string body;
+    };
+
+    struct Request {
+        string topic;
+    };
+
+    interface Rpc {
+        @server_stream
+        Message subscribe(in Request req);
+
+        @server_stream
+        string watch(in string topic);
+    };
+};

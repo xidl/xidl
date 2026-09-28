@@ -1,12 +1,12 @@
 use serde::Serialize;
 
-#[derive(Serialize)]
+#[derive(Clone, Serialize)]
 pub(super) struct ParamField {
     pub(super) name: String,
     pub(super) ty: String,
 }
 
-#[derive(Serialize)]
+#[derive(Clone, Serialize)]
 pub(super) struct OutputField {
     pub(super) name: String,
     pub(super) json_name: String,
@@ -30,6 +30,10 @@ pub(super) struct MethodContext {
     pub(super) response_fields: Vec<OutputField>,
     pub(super) response_single_field: String,
     pub(super) stream_item_ty: String,
+    pub(super) request_item_ty: String,
+    pub(super) response_item_ty: String,
+    pub(super) request_is_unit: bool,
+    pub(super) response_is_unit: bool,
 }
 
 #[derive(Serialize)]

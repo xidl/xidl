@@ -1,16 +1,15 @@
 //! End-to-end integration tests for the concurrent [`RpcClient`].
 //!
 //! These tests exercise `RpcClient` through the public `Server`, `Handler`,
-//! `stream`, and `transport` APIs: concurrent request multiplexing, server
-//! notifications, per-request timeouts, fail-fast on stream close, and
-//! out-of-order batch responses.
+//! `stream`, and `transport` APIs: concurrent request multiplexing,
+//! per-request timeouts, fail-fast on stream close, and out-of-order batch
+//! responses.
 
 #![cfg(feature = "tokio")]
 
 use serde_json::{Value, json};
 use std::sync::Arc;
 use std::time::Duration;
-use tokio::sync::mpsc;
 use xidl_jsonrpc::stream::{ClientStreamWriter, ReaderWriter};
 use xidl_jsonrpc::{Error, Handler, RpcClient, Server};
 
@@ -120,12 +119,11 @@ impl Handler for RpcStreamHandler {
 }
 
 /// Spawns an inproc server and returns a connected `RpcClient` plus the
-/// notification receiver and the notifications the server observed.
+/// notifications the server observed.
 async fn open_rpc_client(
     request_timeout: Duration,
 ) -> (
     Arc<RpcClient>,
-    mpsc::UnboundedReceiver<Value>,
     Arc<std::sync::Mutex<Vec<Value>>>,
     ServerTask,
 ) {
@@ -141,14 +139,13 @@ async fn open_rpc_client(
     let session = xidl_jsonrpc::stream::open_bidi_client(stream, "rpc-stream")
         .await
         .expect("open rpc stream");
-    let (rpc, rx) = RpcClient::with_timeout(session, request_timeout);
-    (Arc::new(rpc), rx, notifications, server)
+    let rpc = RpcClient::with_timeout(session, request_timeout);
+    (Arc::new(rpc), notifications, server)
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-async fn rpc_client_multiplexes_requests_and_delivers_notifications() {
-    let (rpc, mut notifications, _observed, server) =
-        open_rpc_client(Duration::from_secs(30)).await;
+async fn rpc_client_multiplexes_requests_and_drops_idless_messages() {
+    let (rpc, _observed, server) = open_rpc_client(Duration::from_secs(30)).await;
 
     let slow = tokio::spawn({
         let rpc = rpc.clone();
@@ -163,13 +160,8 @@ async fn rpc_client_multiplexes_requests_and_delivers_notifications() {
         async move { rpc.call::<_, Value>("sum", json!({"a": 1, "b": 2})).await }
     });
 
-    let pushed = tokio::time::timeout(Duration::from_secs(10), notifications.recv())
-        .await
-        .expect("pushed notification must arrive")
-        .expect("notification channel must stay open");
-    assert_eq!(pushed["method"], "pushed");
-    assert_eq!(pushed["params"]["n"], 7);
-
+    // The server's id-less "pushed" frame is dropped and must not disturb
+    // id-based response routing.
     let total = sum.await.expect("join sum").expect("sum call");
     assert_eq!(total["total"], 3);
     let pushed_result = push.await.expect("join push").expect("push call");
@@ -182,7 +174,7 @@ async fn rpc_client_multiplexes_requests_and_delivers_notifications() {
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn rpc_client_maps_server_errors() {
-    let (rpc, _notifications, _observed, server) = open_rpc_client(Duration::from_secs(30)).await;
+    let (rpc, _observed, server) = open_rpc_client(Duration::from_secs(30)).await;
 
     let error = rpc
         .call::<_, Value>("fail", json!({}))
@@ -198,7 +190,7 @@ async fn rpc_client_maps_server_errors() {
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn rpc_client_pending_requests_fail_fast_when_stream_closes() {
-    let (rpc, _notifications, _observed, server) = open_rpc_client(Duration::from_secs(30)).await;
+    let (rpc, _observed, server) = open_rpc_client(Duration::from_secs(30)).await;
 
     let closing = tokio::spawn({
         let rpc = rpc.clone();
@@ -230,7 +222,7 @@ async fn rpc_client_pending_requests_fail_fast_when_stream_closes() {
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn rpc_client_times_out_when_peer_never_responds() {
-    let (rpc, _notifications, _observed, server) = open_rpc_client(Duration::from_millis(50)).await;
+    let (rpc, _observed, server) = open_rpc_client(Duration::from_millis(50)).await;
 
     let error = rpc
         .call::<_, Value>("never", json!({}))
@@ -243,7 +235,7 @@ async fn rpc_client_times_out_when_peer_never_responds() {
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn rpc_client_notify_reaches_the_server() {
-    let (rpc, _notifications, observed, server) = open_rpc_client(Duration::from_secs(30)).await;
+    let (rpc, observed, server) = open_rpc_client(Duration::from_secs(30)).await;
 
     rpc.notify("ping", json!({"n": 3})).await.expect("notify");
 
@@ -293,7 +285,7 @@ async fn rpc_client_routes_out_of_order_batch_responses() {
     let session = xidl_jsonrpc::stream::open_bidi_client(client_side, "rpc-stream")
         .await
         .expect("open rpc stream");
-    let (rpc, _notifications) = RpcClient::new(session);
+    let rpc = RpcClient::new(session);
     let rpc = Arc::new(rpc);
     let alpha = tokio::spawn({
         let rpc = rpc.clone();

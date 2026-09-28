@@ -1,0 +1,29 @@
+enum PacketKind {
+    PING,
+    TEXT,
+};
+
+union Packet switch (PacketKind) {
+    case PacketKind::PING:
+        long ping_id;
+    case PacketKind::TEXT:
+        string data;
+};
+
+struct Message {
+    long seq;
+    string body;
+};
+
+interface Feed {
+    @server_stream
+    Message messages(in long count);
+
+    string ping();
+
+    @bidi_stream
+    Message echo(in Message req);
+
+    @bidi_stream
+    Packet converse(in Packet req);
+};
