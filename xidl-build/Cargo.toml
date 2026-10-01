@@ -13,22 +13,26 @@ repository.workspace = true
 workspace = true
 
 [features]
-default = [
+default = []
+# Embed the xidlc compiler in-process, with the previously-default generator
+# set. Pair with `gen-*` features to add more generators (typescript, go, ...).
+bundle = [
+  "dep:xidlc",
   "gen-rust",
   "gen-rust-axum",
   "gen-openapi",
   "gen-openrpc",
   "gen-rust-jsonrpc",
 ]
-gen-rust = ["xidlc/gen-rust"]
-gen-rust-jsonrpc = ["gen-rust", "xidlc/gen-rust-jsonrpc"]
-gen-rust-axum = ["gen-rust", "xidlc/gen-rust-axum"]
-gen-typescript = ["xidlc/gen-typescript"]
-gen-typescript-rest = ["gen-typescript", "xidlc/gen-typescript-rest"]
-gen-go = ["xidlc/gen-go"]
-gen-go-rest = ["gen-go", "xidlc/gen-go-rest"]
-gen-openapi = ["xidlc/gen-openapi"]
-gen-openrpc = ["xidlc/gen-openrpc"]
+gen-rust = ["xidlc?/gen-rust"]
+gen-rust-jsonrpc = ["gen-rust", "xidlc?/gen-rust-jsonrpc"]
+gen-rust-axum = ["gen-rust", "xidlc?/gen-rust-axum"]
+gen-typescript = ["xidlc?/gen-typescript"]
+gen-typescript-rest = ["gen-typescript", "xidlc?/gen-typescript-rest"]
+gen-go = ["xidlc?/gen-go"]
+gen-go-rest = ["gen-go", "xidlc?/gen-go-rest"]
+gen-openapi = ["xidlc?/gen-openapi"]
+gen-openrpc = ["xidlc?/gen-openrpc"]
 
 [dependencies]
-xidlc = { version = "0.94.0", path = "../xidlc", default-features = false }
+xidlc = { version = "0.94.0", path = "../xidlc", default-features = false, optional = true }

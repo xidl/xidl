@@ -18,6 +18,8 @@ init:
 # Test Rust
 test-rust: init
     XIDLC_VERSION={{xidlc_snapshot_version}} XIDLC_GIT_HASH={{xidlc_snapshot_hash}} cargo test --all -F transport-all -F fmt
+    # Exercise the xidl-build CLI backend; `--all` unification enables `bundle`.
+    cargo test -p xidl-build
 
 # Test Go
 test-go: test-go-runtime
