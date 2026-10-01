@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.95.0](https://github.com/xidl/xidl/compare/v0.94.0...v0.95.0) (2026-10-01)
+
+
+### Features
+
+* **xidl-build:** default to the xidlc cli with opt-in bundle backend ([5a73803](https://github.com/xidl/xidl/commit/5a738038ec3a7c1ae9684ec0b880ced551769b0c))
+
 ## [0.94.0](https://github.com/xidl/xidl/compare/v0.93.1...v0.94.0) (2026-09-22)
 
 
