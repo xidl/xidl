@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.96.0](https://github.com/xidl/xidl/compare/v0.95.0...v0.96.0) (2026-10-08)
+
+
+### Features
+
+* **website:** add starlight llms-txt generation ([382dccf](https://github.com/xidl/xidl/commit/382dccf7412920687026135b8f2a31f3c7f18dd3))
+
+
+### Bug Fixes
+
+* **xidlc:** keep module types in rust-axum output with types first ([36f765d](https://github.com/xidl/xidl/commit/36f765d2b175373dc224405e85865edc949583c2))
+
 ## [0.95.0](https://github.com/xidl/xidl/compare/v0.94.0...v0.95.0) (2026-10-01)
 
 
