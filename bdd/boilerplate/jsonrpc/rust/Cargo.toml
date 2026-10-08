@@ -6,7 +6,7 @@ edition = "2021"
 [workspace]
 
 [dependencies]
-xidl-jsonrpc = { path = "{{RUST_XIDL_JSONRPC_PATH}}", features = [
+xidl-jsonrpc = { path = "{{RUST_XIDL_JSONRPC_PATH}}", default-features = false, features = [
   "transport-tcp",
 ] }
 tokio = { version = "1", features = ["full"] }
