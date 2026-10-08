@@ -2,6 +2,7 @@ import netlify from '@astrojs/netlify';
 import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
+import starlightLlmsTxt from 'starlight-llms-txt';
 import idlLanguage from './src/shiki/idl.mjs';
 
 // https://astro.build/config
@@ -60,6 +61,7 @@ export default defineConfig({
           lang: 'en',
         },
       },
+      plugins: [starlightLlmsTxt()],
       sidebar: [
         {
           items: [
@@ -87,23 +89,23 @@ export default defineConfig({
           label: 'Guide',
         },
         {
-          autogenerate: { directory: 'docs' },
+          items: [{ autogenerate: { directory: 'docs' } }],
           label: 'Reference',
         },
         {
-          autogenerate: { directory: 'rest' },
+          items: [{ autogenerate: { directory: 'rest' } }],
           label: 'HTTP & REST',
         },
         {
-          autogenerate: { directory: 'jsonrpc' },
+          items: [{ autogenerate: { directory: 'jsonrpc' } }],
           label: 'JSON-RPC',
         },
         {
-          autogenerate: { directory: 'rfc' },
+          items: [{ autogenerate: { directory: 'rfc' } }],
           label: 'RFC',
         },
         {
-          autogenerate: { directory: 'ai' },
+          items: [{ autogenerate: { directory: 'ai' } }],
           label: 'AI',
         },
         {
