@@ -444,6 +444,3 @@ impl RustHttpClient {
         }
     }
 }
-===============
-rust_annotation_passthrough.rs
-===============

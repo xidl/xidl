@@ -1,0 +1,24 @@
+#pragma xidlc package Demo API
+#pragma xidlc version v1
+
+module demo {
+
+struct Point {
+    int64 x;
+    int64 y;
+};
+
+@no_security
+interface Things {
+    @get(path = "/points")
+    Point get_point();
+
+    // Conditional read: validate a caller-supplied, optional header.
+    @get(path = "/points/{id}")
+    Point get_point_by_id(
+        @path string id,
+        @header @rename("If-None-Match") @optional string if_none_match
+    );
+};
+
+};

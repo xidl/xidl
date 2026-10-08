@@ -29,8 +29,12 @@ fn convert_expr(expr: &str, ty: &hir::TypeSpec, registry: &TypeRegistry) -> Idlc
             }
         }
         hir::TypeSpec::ScopedName(value) => {
-            let name = scoped_key(value);
-            match registry.get(&name) {
+            let raw = scoped_key(value);
+            let key = resolve_convert_key(&raw, registry);
+            let Some(key) = key else {
+                return Ok(expr.to_string());
+            };
+            match registry.get(key.as_str()) {
                 Some(TransportTypeDef::Struct(_)) | Some(TransportTypeDef::Enum(_)) => {
                     format!("{expr}.into()")
                 }
@@ -38,8 +42,7 @@ fn convert_expr(expr: &str, ty: &hir::TypeSpec, registry: &TypeRegistry) -> Idlc
                     hir::TypedefType::TypeSpec(inner) => convert_expr(expr, inner, registry)?,
                     hir::TypedefType::ConstrTypeDcl(_) => {
                         return Err(IdlcError::rpc(format!(
-                            "unsupported inline typedef transport for '{}'",
-                            name
+                            "unsupported inline typedef transport for '{key}'"
                         )));
                     }
                 },
@@ -48,4 +51,11 @@ fn convert_expr(expr: &str, ty: &hir::TypeSpec, registry: &TypeRegistry) -> Idlc
         }
         _ => expr.to_string(),
     })
+}
+
+fn resolve_convert_key(raw: &str, registry: &TypeRegistry) -> Option<String> {
+    if registry.contains_key(raw) {
+        return Some(raw.to_string());
+    }
+    crate::generate::utils::scope::find_unambiguous_suffix_match(raw, registry.keys())
 }

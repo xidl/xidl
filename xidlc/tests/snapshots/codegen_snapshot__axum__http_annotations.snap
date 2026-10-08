@@ -1460,6 +1460,3 @@ impl HttpAnnoServiceClient {
         }
     }
 }
-===============
-http_annotations.rs
-===============

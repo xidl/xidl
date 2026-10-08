@@ -340,25 +340,35 @@ fn map_scoped(
     registry: &TypeRegistry,
     tracker: Option<&mut TransportTracker>,
 ) -> IdlcResult<String> {
-    let name = scoped_key(value);
-    match registry.get(&name) {
+    let raw = scoped_key(value);
+    let canonical = resolve_transport_key(&raw, registry);
+    let Some(key) = canonical else {
+        return Ok(render_public_scoped(value));
+    };
+    match registry.get(key.as_str()) {
         Some(TransportTypeDef::Struct(_)) | Some(TransportTypeDef::Enum(_)) => {
             if let Some(tracker) = tracker {
-                track_type(&name, direction, module_name, registry, tracker)?;
+                track_type(key.as_str(), direction, module_name, registry, tracker)?;
             }
-            Ok(format!("{module_name}::{}", transport_ident(&name)))
+            Ok(format!("{module_name}::{}", transport_ident(key.as_str())))
         }
         Some(TransportTypeDef::Typedef(def)) => match &def.ty {
             hir::TypedefType::TypeSpec(ty) => {
                 map_type_inner(ty, direction, module_name, registry, tracker)
             }
             hir::TypedefType::ConstrTypeDcl(_) => Err(IdlcError::rpc(format!(
-                "unsupported inline typedef transport for '{}'",
-                name
+                "unsupported inline typedef transport for '{key}'"
             ))),
         },
         None => Ok(render_public_scoped(value)),
     }
+}
+
+fn resolve_transport_key(raw: &str, registry: &TypeRegistry) -> Option<String> {
+    if registry.contains_key(raw) {
+        return Some(raw.to_string());
+    }
+    crate::generate::utils::scope::find_unambiguous_suffix_match(raw, registry.keys())
 }
 
 fn track_type(

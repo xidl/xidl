@@ -216,6 +216,3 @@ impl HttpBidiStreamServiceClient {
             .await;
     }
 }
-===============
-http_bidi_stream.rs
-===============
