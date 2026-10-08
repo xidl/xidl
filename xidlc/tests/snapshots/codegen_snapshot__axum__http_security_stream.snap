@@ -288,6 +288,3 @@ impl HttpSecurityStreamServiceClient {
         xidl_rust_axum::stream::open_sse::<String>(self.client.http(), req).await
     }
 }
-===============
-http_security_stream.rs
-===============

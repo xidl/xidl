@@ -748,6 +748,3 @@ impl HttpResponseShapeServiceClient {
         }
     }
 }
-===============
-http_response_shape.rs
-===============

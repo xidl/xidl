@@ -409,6 +409,3 @@ impl HttpMediaServiceClient {
         }
     }
 }
-===============
-http_media_types.rs
-===============

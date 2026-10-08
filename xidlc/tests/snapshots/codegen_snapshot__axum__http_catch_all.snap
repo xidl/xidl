@@ -383,6 +383,3 @@ impl HttpCatchAllServiceClient {
         }
     }
 }
-===============
-http_catch_all.rs
-===============

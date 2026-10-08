@@ -434,6 +434,3 @@ impl HttpQueryTemplateServiceClient {
         }
     }
 }
-===============
-http_query_template.rs
-===============

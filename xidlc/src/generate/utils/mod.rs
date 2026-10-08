@@ -1,5 +1,6 @@
 pub mod doc;
 pub mod filter;
+pub mod scope;
 
 pub use doc::doc_lines_from_annotations;
 pub use filter::rust_format_filter;

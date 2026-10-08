@@ -395,6 +395,3 @@ impl HttpAttributeServiceClient {
         }
     }
 }
-===============
-http_attribute.rs
-===============
