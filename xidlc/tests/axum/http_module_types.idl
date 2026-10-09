@@ -13,11 +13,14 @@ interface Things {
     @get(path = "/points")
     Point get_point();
 
-    // Conditional read: validate a caller-supplied, optional header.
+    // Conditional read: validate caller-supplied optional header, cookie, and multi-values.
     @get(path = "/points/{id}")
     Point get_point_by_id(
         @path string id,
-        @header @rename("If-None-Match") @optional string if_none_match
+        @header @rename("If-None-Match") @optional string if_none_match,
+        @cookie @rename("session_token") @optional string session_token,
+        @header @rename("X-Tags") @optional sequence<string> tags,
+        @cookie @rename("pref") @optional sequence<string> prefs
     );
 };
 

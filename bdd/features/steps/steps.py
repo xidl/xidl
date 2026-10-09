@@ -1388,3 +1388,57 @@ def step_impl(context):
         assert ws.connected
     finally:
         ws.close()
+
+
+@then("the client can test optional headers and cookies without values")
+def step_impl(context):
+    import http.client
+    import json
+
+    conn = http.client.HTTPConnection("127.0.0.1", context.port)
+    conn.putrequest("GET", "/test/test-none")
+    conn.endheaders()
+    resp = conn.getresponse()
+    assert resp.status == 200, f"Got status {resp.status}"
+    data = json.loads(resp.read().decode())
+    assert data["header_echo"] == "NONE", f"Expected 'NONE', got {data['header_echo']}"
+    assert data["cookie_echo"] == "NONE", f"Expected 'NONE', got {data['cookie_echo']}"
+    assert data["multi_header_echo"] == [], (
+        f"Expected [], got {data['multi_header_echo']}"
+    )
+    assert data["multi_cookie_echo"] == [], (
+        f"Expected [], got {data['multi_cookie_echo']}"
+    )
+    conn.close()
+
+
+@then("the client can test optional headers and cookies with values")
+def step_impl(context):
+    import http.client
+    import json
+
+    conn = http.client.HTTPConnection("127.0.0.1", context.port)
+    conn.putrequest("GET", "/test/test-some")
+    conn.putheader("X-Optional-Header", "my-header")
+    conn.putheader("X-Multi-Header", "h1")
+    conn.putheader("X-Multi-Header", "h2")
+    conn.putheader("Cookie", "opt_cookie=my-cookie; multi_cookie=c1; multi_cookie=c2")
+    conn.endheaders()
+    resp = conn.getresponse()
+    assert resp.status == 200, f"Got status {resp.status}"
+    data = json.loads(resp.read().decode())
+    assert data["header_echo"] == "my-header", (
+        f"Expected 'my-header', got {data['header_echo']}"
+    )
+    assert data["cookie_echo"] == "my-cookie", (
+        f"Expected 'my-cookie', got {data['cookie_echo']}"
+    )
+    assert data["multi_header_echo"] == [
+        "h1",
+        "h2",
+    ], f"Expected ['h1', 'h2'], got {data['multi_header_echo']}"
+    assert data["multi_cookie_echo"] == [
+        "c1",
+        "c2",
+    ], f"Expected ['c1', 'c2'], got {data['multi_cookie_echo']}"
+    conn.close()

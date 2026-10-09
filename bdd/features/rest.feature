@@ -243,3 +243,15 @@ Feature: REST API Generation and Communication
       | rust |
       | go   |
       | ts   |
+
+  Scenario Outline: REST Optional Header and Cookie
+    Given a REST IDL file "bdd/features/data/optional_header_cookie.idl"
+    When I generate <lang> code for the IDL
+    Then the generated <lang> code should be valid
+    And I can run the generated <lang> server and client
+    And the client can test optional headers and cookies without values
+    And the client can test optional headers and cookies with values
+
+    Examples:
+      | lang |
+      | rust |

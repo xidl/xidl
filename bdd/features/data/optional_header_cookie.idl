@@ -1,0 +1,26 @@
+#pragma xidlc package OptionalHeaderCookie API
+#pragma xidlc version v1
+
+module test {
+
+struct EchoResult {
+    string id;
+    string header_echo;
+    string cookie_echo;
+    sequence<string> multi_header_echo;
+    sequence<string> multi_cookie_echo;
+};
+
+@no_security
+interface OptionalTestService {
+    @get(path = "/test/{id}")
+    EchoResult test_optional(
+        @path string id,
+        @header @rename("X-Optional-Header") @optional string opt_header,
+        @cookie @rename("opt_cookie") @optional string opt_cookie,
+        @header @rename("X-Multi-Header") @optional sequence<string> multi_header,
+        @cookie @rename("multi_cookie") @optional sequence<string> multi_cookie
+    );
+};
+
+};
