@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.96.1](https://github.com/xidl/xidl/compare/v0.96.0...v0.96.1) (2026-10-09)
+
+
+### Bug Fixes
+
+* **rust-axum:** decouple server feature for wasm compatibility ([f398886](https://github.com/xidl/xidl/commit/f3988865d98eb6b674a962a00e8a072a89d0a385)), closes [#297](https://github.com/xidl/xidl/issues/297)
+* **xidlc:** unwrap optional header and cookie in rust-axum client ([da6cd79](https://github.com/xidl/xidl/commit/da6cd7944754df3157559063389dea766779862e)), closes [#295](https://github.com/xidl/xidl/issues/295)
+
 ## [0.96.0](https://github.com/xidl/xidl/compare/v0.95.0...v0.96.0) (2026-10-08)
 
 
