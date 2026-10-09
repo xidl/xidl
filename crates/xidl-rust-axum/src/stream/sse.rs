@@ -2,6 +2,7 @@ use super::{SseClientStream, SseStream};
 #[cfg(feature = "client")]
 use crate::Error;
 use crate::{ErrorBody, Result};
+#[cfg(feature = "server")]
 use axum::response::{IntoResponse, Sse, sse::Event};
 #[cfg(feature = "client")]
 use futures_util::TryStreamExt;
@@ -43,6 +44,7 @@ where
     Box::pin(stream)
 }
 
+#[cfg(feature = "server")]
 /// Converts an item stream into an SSE HTTP response.
 pub fn sse_response<T>(stream: SseStream<T>) -> axum::response::Response
 where

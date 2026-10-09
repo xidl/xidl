@@ -75,3 +75,7 @@ docs-dev:
 # Build docs
 docs-build:
     pnpm --dir docs build
+
+# Check wasm compilation
+check-wasm:
+    cargo check -p xidl-rust-axum --target wasm32-unknown-unknown --no-default-features --features client

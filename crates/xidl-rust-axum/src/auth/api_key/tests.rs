@@ -1,5 +1,5 @@
 use super::{ApiKeyAuthError, ApiKeyLocation, extract_api_key};
-use axum::http::{HeaderMap, HeaderValue, Uri, header};
+use http::{HeaderMap, HeaderValue, Uri, header};
 
 fn headers_with_cookie(value: &str) -> HeaderMap {
     let mut headers = HeaderMap::new();

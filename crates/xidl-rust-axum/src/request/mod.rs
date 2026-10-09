@@ -5,19 +5,19 @@
 #[derive(Debug, Clone)]
 pub struct Request<T> {
     /// Original request headers.
-    pub headers: axum::http::HeaderMap,
+    pub headers: http::HeaderMap,
     /// Decoded request payload.
     pub data: T,
 }
 
 impl<T> Request<T> {
     /// Creates a new request wrapper.
-    pub fn new(headers: axum::http::HeaderMap, data: T) -> Self {
+    pub fn new(headers: http::HeaderMap, data: T) -> Self {
         Self { headers, data }
     }
 
     /// Returns the request headers.
-    pub fn headers(&self) -> &axum::http::HeaderMap {
+    pub fn headers(&self) -> &http::HeaderMap {
         &self.headers
     }
 

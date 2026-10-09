@@ -1,9 +1,13 @@
-use axum::http::HeaderMap;
-use axum::http::HeaderValue;
-use axum::http::header::{AUTHORIZATION, HeaderName};
+#[cfg(feature = "server")]
 use axum_extra::headers::{Error as HeaderError, Header};
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
+use http::HeaderMap;
+#[cfg(feature = "server")]
+use http::HeaderValue;
+use http::header::AUTHORIZATION;
+#[cfg(feature = "server")]
+use http::header::HeaderName;
 
 /// Parsed HTTP Basic auth credentials.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
@@ -84,6 +88,7 @@ impl BearerHeader {
     }
 }
 
+#[cfg(feature = "server")]
 impl Header for BearerHeader {
     fn name() -> &'static HeaderName {
         &AUTHORIZATION

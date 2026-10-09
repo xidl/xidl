@@ -480,7 +480,7 @@ impl {{ ident }}Client {
                             {% endif %}
                             {% if method.response_cookie_params | length > 0 %}
                                 let mut cookie_map: ::std::collections::HashMap<String, Vec<String>> = ::std::collections::HashMap::new();
-                                for header_value in headers.get_all(::xidl_rust_axum::axum::http::header::SET_COOKIE).iter() {
+                                for header_value in headers.get_all(::xidl_rust_axum::reqwest::header::SET_COOKIE).iter() {
                                     let cookie_str = header_value
                                     .to_str()
                                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;

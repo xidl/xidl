@@ -1,5 +1,6 @@
 use super::{NdjsonSendStream, NdjsonStream};
 use crate::{Error, Result};
+#[cfg(feature = "server")]
 use axum::body::Body;
 use futures_util::{Stream, StreamExt, TryStreamExt};
 #[cfg(feature = "client")]
@@ -17,6 +18,7 @@ where
     Box::pin(stream)
 }
 
+#[cfg(feature = "server")]
 /// Decodes an Axum request body as an NDJSON stream.
 pub fn decode_ndjson_body<T>(body: Body) -> NdjsonStream<T>
 where

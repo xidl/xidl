@@ -1,5 +1,6 @@
 use super::*;
 use crate::Error;
+#[cfg(feature = "server")]
 use axum::body::{self, Body};
 use futures_util::{StreamExt, stream};
 use serde::{Deserialize, Serialize};
@@ -21,6 +22,7 @@ async fn reader_reads_items_from_boxed_stream() {
     assert!(reader.read().await.is_none());
 }
 
+#[cfg(feature = "server")]
 #[tokio::test]
 async fn bidi_server_stream_write_close_and_error_sender_follow_state() {
     let (in_tx, in_rx) = mpsc::channel(1);
@@ -101,6 +103,7 @@ async fn client_stream_writer_close_and_cancel_handle_state() {
     writer.cancel().await.unwrap();
 }
 
+#[cfg(feature = "server")]
 #[tokio::test]
 async fn sse_response_emits_next_error_and_complete_events() {
     let response = sse_response(boxed_sse(stream::iter(vec![
@@ -118,6 +121,7 @@ async fn sse_response_emits_next_error_and_complete_events() {
     assert!(text.contains("event: complete"));
 }
 
+#[cfg(feature = "server")]
 #[tokio::test]
 async fn decode_ndjson_body_decodes_valid_and_invalid_lines() {
     let body = Body::from("{\"value\":1}\nnot-json\n");
@@ -232,7 +236,7 @@ fn open_bidi_client_with_headers_rejects_invalid_urls_before_connecting() {
     let runtime = tokio::runtime::Runtime::new().unwrap();
     let err = match runtime.block_on(open_bidi_client_with_headers::<Payload, Payload>(
         "not a url",
-        axum::http::HeaderMap::new(),
+        http::HeaderMap::new(),
     )) {
         Err(err) => err,
         Ok(_) => panic!("expected invalid url error"),

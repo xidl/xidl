@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use axum::http::StatusCode;
+use http::StatusCode;
 use serde::Serialize;
 use xidl_rust_axum::http::{accepts_media_type, content_type_matches};
 use xidl_rust_axum::{DeserializeFactory, Error, ErrorBody, SerializeFactory};
@@ -71,18 +71,18 @@ fn serde_factories_reject_unsupported_mime_types() {
 
 #[test]
 fn http_helpers_cover_invalid_expected_and_invalid_content_type() {
-    let headers = axum::http::HeaderMap::new();
+    let headers = http::HeaderMap::new();
     assert!(!accepts_media_type(&headers, "invalid"));
     assert!(!accepts_media_type(&headers, "applicationjson"));
 
-    let mut headers = axum::http::HeaderMap::new();
+    let mut headers = http::HeaderMap::new();
     headers.insert(
-        axum::http::header::CONTENT_TYPE,
-        axum::http::HeaderValue::from_bytes(b"\xff").unwrap(),
+        http::header::CONTENT_TYPE,
+        http::HeaderValue::from_bytes(b"\xff").unwrap(),
     );
     assert!(!content_type_matches(&headers, "application/json"));
     assert!(!content_type_matches(
-        &axum::http::HeaderMap::new(),
+        &http::HeaderMap::new(),
         "application/json"
     ));
 }

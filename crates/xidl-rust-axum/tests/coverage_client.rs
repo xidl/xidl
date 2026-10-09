@@ -273,3 +273,22 @@ fn url_and_ws_url_cover_join_concat_and_scheme_validation() {
     assert_eq!(err.code, 500);
     assert_eq!(err.message, "invalid base_url");
 }
+
+#[test]
+fn client_runtime_error_and_request_round_trip() {
+    let mut headers = http::HeaderMap::new();
+    headers.insert(
+        http::header::CONTENT_TYPE,
+        http::HeaderValue::from_static("application/json"),
+    );
+    let req = xidl_rust_axum::Request::new(headers.clone(), "test-payload".to_string());
+    assert_eq!(
+        req.headers().get(http::header::CONTENT_TYPE),
+        headers.get(http::header::CONTENT_TYPE)
+    );
+    assert_eq!(req.into_inner(), "test-payload");
+
+    let err = xidl_rust_axum::Error::from_http_response(http::StatusCode::BAD_REQUEST, None);
+    assert_eq!(err.code, 400);
+    assert_eq!(err.http_status(), http::StatusCode::BAD_REQUEST);
+}

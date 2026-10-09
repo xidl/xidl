@@ -1,5 +1,5 @@
 use crate::{Error, ErrorBody, Result};
-#[cfg(not(tarpaulin_include))]
+#[cfg(all(not(tarpaulin_include), feature = "server"))]
 use axum::extract::ws::{Message as AxumWsMessage, WebSocket as AxumWebSocket};
 #[cfg(not(tarpaulin_include))]
 use futures_util::{SinkExt, StreamExt};
@@ -13,6 +13,7 @@ use tokio_tungstenite::tungstenite::Message as TungsteniteMessage;
 #[cfg(not(tarpaulin_include))]
 use tokio_tungstenite::tungstenite::client::IntoClientRequest;
 
+#[cfg(feature = "server")]
 /// Server-side handle for a bidirectional WebSocket stream.
 pub struct BidiServerStream<TIn, TOut> {
     pub(super) inbound: mpsc::Receiver<Result<TIn>>,
@@ -20,6 +21,7 @@ pub struct BidiServerStream<TIn, TOut> {
     pub(super) task: Option<tokio::task::JoinHandle<()>>,
 }
 
+#[cfg(feature = "server")]
 impl<TIn, TOut> BidiServerStream<TIn, TOut> {
     /// Reads the next client message.
     pub async fn read(&mut self) -> Option<Result<TIn>> {
@@ -48,6 +50,7 @@ impl<TIn, TOut> BidiServerStream<TIn, TOut> {
     }
 }
 
+#[cfg(feature = "server")]
 impl<TIn, TOut> Drop for BidiServerStream<TIn, TOut> {
     fn drop(&mut self) {
         // Dropping the outbound sender ends the write half, which lets the
@@ -107,7 +110,7 @@ impl<TIn, TOut> Drop for BidiClientStream<TIn, TOut> {
 }
 
 /// Opens a server-side bidirectional WebSocket stream from an upgraded socket.
-#[cfg(not(tarpaulin_include))]
+#[cfg(all(not(tarpaulin_include), feature = "server"))]
 pub fn open_bidi_server<TIn, TOut>(socket: AxumWebSocket) -> BidiServerStream<TIn, TOut>
 where
     TIn: DeserializeOwned + Send + 'static,
@@ -283,7 +286,7 @@ where
 #[cfg(not(tarpaulin_include))]
 pub async fn open_bidi_client_with_headers<TIn, TOut>(
     ws_url: &str,
-    headers: axum::http::HeaderMap,
+    headers: http::HeaderMap,
 ) -> Result<BidiClientStream<TIn, TOut>>
 where
     TIn: Serialize + Send + 'static,
