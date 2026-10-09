@@ -14,7 +14,7 @@ use crate::openapi::server::Server;
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::mem;
 use xidl_parser::hir;
-use xidl_parser::rest_hir::RestHirDocument;
+use xidl_parser::rest_hir::{RestHirDocument, semantics::has_annotation};
 
 #[derive(Default)]
 pub(crate) struct OpenApiContext {
@@ -168,10 +168,18 @@ impl OpenApiContext {
 
     fn collect_exception(&mut self, except: &hir::ExceptDcl, module_path: &[String]) {
         let name = scoped_name(module_path, &except.ident);
-        self.schemas.insert(
-            name,
-            schema_for_struct_with_annotations(&except.member, &[]),
-        );
+        // `@header`/`@cookie` members travel as response metadata, not body.
+        let body_members: Vec<hir::Member> = except
+            .member
+            .iter()
+            .filter(|member| {
+                !has_annotation(&member.annotations, "header")
+                    && !has_annotation(&member.annotations, "cookie")
+            })
+            .cloned()
+            .collect();
+        self.schemas
+            .insert(name, schema_for_struct_with_annotations(&body_members, &[]));
     }
 
     fn collect_interface(
@@ -189,11 +197,14 @@ impl OpenApiContext {
         };
         self.tags.insert(def.header.ident.clone());
         let mut route_bindings = HashMap::new();
-        for method in http_interface
-            .operations
-            .iter()
-            .map(|op| render_http_operation(op, module_path, &def.header.ident))
-        {
+        for method in http_interface.operations.iter().map(|op| {
+            render_http_operation(
+                op,
+                module_path,
+                &def.header.ident,
+                &rest_hir.document.exceptions,
+            )
+        }) {
             self.collect_method(method, &mut route_bindings);
         }
         self.schemas

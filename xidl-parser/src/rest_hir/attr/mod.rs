@@ -286,6 +286,7 @@ fn base_attribute_operation(args: AttributeOperationArgs<'_>) -> HttpOperation {
             upgrade_protocol: None,
             upgrade_mode: None,
             websocket: None,
+            raises: Vec::new(),
         },
         signature,
         http,

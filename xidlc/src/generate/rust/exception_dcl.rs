@@ -7,6 +7,7 @@ use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
 use serde_json::json;
 use xidl_parser::hir;
+use xidl_parser::rest_hir::semantics::has_annotation;
 
 impl RustRender for hir::ExceptDcl {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
@@ -16,7 +17,12 @@ impl RustRender for hir::ExceptDcl {
             .flat_map(|member| {
                 let doc = doc_lines_from_annotations(&member.annotations);
                 let rust_attrs = rust_passthrough_attrs_from_annotations(&member.annotations);
-                let skip = hir::is_skipped(&member.annotations);
+                // `@header`/`@cookie` members travel outside the body, so the
+                // serialized error body excludes them; generated client/server
+                // code moves the values through real headers instead.
+                let skip = hir::is_skipped(&member.annotations)
+                    || has_annotation(&member.annotations, "header")
+                    || has_annotation(&member.annotations, "cookie");
                 member.ident.iter().map(move |decl| {
                     let name = crate::generate::rust::util::rust_ident(&declarator_name(decl));
                     let ty = type_with_decl(&member.ty, decl);

@@ -264,7 +264,7 @@ pub(crate) fn error_schema_ref() -> RefOr<Schema> {
     schema_ref("Error")
 }
 
-fn schema_ref(name: &str) -> RefOr<Schema> {
+pub(crate) fn schema_ref(name: &str) -> RefOr<Schema> {
     RefOr::Ref(Ref::from_schema_name(name))
 }
 

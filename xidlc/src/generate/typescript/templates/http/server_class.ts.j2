@@ -41,6 +41,28 @@ export const {{ service_name }}Operations = {
             {% endif %}
         },
         security: [{% for security in method.security %}{ kind: "{{ security.kind }}"{% if security.location %}, location: "{{ security.location }}"{% endif %}{% if security.name %}, name: "{{ security.name }}"{% endif %}{% if security.realm %}, realm: "{{ security.realm }}"{% endif %} }{% if not loop.last %}, {% endif %}{% endfor %}],
+        {% if method.raises | length > 0 %}
+        errors: {
+            match: (error: unknown) => {
+                {% for ex in method.raises %}
+                if (error instanceof {{ ex.ident }}) {
+                    const headers = new Headers();
+                    {% for member in ex.headers %}if (error.{{ member.field }} !== undefined) headers.set("{{ member.wire_name }}", String(error.{{ member.field }}));
+                    {% endfor %}{% for member in ex.cookies %}if (error.{{ member.field }} !== undefined) headers.append("Set-Cookie", String(error.{{ member.field }}));
+                    {% endfor %}{% if ex.has_body %}headers.set("Content-Type", "application/json");
+                    return {
+                        status: {{ ex.status }},
+                        headers,
+                        body: { {% for field in ex.body %}"{{ field.field }}": error.{{ field.field }}, {% endfor %}},
+                    };
+                    {% else %}return { status: {{ ex.status }}, headers };
+                    {% endif %}
+                }
+                {% endfor %}
+                return undefined;
+            },
+        },
+        {% endif %}
     }),
     {% endfor %}
 } as const;

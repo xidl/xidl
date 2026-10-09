@@ -94,6 +94,37 @@ pub(crate) struct MethodContext {
     pub(crate) websocket_max_message_bytes: Option<u64>,
     pub(crate) handshake_params: Vec<String>,
     pub(crate) handshake_param_names: Vec<String>,
+    /// Exceptions from `raises(...)`: typed error variants for this operation.
+    pub(crate) raises: Vec<RaisesContext>,
+    /// The operation's error type: the per-operation enum when `raises` is
+    /// non-empty, otherwise the runtime [`xidl_rust_axum::Error`].
+    pub(crate) error_ty: Option<String>,
+}
+
+/// One `raises(...)` entry projected for the rust-axum generator.
+#[derive(Serialize, Clone)]
+pub(crate) struct RaisesContext {
+    /// Enum variant identifier (Pascal-cased exception name).
+    pub(crate) variant: String,
+    /// Exception struct path as written in the IDL (resolves in-module).
+    pub(crate) ty: String,
+    pub(crate) status: u16,
+    pub(crate) headers: Vec<ExceptionMemberContext>,
+    pub(crate) cookies: Vec<ExceptionMemberContext>,
+    /// Whether the exception declares body members (non-`@header`/`@cookie`).
+    pub(crate) has_body: bool,
+}
+
+/// A `@header`/`@cookie` member of an exception, for wire read/write.
+#[derive(Serialize, Clone)]
+pub(crate) struct ExceptionMemberContext {
+    pub(crate) field: String,
+    pub(crate) wire_name: String,
+    pub(crate) ty: String,
+    pub(crate) is_multi: bool,
+    pub(crate) item_ty: String,
+    pub(crate) item_is_string: bool,
+    pub(crate) item_is_primitive: bool,
 }
 
 #[derive(Serialize, Clone)]

@@ -9,6 +9,7 @@ http_edge_cases.client.ts
 
 
 import type * as types from "./http_edge_cases";
+
 import type * as ifaceTypes from "./http_edge_cases.iface";
 import * as ifaceSchemas from "./http_edge_cases.iface.zod";
 import { deserialize } from "xidl-typescript-codec";
@@ -71,6 +72,7 @@ export class HttpEdgeCasesServiceClient {
         const resp = await this.fetchImpl(url, { method: "HEAD", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
+            
         }
         return;
         
@@ -95,6 +97,7 @@ export class HttpEdgeCasesServiceClient {
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
+            
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
         
@@ -118,6 +121,7 @@ export class HttpEdgeCasesServiceClient {
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
+            
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
         
@@ -142,6 +146,7 @@ export class HttpEdgeCasesServiceClient {
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
+            
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
         
@@ -166,11 +171,14 @@ export class HttpEdgeCasesServiceClient {
         const resp = await this.fetchImpl(url, { method: "POST", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
+            
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
         
     }
-    }
+    
+    
+}
 ===============
 http_edge_cases.d.ts
 ===============
@@ -270,6 +278,7 @@ http_edge_cases.server.ts
 
 
 import type * as types from "./http_edge_cases";
+
 import type * as ifaceTypes from "./http_edge_cases.iface";
 import * as ifaceSchemas from "./http_edge_cases.iface.zod";
 import {
@@ -324,6 +333,7 @@ export const HttpEdgeCasesServiceOperations = {
             
         },
         security: [],
+        
     }),
     
         get_user: defineOperation<HttpEdgeCasesService, "get_user">({
@@ -356,6 +366,7 @@ export const HttpEdgeCasesServiceOperations = {
             
         },
         security: [],
+        
     }),
     
         dedup_user: defineOperation<HttpEdgeCasesService, "dedup_user">({
@@ -388,6 +399,7 @@ export const HttpEdgeCasesServiceOperations = {
             
         },
         security: [],
+        
     }),
     
         get_item: defineOperation<HttpEdgeCasesService, "get_item">({
@@ -420,6 +432,7 @@ export const HttpEdgeCasesServiceOperations = {
             
         },
         security: [],
+        
     }),
     
         lookup: defineOperation<HttpEdgeCasesService, "lookup">({
@@ -452,6 +465,7 @@ export const HttpEdgeCasesServiceOperations = {
             
         },
         security: [],
+        
     }),
     
 } as const;

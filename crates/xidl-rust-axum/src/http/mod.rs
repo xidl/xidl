@@ -70,6 +70,29 @@ fn parse_media_type(value: &str) -> Option<(&str, &str)> {
     media.split_once('/')
 }
 
+/// Parses `Set-Cookie` header values into a cookie-name → values map.
+///
+/// Only the first `name=value` pair of each header counts; attributes
+/// (`Path=`, `HttpOnly`, …) are ignored.
+pub fn parse_set_cookies<'a, I>(values: I) -> std::collections::HashMap<String, Vec<String>>
+where
+    I: Iterator<Item = &'a http::HeaderValue>,
+{
+    let mut map: std::collections::HashMap<String, Vec<String>> = std::collections::HashMap::new();
+    for header_value in values {
+        let Ok(cookie_str) = header_value.to_str() else {
+            continue;
+        };
+        let pair = cookie_str.split(';').next().unwrap_or("");
+        if let Some((name, value)) = pair.split_once('=') {
+            map.entry(name.trim().to_string())
+                .or_default()
+                .push(value.trim().to_string());
+        }
+    }
+    map
+}
+
 /// Serde helper functions used by generated request models.
 pub mod serde_ext {
     use serde::Deserialize;

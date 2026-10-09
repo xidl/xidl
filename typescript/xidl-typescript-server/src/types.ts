@@ -62,6 +62,15 @@ export interface OperationResponseSpec {
   streamSchema?: XidlSchema;
 }
 
+/**
+ * A `raises(...)` exception matched and serialized by generated code.
+ */
+export interface TypedErrorResponse {
+  status: number;
+  headers?: Headers;
+  body?: unknown;
+}
+
 export interface OperationDescriptor<
   TService,
   THandler extends keyof TService = keyof TService,
@@ -73,6 +82,10 @@ export interface OperationDescriptor<
   request: OperationRequestSpec;
   response: OperationResponseSpec;
   security: SecurityRequirement[];
+  /** Matches thrown typed exceptions; first match wins. */
+  errors?: {
+    match: (error: unknown) => TypedErrorResponse | undefined;
+  };
 }
 
 export function defineOperation<TService, THandler extends keyof TService>(

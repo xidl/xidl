@@ -231,6 +231,9 @@ pub(crate) fn render_attr_operation_from_http(
             .clone()
             .unwrap_or_else(|| "application/json".to_string()),
         response_status: http_op.http.response.status.clone(),
+        // Attribute-generated operations carry no raises channel.
+        raises: Vec::new(),
+        error_ty: None,
     })
 }
 

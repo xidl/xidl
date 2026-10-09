@@ -14,8 +14,8 @@ use crate::generate::rust_axum::{RustAxumRenderOutput, RustAxumRenderer};
 use xidl_parser::hir;
 
 pub(crate) use interface_model::{
-    ApiKeyContext, DeprecatedContext, HttpMethod, MethodContext, ParamContext, ParamSource,
-    RenderEnv,
+    ApiKeyContext, DeprecatedContext, ExceptionMemberContext, HttpMethod, MethodContext,
+    ParamContext, ParamSource, RaisesContext, RenderEnv,
 };
 
 pub fn render_interface_with_path(

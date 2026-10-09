@@ -1,6 +1,7 @@
 use super::naming::{method_to_openapi, openapi_path_template, operation_id};
 use super::schema::{
     apply_deprecation_note, array_schema, parameter_schema, request_body_schema, schema_for_type,
+    schema_ref,
 };
 use super::security::openapi_security_requirement;
 use crate::openapi::path::{HttpMethod as OpenApiHttpMethod, Parameter, ParameterIn};
@@ -8,7 +9,7 @@ use crate::openapi::request_body::RequestBody;
 use crate::openapi::schema::{ObjectBuilder, Schema, Type};
 use crate::openapi::{RefOr, security::SecurityRequirement};
 use xidl_parser::rest_hir::{
-    HttpOperation, HttpRequestBodyShape, HttpResponseBodyShape,
+    HttpException, HttpOperation, HttpRequestBodyShape, HttpResponseBodyShape,
     semantics::{HttpSecurityRequirement, HttpStreamCodec, HttpStreamKind},
 };
 
@@ -31,12 +32,25 @@ pub(crate) struct MethodInfo {
     pub(crate) tag: String,
     pub(crate) is_websocket: bool,
     pub(crate) websocket_subprotocol: Option<String>,
+    /// `raises(...)` exceptions projected as typed error responses.
+    pub(crate) raises: Vec<ExceptionResponseInfo>,
+}
+
+/// One declared exception rendered as an OpenAPI response.
+pub(crate) struct ExceptionResponseInfo {
+    pub(crate) status: String,
+    pub(crate) ident: String,
+    /// Response headers: `(wire_name, schema)` from `@header` members.
+    pub(crate) headers: Vec<(String, RefOr<Schema>)>,
+    /// `$ref` to the exception schema when it has body members.
+    pub(crate) schema: Option<RefOr<Schema>>,
 }
 
 pub(crate) fn render_http_operation(
     op: &HttpOperation,
     module_path: &[String],
     interface_name: &str,
+    exceptions: &[HttpException],
 ) -> MethodInfo {
     validate_stream_contract(op);
 
@@ -187,6 +201,33 @@ pub(crate) fn render_http_operation(
             .websocket
             .as_ref()
             .and_then(|cfg| cfg.subprotocol.clone()),
+        raises: op
+            .meta
+            .raises
+            .iter()
+            .filter_map(|refer| {
+                let exception = exceptions
+                    .iter()
+                    .find(|e| e.ident == refer.ident && e.module_path == refer.module_path)?;
+                let headers = exception
+                    .headers
+                    .iter()
+                    .map(|member| (member.wire_name.clone(), schema_for_type(&member.ty)))
+                    .collect();
+                let schema = (!exception.body.is_empty()).then(|| {
+                    schema_ref(&super::naming::scoped_name(
+                        &exception.module_path,
+                        &exception.ident,
+                    ))
+                });
+                Some(ExceptionResponseInfo {
+                    status: exception.status.to_string(),
+                    ident: exception.ident.clone(),
+                    headers,
+                    schema,
+                })
+            })
+            .collect(),
     }
 }
 

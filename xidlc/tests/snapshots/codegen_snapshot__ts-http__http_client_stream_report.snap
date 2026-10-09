@@ -9,6 +9,7 @@ http_client_stream_report.client.ts
 
 
 import type * as types from "./http_client_stream_report";
+
 import type * as ifaceTypes from "./http_client_stream_report.iface";
 import * as ifaceSchemas from "./http_client_stream_report.iface.zod";
 import { deserialize } from "xidl-typescript-codec";
@@ -70,12 +71,15 @@ export class HttpClientStreamReportServiceClient {
         const resp = await this.fetchImpl(url, { method: "POST", headers, body: ndjsonBody(stream, undefined) });
         if (!resp.ok) {
             throw await parseXidlError(resp);
+            
         }
         return await decodeResponseBody<types.UploadSummary>(resp, "application/json", this.codecs);
         
         
     }
-    }
+    
+    
+}
 ===============
 http_client_stream_report.d.ts
 ===============
@@ -142,6 +146,7 @@ http_client_stream_report.server.ts
 
 
 import type * as types from "./http_client_stream_report";
+
 import type * as ifaceTypes from "./http_client_stream_report.iface";
 import * as ifaceSchemas from "./http_client_stream_report.iface.zod";
 import {
@@ -188,6 +193,7 @@ export const HttpClientStreamReportServiceOperations = {
             
         },
         security: [],
+        
     }),
     
 } as const;

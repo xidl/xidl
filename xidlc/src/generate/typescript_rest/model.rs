@@ -2,6 +2,7 @@ use crate::generate::typescript::definition::contexts::{
     ClientParamContext, ParamDeclContext, TsType,
 };
 use crate::generate::typescript::definition::names::scoped_name;
+use convert_case::Casing;
 use serde::Serialize;
 
 #[derive(Default)]
@@ -60,6 +61,33 @@ pub(super) struct SecurityContext {
     pub(super) realm: Option<String>,
 }
 
+/// One `raises(...)` entry projected for the typescript-rest generator.
+#[derive(Clone, Serialize)]
+pub(super) struct TsRaisesContext {
+    pub(super) ident: String,
+    pub(super) status: u16,
+    pub(super) has_body: bool,
+    /// `@header` members: written to / read from the error response.
+    pub(super) headers: Vec<TsExceptionMemberContext>,
+    pub(super) cookies: Vec<TsExceptionMemberContext>,
+    /// Body members: JSON fields of the error response.
+    pub(super) body: Vec<TsExceptionFieldContext>,
+}
+
+#[derive(Clone, Serialize)]
+pub(super) struct TsExceptionMemberContext {
+    pub(super) field: String,
+    pub(super) wire_name: String,
+    pub(super) ty: TsType,
+    pub(super) is_multi: bool,
+}
+
+#[derive(Clone, Serialize)]
+pub(super) struct TsExceptionFieldContext {
+    pub(super) field: String,
+    pub(super) ty: TsType,
+}
+
 #[derive(Serialize)]
 pub(super) struct ClientClassContext {
     pub(super) client_name: String,
@@ -97,6 +125,8 @@ pub(super) struct ClientMethodContext {
     pub(super) stream_item_ty: Option<TsType>,
     pub(super) stream_item_schema_ref: Option<String>,
     pub(super) security: Vec<SecurityContext>,
+    pub(super) raises: Vec<TsRaisesContext>,
+    pub(super) raise_helper: String,
 }
 
 #[derive(Serialize)]
@@ -137,6 +167,7 @@ pub(super) struct ServerMethodContext {
     pub(super) stream_item_ty: Option<TsType>,
     pub(super) stream_item_schema_ref: Option<String>,
     pub(super) security: Vec<SecurityContext>,
+    pub(super) raises: Vec<TsRaisesContext>,
 }
 
 #[derive(Clone)]
@@ -176,11 +207,16 @@ pub(super) struct MethodModel {
     pub(super) security: Vec<SecurityContext>,
     pub(super) request_fields: Vec<ParamDeclContext>,
     pub(super) response_fields: Vec<ParamDeclContext>,
+    pub(super) raises: Vec<TsRaisesContext>,
 }
 
 impl MethodModel {
     pub(super) fn into_client_context(self) -> ClientMethodContext {
         ClientMethodContext {
+            raise_helper: format!(
+                "throw{}Error",
+                self.name.to_case(convert_case::Case::Pascal)
+            ),
             name: self.name,
             params: self.params,
             return_ty: self.return_ty,
@@ -210,6 +246,7 @@ impl MethodModel {
             stream_item_ty: self.stream_item_ty,
             stream_item_schema_ref: self.stream_item_schema_ref,
             security: self.security,
+            raises: self.raises.clone(),
         }
     }
 
@@ -252,6 +289,7 @@ impl MethodModel {
             stream_item_ty: self.stream_item_ty,
             stream_item_schema_ref: self.stream_item_schema_ref,
             security: self.security,
+            raises: self.raises,
         }
     }
 }

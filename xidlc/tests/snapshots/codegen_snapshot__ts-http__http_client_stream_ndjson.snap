@@ -9,6 +9,7 @@ http_client_stream_ndjson.client.ts
 
 
 import type * as types from "./http_client_stream_ndjson";
+
 import type * as ifaceTypes from "./http_client_stream_ndjson.iface";
 import * as ifaceSchemas from "./http_client_stream_ndjson.iface.zod";
 import { deserialize } from "xidl-typescript-codec";
@@ -70,12 +71,15 @@ export class HttpClientStreamServiceClient {
         const resp = await this.fetchImpl(url, { method: "POST", headers, body: ndjsonBody(stream, undefined) });
         if (!resp.ok) {
             throw await parseXidlError(resp);
+            
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
         
         
     }
-    }
+    
+    
+}
 ===============
 http_client_stream_ndjson.iface.d.ts
 ===============
@@ -115,6 +119,7 @@ http_client_stream_ndjson.server.ts
 
 
 import type * as types from "./http_client_stream_ndjson";
+
 import type * as ifaceTypes from "./http_client_stream_ndjson.iface";
 import * as ifaceSchemas from "./http_client_stream_ndjson.iface.zod";
 import {
@@ -160,6 +165,7 @@ export const HttpClientStreamServiceOperations = {
             
         },
         security: [],
+        
     }),
     
 } as const;

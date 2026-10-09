@@ -59,6 +59,12 @@ pub fn generate(
             content: output.server,
         }));
     }
+    if !output.errors.is_empty() {
+        artifacts.push(Artifact::new_file(ArtifactFile {
+            path: format!("{file_name}.errors.ts"),
+            content: output.errors,
+        }));
+    }
     let non_interface = strip_interfaces(spec);
     if !non_interface.0.is_empty() {
         artifacts.push(Artifact::new_hir(ArtifactHir {

@@ -20,16 +20,90 @@
             {% if method.deprecated -%}
                 #[deprecated{% if method.deprecated_note %}(note = "{{ method.deprecated_note }}"){% endif %}]
             {%- endif %}
+            {% set ret_ty %}{% if method.is_server_stream %}{% if method.is_byte_stream %}xidl_rust_axum::stream::ByteStream{% else %}xidl_rust_axum::stream::SseStream<{{ method.response_ty }}>{% endif %}{% elif method.is_bidi_stream %}(){% elif method.is_upgrade %}::xidl_rust_axum::axum::response::Response{% else %}{{ method.response_ty }}{% endif %}{% endset %}
             async fn {{ method.name }}(
             &self{% if method.is_server_stream or method.is_client_stream or method.is_bidi_stream %},
             req: ::xidl_rust_axum::Request<{{ method.request_payload_ty }}>{% if method.handshake_params | length > 0 %},
             {{ method.handshake_params | join(", ") }}{% endif %}{% else %}{% if method.server_params | length > 0 %},
             {{ method.server_params | join(", ") }}{% endif %}{% if method.is_upgrade %},
             upgrade: ::xidl_rust_axum::upgrade::Upgrade{% endif %}{% endif %}
-            ) -> ::xidl_rust_axum::Result<{% if method.is_server_stream %}{% if method.is_byte_stream %}xidl_rust_axum::stream::ByteStream{% else %}xidl_rust_axum::stream::SseStream<{{ method.response_ty }}>{% endif %}{% elif method.is_bidi_stream %}(){% elif method.is_upgrade %}::xidl_rust_axum::axum::response::Response{% else %}{{ method.response_ty }}{% endif %}>;
+            ) -> {% if method.raises | length > 0 %}::std::result::Result<{{ ret_ty }}, {{ method.error_ty }}>{% else %}::xidl_rust_axum::Result<{{ ret_ty }}>{% endif %};
         {% endfor %}
     }
 {% endif %}
+
+{% for method in methods %}
+    {% if method.raises | length > 0 %}
+        /// Typed error channel for `{{ method.name }}`: one variant per
+        /// declared `raises(...)` exception, plus the runtime fallback.
+        #[derive(Debug)]
+        pub enum {{ method.error_ty }} {
+            {% for ex in method.raises %}
+                {{ ex.variant }}({{ ex.ty }}),
+            {% endfor %}
+            Framework(xidl_rust_axum::Error),
+        }
+
+        impl From<xidl_rust_axum::Error> for {{ method.error_ty }} {
+            fn from(err: xidl_rust_axum::Error) -> Self {
+                Self::Framework(err)
+            }
+        }
+        {% if opt.enable_server %}
+            impl ::xidl_rust_axum::axum::response::IntoResponse for {{ method.error_ty }} {
+                fn into_response(self) -> ::xidl_rust_axum::axum::response::Response {
+                    match self {
+                        Self::Framework(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+                        {% for ex in method.raises %}
+                            Self::{{ ex.variant }}(err) => {
+                                let mut headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
+                                {% for member in ex.headers %}
+                                    {% if member.is_multi %}
+                                        for value in &err.{{ member.field }} {
+                                            if let Ok(header_value) = ::xidl_rust_axum::axum::http::header::HeaderValue::from_str(&value.to_string()) {
+                                                headers.append("{{ member.wire_name }}", header_value);
+                                            }
+                                        }
+                                    {% else %}
+                                        if let Ok(header_value) = ::xidl_rust_axum::axum::http::header::HeaderValue::from_str(&err.{{ member.field }}.to_string()) {
+                                            headers.insert("{{ member.wire_name }}", header_value);
+                                        }
+                                    {% endif %}
+                                {% endfor %}
+                                {% for member in ex.cookies %}
+                                    if let Ok(header_value) = ::xidl_rust_axum::axum::http::header::HeaderValue::from_str(&format!("{}={}", "{{ member.wire_name }}", err.{{ member.field }})) {
+                                        headers.append(::xidl_rust_axum::axum::http::header::SET_COOKIE, header_value);
+                                    }
+                                {% endfor %}
+                                {% if ex.has_body %}
+                                    let body = match xidl_rust_axum::serde_json::to_vec(&err) {
+                                        Ok(body) => body,
+                                        Err(err) => {
+                                            return ::xidl_rust_axum::axum::response::IntoResponse::into_response(
+                                                xidl_rust_axum::Error::new(500, format!("{err:?}")));
+                                        }
+                                    };
+                                    let mut response = ::xidl_rust_axum::axum::http::Response::builder()
+                                    .status(::xidl_rust_axum::axum::http::StatusCode::from_u16({{ ex.status }}u16).unwrap())
+                                    .header(::xidl_rust_axum::axum::http::header::CONTENT_TYPE, "application/json")
+                                    .body(::xidl_rust_axum::axum::body::Body::from(body))
+                                    .expect("error response should build");
+                                {% else %}
+                                    let mut response = ::xidl_rust_axum::axum::http::Response::builder()
+                                    .status(::xidl_rust_axum::axum::http::StatusCode::from_u16({{ ex.status }}u16).unwrap())
+                                    .body(::xidl_rust_axum::axum::body::Body::empty())
+                                    .expect("error response should build");
+                                {% endif %}
+                                *response.headers_mut() = headers;
+                                response
+                            }
+                        {% endfor %}
+                    }
+                }
+            }
+        {% endif %}
+    {% endif %}
+{% endfor %}
 
 {% set module = inbound_transport %}
 {% include 'interface/transport_module.rs.j2' %}

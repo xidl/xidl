@@ -1,0 +1,43 @@
+#pragma xidlc package Demo API
+#pragma xidlc version v1
+
+// Conditional reads: 304 carries only the current ETag (no body).
+@http(304)
+exception NotModified {
+    @header @rename("ETag") string etag;
+};
+
+// CAS conflicts: 412 carries the current ETag plus the legacy error body.
+@http(412)
+exception PreconditionFailed {
+    @header @rename("ETag") string etag;
+    uint32 code;
+    string msg;
+};
+
+// Plain 404 without extra headers.
+@http(404)
+exception NotFound {
+    uint32 code;
+    string msg;
+};
+
+struct FileMeta {
+    string id;
+    string etag;
+};
+
+@no_security
+interface Files {
+    @get(path = "/files/{id}")
+    FileMeta get_file(
+        @path string id,
+        @header @rename("If-None-Match") @optional string if_none_match
+    ) raises(NotModified, PreconditionFailed, NotFound);
+
+    @delete(path = "/files/{id}")
+    void delete_file(
+        @path string id,
+        @header @rename("If-Match") string if_match
+    ) raises(PreconditionFailed, NotFound);
+};
