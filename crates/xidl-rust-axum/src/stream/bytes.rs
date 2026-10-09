@@ -1,6 +1,8 @@
 use super::ByteStream;
 use crate::{Error, Result};
-use axum::body::{Body, Bytes};
+#[cfg(feature = "server")]
+use axum::body::Body;
+use bytes::Bytes;
 use futures_util::{Stream, StreamExt};
 #[cfg(feature = "client")]
 use reqwest::Request;
@@ -13,6 +15,7 @@ where
     Box::pin(stream)
 }
 
+#[cfg(feature = "server")]
 /// Decodes an Axum request body as a raw byte stream (client → server upload).
 pub fn decode_bytes_body(body: Body) -> ByteStream {
     let stream = body
@@ -21,6 +24,7 @@ pub fn decode_bytes_body(body: Body) -> ByteStream {
     Box::pin(stream)
 }
 
+#[cfg(feature = "server")]
 /// Converts a raw byte stream into an HTTP response (server → client download).
 pub fn byte_stream_response(stream: ByteStream) -> axum::response::Response {
     use axum::response::IntoResponse;
@@ -28,7 +32,7 @@ pub fn byte_stream_response(stream: ByteStream) -> axum::response::Response {
         stream.map(|r: Result<Bytes>| r.map_err(|e: Error| std::io::Error::other(e.to_string()))),
     );
     (
-        [(axum::http::header::CONTENT_TYPE, "application/octet-stream")],
+        [(http::header::CONTENT_TYPE, "application/octet-stream")],
         body,
     )
         .into_response()

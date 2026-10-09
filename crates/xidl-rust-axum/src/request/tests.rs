@@ -1,5 +1,5 @@
 use super::*;
-use axum::http::{HeaderMap, HeaderValue, header};
+use http::{HeaderMap, HeaderValue, header};
 
 #[test]
 fn request_preserves_headers_and_payload() {

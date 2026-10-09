@@ -19,7 +19,9 @@ mod client;
 /// Client-side HTTP helpers and auth application utilities.
 pub use client::{Client, ClientAuth, ClientAuthRequirement};
 
+#[cfg(feature = "server")]
 mod server;
+#[cfg(feature = "server")]
 /// Server-side traits and builders for mounting generated services.
 pub use server::{Server, Service};
 
@@ -41,11 +43,14 @@ pub mod auth;
 /// API key auth types, available without the `client` feature for server use.
 pub use auth::api_key::{ApiKeyAuth, ApiKeyAuthError, ApiKeyLocation, extract_api_key};
 
+#[cfg(feature = "server")]
 /// HTTP connection upgrade helpers.
 pub mod upgrade;
 
+#[cfg(feature = "server")]
 /// Re-export of `axum` so generated code can depend on a single runtime crate.
 pub use axum;
+#[cfg(feature = "server")]
 /// Re-export of `axum-extra` for typed header support.
 pub use axum_extra;
 /// Re-export of `futures-util` for generated stream code.
@@ -59,10 +64,12 @@ pub use serde;
 pub use serde_json;
 /// Re-export of `serde_urlencoded` for generated form handling.
 pub use serde_urlencoded;
+#[cfg(any(feature = "server", feature = "stream"))]
 /// Re-export of `tokio` for generated async runtime integration.
 pub use tokio;
 /// Re-export of `tokio-tungstenite` for generated WebSocket clients.
 #[cfg(feature = "stream")]
 pub use tokio_tungstenite;
+#[cfg(feature = "server")]
 /// Re-export of `tower-http` for generated middleware wiring.
 pub use tower_http;

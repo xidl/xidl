@@ -1,4 +1,4 @@
-use axum::http::{HeaderMap, header};
+use http::{HeaderMap, header};
 
 /// Returns `true` when the request accepts `expected` according to `Accept`.
 ///

@@ -1,6 +1,6 @@
 use super::serde_ext::default_on_missing_reject_null;
 use super::*;
-use axum::http::{HeaderMap, HeaderValue, header};
+use http::{HeaderMap, HeaderValue, header};
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize, PartialEq, Eq)]

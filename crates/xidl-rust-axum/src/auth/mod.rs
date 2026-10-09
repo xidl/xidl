@@ -9,8 +9,8 @@ pub mod bearer;
 
 /// Re-exports for API key auth helper types.
 pub use api_key::{ApiKeyAuth, ApiKeyAuthError, ApiKeyLocation, extract_api_key};
+#[cfg(feature = "server")]
+pub use basic::unauthorized_response;
 /// Re-exports for basic and bearer auth helper types.
-pub use basic::{
-    BasicAuth, BasicAuthError, extract_basic_auth, parse_basic_auth, unauthorized_response,
-};
+pub use basic::{BasicAuth, BasicAuthError, extract_basic_auth, parse_basic_auth};
 pub use bearer::{BearerAuth, BearerHeader};

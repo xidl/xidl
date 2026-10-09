@@ -1,7 +1,10 @@
 pub use crate::auth::bearer::{BasicAuth, BasicAuthError, extract_basic_auth, parse_basic_auth};
-use axum::http::HeaderValue;
+#[cfg(feature = "server")]
 use axum::response::IntoResponse;
+#[cfg(feature = "server")]
+use http::HeaderValue;
 
+#[cfg(feature = "server")]
 /// Builds a `401 Unauthorized` response with a Basic auth challenge.
 pub fn unauthorized_response(realm: &str) -> axum::response::Response {
     let mut resp = crate::Error::unauthorized().into_response();
@@ -9,11 +12,12 @@ pub fn unauthorized_response(realm: &str) -> axum::response::Response {
     let header_value = format!("Basic realm=\"{}\"", realm);
     if let Ok(value) = HeaderValue::from_str(&header_value) {
         resp.headers_mut()
-            .insert(axum::http::header::WWW_AUTHENTICATE, value);
+            .insert(http::header::WWW_AUTHENTICATE, value);
     }
     resp
 }
 
+#[cfg(feature = "server")]
 fn sanitize_realm(realm: &str) -> String {
     let mut out = String::new();
     for ch in realm.chars() {
@@ -29,5 +33,5 @@ fn sanitize_realm(realm: &str) -> String {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "server"))]
 mod tests;

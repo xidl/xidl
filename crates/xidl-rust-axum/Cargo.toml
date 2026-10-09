@@ -10,35 +10,58 @@ categories.workspace = true
 repository.workspace = true
 
 [features]
-default = ["client", "stream"]
+default = ["client", "server", "stream"]
 client = ["dep:reqwest"]
+server = [
+  "dep:axum",
+  "dep:axum-extra",
+  "dep:tower-http",
+  "dep:hyper",
+  "dep:hyper-util",
+  "dep:tokio",
+  "tokio/net",
+  "tokio/rt-multi-thread",
+  "tokio/sync",
+]
 msgpack = ["dep:rmp-serde"]
-stream = ["dep:tokio-tungstenite", "axum/ws"]
+stream = [
+  "dep:tokio-tungstenite",
+  "dep:tokio",
+  "dep:tokio-util",
+  "tokio/sync",
+  "axum?/ws",
+]
 
 [lints]
 workspace = true
 
 [dependencies]
+http.workspace = true
+bytes.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
 futures-util.workspace = true
 base64 = "0.23"
-
-axum = { version = "0.8", features = ["macros"] }
-axum-extra = { version = "0.12", features = ["typed-header"] }
-tower-http = { version = "0.7", features = ["cors"] }
-hyper = { version = "1.8", features = ["server", "client"] }
-hyper-util = { version = "0.1", features = ["tokio"] }
-reqwest = { workspace = true, features = ["json", "stream"], optional = true }
 serde_urlencoded = "0.7"
 serde_plain = "1.0"
-tokio = { workspace = true, features = [
-  "net",
-  "rt",
-  "rt-multi-thread",
-  "sync",
-] }
-tokio-util = { version = "0.7", features = ["codec", "io"] }
+
+axum = { version = "0.8", features = ["macros"], optional = true }
+axum-extra = { version = "0.12", features = ["typed-header"], optional = true }
+tower-http = { version = "0.7", features = ["cors"], optional = true }
+hyper = { version = "1.8", features = ["server", "client"], optional = true }
+hyper-util = { version = "0.1", features = ["tokio"], optional = true }
+reqwest = { workspace = true, features = ["json", "stream"], optional = true }
+tokio = { workspace = true, optional = true }
+tokio-util = { version = "0.7", features = ["codec", "io"], optional = true }
 tokio-tungstenite = { workspace = true, optional = true }
 rmp-serde = { version = "1", optional = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = [
+  "macros",
+  "rt-multi-thread",
+  "sync",
+  "time",
+  "io-util",
+] }

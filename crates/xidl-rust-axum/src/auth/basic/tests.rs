@@ -1,5 +1,5 @@
 use super::*;
-use axum::http::header::WWW_AUTHENTICATE;
+use http::header::WWW_AUTHENTICATE;
 
 #[test]
 fn unauthorized_response_sanitizes_realm() {

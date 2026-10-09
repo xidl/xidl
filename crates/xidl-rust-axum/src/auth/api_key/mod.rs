@@ -1,5 +1,5 @@
-use axum::http::HeaderMap;
-use axum::http::Uri;
+use http::HeaderMap;
+use http::Uri;
 
 /// Location of an API key credential in an HTTP request.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
@@ -72,7 +72,7 @@ fn extract_query_key(uri: &Uri, name: &str) -> Result<ApiKeyAuth, ApiKeyAuthErro
 
 fn extract_cookie_key(headers: &HeaderMap, name: &str) -> Result<ApiKeyAuth, ApiKeyAuthError> {
     let cookie_header = headers
-        .get(axum::http::header::COOKIE)
+        .get(http::header::COOKIE)
         .ok_or(ApiKeyAuthError::Missing)?;
     let cookie_str = cookie_header
         .to_str()
