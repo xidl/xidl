@@ -30,6 +30,9 @@ pub mod demo {
             &self,
             id: String,
             if_none_match: Option<String>,
+            session_token: Option<String>,
+            tags: Option<Vec<String>>,
+            prefs: Option<Vec<String>>,
         ) -> ::xidl_rust_axum::Result<Point>;
     }
     #[allow(non_snake_case, unused_imports)]
@@ -82,6 +85,9 @@ pub mod demo {
     struct ThingsGetPointByIdRequest {
         id: String,
         if_none_match: Option<String>,
+        session_token: Option<String>,
+        tags: Option<Vec<String>>,
+        prefs: Option<Vec<String>>,
     }
     #[allow(clippy::manual_async_fn, unused_mut)]
     impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S> for ThingsGetPointByIdRequest
@@ -121,7 +127,62 @@ pub mod demo {
                     }
                     None => None,
                 };
-                Ok(Self { id, if_none_match })
+                let mut tags: Vec<String> = Vec::new();
+                for header_value in xidl_headers.get_all("X-Tags").iter() {
+                    let header_str = header_value
+                        .to_str()
+                        .map_err(|err| ::xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?;
+                    let parsed: String = header_str.to_string();
+                    tags.push(parsed);
+                }
+                let tags = if tags.is_empty() { None } else { Some(tags) };
+                let mut cookie_map: ::std::collections::HashMap<String, Vec<String>> = ::std::collections::HashMap::new();
+                for header_value in xidl_headers.get_all("cookie").iter() {
+                    let cookie_str = header_value
+                        .to_str()
+                        .map_err(|err| ::xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?;
+                    for part in cookie_str.split(';') {
+                        let part = part.trim();
+                        if part.is_empty() {
+                            continue;
+                        }
+                        let mut iter = part.splitn(2, '=');
+                        let name = iter.next().unwrap_or("").trim();
+                        if name.is_empty() {
+                            continue;
+                        }
+                        let value = iter.next().unwrap_or("").trim().to_string();
+                        cookie_map.entry(name.to_string()).or_default().push(value);
+                    }
+                }
+                let session_token: Option<String> = match cookie_map
+                    .get("session_token")
+                    .and_then(|values| values.first())
+                {
+                    Some(value) => Some(value.to_string()),
+                    None => None,
+                };
+                let mut prefs: Vec<String> = Vec::new();
+                if let Some(values) = cookie_map.get("pref") {
+                    for value in values {
+                        let parsed: String = value.to_string();
+                        prefs.push(parsed);
+                    }
+                }
+                let prefs = if prefs.is_empty() { None } else { Some(prefs) };
+                Ok(Self {
+                    id,
+                    if_none_match,
+                    session_token,
+                    tags,
+                    prefs,
+                })
             }
         }
     }
@@ -225,10 +286,24 @@ pub mod demo {
             if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
                 return Err(xidl_rust_axum::Error::not_acceptable());
             }
-            let ThingsGetPointByIdRequest { id, if_none_match } = request;
+            let ThingsGetPointByIdRequest {
+                id,
+                if_none_match,
+                session_token,
+                tags,
+                prefs,
+            } = request;
             let id: String = id;
             let if_none_match: Option<String> = if_none_match;
-            let mut resp = match svc.get_point_by_id(id, if_none_match).await {
+            let session_token: Option<String> = session_token;
+            let tags: Option<Vec<String>> = tags
+                .map(|value| value.into_iter().collect());
+            let prefs: Option<Vec<String>> = prefs
+                .map(|value| value.into_iter().collect());
+            let mut resp = match svc
+                .get_point_by_id(id, if_none_match, session_token, tags, prefs)
+                .await
+            {
                 Ok(resp_value) => {
                     let mut resp = {
                         let body_value: __xidl_out_Things::demo_Point = resp_value
@@ -350,6 +425,9 @@ pub mod demo {
             &self,
             id: String,
             if_none_match: Option<String>,
+            session_token: Option<String>,
+            tags: Option<Vec<String>>,
+            prefs: Option<Vec<String>>,
         ) -> Result<Point, xidl_rust_axum::Error> {
             let path = "/points/{id}".to_string();
             let path = path.replace("{id}", &id.to_string());
@@ -381,6 +459,61 @@ pub mod demo {
                     )
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
                 req.headers_mut().insert(header_name, header_value);
+            }
+            if let Some(tags) = tags {
+                let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
+                        "X-Tags".as_bytes(),
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                for value in tags {
+                    let header_value_str = value;
+                    let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                            &header_value_str,
+                        )
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?;
+                    req.headers_mut().append(header_name.clone(), header_value);
+                }
+            }
+            let mut cookie_pairs: Vec<String> = Vec::new();
+            if let Some(session_token) = session_token {
+                let value_str = session_token;
+                cookie_pairs.push(format!("{}={}", "session_token", value_str));
+            }
+            if let Some(prefs) = prefs {
+                for value in prefs {
+                    let value_str = value;
+                    cookie_pairs.push(format!("{}={}", "pref", value_str));
+                }
+            }
+            if !cookie_pairs.is_empty() {
+                let cookie_value = cookie_pairs.join("; ");
+                let cookie_name = xidl_rust_axum::reqwest::header::HeaderName::from_static(
+                    "cookie",
+                );
+                let merged = match req.headers().get(&cookie_name) {
+                    Some(existing) => {
+                        let existing = existing
+                            .to_str()
+                            .map_err(|err| xidl_rust_axum::Error::new(
+                                400,
+                                format!("{err:?}"),
+                            ))?;
+                        if existing.is_empty() {
+                            cookie_value
+                        } else {
+                            format!("{existing}; {cookie_value}")
+                        }
+                    }
+                    None => cookie_value,
+                };
+                let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        &merged,
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                req.headers_mut().insert(cookie_name, header_value);
             }
             let auth_target = &self.client;
             let _ = auth_target;
