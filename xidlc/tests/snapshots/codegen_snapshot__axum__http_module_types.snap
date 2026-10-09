@@ -370,16 +370,18 @@ pub mod demo {
                             format!("{err:?}"),
                         ))?,
                 );
-            let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
-                    "If-None-Match".as_bytes(),
-                )
-                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-            let header_value_str = if_none_match;
-            let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                    &header_value_str,
-                )
-                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-            req.headers_mut().insert(header_name, header_value);
+            if let Some(if_none_match) = if_none_match {
+                let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
+                        "If-None-Match".as_bytes(),
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                let header_value_str = if_none_match;
+                let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        &header_value_str,
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                req.headers_mut().insert(header_name, header_value);
+            }
             let auth_target = &self.client;
             let _ = auth_target;
             let resp = self

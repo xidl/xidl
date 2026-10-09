@@ -102,3 +102,50 @@ interface Things {
         "top-level Point should appear before Things:\n{output}"
     );
 }
+
+#[test]
+fn axum_client_unwraps_optional_header() {
+    let output = generate_axum(module_case_source());
+
+    assert!(
+        output.contains("if let Some(if_none_match) = if_none_match {"),
+        "client should unwrap optional header before insertion:\n{output}"
+    );
+}
+
+#[test]
+fn axum_client_unwraps_optional_cookie_and_multi_header() {
+    let output = generate_axum(
+        r#"
+#pragma xidlc package Demo API
+#pragma xidlc version v1
+
+module demo {
+
+struct Point {
+    int64 x;
+    int64 y;
+};
+
+@no_security
+interface Things {
+    @get(path = "/points")
+    Point get_points(
+        @header @rename("X-Tags") @optional sequence<string> tags,
+        @cookie @rename("session_id") @optional string sid
+    );
+};
+
+};
+"#,
+    );
+
+    assert!(
+        output.contains("if let Some(tags) = tags {"),
+        "client should unwrap optional multi-header:\n{output}"
+    );
+    assert!(
+        output.contains("if let Some(sid) = sid {"),
+        "client should unwrap optional cookie:\n{output}"
+    );
+}
