@@ -393,6 +393,8 @@ fn raises_contexts(
                     wire_name: member.wire_name.clone(),
                     ty: if member.is_multi {
                         format!("Vec<{}>", header_item_ty(&member.ty))
+                    } else if member.optional {
+                        format!("Option<{}>", axum_type(&member.ty))
                     } else {
                         axum_type(&member.ty)
                     },
@@ -400,6 +402,7 @@ fn raises_contexts(
                     item_ty: header_item_ty(&member.ty),
                     item_is_string: header_item_is_string(&member.ty),
                     item_is_primitive: header_item_is_primitive(&member.ty),
+                    optional: member.optional,
                 })
                 .collect()
         };

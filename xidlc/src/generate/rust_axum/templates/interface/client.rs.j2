@@ -615,6 +615,18 @@ impl {{ ident }}Client {
                                             }
                                             values
                                         };
+                                    {% elif member.optional %}
+                                        value.{{ member.field }} = match headers.get("{{ member.wire_name }}") {
+                                            Some(header_value) => {
+                                                let header_str = header_value
+                                                .to_str()
+                                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                                                Some({% if member.item_is_string %}header_str.to_string(){% elif member.item_is_primitive %}header_str.parse()
+                                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% else %}xidl_rust_axum::serde_json::from_str(header_str)
+                                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %})
+                                            }
+                                            None => None,
+                                        };
                                     {% else %}
                                         value.{{ member.field }} = match headers.get("{{ member.wire_name }}") {
                                             Some(header_value) => {
@@ -644,6 +656,13 @@ impl {{ ident }}Client {
                                                     }
                                                 }
                                                 values
+                                            };
+                                        {% elif member.optional %}
+                                            value.{{ member.field }} = match cookie_map.get("{{ member.wire_name }}").and_then(|values| values.first()) {
+                                                Some(value_str) => Some({% if member.item_is_string %}value_str.to_string(){% elif member.item_is_primitive %}value_str.parse()
+                                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% else %}xidl_rust_axum::serde_json::from_str(value_str)
+                                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}),
+                                                None => None,
                                             };
                                         {% else %}
                                             value.{{ member.field }} = match cookie_map.get("{{ member.wire_name }}").and_then(|values| values.first()) {

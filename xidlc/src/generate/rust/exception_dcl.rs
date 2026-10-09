@@ -25,7 +25,11 @@ impl RustRender for hir::ExceptDcl {
                     || has_annotation(&member.annotations, "cookie");
                 member.ident.iter().map(move |decl| {
                     let name = crate::generate::rust::util::rust_ident(&declarator_name(decl));
-                    let ty = type_with_decl(&member.ty, decl);
+                    let mut ty = type_with_decl(&member.ty, decl);
+                    let optional = member.is_optional();
+                    if optional {
+                        ty = format!("Option<{ty}>");
+                    }
                     json!({
                         "ty": ty,
                         "name": name,

@@ -394,6 +394,7 @@ fn build_raises_contexts(
                     wire_name: m.wire_name.clone(),
                     ty: ts_type_for_type_spec(&m.ty, module_path, TypeRefTarget::Client),
                     is_multi: m.is_multi,
+                    optional: m.optional,
                 };
             let field = |f: &xidl_parser::rest_hir::HttpExceptionField| TsExceptionFieldContext {
                 field: f.field.clone(),

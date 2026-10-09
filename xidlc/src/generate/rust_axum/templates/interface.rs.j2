@@ -64,6 +64,12 @@
                                                 headers.append("{{ member.wire_name }}", header_value);
                                             }
                                         }
+                                    {% elif member.optional %}
+                                        if let Some(value) = &err.{{ member.field }} {
+                                            if let Ok(header_value) = ::xidl_rust_axum::axum::http::header::HeaderValue::from_str(&value.to_string()) {
+                                                headers.insert("{{ member.wire_name }}", header_value);
+                                            }
+                                        }
                                     {% else %}
                                         if let Ok(header_value) = ::xidl_rust_axum::axum::http::header::HeaderValue::from_str(&err.{{ member.field }}.to_string()) {
                                             headers.insert("{{ member.wire_name }}", header_value);

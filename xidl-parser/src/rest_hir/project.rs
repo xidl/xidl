@@ -99,6 +99,7 @@ impl ProjectionContext {
                         wire_name,
                         ty: member.ty.clone(),
                         is_multi: is_multi_type(&member.ty),
+                        optional: member.is_optional(),
                     });
                 } else if has_annotation(&member.annotations, "cookie") {
                     cookies.push(HttpExceptionMember {
@@ -106,6 +107,7 @@ impl ProjectionContext {
                         wire_name,
                         ty: member.ty.clone(),
                         is_multi: is_multi_type(&member.ty),
+                        optional: member.is_optional(),
                     });
                 } else {
                     body.push(HttpExceptionField {
