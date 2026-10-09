@@ -9,6 +9,7 @@ http_attribute.client.ts
 
 
 import type * as types from "./http_attribute";
+
 import type * as ifaceTypes from "./http_attribute.iface";
 import * as ifaceSchemas from "./http_attribute.iface.zod";
 import { deserialize } from "xidl-typescript-codec";
@@ -69,6 +70,7 @@ export class HttpAttributeServiceClient {
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
+            
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
         
@@ -90,6 +92,7 @@ export class HttpAttributeServiceClient {
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
+            
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
         
@@ -114,11 +117,14 @@ export class HttpAttributeServiceClient {
         const resp = await this.fetchImpl(url, { method: "POST", headers, body: encodeRequestBody(body, "text/plain", this.codecs, ifaceSchemas.HttpAttributeServiceSetAttributeNameRequestSchema) });
         if (!resp.ok) {
             throw await parseXidlError(resp);
+            
         }
         return;
         
     }
-    }
+    
+    
+}
 ===============
 http_attribute.d.ts
 ===============
@@ -164,6 +170,7 @@ http_attribute.server.ts
 
 
 import type * as types from "./http_attribute";
+
 import type * as ifaceTypes from "./http_attribute.iface";
 import * as ifaceSchemas from "./http_attribute.iface.zod";
 import {
@@ -213,6 +220,7 @@ export const HttpAttributeServiceOperations = {
             
         },
         security: [],
+        
     }),
     
         get_attribute_name: defineOperation<HttpAttributeService, "get_attribute_name">({
@@ -244,6 +252,7 @@ export const HttpAttributeServiceOperations = {
             
         },
         security: [],
+        
     }),
     
         set_attribute_name: defineOperation<HttpAttributeService, "set_attribute_name">({
@@ -278,6 +287,7 @@ export const HttpAttributeServiceOperations = {
             
         },
         security: [],
+        
     }),
     
 } as const;

@@ -9,6 +9,7 @@ http_stream_sse_bindings.client.ts
 
 
 import type * as types from "./http_stream_sse_bindings";
+
 import type * as ifaceTypes from "./http_stream_sse_bindings.iface";
 import * as ifaceSchemas from "./http_stream_sse_bindings.iface.zod";
 import { deserialize } from "xidl-typescript-codec";
@@ -73,7 +74,9 @@ export class HttpStreamSseBindingsServiceClient {
         
         
     }
-    }
+    
+    
+}
 ===============
 http_stream_sse_bindings.d.ts
 ===============
@@ -134,6 +137,7 @@ http_stream_sse_bindings.server.ts
 
 
 import type * as types from "./http_stream_sse_bindings";
+
 import type * as ifaceTypes from "./http_stream_sse_bindings.iface";
 import * as ifaceSchemas from "./http_stream_sse_bindings.iface.zod";
 import {
@@ -181,6 +185,7 @@ export const HttpStreamSseBindingsServiceOperations = {
             
         },
         security: [],
+        
     }),
     
 } as const;

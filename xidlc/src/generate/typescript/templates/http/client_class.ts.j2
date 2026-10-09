@@ -38,7 +38,9 @@ export class {{ client_name }}Client {
         headers.set("Accept", "{{ method.response_content_type }}");
         const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers, body: {% if method.request_content_type == "application/octet-stream" %}byteStreamBody(stream){% else %}ndjsonBody(stream, {% if method.request_schema_ref %}ifaceSchemas.{{ method.request_schema_ref }}Schema{% else %}undefined{% endif %}){% endif %} });
         if (!resp.ok) {
-            throw await parseXidlError(resp);
+            {% if method.raises | length > 0 %}await this.{{ method.raise_helper }}(resp);
+            {% else %}throw await parseXidlError(resp);
+            {% endif %}
         }
         {% if method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs, ifaceSchemas.{{ method.response_schema_ref }}Schema);
         const responsePayload = buildResponsePayload(responseBody, resp, "{{ method.response_body_mode }}", [{% for param in method.response_header_params %}{ name: "{{ param.raw_name }}", key: "{{ param.key_name }}", optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], [{% for param in method.response_cookie_params %}{ name: "{{ param.raw_name }}", key: "{{ param.key_name }}", optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}]);
@@ -52,7 +54,9 @@ export class {{ client_name }}Client {
         {% endif %}headers.set("Accept", "{{ method.response_content_type }}");
         const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers{% if method.body_single or method.body_entries | length > 0 %}, body: encodeRequestBody(body, "{{ method.request_content_type }}", this.codecs, {% if method.body_schema_ref %}ifaceSchemas.{{ method.body_schema_ref }}Schema{% else %}undefined{% endif %}){% endif %} });
         if (!resp.ok) {
-            throw await parseXidlError(resp);
+            {% if method.raises | length > 0 %}await this.{{ method.raise_helper }}(resp);
+            {% else %}throw await parseXidlError(resp);
+            {% endif %}
         }
         {% if method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs, ifaceSchemas.{{ method.response_schema_ref }}Schema);
         const responsePayload = buildResponsePayload(responseBody, resp, "{{ method.response_body_mode }}", [{% for param in method.response_header_params %}{ name: "{{ param.raw_name }}", key: "{{ param.key_name }}", optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], [{% for param in method.response_cookie_params %}{ name: "{{ param.raw_name }}", key: "{{ param.key_name }}", optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}]);
@@ -61,4 +65,21 @@ export class {{ client_name }}Client {
         {% else %}return await decodeResponseBody<{{ render_type(method.return_ty) }}>(resp, "{{ method.response_content_type }}", this.codecs);
         {% endif %}{% endif %}
     }
-    {% endfor %}}
+    {% endfor %}
+    {% for method in methods %}{% if method.raises | length > 0 %}
+        async {{ method.raise_helper }}(resp: Response): Promise<never> {
+            const status = resp.status;
+            {% for ex in method.raises %}
+            if (status === {{ ex.status }}) {
+                const body = {% if ex.has_body %}(await resp.json().catch(() => ({}))) as Record<string, unknown>{% else %}{}{% endif %};
+                throw new {{ ex.ident }}({
+                    {% for member in ex.headers %}"{{ member.field }}": readResponseHeader(resp.headers, "{{ member.wire_name }}", {{ member.is_multi | lower }}) as never,
+                    {% endfor %}{% for member in ex.cookies %}"{{ member.field }}": {% if member.is_multi %}(readResponseCookies(resp.headers)["{{ member.wire_name }}"] ?? []) as never{% else %}(readResponseCookies(resp.headers)["{{ member.wire_name }}"]?.[0]) as never{% endif %},
+                    {% endfor %}{% for field in ex.body %}"{{ field.field }}": body["{{ field.field }}"] as never,
+                    {% endfor %}});
+            }
+            {% endfor %}
+            throw await parseXidlError(resp);
+        }
+    {% endif %}{% endfor %}
+}

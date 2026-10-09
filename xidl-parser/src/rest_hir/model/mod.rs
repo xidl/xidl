@@ -56,11 +56,53 @@ pub struct HttpDocumentServer {
     pub description: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct HttpDocumentMetadata {
     pub package: Option<String>,
     pub version: Option<String>,
     pub servers: Vec<HttpDocumentServer>,
+    /// Document-level `exception` declarations projected for HTTP use.
+    #[serde(default)]
+    pub exceptions: Vec<HttpException>,
+}
+
+/// An `exception` declaration with its HTTP error-channel semantics.
+///
+/// Members annotated `@header`/`@cookie` become the error response's
+/// headers/cookies; unannotated members form the JSON error body.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct HttpException {
+    pub module_path: Vec<String>,
+    pub ident: String,
+    /// HTTP status code bound via `@http(<status>)` / `@http(status = <status>)`.
+    pub status: u16,
+    pub headers: Vec<HttpExceptionMember>,
+    pub cookies: Vec<HttpExceptionMember>,
+    pub body: Vec<HttpExceptionField>,
+}
+
+/// A `@header`/`@cookie` annotated member of an exception.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct HttpExceptionMember {
+    pub field: String,
+    pub wire_name: String,
+    pub ty: hir::TypeSpec,
+    /// `sequence<...>` members repeat the header (append) instead of replacing it.
+    pub is_multi: bool,
+}
+
+/// An unannotated member of an exception: part of the JSON error body.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct HttpExceptionField {
+    pub field: String,
+    pub ty: hir::TypeSpec,
+}
+
+/// A `raises(...)` entry on an operation, resolved to a declared exception.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct HttpExceptionRef {
+    pub module_path: Vec<String>,
+    pub ident: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -85,6 +127,9 @@ pub struct HttpOperationMeta {
     pub upgrade_protocol: Option<String>,
     pub upgrade_mode: Option<super::semantics::UpgradeMode>,
     pub websocket: Option<super::semantics::WebSocketConfig>,
+    /// Exceptions declared via `raises(...)` on this operation.
+    #[serde(default)]
+    pub raises: Vec<HttpExceptionRef>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

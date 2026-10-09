@@ -3,7 +3,8 @@ mod render_types;
 mod websocket_helpers;
 
 use super::model::{
-    ClientClassContext, MethodModel, PathParamContext, RequestPayloadEntry, TsHttpBlocks,
+    ClientClassContext, MethodModel, PathParamContext, RequestPayloadEntry,
+    TsExceptionFieldContext, TsExceptionMemberContext, TsHttpBlocks, TsRaisesContext,
 };
 use super::server::ServerClass;
 use crate::error::IdlcResult;
@@ -41,7 +42,14 @@ pub(crate) fn render_interface(
     let methods = http_interface
         .operations
         .iter()
-        .map(|op| build_method_model(def.header.ident.as_str(), module_path, op))
+        .map(|op| {
+            build_method_model(
+                def.header.ident.as_str(),
+                module_path,
+                op,
+                &rest_hir.document.exceptions,
+            )
+        })
         .collect::<IdlcResult<Vec<_>>>()?;
     let mut out = TsHttpBlocks::default();
     for method in &methods {
@@ -75,6 +83,7 @@ fn build_method_model(
     interface_name: &str,
     module_path: &[String],
     op: &HttpOperation,
+    exceptions: &[xidl_parser::rest_hir::HttpException],
 ) -> IdlcResult<MethodModel> {
     validate_stream_support(op)?;
     let prefix = method_struct_prefix(interface_name, &op.meta.name);
@@ -361,5 +370,43 @@ fn build_method_model(
         security: security_contexts(op),
         request_fields,
         response_fields,
+        raises: build_raises_contexts(op, exceptions, module_path),
     })
+}
+
+/// Pairs each `raises(...)` ref with its projected exception for the
+/// typescript-rest templates.
+fn build_raises_contexts(
+    op: &HttpOperation,
+    exceptions: &[xidl_parser::rest_hir::HttpException],
+    module_path: &[String],
+) -> Vec<TsRaisesContext> {
+    op.meta
+        .raises
+        .iter()
+        .filter_map(|refer| {
+            let exception = exceptions
+                .iter()
+                .find(|e| e.ident == refer.ident && e.module_path == refer.module_path)?;
+            let member =
+                |m: &xidl_parser::rest_hir::HttpExceptionMember| TsExceptionMemberContext {
+                    field: m.field.clone(),
+                    wire_name: m.wire_name.clone(),
+                    ty: ts_type_for_type_spec(&m.ty, module_path, TypeRefTarget::Client),
+                    is_multi: m.is_multi,
+                };
+            let field = |f: &xidl_parser::rest_hir::HttpExceptionField| TsExceptionFieldContext {
+                field: f.field.clone(),
+                ty: ts_type_for_type_spec(&f.ty, module_path, TypeRefTarget::Client),
+            };
+            Some(TsRaisesContext {
+                ident: exception.ident.clone(),
+                status: exception.status,
+                has_body: !exception.body.is_empty(),
+                headers: exception.headers.iter().map(member).collect(),
+                cookies: exception.cookies.iter().map(member).collect(),
+                body: exception.body.iter().map(field).collect(),
+            })
+        })
+        .collect()
 }

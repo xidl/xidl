@@ -59,3 +59,9 @@ single_element_loop = "allow"
 
 [workspace.lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(tarpaulin_include)'] }
+
+# Exception declarations carry annotations (@http status binding, docs);
+# upstream grammar rule except_dcl lacks the annotation prefix
+# (cathaysia/tree-sitter-idl feat/exception-annotations).
+[patch.crates-io]
+tree-sitter-idl = { path = "../tree-sitter-idl" }

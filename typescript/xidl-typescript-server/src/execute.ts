@@ -60,6 +60,14 @@ export async function executeOperation<
     }
     return encodeOperationResponse(operation, result, options.codecs ?? {});
   } catch (error) {
+    const typed = operation.errors?.match(error);
+    if (typed) {
+      const headers = typed.headers ?? new Headers();
+      return new Response(typed.body === undefined ? null : JSON.stringify(typed.body), {
+        status: typed.status,
+        headers,
+      });
+    }
     if (options.onError) {
       return options.onError(error, context);
     }

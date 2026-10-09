@@ -1,5 +1,6 @@
 use super::operation::MethodInfo;
 use super::schema::error_schema_ref;
+use crate::openapi::header::Header;
 use crate::openapi::response::ResponseBuilder;
 use crate::openapi::schema::{ObjectBuilder, Schema, Type};
 use crate::openapi::{Content, RefOr, ResponsesBuilder};
@@ -14,17 +15,39 @@ pub(crate) fn build_operation(method: &MethodInfo) -> crate::openapi::path::Oper
         );
     }
     responses = responses.response(method.response_status.clone(), ok_response.build());
+    // Declared `raises(...)` responses win over the generic defaults below.
+    let mut declared_statuses = std::collections::HashSet::new();
+    for exception in &method.raises {
+        let mut response =
+            ResponseBuilder::new().description(format!("Error: {}", exception.ident));
+        for (name, schema) in &exception.headers {
+            response = response.header(name.clone(), Header::new(schema.clone()));
+        }
+        if let Some(schema) = &exception.schema {
+            response = response.content(
+                "application/json",
+                Content::new(Some::<RefOr<Schema>>(schema.clone())),
+            );
+        }
+        declared_statuses.insert(exception.status.clone());
+        responses = responses.response(exception.status.clone(), response.build());
+    }
     if !method.parameters.is_empty() || method.request_body.is_some() {
-        responses = add_error_response(responses, "400", "Bad Request");
+        responses = add_error_response(responses, "400", "Bad Request", &declared_statuses);
     }
     if method
         .security
         .as_ref()
         .is_some_and(|reqs| !reqs.is_empty())
     {
-        responses = add_error_response(responses, "401", "Unauthorized");
+        responses = add_error_response(responses, "401", "Unauthorized", &declared_statuses);
     }
-    responses = add_error_response(responses, "500", "Internal Server Error");
+    responses = add_error_response(
+        responses,
+        "500",
+        "Internal Server Error",
+        &declared_statuses,
+    );
 
     let mut operation = crate::openapi::path::OperationBuilder::new()
         .operation_id(Some(method.operation_id.clone()))
@@ -66,7 +89,11 @@ fn add_error_response(
     responses: ResponsesBuilder,
     status: &str,
     description: &str,
+    declared: &std::collections::HashSet<String>,
 ) -> ResponsesBuilder {
+    if declared.contains(status) {
+        return responses;
+    }
     responses.response(
         status,
         ResponseBuilder::new()

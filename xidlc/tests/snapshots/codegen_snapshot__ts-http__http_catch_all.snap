@@ -9,6 +9,7 @@ http_catch_all.client.ts
 
 
 import type * as types from "./http_catch_all";
+
 import type * as ifaceTypes from "./http_catch_all.iface";
 import * as ifaceSchemas from "./http_catch_all.iface.zod";
 import { deserialize } from "xidl-typescript-codec";
@@ -71,6 +72,7 @@ export class HttpCatchAllServiceClient {
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
+            
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
         
@@ -95,11 +97,14 @@ export class HttpCatchAllServiceClient {
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
+            
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
         
     }
-    }
+    
+    
+}
 ===============
 http_catch_all.d.ts
 ===============
@@ -159,6 +164,7 @@ http_catch_all.server.ts
 
 
 import type * as types from "./http_catch_all";
+
 import type * as ifaceTypes from "./http_catch_all.iface";
 import * as ifaceSchemas from "./http_catch_all.iface.zod";
 import {
@@ -207,6 +213,7 @@ export const HttpCatchAllServiceOperations = {
             
         },
         security: [],
+        
     }),
     
         read_asset: defineOperation<HttpCatchAllService, "read_asset">({
@@ -239,6 +246,7 @@ export const HttpCatchAllServiceOperations = {
             
         },
         security: [],
+        
     }),
     
 } as const;

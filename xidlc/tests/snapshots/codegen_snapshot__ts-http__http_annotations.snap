@@ -9,6 +9,7 @@ http_annotations.client.ts
 
 
 import type * as types from "./http_annotations";
+
 import type * as ifaceTypes from "./http_annotations.iface";
 import * as ifaceSchemas from "./http_annotations.iface.zod";
 import { deserialize } from "xidl-typescript-codec";
@@ -72,6 +73,7 @@ export class HttpAnnoServiceClient {
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
+            
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
         
@@ -96,6 +98,7 @@ export class HttpAnnoServiceClient {
         const resp = await this.fetchImpl(url, { method: "POST", headers, body: encodeRequestBody(body, "application/json", this.codecs, ifaceSchemas.HttpAnnoServiceCreateUserRequestSchema) });
         if (!resp.ok) {
             throw await parseXidlError(resp);
+            
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
         
@@ -119,6 +122,7 @@ export class HttpAnnoServiceClient {
         const resp = await this.fetchImpl(url, { method: "POST", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
+            
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
         
@@ -143,6 +147,7 @@ export class HttpAnnoServiceClient {
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
+            
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
         
@@ -167,6 +172,7 @@ export class HttpAnnoServiceClient {
         const resp = await this.fetchImpl(url, { method: "POST", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
+            
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
         
@@ -191,6 +197,7 @@ export class HttpAnnoServiceClient {
         const resp = await this.fetchImpl(url, { method: "POST", headers, body: encodeRequestBody(body, "application/json", this.codecs, ifaceSchemas.HttpAnnoServiceAddRequestSchema) });
         if (!resp.ok) {
             throw await parseXidlError(resp);
+            
         }
         const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs, ifaceSchemas.HttpAnnoServiceAddResponseSchema);
         const responsePayload = buildResponsePayload(responseBody, resp, "object", [], []);
@@ -217,6 +224,7 @@ export class HttpAnnoServiceClient {
         const resp = await this.fetchImpl(url, { method: "POST", headers, body: encodeRequestBody(body, "text/plain", this.codecs, ifaceSchemas.HttpAnnoServiceBumpRequestSchema) });
         if (!resp.ok) {
             throw await parseXidlError(resp);
+            
         }
         const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs, ifaceSchemas.HttpAnnoServiceBumpResponseSchema);
         const responsePayload = buildResponsePayload(responseBody, resp, "object", [], []);
@@ -240,6 +248,7 @@ export class HttpAnnoServiceClient {
         const resp = await this.fetchImpl(url, { method: "POST", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
+            
         }
         const responseBody = await decodeOptionalResponseBody(resp, "text/plain", this.codecs, ifaceSchemas.HttpAnnoServiceGetCountResponseSchema);
         const responsePayload = buildResponsePayload(responseBody, resp, "object", [], []);
@@ -263,11 +272,14 @@ export class HttpAnnoServiceClient {
         const resp = await this.fetchImpl(url, { method: "POST", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
+            
         }
         return;
         
     }
-    }
+    
+    
+}
 ===============
 http_annotations.d.ts
 ===============
@@ -435,6 +447,7 @@ http_annotations.server.ts
 
 
 import type * as types from "./http_annotations";
+
 import type * as ifaceTypes from "./http_annotations.iface";
 import * as ifaceSchemas from "./http_annotations.iface.zod";
 import {
@@ -497,6 +510,7 @@ export const HttpAnnoServiceOperations = {
             
         },
         security: [],
+        
     }),
     
         create_user: defineOperation<HttpAnnoService, "create_user">({
@@ -530,6 +544,7 @@ export const HttpAnnoServiceOperations = {
             
         },
         security: [],
+        
     }),
     
         get_name: defineOperation<HttpAnnoService, "get_name">({
@@ -562,6 +577,7 @@ export const HttpAnnoServiceOperations = {
             
         },
         security: [],
+        
     }),
     
         search_user: defineOperation<HttpAnnoService, "search_user">({
@@ -594,6 +610,7 @@ export const HttpAnnoServiceOperations = {
             
         },
         security: [],
+        
     }),
     
         get_user_alias: defineOperation<HttpAnnoService, "get_user_alias">({
@@ -626,6 +643,7 @@ export const HttpAnnoServiceOperations = {
             
         },
         security: [],
+        
     }),
     
         add: defineOperation<HttpAnnoService, "add">({
@@ -660,6 +678,7 @@ export const HttpAnnoServiceOperations = {
             
         },
         security: [],
+        
     }),
     
         bump: defineOperation<HttpAnnoService, "bump">({
@@ -695,6 +714,7 @@ export const HttpAnnoServiceOperations = {
             
         },
         security: [],
+        
     }),
     
         get_count: defineOperation<HttpAnnoService, "get_count">({
@@ -727,6 +747,7 @@ export const HttpAnnoServiceOperations = {
             
         },
         security: [],
+        
     }),
     
         ping: defineOperation<HttpAnnoService, "ping">({
@@ -758,6 +779,7 @@ export const HttpAnnoServiceOperations = {
             
         },
         security: [],
+        
     }),
     
 } as const;

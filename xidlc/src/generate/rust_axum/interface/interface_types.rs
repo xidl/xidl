@@ -41,7 +41,7 @@ pub(crate) fn axum_type(ty: &hir::TypeSpec) -> String {
     }
 }
 
-fn render_scoped_name(value: &hir::ScopedName) -> String {
+pub(crate) fn render_scoped_name(value: &hir::ScopedName) -> String {
     let mut iter = value.name.iter();
     let mut parts = Vec::new();
     if let Some(first) = iter.next() {

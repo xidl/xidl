@@ -1,5 +1,8 @@
 use crate::error::IdlcResult;
 use crate::generate::typescript::TypescriptRenderer;
+use crate::generate::typescript::definition::TypeRefTarget;
+use crate::generate::typescript::definition::contexts::TsType;
+use crate::generate::typescript::definition::type_expr::ts_type_for_type_spec;
 use serde::Serialize;
 use xidl_parser::hir;
 use xidl_parser::rest_hir::RestHirDocument;
@@ -26,12 +29,40 @@ struct ClientFileContext {
     file_stem: String,
     blocks: Vec<String>,
     imports: Vec<String>,
+    error_imports: Vec<String>,
 }
 
 #[derive(Serialize)]
 struct ServerFileContext {
     file_stem: String,
     blocks: Vec<String>,
+    error_imports: Vec<String>,
+}
+
+#[derive(Serialize)]
+struct ErrorsFileContext {
+    exceptions: Vec<ErrorsExceptionContext>,
+}
+
+#[derive(Serialize, Clone)]
+struct ErrorsExceptionContext {
+    ident: String,
+    status: u16,
+    headers: Vec<ErrorsExceptionMemberContext>,
+    cookies: Vec<ErrorsExceptionMemberContext>,
+    body: Vec<ErrorsExceptionFieldContext>,
+}
+
+#[derive(Serialize, Clone)]
+struct ErrorsExceptionMemberContext {
+    field: String,
+    ty: TsType,
+}
+
+#[derive(Serialize, Clone)]
+struct ErrorsExceptionFieldContext {
+    field: String,
+    ty: TsType,
 }
 
 #[derive(Serialize)]
@@ -45,6 +76,7 @@ pub(crate) struct TsHttpOutput {
     pub(crate) zod: String,
     pub(crate) client: String,
     pub(crate) server: String,
+    pub(crate) errors: String,
 }
 
 pub(crate) fn render_spec(
@@ -85,6 +117,77 @@ pub(crate) fn render_spec(
             type_imports.push(name);
         }
     }
+    // Document-level exceptions become typed error classes; the client and
+    // server files import exactly the ones their operations reference.
+    let exception_contexts: Vec<ErrorsExceptionContext> = rest_hir
+        .document
+        .exceptions
+        .iter()
+        .map(|exception| ErrorsExceptionContext {
+            ident: exception.ident.clone(),
+            status: exception.status,
+            headers: exception
+                .headers
+                .iter()
+                .map(|member| ErrorsExceptionMemberContext {
+                    field: member.field.clone(),
+                    ty: ts_type_for_type_spec(
+                        &member.ty,
+                        &exception.module_path,
+                        TypeRefTarget::Client,
+                    ),
+                })
+                .collect(),
+            cookies: exception
+                .cookies
+                .iter()
+                .map(|member| ErrorsExceptionMemberContext {
+                    field: member.field.clone(),
+                    ty: ts_type_for_type_spec(
+                        &member.ty,
+                        &exception.module_path,
+                        TypeRefTarget::Client,
+                    ),
+                })
+                .collect(),
+            body: exception
+                .body
+                .iter()
+                .map(|field| ErrorsExceptionFieldContext {
+                    field: field.field.clone(),
+                    ty: ts_type_for_type_spec(
+                        &field.ty,
+                        &exception.module_path,
+                        TypeRefTarget::Client,
+                    ),
+                })
+                .collect(),
+        })
+        .collect();
+    let errors = if exception_contexts.is_empty() {
+        String::new()
+    } else {
+        renderer.render_template(
+            "http/errors.ts.j2",
+            &ErrorsFileContext {
+                exceptions: exception_contexts.clone(),
+            },
+        )?
+    };
+    let error_imports = |blocks: &[String]| -> Vec<String> {
+        exception_contexts
+            .iter()
+            .filter(|exception| {
+                blocks
+                    .iter()
+                    .any(|block| ZodImportCollector::is_word_in_text(&exception.ident, block))
+            })
+            .map(|exception| exception.ident.clone())
+            .collect()
+    };
+    let client_error_imports = error_imports(&blocks.client);
+    let server_error_imports = error_imports(&blocks.server);
+
     Ok(TsHttpOutput {
         types: renderer.render_template(
             "http/types.d.ts.j2",
@@ -108,6 +211,7 @@ pub(crate) fn render_spec(
                 file_stem: file_stem.to_string(),
                 blocks: blocks.client,
                 imports: zod_imports.clone(),
+                error_imports: client_error_imports,
             },
         )?,
         server: renderer.render_template(
@@ -115,8 +219,10 @@ pub(crate) fn render_spec(
             &ServerFileContext {
                 file_stem: file_stem.to_string(),
                 blocks: blocks.server,
+                error_imports: server_error_imports,
             },
         )?,
+        errors,
     })
 }
 

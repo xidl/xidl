@@ -3,6 +3,9 @@
 
 {% endif %}
 import type * as types from "./{{ file_stem }}";
+{% if error_imports | length > 0 %}import { readResponseCookies, readResponseHeader } from "xidl-typescript-client";
+import { {{ error_imports | join(", ") }} } from "./{{ file_stem }}.errors";
+{% endif %}
 import type * as ifaceTypes from "./{{ file_stem }}.iface";
 import * as ifaceSchemas from "./{{ file_stem }}.iface.zod";
 import { deserialize } from "xidl-typescript-codec";
