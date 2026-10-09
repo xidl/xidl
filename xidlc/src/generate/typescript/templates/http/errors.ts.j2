@@ -8,12 +8,12 @@
 export class {{ exception.ident }} extends Error {
     readonly status = {{ exception.status }};
     readonly kind = "{{ exception.ident }}" as const;
-    {% for member in exception.headers %}readonly {{ member.field }}: {{ render_type(member.ty) }};
+    {% for member in exception.headers %}readonly {{ member.field }}{% if member.optional %}?{% endif %}: {{ render_type(member.ty) }};
     {% endfor %}{% for member in exception.cookies %}readonly {{ member.field }}: {{ render_type(member.ty) }};
     {% endfor %}{% for field in exception.body %}readonly {{ field.field }}: {{ render_type(field.ty) }};
     {% endfor %}
     constructor(fields: {
-        {% for member in exception.headers %}"{{ member.field }}": {{ render_type(member.ty) }};
+        {% for member in exception.headers %}"{{ member.field }}"{% if member.optional %}?{% endif %}: {{ render_type(member.ty) }};
         {% endfor %}{% for member in exception.cookies %}"{{ member.field }}": {{ render_type(member.ty) }};
         {% endfor %}{% for field in exception.body %}"{{ field.field }}": {{ render_type(field.ty) }};
         {% endfor %}

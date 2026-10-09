@@ -80,6 +80,7 @@ pub(super) struct TsExceptionMemberContext {
     pub(super) wire_name: String,
     pub(super) ty: TsType,
     pub(super) is_multi: bool,
+    pub(super) optional: bool,
 }
 
 #[derive(Clone, Serialize)]

@@ -89,6 +89,10 @@ pub struct HttpExceptionMember {
     pub ty: hir::TypeSpec,
     /// `sequence<...>` members repeat the header (append) instead of replacing it.
     pub is_multi: bool,
+    /// `@optional` members may be absent: the field is `Option<_>` and the
+    /// header is only written when a value exists.
+    #[serde(default)]
+    pub optional: bool,
 }
 
 /// An unannotated member of an exception: part of the JSON error body.

@@ -73,7 +73,7 @@ export class {{ client_name }}Client {
             if (status === {{ ex.status }}) {
                 const body = {% if ex.has_body %}(await resp.json().catch(() => ({}))) as Record<string, unknown>{% else %}{}{% endif %};
                 throw new {{ ex.ident }}({
-                    {% for member in ex.headers %}"{{ member.field }}": readResponseHeader(resp.headers, "{{ member.wire_name }}", {{ member.is_multi | lower }}) as never,
+                    {% for member in ex.headers %}"{{ member.field }}": {% if member.optional %}(readResponseHeader(resp.headers, "{{ member.wire_name }}", {{ member.is_multi | lower }}) ?? undefined) as never{% else %}readResponseHeader(resp.headers, "{{ member.wire_name }}", {{ member.is_multi | lower }}) as never{% endif %},
                     {% endfor %}{% for member in ex.cookies %}"{{ member.field }}": {% if member.is_multi %}(readResponseCookies(resp.headers)["{{ member.wire_name }}"] ?? []) as never{% else %}(readResponseCookies(resp.headers)["{{ member.wire_name }}"]?.[0]) as never{% endif %},
                     {% endfor %}{% for field in ex.body %}"{{ field.field }}": body["{{ field.field }}"] as never,
                     {% endfor %}});

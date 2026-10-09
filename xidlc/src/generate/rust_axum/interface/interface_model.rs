@@ -125,6 +125,8 @@ pub(crate) struct ExceptionMemberContext {
     pub(crate) item_ty: String,
     pub(crate) item_is_string: bool,
     pub(crate) item_is_primitive: bool,
+    /// `@optional`: the field is `Option<_>`; absent means no header.
+    pub(crate) optional: bool,
 }
 
 #[derive(Serialize, Clone)]
