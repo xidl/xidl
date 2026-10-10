@@ -195,6 +195,7 @@ pub(super) struct ServerClassContext {
 
 #[derive(Serialize)]
 pub(super) struct ServerMethodContext {
+    pub(super) response_status: String,
     pub(super) name: String,
     pub(super) params: Vec<ClientParamContext>,
     pub(super) response_ty: TsType,
@@ -232,6 +233,7 @@ pub(super) struct ServerMethodContext {
 
 #[derive(Clone)]
 pub(super) struct MethodModel {
+    pub(super) response_status: String,
     pub(super) name: String,
     pub(super) params: Vec<ClientParamContext>,
     pub(super) request_name: Option<String>,
@@ -333,6 +335,7 @@ impl MethodModel {
             })
             .unwrap_or(self.return_ty);
         ServerMethodContext {
+            response_status: self.response_status,
             name: self.name,
             params: self.params,
             response_ty,

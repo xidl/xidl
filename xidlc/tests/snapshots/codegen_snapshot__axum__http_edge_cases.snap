@@ -331,7 +331,7 @@ where
                 let mut resp = {
                     let _ = resp_value;
                     ::xidl_rust_axum::axum::response::IntoResponse::into_response(
-                        ::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT,
+                        ::xidl_rust_axum::axum::http::StatusCode::from_u16(200).unwrap(),
                     )
                 };
                 resp

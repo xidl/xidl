@@ -22,6 +22,9 @@ pub(crate) fn build_operation(method: &MethodInfo) -> crate::openapi::path::Oper
             Content::new(Some::<RefOr<Schema>>(schema.clone())),
         );
     }
+    for (name, schema) in &method.response_headers {
+        ok_response = ok_response.header(name.clone(), Header::new(schema.clone()));
+    }
     responses = responses.response(method.response_status.clone(), ok_response.build());
     // Declared `raises(...)` responses win over the generic defaults below.
     let mut declared_statuses = std::collections::HashSet::new();

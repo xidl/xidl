@@ -3,6 +3,7 @@ import { createServer } from 'node:http';
 import { createRouter } from 'xidl-typescript-server';
 import { EnvelopeApiClient } from './http_envelope.client.js';
 import {
+  HeadMissing,
   NotFound,
   NotModified,
   PreconditionFailed,
@@ -48,6 +49,10 @@ const handler = createRouter(
     },
     get_fresh() {
       throw new NotModified({ etag: 'same-tag' });
+    },
+    head_file(key: string) {
+      if (key === 'missing') throw new HeadMissing({ code: 'NOT_FOUND' });
+      return { cached: true, etag: 'head-v1', size: 14 };
     },
     read_secondary() {
       return { kind: 'Text', value: 'second-idl' };
@@ -101,6 +106,15 @@ server.listen(0, '127.0.0.1', async () => {
     assert.equal(meta.etag, 'meta-v1');
     assert.deepEqual(meta.tags, ['001', '"quoted"']);
     assert.equal(meta.cached, false);
+    assert.deepEqual(await client.head_file('raw'), {
+      cached: true,
+      etag: 'head-v1',
+      size: 14,
+    });
+    await assert.rejects(
+      client.head_file('missing'),
+      error => error instanceof HeadMissing && error.code === 'NOT_FOUND',
+    );
     const raw = await client.get_file('raw');
     assert(raw.kind === 'OctetStream');
     assert.deepEqual(raw.value, new TextEncoder().encode('envelope-bytes'));

@@ -356,9 +356,9 @@ fn build_response_mapping(
             (Some(ct.clone()), map_body_codec(&ct))
         };
 
-    let status = if matches!(method, HttpMethod::Head)
-        || matches!(body_shape, HttpResponseBodyShape::Empty)
-    {
+    let status = if matches!(method, HttpMethod::Head) {
+        "200".to_string()
+    } else if matches!(body_shape, HttpResponseBodyShape::Empty) {
         "204".to_string()
     } else {
         "200".to_string()

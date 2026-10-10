@@ -367,6 +367,7 @@ export const BodyShapeOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "application/json",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -400,6 +401,7 @@ export const BodyShapeOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -436,6 +438,7 @@ export const BodyShapeOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "application/json",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -469,6 +472,7 @@ export const BodyShapeOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "application/json",
             bodyMode: "return",
             bodyFields: [{ wireName: "document", key: "document" }],
@@ -504,6 +508,7 @@ export const BodyShapeOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "application/json",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],

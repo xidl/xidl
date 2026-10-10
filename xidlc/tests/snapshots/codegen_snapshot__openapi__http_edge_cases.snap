@@ -222,7 +222,7 @@ openapi_http_edge_cases.json
           }
         ],
         "responses": {
-          "204": {
+          "200": {
             "description": "OK"
           },
           "400": {

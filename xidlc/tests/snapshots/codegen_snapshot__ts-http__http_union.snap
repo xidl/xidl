@@ -329,6 +329,7 @@ export const FilesOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "application/json",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -383,6 +384,7 @@ export const FilesOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "application/json",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],

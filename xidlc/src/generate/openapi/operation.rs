@@ -22,6 +22,7 @@ pub(crate) struct MethodInfo {
     pub(crate) request_body: Option<RequestBody>,
     pub(crate) request_stream_item_schema: Option<RefOr<Schema>>,
     pub(crate) response_status: String,
+    pub(crate) response_headers: Vec<(String, RefOr<Schema>)>,
     pub(crate) response_schema: Option<RefOr<Schema>>,
     pub(crate) response_stream_item_schema: Option<RefOr<Schema>>,
     pub(crate) summary: Option<String>,
@@ -181,6 +182,24 @@ pub(crate) fn render_http_operation(
         .unwrap_or_else(|| "application/json".to_string());
 
     let response_status = op.http.response.status.clone();
+    let mut response_headers = op
+        .http
+        .response
+        .header
+        .iter()
+        .map(|binding| {
+            Ok((
+                binding.wire_name.clone(),
+                scope.schema_for_type(&binding.ty)?,
+            ))
+        })
+        .collect::<IdlcResult<Vec<_>>>()?;
+    if !op.http.response.cookie.is_empty() {
+        response_headers.push((
+            "Set-Cookie".into(),
+            ObjectBuilder::new().schema_type(Type::String).into(),
+        ));
+    }
 
     Ok(MethodInfo {
         http_method: method_to_openapi(op.meta.method),
@@ -198,6 +217,7 @@ pub(crate) fn render_http_operation(
             .then_some(request_schema)
             .flatten(),
         response_status,
+        response_headers,
         response_schema: final_response_schema,
         response_stream_item_schema: matches!(op.meta.stream.kind, Some(HttpStreamKind::Server))
             .then_some(response_schema)

@@ -322,6 +322,7 @@ export const HttpResponseShapeServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -354,6 +355,7 @@ export const HttpResponseShapeServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "count", key: "count" }],
@@ -389,6 +391,7 @@ export const HttpResponseShapeServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "application/json",
             bodyMode: "object",
             bodyFields: [{ wireName: "return", key: "return" }, { wireName: "sum", key: "sum" }],
@@ -425,6 +428,7 @@ export const HttpResponseShapeServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "application/json",
             bodyMode: "object",
             bodyFields: [{ wireName: "return", key: "return" }, { wireName: "value", key: "value" }],
@@ -458,6 +462,7 @@ export const HttpResponseShapeServiceOperations = {
             },
         },
         response: {
+            status: 204,
             contentType: "",
             bodyMode: "none",
             bodyFields: [],

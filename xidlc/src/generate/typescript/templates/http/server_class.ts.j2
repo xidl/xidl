@@ -30,6 +30,7 @@ export const {{ service_name }}Operations = {
             },
         },
         response: {
+            status: {{ method.response_status }},
             contentType: "{{ method.response_content_type }}",
             bodyMode: "{{ method.response_body_mode }}",
             bodyFields: [{% for entry in method.response_body_entries %}{ wireName: "{{ entry.raw_name }}", key: "{{ entry.key_name }}" }{% if not loop.last %}, {% endif %}{% endfor %}],

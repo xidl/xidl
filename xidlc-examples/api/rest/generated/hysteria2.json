@@ -41,7 +41,26 @@
         ],
         "responses": {
           "204": {
-            "description": "OK"
+            "description": "OK",
+            "headers": {
+              "Hysteria-CC-RX": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 0
+                }
+              },
+              "Hysteria-Padding": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Hysteria-UDP": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad Request",

@@ -207,6 +207,25 @@ fn validates_route_bindings_request_shape_and_head_constraints() {
     .expect_err("head response");
     assert!(head_err.contains("must return void"));
     validate_head_constraints("head_city", HttpMethod::Head, &[], None).unwrap();
+    validate_head_constraints(
+        "head_city",
+        HttpMethod::Head,
+        &[
+            param("etag", HttpParamKind::Header),
+            param("session", HttpParamKind::Cookie),
+        ],
+        None,
+    )
+    .unwrap();
+    let body_error = validate_head_constraints(
+        "head_city",
+        HttpMethod::Head,
+        &[param("value", HttpParamKind::Body)],
+        None,
+    )
+    .unwrap_err();
+    assert!(body_error.contains("must return void"));
+
     assert_eq!(http_method_name(HttpMethod::Post), "POST");
     assert_eq!(http_method_name(HttpMethod::Put), "PUT");
     assert_eq!(http_method_name(HttpMethod::Delete), "DELETE");

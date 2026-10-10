@@ -325,7 +325,14 @@
         "operationId": "RestServer.login",
         "responses": {
           "204": {
-            "description": "OK"
+            "description": "OK",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "401": {
             "description": "Unauthorized",
@@ -401,7 +408,14 @@
         "operationId": "RestServer.login_realm",
         "responses": {
           "204": {
-            "description": "OK"
+            "description": "OK",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "401": {
             "description": "Unauthorized",
@@ -839,7 +853,7 @@
           }
         ],
         "responses": {
-          "204": {
+          "200": {
             "description": "OK"
           },
           "400": {

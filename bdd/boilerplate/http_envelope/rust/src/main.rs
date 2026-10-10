@@ -26,6 +26,12 @@ impl EnvelopeApi for Files {
         };
         Ok(EnvelopeApiGetFileResponse { r#return: value, etag: "meta-v1".into(), tags: vec!["001".into(), "\"quoted\"".into()], cached: false })
     }
+    async fn head_file(&self, key: String) -> Result<EnvelopeApiHeadFileResponse, EnvelopeApiHeadFileError> {
+        if key == "missing" {
+            return Err(EnvelopeApiHeadFileError::HeadMissing(HeadMissing { code: "NOT_FOUND".into() }));
+        }
+        Ok(EnvelopeApiHeadFileResponse { etag: "head-v1".into(), size: 14, cached: true })
+    }
     async fn get_fresh(&self) -> Result<String, EnvelopeApiGetFreshError> {
         Err(EnvelopeApiGetFreshError::NotModified(NotModified { etag: "same-tag".into() }))
     }
@@ -50,6 +56,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(meta.etag, "meta-v1");
     assert_eq!(meta.tags, ["001", "\"quoted\""]);
     assert!(!meta.cached);
+    let head = client.head_file("raw".into()).await?;
+    assert_eq!(head.etag, "head-v1");
+    assert_eq!(head.size, 14);
+    assert!(head.cached);
+    assert!(matches!(client.head_file("missing".into()).await, Err(EnvelopeApiHeadFileError::HeadMissing(HeadMissing { code })) if code == "NOT_FOUND"));
     let raw = client.get_file("raw".into()).await?;
     assert!(matches!(raw.r#return, FileResponse::OctetStream(bytes) if bytes == b"envelope-bytes"));
     assert_eq!(raw.etag, "meta-v1");

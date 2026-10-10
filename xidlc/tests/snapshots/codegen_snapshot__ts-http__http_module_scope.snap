@@ -317,6 +317,7 @@ import {
                 },
             },
             response: {
+                status: 200,
                 contentType: "application/json",
                 bodyMode: "return",
                 bodyFields: [{ wireName: "return", key: "return" }],
@@ -351,6 +352,7 @@ import {
                 },
             },
             response: {
+                status: 204,
                 contentType: "",
                 bodyMode: "none",
                 bodyFields: [],
@@ -383,6 +385,7 @@ import {
                 },
             },
             response: {
+                status: 200,
                 contentType: "application/json",
                 bodyMode: "return",
                 bodyFields: [{ wireName: "return", key: "return" }],
@@ -427,6 +430,7 @@ import {
                     },
                 },
                 response: {
+                    status: 200,
                     contentType: "application/json",
                     bodyMode: "return",
                     bodyFields: [{ wireName: "return", key: "return" }],

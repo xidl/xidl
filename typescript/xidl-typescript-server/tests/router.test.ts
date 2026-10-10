@@ -38,6 +38,7 @@ const getItem = defineOperation<ItemServer, 'getItem'>({
     contentType: 'application/json',
     cookies: [],
     headers: [],
+    status: 200,
     stream: false,
   },
   security: [],
@@ -67,6 +68,7 @@ const createItem = defineOperation<ItemServer, 'createItem'>({
     contentType: 'application/json',
     cookies: [],
     headers: [],
+    status: 200,
     stream: false,
   },
   security: [],
@@ -75,6 +77,35 @@ const createItem = defineOperation<ItemServer, 'createItem'>({
 const router = createRouter([getItem, createItem], {
   createItem: name => ({ name }),
   getItem: id => ({ id }),
+});
+
+test('bodyless responses preserve the declared status and metadata', async () => {
+  for (const [method, status] of [
+    ['HEAD', 200],
+    ['DELETE', 204],
+  ] as const) {
+    const operation = defineOperation<{ probe(id: number): unknown }, 'probe'>({
+      ...getItem,
+      handler: 'probe',
+      method,
+      response: {
+        ...getItem.response,
+        bodyFields: [],
+        bodyMode: 'none',
+        headers: [{ key: 'etag', multi: false, wireName: 'ETag' }],
+        status,
+      },
+    });
+    const handler = createRouter([operation], {
+      probe: () => ({ etag: 'v1' }),
+    });
+    const response = await handler(
+      new Request('http://localhost/items/7', { method }),
+    );
+    assert.equal(response.status, status);
+    assert.equal(response.headers.get('ETag'), 'v1');
+    assert.equal(await response.text(), '');
+  }
 });
 
 test('negotiated payloads use their schema for wire field mappings', async () => {
@@ -226,6 +257,7 @@ test('createRouter handles raw byte request and response streams', async () => {
       contentType: 'application/octet-stream',
       cookies: [],
       headers: [],
+      status: 200,
       stream: true,
     },
   });
@@ -252,6 +284,7 @@ test('createRouter handles raw byte request and response streams', async () => {
       contentType: 'text/plain',
       cookies: [],
       headers: [],
+      status: 200,
       stream: false,
     },
   });
