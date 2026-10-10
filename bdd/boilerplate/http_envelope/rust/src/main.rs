@@ -1,10 +1,20 @@
 use async_trait::async_trait;
 
-pub mod gen { include!("../{{MODULE_NAME}}.rs"); }
+// Both independent inputs share one Rust scope: duplicate builtin types fail compilation.
+pub mod gen {
+    include!("../http_envelope.rs");
+    include!("../http_envelope_secondary.rs");
+}
 use gen::*;
 use gen::representations::{FileDetails, FileMeta, FileResponse};
 
 struct Files;
+#[async_trait]
+impl SecondaryApi for Files {
+    async fn read_secondary(&self) -> Result<SecondaryPayload, xidl_rust_axum::Error> {
+        Ok(SecondaryPayload::Text("second-idl".into()))
+    }
+}
 #[async_trait]
 impl EnvelopeApi for Files {
     async fn get_file(&self, key: String) -> Result<EnvelopeApiGetFileResponse, EnvelopeApiGetFileError> {
@@ -30,9 +40,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await?;
     let address = listener.local_addr()?;
     let server = tokio::spawn(async move {
-        xidl_rust_axum::Server::builder().with_service(EnvelopeApiServer::new(Files)).serve_with_listener(listener).await
+        xidl_rust_axum::Server::builder().with_service(EnvelopeApiServer::new(Files)).with_service(SecondaryApiServer::new(Files)).serve_with_listener(listener).await
     });
     let client = EnvelopeApiClient::new(format!("http://{address}"));
+    let second = SecondaryApiClient::new(format!("http://{address}"));
+    assert!(matches!(second.read_secondary().await?, SecondaryPayload::Text(text) if text == "second-idl"));
     let meta = client.get_file("meta".into()).await?;
     assert!(matches!(meta.r#return, FileResponse::Json(FileMeta { id, .. }) if id == "meta"));
     assert_eq!(meta.etag, "meta-v1");
@@ -51,6 +63,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     assert!(matches!(client.get_file("missing".into()).await, Err(EnvelopeApiGetFileError::NotFound(_))));
     server.abort();
     let listener = tokio::net::TcpListener::bind(format!("127.0.0.1:{port}")).await?;
-    xidl_rust_axum::Server::builder().with_service(EnvelopeApiServer::new(Files)).serve_with_listener(listener).await?;
+    xidl_rust_axum::Server::builder().with_service(EnvelopeApiServer::new(Files)).with_service(SecondaryApiServer::new(Files)).serve_with_listener(listener).await?;
     Ok(())
 }

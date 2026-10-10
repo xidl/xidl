@@ -1,5 +1,8 @@
+use super::has_annotation;
 use crate::error::{ParseError, ParserResult};
 use crate::hir;
+
+mod runtime;
 
 struct Declaration<'a> {
     module_path: Vec<String>,
@@ -8,7 +11,8 @@ struct Declaration<'a> {
 }
 
 enum DeclarationKind<'a> {
-    Enum(&'a hir::EnumDcl),
+    BuiltinEnum(&'a hir::EnumDcl),
+    HttpUnion(&'a hir::UnionDef),
     Type,
     Other,
 }
@@ -21,6 +25,39 @@ impl<'a> TypeDeclarations<'a> {
         let mut types = Self(Vec::new());
         types.collect_scope(definitions, &[]);
         types
+    }
+
+    pub(super) fn add_builtins(&mut self, definitions: &'a [hir::Definition]) -> ParserResult<()> {
+        for definition in definitions {
+            if let hir::Definition::TypeDcl(hir::TypeDcl::ConstrTypeDcl(
+                hir::ConstrTypeDcl::EnumDcl(enumeration),
+            )) = definition
+            {
+                if self
+                    .0
+                    .iter()
+                    .any(|decl| decl.module_path.is_empty() && decl.ident == enumeration.ident)
+                {
+                    return Err(ParseError::Message(format!(
+                        "{} is a built-in root declaration when using @http unions; remove the user declaration",
+                        enumeration.ident
+                    )));
+                }
+                self.declare(
+                    &enumeration.ident,
+                    DeclarationKind::BuiltinEnum(enumeration),
+                    &[],
+                );
+            }
+        }
+        Ok(())
+    }
+
+    pub(super) fn http_unions(&self) -> impl Iterator<Item = (&[String], &hir::UnionDef)> {
+        self.0.iter().filter_map(|decl| match decl.kind {
+            DeclarationKind::HttpUnion(union) => Some((decl.module_path.as_slice(), union)),
+            _ => None,
+        })
     }
 
     fn declare(&mut self, ident: &'a str, kind: DeclarationKind<'a>, scope: &[String]) {
@@ -54,6 +91,24 @@ impl<'a> TypeDeclarations<'a> {
                         hir::InterfaceDclInner::InterfaceForwardDcl(def) => &def.ident,
                     };
                     self.declare(ident, DeclarationKind::Other, scope);
+                    if let hir::InterfaceDclInner::InterfaceDef(def) = &value.decl
+                        && let Some(body) = &def.interface_body
+                    {
+                        let mut nested = scope.to_vec();
+                        nested.push(ident.clone());
+                        for export in &body.0 {
+                            match export {
+                                hir::Export::TypeDcl(ty) => self.collect_type(ty, &nested),
+                                hir::Export::ConstDcl(value) => {
+                                    self.declare(&value.ident, DeclarationKind::Other, &nested)
+                                }
+                                hir::Export::ExceptDcl(value) => {
+                                    self.declare(&value.ident, DeclarationKind::Type, &nested)
+                                }
+                                _ => {}
+                            }
+                        }
+                    }
                 }
                 hir::Definition::Pragma(_) => {}
             }
@@ -82,8 +137,10 @@ impl<'a> TypeDeclarations<'a> {
     }
 
     fn collect_constructed(&mut self, ty: &'a hir::ConstrTypeDcl, scope: &[String]) {
-        let kind = if let hir::ConstrTypeDcl::EnumDcl(value) = ty {
-            DeclarationKind::Enum(value)
+        let kind = if let hir::ConstrTypeDcl::UnionDef(union) = ty
+            && has_annotation(&union.annotations, "http")
+        {
+            DeclarationKind::HttpUnion(union)
         } else {
             DeclarationKind::Type
         };
@@ -108,11 +165,7 @@ impl<'a> TypeDeclarations<'a> {
     ) -> Option<&'a hir::EnumDcl> {
         let declaration = self.resolve(name, scope)?;
         match declaration.kind {
-            DeclarationKind::Enum(enumeration)
-                if declaration.module_path.is_empty() && declaration.ident == "ContentType" =>
-            {
-                Some(enumeration)
-            }
+            DeclarationKind::BuiltinEnum(enumeration) => Some(enumeration),
             _ => None,
         }
     }

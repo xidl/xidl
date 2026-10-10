@@ -189,8 +189,6 @@ export interface NotFound {
 
 export type FileResponse = { meta: FileMeta } | { raw: Array<number> };
 
-    export type ContentType = "application/json" | "application/octet-stream" | "text/plain";
-
 export {};
 ===============
 http_union.errors.ts
@@ -448,5 +446,3 @@ import { xjson } from "xidl-typescript-codec";
 
     
     export const FileResponseSchema = z.union([z.object({ meta: FileMetaSchema }), z.object({ raw: z.array(z.coerce.number().int().nonnegative()) })]);
-
-    export const ContentTypeSchema = z.enum(["application/json", "application/octet-stream", "text/plain"]);

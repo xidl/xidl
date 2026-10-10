@@ -29,25 +29,6 @@ pub struct NotFound {
     pub code: u32,
     pub msg: String,
 }
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    ::serde::Serialize,
-    ::serde::Deserialize,
-    Copy,
-    Eq,
-    Default,
-)]
-pub enum ContentType {
-    #[serde(rename = "application/json")]
-    #[default]
-    Json,
-    #[serde(rename = "application/octet-stream")]
-    OctetStream,
-    #[serde(rename = "text/plain")]
-    Text,
-}
 #[allow(
     non_snake_case,
     unused_attributes,

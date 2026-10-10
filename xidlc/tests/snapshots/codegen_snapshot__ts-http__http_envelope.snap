@@ -226,8 +226,6 @@ export interface NotFound {
                 msg: string;
             }
 
-    export type ContentType = "application/json" | "application/octet-stream" | "text/plain";
-
     export namespace representations {
 
 
@@ -611,8 +609,6 @@ import { xjson } from "xidl-typescript-codec";
             msg: z.coerce.string()
         
     });
-
-    export const ContentTypeSchema = z.enum(["application/json", "application/octet-stream", "text/plain"]);
 
     export namespace representations {
 

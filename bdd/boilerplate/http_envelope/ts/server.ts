@@ -1,48 +1,59 @@
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { createRouter } from 'xidl-typescript-server';
-import { EnvelopeApiClient } from './{{MODULE_NAME}}.client.js';
+import { EnvelopeApiClient } from './http_envelope.client.js';
 import {
   NotFound,
   NotModified,
   PreconditionFailed,
-} from './{{MODULE_NAME}}.errors.js';
-import { EnvelopeApiOperations } from './{{MODULE_NAME}}.server.js';
+} from './http_envelope.errors.js';
+import { EnvelopeApiOperations } from './http_envelope.server.js';
+import { SecondaryApiClient } from './http_envelope_secondary.client.js';
+import { SecondaryApiOperations } from './http_envelope_secondary.server.js';
 
-const handler = createRouter(Object.values(EnvelopeApiOperations), {
-  delete_file(_if_match: string) {
-    throw new PreconditionFailed({
-      code: 412,
-      etag: 'current-tag',
-      msg: 'stale revision',
-    });
-  },
-  get_file(key: string) {
-    if (key === 'missing')
-      throw new NotFound({ code: 404, msg: 'no such file' });
-    const metadata = {
-      cached: false,
-      etag: 'meta-v1',
-      tags: ['001', '"quoted"'],
-    };
-    if (key === 'raw')
+const handler = createRouter(
+  [
+    ...Object.values(EnvelopeApiOperations),
+    ...Object.values(SecondaryApiOperations),
+  ],
+  {
+    delete_file(_if_match: string) {
+      throw new PreconditionFailed({
+        code: 412,
+        etag: 'current-tag',
+        msg: 'stale revision',
+      });
+    },
+    get_file(key: string) {
+      if (key === 'missing')
+        throw new NotFound({ code: 404, msg: 'no such file' });
+      const metadata = {
+        cached: false,
+        etag: 'meta-v1',
+        tags: ['001', '"quoted"'],
+      };
+      if (key === 'raw')
+        return {
+          kind: 'OctetStream',
+          value: new TextEncoder().encode('envelope-bytes'),
+          ...metadata,
+        };
+      if (key === 'text')
+        return { kind: 'Text', value: 'envelope-text', ...metadata };
       return {
-        kind: 'OctetStream',
-        value: new TextEncoder().encode('envelope-bytes'),
+        kind: 'Json',
+        value: { details: { label: 'detail' }, etag: 'meta-v1', id: key },
         ...metadata,
       };
-    if (key === 'text')
-      return { kind: 'Text', value: 'envelope-text', ...metadata };
-    return {
-      kind: 'Json',
-      value: { details: { label: 'detail' }, etag: 'meta-v1', id: key },
-      ...metadata,
-    };
+    },
+    get_fresh() {
+      throw new NotModified({ etag: 'same-tag' });
+    },
+    read_secondary() {
+      return { kind: 'Text', value: 'second-idl' };
+    },
   },
-  get_fresh() {
-    throw new NotModified({ etag: 'same-tag' });
-  },
-});
+);
 const port = process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 8080;
 const server = createServer(async (request, response) => {
   const url = new URL(
@@ -77,6 +88,11 @@ server.listen(0, '127.0.0.1', async () => {
     const address = server.address();
     assert.ok(address && typeof address !== 'string');
     const client = new EnvelopeApiClient(`http://127.0.0.1:${address.port}`);
+    const second = new SecondaryApiClient(`http://127.0.0.1:${address.port}`);
+    assert.deepEqual(await second.read_secondary(), {
+      kind: 'Text',
+      value: 'second-idl',
+    });
     const meta = await client.get_file('meta');
     assert(meta.kind === 'Json');
     assert.equal(meta.value.id, 'meta');

@@ -1,6 +1,6 @@
 mod annotation;
 mod annotation_builtin;
-mod builtin;
+pub(crate) mod builtin;
 mod compound;
 mod const_dcl;
 mod declarator;
