@@ -119,6 +119,10 @@ export class FilesClient {
                     "msg": body["msg"] as never,
                     });
             }
+            if (status === 410) {
+                throw new $xidlErrors.EmptyGone({
+                    });
+            }
             throw await parseXidlError(resp);
         }
     
@@ -299,6 +303,12 @@ export interface NotFound {
 
     
 
+export interface EmptyGone {
+        
+        }
+
+    
+
 export interface FileMeta {
         
             id: string;
@@ -422,6 +432,20 @@ import type * as types from "./http_exceptions";
         this.name = "NotFound";
         this.code = fields["code"];
         this.msg = fields["msg"];
+        
+    }
+}
+
+    /** Typed HTTP error for status 410 responses. */
+    export class EmptyGone extends Error {
+        readonly status = 410;
+        readonly kind = "EmptyGone" as const;
+        
+    constructor(fields: {
+        
+    }) {
+        super("EmptyGone");
+        this.name = "EmptyGone";
         
     }
 }
@@ -632,6 +656,14 @@ export const FilesOperations = {
                             
                     }
                 
+                        if (error instanceof $xidlErrors.EmptyGone) {
+                            const headers = new Headers();
+                            writeResponseBindings(headers, { ...error }, [], false);
+                            writeResponseBindings(headers, { ...error }, [], true);
+                            return { status: 410, headers };
+                        
+                    }
+                
                 return undefined;
             },
         },
@@ -835,6 +867,11 @@ import { xjson } from "xidl-typescript-codec";
             code: z.coerce.number().int().nonnegative(),
         
             msg: z.coerce.string()
+        
+    });
+
+    
+    export const EmptyGoneSchema = z.object({
         
     });
 
