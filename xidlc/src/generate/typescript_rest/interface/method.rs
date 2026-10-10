@@ -292,6 +292,7 @@ impl MethodModel {
         };
 
         Ok(MethodModel {
+            response_status: op.http.response.status.clone(),
             union_wrapper,
             representations,
             name: ts_ident(&op.meta.name),

@@ -44,6 +44,11 @@ exception NotFound {
     string msg;
 };
 
+@http(404)
+exception HeadMissing {
+    @header @rename("X-Error-Code") string code;
+};
+
 @no_security
 interface EnvelopeApi {
     @get(path = "/file")
@@ -53,6 +58,14 @@ interface EnvelopeApi {
         @header @rename("X-Tag") out sequence<string> tags,
         @cookie out boolean cached
     ) raises(NotFound);
+
+    @head(path = "/file")
+    void head_file(
+        @query string key,
+        @header @rename("ETag") out string etag,
+        @header @rename("X-Size") out uint64 size,
+        @cookie out boolean cached
+    ) raises(HeadMissing);
 
     @get(path = "/fresh")
     string get_fresh() raises(NotModified);

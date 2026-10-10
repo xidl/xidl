@@ -178,6 +178,7 @@ export const HttpStreamSseBindingsServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/event-stream",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],

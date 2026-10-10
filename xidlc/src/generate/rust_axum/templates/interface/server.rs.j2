@@ -434,7 +434,7 @@ T: {{ ident }} + Send + Sync + 'static,
                                 {% elif method.response_is_empty %}
                                     {
                                         let _ = resp_value;
-                                        ::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT)
+                                        ::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::from_u16({{ method.response_status }}).unwrap())
                                     }
                                 {% else %}
                                     {

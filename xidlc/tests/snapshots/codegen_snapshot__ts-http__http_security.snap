@@ -250,6 +250,7 @@ export const HttpSecurityServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -282,6 +283,7 @@ export const HttpSecurityServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -317,6 +319,7 @@ export const HttpSecurityServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -349,6 +352,7 @@ export const HttpSecurityServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],

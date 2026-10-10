@@ -90,7 +90,7 @@ fn test_build_http_mapping_covers_bindings_streams_and_codecs() {
         Some(HttpBodyCodec::FormUrlEncoded)
     );
     assert_eq!(explicit.response.body.codec, Some(HttpBodyCodec::Msgpack));
-    assert_eq!(explicit.response.status, "204");
+    assert_eq!(explicit.response.status, "200");
 }
 
 #[test]

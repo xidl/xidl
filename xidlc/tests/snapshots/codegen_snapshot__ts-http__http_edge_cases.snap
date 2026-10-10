@@ -322,6 +322,7 @@ export const HttpEdgeCasesServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "",
             bodyMode: "none",
             bodyFields: [],
@@ -355,6 +356,7 @@ export const HttpEdgeCasesServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -388,6 +390,7 @@ export const HttpEdgeCasesServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -421,6 +424,7 @@ export const HttpEdgeCasesServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -454,6 +458,7 @@ export const HttpEdgeCasesServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],

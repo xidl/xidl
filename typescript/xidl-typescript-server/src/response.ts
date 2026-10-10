@@ -68,7 +68,7 @@ export function encodeOperationResponse<TService>(
                 codecs,
                 representation.schema,
               );
-      return new Response(body, { headers, status: 200 });
+      return new Response(body, { headers, status: operation.response.status });
     }
   }
 
@@ -82,7 +82,7 @@ export function encodeOperationResponse<TService>(
   writeResponseBindings(headers, record, operation.response.cookies, true);
 
   if (operation.response.bodyMode === 'none') {
-    return new Response(null, { headers, status: 204 });
+    return new Response(null, { headers, status: operation.response.status });
   }
 
   const body = selectBody(
@@ -97,7 +97,7 @@ export function encodeOperationResponse<TService>(
     encodeBody(body, contentType, codecs, operation.response.schema),
     {
       headers,
-      status: 200,
+      status: operation.response.status,
     },
   );
 }

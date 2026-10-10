@@ -667,6 +667,7 @@ export const HttpDefaultsServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -700,6 +701,7 @@ export const HttpDefaultsServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -734,6 +736,7 @@ export const HttpDefaultsServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -769,6 +772,7 @@ export const HttpDefaultsServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -803,6 +807,7 @@ export const HttpDefaultsServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -837,6 +842,7 @@ export const HttpDefaultsServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -870,6 +876,7 @@ export const HttpDefaultsServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -903,6 +910,7 @@ export const HttpDefaultsServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -936,6 +944,7 @@ export const HttpDefaultsServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -969,6 +978,7 @@ export const HttpDefaultsServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "",
             bodyMode: "none",
             bodyFields: [],
@@ -1002,6 +1012,7 @@ export const HttpDefaultsServiceOperations = {
             },
         },
         response: {
+            status: 204,
             contentType: "",
             bodyMode: "none",
             bodyFields: [],
@@ -1036,6 +1047,7 @@ export const HttpDefaultsServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -1070,6 +1082,7 @@ export const HttpDefaultsServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],

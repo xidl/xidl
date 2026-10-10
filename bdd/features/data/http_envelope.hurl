@@ -70,3 +70,18 @@ HTTP 412
 ETag: current-tag
 [Asserts]
 jsonpath "$.msg" == "stale revision"
+
+# HEAD shares a route with GET but returns metadata without invoking GET.
+HEAD {{base_url}}/file?key=raw
+HTTP 200
+ETag: head-v1
+X-Size: 14
+[Asserts]
+body == ""
+cookie "cached" == "true"
+
+HEAD {{base_url}}/file?key=missing
+HTTP 404
+X-Error-Code: NOT_FOUND
+[Asserts]
+body == ""

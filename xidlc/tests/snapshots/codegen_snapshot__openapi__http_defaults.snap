@@ -417,7 +417,7 @@ openapi_http_defaults.json
           }
         ],
         "responses": {
-          "204": {
+          "200": {
             "description": "OK"
           },
           "400": {

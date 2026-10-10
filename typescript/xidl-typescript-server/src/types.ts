@@ -59,6 +59,8 @@ export interface ResponseRepresentation {
 }
 
 export interface OperationResponseSpec {
+  /** Successful status selected by the IDL compiler. */
+  status: number;
   bodyFields: BodyField[];
   bodyMode: 'none' | 'object' | 'return';
   contentType: string;

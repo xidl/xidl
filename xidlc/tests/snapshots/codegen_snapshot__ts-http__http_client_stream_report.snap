@@ -187,6 +187,7 @@ export const HttpClientStreamReportServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "application/json",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],

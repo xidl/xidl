@@ -29,6 +29,13 @@ pub struct NotFound {
     pub code: u32,
     pub msg: String,
 }
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
+pub struct HeadMissing {
+    #[serde(rename = "X-Error-Code")]
+    #[serde(skip)]
+    pub code: String,
+}
 #[allow(
     non_snake_case,
     unused_attributes,
@@ -43,6 +50,10 @@ pub trait EnvelopeApi {
         &self,
         key: String,
     ) -> ::std::result::Result<EnvelopeApiGetFileResponse, EnvelopeApiGetFileError>;
+    async fn head_file(
+        &self,
+        key: String,
+    ) -> ::std::result::Result<EnvelopeApiHeadFileResponse, EnvelopeApiHeadFileError>;
     async fn get_fresh(&self) -> ::std::result::Result<String, EnvelopeApiGetFreshError>;
     async fn delete_file(
         &self,
@@ -106,6 +117,79 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for EnvelopeApiGetFileError 
                             "application/json",
                         ),
                     );
+                response
+            }
+        }
+    }
+}
+/// Typed error channel for `head_file`: one variant per
+/// declared `raises(...)` exception, plus the runtime fallback.
+#[derive(Debug)]
+pub enum EnvelopeApiHeadFileError {
+    HeadMissing(HeadMissing),
+    Framework(xidl_rust_axum::Error),
+}
+impl ::std::fmt::Display for EnvelopeApiHeadFileError {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match self {
+            Self::HeadMissing(_) => f.write_str("HTTP 404: HeadMissing"),
+            Self::Framework(err) => ::std::fmt::Display::fmt(err, f),
+        }
+    }
+}
+impl ::std::error::Error for EnvelopeApiHeadFileError {
+    fn source(&self) -> Option<&(dyn ::std::error::Error + 'static)> {
+        match self {
+            Self::Framework(err) => Some(err),
+            _ => None,
+        }
+    }
+}
+impl From<xidl_rust_axum::Error> for EnvelopeApiHeadFileError {
+    fn from(err: xidl_rust_axum::Error) -> Self {
+        Self::Framework(err)
+    }
+}
+impl ::xidl_rust_axum::axum::response::IntoResponse for EnvelopeApiHeadFileError {
+    fn into_response(self) -> ::xidl_rust_axum::axum::response::Response {
+        match self {
+            Self::Framework(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+            Self::HeadMissing(err) => {
+                let headers = (|| -> xidl_rust_axum::Result<
+                    ::xidl_rust_axum::axum::http::HeaderMap,
+                > {
+                    let mut headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
+                    {
+                        let value = &err.code;
+                        let value = value.to_string();
+                        let value = ::xidl_rust_axum::axum::http::header::HeaderValue::from_str(
+                                &value,
+                            )
+                            .map_err(|err| xidl_rust_axum::Error::new(
+                                500,
+                                format!("exception X-Error-Code: {err}"),
+                            ))?;
+                        headers.append("X-Error-Code", value);
+                    }
+                    Ok(headers)
+                })();
+                let headers = match headers {
+                    Ok(headers) => headers,
+                    Err(err) => {
+                        return ::xidl_rust_axum::axum::response::IntoResponse::into_response(
+                            err,
+                        );
+                    }
+                };
+                let body = ::xidl_rust_axum::axum::body::Body::empty();
+                let mut response = ::xidl_rust_axum::axum::response::Response::new(body);
+                *response.status_mut() = ::xidl_rust_axum::axum::http::StatusCode::from_u16(
+                        404u16,
+                    )
+                    .unwrap();
+                response.headers_mut().extend(headers);
                 response
             }
         }
@@ -348,6 +432,53 @@ impl From<EnvelopeApiGetFileResponseInBody> for EnvelopeApiGetFileResponse {
         }
     }
 }
+#[derive(::serde::Serialize, ::core::default::Default)]
+struct EnvelopeApiHeadFileRequestOutQuery {
+    #[serde(default)]
+    key: String,
+}
+#[derive(::serde::Deserialize, ::core::default::Default)]
+struct EnvelopeApiHeadFileRequestInQuery {
+    #[serde(default)]
+    key: String,
+}
+#[derive(::serde::Deserialize)]
+struct EnvelopeApiHeadFileRequest {
+    key: String,
+}
+#[allow(clippy::manual_async_fn, unused_mut)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S> for EnvelopeApiHeadFileRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
+            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
+                EnvelopeApiHeadFileRequestInQuery,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let EnvelopeApiHeadFileRequestInQuery { key } = xidl_query;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
+            Ok(Self { key })
+        }
+    }
+}
+pub struct EnvelopeApiHeadFileResponse {
+    pub etag: String,
+    pub size: u64,
+    pub cached: bool,
+}
 #[derive(::serde::Deserialize)]
 struct EnvelopeApiDeleteFileRequest {
     if_match: String,
@@ -404,6 +535,7 @@ where
         let _svc = self.inner;
         xidl_rust_axum::axum::Router::new()
             .route("/file", xidl_rust_axum::axum::routing::get(Self::get_file))
+            .route("/file", xidl_rust_axum::axum::routing::head(Self::head_file))
             .route("/fresh", xidl_rust_axum::axum::routing::get(Self::get_fresh))
             .route("/file", xidl_rust_axum::axum::routing::delete(Self::delete_file))
             .with_state(_svc)
@@ -577,6 +709,87 @@ where
         clippy::let_unit_value,
         unused_variables
     )]
+    async fn head_file(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
+        request: EnvelopeApiHeadFileRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
+        let EnvelopeApiHeadFileRequest { key } = request;
+        let key: String = key;
+        let mut resp = match svc.head_file(key).await {
+            Ok(resp_value) => {
+                let etag_header_value: String = {
+                    let value = &resp_value.etag;
+                    value.clone()
+                };
+                let size_header_value: String = {
+                    let value = &resp_value.size;
+                    value.to_string()
+                };
+                let cached_cookie_value: String = {
+                    let value = &resp_value.cached;
+                    value.to_string()
+                };
+                let mut resp = {
+                    let _ = resp_value;
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(
+                        ::xidl_rust_axum::axum::http::StatusCode::from_u16(200).unwrap(),
+                    )
+                };
+                let header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
+                        "ETag".as_bytes(),
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
+                        &etag_header_value,
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                resp.headers_mut().insert(header_name, header_value);
+                let header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
+                        "X-Size".as_bytes(),
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
+                        &size_header_value,
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                resp.headers_mut().insert(header_name, header_value);
+                let cookie_str = xidl_rust_axum::cookie::Cookie::new(
+                        "cached",
+                        cached_cookie_value,
+                    )
+                    .encoded()
+                    .to_string();
+                let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
+                        &cookie_str,
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                resp.headers_mut()
+                    .append(
+                        ::xidl_rust_axum::axum::http::header::SET_COOKIE,
+                        header_value,
+                    );
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn get_fresh(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -643,7 +856,7 @@ where
                 let mut resp = {
                     let _ = resp_value;
                     ::xidl_rust_axum::axum::response::IntoResponse::into_response(
-                        ::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT,
+                        ::xidl_rust_axum::axum::http::StatusCode::from_u16(204).unwrap(),
                     )
                 };
                 resp
@@ -842,6 +1055,120 @@ impl EnvelopeApiClient {
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(
                 EnvelopeApiGetFileError::Framework(
+                    xidl_rust_axum::Error::from_http_response(status, body),
+                ),
+            )
+        }
+    }
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
+    pub async fn head_file(
+        &self,
+        key: String,
+    ) -> Result<EnvelopeApiHeadFileResponse, EnvelopeApiHeadFileError> {
+        let xidl_path = "/file".to_string();
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::HEAD, self.client.url(&xidl_path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("")
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let query = EnvelopeApiHeadFileRequestOutQuery {
+            key,
+        };
+        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if !query.is_empty() {
+            req.url_mut().set_query(Some(&query));
+        }
+        let auth_target = &self.client;
+        let _ = auth_target;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let headers = resp.headers().clone();
+            let etag: String = match headers.get("ETag") {
+                Some(header_value) => {
+                    let header_str = header_value
+                        .to_str()
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?;
+                    header_str.to_string()
+                }
+                None => ::core::default::Default::default(),
+            };
+            let size: u64 = match headers.get("X-Size") {
+                Some(header_value) => {
+                    let header_str = header_value
+                        .to_str()
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?;
+                    header_str
+                        .parse()
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?
+                }
+                None => ::core::default::Default::default(),
+            };
+            let cookie_map = xidl_rust_axum::http::parse_set_cookies(
+                headers.get_all(::xidl_rust_axum::reqwest::header::SET_COOKIE).iter(),
+            );
+            let cached: bool = match cookie_map
+                .get("cached")
+                .and_then(|values| values.first())
+            {
+                Some(value) => {
+                    value
+                        .parse()
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?
+                }
+                None => ::core::default::Default::default(),
+            };
+            Ok(EnvelopeApiHeadFileResponse {
+                etag,
+                size,
+                cached,
+            })
+        } else {
+            let status = resp.status();
+            if status.as_u16() == 404 {
+                let headers = resp.headers().clone();
+                let mut value: HeadMissing = ::core::default::Default::default();
+                value.code = match headers.get("X-Error-Code") {
+                    Some(header_value) => {
+                        let header_str = header_value
+                            .to_str()
+                            .map_err(|err| xidl_rust_axum::Error::new(
+                                400,
+                                format!("{err:?}"),
+                            ))?;
+                        header_str.to_string()
+                    }
+                    None => ::core::default::Default::default(),
+                };
+                return Err(EnvelopeApiHeadFileError::HeadMissing(value));
+            }
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(
+                EnvelopeApiHeadFileError::Framework(
                     xidl_rust_axum::Error::from_http_response(status, body),
                 ),
             )

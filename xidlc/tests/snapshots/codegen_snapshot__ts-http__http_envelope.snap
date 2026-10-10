@@ -97,6 +97,31 @@ import {
         throw await parseXidlError(resp);
     }
     
+            async head_file(key: string): Promise<ifaceTypes.EnvelopeApiHeadFileResponse> {
+                const parsed = ifaceSchemas.EnvelopeApiHeadFileRequestSchema.parse({ "key": key });
+                let xidlPath = "/file";
+                const query = new URLSearchParams();
+                appendParam(query, "key", key, false, false);
+                const headers = new Headers(this.defaultHeaders);
+                const cookies: string[] = [];
+                applyCookies(headers, cookies);
+                applyClientAuth(xidlPath, query, headers, this.auth, []);
+                const queryString = query.toString();
+                if (queryString.length > 0) {
+                    xidlPath = `${xidlPath}?${queryString}`;
+                }
+                const url = joinUrl(this.baseUrl, xidlPath);
+                headers.set("Accept", "");
+        const resp = await this.fetchImpl(url, { method: "HEAD", headers });
+        if (!resp.ok) {
+            await this.throwHeadFileError(resp);
+            
+        }
+        const responseBody = await decodeOptionalResponseBody(resp, "", this.codecs);
+        const responsePayload = buildResponsePayload(responseBody, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }, { name: "X-Size", key: "size", optional: false, isMulti: false }], [{ name: "cached", key: "cached", optional: false, isMulti: false }]);
+        return ifaceSchemas.EnvelopeApiHeadFileResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.EnvelopeApiHeadFileResponseSchema)) as ifaceTypes.EnvelopeApiHeadFileResponse;
+    }
+    
             async get_fresh(): Promise<string> {
                 let xidlPath = "/fresh";
                 const query = new URLSearchParams();
@@ -154,6 +179,16 @@ import {
                 throw new $xidlErrors.NotFound({
                     "code": body["code"] as never,
                     "msg": body["msg"] as never,
+                    });
+            }
+            throw await parseXidlError(resp);
+        }
+    
+        async throwHeadFileError(resp: Response): Promise<never> {
+            const status = resp.status;
+            if (status === 404) {
+                throw new $xidlErrors.HeadMissing({
+                    "code": readResponseHeader(resp.headers, "X-Error-Code", false, value => value) as never,
                     });
             }
             throw await parseXidlError(resp);
@@ -224,6 +259,13 @@ export interface NotFound {
         
             code: number;
                 msg: string;
+            }
+
+    
+
+export interface HeadMissing {
+        
+            code: string;
             }
 
     export namespace representations {
@@ -316,6 +358,23 @@ import type * as types from "./http_envelope";
         
     }
 }
+
+    /** Typed HTTP error for status 404 responses. */
+    export class HeadMissing extends Error {
+        readonly status = 404;
+        readonly kind = "HeadMissing" as const;
+        readonly code: string;
+        
+    constructor(fields: {
+        "code": string;
+        
+    }) {
+        super("HeadMissing");
+        this.name = "HeadMissing";
+        this.code = fields["code"];
+        
+    }
+}
 ===============
 http_envelope.iface.d.ts
 ===============
@@ -338,6 +397,20 @@ export interface EnvelopeApiGetFileResponse {
         return: types.representations.FileResponse;
             etag: string;
             tags: Array<string>;
+            cached: boolean;
+        }
+
+    
+
+export interface EnvelopeApiHeadFileRequest {
+        key: string;
+        }
+
+    
+
+export interface EnvelopeApiHeadFileResponse {
+        etag: string;
+            size: number;
             cached: boolean;
         }
 
@@ -377,6 +450,20 @@ export const EnvelopeApiGetFileResponseSchema = z.object({
 export type EnvelopeApiGetFileResponse = z.infer<typeof EnvelopeApiGetFileResponseSchema>;
 
     
+export const EnvelopeApiHeadFileRequestSchema = z.object({
+        key: z.coerce.string(),
+    });
+export type EnvelopeApiHeadFileRequest = z.infer<typeof EnvelopeApiHeadFileRequestSchema>;
+
+    
+export const EnvelopeApiHeadFileResponseSchema = z.object({
+        etag: z.coerce.string(),
+        size: z.coerce.number().int().nonnegative(),
+        cached: z.coerce.boolean(),
+    });
+export type EnvelopeApiHeadFileResponse = z.infer<typeof EnvelopeApiHeadFileResponseSchema>;
+
+    
 export const EnvelopeApiDeleteFileRequestSchema = z.object({
         if_match: z.coerce.string(),
     });
@@ -403,6 +490,8 @@ import {
 export interface EnvelopeApi {
     
         get_file(key: string): Awaitable<ifaceTypes.EnvelopeApiGetFileResponse>;
+    
+        head_file(key: string): Awaitable<ifaceTypes.EnvelopeApiHeadFileResponse>;
     
         get_fresh(): Awaitable<string>;
     
@@ -433,6 +522,7 @@ export const EnvelopeApiOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "application/json",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -466,6 +556,56 @@ export const EnvelopeApiOperations = {
         
     }),
     
+        head_file: defineOperation<EnvelopeApi, "head_file">({
+            handler: "head_file",
+            method: "HEAD",
+            path: "/file",
+            paths: ["/file"],
+            request: {
+                kind: "object",
+                args: ["key"],
+                schema: ifaceSchemas.EnvelopeApiHeadFileRequestSchema,
+                path: [],
+                query: [{ wireName: "key", key: "key", multi: false }],
+                headers: [],
+                cookies: [],
+                body: {
+                    kind: "none",
+                    contentType: "",
+                    fields: [],
+                    
+            },
+        },
+        response: {
+            status: 200,
+            contentType: "",
+            bodyMode: "none",
+            bodyFields: [],
+            headers: [{ wireName: "ETag", key: "etag", multi: false }, { wireName: "X-Size", key: "size", multi: false }],
+            cookies: [{ wireName: "cached", key: "cached", multi: false }],
+            schema: ifaceSchemas.EnvelopeApiHeadFileResponseSchema,
+            stream: false,
+            
+        },
+        security: [],
+        
+            errors: {
+                match: (error: unknown) => {
+                    
+                        if (error instanceof $xidlErrors.HeadMissing) {
+                            const headers = new Headers();
+                            writeResponseBindings(headers, { ...error }, [{ wireName: "X-Error-Code", key: "code", multi: false }], false);
+                            writeResponseBindings(headers, { ...error }, [], true);
+                            return { status: 404, headers };
+                        
+                    }
+                
+                return undefined;
+            },
+        },
+        
+    }),
+    
         get_fresh: defineOperation<EnvelopeApi, "get_fresh">({
             handler: "get_fresh",
             method: "GET",
@@ -486,6 +626,7 @@ export const EnvelopeApiOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -534,6 +675,7 @@ export const EnvelopeApiOperations = {
             },
         },
         response: {
+            status: 204,
             contentType: "",
             bodyMode: "none",
             bodyFields: [],
@@ -607,6 +749,13 @@ import { xjson } from "xidl-typescript-codec";
             code: z.coerce.number().int().nonnegative(),
         
             msg: z.coerce.string()
+        
+    });
+
+    
+    export const HeadMissingSchema = z.object({
+        
+            code: xjson(z.coerce.string(), {"name":"X-Error-Code"})
         
     });
 

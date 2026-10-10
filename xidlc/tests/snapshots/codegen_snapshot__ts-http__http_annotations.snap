@@ -498,6 +498,7 @@ export const HttpAnnoServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -532,6 +533,7 @@ export const HttpAnnoServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -565,6 +567,7 @@ export const HttpAnnoServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -598,6 +601,7 @@ export const HttpAnnoServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -631,6 +635,7 @@ export const HttpAnnoServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -665,6 +670,7 @@ export const HttpAnnoServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "application/json",
             bodyMode: "object",
             bodyFields: [{ wireName: "return", key: "return" }, { wireName: "sum", key: "sum" }],
@@ -701,6 +707,7 @@ export const HttpAnnoServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "application/json",
             bodyMode: "object",
             bodyFields: [{ wireName: "return", key: "return" }, { wireName: "value", key: "value" }],
@@ -734,6 +741,7 @@ export const HttpAnnoServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "count", key: "count" }],
@@ -767,6 +775,7 @@ export const HttpAnnoServiceOperations = {
             },
         },
         response: {
+            status: 204,
             contentType: "",
             bodyMode: "none",
             bodyFields: [],

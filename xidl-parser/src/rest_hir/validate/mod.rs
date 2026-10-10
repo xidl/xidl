@@ -275,7 +275,11 @@ pub(super) fn validate_head_constraints(
     response_params: &[HttpParam],
     return_type: Option<&hir::TypeSpec>,
 ) -> RestHirResult<()> {
-    if matches!(method, HttpMethod::Head) && (return_type.is_some() || !response_params.is_empty())
+    if matches!(method, HttpMethod::Head)
+        && (return_type.is_some()
+            || response_params
+                .iter()
+                .any(|param| param.kind == HttpParamKind::Body))
     {
         return Err(format!("HEAD method '{}' must return void", op_name));
     }

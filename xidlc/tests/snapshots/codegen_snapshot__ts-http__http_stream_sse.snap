@@ -237,6 +237,7 @@ export const HttpStreamSseServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/event-stream",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -269,6 +270,7 @@ export const HttpStreamSseServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/plain",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
@@ -304,6 +306,7 @@ export const HttpStreamSseServiceOperations = {
             },
         },
         response: {
+            status: 204,
             contentType: "",
             bodyMode: "none",
             bodyFields: [],
@@ -336,6 +339,7 @@ export const HttpStreamSseServiceOperations = {
             },
         },
         response: {
+            status: 200,
             contentType: "text/event-stream",
             bodyMode: "return",
             bodyFields: [{ wireName: "return", key: "return" }],
