@@ -435,13 +435,13 @@ T: {{ ident }} + Send + Sync + 'static,
                                     {% for param in method.response_cookie_params %}
                                         {% if param.cookie_is_multi %}
                                             for value_str in {{ param.name }}_cookie_values {
-                                                let cookie_str = format!("{}={}", "{{ param.wire_name }}", value_str);
+                                                let cookie_str = xidl_rust_axum::cookie::Cookie::new("{{ param.wire_name }}", value_str).encoded().to_string();
                                                 let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&cookie_str)
                                                 .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
                                                 resp.headers_mut().append(::xidl_rust_axum::axum::http::header::SET_COOKIE, header_value);
                                             }
                                         {% else %}
-                                            let cookie_str = format!("{}={}", "{{ param.wire_name }}", {{ param.name }}_cookie_value);
+                                            let cookie_str = xidl_rust_axum::cookie::Cookie::new("{{ param.wire_name }}", {{ param.name }}_cookie_value).encoded().to_string();
                                             let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&cookie_str)
                                             .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
                                             resp.headers_mut().append(::xidl_rust_axum::axum::http::header::SET_COOKIE, header_value);

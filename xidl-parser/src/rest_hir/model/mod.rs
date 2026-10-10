@@ -99,6 +99,10 @@ pub struct HttpExceptionMember {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HttpExceptionField {
     pub field: String,
+    /// JSON property name after applying the existing naming annotations.
+    pub wire_name: String,
+    /// Whether the JSON property may be absent.
+    pub optional: bool,
     pub ty: hir::TypeSpec,
 }
 

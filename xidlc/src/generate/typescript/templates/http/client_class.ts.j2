@@ -69,17 +69,20 @@ export class {{ client_name }}Client {
     {% for method in methods %}{% if method.raises | length > 0 %}
         async {{ method.raise_helper }}(resp: Response): Promise<never> {
             const status = resp.status;
-            {% for ex in method.raises %}
-                if (status === {{ ex.status }}) {
-                    const body = {% if ex.has_body %}(await resp.json().catch(() => ({}))) as Record<string, unknown>{% else %}{}{% endif %};
-                    throw new {{ ex.ident }}({
-                        {% for member in ex.headers %}"{{ member.field }}": {% if member.optional %}(readResponseHeader(resp.headers, "{{ member.wire_name }}", {{ member.is_multi | lower }}) ?? undefined) as never{% else %}readResponseHeader(resp.headers, "{{ member.wire_name }}", {{ member.is_multi | lower }}) as never{% endif %},
-                        {% endfor %}{% for member in ex.cookies %}"{{ member.field }}": {% if member.is_multi %}(readResponseCookies(resp.headers)["{{ member.wire_name }}"] ?? []) as never{% else %}(readResponseCookies(resp.headers)["{{ member.wire_name }}"]?.[0]) as never{% endif %},
-                        {% endfor %}{% for field in ex.body %}"{{ field.field }}": body["{{ field.field }}"] as never,
-                        {% endfor %}});
-                }
-            {% endfor %}
-            throw await parseXidlError(resp);
+            {% for ex in method.raises %}if (status === {{ ex.status }}) {
+                {% if ex.has_body %}const bodySchema = z.object({ {% for field in ex.body %}"{{ field.wire_name }}": {{ render_zod(field.schema) }}{% if field.optional %}.optional(){% endif %}, {% endfor %} });
+                const rawBody = await resp.clone().json().catch(() => undefined);
+                if (rawBody == null{% for field in ex.body %}{% if not field.optional %} || rawBody["{{ field.wire_name }}"] === undefined{% endif %}{% endfor %}) throw await parseXidlError(resp);
+                const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
+                if (!decoded.success) throw await parseXidlError(resp);
+                const body = decoded.data;
+                {% endif %}throw new {{ ex.ident }}({
+                    {% for member in ex.headers %}"{{ member.field }}": {% if member.optional %}(readResponseHeader(resp.headers, "{{ member.wire_name }}", {{ member.is_multi | lower }}{% if member.item_is_string %}, value => value{% endif %}) ?? undefined) as never{% else %}readResponseHeader(resp.headers, "{{ member.wire_name }}", {{ member.is_multi | lower }}{% if member.item_is_string %}, value => value{% endif %}) as never{% endif %},
+                    {% endfor %}{% for member in ex.cookies %}"{{ member.field }}": {% if member.is_multi %}(readResponseCookies(resp.headers{% if member.item_is_string %}, value => value{% endif %}).get("{{ member.wire_name }}") ?? {% if member.optional %}undefined{% else %}[]{% endif %}) as never{% else %}(readResponseCookies(resp.headers{% if member.item_is_string %}, value => value{% endif %}).get("{{ member.wire_name }}")?.[0]) as never{% endif %},
+                    {% endfor %}{% for field in ex.body %}"{{ field.field }}": {% if field.optional %}(body["{{ field.wire_name }}"] ?? undefined){% else %}body["{{ field.wire_name }}"]{% endif %} as never,
+                    {% endfor %}});
+            }
+            {% endfor %}throw await parseXidlError(resp);
         }
     {% endif %}{% endfor %}
 }

@@ -8,7 +8,7 @@ use xidl_parser::hir;
 use xidl_parser::rest_hir::RestHirDocument;
 
 use super::interface::render_interface;
-use super::model::TsHttpBlocks;
+use super::model::{TsHttpBlocks, TsRaisesContext};
 
 #[derive(Serialize)]
 struct TypesFileContext {
@@ -41,6 +41,7 @@ struct ServerFileContext {
 
 #[derive(Serialize)]
 struct ErrorsFileContext {
+    file_stem: String,
     exceptions: Vec<ErrorsExceptionContext>,
 }
 
@@ -56,12 +57,14 @@ struct ErrorsExceptionContext {
 #[derive(Serialize, Clone)]
 struct ErrorsExceptionMemberContext {
     field: String,
+    optional: bool,
     ty: TsType,
 }
 
 #[derive(Serialize, Clone)]
 struct ErrorsExceptionFieldContext {
     field: String,
+    optional: bool,
     ty: TsType,
 }
 
@@ -124,13 +127,14 @@ pub(crate) fn render_spec(
         .exceptions
         .iter()
         .map(|exception| ErrorsExceptionContext {
-            ident: exception.ident.clone(),
+            ident: TsRaisesContext::error_ident(exception, &rest_hir.document.exceptions),
             status: exception.status,
             headers: exception
                 .headers
                 .iter()
                 .map(|member| ErrorsExceptionMemberContext {
                     field: member.field.clone(),
+                    optional: member.optional,
                     ty: ts_type_for_type_spec(
                         &member.ty,
                         &exception.module_path,
@@ -143,6 +147,7 @@ pub(crate) fn render_spec(
                 .iter()
                 .map(|member| ErrorsExceptionMemberContext {
                     field: member.field.clone(),
+                    optional: member.optional,
                     ty: ts_type_for_type_spec(
                         &member.ty,
                         &exception.module_path,
@@ -155,6 +160,7 @@ pub(crate) fn render_spec(
                 .iter()
                 .map(|field| ErrorsExceptionFieldContext {
                     field: field.field.clone(),
+                    optional: field.optional,
                     ty: ts_type_for_type_spec(
                         &field.ty,
                         &exception.module_path,
@@ -170,6 +176,7 @@ pub(crate) fn render_spec(
         renderer.render_template(
             "http/errors.ts.j2",
             &ErrorsFileContext {
+                file_stem: file_stem.to_string(),
                 exceptions: exception_contexts.clone(),
             },
         )?

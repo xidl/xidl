@@ -191,3 +191,66 @@ fn surfaces_route_parse_errors_from_projection() {
     let err = super::project(&spec).expect_err("invalid route should fail");
     assert!(err.to_string().contains("unmatched '{'"));
 }
+
+#[test]
+fn exceptions_require_non_success_final_status_and_bodyless_304() {
+    for status in [100, 200, 204, 299, 600] {
+        let spec = parse(&format!(
+            "@http({status}) exception Invalid {{ string msg; }};"
+        ));
+        let error = super::project(&spec).expect_err("unusable exception status");
+        assert!(error.to_string().contains("must be in 300..=599"));
+    }
+    let spec = parse("@http(304) exception Cached { @body string msg; };");
+    let error = super::project(&spec).expect_err("304 body is forbidden");
+    assert!(
+        error
+            .to_string()
+            .contains("HTTP 304 cannot carry body members")
+    );
+}
+
+#[test]
+fn exceptions_preserve_body_names_optional_metadata_and_raises_order() {
+    let spec = parse(
+        r#"
+        @http(304) exception Cached { @header @rename("ETag") string etag; };
+        @http(412) exception Conflict {
+            @header @optional sequence<string> hints;
+            @cookie @optional string session;
+            @body @rename("message") @optional string msg;
+        };
+        interface Files {
+            @get(path="/file") string read() raises(Cached, Conflict);
+        };
+    "#,
+    );
+    let doc = super::project(&spec).expect("http exceptions");
+    let conflict = &doc.document.exceptions[1];
+    assert!(conflict.headers[0].optional && conflict.headers[0].is_multi);
+    assert!(conflict.cookies[0].optional);
+    assert_eq!(conflict.body[0].wire_name, "message");
+    assert!(conflict.body[0].optional);
+    let raises = &doc.interfaces[0].operations[0].meta.raises;
+    assert_eq!(
+        raises.iter().map(|r| r.ident.as_str()).collect::<Vec<_>>(),
+        ["Cached", "Conflict"]
+    );
+}
+
+#[test]
+fn raises_resolves_relative_and_absolute_qualified_names() {
+    let spec = parse(
+        r#"
+        module Left { @http(409) exception Failure { string reason; }; };
+        module Right { @http(422) exception Failure { string reason; }; };
+        @no_security interface Files {
+            @get(path="/file") string read() raises(Left::Failure, ::Right::Failure);
+        };
+    "#,
+    );
+    let doc = super::project(&spec).expect("qualified raises");
+    let raises = &doc.interfaces[0].operations[0].meta.raises;
+    assert_eq!(raises[0].module_path, ["Left"]);
+    assert_eq!(raises[1].module_path, ["Right"]);
+}

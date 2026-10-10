@@ -1,7 +1,7 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::util::{
     declarator_name, rust_derive_info_with_extra, rust_passthrough_attrs_from_annotations,
-    type_with_decl,
+    serde_rename_all_from_annotations, serde_rename_from_annotations, type_with_decl,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
@@ -34,6 +34,8 @@ impl RustRender for hir::ExceptDcl {
                         "ty": ty,
                         "name": name,
                         "serde_skip": skip,
+                        "optional": optional,
+                        "serde_rename": serde_rename_from_annotations(&member.annotations),
                         "doc": doc,
                         "rust_attrs": rust_attrs,
                     })
@@ -45,6 +47,7 @@ impl RustRender for hir::ExceptDcl {
             renderer.with_ident(
                 json!({
                     "members": members,
+                    "serde_rename_all": serde_rename_all_from_annotations(&self.annotations).map(|r| r.as_str()),
                     "derive": derive.all,
                     "enable_serde_attrs": derive.enable_serde_attrs(),
                     "rust_attrs": rust_passthrough_attrs_from_annotations(&self.annotations),

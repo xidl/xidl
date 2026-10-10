@@ -178,8 +178,10 @@ impl OpenApiContext {
             })
             .cloned()
             .collect();
-        self.schemas
-            .insert(name, schema_for_struct_with_annotations(&body_members, &[]));
+        self.schemas.insert(
+            name,
+            schema_for_struct_with_annotations(&body_members, &except.annotations),
+        );
     }
 
     fn collect_interface(

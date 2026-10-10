@@ -627,8 +627,10 @@ def run_generated_server_using_boilerplate(context, lang):
         server_path = os.path.abspath(
             os.path.join(os.getcwd(), "typescript", "xidl-typescript-server")
         )
+        client_path = os.path.abspath("typescript/xidl-typescript-client")
         content = content.replace("{{TS_XIDL_TYPESCRIPT_CODEC_PATH}}", codec_path)
         content = content.replace("{{TS_XIDL_TYPESCRIPT_SERVER_PATH}}", server_path)
+        content = content.replace("{{TS_XIDL_TYPESCRIPT_CLIENT_PATH}}", client_path)
         with open(package_json_path, "w") as f:
             f.write(content)
 
@@ -640,7 +642,7 @@ def run_generated_server_using_boilerplate(context, lang):
         with open(server_ts_path, "w") as f:
             f.write(content)
 
-        for package_path in (codec_path, server_path):
+        for package_path in (codec_path, client_path, server_path):
             if not os.path.exists(os.path.join(package_path, "dist")):
                 subprocess.run(
                     ["pnpm", "install", "--ignore-scripts"],

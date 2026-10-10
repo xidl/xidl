@@ -68,13 +68,49 @@ openapi_http_exceptions.json
             "minimum": 0,
             "type": "integer"
           },
-          "msg": {
+          "detail": {
+            "type": "string"
+          },
+          "message": {
             "type": "string"
           }
         },
         "required": [
           "code",
-          "msg"
+          "message"
+        ],
+        "type": "object"
+      },
+      "left.Detail": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "type": "object"
+      },
+      "left.Failure": {
+        "properties": {
+          "detail": {
+            "$ref": "#/components/schemas/Detail"
+          }
+        },
+        "required": [
+          "detail"
+        ],
+        "type": "object"
+      },
+      "right.Failure": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
         ],
         "type": "object"
       }
@@ -87,83 +123,6 @@ openapi_http_exceptions.json
   "openapi": "3.1.0",
   "paths": {
     "/files/{id}": {
-      "delete": {
-        "operationId": "Files.delete_file",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "If-Match",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotFound"
-                }
-              }
-            },
-            "description": "Error: NotFound"
-          },
-          "412": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PreconditionFailed"
-                }
-              }
-            },
-            "description": "Error: PreconditionFailed",
-            "headers": {
-              "ETag": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Internal Server Error"
-          }
-        },
-        "security": [],
-        "tags": [
-          "Files"
-        ]
-      },
       "get": {
         "operationId": "Files.get_file",
         "parameters": [
@@ -171,14 +130,6 @@ openapi_http_exceptions.json
             "in": "path",
             "name": "id",
             "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "If-None-Match",
-            "required": false,
             "schema": {
               "type": "string"
             }
@@ -239,6 +190,19 @@ openapi_http_exceptions.json
                 "schema": {
                   "type": "string"
                 }
+              },
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Hint": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
               }
             }
           },
@@ -258,11 +222,65 @@ openapi_http_exceptions.json
           "Files"
         ]
       }
+    },
+    "/scoped": {
+      "get": {
+        "operationId": "Scoped.read",
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/left.Failure"
+                }
+              }
+            },
+            "description": "Error: Failure"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/right.Failure"
+                }
+              }
+            },
+            "description": "Error: Failure"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [],
+        "tags": [
+          "Scoped"
+        ]
+      }
     }
   },
   "tags": [
     {
       "name": "Files"
+    },
+    {
+      "name": "Scoped"
     }
   ]
 }

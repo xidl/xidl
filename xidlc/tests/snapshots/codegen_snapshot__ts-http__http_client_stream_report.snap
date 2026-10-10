@@ -12,6 +12,7 @@ import type * as types from "./http_client_stream_report";
 
 import type * as ifaceTypes from "./http_client_stream_report.iface";
 import * as ifaceSchemas from "./http_client_stream_report.iface.zod";
+import { z } from "zod";
 import { deserialize } from "xidl-typescript-codec";
 import {
     appendCookie,

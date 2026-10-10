@@ -53,6 +53,8 @@ pub use axum;
 #[cfg(feature = "server")]
 /// Re-export of `axum-extra` for typed header support.
 pub use axum_extra;
+/// Cookie encoding shared by generated HTTP clients and servers.
+pub use cookie;
 /// Re-export of `futures-util` for generated stream code.
 pub use futures_util;
 #[cfg(feature = "client")]

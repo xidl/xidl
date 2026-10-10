@@ -83,11 +83,10 @@ where
         let Ok(cookie_str) = header_value.to_str() else {
             continue;
         };
-        let pair = cookie_str.split(';').next().unwrap_or("");
-        if let Some((name, value)) = pair.split_once('=') {
-            map.entry(name.trim().to_string())
+        if let Ok(cookie) = cookie::Cookie::parse_encoded(cookie_str) {
+            map.entry(cookie.name().to_string())
                 .or_default()
-                .push(value.trim().to_string());
+                .push(cookie.value().to_string());
         }
     }
     map

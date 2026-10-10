@@ -42,10 +42,18 @@ impl HttpException {
                 } else {
                     body.push(HttpExceptionField {
                         field,
+                        wire_name,
+                        optional: member.is_optional(),
                         ty: member.ty.clone(),
                     });
                 }
             }
+        }
+        if status == 304 && !body.is_empty() {
+            return Err(ParseError::Message(format!(
+                "exception '{}': HTTP 304 cannot carry body members",
+                except.ident
+            )));
         }
         Ok(Self {
             module_path: module_path.to_vec(),
@@ -90,9 +98,9 @@ impl HttpException {
                 "exception '{ident}': @http status '{raw}' is not an integer {HINT}"
             ))
         })?;
-        if !(100..=599).contains(&status) {
+        if !(300..=599).contains(&status) {
             return Err(ParseError::Message(format!(
-                "exception '{ident}': @http status {status} is outside 100..=599"
+                "exception '{ident}': @http status {status} must be in 300..=599; success responses belong to the return type"
             )));
         }
         Ok(status)
@@ -113,10 +121,9 @@ impl HttpException {
         let depth = module_path.len();
         for skip in (0..=depth).rev() {
             let scope = &module_path[..skip];
-            if scope.ends_with(prefix)
-                && let Some(found) = exceptions
-                    .iter()
-                    .find(|e| &e.ident == ident && e.module_path.as_slice() == scope)
+            if let Some(found) = exceptions
+                .iter()
+                .find(|e| &e.ident == ident && e.module_path.iter().eq(scope.iter().chain(prefix)))
             {
                 return Some(found);
             }

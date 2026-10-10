@@ -36,6 +36,7 @@ stream = [
 workspace = true
 
 [dependencies]
+cookie = { version = "0.18.2", features = ["percent-encode"] }
 http.workspace = true
 bytes.workspace = true
 serde.workspace = true

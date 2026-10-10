@@ -12,6 +12,7 @@ import type * as types from "./http_query_template";
 
 import type * as ifaceTypes from "./http_query_template.iface";
 import * as ifaceSchemas from "./http_query_template.iface.zod";
+import { z } from "zod";
 import { deserialize } from "xidl-typescript-codec";
 import {
     appendCookie,

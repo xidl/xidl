@@ -47,13 +47,13 @@ export const {{ service_name }}Operations = {
                     {% for ex in method.raises %}
                         if (error instanceof {{ ex.ident }}) {
                             const headers = new Headers();
-                            {% for member in ex.headers %}if (error.{{ member.field }} !== undefined) headers.set("{{ member.wire_name }}", String(error.{{ member.field }}));
-                            {% endfor %}{% for member in ex.cookies %}if (error.{{ member.field }} !== undefined) headers.append("Set-Cookie", String(error.{{ member.field }}));
-                            {% endfor %}{% if ex.has_body %}headers.set("Content-Type", "application/json");
+                            writeResponseBindings(headers, { ...error }, [{% for member in ex.headers %}{ wireName: "{{ member.wire_name }}", key: "{{ member.field }}", multi: {{ member.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], false);
+                            writeResponseBindings(headers, { ...error }, [{% for member in ex.cookies %}{ wireName: "{{ member.wire_name }}", key: "{{ member.field }}", multi: {{ member.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], true);
+                            {% if ex.has_body %}headers.set("Content-Type", "application/json");
                             return {
                                 status: {{ ex.status }},
                                 headers,
-                                body: { {% for field in ex.body %}"{{ field.field }}": error.{{ field.field }}, {% endfor %}},
+                                body: { {% for field in ex.body %}"{{ field.wire_name }}": error.{{ field.field }}, {% endfor %}},
                             };
                             {% else %}return { status: {{ ex.status }}, headers };
                         {% endif %}
