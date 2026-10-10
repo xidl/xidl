@@ -11,7 +11,7 @@ fn lower(source: &str) -> ParserResult<Specification> {
 }
 
 #[test]
-fn loads_one_builtin_for_nested_unions_and_resolves_qualified_cases() {
+fn builtin_stays_out_of_user_models_and_survives_hir_round_trip() {
     let spec = lower(
         r#"
         module api {
@@ -34,8 +34,11 @@ fn loads_one_builtin_for_nested_unions_and_resolves_qualified_cases() {
             _ => None,
         })
         .collect::<Vec<_>>();
-    assert_eq!(enums.len(), 1);
-    assert_eq!(enums[0].ident, "ContentType");
+    assert!(
+        enums.is_empty(),
+        "compiler declarations are not generated models"
+    );
+    assert_eq!(spec.0.len(), 1, "only the user module is retained");
     let serialized = serde_json::to_string(&spec).expect("serialize HIR");
     let restored: Specification = serde_json::from_str(&serialized).expect("restore HIR");
     let document = crate::rest_hir::project(&restored).expect("project restored HIR");
@@ -51,6 +54,107 @@ fn loads_one_builtin_for_nested_unions_and_resolves_qualified_cases() {
         ["application/json", "application/octet-stream", "text/plain"]
     );
     assert_eq!(serde_json::to_string(&document.spec).unwrap(), serialized);
+}
+
+#[test]
+fn rejects_runtime_references_to_compile_time_builtins() {
+    for declaration in [
+        "struct Meta { ::ContentType media; };",
+        "struct Meta { sequence<ContentType> media; };",
+        "struct Meta { map<string, ContentType> media; };",
+        "struct Meta { optional<ContentType> media; };",
+        "struct Meta { string media[ContentType::Json]; };",
+        "struct Meta { string<ContentType::Json> media; };",
+        "struct Meta : ContentType { string value; };",
+        "typedef ContentType Media;",
+        "const ContentType media = ContentType::Json;",
+        "const long media = ContentType::Json;",
+        "exception Failure { ContentType media; };",
+        "interface Api { ContentType read(); };",
+        "interface Api { void write(in ContentType media); };",
+        "interface Api { readonly attribute ContentType media; };",
+        "interface Api { attribute ContentType media; };",
+        "interface Api { void read() raises(ContentType); };",
+        "interface Api { typedef ContentType Media; };",
+        "interface Api { exception Failure { ContentType media; }; };",
+        "union Ordinary switch(ContentType) { case Json: string value; };",
+        "union Ordinary switch(long) { case ContentType::Json: string value; };",
+        "@http union Other switch(ContentType) { case Json: ContentType value; };",
+    ] {
+        let source = format!(
+            "@http union Payload switch(ContentType) {{ case Json: string value; }}; {declaration}"
+        );
+        let error = lower(&source).expect_err("builtin has no runtime representation");
+        assert!(
+            error.to_string().contains("compile-time only"),
+            "{declaration}: {error}"
+        );
+    }
+}
+
+#[test]
+fn runtime_types_can_shadow_the_builtin_in_modules_and_interfaces() {
+    let spec = lower(
+        r#"
+        @http union Payload switch(ContentType) { case Json: string value; };
+        module models {
+            enum ContentType { Custom, };
+            struct Meta { ContentType media; };
+            typedef ContentType Media;
+            const ContentType media = ContentType::Custom;
+            union Ordinary switch(ContentType) { case Custom: string value; };
+        };
+        interface Api {
+            enum ContentType { Local, };
+            ContentType read(in ContentType value);
+            attribute ContentType media;
+        };
+        "#,
+    )
+    .expect("user runtime types keep their lexical bindings");
+    assert_eq!(spec.0.len(), 3);
+    crate::rest_hir::project(&spec).expect("projection retains the same lexical bindings");
+}
+
+#[test]
+fn interface_expansion_preserves_source_scope_validation() {
+    let source = r#"
+        @http union Payload switch(ContentType) { case Json: string value; };
+        interface Api {
+            enum ContentType { Custom, };
+            ContentType read(in ContentType value);
+            attribute ContentType media;
+        };
+    "#;
+    let typed = crate::parser::parser_text(source).expect("valid source");
+    Specification::from_typed_ast_with_path(typed, "interface-local.idl")
+        .expect("source scope is checked before generated wrappers are added");
+    for expand in [false, true] {
+        Specification::project_typed_ast_with_properties_and_path(
+            crate::parser::parser_text(source).expect("valid source"),
+            HashMap::from([
+                ("hir_kind".to_string(), "http".into()),
+                ("expand_interface".to_string(), expand.into()),
+            ]),
+            "interface-local.idl",
+        )
+        .expect(
+            "projection collects representations without rechecking generated wrappers as source",
+        );
+    }
+}
+
+#[test]
+fn rejects_http_unions_inside_interfaces_before_transport_projection() {
+    let error = lower(
+        "interface Api { @http union Payload switch(ContentType) { case Text: string value; }; Payload read(); };"
+    ).expect_err("interface-local models are not supported by HTTP generators");
+    assert!(
+        error
+            .to_string()
+            .contains("declare it at module or root scope"),
+        "{error}"
+    );
 }
 
 #[test]

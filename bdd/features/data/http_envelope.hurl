@@ -1,3 +1,10 @@
+GET {{base_url}}/secondary
+Accept: text/plain
+HTTP 200
+Content-Type: text/plain
+[Asserts]
+body == "second-idl"
+
 GET {{base_url}}/file?key=meta
 Accept: application/json
 HTTP 200

@@ -13,40 +13,37 @@ use types::TypeDeclarations;
 impl HttpUnion {
     /// Collects `@http` unions with their content-negotiated cases resolved.
     pub(crate) fn collect(definitions: &[hir::Definition]) -> ParserResult<Vec<HttpUnion>> {
-        let types = TypeDeclarations::collect(definitions);
-        let mut out = Vec::new();
-        fn walk(
-            definitions: &[hir::Definition],
-            module_path: &[String],
-            types: &TypeDeclarations<'_>,
-            out: &mut Vec<HttpUnion>,
-        ) -> ParserResult<()> {
-            for def in definitions {
-                match def {
-                    hir::Definition::ModuleDcl(module) => {
-                        let mut next = module_path.to_vec();
-                        next.push(module.ident.clone());
-                        walk(&module.definition, &next, types, out)?;
-                    }
-                    hir::Definition::TypeDcl(hir::TypeDcl::ConstrTypeDcl(
-                        hir::ConstrTypeDcl::UnionDef(union),
-                    ))
-                    | hir::Definition::ConstrTypeDcl(hir::ConstrTypeDcl::UnionDef(union)) => {
-                        if has_annotation(&union.annotations, "http") {
-                            out.push(HttpUnion {
-                                module_path: module_path.to_vec(),
-                                ident: union.ident.clone(),
-                                cases: HttpUnion::cases(union, module_path, types)?,
-                            });
-                        }
-                    }
-                    _ => {}
-                }
-            }
-            Ok(())
+        Self::analyze(definitions, false)
+    }
+
+    /// Checks user declarations before generated RPC wrappers change their scopes.
+    pub(crate) fn validate_source(definitions: &[hir::Definition]) -> ParserResult<()> {
+        Self::analyze(definitions, true).map(|_| ())
+    }
+
+    fn analyze(
+        definitions: &[hir::Definition],
+        validate_source: bool,
+    ) -> ParserResult<Vec<HttpUnion>> {
+        let mut types = TypeDeclarations::collect(definitions);
+        if types.http_unions().next().is_none() {
+            return Ok(Vec::new());
         }
-        walk(definitions, &[], &types, &mut out)?;
-        Ok(out)
+        let builtins = hir::builtin::HttpBuiltins::load()?;
+        types.add_builtins(&builtins)?;
+        if validate_source {
+            types.validate_runtime_references(definitions, &[])?;
+        }
+        types
+            .http_unions()
+            .map(|(module_path, union)| {
+                Ok(HttpUnion {
+                    module_path: module_path.to_vec(),
+                    ident: union.ident.clone(),
+                    cases: Self::cases(union, module_path, &types)?,
+                })
+            })
+            .collect()
     }
 
     fn cases(

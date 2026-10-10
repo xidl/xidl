@@ -69,6 +69,13 @@ same operation's success response.
 With an `@http union` present, root-level `ContentType` is reserved. If a local
 declaration shadows it, use `switch (::ContentType)` to refer to the built-in
 one. Qualified case labels such as `::ContentType::Json` are also supported.
+
+This built-in is a compile-time discriminator, not a runtime model. It is only
+available in HTTP union switches and their case labels; it cannot be used as a
+field, parameter, return value, or type alias. Generated code uses the payload
+variants and resolved media types directly. Multiple IDL files can each declare
+HTTP unions without generating duplicate `ContentType` types or requiring a
+shared runtime enum.
 Ordinary unions without `@http` retain their existing discriminator and
 `default` rules. HTTP representation generation is supported by Rust Axum,
 TypeScript REST, and OpenAPI; it is not currently supported by Go REST.

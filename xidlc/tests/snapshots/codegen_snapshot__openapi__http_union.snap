@@ -8,14 +8,6 @@ openapi_http_union.json
 {
   "components": {
     "schemas": {
-      "ContentType": {
-        "enum": [
-          "application/json",
-          "application/octet-stream",
-          "text/plain"
-        ],
-        "type": "string"
-      },
       "Error": {
         "properties": {
           "code": {

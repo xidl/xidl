@@ -48,6 +48,7 @@ def release_reserved_test_port(context):
 @given('a REST IDL file "{idl_file}"')
 def step_impl(context, idl_file):
     context.idl_file = os.path.abspath(idl_file)
+    context.idl_files = [context.idl_file]
     context.protocol = "rest"
     base_temp = os.path.join(os.getcwd(), "bdd", ".temp")
     os.makedirs(base_temp, exist_ok=True)
@@ -57,9 +58,16 @@ def step_impl(context, idl_file):
     context.port, context.port_guard = reserve_test_port()
 
 
+@given('another REST IDL file "{idl_file}"')
+def step_impl(context, idl_file):
+    assert context.protocol == "rest"
+    context.idl_files.append(os.path.abspath(idl_file))
+
+
 @given('a JSON-RPC IDL file "{idl_file}"')
 def step_impl(context, idl_file):
     context.idl_file = os.path.abspath(idl_file)
+    context.idl_files = [context.idl_file]
     context.protocol = "jsonrpc"
     base_temp = os.path.join(os.getcwd(), "bdd", ".temp")
     os.makedirs(base_temp, exist_ok=True)
@@ -100,7 +108,7 @@ def step_impl(context, lang):
         cmd_lang,
     ]
     cmd.extend(["--client", "--server"])
-    cmd.append(context.idl_file)
+    cmd.extend(context.idl_files)
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=os.getcwd())
     if result.returncode != 0:
         print(f"Gen stdout: {result.stdout}")

@@ -55,16 +55,39 @@ impl Specification {
         expand_interfaces: bool,
     ) -> crate::error::ParserResult<Self> {
         let mut definitions = Vec::new();
-        collect_defs_with_context(
-            value.0,
-            &mut Vec::new(),
-            expand_interfaces,
-            &mut definitions,
-        )?;
+        collect_defs(value.0, &mut definitions);
         let mut spec = Self(definitions);
-        super::builtin::HttpBuiltins::load(&mut spec)?;
+        // All source targets share HTTP declaration validation; builtins belong
+        // to its temporary type environment, not the generated user models.
+        rest_hir::HttpUnion::validate_source(&spec.0)?;
+        // Validate lexical source scopes before adding RPC wrapper declarations
+        // at their generated scopes.
+        if expand_interfaces {
+            Self::expand_interfaces(&mut spec.0, &mut Vec::new())?;
+        }
         semantic::analyze(&mut spec);
         Ok(spec)
+    }
+
+    fn expand_interfaces(
+        definitions: &mut Vec<Definition>,
+        modules: &mut Vec<String>,
+    ) -> crate::error::ParserResult<()> {
+        for mut definition in std::mem::take(definitions) {
+            match &mut definition {
+                Definition::ModuleDcl(module) => {
+                    modules.push(module.ident.clone());
+                    Self::expand_interfaces(&mut module.definition, modules)?;
+                    modules.pop();
+                }
+                Definition::InterfaceDcl(interface) => {
+                    definitions.extend(interface_codegen::expand_interface(interface, modules)?);
+                }
+                _ => {}
+            }
+            definitions.push(definition);
+        }
+        Ok(())
     }
 }
 
@@ -75,26 +98,14 @@ pub(crate) fn spec_from_typed_ast(
     Specification::lower(value, expand_interfaces).expect("HIR conversion should not fail")
 }
 
-pub(super) fn collect_defs_with_context(
-    defs: Vec<crate::typed_ast::Definition>,
-    modules: &mut Vec<String>,
-    expand_interfaces: bool,
-    out: &mut Vec<Definition>,
-) -> crate::error::ParserResult<()> {
+pub(super) fn collect_defs(defs: Vec<crate::typed_ast::Definition>, out: &mut Vec<Definition>) {
     for def in defs {
         match def {
             crate::typed_ast::Definition::ModuleDcl(module) => {
                 let ident = module.ident.0;
                 let annotations = expand_annotations(module.annotations);
-                modules.push(ident.clone());
                 let mut inner = Vec::new();
-                collect_defs_with_context(
-                    module.definition,
-                    modules,
-                    expand_interfaces,
-                    &mut inner,
-                )?;
-                modules.pop();
+                collect_defs(module.definition, &mut inner);
                 out.push(Definition::ModuleDcl(ModuleDcl {
                     annotations,
                     ident,
@@ -116,13 +127,7 @@ pub(super) fn collect_defs_with_context(
                 out.push(Definition::ExceptDcl(value.into()))
             }
             crate::typed_ast::Definition::InterfaceDcl(value) => {
-                let interface = InterfaceDcl::from(value);
-                if expand_interfaces {
-                    let generated = interface_codegen::expand_interface(&interface, modules)
-                        .unwrap_or_else(|err| panic!("interface expansion failed: {err}"));
-                    out.extend(generated);
-                }
-                out.push(Definition::InterfaceDcl(interface));
+                out.push(Definition::InterfaceDcl(InterfaceDcl::from(value)));
             }
             crate::typed_ast::Definition::PreprocInclude(_) => {
                 // Includes are now handled at the tree-sitter stage.
@@ -133,8 +138,6 @@ pub(super) fn collect_defs_with_context(
             | crate::typed_ast::Definition::PreprocDefine(_) => {}
         }
     }
-
-    Ok(())
 }
 
 fn expand_interface(properties: &ParserProperties) -> bool {

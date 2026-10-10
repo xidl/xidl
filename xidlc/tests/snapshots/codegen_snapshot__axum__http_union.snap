@@ -28,25 +28,6 @@ pub enum FileResponse {
     Json(FileMeta),
     OctetStream(Vec<u8>),
 }
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    ::serde::Serialize,
-    ::serde::Deserialize,
-    Copy,
-    Eq,
-    Default,
-)]
-pub enum ContentType {
-    #[serde(rename = "application/json")]
-    #[default]
-    Json,
-    #[serde(rename = "application/octet-stream")]
-    OctetStream,
-    #[serde(rename = "text/plain")]
-    Text,
-}
 #[allow(
     non_snake_case,
     unused_attributes,

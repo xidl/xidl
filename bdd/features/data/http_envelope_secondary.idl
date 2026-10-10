@@ -1,0 +1,11 @@
+// A second independent input must not emit a duplicate built-in ContentType.
+@http
+union SecondaryPayload switch(ContentType) {
+    case Text: string text;
+};
+
+@no_security
+interface SecondaryApi {
+    @get(path = "/secondary")
+    SecondaryPayload read_secondary();
+};

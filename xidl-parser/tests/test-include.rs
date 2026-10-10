@@ -149,3 +149,30 @@ fn test_hir_include_cycle_errors() {
     assert!(err.to_string().contains("a.idl"));
     assert!(err.to_string().contains("b.idl"));
 }
+
+#[test]
+fn http_includes_share_compiler_builtins_without_adding_runtime_models() {
+    let root = unique_temp_dir("http-builtins");
+    let main = root.join("main.idl");
+    write_file(&main, "#include \"first.idl\"\n#include \"second.idl\"\n");
+    write_file(
+        &root.join("first.idl"),
+        "@http union First switch(ContentType) { case Json: string value; };",
+    );
+    write_file(
+        &root.join("second.idl"),
+        "@http union Second switch(ContentType) { case Text: string value; };",
+    );
+    let spec = parse_hir(&main).expect("two included HTTP unions");
+    assert_eq!(spec.0.len(), 2, "only user declarations are retained");
+    let projected = xidl_parser::rest_hir::project(&spec).expect("HTTP projection");
+    let media_types = projected
+        .document
+        .http_unions
+        .iter()
+        .flat_map(|union| &union.cases)
+        .map(|case| case.content_type.as_str())
+        .collect::<Vec<_>>();
+    assert_eq!(media_types, ["application/json", "text/plain"]);
+    fs::remove_dir_all(root).expect("remove include fixtures");
+}
