@@ -69,8 +69,8 @@ pub(crate) fn render_attr_operation_from_http(
                 wire_name,
                 path_template_name: String::new(),
                 ty: ty.clone(),
-                in_ty: transport.map_type(&p.ty, TransportDirection::In, env.registry)?,
-                out_ty: transport.map_type(&p.ty, TransportDirection::Out, env.registry)?,
+                in_ty: transport.map_type(&p.ty, TransportDirection::In, env.scope())?,
+                out_ty: transport.map_type(&p.ty, TransportDirection::Out, env.scope())?,
                 source: param_source_code(ParamSource::Body),
                 serde_rename: None,
                 header_is_multi: false,
@@ -84,10 +84,10 @@ pub(crate) fn render_attr_operation_from_http(
                 optional: false,
                 inner_ty: ty.clone(),
                 flatten: false,
-                in_expr: decode_expr(&param_name, &p.ty, env.registry)?,
-                out_expr: encode_expr(&param_name, &p.ty, env.registry)?,
-                field_in_expr: decode_expr(&format!("value.{param_name}"), &p.ty, env.registry)?,
-                field_out_expr: encode_expr(&format!("value.{param_name}"), &p.ty, env.registry)?,
+                in_expr: decode_expr(&param_name, &p.ty, env.scope())?,
+                out_expr: encode_expr(&param_name, &p.ty, env.scope())?,
+                field_in_expr: decode_expr(&format!("value.{param_name}"), &p.ty, env.scope())?,
+                field_out_expr: encode_expr(&format!("value.{param_name}"), &p.ty, env.scope())?,
             };
             request_params.push(request_param.clone());
             body_params.push(request_param);
@@ -101,19 +101,19 @@ pub(crate) fn render_attr_operation_from_http(
         .map(|ty| env.axum_type(ty))
         .unwrap_or_else(|| "()".to_string());
     let ret_in_ty = match &http_op.signature.return_type {
-        Some(ty) => transport.map_type(ty, TransportDirection::In, env.registry)?,
+        Some(ty) => transport.map_type(ty, TransportDirection::In, env.scope())?,
         None => "()".to_string(),
     };
     let ret_out_ty = match &http_op.signature.return_type {
-        Some(ty) => transport.map_type(ty, TransportDirection::Out, env.registry)?,
+        Some(ty) => transport.map_type(ty, TransportDirection::Out, env.scope())?,
         None => "()".to_string(),
     };
     let ret_in_expr = match &http_op.signature.return_type {
-        Some(ty) => decode_expr("body", ty, env.registry)?,
+        Some(ty) => decode_expr("body", ty, env.scope())?,
         None => "()".to_string(),
     };
     let ret_out_expr = match &http_op.signature.return_type {
-        Some(ty) => encode_expr("resp_value", ty, env.registry)?,
+        Some(ty) => encode_expr("resp_value", ty, env.scope())?,
         None => "()".to_string(),
     };
     let return_is_unit = http_op.signature.return_type.is_none();

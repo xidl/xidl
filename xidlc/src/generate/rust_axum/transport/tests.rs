@@ -56,7 +56,7 @@ fn render_modules_returns_structured_transport_context() {
                 is_root: false,
             }),
             TransportDirection::In,
-            &registry,
+            super::super::scope::TypeScope::new(&registry, &["demo".to_string()]),
         )
         .expect("track widget type");
 

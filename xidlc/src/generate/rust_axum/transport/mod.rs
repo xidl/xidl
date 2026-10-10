@@ -9,14 +9,12 @@ pub use model::{
 
 pub(crate) use convert::{decode_expr, encode_expr};
 
+use super::scope::TypeScope;
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::rust::util::{
     array_type, declarator_dims, declarator_name, rust_ident, serde_rename_from_annotations,
 };
-use names::{
-    canonical_name, public_path_from_canonical, render_public_scoped, scoped_key, transport_ident,
-    transport_module,
-};
+use names::{canonical_name, transport_ident, transport_module};
 use std::collections::{BTreeSet, HashMap};
 use xidl_parser::hir;
 
@@ -37,14 +35,14 @@ impl TransportTracker {
         }
     }
 
-    pub fn map_type(
+    pub(crate) fn map_type(
         &mut self,
         ty: &hir::TypeSpec,
         direction: TransportDirection,
-        registry: &TypeRegistry,
+        scope: TypeScope<'_>,
     ) -> IdlcResult<String> {
         let module_name = self.module_name(direction).to_string();
-        map_type_inner(ty, direction, &module_name, registry, Some(self))
+        map_type_inner(ty, direction, &module_name, scope, Some(self))
     }
 
     pub fn render_modules(
@@ -86,6 +84,10 @@ pub fn build_type_registry(defs: &[&hir::Definition], module_path: &[String]) ->
 
 fn collect_registry(defs: &[&hir::Definition], module_path: &[String], out: &mut TypeRegistry) {
     for def in defs {
+        for ident in super::get_def_idents(def) {
+            out.entry(canonical_name(module_path, &ident))
+                .or_insert(TransportTypeDef::Public);
+        }
         match def {
             hir::Definition::ModuleDcl(module) => {
                 let mut next = module_path.to_vec();
@@ -94,6 +96,9 @@ fn collect_registry(defs: &[&hir::Definition], module_path: &[String], out: &mut
                 collect_registry(&nested, &next, out);
             }
             hir::Definition::TypeDcl(ty) => collect_type_decl(ty, module_path, out),
+            hir::Definition::ConstrTypeDcl(c) => {
+                collect_type_decl(&hir::TypeDcl::ConstrTypeDcl(c.clone()), module_path, out)
+            }
             _ => {}
         }
     }
@@ -150,7 +155,7 @@ fn render_module(
                 module_path,
             )?),
             TransportTypeDef::Enum(def) => items.push(render_enum(name, def, module_path)),
-            TransportTypeDef::Typedef(_) => {}
+            TransportTypeDef::Typedef(_) | TransportTypeDef::Public => {}
         }
     }
     Ok(TransportModuleContext {
@@ -167,15 +172,27 @@ fn render_struct(
     registry: &TypeRegistry,
     module_path: &[String],
 ) -> IdlcResult<TransportItemContext> {
+    let mut output = module_path.to_vec();
+    output.push(module_name.to_string());
+    let mut declaration = canonical
+        .split("::")
+        .map(str::to_string)
+        .collect::<Vec<_>>();
+    declaration.pop();
+    let scope = TypeScope {
+        registry,
+        declaration: &declaration,
+        output: &output,
+    };
     let mut fields = Vec::new();
     for member in &def.member {
         let rename = serde_rename_from_annotations(&member.annotations);
         for decl in &member.ident {
             let name = rust_ident(&declarator_name(decl));
-            let ty = member_ty(member, decl, direction, module_name, registry)?;
+            let ty = member_ty(member, decl, direction, module_name, scope)?;
             let (enc, dec) = if member.is_optional() {
-                let e = encode_expr("value", &member.ty, registry)?;
-                let d = decode_expr("value", &member.ty, registry)?;
+                let e = encode_expr("value", &member.ty, scope)?;
+                let d = decode_expr("value", &member.ty, scope)?;
                 let enc = if e == "value" {
                     format!("value.{name}")
                 } else {
@@ -189,8 +206,8 @@ fn render_struct(
                 (enc, dec)
             } else {
                 (
-                    encode_expr(&format!("value.{name}"), &member.ty, registry)?,
-                    decode_expr(&format!("value.{name}"), &member.ty, registry)?,
+                    encode_expr(&format!("value.{name}"), &member.ty, scope)?,
+                    decode_expr(&format!("value.{name}"), &member.ty, scope)?,
                 )
             };
             fields.push(TransportFieldContext {
@@ -206,7 +223,7 @@ fn render_struct(
     Ok(TransportItemContext {
         kind: "struct".to_string(),
         transport_ident: transport_ident(canonical),
-        public_path: public_path_from_canonical(canonical, module_path),
+        public_path: TypeScope::relative_path(scope.output, canonical),
         fields,
         variants: Vec::new(),
     })
@@ -220,7 +237,10 @@ fn render_enum(
     TransportItemContext {
         kind: "enum".to_string(),
         transport_ident: transport_ident(canonical),
-        public_path: public_path_from_canonical(canonical, module_path),
+        public_path: format!(
+            "super::{}",
+            TypeScope::relative_path(module_path, canonical)
+        ),
         fields: Vec::new(),
         variants: def
             .member
@@ -238,9 +258,9 @@ fn member_ty(
     decl: &hir::Declarator,
     direction: TransportDirection,
     module_name: &str,
-    registry: &TypeRegistry,
+    scope: TypeScope<'_>,
 ) -> IdlcResult<String> {
-    let mut base = map_type_inner(&member.ty, direction, module_name, registry, None)?;
+    let mut base = map_type_inner(&member.ty, direction, module_name, scope, None)?;
     if member.is_optional() {
         base = format!("Option<{base}>");
     }
@@ -256,7 +276,7 @@ fn map_type_inner(
     ty: &hir::TypeSpec,
     direction: TransportDirection,
     module_name: &str,
-    registry: &TypeRegistry,
+    scope: TypeScope<'_>,
     tracker: Option<&mut TransportTracker>,
 ) -> IdlcResult<String> {
     Ok(match ty {
@@ -272,11 +292,11 @@ fn map_type_inner(
         hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => "String".to_string(),
         hir::TypeSpec::SequenceType(seq) => format!(
             "Vec<{}>",
-            map_type_inner(&seq.ty, direction, module_name, registry, tracker)?
+            map_type_inner(&seq.ty, direction, module_name, scope, tracker)?
         ),
         hir::TypeSpec::MapType(map) => {
-            let key_ty = map_type_inner(&map.key, direction, module_name, registry, None)?;
-            let value_ty = map_type_inner(&map.value, direction, module_name, registry, tracker)?;
+            let key_ty = map_type_inner(&map.key, direction, module_name, scope, None)?;
+            let value_ty = map_type_inner(&map.value, direction, module_name, scope, tracker)?;
             format!("::std::collections::BTreeMap<{key_ty}, {value_ty}>")
         }
         hir::TypeSpec::TemplateType(value) => format!(
@@ -285,12 +305,12 @@ fn map_type_inner(
             value
                 .args
                 .iter()
-                .map(|arg| map_type_inner(arg, direction, module_name, registry, None))
+                .map(|arg| map_type_inner(arg, direction, module_name, scope, None))
                 .collect::<Result<Vec<_>, _>>()?
                 .join(", "),
         ),
         hir::TypeSpec::ScopedName(value) => {
-            map_scoped(value, direction, module_name, registry, tracker)?
+            map_scoped(value, direction, module_name, scope, tracker)?
         }
     })
 }
@@ -299,45 +319,45 @@ fn map_scoped(
     value: &hir::ScopedName,
     direction: TransportDirection,
     module_name: &str,
-    registry: &TypeRegistry,
+    scope: TypeScope<'_>,
     tracker: Option<&mut TransportTracker>,
 ) -> IdlcResult<String> {
-    let raw = scoped_key(value);
-    let canonical = resolve_transport_key(&raw, registry);
+    let canonical = scope.resolve(value);
     let Some(key) = canonical else {
-        return Ok(render_public_scoped(value));
+        return Ok(scope.render(value));
     };
-    match registry.get(key.as_str()) {
+    match scope.registry.get(key.as_str()) {
         Some(TransportTypeDef::Struct(_)) | Some(TransportTypeDef::Enum(_)) => {
             if let Some(tracker) = tracker {
-                track_type(key.as_str(), direction, module_name, registry, tracker)?;
+                track_type(key.as_str(), direction, module_name, scope, tracker)?;
             }
             Ok(format!("{module_name}::{}", transport_ident(key.as_str())))
         }
         Some(TransportTypeDef::Typedef(def)) => match &def.ty {
             hir::TypedefType::TypeSpec(ty) => {
-                map_type_inner(ty, direction, module_name, registry, tracker)
+                let mut parent = key.split("::").map(str::to_string).collect::<Vec<_>>();
+                parent.pop();
+                map_type_inner(
+                    ty,
+                    direction,
+                    module_name,
+                    scope.in_declaration(&parent),
+                    tracker,
+                )
             }
             hir::TypedefType::ConstrTypeDcl(_) => Err(IdlcError::rpc(format!(
                 "unsupported inline typedef transport for '{key}'"
             ))),
         },
-        None => Ok(render_public_scoped(value)),
+        Some(TransportTypeDef::Public) | None => Ok(scope.render(value)),
     }
-}
-
-fn resolve_transport_key(raw: &str, registry: &TypeRegistry) -> Option<String> {
-    if registry.contains_key(raw) {
-        return Some(raw.to_string());
-    }
-    crate::generate::utils::scope::find_unambiguous_suffix_match(raw, registry.keys())
 }
 
 fn track_type(
     name: &str,
     direction: TransportDirection,
     module_name: &str,
-    registry: &TypeRegistry,
+    scope: TypeScope<'_>,
     tracker: &mut TransportTracker,
 ) -> IdlcResult<()> {
     let inserted = match direction {
@@ -347,9 +367,12 @@ fn track_type(
     if !inserted {
         return Ok(());
     }
-    if let Some(TransportTypeDef::Struct(def)) = registry.get(name) {
+    if let Some(TransportTypeDef::Struct(def)) = scope.registry.get(name) {
+        let mut parent = name.split("::").map(str::to_string).collect::<Vec<_>>();
+        parent.pop();
+        let scope = scope.in_declaration(&parent);
         for member in &def.member {
-            map_type_inner(&member.ty, direction, module_name, registry, Some(tracker))?;
+            map_type_inner(&member.ty, direction, module_name, scope, Some(tracker))?;
         }
     }
     Ok(())

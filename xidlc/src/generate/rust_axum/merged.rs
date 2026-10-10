@@ -44,7 +44,7 @@ impl<'a> MergedAxumSpecBuilder<'a> {
         let mut out = Vec::new();
         for &def in defs {
             if self.is_type_def(def) && self.is_reachable_type(def, module_path) {
-                out.extend(self.render_type(def)?.source);
+                out.extend(self.render_type(def, module_path)?.source);
             }
         }
         for &def in defs {
@@ -129,7 +129,13 @@ impl<'a> MergedAxumSpecBuilder<'a> {
         }
     }
 
-    fn render_type(&self, def: &hir::Definition) -> IdlcResult<RustAxumRenderOutput> {
+    fn render_type(
+        &self,
+        def: &hir::Definition,
+        module_path: &[String],
+    ) -> IdlcResult<RustAxumRenderOutput> {
+        let mut def = def.clone();
+        super::scope::TypeScope::new(&self.registry, module_path).lower_definition(&mut def);
         let output = def.render(&self.rust_renderer)?;
         Ok(RustAxumRenderOutput {
             source: output.source,

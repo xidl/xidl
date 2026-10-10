@@ -5,14 +5,18 @@ pub fn rust_scoped_name(value: &hir::ScopedName) -> String {
     let mut iter = value.name.iter();
     let mut parts = Vec::new();
     if let Some(first) = iter.next() {
-        if !value.is_root && first == "crate" {
-            parts.push("crate".to_string());
+        if !value.is_root && matches!(first.as_str(), "crate" | "super" | "self") {
+            parts.push(first.clone());
         } else {
             parts.push(rust_ident(first));
         }
     }
     for part in iter {
-        parts.push(rust_ident(part));
+        parts.push(if part == "super" {
+            part.clone()
+        } else {
+            rust_ident(part)
+        });
     }
     let mut name = parts.join("::");
     if value.is_root {

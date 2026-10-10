@@ -294,16 +294,16 @@ fn build_param_context(
         inner_ty: input.inner_ty.to_string(),
         flatten: input.flatten,
         in_expr: map_expr(input.name, input.optional, |e| {
-            decode_expr(e, &input.sig_param.ty, env.registry)
+            decode_expr(e, &input.sig_param.ty, env.scope())
         })?,
         out_expr: map_expr(input.name, input.optional, |e| {
-            encode_expr(e, &input.sig_param.ty, env.registry)
+            encode_expr(e, &input.sig_param.ty, env.scope())
         })?,
         field_in_expr: map_expr(&format!("value.{}", input.name), input.optional, |e| {
-            decode_expr(e, &input.sig_param.ty, env.registry)
+            decode_expr(e, &input.sig_param.ty, env.scope())
         })?,
         field_out_expr: map_expr(&format!("value.{}", input.name), input.optional, |e| {
-            encode_expr(e, &input.sig_param.ty, env.registry)
+            encode_expr(e, &input.sig_param.ty, env.scope())
         })?,
     })
 }

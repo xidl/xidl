@@ -1,0 +1,58 @@
+#pragma xidlc package scoped_types
+#pragma xidlc version v1
+
+struct Root {
+    int64 id;
+};
+
+module right {
+    struct Item {
+        string label;
+    };
+};
+
+module errors {
+    enum Hint { Busy, };
+    @http(429)
+    exception Failure {
+        @header @rename("X-Hint") Hint hint;
+    };
+};
+
+module choices {
+    enum Kind { Text, Number, };
+    const Kind TEXT = Kind::Text;
+};
+
+module left {
+    struct Item {
+        string name;
+    };
+    typedef sequence<Item> Batch;
+    struct Envelope {
+        Batch items;
+        ::Root root;
+    };
+    union Choice switch (::choices::Kind) {
+        case ::choices::TEXT: string text;
+        case ::choices::Kind::Number: int64 number;
+    };
+    module nested {
+        struct Item {
+            int64 value;
+        };
+        @no_security
+        interface Scoped {
+            @post(path = "/scoped/exchange")
+            right::Item exchange(@flatten left::Envelope payload);
+            @post(path = "/scoped/local")
+            Item local(@flatten Item payload);
+            @post(path = "/scoped/root")
+            ::Root root(@flatten ::Root payload);
+            @get(path = "/scoped/failure")
+            void failure() raises(errors::Failure);
+            @post(path = "/scoped/choice")
+            left::Choice choice(@flatten left::Choice payload);
+        };
+    };
+};

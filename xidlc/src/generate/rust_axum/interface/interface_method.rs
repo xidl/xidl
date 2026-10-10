@@ -70,13 +70,13 @@ pub(crate) fn render_op_from_http(
     let ret_in_ty = match &op.ty {
         hir::OpTypeSpec::Void => "()".to_string(),
         hir::OpTypeSpec::TypeSpec(ty) => {
-            transport.map_type(ty, TransportDirection::In, env.registry)?
+            transport.map_type(ty, TransportDirection::In, env.scope())?
         }
     };
     let ret_out_ty = match &op.ty {
         hir::OpTypeSpec::Void => "()".to_string(),
         hir::OpTypeSpec::TypeSpec(ty) => {
-            transport.map_type(ty, TransportDirection::Out, env.registry)?
+            transport.map_type(ty, TransportDirection::Out, env.scope())?
         }
     };
     let ret_in_expr = op_decode_expr(&op.ty, env)?;

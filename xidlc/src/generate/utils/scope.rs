@@ -24,23 +24,3 @@ pub fn resolve_canonical(
         .into_iter()
         .find(|candidate| exists(candidate.as_str()))
 }
-
-/// Find a single registry key matching a short reference suffix.
-pub fn find_unambiguous_suffix_match<'a>(
-    raw: &str,
-    keys: impl Iterator<Item = &'a String>,
-) -> Option<String> {
-    let suffix = format!("::{raw}");
-    let mut found: Option<String> = None;
-    let mut count = 0;
-    for key in keys {
-        if key.as_str() == raw || key.ends_with(suffix.as_str()) {
-            count += 1;
-            if count > 1 {
-                return None;
-            }
-            found = Some(key.clone());
-        }
-    }
-    found
-}

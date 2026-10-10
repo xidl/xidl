@@ -14,7 +14,7 @@ pub(crate) fn transport_param_type(
     transport: &mut TransportTracker,
     env: RenderEnv<'_>,
 ) -> IdlcResult<String> {
-    let inner = transport.map_type(ty, direction, env.registry)?;
+    let inner = transport.map_type(ty, direction, env.scope())?;
     Ok(if optional {
         format!("Option<{inner}>")
     } else {
@@ -42,14 +42,14 @@ pub(crate) fn op_return_ty(op_ty: &hir::OpTypeSpec, env: RenderEnv<'_>) -> Strin
 pub(crate) fn op_decode_expr(op_ty: &hir::OpTypeSpec, env: RenderEnv<'_>) -> IdlcResult<String> {
     match op_ty {
         hir::OpTypeSpec::Void => Ok("()".to_string()),
-        hir::OpTypeSpec::TypeSpec(ty) => decode_expr("body", ty, env.registry),
+        hir::OpTypeSpec::TypeSpec(ty) => decode_expr("body", ty, env.scope()),
     }
 }
 
 pub(crate) fn op_encode_expr(op_ty: &hir::OpTypeSpec, env: RenderEnv<'_>) -> IdlcResult<String> {
     match op_ty {
         hir::OpTypeSpec::Void => Ok("()".to_string()),
-        hir::OpTypeSpec::TypeSpec(ty) => encode_expr("resp_value", ty, env.registry),
+        hir::OpTypeSpec::TypeSpec(ty) => encode_expr("resp_value", ty, env.scope()),
     }
 }
 
