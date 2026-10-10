@@ -51,6 +51,12 @@ export interface OperationRequestSpec {
   schema?: XidlSchema;
 }
 
+/** One negotiated representation of an `@http` union response. */
+export interface ResponseRepresentation {
+  contentType: string;
+  kind: string;
+}
+
 export interface OperationResponseSpec {
   bodyFields: BodyField[];
   bodyMode: 'none' | 'object' | 'return';
@@ -60,6 +66,8 @@ export interface OperationResponseSpec {
   schema?: XidlSchema;
   stream: boolean;
   streamSchema?: XidlSchema;
+  /** Non-empty for `@http` union responses (content negotiation). */
+  representations?: ResponseRepresentation[];
 }
 
 /**

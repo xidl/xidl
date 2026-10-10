@@ -19,8 +19,57 @@ impl RustRender for hir::UnionForwardDcl {
 
 impl RustRender for hir::UnionDef {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
+        if crate::generate::utils::has_annotation(&self.annotations, "http") {
+            return render_http_union(self, renderer);
+        }
         render_union_with_config(self, renderer, &[])
     }
+}
+
+/// `@http` unions render as a plain untagged enum: HTTP codegen dispatches
+/// per case on the negotiated media type, so no wire-level tag exists.
+fn render_http_union(def: &hir::UnionDef, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
+    let cases = def
+        .case
+        .iter()
+        .map(|case| {
+            let case_ident = match case.label.first() {
+                Some(hir::CaseLabel::Value(hir::ConstExpr::ScopedName(name))) => name
+                    .name
+                    .last()
+                    .cloned()
+                    .unwrap_or_else(|| declarator_name(&case.element.value)),
+                _ => declarator_name(&case.element.value),
+            };
+            let ty = match &case.element.ty {
+                hir::ElementSpecTy::TypeSpec(ty) => type_with_decl(ty, &case.element.value),
+                hir::ElementSpecTy::ConstrTypeDcl(_) => String::new(),
+            };
+            json!({
+                "case": convert_case(&case_ident),
+                "ty": ty,
+                "doc": doc_lines_from_annotations(&case.element.annotations),
+            })
+        })
+        .collect::<Vec<_>>();
+    let ctx = renderer.enrich_ctx(
+        renderer.with_ident(
+            json!({
+                "cases": cases,
+                "rust_attrs": rust_passthrough_attrs_from_annotations(&def.annotations),
+            }),
+            &def.ident,
+        ),
+        &doc_lines_from_annotations(&def.annotations),
+    );
+    renderer.render_source_template("http_union.rs.j2", &ctx)
+}
+
+fn convert_case(ident: &str) -> String {
+    ident
+        .strip_prefix("r#")
+        .unwrap_or(ident)
+        .to_case(ConvertCase::Pascal)
 }
 
 pub(crate) fn render_union_with_config(

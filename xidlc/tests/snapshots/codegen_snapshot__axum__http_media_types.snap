@@ -24,11 +24,11 @@ pub trait HttpMediaService {
     ) -> ::xidl_rust_axum::Result<String>;
     async fn fetch_msgpack(&self, id: String) -> ::xidl_rust_axum::Result<String>;
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_in_HttpMediaService {
     use super::*;
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_out_HttpMediaService {
     use super::*;
 }
@@ -72,12 +72,17 @@ where
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
-                    body,
-                    usize::MAX,
+            let xidl_body_bytes = <::xidl_rust_axum::axum::body::Bytes as ::xidl_rust_axum::axum::extract::FromRequest<
+                S,
+            >>::from_request(
+                    ::xidl_rust_axum::axum::extract::Request::from_parts(parts, body),
+                    state,
                 )
                 .await
-                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                .map_err(|err| ::xidl_rust_axum::Error::new(
+                    err.status().as_u16(),
+                    err.body_text(),
+                ))?;
             let xidl_body: HttpMediaServiceSubmitFormRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/x-www-form-urlencoded",
                 )
@@ -304,11 +309,11 @@ impl HttpMediaServiceClient {
         name: String,
         age: u32,
     ) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/submit_form".to_string();
+        let xidl_path = "/submit_form".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -361,11 +366,11 @@ impl HttpMediaServiceClient {
         &self,
         id: String,
     ) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/fetch_msgpack".to_string();
+        let xidl_path = "/fetch_msgpack".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()

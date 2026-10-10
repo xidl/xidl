@@ -1,0 +1,33 @@
+#pragma xidlc package Demo API
+#pragma xidlc version v1
+
+struct Document {
+    string title;
+};
+
+struct UploadResult {
+    string media_type;
+    uint32 size;
+};
+
+@no_security
+interface BodyShape {
+    @get(path = "/document")
+    Document document(@header @rename("ETag") out string etag);
+
+    @get(path = "/scalar")
+    string scalar(@header @rename("ETag") out string etag,
+        @header @rename("X-Count") out uint32 count, @cookie out boolean cached);
+
+    @post(path = "/rename")
+    Document rename(@flatten Document document, @header @rename("ETag") out string etag);
+
+    @get(path = "/output")
+    void output(out Document document, @header @rename("ETag") out string etag);
+
+    @post(path = "/upload")
+    UploadResult upload(
+        @header @rename("Content-Type") @optional string media_type,
+        in sequence<octet> payload
+    );
+};

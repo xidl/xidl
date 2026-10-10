@@ -7,6 +7,7 @@ use super::schema::{
 };
 use super::security::register_security_schemes;
 use super::stream::{OpenApiStreamPatch, request_stream_content_type, stream_patch_item_schema};
+use crate::error::{IdlcError, IdlcResult};
 use crate::openapi::RefOr;
 use crate::openapi::path::PathItem;
 use crate::openapi::schema::{ObjectBuilder, Schema, Type};
@@ -52,11 +53,11 @@ impl OpenApiContext {
         spec: &hir::Specification,
         module_path: &[String],
         rest_hir: &RestHirDocument,
-    ) -> Self {
+    ) -> IdlcResult<Self> {
         for def in &spec.0 {
-            self.collect_def(def, module_path, rest_hir);
+            self.collect_def(def, module_path, rest_hir)?;
         }
-        self
+        Ok(self)
     }
 
     fn collect_def(
@@ -64,24 +65,25 @@ impl OpenApiContext {
         def: &hir::Definition,
         module_path: &[String],
         rest_hir: &RestHirDocument,
-    ) {
+    ) -> IdlcResult<()> {
         match def {
             hir::Definition::ModuleDcl(module) => {
                 let mut next_path = module_path.to_vec();
                 next_path.push(module.ident.clone());
                 for def in &module.definition {
-                    self.collect_def(def, &next_path, rest_hir);
+                    self.collect_def(def, &next_path, rest_hir)?;
                 }
             }
             hir::Definition::TypeDcl(type_dcl) => self.collect_type_dcl(type_dcl, module_path),
             hir::Definition::ConstrTypeDcl(constr) => self.collect_constr_type(constr, module_path),
             hir::Definition::ExceptDcl(except) => self.collect_exception(except, module_path),
             hir::Definition::InterfaceDcl(interface) => {
-                self.collect_interface(interface, module_path, rest_hir)
+                self.collect_interface(interface, module_path, rest_hir)?
             }
             hir::Definition::Pragma(_) => {}
             _ => {}
         }
+        Ok(())
     }
 
     fn collect_type_dcl(&mut self, type_dcl: &hir::TypeDcl, module_path: &[String]) {
@@ -189,13 +191,13 @@ impl OpenApiContext {
         interface: &hir::InterfaceDcl,
         module_path: &[String],
         rest_hir: &RestHirDocument,
-    ) {
+    ) -> IdlcResult<()> {
         let def = match &interface.decl {
             hir::InterfaceDclInner::InterfaceDef(def) => def,
-            _ => return,
+            _ => return Ok(()),
         };
         let Some(http_interface) = rest_hir.find_interface(module_path, &def.header.ident) else {
-            return;
+            return Ok(());
         };
         self.tags.insert(def.header.ident.clone());
         let mut route_bindings = HashMap::new();
@@ -207,26 +209,32 @@ impl OpenApiContext {
                 &rest_hir.document.exceptions,
             )
         }) {
-            self.collect_method(method, &mut route_bindings);
+            self.collect_method(method, &mut route_bindings)?;
         }
         self.schemas
             .entry("Error".to_string())
             .or_insert_with(build_error_schema);
+        Ok(())
     }
 
-    fn collect_method(&mut self, method: MethodInfo, route_bindings: &mut HashMap<String, String>) {
+    fn collect_method(
+        &mut self,
+        method: MethodInfo,
+        route_bindings: &mut HashMap<String, String>,
+    ) -> IdlcResult<()> {
         if let Some(security_requirements) = &method.security_requirements {
             register_security_schemes(&mut self.security_schemes, security_requirements);
         }
 
         for path in method.paths.clone() {
-            self.register_route_binding(&method, &path, route_bindings);
+            self.register_route_binding(&method, &path, route_bindings)?;
             self.collect_stream_patches(&method, &path);
             self.paths = mem::take(&mut self.paths).path(
                 path,
                 PathItem::new(method.http_method.clone(), build_operation(&method)),
             );
         }
+        Ok(())
     }
 
     fn register_route_binding(
@@ -234,14 +242,17 @@ impl OpenApiContext {
         method: &MethodInfo,
         path: &str,
         route_bindings: &mut HashMap<String, String>,
-    ) {
+    ) -> IdlcResult<()> {
         let key = format!("{} {path}", openapi_method_name(&method.http_method));
         if let Some(previous) = route_bindings.insert(key.clone(), method.operation_id.clone()) {
-            panic!(
-                "duplicate HTTP route binding: {key} (operations: {previous}, {})",
+            return Err(IdlcError::rpc(format!(
+                "duplicate HTTP route binding: {key} (operations: {previous}, {}); \
+                 give each operation a distinct path, or use an @http union for \
+                 content negotiation on one route",
                 method.operation_id
-            );
+            )));
         }
+        Ok(())
     }
 
     fn collect_stream_patches(&mut self, method: &MethodInfo, path: &str) {

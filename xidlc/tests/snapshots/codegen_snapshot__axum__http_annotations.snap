@@ -48,11 +48,11 @@ pub trait HttpAnnoService {
     ) -> ::xidl_rust_axum::Result<HttpAnnoServiceGetCountResponse>;
     async fn ping(&self) -> ::xidl_rust_axum::Result<()>;
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_in_HttpAnnoService {
     use super::*;
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_out_HttpAnnoService {
     use super::*;
 }
@@ -151,12 +151,17 @@ where
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
-                    body,
-                    usize::MAX,
+            let xidl_body_bytes = <::xidl_rust_axum::axum::body::Bytes as ::xidl_rust_axum::axum::extract::FromRequest<
+                S,
+            >>::from_request(
+                    ::xidl_rust_axum::axum::extract::Request::from_parts(parts, body),
+                    state,
                 )
                 .await
-                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                .map_err(|err| ::xidl_rust_axum::Error::new(
+                    err.status().as_u16(),
+                    err.body_text(),
+                ))?;
             let xidl_body: HttpAnnoServiceCreateUserRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
@@ -354,12 +359,17 @@ where
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
-                    body,
-                    usize::MAX,
+            let xidl_body_bytes = <::xidl_rust_axum::axum::body::Bytes as ::xidl_rust_axum::axum::extract::FromRequest<
+                S,
+            >>::from_request(
+                    ::xidl_rust_axum::axum::extract::Request::from_parts(parts, body),
+                    state,
                 )
                 .await
-                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                .map_err(|err| ::xidl_rust_axum::Error::new(
+                    err.status().as_u16(),
+                    err.body_text(),
+                ))?;
             let xidl_body: HttpAnnoServiceAddRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
@@ -429,12 +439,17 @@ where
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
-                    body,
-                    usize::MAX,
+            let xidl_body_bytes = <::xidl_rust_axum::axum::body::Bytes as ::xidl_rust_axum::axum::extract::FromRequest<
+                S,
+            >>::from_request(
+                    ::xidl_rust_axum::axum::extract::Request::from_parts(parts, body),
+                    state,
                 )
                 .await
-                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                .map_err(|err| ::xidl_rust_axum::Error::new(
+                    err.status().as_u16(),
+                    err.body_text(),
+                ))?;
             let xidl_body: HttpAnnoServiceBumpRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "text/plain",
                 )
@@ -1029,12 +1044,12 @@ impl HttpAnnoServiceClient {
         id: u32,
         lang: String,
     ) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/v1/users/{id}".to_string();
-        let path = path.replace("{id}", &id.to_string());
+        let xidl_path = "/v1/users/{id}".to_string();
+        let xidl_path = xidl_path.replace("{id}", &id.to_string());
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -1079,11 +1094,11 @@ impl HttpAnnoServiceClient {
         name: String,
         age: u32,
     ) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/create_user".to_string();
+        let xidl_path = "/create_user".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -1131,11 +1146,11 @@ impl HttpAnnoServiceClient {
     }
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn get_name(&self, name: String) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/get_name".to_string();
+        let xidl_path = "/get_name".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -1180,11 +1195,11 @@ impl HttpAnnoServiceClient {
         keyword: String,
         page: u32,
     ) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/search_user".to_string();
+        let xidl_path = "/search_user".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -1230,12 +1245,12 @@ impl HttpAnnoServiceClient {
         user_id: u32,
         locale: String,
     ) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/get_user_alias/{id}".to_string();
-        let path = path.replace("{id}", &user_id.to_string());
+        let xidl_path = "/get_user_alias/{id}".to_string();
+        let xidl_path = xidl_path.replace("{id}", &user_id.to_string());
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -1280,11 +1295,11 @@ impl HttpAnnoServiceClient {
         a: i32,
         b: i32,
     ) -> Result<HttpAnnoServiceAddResponse, xidl_rust_axum::Error> {
-        let path = "/add".to_string();
+        let xidl_path = "/add".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -1339,11 +1354,11 @@ impl HttpAnnoServiceClient {
         &self,
         value: i32,
     ) -> Result<HttpAnnoServiceBumpResponse, xidl_rust_axum::Error> {
-        let path = "/bump".to_string();
+        let xidl_path = "/bump".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -1391,11 +1406,11 @@ impl HttpAnnoServiceClient {
     pub async fn get_count(
         &self,
     ) -> Result<HttpAnnoServiceGetCountResponse, xidl_rust_axum::Error> {
-        let path = "/get_count".to_string();
+        let xidl_path = "/get_count".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -1430,11 +1445,11 @@ impl HttpAnnoServiceClient {
     }
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn ping(&self) -> Result<(), xidl_rust_axum::Error> {
-        let path = "/ping".to_string();
+        let xidl_path = "/ping".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()

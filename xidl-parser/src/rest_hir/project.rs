@@ -4,7 +4,7 @@ use std::collections::HashSet;
 
 use super::attr::project_attribute;
 use super::mapping;
-use super::model::{HttpException, HttpExceptionRef};
+use super::model::{HttpException, HttpExceptionRef, HttpRepresentation, HttpUnion};
 use super::project_params::project_params;
 use super::route::{
     auto_default_method_path, operation_id, parse_route_template, route_from_annotations,
@@ -26,8 +26,9 @@ use super::{
 
 pub fn project(spec: &hir::Specification) -> ParserResult<RestHirDocument> {
     let mut ctx = ProjectionContext::default();
-    // Exceptions first: `raises(...)` on operations resolves against them.
+    // Exceptions and `@http` unions first: operations resolve against them.
     ctx.collect_exceptions(&spec.0, &[])?;
+    ctx.document.http_unions = HttpUnion::collect(&spec.0)?;
     ctx.collect_spec(spec, &[])?;
     ctx.document.exceptions = ctx.exceptions;
     Ok(RestHirDocument {
@@ -93,9 +94,12 @@ impl ProjectionContext {
             }
             hir::Definition::Pragma(pragma) => self.apply_pragma(pragma),
             hir::Definition::InterfaceDcl(interface) => {
-                if let Some(interface) =
-                    project_interface(interface, module_path, &self.exceptions)?
-                {
+                if let Some(interface) = project_interface(
+                    interface,
+                    module_path,
+                    &self.exceptions,
+                    &self.document.http_unions,
+                )? {
                     self.interfaces.push(interface);
                 }
             }
@@ -140,6 +144,7 @@ fn project_interface(
     interface: &hir::InterfaceDcl,
     module_path: &[String],
     exceptions: &[HttpException],
+    http_unions: &[HttpUnion],
 ) -> ParserResult<Option<HttpInterface>> {
     let hir::InterfaceDclInner::InterfaceDef(def) = &interface.decl else {
         return Ok(None);
@@ -159,6 +164,7 @@ fn project_interface(
                     module_path,
                     &interface.annotations,
                     exceptions,
+                    http_unions,
                     op,
                 )?),
                 hir::Export::AttrDcl(attr) => operations.extend(project_attribute_group(
@@ -219,6 +225,7 @@ fn project_operation(
     module_path: &[String],
     interface_annotations: &[hir::Annotation],
     exceptions: &[HttpException],
+    http_unions: &[HttpUnion],
     op: &hir::OpDcl,
 ) -> ParserResult<HttpOperation> {
     validate_http_annotations(&format!("operation '{}'", op.ident), &op.annotations)
@@ -365,8 +372,7 @@ fn project_operation(
         )));
     }
     let raises = HttpExceptionRef::for_operation(op, module_path, exceptions)?;
-
-    Ok(HttpOperation {
+    let mut operation = HttpOperation {
         meta: HttpOperationMeta {
             name: op.ident.clone(),
             operation_id: operation_id(module_path, interface_name, &op.ident),
@@ -385,5 +391,8 @@ fn project_operation(
         },
         signature,
         http,
-    })
+    };
+    operation.http.response.representations =
+        HttpRepresentation::for_operation(&operation, module_path, http_unions, has_upgrade)?;
+    Ok(operation)
 }

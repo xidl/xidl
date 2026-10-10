@@ -1,7 +1,8 @@
+use super::interface_types::{axum_type, render_scoped_name};
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::rust::util::{rust_ident, rust_passthrough_attrs_from_annotations};
 use crate::generate::rust_axum::interface::{
-    MethodContext, RaisesContext, RenderEnv,
+    MethodContext, RaisesContext, RenderEnv, RepresentationContext,
     interface_http::{
         cors_layer, deprecated_context_from_http, http_method_code, http_method_fn,
         http_method_from_hir, reqwest_method_code, security_context,
@@ -13,6 +14,7 @@ use crate::generate::rust_axum::interface::{
     },
 };
 use crate::generate::rust_axum::transport::{TransportDirection, TransportTracker};
+use convert_case::Casing;
 use xidl_parser::hir;
 use xidl_parser::rest_hir::{
     HttpOperation, HttpRequestBodyShape, HttpResponseBodyShape, HttpStreamPayloadCodec,
@@ -231,14 +233,10 @@ pub(crate) fn render_op_from_http(
         http_op.http.request.body.shape,
         HttpRequestBodyShape::SingleValue { flatten, .. } if flatten || is_text
     );
-    let response_is_text = matches!(
-        http_op.http.response.body.codec,
-        Some(xidl_parser::rest_hir::HttpBodyCodec::Text)
-    );
-    let response_body_flatten = matches!(
+    let response_body_is_value = matches!(
         http_op.http.response.body.shape,
-        HttpResponseBodyShape::SingleValue { .. }
-    ) && response_is_text;
+        HttpResponseBodyShape::ReturnOnly { .. } | HttpResponseBodyShape::SingleValue { .. }
+    );
     let response_include_return = has_return;
     let response_is_empty = matches!(
         http_op.http.response.body.shape,
@@ -257,6 +255,26 @@ pub(crate) fn render_op_from_http(
     } else {
         Some(format!("{struct_prefix}Error"))
     };
+    let representations: Vec<RepresentationContext> = http_op
+        .http
+        .response
+        .representations
+        .iter()
+        .map(|repr| RepresentationContext {
+            variant: repr.case.to_case(convert_case::Case::Pascal),
+            content_type: repr.content_type.clone(),
+            ty: axum_type(&repr.ty),
+            is_byte: repr.is_byte,
+        })
+        .collect();
+    let response_union = if representations.is_empty() {
+        String::new()
+    } else {
+        match http_op.signature.return_type.as_ref() {
+            Some(hir::TypeSpec::ScopedName(scoped)) => render_scoped_name(scoped),
+            _ => String::new(),
+        }
+    };
 
     Ok(MethodContext {
         name: method_name.clone(),
@@ -273,7 +291,7 @@ pub(crate) fn render_op_from_http(
         ret,
         response_ty: response_ty_str,
         request_body_flatten,
-        response_body_flatten,
+        response_body_is_value,
         http_method: http_method_code(method),
         http_method_fn: http_method_fn(method),
         reqwest_method: reqwest_method_code(method),
@@ -347,5 +365,18 @@ pub(crate) fn render_op_from_http(
         response_status: http_op.http.response.status.clone(),
         raises,
         error_ty,
+        union_accept: if representations.is_empty() {
+            None
+        } else {
+            Some(
+                representations
+                    .iter()
+                    .map(|repr| repr.content_type.clone())
+                    .collect::<Vec<_>>()
+                    .join(", "),
+            )
+        },
+        representations,
+        response_union,
     })
 }

@@ -11,6 +11,7 @@ http_scope_matrix.rs
 #[derive(Default)]
 pub struct MatrixBody {
     pub name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub alias: Option<String>,
     pub tags: Vec<String>,
 }
@@ -60,13 +61,13 @@ pub trait HttpScopeMatrixService {
     )]
     async fn deprecated_window(&self, id: String) -> ::xidl_rust_axum::Result<String>;
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_in_HttpScopeMatrixService {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub struct MatrixBody {
         pub name: String,
-        #[serde(default)]
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         pub alias: Option<String>,
         pub tags: Vec<String>,
     }
@@ -91,13 +92,13 @@ pub(super) mod __xidl_in_HttpScopeMatrixService {
         }
     }
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_out_HttpScopeMatrixService {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub struct MatrixBody {
         pub name: String,
-        #[serde(default)]
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         pub alias: Option<String>,
         pub tags: Vec<String>,
     }
@@ -158,12 +159,17 @@ where
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
-                    body,
-                    usize::MAX,
+            let xidl_body_bytes = <::xidl_rust_axum::axum::body::Bytes as ::xidl_rust_axum::axum::extract::FromRequest<
+                S,
+            >>::from_request(
+                    ::xidl_rust_axum::axum::extract::Request::from_parts(parts, body),
+                    state,
                 )
                 .await
-                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                .map_err(|err| ::xidl_rust_axum::Error::new(
+                    err.status().as_u16(),
+                    err.body_text(),
+                ))?;
             let xidl_body: HttpScopeMatrixServiceDefaultScopeRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
@@ -214,12 +220,17 @@ where
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
-                    body,
-                    usize::MAX,
+            let xidl_body_bytes = <::xidl_rust_axum::axum::body::Bytes as ::xidl_rust_axum::axum::extract::FromRequest<
+                S,
+            >>::from_request(
+                    ::xidl_rust_axum::axum::extract::Request::from_parts(parts, body),
+                    state,
                 )
                 .await
-                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                .map_err(|err| ::xidl_rust_axum::Error::new(
+                    err.status().as_u16(),
+                    err.body_text(),
+                ))?;
             let xidl_body: HttpScopeMatrixServiceOverrideConsumesOnlyRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/x-www-form-urlencoded",
                 )
@@ -375,12 +386,17 @@ where
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
-                    body,
-                    usize::MAX,
+            let xidl_body_bytes = <::xidl_rust_axum::axum::body::Bytes as ::xidl_rust_axum::axum::extract::FromRequest<
+                S,
+            >>::from_request(
+                    ::xidl_rust_axum::axum::extract::Request::from_parts(parts, body),
+                    state,
                 )
                 .await
-                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                .map_err(|err| ::xidl_rust_axum::Error::new(
+                    err.status().as_u16(),
+                    err.body_text(),
+                ))?;
             let xidl_body: HttpScopeMatrixServiceOverrideBothMediaRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/x-www-form-urlencoded",
                 )
@@ -1257,11 +1273,11 @@ impl HttpScopeMatrixServiceClient {
     pub async fn get_attribute_inherited_attr(
         &self,
     ) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/attribute/inherited_attr".to_string();
+        let xidl_path = "/attribute/inherited_attr".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -1296,11 +1312,11 @@ impl HttpScopeMatrixServiceClient {
     pub async fn get_attribute_bare_attr(
         &self,
     ) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/attribute/bare_attr".to_string();
+        let xidl_path = "/attribute/bare_attr".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -1336,11 +1352,11 @@ impl HttpScopeMatrixServiceClient {
         &self,
         req: MatrixBody,
     ) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/v2/scope/default".to_string();
+        let xidl_path = "/v2/scope/default".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -1398,11 +1414,11 @@ impl HttpScopeMatrixServiceClient {
         HttpScopeMatrixServiceOverrideConsumesOnlyResponse,
         xidl_rust_axum::Error,
     > {
-        let path = "/v2/scope/override-consumes".to_string();
+        let xidl_path = "/v2/scope/override-consumes".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -1462,12 +1478,12 @@ impl HttpScopeMatrixServiceClient {
         HttpScopeMatrixServiceOverrideProducesOnlyResponse,
         xidl_rust_axum::Error,
     > {
-        let path = "/v2/scope/override-produces/{id}".to_string();
-        let path = path.replace("{id}", &id.to_string());
+        let xidl_path = "/v2/scope/override-produces/{id}".to_string();
+        let xidl_path = xidl_path.replace("{id}", &id.to_string());
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -1508,11 +1524,11 @@ impl HttpScopeMatrixServiceClient {
         name: String,
         age: Option<u32>,
     ) -> Result<HttpScopeMatrixServiceOverrideBothMediaResponse, xidl_rust_axum::Error> {
-        let path = "/v2/scope/override-both".to_string();
+        let xidl_path = "/v2/scope/override-both".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -1569,12 +1585,12 @@ impl HttpScopeMatrixServiceClient {
         &self,
         id: String,
     ) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/v2/scope/deprecated/plain/{id}".to_string();
-        let path = path.replace("{id}", &id.to_string());
+        let xidl_path = "/v2/scope/deprecated/plain/{id}".to_string();
+        let xidl_path = xidl_path.replace("{id}", &id.to_string());
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -1614,12 +1630,12 @@ impl HttpScopeMatrixServiceClient {
         &self,
         id: String,
     ) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/v2/scope/deprecated/since/{id}".to_string();
-        let path = path.replace("{id}", &id.to_string());
+        let xidl_path = "/v2/scope/deprecated/since/{id}".to_string();
+        let xidl_path = xidl_path.replace("{id}", &id.to_string());
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -1659,12 +1675,12 @@ impl HttpScopeMatrixServiceClient {
         &self,
         id: String,
     ) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/v2/scope/deprecated/window/{id}".to_string();
-        let path = path.replace("{id}", &id.to_string());
+        let xidl_path = "/v2/scope/deprecated/window/{id}".to_string();
+        let xidl_path = xidl_path.replace("{id}", &id.to_string());
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -1736,11 +1752,11 @@ pub trait HttpSecurityMatrixService {
     ) -> ::xidl_rust_axum::Result<String>;
     async fn public_ping(&self) -> ::xidl_rust_axum::Result<String>;
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_in_HttpSecurityMatrixService {
     use super::*;
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_out_HttpSecurityMatrixService {
     use super::*;
 }
@@ -1835,12 +1851,17 @@ where
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
-                    body,
-                    usize::MAX,
+            let xidl_body_bytes = <::xidl_rust_axum::axum::body::Bytes as ::xidl_rust_axum::axum::extract::FromRequest<
+                S,
+            >>::from_request(
+                    ::xidl_rust_axum::axum::extract::Request::from_parts(parts, body),
+                    state,
                 )
                 .await
-                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                .map_err(|err| ::xidl_rust_axum::Error::new(
+                    err.status().as_u16(),
+                    err.body_text(),
+                ))?;
             let xidl_body: HttpSecurityMatrixServiceBearerOrCookieSecurityRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
@@ -1950,12 +1971,17 @@ where
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
-                    body,
-                    usize::MAX,
+            let xidl_body_bytes = <::xidl_rust_axum::axum::body::Bytes as ::xidl_rust_axum::axum::extract::FromRequest<
+                S,
+            >>::from_request(
+                    ::xidl_rust_axum::axum::extract::Request::from_parts(parts, body),
+                    state,
                 )
                 .await
-                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                .map_err(|err| ::xidl_rust_axum::Error::new(
+                    err.status().as_u16(),
+                    err.body_text(),
+                ))?;
             let xidl_body: HttpSecurityMatrixServiceOauthSecurityRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
@@ -2413,12 +2439,12 @@ impl HttpSecurityMatrixServiceClient {
         id: String,
         x_trace_id: String,
     ) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/v2/security/inherited/{id}".to_string();
-        let path = path.replace("{id}", &id.to_string());
+        let xidl_path = "/v2/security/inherited/{id}".to_string();
+        let xidl_path = xidl_path.replace("{id}", &id.to_string());
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -2475,11 +2501,11 @@ impl HttpSecurityMatrixServiceClient {
         note: Option<String>,
         xidl_auth: xidl_rust_axum::ClientAuth,
     ) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/v2/security/bearer-cookie".to_string();
+        let xidl_path = "/v2/security/bearer-cookie".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -2542,12 +2568,12 @@ impl HttpSecurityMatrixServiceClient {
         locale: Option<String>,
         xidl_auth: xidl_rust_axum::ClientAuth,
     ) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/v2/security/alternatives/{id}".to_string();
-        let path = path.replace("{id}", &id.to_string());
+        let xidl_path = "/v2/security/alternatives/{id}".to_string();
+        let xidl_path = xidl_path.replace("{id}", &id.to_string());
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -2602,11 +2628,11 @@ impl HttpSecurityMatrixServiceClient {
         keyword: String,
         page: Option<u32>,
     ) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/v2/security/oauth-search".to_string();
+        let xidl_path = "/v2/security/oauth-search".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -2663,11 +2689,11 @@ impl HttpSecurityMatrixServiceClient {
     }
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn public_ping(&self) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/v2/security/public/ping".to_string();
+        let xidl_path = "/v2/security/public/ping".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()

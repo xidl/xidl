@@ -40,36 +40,37 @@ import {
 } from "xidl-typescript-client";
 
     
-export class HttpCatchAllServiceClient {
-    private readonly baseUrl: string;
-    private readonly fetchImpl: FetchLike;
-    private readonly defaultHeaders: Record<string, string>;
-    private readonly auth?: ClientAuth;
-    private readonly codecs: Record<string, HttpCodec>;
 
-    constructor(baseUrl: string, options: ClientOptions = {}) {
-        this.baseUrl = baseUrl;
-        this.fetchImpl = resolveFetch(options.fetch);
-        this.defaultHeaders = options.headers ?? {};
-        this.auth = options.auth;
-        this.codecs = options.codecs ?? {};
-    }
-    
-        async read_file(rel_path: string): Promise<string> {
-            const parsed = ifaceSchemas.HttpCatchAllServiceReadFileRequestSchema.parse({ "rel_path": rel_path });
-            let path = "/files/{*path}";
-            path = path.replace("{" + "*path" + "}", encodePathCatchAll(rel_path));
-            const query = new URLSearchParams();
-            const headers = new Headers(this.defaultHeaders);
-            const cookies: string[] = [];
-            applyCookies(headers, cookies);
-            applyClientAuth(path, query, headers, this.auth, []);
-            const queryString = query.toString();
-            if (queryString.length > 0) {
-                path = `${path}?${queryString}`;
-            }
-            const url = joinUrl(this.baseUrl, path);
-            headers.set("Accept", "text/plain");
+    export class HttpCatchAllServiceClient {
+        private readonly baseUrl: string;
+        private readonly fetchImpl: FetchLike;
+        private readonly defaultHeaders: Record<string, string>;
+        private readonly auth?: ClientAuth;
+        private readonly codecs: Record<string, HttpCodec>;
+
+        constructor(baseUrl: string, options: ClientOptions = {}) {
+            this.baseUrl = baseUrl;
+            this.fetchImpl = resolveFetch(options.fetch);
+            this.defaultHeaders = options.headers ?? {};
+            this.auth = options.auth;
+            this.codecs = options.codecs ?? {};
+        }
+        
+            async read_file(rel_path: string): Promise<string> {
+                const parsed = ifaceSchemas.HttpCatchAllServiceReadFileRequestSchema.parse({ "rel_path": rel_path });
+                let xidlPath = "/files/{*path}";
+                xidlPath = xidlPath.replace("{" + "*path" + "}", encodePathCatchAll(rel_path));
+                const query = new URLSearchParams();
+                const headers = new Headers(this.defaultHeaders);
+                const cookies: string[] = [];
+                applyCookies(headers, cookies);
+                applyClientAuth(xidlPath, query, headers, this.auth, []);
+                const queryString = query.toString();
+                if (queryString.length > 0) {
+                    xidlPath = `${xidlPath}?${queryString}`;
+                }
+                const url = joinUrl(this.baseUrl, xidlPath);
+                headers.set("Accept", "text/plain");
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
@@ -79,22 +80,22 @@ export class HttpCatchAllServiceClient {
         
     }
     
-        async read_asset(key: string, version: string): Promise<string> {
-            const parsed = ifaceSchemas.HttpCatchAllServiceReadAssetRequestSchema.parse({ "key": key, "version": version });
-            let path = "/assets/{*key}";
-            path = path.replace("{" + "*key" + "}", encodePathCatchAll(key));
-            const query = new URLSearchParams();
-            appendParam(query, "v", version, false, false);
-            const headers = new Headers(this.defaultHeaders);
-            const cookies: string[] = [];
-            applyCookies(headers, cookies);
-            applyClientAuth(path, query, headers, this.auth, []);
-            const queryString = query.toString();
-            if (queryString.length > 0) {
-                path = `${path}?${queryString}`;
-            }
-            const url = joinUrl(this.baseUrl, path);
-            headers.set("Accept", "text/plain");
+            async read_asset(key: string, version: string): Promise<string> {
+                const parsed = ifaceSchemas.HttpCatchAllServiceReadAssetRequestSchema.parse({ "key": key, "version": version });
+                let xidlPath = "/assets/{*key}";
+                xidlPath = xidlPath.replace("{" + "*key" + "}", encodePathCatchAll(key));
+                const query = new URLSearchParams();
+                appendParam(query, "v", version, false, false);
+                const headers = new Headers(this.defaultHeaders);
+                const cookies: string[] = [];
+                applyCookies(headers, cookies);
+                applyClientAuth(xidlPath, query, headers, this.auth, []);
+                const queryString = query.toString();
+                if (queryString.length > 0) {
+                    xidlPath = `${xidlPath}?${queryString}`;
+                }
+                const url = joinUrl(this.baseUrl, xidlPath);
+                headers.set("Accept", "text/plain");
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);

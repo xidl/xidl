@@ -16,7 +16,7 @@ use xidl_parser::hir;
 
 pub(crate) use interface_model::{
     ApiKeyContext, DeprecatedContext, ExceptionMemberContext, HttpMethod, MethodContext,
-    ParamContext, ParamSource, RaisesContext, RenderEnv,
+    ParamContext, ParamSource, RaisesContext, RenderEnv, RepresentationContext,
 };
 
 pub fn render_interface_with_path(

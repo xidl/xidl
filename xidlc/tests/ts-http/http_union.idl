@@ -1,0 +1,40 @@
+#pragma xidlc package Demo API
+#pragma xidlc version v1
+
+enum ContentType {
+    @rename("application/json")
+    Json,
+    @rename("application/octet-stream")
+    OctetStream,
+};
+
+struct FileMeta {
+    string id;
+    string etag;
+};
+
+@http(404)
+exception NotFound {
+    uint32 code;
+    string msg;
+};
+
+@http
+union FileResponse switch (ContentType) {
+    case Json: FileMeta meta;
+    case OctetStream: sequence<octet> raw;
+};
+
+@no_security
+interface Files {
+    // Plain union return: no extra out params.
+    @get(path = "/meta")
+    FileResponse get_meta(@query string path) raises(NotFound);
+
+    // Union + @header out param: ETag rides every representation.
+    @get(path = "/file")
+    FileResponse get_file(
+        @query string path,
+        @header @rename("ETag") out string etag
+    ) raises(NotFound);
+};

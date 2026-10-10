@@ -79,7 +79,7 @@ fn get_signature_annotations(param: &hir::ParamDcl) -> Vec<HttpSignatureParamAnn
 
 /// Returns true iff `ty` is `sequence<octet>`, indicating a raw byte buffer
 /// that should be streamed without framing.
-fn is_byte_sequence(ty: &hir::TypeSpec) -> bool {
+pub fn is_byte_sequence(ty: &hir::TypeSpec) -> bool {
     matches!(
         ty,
         hir::TypeSpec::SequenceType(seq)
@@ -178,36 +178,45 @@ fn build_request_mapping(
         }
     };
 
-    let (final_content_type, final_codec) =
-        if is_stream && !matches!(body_shape, HttpRequestBodyShape::Empty) {
-            let ct = match &body_shape {
-                HttpRequestBodyShape::Stream {
-                    codec: HttpStreamPayloadCodec::Bytes,
-                    ..
-                } => "application/octet-stream",
-                HttpRequestBodyShape::Stream {
-                    codec: HttpStreamPayloadCodec::Ndjson,
-                    ..
-                } => "application/x-ndjson",
-                HttpRequestBodyShape::Stream {
-                    codec: HttpStreamPayloadCodec::Sse,
-                    ..
-                } => "text/event-stream",
-                _ => unreachable!(),
-            };
-            (Some(ct.to_string()), map_body_codec(ct))
-        } else if matches!(body_shape, HttpRequestBodyShape::Empty) {
-            (None, None)
-        } else {
-            let ct = content_type.map(|s| s.to_string()).unwrap_or_else(|| {
-                if is_composite_request_body(&body_shape) {
-                    "application/json".to_string()
-                } else {
-                    "text/plain".to_string()
-                }
-            });
-            (Some(ct.clone()), map_body_codec(&ct))
+    let (final_content_type, final_codec) = if is_stream
+        && !matches!(body_shape, HttpRequestBodyShape::Empty)
+    {
+        let ct = match &body_shape {
+            HttpRequestBodyShape::Stream {
+                codec: HttpStreamPayloadCodec::Bytes,
+                ..
+            } => "application/octet-stream",
+            HttpRequestBodyShape::Stream {
+                codec: HttpStreamPayloadCodec::Ndjson,
+                ..
+            } => "application/x-ndjson",
+            HttpRequestBodyShape::Stream {
+                codec: HttpStreamPayloadCodec::Sse,
+                ..
+            } => "text/event-stream",
+            _ => unreachable!(),
         };
+        (Some(ct.to_string()), map_body_codec(ct))
+    } else if matches!(body_shape, HttpRequestBodyShape::Empty) {
+        (None, None)
+    } else if matches!(&body_shape, HttpRequestBodyShape::SingleValue { ty, .. } if is_byte_sequence(ty))
+    {
+        // A lone `sequence<octet>` body travels as raw bytes; senders may
+        // still declare the payload's media type explicitly.
+        (
+            Some("application/octet-stream".to_string()),
+            map_body_codec("application/octet-stream"),
+        )
+    } else {
+        let ct = content_type.map(|s| s.to_string()).unwrap_or_else(|| {
+            if is_composite_request_body(&body_shape) {
+                "application/json".to_string()
+            } else {
+                "text/plain".to_string()
+            }
+        });
+        (Some(ct.clone()), map_body_codec(&ct))
+    };
 
     HttpRequestMapping {
         path,
@@ -356,6 +365,7 @@ fn build_response_mapping(
     };
 
     HttpResponseMapping {
+        representations: Vec::new(),
         header,
         cookie,
         body: HttpResponseBodyMapping {

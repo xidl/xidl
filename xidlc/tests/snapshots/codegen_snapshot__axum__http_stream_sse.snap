@@ -28,11 +28,11 @@ pub trait HttpStreamSseService {
         req: ::xidl_rust_axum::Request<()>,
     ) -> ::xidl_rust_axum::Result<xidl_rust_axum::stream::SseStream<bool>>;
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_in_HttpStreamSseService {
     use super::*;
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_out_HttpStreamSseService {
     use super::*;
 }
@@ -84,12 +84,17 @@ where
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
-                    body,
-                    usize::MAX,
+            let xidl_body_bytes = <::xidl_rust_axum::axum::body::Bytes as ::xidl_rust_axum::axum::extract::FromRequest<
+                S,
+            >>::from_request(
+                    ::xidl_rust_axum::axum::extract::Request::from_parts(parts, body),
+                    state,
                 )
                 .await
-                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                .map_err(|err| ::xidl_rust_axum::Error::new(
+                    err.status().as_u16(),
+                    err.body_text(),
+                ))?;
             let xidl_body: HttpStreamSseServiceSetAttributeOnlineRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "text/plain",
                 )
@@ -346,12 +351,12 @@ impl HttpStreamSseServiceClient {
         topic: String,
         lang: String,
     ) -> Result<xidl_rust_axum::stream::Reader<String>, xidl_rust_axum::Error> {
-        let path = "/events/{topic}".to_string();
-        let path = path.replace("{topic}", &topic.to_string());
+        let xidl_path = "/events/{topic}".to_string();
+        let xidl_path = xidl_path.replace("{topic}", &topic.to_string());
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -376,11 +381,11 @@ impl HttpStreamSseServiceClient {
     }
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn get_attribute_online(&self) -> Result<bool, xidl_rust_axum::Error> {
-        let path = "/attribute/online".to_string();
+        let xidl_path = "/attribute/online".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -416,11 +421,11 @@ impl HttpStreamSseServiceClient {
         &self,
         online: bool,
     ) -> Result<(), xidl_rust_axum::Error> {
-        let path = "/attribute/online".to_string();
+        let xidl_path = "/attribute/online".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -460,11 +465,11 @@ impl HttpStreamSseServiceClient {
     pub async fn watch_attribute_online(
         &self,
     ) -> Result<xidl_rust_axum::stream::Reader<bool>, xidl_rust_axum::Error> {
-        let path = "/HttpStreamSseService/watch_attribute_online".to_string();
+        let xidl_path = "/HttpStreamSseService/watch_attribute_online".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()

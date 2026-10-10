@@ -33,7 +33,9 @@ export async function executeOperation<
   };
   try {
     await options.authorize?.(request, operation.security, context);
-    assertAccepts(request.headers, operation.response.contentType);
+    if (!operation.response.representations?.length) {
+      assertAccepts(request.headers, operation.response.contentType);
+    }
     const input = await decodeOperationRequest(
       operation,
       request,
@@ -58,7 +60,12 @@ export async function executeOperation<
       const args = (operation.request.args ?? []).map(key => record[key]);
       result = await invoke.call(service, ...args);
     }
-    return encodeOperationResponse(operation, result, options.codecs ?? {});
+    return encodeOperationResponse(
+      operation,
+      result,
+      request.headers,
+      options.codecs ?? {},
+    );
   } catch (error) {
     const typed = operation.errors?.match(error);
     if (typed) {

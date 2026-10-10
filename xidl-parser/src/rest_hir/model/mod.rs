@@ -64,6 +64,9 @@ pub struct HttpDocumentMetadata {
     /// Document-level `exception` declarations projected for HTTP use.
     #[serde(default)]
     pub exceptions: Vec<HttpException>,
+    /// Document-level `@http` unions: content-negotiated representations.
+    #[serde(default)]
+    pub http_unions: Vec<HttpUnion>,
 }
 
 /// An `exception` declaration with its HTTP error-channel semantics.
@@ -238,6 +241,31 @@ pub struct HttpResponseMapping {
     pub cookie: Vec<HttpOutputBinding>,
     pub body: HttpResponseBodyMapping,
     pub status: String,
+    /// Non-empty when the return type is an `@http` union: the success
+    /// response is content-negotiated across these representations.
+    #[serde(default)]
+    pub representations: Vec<HttpRepresentation>,
+}
+
+/// One content-negotiated representation of an `@http` union response.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct HttpRepresentation {
+    /// Enum case ident (e.g. `Json`), also the generated variant name.
+    pub case: String,
+    /// Media type from the case's `@rename` or its well-known name.
+    pub content_type: String,
+    /// Case payload type.
+    pub ty: hir::TypeSpec,
+    /// `sequence<octet>` cases respond with raw bytes.
+    pub is_byte: bool,
+}
+
+/// An `@http` union declaration: HTTP representation switching (#296).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct HttpUnion {
+    pub module_path: Vec<String>,
+    pub ident: String,
+    pub cases: Vec<HttpRepresentation>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

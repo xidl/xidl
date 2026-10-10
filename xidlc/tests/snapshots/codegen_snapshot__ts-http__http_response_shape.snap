@@ -40,34 +40,35 @@ import {
 } from "xidl-typescript-client";
 
     
-export class HttpResponseShapeServiceClient {
-    private readonly baseUrl: string;
-    private readonly fetchImpl: FetchLike;
-    private readonly defaultHeaders: Record<string, string>;
-    private readonly auth?: ClientAuth;
-    private readonly codecs: Record<string, HttpCodec>;
 
-    constructor(baseUrl: string, options: ClientOptions = {}) {
-        this.baseUrl = baseUrl;
-        this.fetchImpl = resolveFetch(options.fetch);
-        this.defaultHeaders = options.headers ?? {};
-        this.auth = options.auth;
-        this.codecs = options.codecs ?? {};
-    }
-    
-        async hello(): Promise<string> {
-            let path = "/hello";
-            const query = new URLSearchParams();
-            const headers = new Headers(this.defaultHeaders);
-            const cookies: string[] = [];
-            applyCookies(headers, cookies);
-            applyClientAuth(path, query, headers, this.auth, []);
-            const queryString = query.toString();
-            if (queryString.length > 0) {
-                path = `${path}?${queryString}`;
-            }
-            const url = joinUrl(this.baseUrl, path);
-            headers.set("Accept", "text/plain");
+    export class HttpResponseShapeServiceClient {
+        private readonly baseUrl: string;
+        private readonly fetchImpl: FetchLike;
+        private readonly defaultHeaders: Record<string, string>;
+        private readonly auth?: ClientAuth;
+        private readonly codecs: Record<string, HttpCodec>;
+
+        constructor(baseUrl: string, options: ClientOptions = {}) {
+            this.baseUrl = baseUrl;
+            this.fetchImpl = resolveFetch(options.fetch);
+            this.defaultHeaders = options.headers ?? {};
+            this.auth = options.auth;
+            this.codecs = options.codecs ?? {};
+        }
+        
+            async hello(): Promise<string> {
+                let xidlPath = "/hello";
+                const query = new URLSearchParams();
+                const headers = new Headers(this.defaultHeaders);
+                const cookies: string[] = [];
+                applyCookies(headers, cookies);
+                applyClientAuth(xidlPath, query, headers, this.auth, []);
+                const queryString = query.toString();
+                if (queryString.length > 0) {
+                    xidlPath = `${xidlPath}?${queryString}`;
+                }
+                const url = joinUrl(this.baseUrl, xidlPath);
+                headers.set("Accept", "text/plain");
         const resp = await this.fetchImpl(url, { method: "POST", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
@@ -77,104 +78,106 @@ export class HttpResponseShapeServiceClient {
         
     }
     
-        async get_count(): Promise<ifaceTypes.HttpResponseShapeServiceGetCountResponse> {
-            let path = "/get_count";
-            const query = new URLSearchParams();
-            const headers = new Headers(this.defaultHeaders);
-            const cookies: string[] = [];
-            applyCookies(headers, cookies);
-            applyClientAuth(path, query, headers, this.auth, []);
-            const queryString = query.toString();
-            if (queryString.length > 0) {
-                path = `${path}?${queryString}`;
-            }
-            const url = joinUrl(this.baseUrl, path);
-            headers.set("Accept", "text/plain");
+            async get_count(): Promise<ifaceTypes.HttpResponseShapeServiceGetCountResponse> {
+                let xidlPath = "/get_count";
+                const query = new URLSearchParams();
+                const headers = new Headers(this.defaultHeaders);
+                const cookies: string[] = [];
+                applyCookies(headers, cookies);
+                applyClientAuth(xidlPath, query, headers, this.auth, []);
+                const queryString = query.toString();
+                if (queryString.length > 0) {
+                    xidlPath = `${xidlPath}?${queryString}`;
+                }
+                const url = joinUrl(this.baseUrl, xidlPath);
+                headers.set("Accept", "text/plain");
         const resp = await this.fetchImpl(url, { method: "POST", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
             
         }
-        const responseBody = await decodeOptionalResponseBody(resp, "text/plain", this.codecs, ifaceSchemas.HttpResponseShapeServiceGetCountResponseSchema);
-        const responsePayload = buildResponsePayload(responseBody, resp, "object", [], []);
-        return deserialize(responsePayload, ifaceSchemas.HttpResponseShapeServiceGetCountResponseSchema) as ifaceTypes.HttpResponseShapeServiceGetCountResponse;
-        
+        const responseBody = await decodeOptionalResponseBody(resp, "text/plain", this.codecs);
+            const responsePayload = buildResponsePayload(responseBody, resp, "return", [{ wireName: "count", key: "count" }], [], []);
+            return ifaceSchemas.HttpResponseShapeServiceGetCountResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.HttpResponseShapeServiceGetCountResponseSchema)) as ifaceTypes.HttpResponseShapeServiceGetCountResponse;
+            
     }
     
-        async add(a: number, b: number): Promise<ifaceTypes.HttpResponseShapeServiceAddResponse> {
-            const parsed = ifaceSchemas.HttpResponseShapeServiceAddRequestSchema.parse({ "a": a, "b": b });
-            let path = "/add";
-            const query = new URLSearchParams();
-            const headers = new Headers(this.defaultHeaders);
-            const cookies: string[] = [];
-            applyCookies(headers, cookies);
-            applyClientAuth(path, query, headers, this.auth, []);
-            const queryString = query.toString();
-            if (queryString.length > 0) {
-                path = `${path}?${queryString}`;
-            }
-            const url = joinUrl(this.baseUrl, path);
-            const body = { "a": parsed["a"], "b": parsed["b"] };
+            async add(a: number, b: number): Promise<ifaceTypes.HttpResponseShapeServiceAddResponse> {
+                const parsed = ifaceSchemas.HttpResponseShapeServiceAddRequestSchema.parse({ "a": a, "b": b });
+                let xidlPath = "/add";
+                const query = new URLSearchParams();
+                const headers = new Headers(this.defaultHeaders);
+                const cookies: string[] = [];
+                applyCookies(headers, cookies);
+                applyClientAuth(xidlPath, query, headers, this.auth, []);
+                const queryString = query.toString();
+                if (queryString.length > 0) {
+                    xidlPath = `${xidlPath}?${queryString}`;
+                }
+                const url = joinUrl(this.baseUrl, xidlPath);
+                const xidlBody = { "a": parsed["a"], "b": parsed["b"] };
         headers.set("Content-Type", "application/json");
+        
         headers.set("Accept", "application/json");
-        const resp = await this.fetchImpl(url, { method: "POST", headers, body: encodeRequestBody(body, "application/json", this.codecs, ifaceSchemas.HttpResponseShapeServiceAddRequestSchema) });
+        const resp = await this.fetchImpl(url, { method: "POST", headers, body: encodeRequestBody(xidlBody, "application/json", this.codecs, ifaceSchemas.HttpResponseShapeServiceAddRequestSchema) });
         if (!resp.ok) {
             throw await parseXidlError(resp);
             
         }
-        const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs, ifaceSchemas.HttpResponseShapeServiceAddResponseSchema);
-        const responsePayload = buildResponsePayload(responseBody, resp, "object", [], []);
-        return deserialize(responsePayload, ifaceSchemas.HttpResponseShapeServiceAddResponseSchema) as ifaceTypes.HttpResponseShapeServiceAddResponse;
-        
+        const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
+            const responsePayload = buildResponsePayload(responseBody, resp, "object", [{ wireName: "return", key: "return" }, { wireName: "sum", key: "sum" }], [], []);
+            return ifaceSchemas.HttpResponseShapeServiceAddResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.HttpResponseShapeServiceAddResponseSchema)) as ifaceTypes.HttpResponseShapeServiceAddResponse;
+            
     }
     
-        async bump(value: number): Promise<ifaceTypes.HttpResponseShapeServiceBumpResponse> {
-            const parsed = ifaceSchemas.HttpResponseShapeServiceBumpRequestSchema.parse({ "value": value });
-            let path = "/bump";
-            const query = new URLSearchParams();
-            const headers = new Headers(this.defaultHeaders);
-            const cookies: string[] = [];
-            applyCookies(headers, cookies);
-            applyClientAuth(path, query, headers, this.auth, []);
-            const queryString = query.toString();
-            if (queryString.length > 0) {
-                path = `${path}?${queryString}`;
-            }
-            const url = joinUrl(this.baseUrl, path);
-            const body = parsed;
+            async bump(value: number): Promise<ifaceTypes.HttpResponseShapeServiceBumpResponse> {
+                const parsed = ifaceSchemas.HttpResponseShapeServiceBumpRequestSchema.parse({ "value": value });
+                let xidlPath = "/bump";
+                const query = new URLSearchParams();
+                const headers = new Headers(this.defaultHeaders);
+                const cookies: string[] = [];
+                applyCookies(headers, cookies);
+                applyClientAuth(xidlPath, query, headers, this.auth, []);
+                const queryString = query.toString();
+                if (queryString.length > 0) {
+                    xidlPath = `${xidlPath}?${queryString}`;
+                }
+                const url = joinUrl(this.baseUrl, xidlPath);
+                const xidlBody = parsed["value"];
         headers.set("Content-Type", "text/plain");
+        
         headers.set("Accept", "application/json");
-        const resp = await this.fetchImpl(url, { method: "POST", headers, body: encodeRequestBody(body, "text/plain", this.codecs, ifaceSchemas.HttpResponseShapeServiceBumpRequestSchema) });
+        const resp = await this.fetchImpl(url, { method: "POST", headers, body: encodeRequestBody(xidlBody, "text/plain", this.codecs, ifaceSchemas.HttpResponseShapeServiceBumpRequestSchema) });
         if (!resp.ok) {
             throw await parseXidlError(resp);
             
         }
-        const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs, ifaceSchemas.HttpResponseShapeServiceBumpResponseSchema);
-        const responsePayload = buildResponsePayload(responseBody, resp, "object", [], []);
-        return deserialize(responsePayload, ifaceSchemas.HttpResponseShapeServiceBumpResponseSchema) as ifaceTypes.HttpResponseShapeServiceBumpResponse;
-        
+        const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
+            const responsePayload = buildResponsePayload(responseBody, resp, "object", [{ wireName: "return", key: "return" }, { wireName: "value", key: "value" }], [], []);
+            return ifaceSchemas.HttpResponseShapeServiceBumpResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.HttpResponseShapeServiceBumpResponseSchema)) as ifaceTypes.HttpResponseShapeServiceBumpResponse;
+            
     }
     
-        async ping(): Promise<void> {
-            let path = "/ping";
-            const query = new URLSearchParams();
-            const headers = new Headers(this.defaultHeaders);
-            const cookies: string[] = [];
-            applyCookies(headers, cookies);
-            applyClientAuth(path, query, headers, this.auth, []);
-            const queryString = query.toString();
-            if (queryString.length > 0) {
-                path = `${path}?${queryString}`;
-            }
-            const url = joinUrl(this.baseUrl, path);
-            headers.set("Accept", "");
+            async ping(): Promise<void> {
+                let xidlPath = "/ping";
+                const query = new URLSearchParams();
+                const headers = new Headers(this.defaultHeaders);
+                const cookies: string[] = [];
+                applyCookies(headers, cookies);
+                applyClientAuth(xidlPath, query, headers, this.auth, []);
+                const queryString = query.toString();
+                if (queryString.length > 0) {
+                    xidlPath = `${xidlPath}?${queryString}`;
+                }
+                const url = joinUrl(this.baseUrl, xidlPath);
+                headers.set("Accept", "");
         const resp = await this.fetchImpl(url, { method: "POST", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
             
         }
         return;
-        
+            
     }
     
     
@@ -356,7 +359,7 @@ export const HttpResponseShapeServiceOperations = {
         },
         response: {
             contentType: "text/plain",
-            bodyMode: "object",
+            bodyMode: "return",
             bodyFields: [{ wireName: "count", key: "count" }],
             headers: [],
             cookies: [],

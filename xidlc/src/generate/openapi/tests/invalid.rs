@@ -10,7 +10,7 @@ fn parse_spec(source: &str) -> hir::Specification {
 
 fn render_openapi_json_from_spec(
     spec: &hir::Specification,
-) -> Result<serde_json::Value, serde_json::Error> {
+) -> Result<serde_json::Value, crate::error::IdlcError> {
     let rest_hir = xidl_parser::rest_hir::project(spec).expect("project http hir");
     render_openapi_json(spec, &rest_hir)
 }
@@ -150,10 +150,9 @@ fn render_openapi_json_rejects_duplicate_route_bindings() {
         };
         "#,
     );
-    let payload = panic::catch_unwind(AssertUnwindSafe(|| render_openapi_json_from_spec(&spec)))
-        .expect_err("duplicate route binding should panic");
-    let message = panic_message(payload);
-    assert!(message.contains("duplicate HTTP route binding"));
+    let error = render_openapi_json_from_spec(&spec)
+        .expect_err("duplicate route binding should be a structured error");
+    assert!(error.to_string().contains("duplicate HTTP route binding"));
 }
 
 #[test]

@@ -30,6 +30,7 @@ export interface SecurityRequirement {
 }
 
 export interface ResponseValueSpec {
+  decode?: (value: string) => unknown;
   name: string;
   key: string;
   optional: boolean;

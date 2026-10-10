@@ -29,11 +29,11 @@ pub trait ReportApi {
         req: ::xidl_rust_axum::Request<ReportApiWatchReportRequest>,
     ) -> ::xidl_rust_axum::Result<xidl_rust_axum::stream::SseStream<String>>;
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_in_ReportApi {
     use super::*;
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_out_ReportApi {
     use super::*;
 }
@@ -342,12 +342,12 @@ impl ReportApiClient {
         lang: Option<String>,
         trace_id: String,
     ) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/reports/{id}".to_string();
-        let path = path.replace("{id}", &id.to_string());
+        let xidl_path = "/reports/{id}".to_string();
+        let xidl_path = xidl_path.replace("{id}", &id.to_string());
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -402,12 +402,12 @@ impl ReportApiClient {
         &self,
         id: String,
     ) -> Result<xidl_rust_axum::stream::Reader<String>, xidl_rust_axum::Error> {
-        let path = "/reports/{id}/events".to_string();
-        let path = path.replace("{id}", &id.to_string());
+        let xidl_path = "/reports/{id}/events".to_string();
+        let xidl_path = xidl_path.replace("{id}", &id.to_string());
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()

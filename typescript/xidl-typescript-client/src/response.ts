@@ -51,27 +51,38 @@ export function buildResponsePayload(
   body: unknown,
   resp: Response,
   bodyMode: string,
+  bodyFields: Array<{ key: string; wireName: string }>,
   headerSpecs: ResponseValueSpec[],
   cookieSpecs: ResponseValueSpec[],
 ): Record<string, unknown> {
-  const out: Record<string, unknown> =
-    bodyMode === 'object' && body && typeof body === 'object'
-      ? { ...(body as Record<string, unknown>) }
-      : {};
-  if (bodyMode === 'return' && body !== undefined) {
-    out.return = body;
+  const out: Record<string, unknown> = {};
+  if (bodyMode === 'return' && body !== undefined && bodyFields[0]) {
+    out[bodyFields[0].key] = body;
+  } else if (bodyMode === 'object' && body && typeof body === 'object') {
+    const record = body as Record<string, unknown>;
+    for (const field of bodyFields) {
+      out[field.key] = record[field.wireName];
+    }
   }
   for (const spec of headerSpecs) {
-    const value = readResponseHeader(resp.headers, spec.name, spec.isMulti);
+    const value = readResponseHeader(
+      resp.headers,
+      spec.name,
+      spec.isMulti,
+      spec.decode,
+    );
     if (value !== undefined) {
       out[spec.key] = value;
     }
   }
-  const cookies = readResponseCookies(resp.headers);
+  const cookies = readResponseCookies(resp.headers, value => value);
   for (const spec of cookieSpecs) {
     const value = cookies.get(spec.name);
     if (value !== undefined) {
-      out[spec.key] = spec.isMulti ? value : value[0];
+      const decoded = value.map(item =>
+        (spec.decode ?? parseScalar)(item as string),
+      );
+      out[spec.key] = spec.isMulti ? decoded : decoded[0];
     }
   }
   return out;

@@ -1,0 +1,53 @@
+GET {{base_url}}/file?key=meta
+Accept: application/json
+HTTP 200
+Content-Type: application/json
+ETag: meta-v1
+[Asserts]
+jsonpath "$.id" == "meta"
+header "X-Tag" contains "001"
+header "X-Tag" contains "\"quoted\""
+cookie "cached" == "false"
+
+GET {{base_url}}/file?key=raw
+Accept: application/octet-stream
+HTTP 200
+Content-Type: application/octet-stream
+[Asserts]
+body == "envelope-bytes"
+
+GET {{base_url}}/file?key=text
+Accept: text/plain
+HTTP 200
+Content-Type: text/plain
+[Asserts]
+body == "envelope-text"
+
+# A supported Accept still rejects a different returned representation.
+GET {{base_url}}/file?key=raw
+Accept: application/json
+HTTP 406
+
+GET {{base_url}}/file?key=meta
+Accept: application/octet-stream
+HTTP 406
+
+# Declared errors must remain reachable regardless of success representation.
+GET {{base_url}}/file?key=missing
+Accept: application/octet-stream
+HTTP 404
+[Asserts]
+jsonpath "$.msg" == "no such file"
+
+GET {{base_url}}/fresh
+HTTP 304
+ETag: same-tag
+[Asserts]
+body == ""
+
+DELETE {{base_url}}/file
+If-Match: stale
+HTTP 412
+ETag: current-tag
+[Asserts]
+jsonpath "$.msg" == "stale revision"

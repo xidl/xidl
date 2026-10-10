@@ -40,98 +40,8 @@ import {
 } from "xidl-typescript-client";
 
     export namespace nm {
-    export class ItemServiceClient {
-        private readonly baseUrl: string;
-        private readonly fetchImpl: FetchLike;
-        private readonly defaultHeaders: Record<string, string>;
-        private readonly auth?: ClientAuth;
-        private readonly codecs: Record<string, HttpCodec>;
 
-        constructor(baseUrl: string, options: ClientOptions = {}) {
-            this.baseUrl = baseUrl;
-            this.fetchImpl = resolveFetch(options.fetch);
-            this.defaultHeaders = options.headers ?? {};
-            this.auth = options.auth;
-            this.codecs = options.codecs ?? {};
-        }
-        
-            async get_item(id: string): Promise<types.nm.Item> {
-                const parsed = ifaceSchemas.nm.ItemServiceGetItemRequestSchema.parse({ "id": id });
-                let path = "/item/{id}";
-                path = path.replace("{" + "id" + "}", encodePathSegment(id));
-                const query = new URLSearchParams();
-                const headers = new Headers(this.defaultHeaders);
-                const cookies: string[] = [];
-                applyCookies(headers, cookies);
-                applyClientAuth(path, query, headers, this.auth, []);
-                const queryString = query.toString();
-                if (queryString.length > 0) {
-                    path = `${path}?${queryString}`;
-                }
-                const url = joinUrl(this.baseUrl, path);
-                headers.set("Accept", "application/json");
-            const resp = await this.fetchImpl(url, { method: "GET", headers });
-            if (!resp.ok) {
-                throw await parseXidlError(resp);
-                
-            }
-            return await decodeResponseBody<types.nm.Item>(resp, "application/json", this.codecs);
-            
-        }
-        
-            async put_item(item: types.nm.Item): Promise<void> {
-                const parsed = ifaceSchemas.nm.ItemServicePutItemRequestSchema.parse({ "item": item });
-                let path = "/items";
-                const query = new URLSearchParams();
-                const headers = new Headers(this.defaultHeaders);
-                const cookies: string[] = [];
-                applyCookies(headers, cookies);
-                applyClientAuth(path, query, headers, this.auth, []);
-                const queryString = query.toString();
-                if (queryString.length > 0) {
-                    path = `${path}?${queryString}`;
-                }
-                const url = joinUrl(this.baseUrl, path);
-                const body = { "item": parsed["item"] };
-            headers.set("Content-Type", "application/json");
-            headers.set("Accept", "");
-            const resp = await this.fetchImpl(url, { method: "PUT", headers, body: encodeRequestBody(body, "application/json", this.codecs, ifaceSchemas.nm.ItemServicePutItemRequestSchema) });
-            if (!resp.ok) {
-                throw await parseXidlError(resp);
-                
-            }
-            return;
-            
-        }
-        
-            async get_wrapper(): Promise<types.nm.Wrapper> {
-                let path = "/wrapper";
-                const query = new URLSearchParams();
-                const headers = new Headers(this.defaultHeaders);
-                const cookies: string[] = [];
-                applyCookies(headers, cookies);
-                applyClientAuth(path, query, headers, this.auth, []);
-                const queryString = query.toString();
-                if (queryString.length > 0) {
-                    path = `${path}?${queryString}`;
-                }
-                const url = joinUrl(this.baseUrl, path);
-                headers.set("Accept", "application/json");
-            const resp = await this.fetchImpl(url, { method: "GET", headers });
-            if (!resp.ok) {
-                throw await parseXidlError(resp);
-                
-            }
-            return await decodeResponseBody<types.nm.Wrapper>(resp, "application/json", this.codecs);
-            
-        }
-        
-        
-    }
-}
-
-    export namespace outer {    export namespace inner {
-        export class InnerServiceClient {
+        export class ItemServiceClient {
             private readonly baseUrl: string;
             private readonly fetchImpl: FetchLike;
             private readonly defaultHeaders: Record<string, string>;
@@ -146,19 +56,112 @@ import {
                 this.codecs = options.codecs ?? {};
             }
             
-                async get_leaf(): Promise<types.outer.inner.Leaf> {
-                    let path = "/leaf";
+                async get_item(id: string): Promise<types.nm.Item> {
+                    const parsed = ifaceSchemas.nm.ItemServiceGetItemRequestSchema.parse({ "id": id });
+                    let xidlPath = "/item/{id}";
+                    xidlPath = xidlPath.replace("{" + "id" + "}", encodePathSegment(id));
                     const query = new URLSearchParams();
                     const headers = new Headers(this.defaultHeaders);
                     const cookies: string[] = [];
                     applyCookies(headers, cookies);
-                    applyClientAuth(path, query, headers, this.auth, []);
+                    applyClientAuth(xidlPath, query, headers, this.auth, []);
                     const queryString = query.toString();
                     if (queryString.length > 0) {
-                        path = `${path}?${queryString}`;
+                        xidlPath = `${xidlPath}?${queryString}`;
                     }
-                    const url = joinUrl(this.baseUrl, path);
+                    const url = joinUrl(this.baseUrl, xidlPath);
                     headers.set("Accept", "application/json");
+            const resp = await this.fetchImpl(url, { method: "GET", headers });
+            if (!resp.ok) {
+                throw await parseXidlError(resp);
+                
+            }
+            return await decodeResponseBody<types.nm.Item>(resp, "application/json", this.codecs);
+            
+        }
+        
+                async put_item(item: types.nm.Item): Promise<void> {
+                    const parsed = ifaceSchemas.nm.ItemServicePutItemRequestSchema.parse({ "item": item });
+                    let xidlPath = "/items";
+                    const query = new URLSearchParams();
+                    const headers = new Headers(this.defaultHeaders);
+                    const cookies: string[] = [];
+                    applyCookies(headers, cookies);
+                    applyClientAuth(xidlPath, query, headers, this.auth, []);
+                    const queryString = query.toString();
+                    if (queryString.length > 0) {
+                        xidlPath = `${xidlPath}?${queryString}`;
+                    }
+                    const url = joinUrl(this.baseUrl, xidlPath);
+                    const xidlBody = { "item": parsed["item"] };
+            headers.set("Content-Type", "application/json");
+            
+            headers.set("Accept", "");
+            const resp = await this.fetchImpl(url, { method: "PUT", headers, body: encodeRequestBody(xidlBody, "application/json", this.codecs, ifaceSchemas.nm.ItemServicePutItemRequestSchema) });
+            if (!resp.ok) {
+                throw await parseXidlError(resp);
+                
+            }
+            return;
+                
+        }
+        
+                async get_wrapper(): Promise<types.nm.Wrapper> {
+                    let xidlPath = "/wrapper";
+                    const query = new URLSearchParams();
+                    const headers = new Headers(this.defaultHeaders);
+                    const cookies: string[] = [];
+                    applyCookies(headers, cookies);
+                    applyClientAuth(xidlPath, query, headers, this.auth, []);
+                    const queryString = query.toString();
+                    if (queryString.length > 0) {
+                        xidlPath = `${xidlPath}?${queryString}`;
+                    }
+                    const url = joinUrl(this.baseUrl, xidlPath);
+                    headers.set("Accept", "application/json");
+            const resp = await this.fetchImpl(url, { method: "GET", headers });
+            if (!resp.ok) {
+                throw await parseXidlError(resp);
+                
+            }
+            return await decodeResponseBody<types.nm.Wrapper>(resp, "application/json", this.codecs);
+            
+        }
+        
+        
+    }
+}
+
+    export namespace outer {    export namespace inner {
+
+            export class InnerServiceClient {
+                private readonly baseUrl: string;
+                private readonly fetchImpl: FetchLike;
+                private readonly defaultHeaders: Record<string, string>;
+                private readonly auth?: ClientAuth;
+                private readonly codecs: Record<string, HttpCodec>;
+
+                constructor(baseUrl: string, options: ClientOptions = {}) {
+                    this.baseUrl = baseUrl;
+                    this.fetchImpl = resolveFetch(options.fetch);
+                    this.defaultHeaders = options.headers ?? {};
+                    this.auth = options.auth;
+                    this.codecs = options.codecs ?? {};
+                }
+                
+                    async get_leaf(): Promise<types.outer.inner.Leaf> {
+                        let xidlPath = "/leaf";
+                        const query = new URLSearchParams();
+                        const headers = new Headers(this.defaultHeaders);
+                        const cookies: string[] = [];
+                        applyCookies(headers, cookies);
+                        applyClientAuth(xidlPath, query, headers, this.auth, []);
+                        const queryString = query.toString();
+                        if (queryString.length > 0) {
+                            xidlPath = `${xidlPath}?${queryString}`;
+                        }
+                        const url = joinUrl(this.baseUrl, xidlPath);
+                        headers.set("Accept", "application/json");
                 const resp = await this.fetchImpl(url, { method: "GET", headers });
                 if (!resp.ok) {
                     throw await parseXidlError(resp);

@@ -1,6 +1,6 @@
 import { serialize, type XidlSchema } from 'xidl-typescript-codec';
 
-import { encodeScalar, normalizeMime } from './scalar.ts';
+import { assertAccepts, encodeScalar, normalizeMime } from './scalar.ts';
 import { byteStreamResponse, sseResponse } from './stream.ts';
 import type {
   BodyField,
@@ -12,6 +12,7 @@ import type {
 export function encodeOperationResponse<TService>(
   operation: OperationDescriptor<TService>,
   result: unknown,
+  requestHeaders: Headers,
   codecs: Record<string, HttpCodec>,
 ): Response {
   if (operation.response.stream) {
@@ -25,6 +26,45 @@ export function encodeOperationResponse<TService>(
       result as AsyncIterable<unknown>,
       operation.response.streamSchema,
     );
+  }
+
+  const representations = operation.response.representations;
+  if (representations?.length) {
+    // `@http` union: the handler returns `{ kind, value, <out params> }`;
+    // the kind picks the media type, out params ride the response headers.
+    const wrapper = result as { kind?: string; value?: unknown };
+    const representation = representations.find(
+      representation => representation.kind === wrapper.kind,
+    );
+    if (representation) {
+      assertAccepts(requestHeaders, representation.contentType);
+      const headers = new Headers();
+      writeResponseBindings(
+        headers,
+        toRecord(wrapper),
+        operation.response.headers,
+        false,
+      );
+      writeResponseBindings(
+        headers,
+        toRecord(wrapper),
+        operation.response.cookies,
+        true,
+      );
+      headers.set('Content-Type', representation.contentType);
+      const value = wrapper.value;
+      const body =
+        value === undefined || value === null
+          ? null
+          : value instanceof Uint8Array
+            ? (value as BodyInit)
+            : encodeBody(
+                value,
+                normalizeMime(representation.contentType),
+                codecs,
+              );
+      return new Response(body, { headers, status: 200 });
+    }
   }
 
   const parsed = operation.response.schema?.parse(result) ?? result;

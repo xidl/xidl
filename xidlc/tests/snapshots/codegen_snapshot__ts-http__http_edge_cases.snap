@@ -40,61 +40,62 @@ import {
 } from "xidl-typescript-client";
 
     
-export class HttpEdgeCasesServiceClient {
-    private readonly baseUrl: string;
-    private readonly fetchImpl: FetchLike;
-    private readonly defaultHeaders: Record<string, string>;
-    private readonly auth?: ClientAuth;
-    private readonly codecs: Record<string, HttpCodec>;
 
-    constructor(baseUrl: string, options: ClientOptions = {}) {
-        this.baseUrl = baseUrl;
-        this.fetchImpl = resolveFetch(options.fetch);
-        this.defaultHeaders = options.headers ?? {};
-        this.auth = options.auth;
-        this.codecs = options.codecs ?? {};
-    }
-    
-        async health(trace: string): Promise<void> {
-            const parsed = ifaceSchemas.HttpEdgeCasesServiceHealthRequestSchema.parse({ "trace": trace });
-            let path = "/v1/health";
-            const query = new URLSearchParams();
-            appendParam(query, "trace_id", trace, false, false);
-            const headers = new Headers(this.defaultHeaders);
-            const cookies: string[] = [];
-            applyCookies(headers, cookies);
-            applyClientAuth(path, query, headers, this.auth, []);
-            const queryString = query.toString();
-            if (queryString.length > 0) {
-                path = `${path}?${queryString}`;
-            }
-            const url = joinUrl(this.baseUrl, path);
-            headers.set("Accept", "");
+    export class HttpEdgeCasesServiceClient {
+        private readonly baseUrl: string;
+        private readonly fetchImpl: FetchLike;
+        private readonly defaultHeaders: Record<string, string>;
+        private readonly auth?: ClientAuth;
+        private readonly codecs: Record<string, HttpCodec>;
+
+        constructor(baseUrl: string, options: ClientOptions = {}) {
+            this.baseUrl = baseUrl;
+            this.fetchImpl = resolveFetch(options.fetch);
+            this.defaultHeaders = options.headers ?? {};
+            this.auth = options.auth;
+            this.codecs = options.codecs ?? {};
+        }
+        
+            async health(trace: string): Promise<void> {
+                const parsed = ifaceSchemas.HttpEdgeCasesServiceHealthRequestSchema.parse({ "trace": trace });
+                let xidlPath = "/v1/health";
+                const query = new URLSearchParams();
+                appendParam(query, "trace_id", trace, false, false);
+                const headers = new Headers(this.defaultHeaders);
+                const cookies: string[] = [];
+                applyCookies(headers, cookies);
+                applyClientAuth(xidlPath, query, headers, this.auth, []);
+                const queryString = query.toString();
+                if (queryString.length > 0) {
+                    xidlPath = `${xidlPath}?${queryString}`;
+                }
+                const url = joinUrl(this.baseUrl, xidlPath);
+                headers.set("Accept", "");
         const resp = await this.fetchImpl(url, { method: "HEAD", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
             
         }
         return;
-        
+            
     }
     
-        async get_user(uid: number, locale: string): Promise<string> {
-            const parsed = ifaceSchemas.HttpEdgeCasesServiceGetUserRequestSchema.parse({ "uid": uid, "locale": locale });
-            let path = "/v1/users/{id}";
-            path = path.replace("{" + "id" + "}", encodePathSegment(uid));
-            const query = new URLSearchParams();
-            appendParam(query, "lang", locale, false, false);
-            const headers = new Headers(this.defaultHeaders);
-            const cookies: string[] = [];
-            applyCookies(headers, cookies);
-            applyClientAuth(path, query, headers, this.auth, []);
-            const queryString = query.toString();
-            if (queryString.length > 0) {
-                path = `${path}?${queryString}`;
-            }
-            const url = joinUrl(this.baseUrl, path);
-            headers.set("Accept", "text/plain");
+            async get_user(uid: number, locale: string): Promise<string> {
+                const parsed = ifaceSchemas.HttpEdgeCasesServiceGetUserRequestSchema.parse({ "uid": uid, "locale": locale });
+                let xidlPath = "/v1/users/{id}";
+                xidlPath = xidlPath.replace("{" + "id" + "}", encodePathSegment(uid));
+                const query = new URLSearchParams();
+                appendParam(query, "lang", locale, false, false);
+                const headers = new Headers(this.defaultHeaders);
+                const cookies: string[] = [];
+                applyCookies(headers, cookies);
+                applyClientAuth(xidlPath, query, headers, this.auth, []);
+                const queryString = query.toString();
+                if (queryString.length > 0) {
+                    xidlPath = `${xidlPath}?${queryString}`;
+                }
+                const url = joinUrl(this.baseUrl, xidlPath);
+                headers.set("Accept", "text/plain");
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
@@ -104,21 +105,21 @@ export class HttpEdgeCasesServiceClient {
         
     }
     
-        async dedup_user(id: number): Promise<string> {
-            const parsed = ifaceSchemas.HttpEdgeCasesServiceDedupUserRequestSchema.parse({ "id": id });
-            let path = "/v1/dedup/{id}";
-            path = path.replace("{" + "id" + "}", encodePathSegment(id));
-            const query = new URLSearchParams();
-            const headers = new Headers(this.defaultHeaders);
-            const cookies: string[] = [];
-            applyCookies(headers, cookies);
-            applyClientAuth(path, query, headers, this.auth, []);
-            const queryString = query.toString();
-            if (queryString.length > 0) {
-                path = `${path}?${queryString}`;
-            }
-            const url = joinUrl(this.baseUrl, path);
-            headers.set("Accept", "text/plain");
+            async dedup_user(id: number): Promise<string> {
+                const parsed = ifaceSchemas.HttpEdgeCasesServiceDedupUserRequestSchema.parse({ "id": id });
+                let xidlPath = "/v1/dedup/{id}";
+                xidlPath = xidlPath.replace("{" + "id" + "}", encodePathSegment(id));
+                const query = new URLSearchParams();
+                const headers = new Headers(this.defaultHeaders);
+                const cookies: string[] = [];
+                applyCookies(headers, cookies);
+                applyClientAuth(xidlPath, query, headers, this.auth, []);
+                const queryString = query.toString();
+                if (queryString.length > 0) {
+                    xidlPath = `${xidlPath}?${queryString}`;
+                }
+                const url = joinUrl(this.baseUrl, xidlPath);
+                headers.set("Accept", "text/plain");
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
@@ -128,22 +129,22 @@ export class HttpEdgeCasesServiceClient {
         
     }
     
-        async get_item(order_id: number, item_id: number): Promise<string> {
-            const parsed = ifaceSchemas.HttpEdgeCasesServiceGetItemRequestSchema.parse({ "order_id": order_id, "item_id": item_id });
-            let path = "/orders/{order_id}/items/{item_id}";
-            path = path.replace("{" + "order_id" + "}", encodePathSegment(order_id));
-            path = path.replace("{" + "item_id" + "}", encodePathSegment(item_id));
-            const query = new URLSearchParams();
-            const headers = new Headers(this.defaultHeaders);
-            const cookies: string[] = [];
-            applyCookies(headers, cookies);
-            applyClientAuth(path, query, headers, this.auth, []);
-            const queryString = query.toString();
-            if (queryString.length > 0) {
-                path = `${path}?${queryString}`;
-            }
-            const url = joinUrl(this.baseUrl, path);
-            headers.set("Accept", "text/plain");
+            async get_item(order_id: number, item_id: number): Promise<string> {
+                const parsed = ifaceSchemas.HttpEdgeCasesServiceGetItemRequestSchema.parse({ "order_id": order_id, "item_id": item_id });
+                let xidlPath = "/orders/{order_id}/items/{item_id}";
+                xidlPath = xidlPath.replace("{" + "order_id" + "}", encodePathSegment(order_id));
+                xidlPath = xidlPath.replace("{" + "item_id" + "}", encodePathSegment(item_id));
+                const query = new URLSearchParams();
+                const headers = new Headers(this.defaultHeaders);
+                const cookies: string[] = [];
+                applyCookies(headers, cookies);
+                applyClientAuth(xidlPath, query, headers, this.auth, []);
+                const queryString = query.toString();
+                if (queryString.length > 0) {
+                    xidlPath = `${xidlPath}?${queryString}`;
+                }
+                const url = joinUrl(this.baseUrl, xidlPath);
+                headers.set("Accept", "text/plain");
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
@@ -153,22 +154,22 @@ export class HttpEdgeCasesServiceClient {
         
     }
     
-        async lookup(keyword: string, page_size: number): Promise<string> {
-            const parsed = ifaceSchemas.HttpEdgeCasesServiceLookupRequestSchema.parse({ "keyword": keyword, "page_size": page_size });
-            let path = "/lookup";
-            const query = new URLSearchParams();
-            appendParam(query, "keyword", keyword, false, false);
-            appendParam(query, "limit", page_size, false, false);
-            const headers = new Headers(this.defaultHeaders);
-            const cookies: string[] = [];
-            applyCookies(headers, cookies);
-            applyClientAuth(path, query, headers, this.auth, []);
-            const queryString = query.toString();
-            if (queryString.length > 0) {
-                path = `${path}?${queryString}`;
-            }
-            const url = joinUrl(this.baseUrl, path);
-            headers.set("Accept", "text/plain");
+            async lookup(keyword: string, page_size: number): Promise<string> {
+                const parsed = ifaceSchemas.HttpEdgeCasesServiceLookupRequestSchema.parse({ "keyword": keyword, "page_size": page_size });
+                let xidlPath = "/lookup";
+                const query = new URLSearchParams();
+                appendParam(query, "keyword", keyword, false, false);
+                appendParam(query, "limit", page_size, false, false);
+                const headers = new Headers(this.defaultHeaders);
+                const cookies: string[] = [];
+                applyCookies(headers, cookies);
+                applyClientAuth(xidlPath, query, headers, this.auth, []);
+                const queryString = query.toString();
+                if (queryString.length > 0) {
+                    xidlPath = `${xidlPath}?${queryString}`;
+                }
+                const url = joinUrl(this.baseUrl, xidlPath);
+                headers.set("Accept", "text/plain");
         const resp = await this.fetchImpl(url, { method: "POST", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
