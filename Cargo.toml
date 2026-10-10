@@ -48,7 +48,7 @@ thiserror = "2.0"
 tokio = "1.49.0"
 mockall = "0.15.0"
 tree-sitter = "=0.25.0"
-tree-sitter-idl = "3.18.0"
+tree-sitter-idl = "3.19.0"
 convert_case = "0.11.0"
 tokio-tungstenite = { version = "0.29.0" }
 
@@ -59,9 +59,3 @@ single_element_loop = "allow"
 
 [workspace.lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(tarpaulin_include)'] }
-
-# Exception declarations carry annotations (@http status binding, docs);
-# the grammar fix is merged upstream (cathaysia/tree-sitter-idl#79) and
-# tagged, but not yet published to crates.io — pin the tagged commit.
-[patch.crates-io]
-tree-sitter-idl = { git = "https://github.com/cathaysia/tree-sitter-idl", rev = "bba2a7b8" }
