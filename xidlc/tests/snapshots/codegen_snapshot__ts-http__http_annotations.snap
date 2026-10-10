@@ -78,7 +78,6 @@ import {
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
-        
     }
     
             async create_user(name: string, age: number): Promise<string> {
@@ -104,7 +103,6 @@ import {
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
-        
     }
     
             async get_name(name: string): Promise<string> {
@@ -128,7 +126,6 @@ import {
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
-        
     }
     
             async search_user(keyword: string, page: number): Promise<string> {
@@ -153,7 +150,6 @@ import {
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
-        
     }
     
             async get_user_alias(user_id: number, locale: string): Promise<string> {
@@ -178,7 +174,6 @@ import {
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
-        
     }
     
             async add(a: number, b: number): Promise<ifaceTypes.HttpAnnoServiceAddResponse> {

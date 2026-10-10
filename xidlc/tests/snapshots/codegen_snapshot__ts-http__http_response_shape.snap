@@ -75,7 +75,6 @@ import {
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
-        
     }
     
             async get_count(): Promise<ifaceTypes.HttpResponseShapeServiceGetCountResponse> {

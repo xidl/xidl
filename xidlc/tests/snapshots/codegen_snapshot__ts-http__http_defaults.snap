@@ -77,7 +77,6 @@ import {
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
-        
     }
     
             async list_orders(user_id: number, page: number, size: number): Promise<string> {
@@ -103,7 +102,6 @@ import {
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
-        
     }
     
             async create_user(req: types.CreateUserRequest): Promise<string> {
@@ -129,7 +127,6 @@ import {
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
-        
     }
     
             async create_user_flat(req: types.CreateUserRequest): Promise<string> {
@@ -155,7 +152,6 @@ import {
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
-        
     }
     
             async search_user(name: string, age: number): Promise<string> {
@@ -181,7 +177,6 @@ import {
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
-        
     }
     
             async preview_user(req: types.CreateUserRequest): Promise<string> {
@@ -207,7 +202,6 @@ import {
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
-        
     }
     
             async get_user(id: number, lang: string): Promise<string> {
@@ -232,7 +226,6 @@ import {
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
-        
     }
     
             async get_user_alias(user_id: number, locale: string): Promise<string> {
@@ -257,7 +250,6 @@ import {
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
-        
     }
     
             async delete_user(id: number, revision: number): Promise<string> {
@@ -282,7 +274,6 @@ import {
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
-        
     }
     
             async probe_user(id: number, revision: number): Promise<void> {
@@ -359,7 +350,6 @@ import {
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
-        
     }
     
             async patch_user(user_id: number, name: string, age: number): Promise<string> {
@@ -386,7 +376,6 @@ import {
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
-        
     }
     
     
