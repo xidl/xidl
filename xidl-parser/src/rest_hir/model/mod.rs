@@ -250,10 +250,8 @@ pub struct HttpResponseMapping {
 /// One content-negotiated representation of an `@http` union response.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HttpRepresentation {
-    /// Enum case ident (e.g. `Json`), also the generated variant name.
-    pub case: String,
-    /// Media type from the case's `@rename` or its well-known name.
-    pub content_type: String,
+    /// Shared protocol value; both the case name and media type derive from it.
+    pub content_type: xidl_http::ContentType,
     /// Case payload type.
     pub ty: hir::TypeSpec,
     /// `sequence<octet>` cases respond with raw bytes.

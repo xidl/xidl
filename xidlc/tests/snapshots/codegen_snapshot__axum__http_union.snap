@@ -336,12 +336,12 @@ where
                         FileResponse::Json(payload) => {
                             if !xidl_rust_axum::http::accepts_media_type(
                                 &headers,
-                                "application/json",
+                                xidl_rust_axum::http::ContentType::Json.as_str(),
                             ) {
                                 return Err(xidl_rust_axum::Error::not_acceptable());
                             }
                             let body = xidl_rust_axum::SerializeFactory::new(
-                                    "application/json",
+                                    xidl_rust_axum::http::ContentType::Json.as_str(),
                                 )
                                 .to_vec(&payload)?;
                             ::xidl_rust_axum::axum::response::Response::builder()
@@ -351,7 +351,7 @@ where
                                 )
                                 .header(
                                     ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                                    "application/json",
+                                    xidl_rust_axum::http::ContentType::Json.as_str(),
                                 )
                                 .body(::xidl_rust_axum::axum::body::Body::from(body))
                                 .map_err(|err| xidl_rust_axum::Error::new(
@@ -362,7 +362,7 @@ where
                         FileResponse::OctetStream(payload) => {
                             if !xidl_rust_axum::http::accepts_media_type(
                                 &headers,
-                                "application/octet-stream",
+                                xidl_rust_axum::http::ContentType::OctetStream.as_str(),
                             ) {
                                 return Err(xidl_rust_axum::Error::not_acceptable());
                             }
@@ -373,7 +373,7 @@ where
                                 )
                                 .header(
                                     ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                                    "application/octet-stream",
+                                    xidl_rust_axum::http::ContentType::OctetStream.as_str(),
                                 )
                                 .body(::xidl_rust_axum::axum::body::Body::from(payload))
                                 .map_err(|err| xidl_rust_axum::Error::new(
@@ -424,12 +424,12 @@ where
                         FileResponse::Json(payload) => {
                             if !xidl_rust_axum::http::accepts_media_type(
                                 &headers,
-                                "application/json",
+                                xidl_rust_axum::http::ContentType::Json.as_str(),
                             ) {
                                 return Err(xidl_rust_axum::Error::not_acceptable());
                             }
                             let body = xidl_rust_axum::SerializeFactory::new(
-                                    "application/json",
+                                    xidl_rust_axum::http::ContentType::Json.as_str(),
                                 )
                                 .to_vec(&payload)?;
                             ::xidl_rust_axum::axum::response::Response::builder()
@@ -439,7 +439,7 @@ where
                                 )
                                 .header(
                                     ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                                    "application/json",
+                                    xidl_rust_axum::http::ContentType::Json.as_str(),
                                 )
                                 .body(::xidl_rust_axum::axum::body::Body::from(body))
                                 .map_err(|err| xidl_rust_axum::Error::new(
@@ -450,7 +450,7 @@ where
                         FileResponse::OctetStream(payload) => {
                             if !xidl_rust_axum::http::accepts_media_type(
                                 &headers,
-                                "application/octet-stream",
+                                xidl_rust_axum::http::ContentType::OctetStream.as_str(),
                             ) {
                                 return Err(xidl_rust_axum::Error::not_acceptable());
                             }
@@ -461,7 +461,7 @@ where
                                 )
                                 .header(
                                     ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                                    "application/octet-stream",
+                                    xidl_rust_axum::http::ContentType::OctetStream.as_str(),
                                 )
                                 .body(::xidl_rust_axum::axum::body::Body::from(payload))
                                 .map_err(|err| xidl_rust_axum::Error::new(
@@ -561,20 +561,23 @@ impl FilesClient {
                 .and_then(|value| value.to_str().ok())
                 .unwrap_or_default()
                 .to_string();
-            if xidl_rust_axum::http::media_type_eq(&content_type, "application/json") {
+            if xidl_rust_axum::http::media_type_eq(
+                &content_type,
+                xidl_rust_axum::http::ContentType::Json.as_str(),
+            ) {
                 let body = resp
                     .bytes()
                     .await
                     .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 let payload: FileMeta = xidl_rust_axum::DeserializeFactory::new(
-                        "application/json",
+                        xidl_rust_axum::http::ContentType::Json.as_str(),
                     )
                     .from_slice(&body)?;
                 return Ok(FileResponse::Json(payload));
             }
             if xidl_rust_axum::http::media_type_eq(
                 &content_type,
-                "application/octet-stream",
+                xidl_rust_axum::http::ContentType::OctetStream.as_str(),
             ) {
                 let payload = resp
                     .bytes()
@@ -667,13 +670,16 @@ impl FilesClient {
                 }
                 None => ::core::default::Default::default(),
             };
-            if xidl_rust_axum::http::media_type_eq(&content_type, "application/json") {
+            if xidl_rust_axum::http::media_type_eq(
+                &content_type,
+                xidl_rust_axum::http::ContentType::Json.as_str(),
+            ) {
                 let body = resp
                     .bytes()
                     .await
                     .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 let payload: FileMeta = xidl_rust_axum::DeserializeFactory::new(
-                        "application/json",
+                        xidl_rust_axum::http::ContentType::Json.as_str(),
                     )
                     .from_slice(&body)?;
                 return Ok(FilesGetFileResponse {
@@ -683,7 +689,7 @@ impl FilesClient {
             }
             if xidl_rust_axum::http::media_type_eq(
                 &content_type,
-                "application/octet-stream",
+                xidl_rust_axum::http::ContentType::OctetStream.as_str(),
             ) {
                 let payload = resp
                     .bytes()

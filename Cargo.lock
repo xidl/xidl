@@ -3461,6 +3461,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "xidl-http"
+version = "0.97.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "xidl-jsonrpc"
 version = "0.97.0"
 dependencies = [
@@ -3497,6 +3505,7 @@ dependencies = [
  "serde_json",
  "tree-sitter",
  "tree-sitter-idl",
+ "xidl-http",
  "xidl-parser-derive",
 ]
 
@@ -3535,6 +3544,7 @@ dependencies = [
  "tokio-tungstenite",
  "tokio-util",
  "tower-http 0.7.0",
+ "xidl-http",
 ]
 
 [[package]]

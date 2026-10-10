@@ -1,0 +1,19 @@
+[package]
+name = "xidl-http"
+version.workspace = true
+edition.workspace = true
+description = "Shared HTTP protocol types for xidl compilers and runtimes."
+license.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+repository.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+serde.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true

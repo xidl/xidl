@@ -6,6 +6,7 @@ members = [
   "xidl-parser-derive",
   "crates/xidl-jsonrpc",
   "crates/xidl-rust-axum",
+  "crates/xidl-http",
   "xidlc",
   "xidl-parser",
   "xidl-typeobject",
@@ -25,6 +26,7 @@ repository = "https://github.com/xidl/xidl"
 strip = true
 
 [workspace.dependencies]
+xidl-http = { version = "0.97.0", path = "crates/xidl-http" }
 xidl-parser = { version = "0.97.0", path = "xidl-parser" }
 xidl-parser-derive = { version = "0.97.0", path = "xidl-parser-derive" }
 xidl-jsonrpc = { version = "0.97.0", path = "crates/xidl-jsonrpc" }

@@ -112,9 +112,9 @@ impl HttpUnion {
                         union.ident, case_ident
                     )));
                 }
-                let content_type = hir::field_rename(&enumerator.annotations).ok_or_else(|| {
+                let content_type = xidl_http::ContentType::from_idl_name(&enumerator.ident).ok_or_else(|| {
                     ParseError::Message(format!(
-                        "@http union '{}': built-in ContentType member '{}' has no media type",
+                        "@http union '{}': built-in ContentType member '{}' has no runtime definition",
                         union.ident, enumerator.ident
                     ))
                 })?;
@@ -129,7 +129,6 @@ impl HttpUnion {
                 };
                 types.qualify(&mut ty, module_path)?;
                 cases.push(HttpRepresentation {
-                    case: case_ident,
                     content_type,
                     is_byte: is_byte_sequence(&ty),
                     ty,

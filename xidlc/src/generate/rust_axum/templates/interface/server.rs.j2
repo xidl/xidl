@@ -403,7 +403,7 @@ T: {{ ident }} + Send + Sync + 'static,
                                         match union_value {
                                             {% for repr in method.representations %}
                                                 {{ method.response_union }}::{{ repr.variant }}(payload) => {
-                                                    if !xidl_rust_axum::http::accepts_media_type(&headers, "{{ repr.content_type }}") {
+                                                    if !xidl_rust_axum::http::accepts_media_type(&headers, xidl_rust_axum::http::ContentType::{{ repr.variant }}.as_str()) {
                                                         return Err(xidl_rust_axum::Error::not_acceptable());
                                                     }
                                                     {% if repr.is_byte %}
@@ -411,18 +411,18 @@ T: {{ ident }} + Send + Sync + 'static,
                                                         .status(::xidl_rust_axum::axum::http::StatusCode::from_u16({{ method.response_status }}).unwrap())
                                                         .header(
                                                         ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                                                        "{{ repr.content_type }}",
+                                                        xidl_rust_axum::http::ContentType::{{ repr.variant }}.as_str(),
                                                         )
                                                         .body(::xidl_rust_axum::axum::body::Body::from(payload))
                                                         .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?
                                                     {% else %}
-                                                        let body = xidl_rust_axum::SerializeFactory::new("{{ repr.content_type }}")
+                                                        let body = xidl_rust_axum::SerializeFactory::new(xidl_rust_axum::http::ContentType::{{ repr.variant }}.as_str())
                                                         .to_vec(&payload)?;
                                                         ::xidl_rust_axum::axum::response::Response::builder()
                                                         .status(::xidl_rust_axum::axum::http::StatusCode::from_u16({{ method.response_status }}).unwrap())
                                                         .header(
                                                         ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                                                        "{{ repr.content_type }}",
+                                                        xidl_rust_axum::http::ContentType::{{ repr.variant }}.as_str(),
                                                         )
                                                         .body(::xidl_rust_axum::axum::body::Body::from(body))
                                                         .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?

@@ -746,7 +746,7 @@
                                         {% endif %}
                                     {% endif %}
                                     {% for repr in method.representations %}
-                                        if xidl_rust_axum::http::media_type_eq(&content_type, "{{ repr.content_type }}") {
+                                        if xidl_rust_axum::http::media_type_eq(&content_type, xidl_rust_axum::http::ContentType::{{ repr.variant }}.as_str()) {
                                             {% if repr.is_byte %}
                                                 let payload = resp
                                                 .bytes()
@@ -758,7 +758,7 @@
                                                 .bytes()
                                                 .await
                                                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-                                                let payload: {{ repr.ty }} = xidl_rust_axum::DeserializeFactory::new("{{ repr.content_type }}")
+                                                let payload: {{ repr.ty }} = xidl_rust_axum::DeserializeFactory::new(xidl_rust_axum::http::ContentType::{{ repr.variant }}.as_str())
                                                 .from_slice(&body)?;
                                             {% endif %}
                                             {% if method.response_struct %}

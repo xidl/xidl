@@ -51,10 +51,15 @@ test-update:
 
 # Run all coverage
 test-coverage:
-    cargo test -p xidl-parser -p xidl-jsonrpc -p xidl-rust-axum --all-features
+    cargo test -p xidl-http -p xidl-parser -p xidl-jsonrpc -p xidl-rust-axum --all-features
+    just test-xidl-http-coverage
     just test-xidl-parser-coverage
     just test-xidl-jsonrpc-coverage
     just test-xidl-rust-axum-coverage
+
+# Test shared HTTP protocol coverage
+test-xidl-http-coverage:
+    cargo tarpaulin --manifest-path crates/xidl-http/Cargo.toml --packages xidl-http --include-files "crates/xidl-http/src/*" --fail-under 95 --out Stdout
 
 # Test rust axum coverage
 test-xidl-rust-axum-coverage:

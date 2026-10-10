@@ -210,7 +210,7 @@ fn http_union_rules_are_shared_by_source_generation_targets() {
         for (source, expected) in [
             (
                 "@http union Payload switch(ContentType) { case Json: string value; }; struct Meta { ContentType media; };",
-                "compile-time only",
+                "ordinary IDL values cannot reference runtime types",
             ),
             (
                 "enum Mime { Json, }; @http union Payload switch(Mime) { case Json: string value; };",

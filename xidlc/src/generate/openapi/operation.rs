@@ -238,7 +238,7 @@ pub(crate) fn render_http_operation(
                     scope.schema_for_type(&repr.ty)?
                 };
                 Ok(RepresentationInfo {
-                    content_type: repr.content_type.clone(),
+                    content_type: repr.content_type.as_str().to_string(),
                     schema,
                 })
             })

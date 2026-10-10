@@ -449,12 +449,12 @@ where
                         representations::FileResponse::Json(payload) => {
                             if !xidl_rust_axum::http::accepts_media_type(
                                 &headers,
-                                "application/json",
+                                xidl_rust_axum::http::ContentType::Json.as_str(),
                             ) {
                                 return Err(xidl_rust_axum::Error::not_acceptable());
                             }
                             let body = xidl_rust_axum::SerializeFactory::new(
-                                    "application/json",
+                                    xidl_rust_axum::http::ContentType::Json.as_str(),
                                 )
                                 .to_vec(&payload)?;
                             ::xidl_rust_axum::axum::response::Response::builder()
@@ -464,7 +464,7 @@ where
                                 )
                                 .header(
                                     ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                                    "application/json",
+                                    xidl_rust_axum::http::ContentType::Json.as_str(),
                                 )
                                 .body(::xidl_rust_axum::axum::body::Body::from(body))
                                 .map_err(|err| xidl_rust_axum::Error::new(
@@ -475,7 +475,7 @@ where
                         representations::FileResponse::OctetStream(payload) => {
                             if !xidl_rust_axum::http::accepts_media_type(
                                 &headers,
-                                "application/octet-stream",
+                                xidl_rust_axum::http::ContentType::OctetStream.as_str(),
                             ) {
                                 return Err(xidl_rust_axum::Error::not_acceptable());
                             }
@@ -486,7 +486,7 @@ where
                                 )
                                 .header(
                                     ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                                    "application/octet-stream",
+                                    xidl_rust_axum::http::ContentType::OctetStream.as_str(),
                                 )
                                 .body(::xidl_rust_axum::axum::body::Body::from(payload))
                                 .map_err(|err| xidl_rust_axum::Error::new(
@@ -497,12 +497,12 @@ where
                         representations::FileResponse::Text(payload) => {
                             if !xidl_rust_axum::http::accepts_media_type(
                                 &headers,
-                                "text/plain",
+                                xidl_rust_axum::http::ContentType::Text.as_str(),
                             ) {
                                 return Err(xidl_rust_axum::Error::not_acceptable());
                             }
                             let body = xidl_rust_axum::SerializeFactory::new(
-                                    "text/plain",
+                                    xidl_rust_axum::http::ContentType::Text.as_str(),
                                 )
                                 .to_vec(&payload)?;
                             ::xidl_rust_axum::axum::response::Response::builder()
@@ -512,7 +512,7 @@ where
                                 )
                                 .header(
                                     ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                                    "text/plain",
+                                    xidl_rust_axum::http::ContentType::Text.as_str(),
                                 )
                                 .body(::xidl_rust_axum::axum::body::Body::from(body))
                                 .map_err(|err| xidl_rust_axum::Error::new(
@@ -765,13 +765,16 @@ impl EnvelopeApiClient {
                 }
                 None => ::core::default::Default::default(),
             };
-            if xidl_rust_axum::http::media_type_eq(&content_type, "application/json") {
+            if xidl_rust_axum::http::media_type_eq(
+                &content_type,
+                xidl_rust_axum::http::ContentType::Json.as_str(),
+            ) {
                 let body = resp
                     .bytes()
                     .await
                     .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 let payload: representations::FileMeta = xidl_rust_axum::DeserializeFactory::new(
-                        "application/json",
+                        xidl_rust_axum::http::ContentType::Json.as_str(),
                     )
                     .from_slice(&body)?;
                 return Ok(EnvelopeApiGetFileResponse {
@@ -783,7 +786,7 @@ impl EnvelopeApiClient {
             }
             if xidl_rust_axum::http::media_type_eq(
                 &content_type,
-                "application/octet-stream",
+                xidl_rust_axum::http::ContentType::OctetStream.as_str(),
             ) {
                 let payload = resp
                     .bytes()
@@ -797,13 +800,16 @@ impl EnvelopeApiClient {
                     cached,
                 });
             }
-            if xidl_rust_axum::http::media_type_eq(&content_type, "text/plain") {
+            if xidl_rust_axum::http::media_type_eq(
+                &content_type,
+                xidl_rust_axum::http::ContentType::Text.as_str(),
+            ) {
                 let body = resp
                     .bytes()
                     .await
                     .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 let payload: String = xidl_rust_axum::DeserializeFactory::new(
-                        "text/plain",
+                        xidl_rust_axum::http::ContentType::Text.as_str(),
                     )
                     .from_slice(&body)?;
                 return Ok(EnvelopeApiGetFileResponse {
