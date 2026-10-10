@@ -1,6 +1,4 @@
-use super::interface_types::{
-    axum_type, header_item_is_primitive, header_item_is_string, header_item_ty,
-};
+use super::interface_types::{header_item_is_primitive, header_item_is_string};
 use super::{ExceptionMemberContext, RaisesContext, RenderEnv};
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::rust::util::rust_ident;
@@ -51,14 +49,14 @@ impl RaisesContext {
                         field: rust_ident(&member.field),
                         wire_name: member.wire_name.clone(),
                         ty: if member.is_multi {
-                            format!("Vec<{}>", header_item_ty(&member.ty))
+                            format!("Vec<{}>", env.header_item_ty(&member.ty))
                         } else if member.optional {
-                            format!("Option<{}>", axum_type(&member.ty))
+                            format!("Option<{}>", env.axum_type(&member.ty))
                         } else {
-                            axum_type(&member.ty)
+                            env.axum_type(&member.ty)
                         },
                         is_multi: member.is_multi,
-                        item_ty: header_item_ty(&member.ty),
+                        item_ty: env.header_item_ty(&member.ty),
                         item_is_string: header_item_is_string(&member.ty),
                         item_is_primitive: header_item_is_primitive(&member.ty),
                         optional: member.optional,

@@ -5,7 +5,6 @@ use crate::generate::rust_axum::interface::interface_http::{
     http_method_from_hir, reqwest_method_code, security_context,
 };
 use crate::generate::rust_axum::interface::interface_method_params::find_input_binding;
-use crate::generate::rust_axum::interface::interface_types::axum_type;
 use crate::generate::rust_axum::interface::{MethodContext, ParamContext, ParamSource, RenderEnv};
 use crate::generate::rust_axum::transport::{
     TransportDirection, TransportTracker, decode_expr, encode_expr,
@@ -56,7 +55,7 @@ pub(crate) fn render_attr_operation_from_http(
                 | xidl_parser::rest_hir::HttpSignatureParamDirection::InOut
         ) {
             let param_name = rust_ident(&p.name);
-            let ty = axum_type(&p.ty);
+            let ty = env.axum_type(&p.ty);
             params.push(format!("{param_name}: {ty}"));
             param_names.push(param_name.clone());
             server_params.push(format!("{param_name}: {ty}"));
@@ -99,7 +98,7 @@ pub(crate) fn render_attr_operation_from_http(
         .signature
         .return_type
         .as_ref()
-        .map(axum_type)
+        .map(|ty| env.axum_type(ty))
         .unwrap_or_else(|| "()".to_string());
     let ret_in_ty = match &http_op.signature.return_type {
         Some(ty) => transport.map_type(ty, TransportDirection::In, env.registry)?,

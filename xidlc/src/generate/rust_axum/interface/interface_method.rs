@@ -1,4 +1,3 @@
-use super::interface_types::{axum_type, render_scoped_name};
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::rust::util::{rust_ident, rust_passthrough_attrs_from_annotations};
 use crate::generate::rust_axum::interface::{
@@ -67,7 +66,7 @@ pub(crate) fn render_op_from_http(
         )));
     }
 
-    let ret = op_return_ty(&op.ty);
+    let ret = op_return_ty(&op.ty, env);
     let ret_in_ty = match &op.ty {
         hir::OpTypeSpec::Void => "()".to_string(),
         hir::OpTypeSpec::TypeSpec(ty) => {
@@ -263,7 +262,7 @@ pub(crate) fn render_op_from_http(
         .map(|repr| RepresentationContext {
             variant: repr.case.to_case(convert_case::Case::Pascal),
             content_type: repr.content_type.clone(),
-            ty: axum_type(&repr.ty),
+            ty: env.axum_type(&repr.ty),
             is_byte: repr.is_byte,
         })
         .collect();
@@ -271,7 +270,7 @@ pub(crate) fn render_op_from_http(
         String::new()
     } else {
         match http_op.signature.return_type.as_ref() {
-            Some(hir::TypeSpec::ScopedName(scoped)) => render_scoped_name(scoped),
+            Some(hir::TypeSpec::ScopedName(scoped)) => env.render_scoped_name(scoped),
             _ => String::new(),
         }
     };

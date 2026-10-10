@@ -32,12 +32,10 @@ pub(crate) fn method_struct_prefix(interface_name: &str, method_name: &str) -> S
     )
 }
 
-pub(crate) fn op_return_ty(op_ty: &hir::OpTypeSpec) -> String {
+pub(crate) fn op_return_ty(op_ty: &hir::OpTypeSpec, env: RenderEnv<'_>) -> String {
     match op_ty {
         hir::OpTypeSpec::Void => "()".to_string(),
-        hir::OpTypeSpec::TypeSpec(ty) => {
-            crate::generate::rust_axum::interface::interface_types::axum_type(ty)
-        }
+        hir::OpTypeSpec::TypeSpec(ty) => env.axum_type(ty),
     }
 }
 
