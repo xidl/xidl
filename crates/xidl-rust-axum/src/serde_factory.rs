@@ -104,11 +104,11 @@ impl DeserializeFactory {
 }
 
 const fn supported_kind_from_mime(mime: &str) -> SerdeKind {
-    if eq_ignore_ascii_case(mime, "application/json") {
+    if eq_ignore_ascii_case(mime, crate::http::ContentType::Json.as_str()) {
         SerdeKind::Json
     } else if eq_ignore_ascii_case(mime, "application/x-www-form-urlencoded") {
         SerdeKind::Form
-    } else if eq_ignore_ascii_case(mime, "text/plain") {
+    } else if eq_ignore_ascii_case(mime, crate::http::ContentType::Text.as_str()) {
         SerdeKind::Plain
     } else if cfg!(feature = "msgpack") && eq_ignore_ascii_case(mime, "application/msgpack") {
         #[cfg(feature = "msgpack")]

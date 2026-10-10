@@ -2,6 +2,29 @@ use crate::error::ParserResult;
 use crate::hir::{self, Specification};
 use std::collections::HashMap;
 
+#[test]
+fn runtime_declaration_uses_the_ordinary_idl_parser() {
+    let definitions = super::HttpBuiltins::load().expect("parse shared runtime declaration");
+    let [
+        hir::Definition::TypeDcl(hir::TypeDcl::ConstrTypeDcl(hir::ConstrTypeDcl::EnumDcl(
+            enumeration,
+        ))),
+    ] = definitions.as_slice()
+    else {
+        panic!("runtime declaration must be a single ordinary enum");
+    };
+    assert_eq!(enumeration.ident, "ContentType");
+    assert_eq!(enumeration.member.len(), 3);
+    for member in &enumeration.member {
+        let value = xidl_http::ContentType::from_idl_name(&member.ident)
+            .expect("IDL member exists in runtime");
+        assert_eq!(
+            hir::field_rename(&member.annotations).as_deref(),
+            Some(value.as_str())
+        );
+    }
+}
+
 fn lower(source: &str) -> ParserResult<Specification> {
     Specification::from_typed_ast_with_properties_and_path(
         crate::parser::parser_text(source)?,
@@ -57,7 +80,7 @@ fn builtin_stays_out_of_user_models_and_survives_hir_round_trip() {
 }
 
 #[test]
-fn rejects_runtime_references_to_compile_time_builtins() {
+fn rejects_unsupported_idl_value_references_to_runtime_builtins() {
     for declaration in [
         "struct Meta { ::ContentType media; };",
         "struct Meta { sequence<ContentType> media; };",
@@ -84,9 +107,11 @@ fn rejects_runtime_references_to_compile_time_builtins() {
         let source = format!(
             "@http union Payload switch(ContentType) {{ case Json: string value; }}; {declaration}"
         );
-        let error = lower(&source).expect_err("builtin has no runtime representation");
+        let error = lower(&source).expect_err("IDL does not support external runtime values");
         assert!(
-            error.to_string().contains("compile-time only"),
+            error
+                .to_string()
+                .contains("ordinary IDL values cannot reference runtime types"),
             "{declaration}: {error}"
         );
     }

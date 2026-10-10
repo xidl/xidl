@@ -1,5 +1,8 @@
 use http::{HeaderMap, header};
 
+/// Shared HTTP discriminator; generated files reference this runtime type.
+pub use xidl_http::ContentType;
+
 /// Returns `true` when the request accepts `expected` according to `Accept`.
 ///
 /// Missing `Accept` headers are treated as accepting any media type.

@@ -15,8 +15,8 @@ impl TsRepresentationContext {
             .representations
             .iter()
             .map(|repr| TsRepresentationContext {
-                kind: repr.case.clone(),
-                content_type: repr.content_type.clone(),
+                kind: repr.content_type.idl_name().to_string(),
+                content_type: repr.content_type.as_str().to_string(),
                 value_ty: ts_type_for_type_spec(&repr.ty, module_path, TypeRefTarget::Client),
                 schema: zod_schema_for_type_spec_with_prefix(
                     &repr.ty,

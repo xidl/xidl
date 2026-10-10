@@ -13,7 +13,6 @@ use crate::generate::rust_axum::interface::{
     },
 };
 use crate::generate::rust_axum::transport::{TransportDirection, TransportTracker};
-use convert_case::Casing;
 use xidl_parser::hir;
 use xidl_parser::rest_hir::{
     HttpOperation, HttpRequestBodyShape, HttpResponseBodyShape, HttpStreamPayloadCodec,
@@ -260,8 +259,8 @@ pub(crate) fn render_op_from_http(
         .representations
         .iter()
         .map(|repr| RepresentationContext {
-            variant: repr.case.to_case(convert_case::Case::Pascal),
-            content_type: repr.content_type.clone(),
+            variant: repr.content_type.idl_name().to_string(),
+            content_type: repr.content_type.as_str().to_string(),
             ty: env.axum_type(&repr.ty),
             is_byte: repr.is_byte,
         })

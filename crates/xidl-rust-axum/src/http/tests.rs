@@ -3,6 +3,34 @@ use super::*;
 use http::{HeaderMap, HeaderValue, header};
 use serde::Deserialize;
 
+#[test]
+fn shared_content_types_compose_with_runtime_codecs_and_headers() {
+    let shared: xidl_http::ContentType = ContentType::Json;
+    let json = crate::SerializeFactory::new(shared.as_str())
+        .to_vec(&vec![1, 2])
+        .expect("shared JSON representation");
+    let decoded: Vec<u8> = crate::DeserializeFactory::new(ContentType::Json.as_str())
+        .from_slice(&json)
+        .expect("decode shared JSON representation");
+    assert_eq!(decoded, [1, 2]);
+    let text = crate::SerializeFactory::new(ContentType::Text.as_str())
+        .to_vec(&"plain body")
+        .expect("shared text representation");
+    assert_eq!(text, b"plain body");
+    let mut headers = HeaderMap::new();
+    headers.insert(
+        header::CONTENT_TYPE,
+        HeaderValue::from_static("Application/Octet-Stream; mode=raw"),
+    );
+    assert!(content_type_matches(
+        &headers,
+        ContentType::OctetStream.as_str()
+    ));
+    headers.insert(header::ACCEPT, HeaderValue::from_static("TEXT/*"));
+    assert!(accepts_media_type(&headers, ContentType::Text.as_str()));
+    assert!(!accepts_media_type(&headers, ContentType::Json.as_str()));
+}
+
 #[derive(Debug, Deserialize, PartialEq, Eq)]
 struct DefaultedPayload {
     #[serde(

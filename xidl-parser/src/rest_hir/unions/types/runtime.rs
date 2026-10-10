@@ -3,7 +3,7 @@ use crate::error::{ParseError, ParserResult};
 use crate::hir;
 
 impl TypeDeclarations<'_> {
-    /// Builtins have no runtime model: only HTTP discriminators and labels may use them.
+    /// IDL references support HTTP discriminators, not external runtime value types.
     pub(in crate::rest_hir::unions) fn validate_runtime_references(
         &self,
         definitions: &[hir::Definition],
@@ -33,7 +33,7 @@ impl TypeDeclarations<'_> {
             if let Some(decl) = self.resolve(&reference, scope) {
                 if matches!(decl.kind, DeclarationKind::BuiltinEnum(_)) {
                     return Err(ParseError::Message(format!(
-                        "HTTP built-in '{}' is compile-time only; use it only as an @http union discriminator or case label (reference '{}')",
+                        "HTTP built-in '{}' is only supported as an @http union discriminator or case label in IDL; ordinary IDL values cannot reference runtime types (reference '{}')",
                         decl.ident,
                         name.name.join("::")
                     )));

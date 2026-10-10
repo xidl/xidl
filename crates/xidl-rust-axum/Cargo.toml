@@ -37,6 +37,7 @@ stream = [
 workspace = true
 
 [dependencies]
+xidl-http.workspace = true
 cookie = { version = "0.18.2", features = ["percent-encode"] }
 http.workspace = true
 bytes.workspace = true

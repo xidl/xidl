@@ -1,7 +1,0 @@
-// Built-in discriminator for content-negotiated HTTP response unions.
-// Compiler-only: not a field type and never emitted as a runtime model.
-enum ContentType {
-    @rename("application/json") Json,
-    @rename("application/octet-stream") OctetStream,
-    @rename("text/plain") Text,
-};
