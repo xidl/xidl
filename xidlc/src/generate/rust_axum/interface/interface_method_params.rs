@@ -5,9 +5,8 @@ use crate::generate::rust_axum::interface::{
     interface_annotations::serde_rename,
     interface_method_support::{param_source_code, path_param_template_name, transport_param_type},
     interface_types::{
-        axum_type, cookie_is_multi, cookie_item_is_primitive, cookie_item_is_string,
-        cookie_item_ty, header_is_multi, header_item_is_primitive, header_item_is_string,
-        header_item_ty, render_param_type,
+        cookie_is_multi, cookie_item_is_primitive, cookie_item_is_string, header_is_multi,
+        header_item_is_primitive, header_item_is_string,
     },
 };
 use crate::generate::rust_axum::transport::{
@@ -59,8 +58,8 @@ pub(crate) fn collect_method_params(
         let name = rust_ident(&p.name);
         let optional = p.is_optional;
         let flatten = p.is_flatten;
-        let inner_ty = axum_type(&p.ty);
-        let ty = render_param_type(&p.ty, optional);
+        let inner_ty = env.axum_type(&p.ty);
+        let ty = env.render_param_type(&p.ty, optional);
 
         // Input
         use xidl_parser::rest_hir::HttpSignatureParamDirection as Dir;
@@ -266,7 +265,7 @@ fn build_param_context(
         raw_name: input.sig_param.name.clone(),
         wire_name: input.wire_name.to_string(),
         path_template_name: input.path_template_name,
-        ty: render_param_type(&input.sig_param.ty, input.optional),
+        ty: env.render_param_type(&input.sig_param.ty, input.optional),
         in_ty: transport_param_type(
             &input.sig_param.ty,
             input.optional,
@@ -284,11 +283,11 @@ fn build_param_context(
         source: param_source_code(input.source),
         serde_rename: input.serde_name,
         header_is_multi: header_is_multi(&input.sig_param.ty),
-        header_item_ty: header_item_ty(&input.sig_param.ty),
+        header_item_ty: env.header_item_ty(&input.sig_param.ty),
         header_item_is_string: header_item_is_string(&input.sig_param.ty),
         header_item_is_primitive: header_item_is_primitive(&input.sig_param.ty),
         cookie_is_multi: cookie_is_multi(&input.sig_param.ty),
-        cookie_item_ty: cookie_item_ty(&input.sig_param.ty),
+        cookie_item_ty: env.cookie_item_ty(&input.sig_param.ty),
         cookie_item_is_string: cookie_item_is_string(&input.sig_param.ty),
         cookie_item_is_primitive: cookie_item_is_primitive(&input.sig_param.ty),
         optional: input.optional,
