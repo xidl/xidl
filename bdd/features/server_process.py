@@ -16,12 +16,17 @@ def start_server_process(args, **kwargs):
 def stop_server_process(process, timeout=5):
     # The launcher can exit before its children finish writing (e.g. Next.js).
     # Reap it while waiting for the session's entire process group to disappear.
+    permission_error = None
     for sig in (signal.SIGTERM, signal.SIGKILL):
         try:
             os.killpg(process.pid, sig)
         except ProcessLookupError:
             process.wait(timeout=timeout)
             return
+        except PermissionError as error:
+            # Darwin can report EPERM while a group contains only zombies.
+            # It still exists: keep waiting for ESRCH, never infer success.
+            permission_error = error
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
             process.poll()
@@ -30,5 +35,9 @@ def stop_server_process(process, timeout=5):
             except ProcessLookupError:
                 process.wait(timeout=timeout)
                 return
+            except PermissionError as error:
+                permission_error = error
             time.sleep(0.05)
-    raise TimeoutError(f"BDD server process group {process.pid} did not exit")
+    raise TimeoutError(
+        f"BDD server process group {process.pid} did not exit"
+    ) from permission_error
