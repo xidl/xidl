@@ -63,10 +63,13 @@ export async function executeOperation<
     const typed = operation.errors?.match(error);
     if (typed) {
       const headers = typed.headers ?? new Headers();
-      return new Response(typed.body === undefined ? null : JSON.stringify(typed.body), {
-        status: typed.status,
-        headers,
-      });
+      return new Response(
+        typed.body === undefined ? null : JSON.stringify(typed.body),
+        {
+          headers,
+          status: typed.status,
+        },
+      );
     }
     if (options.onError) {
       return options.onError(error, context);
