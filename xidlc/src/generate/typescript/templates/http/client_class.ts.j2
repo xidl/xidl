@@ -46,8 +46,8 @@
         {% if method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs);
         const responsePayload = buildResponsePayload(responseBody, resp, "{{ method.response_body_mode }}", [{% for entry in method.response_body_entries %}{ wireName: "{{ entry.raw_name }}", key: "{{ entry.key_name }}" }{% if not loop.last %}, {% endif %}{% endfor %}], {{ response_value_specs(method.response_header_params) }}, {{ response_value_specs(method.response_cookie_params) }});
         return ifaceSchemas.{{ method.response_schema_ref }}Schema.parse(deserialize(responsePayload, ifaceSchemas.{{ method.response_schema_ref }}Schema)) as {{ render_type(method.return_ty) }};
-        {% elif method.return_ty.kind == "Void" %}return;
-        {% else %}return await decodeResponseBody<{{ render_type(method.return_ty) }}>(resp, "{{ method.response_content_type }}", this.codecs);
+        {%- elif method.return_ty.kind == "Void" %}return;
+        {%- else %}return await decodeResponseBody<{{ render_type(method.return_ty) }}>(resp, "{{ method.response_content_type }}", this.codecs);
         {% endif %}
         {% else %}{% if method.body_single %}const xidlBody = {% if method.request_schema_ref %}parsed["{{ method.body_single }}"]{% else %}{{ method.body_single }}{% endif %};
         {% elif method.body_entries | length > 0 %}const xidlBody = { {% for entry in method.body_entries %}"{{ entry.raw_name }}": {% if method.request_schema_ref %}parsed["{{ entry.key_name }}"]{% else %}{{ entry.access }}{% endif %}{% if not loop.last %}, {% endif %}{% endfor %} };
@@ -73,11 +73,11 @@
             }
         {%- endfor %}
         throw await parseXidlError(resp);
-        {% elif method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs);
+        {%- elif method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs);
         const responsePayload = buildResponsePayload(responseBody, resp, "{{ method.response_body_mode }}", [{% for entry in method.response_body_entries %}{ wireName: "{{ entry.raw_name }}", key: "{{ entry.key_name }}" }{% if not loop.last %}, {% endif %}{% endfor %}], {{ response_value_specs(method.response_header_params) }}, {{ response_value_specs(method.response_cookie_params) }});
         return ifaceSchemas.{{ method.response_schema_ref }}Schema.parse(deserialize(responsePayload, ifaceSchemas.{{ method.response_schema_ref }}Schema)) as {{ render_type(method.return_ty) }};
-        {% elif method.return_ty.kind == "Void" %}return;
-        {% else %}return await decodeResponseBody<{{ render_type(method.return_ty) }}>(resp, "{{ method.response_content_type }}", this.codecs);
+        {%- elif method.return_ty.kind == "Void" %}return;
+        {%- else %}return await decodeResponseBody<{{ render_type(method.return_ty) }}>(resp, "{{ method.response_content_type }}", this.codecs);
         {%- endif %}{% endif %}
     }
     {% endfor %}
