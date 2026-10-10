@@ -1,5 +1,5 @@
 export namespace {{ ident }} {
     {%- for block in blocks %}
-        {{- block }}
+        {{- "\n" }}{{ block }}
     {%- endfor %}
 }

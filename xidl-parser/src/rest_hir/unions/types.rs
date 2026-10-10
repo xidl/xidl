@@ -4,7 +4,13 @@ use crate::hir;
 struct Declaration<'a> {
     module_path: Vec<String>,
     ident: &'a str,
-    enum_def: Option<&'a hir::EnumDcl>,
+    kind: DeclarationKind<'a>,
+}
+
+enum DeclarationKind<'a> {
+    Enum(&'a hir::EnumDcl),
+    Type,
+    Other,
 }
 
 /// Borrowed type declarations used while projecting HTTP unions.
@@ -21,6 +27,11 @@ impl<'a> TypeDeclarations<'a> {
         for definition in definitions {
             match definition {
                 hir::Definition::ModuleDcl(module) => {
+                    self.0.push(Declaration {
+                        module_path: scope.to_vec(),
+                        ident: &module.ident,
+                        kind: DeclarationKind::Other,
+                    });
                     let mut nested = scope.to_vec();
                     nested.push(module.ident.clone());
                     self.collect_scope(&module.definition, &nested);
@@ -28,6 +39,9 @@ impl<'a> TypeDeclarations<'a> {
                 hir::Definition::TypeDcl(hir::TypeDcl::ConstrTypeDcl(ty))
                 | hir::Definition::ConstrTypeDcl(ty) => self.collect_constructed(ty, scope),
                 hir::Definition::TypeDcl(hir::TypeDcl::TypedefDcl(ty)) => {
+                    if let hir::TypedefType::ConstrTypeDcl(ty) = &ty.ty {
+                        self.collect_constructed(ty, scope);
+                    }
                     for decl in &ty.decl {
                         let ident = match decl {
                             hir::Declarator::SimpleDeclarator(s) => &s.0,
@@ -36,32 +50,48 @@ impl<'a> TypeDeclarations<'a> {
                         self.0.push(Declaration {
                             module_path: scope.to_vec(),
                             ident,
-                            enum_def: None,
+                            kind: DeclarationKind::Type,
                         });
                     }
                 }
+                hir::Definition::TypeDcl(hir::TypeDcl::NativeDcl(native)) => {
+                    self.0.push(Declaration {
+                        module_path: scope.to_vec(),
+                        ident: &native.decl.0,
+                        kind: DeclarationKind::Type,
+                    });
+                }
+                hir::Definition::ConstDcl(value) => self.0.push(Declaration {
+                    module_path: scope.to_vec(),
+                    ident: &value.ident,
+                    kind: DeclarationKind::Other,
+                }),
+                hir::Definition::ExceptDcl(value) => self.0.push(Declaration {
+                    module_path: scope.to_vec(),
+                    ident: &value.ident,
+                    kind: DeclarationKind::Type,
+                }),
+                hir::Definition::InterfaceDcl(value) => self.0.push(Declaration {
+                    module_path: scope.to_vec(),
+                    ident: match &value.decl {
+                        hir::InterfaceDclInner::InterfaceDef(def) => &def.header.ident,
+                        hir::InterfaceDclInner::InterfaceForwardDcl(def) => &def.ident,
+                    },
+                    kind: DeclarationKind::Other,
+                }),
                 _ => {}
             }
         }
     }
 
     fn collect_constructed(&mut self, ty: &'a hir::ConstrTypeDcl, scope: &[String]) {
-        let ident = match ty {
-            hir::ConstrTypeDcl::StructDcl(v) => &v.ident,
-            hir::ConstrTypeDcl::StructForwardDcl(v) => &v.ident,
-            hir::ConstrTypeDcl::UnionDef(v) => &v.ident,
-            hir::ConstrTypeDcl::UnionForwardDcl(v) => &v.ident,
-            hir::ConstrTypeDcl::EnumDcl(v) => &v.ident,
-            hir::ConstrTypeDcl::BitsetDcl(v) => &v.ident,
-            hir::ConstrTypeDcl::BitmaskDcl(v) => &v.ident,
-        };
         self.0.push(Declaration {
             module_path: scope.to_vec(),
-            ident,
-            enum_def: if let hir::ConstrTypeDcl::EnumDcl(v) = ty {
-                Some(v)
+            ident: ty.ident(),
+            kind: if let hir::ConstrTypeDcl::EnumDcl(v) = ty {
+                DeclarationKind::Enum(v)
             } else {
-                None
+                DeclarationKind::Type
             },
         });
     }
@@ -77,23 +107,54 @@ impl<'a> TypeDeclarations<'a> {
         )
     }
 
-    pub(super) fn enum_definition(
+    pub(super) fn content_type(
         &self,
         name: &hir::ScopedName,
         scope: &[String],
     ) -> Option<&'a hir::EnumDcl> {
-        self.resolve(name, scope)?.enum_def
+        let declaration = self.resolve(name, scope)?;
+        match declaration.kind {
+            DeclarationKind::Enum(enumeration)
+                if declaration.module_path.is_empty() && declaration.ident == "ContentType" =>
+            {
+                Some(enumeration)
+            }
+            _ => None,
+        }
+    }
+
+    pub(super) fn content_type_member<'b>(
+        &self,
+        name: &hir::ScopedName,
+        scope: &[String],
+        content_type: &'b hir::EnumDcl,
+    ) -> Option<&'b hir::Enumerator> {
+        let (ident, owner) = name.name.split_last()?;
+        if !owner.is_empty() {
+            let owner = hir::ScopedName {
+                name: owner.to_vec(),
+                is_root: name.is_root,
+            };
+            self.content_type(&owner, scope)?;
+        }
+        content_type
+            .member
+            .iter()
+            .find(|member| &member.ident == ident)
     }
 
     pub(super) fn qualify(&self, ty: &mut hir::TypeSpec, scope: &[String]) -> ParserResult<()> {
         match ty {
             hir::TypeSpec::ScopedName(name) => {
-                let decl = self.resolve(name, scope).ok_or_else(|| {
-                    ParseError::Message(format!(
-                        "HTTP union payload type '{}' does not resolve",
-                        name.name.join("::")
-                    ))
-                })?;
+                let decl = self
+                    .resolve(name, scope)
+                    .filter(|decl| !matches!(decl.kind, DeclarationKind::Other))
+                    .ok_or_else(|| {
+                        ParseError::Message(format!(
+                            "HTTP union payload type '{}' does not resolve",
+                            name.name.join("::")
+                        ))
+                    })?;
                 name.name = decl
                     .module_path
                     .iter()

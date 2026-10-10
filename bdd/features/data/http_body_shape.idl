@@ -1,3 +1,5 @@
+// Regression coverage for the shared HTTP body/metadata paths changed by #307.
+// The direct #296 multi-representation scenario lives in http_envelope.idl.
 #pragma xidlc package Demo API
 #pragma xidlc version v1
 

@@ -12,7 +12,7 @@ use types::TypeDeclarations;
 
 impl HttpUnion {
     /// Collects `@http` unions with their content-negotiated cases resolved.
-    pub(super) fn collect(definitions: &[hir::Definition]) -> ParserResult<Vec<HttpUnion>> {
+    pub(crate) fn collect(definitions: &[hir::Definition]) -> ParserResult<Vec<HttpUnion>> {
         let types = TypeDeclarations::collect(definitions);
         let mut out = Vec::new();
         fn walk(
@@ -56,18 +56,19 @@ impl HttpUnion {
     ) -> ParserResult<Vec<HttpRepresentation>> {
         let hir::SwitchTypeSpec::ScopedName(scoped) = &union.switch_type_spec else {
             return Err(ParseError::Message(format!(
-                "@http union '{}': the switch discriminator must be an enum",
+                "@http union '{}': the switch discriminator must be the built-in ::ContentType",
                 union.ident
             )));
         };
-        let enum_def = types.enum_definition(scoped, module_path).ok_or_else(|| {
+        let enum_def = types.content_type(scoped, module_path).ok_or_else(|| {
             ParseError::Message(format!(
-                "@http union '{}': switch enum '{}' does not resolve",
+                "@http union '{}': switch '{}' must resolve to the built-in ::ContentType",
                 union.ident,
                 scoped.name.join("::")
             ))
         })?;
         let mut cases = Vec::new();
+        let mut seen = HashSet::new();
         for case in &union.case {
             if has_annotation(&case.element.annotations, "flatten") {
                 return Err(ParseError::Message(format!(
@@ -99,24 +100,24 @@ impl HttpUnion {
                         union.ident
                     )));
                 };
-                let case_ident = label_name.name.last().cloned().ok_or_else(|| {
-                    ParseError::Message(format!("@http union '{}': empty case label", union.ident))
-                })?;
-                let enumerator = enum_def
-                    .member
-                    .iter()
-                    .find(|member| member.ident == case_ident)
+                let enumerator = types
+                    .content_type_member(label_name, module_path, enum_def)
                     .ok_or_else(|| {
                         ParseError::Message(format!(
-                            "@http union '{}': case label '{}' is not a member of enum '{}'",
-                            union.ident, case_ident, enum_def.ident
+                            "@http union '{}': case label '{}' must name a member of the built-in ::ContentType",
+                            union.ident, label_name.name.join("::")
                         ))
                     })?;
-                let content_type = hir::field_rename(&enumerator.annotations)
-                .or_else(|| Self::well_known_media_type(&enumerator.ident))
-                .ok_or_else(|| {
+                let case_ident = enumerator.ident.clone();
+                if !seen.insert(case_ident.clone()) {
+                    return Err(ParseError::Message(format!(
+                        "@http union '{}': duplicate ContentType case '{}'",
+                        union.ident, case_ident
+                    )));
+                }
+                let content_type = hir::field_rename(&enumerator.annotations).ok_or_else(|| {
                     ParseError::Message(format!(
-                        "@http union '{}': cannot derive a media type from enum member '{}'; add @rename(\"...\") to it",
+                        "@http union '{}': built-in ContentType member '{}' has no media type",
                         union.ident, enumerator.ident
                     ))
                 })?;
@@ -139,23 +140,6 @@ impl HttpUnion {
             }
         }
         Ok(cases)
-    }
-
-    /// Well-known media types derivable from an enum member name; anything
-    /// else needs an explicit `@rename`.
-    fn well_known_media_type(ident: &str) -> Option<String> {
-        match ident.to_ascii_lowercase().as_str() {
-            "json" => Some("application/json".to_string()),
-            "octetstream" | "binary" | "bytes" => Some("application/octet-stream".to_string()),
-            "text" | "textplain" | "plaintext" => Some("text/plain".to_string()),
-            "xml" => Some("application/xml".to_string()),
-            "html" => Some("text/html".to_string()),
-            "msgpack" => Some("application/msgpack".to_string()),
-            "form" | "urlencoded" | "formurlencoded" => {
-                Some("application/x-www-form-urlencoded".to_string())
-            }
-            _ => None,
-        }
     }
 
     /// Resolves a (module path, identifier) pair for a scoped name written
@@ -230,15 +214,6 @@ impl HttpRepresentation {
                 "operation '{}': @http union responses cannot have additional body outputs; use header or cookie output parameters",
                 operation.meta.name
             )));
-        }
-        let mut seen = HashSet::new();
-        for case in &union.cases {
-            if !seen.insert(case.content_type.clone()) {
-                return Err(ParseError::Message(format!(
-                    "operation '{}': @http union '{}' declares duplicate media type '{}'",
-                    operation.meta.name, union.ident, case.content_type
-                )));
-            }
         }
         Ok(union.cases.clone())
     }

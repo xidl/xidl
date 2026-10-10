@@ -88,9 +88,15 @@ server.listen(0, '127.0.0.1', async () => {
     const raw = await client.get_file('raw');
     assert(raw.kind === 'OctetStream');
     assert.deepEqual(raw.value, new TextEncoder().encode('envelope-bytes'));
+    assert.equal(raw.etag, 'meta-v1');
+    assert.deepEqual(raw.tags, ['001', '"quoted"']);
+    assert.equal(raw.cached, false);
     const text = await client.get_file('text');
     assert(text.kind === 'Text');
     assert.equal(text.value, 'envelope-text');
+    assert.equal(text.etag, 'meta-v1');
+    assert.deepEqual(text.tags, ['001', '"quoted"']);
+    assert.equal(text.cached, false);
     await assert.rejects(client.get_file('missing'), NotFound);
     server.close(() => server.listen(port, '127.0.0.1'));
   } catch (error) {

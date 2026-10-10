@@ -11,7 +11,8 @@ openapi_http_union.json
       "ContentType": {
         "enum": [
           "application/json",
-          "application/octet-stream"
+          "application/octet-stream",
+          "text/plain"
         ],
         "type": "string"
       },

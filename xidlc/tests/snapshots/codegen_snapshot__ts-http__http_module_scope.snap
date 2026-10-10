@@ -180,6 +180,7 @@ http_module_scope.d.ts
 
     export namespace nm {
 
+
     export interface Item {
             
                 id: string;
@@ -193,7 +194,9 @@ http_module_scope.d.ts
                 }
 }
 
-    export namespace outer {    export namespace inner {
+    export namespace outer {
+    export namespace inner {
+
 
         export interface Leaf {
                 
@@ -449,6 +452,7 @@ import { z } from "zod";
 import { xjson } from "xidl-typescript-codec";
 
     export namespace nm {
+
     export const ItemSchema: z.ZodType<import("./http_module_scope").nm.Item> = z.lazy(() => z.object({
         
             id: z.coerce.string(),
@@ -464,7 +468,9 @@ import { xjson } from "xidl-typescript-codec";
         });
 }
 
-    export namespace outer {    export namespace inner {
+    export namespace outer {
+    export namespace inner {
+
             export const LeafSchema = z.object({
                 
                     id: z.coerce.string()

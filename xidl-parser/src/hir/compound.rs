@@ -12,6 +12,21 @@ pub enum ConstrTypeDcl {
     BitmaskDcl(BitmaskDcl),
 }
 
+impl ConstrTypeDcl {
+    /// Returns the name introduced by this constructed type declaration.
+    pub(crate) fn ident(&self) -> &str {
+        match self {
+            Self::StructDcl(value) => &value.ident,
+            Self::StructForwardDcl(value) => &value.ident,
+            Self::UnionDef(value) => &value.ident,
+            Self::UnionForwardDcl(value) => &value.ident,
+            Self::EnumDcl(value) => &value.ident,
+            Self::BitsetDcl(value) => &value.ident,
+            Self::BitmaskDcl(value) => &value.ident,
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UnionForwardDcl {
     pub annotations: Vec<Annotation>,

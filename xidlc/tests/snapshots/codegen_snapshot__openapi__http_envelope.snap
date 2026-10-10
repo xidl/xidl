@@ -8,6 +8,14 @@ openapi_http_envelope.json
 {
   "components": {
     "schemas": {
+      "ContentType": {
+        "enum": [
+          "application/json",
+          "application/octet-stream",
+          "text/plain"
+        ],
+        "type": "string"
+      },
       "Error": {
         "properties": {
           "code": {
@@ -73,14 +81,6 @@ openapi_http_envelope.json
           "msg"
         ],
         "type": "object"
-      },
-      "representations.ContentType": {
-        "enum": [
-          "application/json",
-          "application/octet-stream",
-          "text/plain"
-        ],
-        "type": "string"
       },
       "representations.FileDetails": {
         "properties": {

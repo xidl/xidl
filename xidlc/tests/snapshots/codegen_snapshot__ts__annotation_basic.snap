@@ -17,8 +17,7 @@ export interface S {
                 b?: number;
             }
 
-    
-export type E = "A" | "B";
+    export type E = "A" | "B";
 
     
 
@@ -47,8 +46,7 @@ import { xjson } from "xidl-typescript-codec";
         
     });
 
-    
-export const ESchema = z.enum(["A", "B"]);
+    export const ESchema = z.enum(["A", "B"]);
 
     
     export const BMSchema = z.number().int();

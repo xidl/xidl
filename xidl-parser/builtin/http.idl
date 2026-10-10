@@ -1,0 +1,6 @@
+// Built-in discriminator for content-negotiated HTTP response unions.
+enum ContentType {
+    @rename("application/json") Json,
+    @rename("application/octet-stream") OctetStream,
+    @rename("text/plain") Text,
+};

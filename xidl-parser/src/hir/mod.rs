@@ -1,5 +1,6 @@
 mod annotation;
 mod annotation_builtin;
+mod builtin;
 mod compound;
 mod const_dcl;
 mod declarator;
