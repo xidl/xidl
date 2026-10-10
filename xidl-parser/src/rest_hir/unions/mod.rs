@@ -1,42 +1,22 @@
+mod types;
+
 use super::mapping::is_byte_sequence;
 use super::model::{HttpOperation, HttpRepresentation, HttpUnion};
 use super::semantics::has_annotation;
 use crate::error::{ParseError, ParserResult};
 use crate::hir;
 use std::collections::HashSet;
+use types::TypeDeclarations;
 
 impl HttpUnion {
-    /// Collects every enum declaration so `@http` unions can resolve their
-    /// switch discriminator and derive member media types.
-    fn collect_enums(
-        definitions: &[hir::Definition],
-        module_path: &[String],
-        out: &mut Vec<(Vec<String>, hir::EnumDcl)>,
-    ) {
-        for def in definitions {
-            match def {
-                hir::Definition::ModuleDcl(module) => {
-                    let mut next = module_path.to_vec();
-                    next.push(module.ident.clone());
-                    Self::collect_enums(&module.definition, &next, out);
-                }
-                hir::Definition::TypeDcl(hir::TypeDcl::ConstrTypeDcl(
-                    hir::ConstrTypeDcl::EnumDcl(enum_dcl),
-                )) => out.push((module_path.to_vec(), enum_dcl.clone())),
-                _ => {}
-            }
-        }
-    }
-
     /// Collects `@http` unions with their content-negotiated cases resolved.
     pub(super) fn collect(definitions: &[hir::Definition]) -> ParserResult<Vec<HttpUnion>> {
-        let mut http_enums = Vec::new();
-        Self::collect_enums(definitions, &[], &mut http_enums);
+        let types = TypeDeclarations::collect(definitions);
         let mut out = Vec::new();
         fn walk(
             definitions: &[hir::Definition],
             module_path: &[String],
-            http_enums: &[(Vec<String>, hir::EnumDcl)],
+            types: &TypeDeclarations<'_>,
             out: &mut Vec<HttpUnion>,
         ) -> ParserResult<()> {
             for def in definitions {
@@ -44,16 +24,17 @@ impl HttpUnion {
                     hir::Definition::ModuleDcl(module) => {
                         let mut next = module_path.to_vec();
                         next.push(module.ident.clone());
-                        walk(&module.definition, &next, http_enums, out)?;
+                        walk(&module.definition, &next, types, out)?;
                     }
                     hir::Definition::TypeDcl(hir::TypeDcl::ConstrTypeDcl(
                         hir::ConstrTypeDcl::UnionDef(union),
-                    )) => {
+                    ))
+                    | hir::Definition::ConstrTypeDcl(hir::ConstrTypeDcl::UnionDef(union)) => {
                         if has_annotation(&union.annotations, "http") {
                             out.push(HttpUnion {
                                 module_path: module_path.to_vec(),
                                 ident: union.ident.clone(),
-                                cases: HttpUnion::cases(union, module_path, http_enums)?,
+                                cases: HttpUnion::cases(union, module_path, types)?,
                             });
                         }
                     }
@@ -62,14 +43,14 @@ impl HttpUnion {
             }
             Ok(())
         }
-        walk(definitions, &[], &http_enums, &mut out)?;
+        walk(definitions, &[], &types, &mut out)?;
         Ok(out)
     }
 
     fn cases(
         union: &hir::UnionDef,
         module_path: &[String],
-        http_enums: &[(Vec<String>, hir::EnumDcl)],
+        types: &TypeDeclarations<'_>,
     ) -> ParserResult<Vec<HttpRepresentation>> {
         let hir::SwitchTypeSpec::ScopedName(scoped) = &union.switch_type_spec else {
             return Err(ParseError::Message(format!(
@@ -77,15 +58,7 @@ impl HttpUnion {
                 union.ident
             )));
         };
-        let enum_def = Self::resolve_scoped_definition(
-            http_enums
-                .iter()
-                .map(|(path, enum_dcl)| (path.as_slice(), enum_dcl)),
-            module_path,
-            scoped,
-            |enum_dcl| enum_dcl.ident.as_str(),
-        )
-        .ok_or_else(|| {
+        let enum_def = types.enum_definition(scoped, module_path).ok_or_else(|| {
             ParseError::Message(format!(
                 "@http union '{}': switch enum '{}' does not resolve",
                 union.ident,
@@ -133,7 +106,7 @@ impl HttpUnion {
                         union.ident, enumerator.ident
                     ))
                 })?;
-                let ty = match &case.element.ty {
+                let mut ty = match &case.element.ty {
                     hir::ElementSpecTy::TypeSpec(ty) => ty.clone(),
                     hir::ElementSpecTy::ConstrTypeDcl(_) => {
                         return Err(ParseError::Message(format!(
@@ -142,6 +115,7 @@ impl HttpUnion {
                         )));
                     }
                 };
+                types.qualify(&mut ty, module_path)?;
                 cases.push(HttpRepresentation {
                     case: case_ident,
                     content_type,
@@ -188,12 +162,15 @@ impl HttpUnion {
                 .map(|(_, item)| item);
         }
         for skip in (0..=module_path.len()).rev() {
-            let scope = &module_path[..skip];
-            if scope.ends_with(prefix)
-                && let Some(found) = items
-                    .iter()
-                    .find(|(path, item)| *path == scope && ident_of(item) == &ident[..])
-                    .map(|(_, item)| *item)
+            let scope = module_path[..skip]
+                .iter()
+                .chain(prefix)
+                .cloned()
+                .collect::<Vec<_>>();
+            if let Some(found) = items
+                .iter()
+                .find(|(path, item)| *path == scope.as_slice() && ident_of(item) == &ident[..])
+                .map(|(_, item)| *item)
             {
                 return Some(found);
             }

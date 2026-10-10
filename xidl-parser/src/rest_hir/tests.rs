@@ -254,3 +254,42 @@ fn raises_resolves_relative_and_absolute_qualified_names() {
     assert_eq!(raises[0].module_path, ["Left"]);
     assert_eq!(raises[1].module_path, ["Right"]);
 }
+
+#[test]
+fn http_union_payloads_keep_their_declaration_scope() {
+    let spec = parse(
+        r#"
+        module domain {
+            enum Mime { @rename("application/json") Json, };
+            struct Data { string value; };
+            typedef Data Alias, OtherAlias;
+            module nested {
+                @http union Payload switch (::domain::Mime) {
+                    case ::domain::Mime::Json: map<string, sequence<OtherAlias>> values;
+                };
+            };
+        };
+        module api {
+            struct OtherAlias { int64 wrong; };
+            interface Files { @get(path="/file") domain::nested::Payload read(); };
+        };
+        "#,
+    );
+    let doc = super::project(&spec).expect("cross-module HTTP union");
+    let cases = &doc.interfaces[0].operations[0]
+        .http
+        .response
+        .representations;
+    assert_eq!(cases.len(), 1);
+    let hir::TypeSpec::MapType(map) = &cases[0].ty else {
+        panic!("expected map payload")
+    };
+    let hir::TypeSpec::SequenceType(sequence) = &*map.value else {
+        panic!("expected sequence value")
+    };
+    let hir::TypeSpec::ScopedName(name) = &*sequence.ty else {
+        panic!("expected named alias")
+    };
+    assert!(name.is_root);
+    assert_eq!(name.name, ["domain", "OtherAlias"]);
+}

@@ -1,6 +1,10 @@
 #pragma xidlc package Envelope API
 #pragma xidlc version v1
 
+// A same-named type at the operation scope must not capture the union payload.
+struct FileMeta { string wrong; };
+
+module representations {
 // Representation switching (#296): one route, two media types.
 enum ContentType {
     @rename("application/json")
@@ -13,6 +17,15 @@ enum ContentType {
 struct FileMeta {
     string id;
     string etag;
+};
+
+@http
+union FileResponse switch (ContentType) {
+    case Json: FileMeta meta;
+    case OctetStream: sequence<octet> raw;
+    case Text: string text;
+};
+
 };
 
 // Typed error channel (#294): status + headers + body per exception.
@@ -34,17 +47,10 @@ exception NotFound {
     string msg;
 };
 
-@http
-union FileResponse switch (ContentType) {
-    case Json: FileMeta meta;
-    case OctetStream: sequence<octet> raw;
-    case Text: string text;
-};
-
 @no_security
 interface EnvelopeApi {
     @get(path = "/file")
-    FileResponse get_file(
+    representations::FileResponse get_file(
         @query string key,
         @header @rename("ETag") out string etag,
         @header @rename("X-Tag") out sequence<string> tags,
