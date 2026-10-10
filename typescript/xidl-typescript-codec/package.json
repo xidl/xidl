@@ -22,5 +22,5 @@
   },
   "type": "module",
   "types": "dist/index.d.ts",
-  "version": "0.96.1"
+  "version": "0.97.0"
 }

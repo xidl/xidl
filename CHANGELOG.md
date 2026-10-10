@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.97.0](https://github.com/xidl/xidl/compare/v0.96.1...v0.97.0) (2026-10-10)
+
+
+### Features
+
+* **http:** optional @header/[@cookie](https://github.com/cookie) members on exceptions ([c18be11](https://github.com/xidl/xidl/commit/c18be11b7406653912be0e78377656dd40fb57a6))
+* **http:** typed error channel via [@http](https://github.com/http)(status) exceptions and raises ([fdb36ee](https://github.com/xidl/xidl/commit/fdb36eeef4b0cca1f3e83226ed675e42fdfbc537)), closes [#294](https://github.com/xidl/xidl/issues/294)
+
+
+### Bug Fixes
+
+* **axum:** build exception responses without empty metadata scaffolding ([8031c11](https://github.com/xidl/xidl/commit/8031c1124de061b3adc784315140568ef4c0cfd8))
+* depend on the merged grammar fix via git instead of a sibling path ([c2252f4](https://github.com/xidl/xidl/commit/c2252f437b8274e45afcb01d5e15166581b3a7da))
+* **http:** make raised errors composable and avoid generated name collisions ([b9516c4](https://github.com/xidl/xidl/commit/b9516c42bc41acdc5ee2d0fc94b7b31e716c2001))
+* **http:** validate exception metadata through generated SDK and Hurl flows ([6027b73](https://github.com/xidl/xidl/commit/6027b73742fcc18a20d91367f259cada5ebb4689))
+* keep generated example fixtures under clippy -D warnings ([291d79f](https://github.com/xidl/xidl/commit/291d79fcf257436f5669041040b4f54c6ea88a1a))
+
 ## [0.96.1](https://github.com/xidl/xidl/compare/v0.96.0...v0.96.1) (2026-10-09)
 
 
