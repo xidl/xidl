@@ -1,6 +1,7 @@
 import os
 import signal
 import subprocess
+import time
 
 
 def start_server_process(args, **kwargs):
@@ -12,13 +13,22 @@ def start_server_process(args, **kwargs):
     return subprocess.Popen(args, start_new_session=True, **kwargs)
 
 
-def stop_server_process(process):
-    try:
-        os.killpg(process.pid, signal.SIGTERM)
-        process.wait(timeout=5)
-    except:
+def stop_server_process(process, timeout=5):
+    # The launcher can exit before its children finish writing (e.g. Next.js).
+    # Reap it while waiting for the session's entire process group to disappear.
+    for sig in (signal.SIGTERM, signal.SIGKILL):
         try:
-            os.killpg(process.pid, signal.SIGKILL)
-        except:
-            process.kill()
-        process.wait(timeout=5)
+            os.killpg(process.pid, sig)
+        except ProcessLookupError:
+            process.wait(timeout=timeout)
+            return
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            process.poll()
+            try:
+                os.killpg(process.pid, 0)
+            except ProcessLookupError:
+                process.wait(timeout=timeout)
+                return
+            time.sleep(0.05)
+    raise TimeoutError(f"BDD server process group {process.pid} did not exit")

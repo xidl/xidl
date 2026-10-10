@@ -1,3 +1,4 @@
+@bdd_rest-serialization
 Feature: WebSocket Upgrade Generation and Communication
   As a developer
   I want @upgrade(protocol = "websocket") to produce a real RFC 6455 WebSocket

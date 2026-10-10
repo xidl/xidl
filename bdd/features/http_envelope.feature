@@ -1,3 +1,4 @@
+@bdd_rest-serialization
 Feature: HTTP representations and exceptions compose on one route
   Scenario Outline: Negotiation uses the returned representation and retains metadata
     Given a REST IDL file "bdd/features/data/http_envelope.idl"

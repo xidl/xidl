@@ -4,3 +4,4 @@ fastapi
 uvicorn
 msgpack
 websocket-client
+PyYAML

@@ -107,31 +107,7 @@ def step_impl(context, lang):
         print(f"Gen stderr: {result.stderr}")
     assert result.returncode == 0
 
-    if lang == "rust":
-        # Merge duplicate pub mod declarations if any
-        for f in os.listdir(context.lang_dir):
-            if f.endswith(".rs"):
-                path = os.path.join(context.lang_dir, f)
-                with open(path, "r") as fr:
-                    content = fr.read()
-                mod_name = f[:-3]
-                pattern = (
-                    r"\}\s*(?:#\[allow\([^)]+\)\]\s*)?pub\s+mod\s+"
-                    + re.escape(mod_name)
-                    + r"\s*\{"
-                )
-                if len(re.findall(pattern, content)) > 0:
-                    content = re.sub(pattern, "", content)
-                    first_pattern = r"pub\s+mod\s+" + re.escape(mod_name) + r"\s*\{"
-                    content = re.sub(
-                        first_pattern,
-                        f"pub mod {mod_name} {{\n    use crate::{mod_name};",
-                        content,
-                        count=1,
-                    )
-                    with open(path, "w") as fw:
-                        fw.write(content)
-    elif lang == "python":
+    if lang == "python":
         for f in os.listdir(context.lang_dir):
             if f.endswith(".py"):
                 path = os.path.join(context.lang_dir, f)
@@ -380,40 +356,37 @@ def step_impl(context, lang):
     assert found_interface, f"Calculator interface not found in {files}"
 
 
-def wait_for_port(port, timeout=60):
-    start_time = time.time()
-    while time.time() - start_time < timeout:
-        try:
-            with socket.create_connection(("127.0.0.1", port), timeout=1):
-                return True
-        except (socket.error, ConnectionRefusedError):
-            time.sleep(0.5)
-    return False
-
-
 def start_context_server(context, args, **kwargs):
     release_reserved_test_port(context)
-    return start_server_process(args, **kwargs)
+    process = start_server_process(args, **kwargs)
+    context.server_log_thread = threading.Thread(
+        target=run_server_logging,
+        args=(process, context.lang.upper()),
+        daemon=True,
+    )
+    context.server_log_thread.start()
+    return process
 
 
 def wait_for_server(context, timeout=60):
-    if not wait_for_port(context.port, timeout):
-        if context.server_process.poll() is not None:
-            stdout, stderr = context.server_process.communicate()
-            assert False, f"Server failed to start:\n{stdout or stderr}"
-        assert False, f"Timed out waiting for port {context.port}"
-    time.sleep(0.5)
-    if context.server_process.poll() is not None:
-        stdout, stderr = context.server_process.communicate()
-        assert False, f"Server failed to stay running:\n{stdout or stderr}"
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        assert context.server_process.poll() is None, (
+            "Server exited before readiness; see captured server log"
+        )
+        try:
+            with socket.create_connection(("127.0.0.1", context.port), timeout=1):
+                return
+        except OSError:
+            time.sleep(0.1)
+    raise AssertionError(f"Timed out waiting for port {context.port}")
 
 
 def run_server_logging(process, prefix):
     stream = process.stderr or process.stdout
-    for line in iter(stream.readline, ""):
-        if not line:
-            break
-        print(f"{prefix} LOG: {line.strip()}")
+    with stream:
+        for line in stream:
+            print(f"{prefix} LOG: {line.strip()}")
 
 
 def get_module_name(lang_dir):
@@ -454,7 +427,7 @@ def copy_python_boilerplate(context, idl_name):
             shutil.copy2(src, dst)
 
 
-def start_python_boilerplate_server(context, idl_name, log_prefix):
+def start_python_boilerplate_server(context, idl_name):
     copy_python_boilerplate(context, idl_name)
     python_path = os.environ.get("PYTHONPATH", "")
     context.env = os.environ.copy()
@@ -476,11 +449,6 @@ def start_python_boilerplate_server(context, idl_name, log_prefix):
         text=True,
         bufsize=1,
     )
-    t = threading.Thread(
-        target=run_server_logging, args=(context.server_process, log_prefix)
-    )
-    t.daemon = True
-    t.start()
 
 
 @then("I can run the generated {lang} server and client")
@@ -549,11 +517,6 @@ def run_generated_server_using_boilerplate(context, lang):
             text=True,
             env=env,
         )
-        t = threading.Thread(
-            target=run_server_logging, args=(context.server_process, "GO-BOILERPLATE")
-        )
-        t.daemon = True
-        t.start()
     elif lang == "rust":
         shutil.copy(os.path.join(src_dir, "Cargo.toml"), context.lang_dir)
         os.makedirs(os.path.join(context.lang_dir, "src"), exist_ok=True)
@@ -597,11 +560,6 @@ def run_generated_server_using_boilerplate(context, lang):
             text=True,
             env=env,
         )
-        t = threading.Thread(
-            target=run_server_logging, args=(context.server_process, "RUST-BOILERPLATE")
-        )
-        t.daemon = True
-        t.start()
         server_timeout = 180
     elif lang == "ts":
         shutil.copy(os.path.join(src_dir, "server.ts"), context.lang_dir)
@@ -664,11 +622,6 @@ def run_generated_server_using_boilerplate(context, lang):
             text=True,
             env=env,
         )
-        t = threading.Thread(
-            target=run_server_logging, args=(context.server_process, "TS-BOILERPLATE")
-        )
-        t.daemon = True
-        t.start()
     elif lang == "nextjs":
         shutil.copytree(src_dir, context.lang_dir, dirs_exist_ok=True)
         codec_path = os.path.abspath(
@@ -723,11 +676,15 @@ def run_generated_server_using_boilerplate(context, lang):
         )
         env = os.environ.copy()
         env["PORT"] = str(context.port)
+        # Debug mode flushes Next telemetry synchronously without sending it.
+        # Disabled alone still spawns detached flush writers in Next 16.2.9.
+        env["NEXT_TELEMETRY_DISABLED"] = "1"
+        env["NEXT_TELEMETRY_DEBUG"] = "1"
         context.server_process = start_context_server(
             context,
             [
-                "npx",
-                "next",
+                "node",
+                "node_modules/next/dist/bin/next",
                 "dev",
                 "--hostname",
                 "127.0.0.1",
@@ -740,15 +697,9 @@ def run_generated_server_using_boilerplate(context, lang):
             text=True,
             env=env,
         )
-        t = threading.Thread(
-            target=run_server_logging,
-            args=(context.server_process, "NEXTJS-BOILERPLATE"),
-        )
-        t.daemon = True
-        t.start()
         server_timeout = 180
     elif lang == "python":
-        start_python_boilerplate_server(context, idl_name, "PYTHON-BOILERPLATE")
+        start_python_boilerplate_server(context, idl_name)
     wait_for_server(context, timeout=server_timeout)
 
 
