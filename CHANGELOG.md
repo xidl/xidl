@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.99.0](https://github.com/xidl/xidl/compare/v0.98.0...v0.99.0) (2026-10-10)
+
+
+### Features
+
+* **npm:** distribute the xidlc CLI as npm packages ([de290cd](https://github.com/xidl/xidl/commit/de290cdd63048e7e21c8483477f6841c17241120))
+
+
+### Bug Fixes
+
+* **http:** preserve HEAD response metadata and declared status ([779886a](https://github.com/xidl/xidl/commit/779886a7cf63c52f8b9672aa6780056eaeff5257))
+
 ## [0.98.0](https://github.com/xidl/xidl/compare/v0.97.0...v0.98.0) (2026-10-10)
 
 
