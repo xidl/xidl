@@ -123,7 +123,7 @@ openapi_http_envelope.json
           {
             "properties": {
               "meta": {
-                "$ref": "#/components/schemas/FileMeta"
+                "$ref": "#/components/schemas/representations.FileMeta"
               }
             },
             "required": [

@@ -6,7 +6,10 @@ use xidl_parser::hir;
 
 fn parse_spec(source: &str) -> hir::Specification {
     let typed = xidl_parser::parser::parser_text(source).expect("parse typed ast");
-    hir::Specification::from_typed_ast_with_properties(typed, HashMap::new())
+    hir::Specification::from_typed_ast_with_properties(
+        typed,
+        HashMap::from([("hir_kind".to_string(), "http".into())]),
+    )
 }
 
 fn render_openapi_json_from_spec(
@@ -256,4 +259,70 @@ fn render_openapi_json_tags_operations_by_interface_name() {
         doc["paths"]["/beta"]["get"]["tags"],
         serde_json::json!(["BetaApi"])
     );
+}
+
+#[test]
+fn scoped_schemas_resolve_every_reference_in_its_declaration_module() {
+    let spec = parse_spec(include_str!(
+        "../../../../tests/openapi/http_scoped_references.idl"
+    ));
+    let doc = render_openapi_json_from_spec(&spec).expect("render scoped schemas");
+    let schemas = &doc["components"]["schemas"];
+    let fields = &schemas["models.nested.Envelope"]["properties"];
+    assert_eq!(
+        fields["items"]["items"]["$ref"],
+        "#/components/schemas/models.Item"
+    );
+    assert_eq!(
+        fields["by_name"]["additionalProperties"]["$ref"],
+        "#/components/schemas/models.Item"
+    );
+    assert_eq!(fields["root"]["$ref"], "#/components/schemas/Item");
+    assert_eq!(fields["alias"]["$ref"], "#/components/schemas/models.Alias");
+    assert_eq!(
+        schemas["models.Alias"]["$ref"],
+        "#/components/schemas/models.Item"
+    );
+    assert_eq!(
+        fields["later"]["$ref"],
+        "#/components/schemas/models.nested.Later"
+    );
+    assert_eq!(
+        schemas["models.nested.Choice"]["oneOf"][0]["properties"]["local"]["$ref"],
+        "#/components/schemas/models.Item"
+    );
+    let response = &doc["paths"]["/scoped"]["get"]["responses"]["409"];
+    assert_eq!(
+        response["headers"]["X-Token"]["schema"]["$ref"],
+        "#/components/schemas/models.Token"
+    );
+    assert_eq!(
+        schemas["models.Failed"]["properties"]["item"]["$ref"],
+        "#/components/schemas/models.Item"
+    );
+
+    fn check_refs(value: &serde_json::Value, document: &serde_json::Value) {
+        match value {
+            serde_json::Value::Object(object) => {
+                if let Some(reference) = object.get("$ref").and_then(serde_json::Value::as_str) {
+                    assert!(
+                        document
+                            .pointer(reference.strip_prefix('#').expect("local reference"))
+                            .is_some(),
+                        "unresolved reference: {reference}"
+                    );
+                }
+                for value in object.values() {
+                    check_refs(value, document);
+                }
+            }
+            serde_json::Value::Array(values) => {
+                for value in values {
+                    check_refs(value, document);
+                }
+            }
+            _ => {}
+        }
+    }
+    check_refs(&doc, &doc);
 }

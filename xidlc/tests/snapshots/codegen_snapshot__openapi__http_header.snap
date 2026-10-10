@@ -44,7 +44,7 @@ openapi_http_header.json
             "type": "integer"
           },
           "status": {
-            "$ref": "#/components/schemas/Status"
+            "$ref": "#/components/schemas/test.Status"
           }
         },
         "required": [
@@ -190,7 +190,7 @@ openapi_http_header.json
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "$ref": "#/components/schemas/test.User"
                 }
               }
             },

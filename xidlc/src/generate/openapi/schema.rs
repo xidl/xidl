@@ -1,4 +1,5 @@
 use super::scope::SchemaScope;
+use crate::error::IdlcResult;
 use crate::generate::openapi::naming::declarator_name;
 use crate::generate::utils::{doc_lines_from_annotations, has_annotation};
 use crate::openapi::path::{Parameter, ParameterBuilder, ParameterIn};
@@ -46,7 +47,10 @@ pub(crate) fn parameter_schema(
 
 #[cfg(test)]
 pub(crate) fn schema_for_struct(members: &[hir::Member]) -> RefOr<Schema> {
-    SchemaScope::new(&[]).schema_for_struct_with_annotations(members, &[])
+    let names = super::scope::SchemaNames::collect(&hir::Specification(Vec::new()));
+    SchemaScope::new(&names, &[])
+        .schema_for_struct_with_annotations(members, &[])
+        .expect("schema")
 }
 
 pub(crate) fn apply_schema_description(
@@ -123,16 +127,12 @@ pub(crate) fn schema_ref(name: &str) -> RefOr<Schema> {
     RefOr::Ref(Ref::from_schema_name(name))
 }
 
-fn scoped_name_ref(value: &hir::ScopedName) -> String {
-    value.name.join(".")
-}
-
 impl SchemaScope<'_> {
     pub(crate) fn schema_for_struct_with_annotations(
         self,
         members: &[hir::Member],
         container_annotations: &[hir::Annotation],
-    ) -> RefOr<Schema> {
+    ) -> IdlcResult<RefOr<Schema>> {
         let mut object = ObjectBuilder::new().schema_type(Type::Object);
         let mut flattened = Vec::new();
         for member in members {
@@ -148,7 +148,7 @@ impl SchemaScope<'_> {
                     container_annotations,
                 );
                 let schema = apply_schema_description(
-                    self.schema_for_decl(&member.ty, decl),
+                    self.schema_for_decl(&member.ty, decl)?,
                     doc.as_deref(),
                 );
                 if has_annotation(&member.annotations, "flatten") {
@@ -162,23 +162,23 @@ impl SchemaScope<'_> {
             }
         }
         let object = RefOr::T(Schema::from(object));
-        if flattened.is_empty() {
+        Ok(if flattened.is_empty() {
             object
         } else {
             let mut combined = AllOf::new();
             combined.items.push(object);
             combined.items.extend(flattened);
             RefOr::T(Schema::from(combined))
-        }
+        })
     }
 
-    pub(crate) fn schema_for_union(self, def: &hir::UnionDef) -> RefOr<Schema> {
+    pub(crate) fn schema_for_union(self, def: &hir::UnionDef) -> IdlcResult<RefOr<Schema>> {
         let mut variants = Vec::new();
         for case in &def.case {
             let decl = &case.element.value;
             let name = declarator_name(decl);
             let schema = apply_schema_description(
-                self.schema_for_element(&case.element.ty, decl),
+                self.schema_for_element(&case.element.ty, decl)?,
                 doc_text(&case.element.annotations).as_deref(),
             );
             let object = ObjectBuilder::new()
@@ -189,20 +189,26 @@ impl SchemaScope<'_> {
         }
         let mut one_of = OneOf::new();
         one_of.items = variants;
-        RefOr::T(Schema::from(one_of))
+        Ok(RefOr::T(Schema::from(one_of)))
     }
 
-    fn schema_for_element(self, ty: &hir::ElementSpecTy, decl: &hir::Declarator) -> RefOr<Schema> {
+    fn schema_for_element(
+        self,
+        ty: &hir::ElementSpecTy,
+        decl: &hir::Declarator,
+    ) -> IdlcResult<RefOr<Schema>> {
         match ty {
             hir::ElementSpecTy::TypeSpec(spec) => self.schema_for_decl(spec, decl),
-            hir::ElementSpecTy::ConstrTypeDcl(constr) => {
-                SchemaScope::new(&[]).schema_for_constr_type(constr)
-            }
+            hir::ElementSpecTy::ConstrTypeDcl(constr) => Ok(self.schema_for_constr_type(constr)),
         }
     }
 
-    fn schema_for_decl(self, ty: &hir::TypeSpec, decl: &hir::Declarator) -> RefOr<Schema> {
-        let mut schema = self.schema_for_type(ty);
+    fn schema_for_decl(
+        self,
+        ty: &hir::TypeSpec,
+        decl: &hir::Declarator,
+    ) -> IdlcResult<RefOr<Schema>> {
+        let mut schema = self.schema_for_type(ty)?;
         if let hir::Declarator::ArrayDeclarator(array) = decl {
             for len in &array.len {
                 let mut array_schema = ArrayBuilder::new().items(schema);
@@ -215,11 +221,11 @@ impl SchemaScope<'_> {
                 schema = RefOr::T(Schema::from(array_schema));
             }
         }
-        schema
+        Ok(schema)
     }
 
-    pub(crate) fn schema_for_type(self, ty: &hir::TypeSpec) -> RefOr<Schema> {
-        match ty {
+    pub(crate) fn schema_for_type(self, ty: &hir::TypeSpec) -> IdlcResult<RefOr<Schema>> {
+        Ok(match ty {
             hir::TypeSpec::IntegerType(value) => integer_schema(value),
             hir::TypeSpec::FloatingPtType | hir::TypeSpec::FixedPtType(_) => {
                 RefOr::T(Schema::from(
@@ -240,9 +246,9 @@ impl SchemaScope<'_> {
             hir::TypeSpec::AnyType | hir::TypeSpec::ObjectType | hir::TypeSpec::ValueBaseType => {
                 RefOr::T(Schema::from(ObjectBuilder::new()))
             }
-            hir::TypeSpec::ScopedName(value) => schema_ref(&scoped_name_ref(value)),
+            hir::TypeSpec::ScopedName(value) => schema_ref(&self.resolve(value)?),
             hir::TypeSpec::SequenceType(seq) => {
-                let mut schema = ArrayBuilder::new().items(self.schema_for_type(&seq.ty));
+                let mut schema = ArrayBuilder::new().items(self.schema_for_type(&seq.ty)?);
                 if let Some(size) = seq
                     .len
                     .as_ref()
@@ -257,12 +263,12 @@ impl SchemaScope<'_> {
             hir::TypeSpec::MapType(map) => RefOr::T(Schema::from(
                 ObjectBuilder::new()
                     .schema_type(Type::Object)
-                    .additional_properties(Some(self.schema_for_type(&map.value))),
+                    .additional_properties(Some(self.schema_for_type(&map.value)?)),
             )),
             hir::TypeSpec::TemplateType(_) => {
                 RefOr::T(Schema::from(ObjectBuilder::new().schema_type(Type::Object)))
             }
-        }
+        })
     }
 
     pub(crate) fn schema_for_constr_type(self, constr: &hir::ConstrTypeDcl) -> RefOr<Schema> {

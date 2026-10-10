@@ -5,7 +5,10 @@ use xidl_parser::hir;
 
 fn parse_spec(source: &str) -> hir::Specification {
     let typed = xidl_parser::parser::parser_text(source).expect("parse typed ast");
-    hir::Specification::from_typed_ast_with_properties(typed, HashMap::new())
+    hir::Specification::from_typed_ast_with_properties(
+        typed,
+        HashMap::from([("hir_kind".to_string(), "http".into())]),
+    )
 }
 
 fn render_openapi_json_from_spec(
@@ -245,5 +248,29 @@ fn render_openapi_json_rejects_additional_invalid_stream_shapes() {
     assert!(
         message.contains("supports only NDJSON for @client_stream methods")
             || message.contains("requires @server_stream")
+    );
+}
+
+#[test]
+fn unresolved_schema_types_report_the_declaration_scope() {
+    let spec = parse_spec("module models { struct Envelope { Missing value; }; };");
+    let error = render_openapi_json_from_spec(&spec).expect_err("missing schema type");
+    assert!(
+        error
+            .to_string()
+            .contains("OpenAPI type 'Missing' does not resolve in scope 'models'")
+    );
+}
+
+#[test]
+fn undeclared_foreign_types_do_not_become_dangling_local_references() {
+    // These Rust-only types have no OpenAPI schema declarations. The old snapshot
+    // accepted references to missing components; keep this as an error regression.
+    let spec = parse_spec(include_str!("undeclared_types.idl"));
+    let error = render_openapi_json_from_spec(&spec).expect_err("undeclared foreign schema");
+    assert!(
+        error
+            .to_string()
+            .contains("OpenAPI type 'xidl_parser::hir::Specification' does not resolve")
     );
 }

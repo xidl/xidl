@@ -1,0 +1,57 @@
+struct Item {
+    string root;
+};
+
+module models {
+    struct Item {
+        string local;
+    };
+    typedef Item Alias;
+    enum Token { First, Second };
+
+    @http(409)
+    exception Failed {
+        @header @rename("X-Token") Token token;
+        @body Item item;
+    };
+
+    module nested {
+        struct Envelope {
+            sequence<Item> items;
+            map<string, Item> by_name;
+            ::Item root;
+            Alias alias;
+            Later later;
+        };
+
+        union Choice switch (long) {
+            case 0: Item local;
+            case 1: ::Item root;
+        };
+
+        struct Later {
+            string note;
+        };
+
+        @no_security
+        interface Writer {
+            @post(path = "/scoped")
+            Envelope exchange(in Envelope input);
+        };
+    };
+};
+
+module api {
+    enum Token { Shadow };
+
+    @no_security
+    interface Reader {
+        @get(path = "/scoped")
+        models::nested::Envelope read(@query models::Token token) raises(models::Failed);
+
+        @get(path = "/watch")
+        @server_stream
+        @stream_codec("sse")
+        models::Item watch();
+    };
+};
