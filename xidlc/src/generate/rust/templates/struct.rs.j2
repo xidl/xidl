@@ -25,6 +25,9 @@ pub struct {{ ident }} {
             #[{{ attr }}]
         {% endfor %}
         {% if enable_serde_attrs %}
+            {% if member.serde_flatten %}
+                #[serde(flatten)]
+            {% endif %}
             {% if member.optional %}
                 #[serde(skip_serializing_if = "Option::is_none")]
             {% endif %}

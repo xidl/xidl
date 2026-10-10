@@ -121,7 +121,7 @@ import {
             
         }
         return;
-            
+        
     }
     
             watch_attribute_online(): AsyncIterable<boolean> {
@@ -197,6 +197,7 @@ import type * as types from "./http_stream_sse";
 
 import type * as ifaceTypes from "./http_stream_sse.iface";
 import * as ifaceSchemas from "./http_stream_sse.iface.zod";
+import { z } from "zod";
 import {
     defineOperation,
     type Awaitable,

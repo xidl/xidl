@@ -2,7 +2,7 @@ use async_trait::async_trait;
 
 pub mod gen { include!("../{{MODULE_NAME}}.rs"); }
 use gen::*;
-use gen::representations::{FileMeta, FileResponse};
+use gen::representations::{FileDetails, FileMeta, FileResponse};
 
 struct Files;
 #[async_trait]
@@ -12,7 +12,7 @@ impl EnvelopeApi for Files {
             "missing" => return Err(EnvelopeApiGetFileError::NotFound(NotFound { code: 404, msg: "no such file".into() })),
             "raw" => FileResponse::OctetStream(b"envelope-bytes".to_vec()),
             "text" => FileResponse::Text("envelope-text".into()),
-            _ => FileResponse::Json(FileMeta { id: key, etag: "meta-v1".into() }),
+            _ => FileResponse::Json(FileMeta { id: key, etag: "meta-v1".into(), details: FileDetails { label: "detail".into() }, note: None }),
         };
         Ok(EnvelopeApiGetFileResponse { r#return: value, etag: "meta-v1".into(), tags: vec!["001".into(), "\"quoted\"".into()], cached: false })
     }

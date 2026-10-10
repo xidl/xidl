@@ -60,6 +60,7 @@ pub struct TransportFieldContext {
     pub ty: String,
     pub serde_rename: Option<String>,
     pub optional: bool,
+    pub flatten: bool,
     pub encode_expr: String,
     pub decode_expr: String,
 }

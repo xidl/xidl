@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-
+import { xjson } from 'xidl-typescript-codec';
 import { z } from 'zod';
 
 import { createRouter, defineOperation } from '../src/index.js';
@@ -75,6 +75,40 @@ const createItem = defineOperation<ItemServer, 'createItem'>({
 const router = createRouter([getItem, createItem], {
   createItem: name => ({ name }),
   getItem: id => ({ id }),
+});
+
+test('negotiated payloads use their schema for wire field mappings', async () => {
+  const operation = defineOperation<
+    { getItem(id: number): unknown },
+    'getItem'
+  >({
+    ...getItem,
+    response: {
+      ...getItem.response,
+      representations: [
+        {
+          contentType: 'application/json',
+          kind: 'Json',
+          schema: z.object({
+            details: xjson(z.object({ label: z.string() }), { flatten: true }),
+            id: xjson(z.string(), { name: 'wire_id' }),
+          }),
+        },
+      ],
+    },
+  });
+  const handler = createRouter([operation], {
+    getItem: () => ({
+      kind: 'Json',
+      value: { details: { label: 'detail' }, id: 'item-7' },
+    }),
+  });
+  const response = await handler(new Request('http://localhost/items/7'));
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), {
+    label: 'detail',
+    wire_id: 'item-7',
+  });
 });
 
 test('createRouter dispatches by method and path', async () => {

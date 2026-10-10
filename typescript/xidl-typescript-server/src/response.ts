@@ -52,7 +52,11 @@ export function encodeOperationResponse<TService>(
         true,
       );
       headers.set('Content-Type', representation.contentType);
-      const value = wrapper.value;
+      const parsed =
+        representation.schema?.parse(wrapper.value) ?? wrapper.value;
+      const value = representation.schema
+        ? serialize(parsed, representation.schema)
+        : parsed;
       const body =
         value === undefined || value === null
           ? null
@@ -62,6 +66,7 @@ export function encodeOperationResponse<TService>(
                 value,
                 normalizeMime(representation.contentType),
                 codecs,
+                representation.schema,
               );
       return new Response(body, { headers, status: 200 });
     }

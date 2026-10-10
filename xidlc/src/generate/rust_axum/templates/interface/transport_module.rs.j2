@@ -6,6 +6,9 @@ pub(super) mod {{ module.name }} {
         {% if item.kind == "struct" %}
             pub struct {{ item.transport_ident }} {
                 {% for field in item.fields %}
+                    {% if field.flatten %}
+                        #[serde(flatten)]
+                    {% endif %}
                     {% if field.serde_rename %}
                         #[serde(rename = "{{ field.serde_rename }}")]
                     {% endif %}

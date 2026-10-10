@@ -204,9 +204,9 @@ import {
             
         }
         const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
-            const responsePayload = buildResponsePayload(responseBody, resp, "object", [{ wireName: "return", key: "return" }, { wireName: "sum", key: "sum" }], [], []);
-            return ifaceSchemas.HttpAnnoServiceAddResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.HttpAnnoServiceAddResponseSchema)) as ifaceTypes.HttpAnnoServiceAddResponse;
-            
+        const responsePayload = buildResponsePayload(responseBody, resp, "object", [{ wireName: "return", key: "return" }, { wireName: "sum", key: "sum" }], [], []);
+        return ifaceSchemas.HttpAnnoServiceAddResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.HttpAnnoServiceAddResponseSchema)) as ifaceTypes.HttpAnnoServiceAddResponse;
+        
     }
     
             async bump(value: number): Promise<ifaceTypes.HttpAnnoServiceBumpResponse> {
@@ -232,9 +232,9 @@ import {
             
         }
         const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
-            const responsePayload = buildResponsePayload(responseBody, resp, "object", [{ wireName: "return", key: "return" }, { wireName: "value", key: "value" }], [], []);
-            return ifaceSchemas.HttpAnnoServiceBumpResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.HttpAnnoServiceBumpResponseSchema)) as ifaceTypes.HttpAnnoServiceBumpResponse;
-            
+        const responsePayload = buildResponsePayload(responseBody, resp, "object", [{ wireName: "return", key: "return" }, { wireName: "value", key: "value" }], [], []);
+        return ifaceSchemas.HttpAnnoServiceBumpResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.HttpAnnoServiceBumpResponseSchema)) as ifaceTypes.HttpAnnoServiceBumpResponse;
+        
     }
     
             async get_count(): Promise<ifaceTypes.HttpAnnoServiceGetCountResponse> {
@@ -256,9 +256,9 @@ import {
             
         }
         const responseBody = await decodeOptionalResponseBody(resp, "text/plain", this.codecs);
-            const responsePayload = buildResponsePayload(responseBody, resp, "return", [{ wireName: "count", key: "count" }], [], []);
-            return ifaceSchemas.HttpAnnoServiceGetCountResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.HttpAnnoServiceGetCountResponseSchema)) as ifaceTypes.HttpAnnoServiceGetCountResponse;
-            
+        const responsePayload = buildResponsePayload(responseBody, resp, "return", [{ wireName: "count", key: "count" }], [], []);
+        return ifaceSchemas.HttpAnnoServiceGetCountResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.HttpAnnoServiceGetCountResponseSchema)) as ifaceTypes.HttpAnnoServiceGetCountResponse;
+        
     }
     
             async ping(): Promise<void> {
@@ -280,7 +280,7 @@ import {
             
         }
         return;
-            
+        
     }
     
     
@@ -455,6 +455,7 @@ import type * as types from "./http_annotations";
 
 import type * as ifaceTypes from "./http_annotations.iface";
 import * as ifaceSchemas from "./http_annotations.iface.zod";
+import { z } from "zod";
 import {
     defineOperation,
     type Awaitable,

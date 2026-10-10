@@ -236,7 +236,7 @@ import {
             
         }
         return;
-            
+        
     }
     
     
@@ -576,6 +576,7 @@ import * as $xidlErrors from "./http_exceptions.errors";
 
 import type * as ifaceTypes from "./http_exceptions.iface";
 import * as ifaceSchemas from "./http_exceptions.iface.zod";
+import { z } from "zod";
 import {
     defineOperation,
     writeResponseBindings,
@@ -839,26 +840,26 @@ import { xjson } from "xidl-typescript-codec";
     
     export const NotModifiedSchema = z.object({
         
-            etag: z.coerce.string()
+            etag: xjson(z.coerce.string(), {"name":"ETag"})
         
     });
 
     
     export const PreconditionFailedSchema = z.object({
         
-            etag: z.coerce.string(),
+            etag: xjson(z.coerce.string(), {"name":"ETag"}),
         
-            hints: z.array(z.coerce.string()).optional(),
+            hints: xjson(z.array(z.coerce.string()).optional(), {"name":"X-Hint"}),
         
-            session_id: z.coerce.string(),
+            session_id: xjson(z.coerce.string(), {"name":"session"}),
         
-            retry_token: z.coerce.string().optional(),
+            retry_token: xjson(z.coerce.string().optional(), {"name":"retry"}),
         
-            attempts: z.array(z.coerce.string()).optional(),
+            attempts: xjson(z.array(z.coerce.string()).optional(), {"name":"attempt"}),
         
             code: z.coerce.number().int().nonnegative(),
         
-            msg: z.coerce.string(),
+            msg: xjson(z.coerce.string(), {"name":"message"}),
         
             detail: z.coerce.string().optional()
         

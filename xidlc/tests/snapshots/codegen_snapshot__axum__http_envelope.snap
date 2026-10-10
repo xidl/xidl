@@ -997,9 +997,20 @@ pub mod representations {
     }
     #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
     #[derive(Default)]
+    pub struct FileDetails {
+        pub label: String,
+    }
+    impl FileDetails {}
+    #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
+    #[derive(Default)]
     pub struct FileMeta {
+        #[serde(rename = "wire_id")]
         pub id: String,
         pub etag: String,
+        #[serde(flatten)]
+        pub details: FileDetails,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub note: Option<String>,
     }
     impl FileMeta {}
     /// HTTP representation union: each case responds with its own media type

@@ -55,6 +55,7 @@ export interface OperationRequestSpec {
 export interface ResponseRepresentation {
   contentType: string;
   kind: string;
+  schema?: XidlSchema;
 }
 
 export interface OperationResponseSpec {

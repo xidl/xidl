@@ -33,7 +33,11 @@ const handler = createRouter(Object.values(EnvelopeApiOperations), {
       };
     if (key === 'text')
       return { kind: 'Text', value: 'envelope-text', ...metadata };
-    return { kind: 'Json', value: { etag: 'meta-v1', id: key }, ...metadata };
+    return {
+      kind: 'Json',
+      value: { details: { label: 'detail' }, etag: 'meta-v1', id: key },
+      ...metadata,
+    };
   },
   get_fresh() {
     throw new NotModified({ etag: 'same-tag' });
@@ -76,6 +80,8 @@ server.listen(0, '127.0.0.1', async () => {
     const meta = await client.get_file('meta');
     assert(meta.kind === 'Json');
     assert.equal(meta.value.id, 'meta');
+    assert.equal(meta.value.details.label, 'detail');
+    assert.equal(meta.value.note, undefined);
     assert.equal(meta.etag, 'meta-v1');
     assert.deepEqual(meta.tags, ['001', '"quoted"']);
     assert.equal(meta.cached, false);

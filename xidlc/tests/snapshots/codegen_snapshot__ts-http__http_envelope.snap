@@ -82,22 +82,24 @@ import {
             const contentType = (resp.headers.get("Content-Type") ?? "").split(";")[0].trim();
             
                 if (contentType === "application/json") {
-                    const value = await decodeResponseBody(resp, "application/json", this.codecs);
-                    return { kind: "Json", value, ...buildResponsePayload(undefined, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }, { name: "X-Tag", key: "tags", optional: false, isMulti: true, decode: value => value }], [{ name: "cached", key: "cached", optional: false, isMulti: false }]) } as { kind: "Json", value: types.representations.FileMeta, etag: string, tags: Array<string>, cached: boolean } | { kind: "OctetStream", value: Uint8Array, etag: string, tags: Array<string>, cached: boolean } | { kind: "Text", value: string, etag: string, tags: Array<string>, cached: boolean };
-                }
-            
+                    const schema = ifaceSchemas.models.representations.FileMetaSchema;
+                const value = schema.parse(await decodeResponseBody(resp, "application/json", this.codecs, schema));
+                return { kind: "Json", value, ...buildResponsePayload(undefined, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }, { name: "X-Tag", key: "tags", optional: false, isMulti: true, decode: value => value }], [{ name: "cached", key: "cached", optional: false, isMulti: false }]) } as { kind: "Json", value: types.representations.FileMeta, etag: string, tags: Array<string>, cached: boolean } | { kind: "OctetStream", value: Uint8Array, etag: string, tags: Array<string>, cached: boolean } | { kind: "Text", value: string, etag: string, tags: Array<string>, cached: boolean };
+            }
+        
                 if (contentType === "application/octet-stream") {
                     const value = new Uint8Array(await resp.arrayBuffer());
-                    return { kind: "OctetStream", value, ...buildResponsePayload(undefined, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }, { name: "X-Tag", key: "tags", optional: false, isMulti: true, decode: value => value }], [{ name: "cached", key: "cached", optional: false, isMulti: false }]) } as { kind: "Json", value: types.representations.FileMeta, etag: string, tags: Array<string>, cached: boolean } | { kind: "OctetStream", value: Uint8Array, etag: string, tags: Array<string>, cached: boolean } | { kind: "Text", value: string, etag: string, tags: Array<string>, cached: boolean };
-                }
-            
+                return { kind: "OctetStream", value, ...buildResponsePayload(undefined, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }, { name: "X-Tag", key: "tags", optional: false, isMulti: true, decode: value => value }], [{ name: "cached", key: "cached", optional: false, isMulti: false }]) } as { kind: "Json", value: types.representations.FileMeta, etag: string, tags: Array<string>, cached: boolean } | { kind: "OctetStream", value: Uint8Array, etag: string, tags: Array<string>, cached: boolean } | { kind: "Text", value: string, etag: string, tags: Array<string>, cached: boolean };
+            }
+        
                 if (contentType === "text/plain") {
-                    const value = await decodeResponseBody(resp, "text/plain", this.codecs);
-                    return { kind: "Text", value, ...buildResponsePayload(undefined, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }, { name: "X-Tag", key: "tags", optional: false, isMulti: true, decode: value => value }], [{ name: "cached", key: "cached", optional: false, isMulti: false }]) } as { kind: "Json", value: types.representations.FileMeta, etag: string, tags: Array<string>, cached: boolean } | { kind: "OctetStream", value: Uint8Array, etag: string, tags: Array<string>, cached: boolean } | { kind: "Text", value: string, etag: string, tags: Array<string>, cached: boolean };
-                }
-            
-            throw await parseXidlError(resp);
-            
+                    const schema = z.coerce.string();
+                const value = schema.parse(await decodeResponseBody(resp, "text/plain", this.codecs, schema));
+                return { kind: "Text", value, ...buildResponsePayload(undefined, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }, { name: "X-Tag", key: "tags", optional: false, isMulti: true, decode: value => value }], [{ name: "cached", key: "cached", optional: false, isMulti: false }]) } as { kind: "Json", value: types.representations.FileMeta, etag: string, tags: Array<string>, cached: boolean } | { kind: "OctetStream", value: Uint8Array, etag: string, tags: Array<string>, cached: boolean } | { kind: "Text", value: string, etag: string, tags: Array<string>, cached: boolean };
+            }
+        
+        throw await parseXidlError(resp);
+        
     }
     
             async get_fresh(): Promise<string> {
@@ -143,7 +145,7 @@ import {
             
         }
         return;
-            
+        
     }
     
     
@@ -235,10 +237,18 @@ export interface NotFound {
     export type ContentType = "application/json" | "application/octet-stream" | "text/plain";
 
 
+    export interface FileDetails {
+            
+                label: string;
+                }
+
+
     export interface FileMeta {
             
                 id: string;
                     etag: string;
+                    details: representations.FileDetails;
+                    note?: string;
                 }
 
 
@@ -390,6 +400,7 @@ import * as $xidlErrors from "./http_envelope.errors";
 
 import type * as ifaceTypes from "./http_envelope.iface";
 import * as ifaceSchemas from "./http_envelope.iface.zod";
+import { z } from "zod";
 import {
     defineOperation,
     writeResponseBindings,
@@ -435,7 +446,7 @@ export const EnvelopeApiOperations = {
             bodyFields: [{ wireName: "return", key: "return" }],
             headers: [{ wireName: "ETag", key: "etag", multi: false }, { wireName: "X-Tag", key: "tags", multi: true }],
             cookies: [{ wireName: "cached", key: "cached", multi: false }],
-            representations: [{ kind: "Json", contentType: "application/json" }, { kind: "OctetStream", contentType: "application/octet-stream" }, { kind: "Text", contentType: "text/plain" }],
+            representations: [{ kind: "Json", contentType: "application/json", schema: ifaceSchemas.models.representations.FileMetaSchema }, { kind: "OctetStream", contentType: "application/octet-stream" }, { kind: "Text", contentType: "text/plain", schema: z.coerce.string() }],
             stream: false,
             
         },
@@ -583,14 +594,14 @@ import { xjson } from "xidl-typescript-codec";
     
     export const NotModifiedSchema = z.object({
         
-            etag: z.coerce.string()
+            etag: xjson(z.coerce.string(), {"name":"ETag"})
         
     });
 
     
     export const PreconditionFailedSchema = z.object({
         
-            etag: z.coerce.string(),
+            etag: xjson(z.coerce.string(), {"name":"ETag"}),
         
             code: z.coerce.number().int().nonnegative(),
         
@@ -610,11 +621,21 @@ import { xjson } from "xidl-typescript-codec";
     export namespace representations {
     export const ContentTypeSchema = z.enum(["application/json", "application/octet-stream", "text/plain"]);
 
+        export const FileDetailsSchema = z.object({
+            
+                label: z.coerce.string()
+            
+        });
+
         export const FileMetaSchema = z.object({
             
-                id: z.coerce.string(),
+                id: xjson(z.coerce.string(), {"name":"wire_id"}),
             
-                etag: z.coerce.string()
+                etag: z.coerce.string(),
+            
+                details: xjson(representations.FileDetailsSchema, {"flatten":true}),
+            
+                note: z.coerce.string().optional()
             
         });
 

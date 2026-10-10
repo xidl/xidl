@@ -18,13 +18,14 @@ export interface XidlJsonMeta {
   omitempty?: boolean;
 }
 
-const metaMap = new WeakMap<object, XidlJsonMeta>();
+// Metadata belongs to the schema, including when runtimes load another codec copy.
+const metadataKey = Symbol.for('xidl.json.metadata');
 
 /** Read Zod metadata attached via {@link setMeta}. */
 export function getMeta(schema: XidlSchema): XidlJsonMeta | undefined {
   let current: any = schema;
   while (current) {
-    const meta = metaMap.get(current);
+    const meta: XidlJsonMeta | undefined = current[metadataKey];
     if (meta) return meta;
 
     if (isArraySchema(current)) break;
@@ -45,7 +46,10 @@ export function setMeta<T extends XidlSchema>(
   schema: T,
   meta: XidlJsonMeta,
 ): T {
-  metaMap.set(schema, meta);
+  Object.defineProperty(schema, metadataKey, {
+    configurable: true,
+    value: meta,
+  });
   return schema;
 }
 

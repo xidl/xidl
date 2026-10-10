@@ -1,9 +1,9 @@
 use crate::generate::openapi::naming::declarator_name;
-use crate::generate::utils::doc_lines_from_annotations;
+use crate::generate::utils::{doc_lines_from_annotations, has_annotation};
 use crate::openapi::path::{Parameter, ParameterBuilder, ParameterIn};
 use crate::openapi::request_body::RequestBody;
 use crate::openapi::schema::{
-    ArrayBuilder, KnownFormat, ObjectBuilder, OneOf, Schema, SchemaFormat, Type,
+    AllOf, ArrayBuilder, KnownFormat, ObjectBuilder, OneOf, Schema, SchemaFormat, Type,
 };
 use crate::openapi::{Content, Ref, RefOr, Required};
 use xidl_parser::hir;
@@ -53,6 +53,7 @@ pub(crate) fn schema_for_struct_with_annotations(
     container_annotations: &[hir::Annotation],
 ) -> RefOr<Schema> {
     let mut object = ObjectBuilder::new().schema_type(Type::Object);
+    let mut flattened = Vec::new();
     for member in members {
         if hir::is_skipped(&member.annotations) {
             continue;
@@ -67,13 +68,25 @@ pub(crate) fn schema_for_struct_with_annotations(
             );
             let schema =
                 apply_schema_description(schema_for_decl(&member.ty, decl), doc.as_deref());
+            if has_annotation(&member.annotations, "flatten") {
+                flattened.push(schema);
+                continue;
+            }
             object = object.property(name.clone(), schema);
             if !optional {
                 object = object.required(name);
             }
         }
     }
-    RefOr::T(Schema::from(object))
+    let object = RefOr::T(Schema::from(object));
+    if flattened.is_empty() {
+        object
+    } else {
+        let mut combined = AllOf::new();
+        combined.items.push(object);
+        combined.items.extend(flattened);
+        RefOr::T(Schema::from(combined))
+    }
 }
 
 pub(crate) fn schema_for_union(def: &hir::UnionDef) -> RefOr<Schema> {

@@ -82,20 +82,41 @@ openapi_http_envelope.json
         ],
         "type": "string"
       },
-      "representations.FileMeta": {
+      "representations.FileDetails": {
         "properties": {
-          "etag": {
-            "type": "string"
-          },
-          "id": {
+          "label": {
             "type": "string"
           }
         },
         "required": [
-          "id",
-          "etag"
+          "label"
         ],
         "type": "object"
+      },
+      "representations.FileMeta": {
+        "allOf": [
+          {
+            "properties": {
+              "etag": {
+                "type": "string"
+              },
+              "note": {
+                "type": "string"
+              },
+              "wire_id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "wire_id",
+              "etag"
+            ],
+            "type": "object"
+          },
+          {
+            "$ref": "#/components/schemas/representations.FileDetails"
+          }
+        ]
       },
       "representations.FileResponse": {
         "oneOf": [

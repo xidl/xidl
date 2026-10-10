@@ -75,9 +75,9 @@ import {
             
         }
         const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
-            const responsePayload = buildResponsePayload(responseBody, resp, "return", [{ wireName: "return", key: "return" }], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }], []);
-            return ifaceSchemas.BodyShapeDocumentResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.BodyShapeDocumentResponseSchema)) as ifaceTypes.BodyShapeDocumentResponse;
-            
+        const responsePayload = buildResponsePayload(responseBody, resp, "return", [{ wireName: "return", key: "return" }], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }], []);
+        return ifaceSchemas.BodyShapeDocumentResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.BodyShapeDocumentResponseSchema)) as ifaceTypes.BodyShapeDocumentResponse;
+        
     }
     
             async scalar(): Promise<ifaceTypes.BodyShapeScalarResponse> {
@@ -99,9 +99,9 @@ import {
             
         }
         const responseBody = await decodeOptionalResponseBody(resp, "text/plain", this.codecs);
-            const responsePayload = buildResponsePayload(responseBody, resp, "return", [{ wireName: "return", key: "return" }], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }, { name: "X-Count", key: "count", optional: false, isMulti: false }], [{ name: "cached", key: "cached", optional: false, isMulti: false }]);
-            return ifaceSchemas.BodyShapeScalarResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.BodyShapeScalarResponseSchema)) as ifaceTypes.BodyShapeScalarResponse;
-            
+        const responsePayload = buildResponsePayload(responseBody, resp, "return", [{ wireName: "return", key: "return" }], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }, { name: "X-Count", key: "count", optional: false, isMulti: false }], [{ name: "cached", key: "cached", optional: false, isMulti: false }]);
+        return ifaceSchemas.BodyShapeScalarResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.BodyShapeScalarResponseSchema)) as ifaceTypes.BodyShapeScalarResponse;
+        
     }
     
             async rename(document: types.Document): Promise<ifaceTypes.BodyShapeRenameResponse> {
@@ -127,9 +127,9 @@ import {
             
         }
         const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
-            const responsePayload = buildResponsePayload(responseBody, resp, "return", [{ wireName: "return", key: "return" }], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }], []);
-            return ifaceSchemas.BodyShapeRenameResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.BodyShapeRenameResponseSchema)) as ifaceTypes.BodyShapeRenameResponse;
-            
+        const responsePayload = buildResponsePayload(responseBody, resp, "return", [{ wireName: "return", key: "return" }], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }], []);
+        return ifaceSchemas.BodyShapeRenameResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.BodyShapeRenameResponseSchema)) as ifaceTypes.BodyShapeRenameResponse;
+        
     }
     
             async output(): Promise<ifaceTypes.BodyShapeOutputResponse> {
@@ -151,9 +151,9 @@ import {
             
         }
         const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
-            const responsePayload = buildResponsePayload(responseBody, resp, "return", [{ wireName: "document", key: "document" }], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }], []);
-            return ifaceSchemas.BodyShapeOutputResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.BodyShapeOutputResponseSchema)) as ifaceTypes.BodyShapeOutputResponse;
-            
+        const responsePayload = buildResponsePayload(responseBody, resp, "return", [{ wireName: "document", key: "document" }], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }], []);
+        return ifaceSchemas.BodyShapeOutputResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.BodyShapeOutputResponseSchema)) as ifaceTypes.BodyShapeOutputResponse;
+        
     }
     
             async upload(media_type: string | undefined, payload: Uint8Array): Promise<types.UploadResult> {
@@ -329,6 +329,7 @@ import type * as types from "./http_body_shape";
 
 import type * as ifaceTypes from "./http_body_shape.iface";
 import * as ifaceSchemas from "./http_body_shape.iface.zod";
+import { z } from "zod";
 import {
     defineOperation,
     type Awaitable,

@@ -14,9 +14,13 @@ enum ContentType {
     @rename("text/plain") Text,
 };
 
+struct FileDetails { string label; };
+
 struct FileMeta {
-    string id;
+    @rename("wire_id") string id;
     string etag;
+    @flatten ::representations::FileDetails details;
+    @optional string note;
 };
 
 @http
