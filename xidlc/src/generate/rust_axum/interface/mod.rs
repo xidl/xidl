@@ -1,5 +1,6 @@
 mod interface_annotations;
 mod interface_attr;
+mod interface_exceptions;
 mod interface_http;
 mod interface_method;
 mod interface_method_params;

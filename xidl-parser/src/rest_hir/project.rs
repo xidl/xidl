@@ -4,16 +4,15 @@ use std::collections::HashSet;
 
 use super::attr::project_attribute;
 use super::mapping;
-use super::model::{HttpException, HttpExceptionField, HttpExceptionMember, HttpExceptionRef};
+use super::model::{HttpException, HttpExceptionRef};
 use super::project_params::project_params;
 use super::route::{
     auto_default_method_path, operation_id, parse_route_template, route_from_annotations,
 };
 use super::semantics::{
     HttpStreamKind, UpgradeMode, classify_upgrade_protocol, effective_cors, effective_media_type,
-    effective_security_with_origin, has_annotation, http_stream_config,
-    normalize_annotation_params, parse_upgrade_protocol, parse_websocket_config,
-    validate_http_annotations,
+    effective_security_with_origin, has_annotation, http_stream_config, parse_upgrade_protocol,
+    parse_websocket_config, validate_http_annotations,
 };
 use super::validate::{
     effective_basic_auth_realm, effective_deprecated, validate_head_constraints,
@@ -63,68 +62,12 @@ impl ProjectionContext {
                     self.collect_exceptions(&module.definition, &next)?;
                 }
                 hir::Definition::ExceptDcl(except) => {
-                    self.collect_exception(except, module_path)?;
+                    self.exceptions
+                        .push(HttpException::from_hir(except, module_path)?);
                 }
                 _ => {}
             }
         }
-        Ok(())
-    }
-
-    fn collect_exception(
-        &mut self,
-        except: &hir::ExceptDcl,
-        module_path: &[String],
-    ) -> ParserResult<()> {
-        let status = exception_status(&except.annotations, &except.ident)?;
-        let mut headers = Vec::new();
-        let mut cookies = Vec::new();
-        let mut body = Vec::new();
-        for member in &except.member {
-            for decl in &member.ident {
-                let field = match decl {
-                    hir::Declarator::SimpleDeclarator(value) => value.0.clone(),
-                    hir::Declarator::ArrayDeclarator(value) => {
-                        return Err(ParseError::Message(format!(
-                            "exception '{}': array declarators are not supported ('{}')",
-                            except.ident, value.ident
-                        )));
-                    }
-                };
-                let wire_name =
-                    hir::effective_wire_name(&field, &member.annotations, &except.annotations);
-                if has_annotation(&member.annotations, "header") {
-                    headers.push(HttpExceptionMember {
-                        field,
-                        wire_name,
-                        ty: member.ty.clone(),
-                        is_multi: is_multi_type(&member.ty),
-                        optional: member.is_optional(),
-                    });
-                } else if has_annotation(&member.annotations, "cookie") {
-                    cookies.push(HttpExceptionMember {
-                        field,
-                        wire_name,
-                        ty: member.ty.clone(),
-                        is_multi: is_multi_type(&member.ty),
-                        optional: member.is_optional(),
-                    });
-                } else {
-                    body.push(HttpExceptionField {
-                        field,
-                        ty: member.ty.clone(),
-                    });
-                }
-            }
-        }
-        self.exceptions.push(HttpException {
-            module_path: module_path.to_vec(),
-            ident: except.ident.clone(),
-            status,
-            headers,
-            cookies,
-            body,
-        });
         Ok(())
     }
 
@@ -415,14 +358,13 @@ fn project_operation(
         &response_params,
         &return_type,
     );
-    let raises = project_raises(
-        &op.ident,
-        module_path,
-        exceptions,
-        stream.kind,
-        has_upgrade,
-        op,
-    )?;
+    if op.raises.is_some() && (stream.kind.is_some() || has_upgrade) {
+        return Err(ParseError::Message(format!(
+            "operation '{}': raises(...) is only supported on non-stream, non-upgrade operations",
+            op.ident
+        )));
+    }
+    let raises = HttpExceptionRef::for_operation(op, module_path, exceptions)?;
 
     Ok(HttpOperation {
         meta: HttpOperationMeta {
@@ -444,114 +386,4 @@ fn project_operation(
         signature,
         http,
     })
-}
-
-fn project_raises(
-    op_ident: &str,
-    module_path: &[String],
-    exceptions: &[HttpException],
-    stream_kind: Option<HttpStreamKind>,
-    has_upgrade: bool,
-    op: &hir::OpDcl,
-) -> ParserResult<Vec<HttpExceptionRef>> {
-    let Some(expr) = &op.raises else {
-        return Ok(Vec::new());
-    };
-    if stream_kind.is_some() || has_upgrade {
-        return Err(ParseError::Message(format!(
-            "operation '{op_ident}': raises(...) is only supported on non-stream, non-upgrade operations"
-        )));
-    }
-    let mut refs = Vec::new();
-    let mut statuses = HashSet::new();
-    for scoped in &expr.0 {
-        let exception = resolve_exception(exceptions, module_path, scoped).ok_or_else(|| {
-            ParseError::Message(format!(
-                "operation '{op_ident}': raises('{}') does not resolve to a declared exception",
-                scoped.name.join("::")
-            ))
-        })?;
-        if !statuses.insert(exception.status) {
-            return Err(ParseError::Message(format!(
-                "operation '{op_ident}': duplicate HTTP status {} in raises(...)",
-                exception.status
-            )));
-        }
-        refs.push(HttpExceptionRef {
-            module_path: exception.module_path.clone(),
-            ident: exception.ident.clone(),
-        });
-    }
-    Ok(refs)
-}
-
-fn exception_http_params(annotations: &[hir::Annotation]) -> Option<&hir::AnnotationParams> {
-    annotations.iter().find_map(|annotation| match annotation {
-        hir::Annotation::Builtin { name, params } if name == "http" => params.as_ref(),
-        hir::Annotation::ScopedName { name, params }
-            if name.name.last().map(String::as_str) == Some("http") =>
-        {
-            params.as_ref()
-        }
-        _ => None,
-    })
-}
-
-fn exception_status(annotations: &[hir::Annotation], ident: &str) -> ParserResult<u16> {
-    const HINT: &str = "(e.g. @http(412) or @http(status = 412))";
-    let params = exception_http_params(annotations).ok_or_else(|| {
-        ParseError::Message(format!(
-            "exception '{ident}': @http <status> is required for the HTTP error channel {HINT}"
-        ))
-    })?;
-    let params = normalize_annotation_params(params);
-    let raw = params
-        .get("status")
-        .or_else(|| params.get("value"))
-        .ok_or_else(|| {
-            ParseError::Message(format!(
-                "exception '{ident}': @http requires an integer status {HINT}"
-            ))
-        })?;
-    let status: u16 = raw.trim().parse().map_err(|_| {
-        ParseError::Message(format!(
-            "exception '{ident}': @http status '{raw}' is not an integer {HINT}"
-        ))
-    })?;
-    if !(100..=599).contains(&status) {
-        return Err(ParseError::Message(format!(
-            "exception '{ident}': @http status {status} is outside 100..=599"
-        )));
-    }
-    Ok(status)
-}
-
-fn is_multi_type(ty: &hir::TypeSpec) -> bool {
-    matches!(ty, hir::TypeSpec::SequenceType(_))
-}
-
-fn resolve_exception<'a>(
-    exceptions: &'a [HttpException],
-    module_path: &[String],
-    scoped: &hir::ScopedName,
-) -> Option<&'a HttpException> {
-    let ident = scoped.name.last()?;
-    let prefix = &scoped.name[..scoped.name.len() - 1];
-    if scoped.is_root {
-        return exceptions
-            .iter()
-            .find(|e| &e.ident == ident && e.module_path.as_slice() == prefix);
-    }
-    let depth = module_path.len();
-    for skip in (0..=depth).rev() {
-        let scope = &module_path[..skip];
-        if scope.ends_with(prefix)
-            && let Some(found) = exceptions
-                .iter()
-                .find(|e| &e.ident == ident && e.module_path.as_slice() == scope)
-        {
-            return Some(found);
-        }
-    }
-    None
 }
