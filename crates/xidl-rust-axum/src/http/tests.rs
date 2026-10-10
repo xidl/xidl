@@ -73,3 +73,18 @@ fn serde_ext_uses_default_on_missing_and_rejects_null() {
     let err = serde_json::from_str::<DefaultedPayload>(r#"{"count":null}"#).unwrap_err();
     assert!(err.to_string().contains("null is not allowed"));
 }
+
+#[test]
+fn response_cookies_decode_escaped_values_without_attributes() {
+    let mut headers = HeaderMap::new();
+    headers.append(
+        header::SET_COOKIE,
+        HeaderValue::from_static("session=001%2F%3B%25; HttpOnly; Path=/"),
+    );
+    headers.append(
+        header::SET_COOKIE,
+        HeaderValue::from_static("session=next%20value"),
+    );
+    let cookies = parse_set_cookies(headers.get_all(header::SET_COOKIE).iter());
+    assert_eq!(cookies["session"], ["001/;%", "next value"]);
+}

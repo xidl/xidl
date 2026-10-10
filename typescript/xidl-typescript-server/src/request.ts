@@ -60,37 +60,22 @@ export async function decodeOperationRequest<TService>(
   }
 
   if (operation.request.body.kind === 'value') {
-    if (
-      normalizeMime(operation.request.body.contentType) ===
-      'application/octet-stream'
-    ) {
-      // Raw byte payload: the declared Content-Type is the payload's own
-      // media type and is not constrained; the bytes are the value.
-      const bytes = new Uint8Array(await request.arrayBuffer());
-      applyBody(
-        payload,
-        bytes,
-        operation.request.body.fields,
-        operation.request.body.singleKey,
-      );
-    } else {
-      assertRequestContentType(
-        request.headers,
-        operation.request.body.contentType,
-      );
-      const body = await decodeRequestBody(
-        request,
-        operation.request.body.contentType,
-        codecs,
-        operation.request.body.schema,
-      );
-      applyBody(
-        payload,
-        body,
-        operation.request.body.fields,
-        operation.request.body.singleKey,
-      );
-    }
+    assertRequestContentType(
+      request.headers,
+      operation.request.body.contentType,
+    );
+    const body = await decodeRequestBody(
+      request,
+      operation.request.body.contentType,
+      codecs,
+      operation.request.body.schema,
+    );
+    applyBody(
+      payload,
+      body,
+      operation.request.body.fields,
+      operation.request.body.singleKey,
+    );
   }
 
   if (operation.request.kind === 'none') {

@@ -12,6 +12,7 @@ import type * as types from "./http_catch_all";
 
 import type * as ifaceTypes from "./http_catch_all.iface";
 import * as ifaceSchemas from "./http_catch_all.iface.zod";
+import { z } from "zod";
 import { deserialize } from "xidl-typescript-codec";
 import {
     appendCookie,

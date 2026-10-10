@@ -209,11 +209,17 @@ pub(crate) fn render_http_operation(
                 let exception = exceptions
                     .iter()
                     .find(|e| e.ident == refer.ident && e.module_path == refer.module_path)?;
-                let headers = exception
+                let mut headers: Vec<_> = exception
                     .headers
                     .iter()
                     .map(|member| (member.wire_name.clone(), schema_for_type(&member.ty)))
                     .collect();
+                if !exception.cookies.is_empty() {
+                    headers.push((
+                        "Set-Cookie".into(),
+                        ObjectBuilder::new().schema_type(Type::String).into(),
+                    ));
+                }
                 let schema = (!exception.body.is_empty()).then(|| {
                     schema_ref(&super::naming::scoped_name(
                         &exception.module_path,

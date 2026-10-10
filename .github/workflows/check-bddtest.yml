@@ -58,6 +58,7 @@ jobs:
           - shard: rest-errors
             port-base: 17000
             features: >-
+              bdd/features/http_exceptions.feature
               bdd/features/rest.feature:120
               bdd/features/rest.feature:133
               bdd/features/rest.feature:146

@@ -1,4 +1,3 @@
-use super::interface_types::render_scoped_name;
 use super::interface_types::{
     axum_type, header_item_is_primitive, header_item_is_string, header_item_ty,
 };
@@ -6,7 +5,6 @@ use super::{ExceptionMemberContext, RaisesContext, RenderEnv};
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::rust::util::rust_ident;
 use convert_case::Casing;
-use xidl_parser::hir;
 use xidl_parser::rest_hir::HttpOperation;
 
 impl RaisesContext {
@@ -14,7 +12,6 @@ impl RaisesContext {
     /// operation-level ref (order preserved from the IDL) with its declared
     /// exception.
     pub(super) fn for_operation(
-        op: &hir::OpDcl,
         http_op: &HttpOperation,
         env: RenderEnv<'_>,
     ) -> IdlcResult<Vec<RaisesContext>> {
@@ -22,13 +19,8 @@ impl RaisesContext {
             return Ok(Vec::new());
         }
         let document = env.renderer.rest_hir()?;
-        let scoped_names = op
-            .raises
-            .as_ref()
-            .map(|raises| raises.0.as_slice())
-            .unwrap_or_default();
         let mut out = Vec::new();
-        for (refer, scoped) in http_op.meta.raises.iter().zip(scoped_names) {
+        for refer in &http_op.meta.raises {
             let exception = document
                 .document
                 .exceptions
@@ -37,7 +29,7 @@ impl RaisesContext {
                 .ok_or_else(|| {
                     IdlcError::rpc(format!(
                         "raises('{}') does not resolve to a declared exception",
-                        scoped.name.join("::")
+                        refer.ident
                     ))
                 })?;
             let members = |source: &Vec<xidl_parser::rest_hir::HttpExceptionMember>| {
@@ -62,8 +54,26 @@ impl RaisesContext {
                     .collect()
             };
             out.push(RaisesContext {
-                variant: rust_ident(&exception.ident).to_case(convert_case::Case::Pascal),
-                ty: render_scoped_name(scoped),
+                variant: if http_op
+                    .meta
+                    .raises
+                    .iter()
+                    .filter(|entry| entry.ident == refer.ident)
+                    .count()
+                    > 1
+                {
+                    refer
+                        .module_path
+                        .iter()
+                        .chain(std::iter::once(&refer.ident))
+                        .cloned()
+                        .collect::<Vec<_>>()
+                        .join("_")
+                        .to_case(convert_case::Case::Pascal)
+                } else {
+                    rust_ident(&exception.ident).to_case(convert_case::Case::Pascal)
+                },
+                ty: env.relative_type_path(&refer.module_path, &refer.ident),
                 status: exception.status,
                 headers: members(&exception.headers),
                 cookies: members(&exception.cookies),

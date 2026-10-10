@@ -10,10 +10,11 @@ http_exceptions.client.ts
 
 import type * as types from "./http_exceptions";
 import { readResponseCookies, readResponseHeader } from "xidl-typescript-client";
-import { NotModified, PreconditionFailed, NotFound } from "./http_exceptions.errors";
+import { NotModified, PreconditionFailed, NotFound, left$Failure, right$Failure } from "./http_exceptions.errors";
 
 import type * as ifaceTypes from "./http_exceptions.iface";
 import * as ifaceSchemas from "./http_exceptions.iface.zod";
+import { z } from "zod";
 import { deserialize } from "xidl-typescript-codec";
 import {
     appendCookie,
@@ -56,13 +57,12 @@ export class FilesClient {
         this.codecs = options.codecs ?? {};
     }
     
-        async get_file(id: string, if_none_match: string | undefined): Promise<types.FileMeta> {
-            const parsed = ifaceSchemas.FilesGetFileRequestSchema.parse({ "id": id, "if_none_match": if_none_match });
+        async get_file(id: string): Promise<types.FileMeta> {
+            const parsed = ifaceSchemas.FilesGetFileRequestSchema.parse({ "id": id });
             let path = "/files/{id}";
             path = path.replace("{" + "id" + "}", encodePathSegment(id));
             const query = new URLSearchParams();
             const headers = new Headers(this.defaultHeaders);
-            appendHeader(headers, "If-None-Match", if_none_match, true, false);
             const cookies: string[] = [];
             applyCookies(headers, cookies);
             applyClientAuth(path, query, headers, this.auth, []);
@@ -81,13 +81,69 @@ export class FilesClient {
         
     }
     
-        async delete_file(id: string, if_match: string): Promise<void> {
-            const parsed = ifaceSchemas.FilesDeleteFileRequestSchema.parse({ "id": id, "if_match": if_match });
-            let path = "/files/{id}";
-            path = path.replace("{" + "id" + "}", encodePathSegment(id));
+    
+        async throwGetFileError(resp: Response): Promise<never> {
+            const status = resp.status;
+            if (status === 304) {
+                throw new NotModified({
+                    "etag": readResponseHeader(resp.headers, "ETag", false, value => value) as never,
+                    });
+            }
+            if (status === 412) {
+                const bodySchema = z.object({ "code": z.coerce.number().int().nonnegative(), "message": z.coerce.string(), "detail": z.coerce.string().optional(),  });
+                const rawBody = await resp.clone().json().catch(() => undefined);
+                if (rawBody == null || rawBody["code"] === undefined || rawBody["message"] === undefined) throw await parseXidlError(resp);
+                const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
+                if (!decoded.success) throw await parseXidlError(resp);
+                const body = decoded.data;
+                throw new PreconditionFailed({
+                    "etag": readResponseHeader(resp.headers, "ETag", false, value => value) as never,
+                    "hints": (readResponseHeader(resp.headers, "X-Hint", true, value => value) ?? undefined) as never,
+                    "session_id": (readResponseCookies(resp.headers, value => value).get("session")?.[0]) as never,
+                    "retry_token": (readResponseCookies(resp.headers, value => value).get("retry")?.[0]) as never,
+                    "attempts": (readResponseCookies(resp.headers, value => value).get("attempt") ?? undefined) as never,
+                    "code": body["code"] as never,
+                    "msg": body["message"] as never,
+                    "detail": (body["detail"] ?? undefined) as never,
+                    });
+            }
+            if (status === 404) {
+                const bodySchema = z.object({ "code": z.coerce.number().int().nonnegative(), "msg": z.coerce.string(),  });
+                const rawBody = await resp.clone().json().catch(() => undefined);
+                if (rawBody == null || rawBody["code"] === undefined || rawBody["msg"] === undefined) throw await parseXidlError(resp);
+                const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
+                if (!decoded.success) throw await parseXidlError(resp);
+                const body = decoded.data;
+                throw new NotFound({
+                    "code": body["code"] as never,
+                    "msg": body["msg"] as never,
+                    });
+            }
+            throw await parseXidlError(resp);
+        }
+    
+}
+
+    
+export class ScopedClient {
+    private readonly baseUrl: string;
+    private readonly fetchImpl: FetchLike;
+    private readonly defaultHeaders: Record<string, string>;
+    private readonly auth?: ClientAuth;
+    private readonly codecs: Record<string, HttpCodec>;
+
+    constructor(baseUrl: string, options: ClientOptions = {}) {
+        this.baseUrl = baseUrl;
+        this.fetchImpl = resolveFetch(options.fetch);
+        this.defaultHeaders = options.headers ?? {};
+        this.auth = options.auth;
+        this.codecs = options.codecs ?? {};
+    }
+    
+        async read(): Promise<string> {
+            let path = "/scoped";
             const query = new URLSearchParams();
             const headers = new Headers(this.defaultHeaders);
-            appendHeader(headers, "If-Match", if_match, false, false);
             const cookies: string[] = [];
             applyCookies(headers, cookies);
             applyClientAuth(path, query, headers, this.auth, []);
@@ -96,67 +152,41 @@ export class FilesClient {
                 path = `${path}?${queryString}`;
             }
             const url = joinUrl(this.baseUrl, path);
-            headers.set("Accept", "");
-        const resp = await this.fetchImpl(url, { method: "DELETE", headers });
+            headers.set("Accept", "text/plain");
+        const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
-            await this.throwDeleteFileError(resp);
+            await this.throwReadError(resp);
             
         }
-        return;
+        return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
         
     }
     
     
-        async throwGetFileError(resp: Response): Promise<never> {
+        async throwReadError(resp: Response): Promise<never> {
             const status = resp.status;
-            
-                if (status === 304) {
-                    const body = {};
-                    throw new NotModified({
-                        "etag": readResponseHeader(resp.headers, "ETag", false) as never,
-                        });
-                }
-            
-                if (status === 412) {
-                    const body = (await resp.json().catch(() => ({}))) as Record<string, unknown>;
-                    throw new PreconditionFailed({
-                        "etag": readResponseHeader(resp.headers, "ETag", false) as never,
-                        "code": body["code"] as never,
-                        "msg": body["msg"] as never,
-                        });
-                }
-            
-                if (status === 404) {
-                    const body = (await resp.json().catch(() => ({}))) as Record<string, unknown>;
-                    throw new NotFound({
-                        "code": body["code"] as never,
-                        "msg": body["msg"] as never,
-                        });
-                }
-            
-            throw await parseXidlError(resp);
-        }
-    
-        async throwDeleteFileError(resp: Response): Promise<never> {
-            const status = resp.status;
-            
-                if (status === 412) {
-                    const body = (await resp.json().catch(() => ({}))) as Record<string, unknown>;
-                    throw new PreconditionFailed({
-                        "etag": readResponseHeader(resp.headers, "ETag", false) as never,
-                        "code": body["code"] as never,
-                        "msg": body["msg"] as never,
-                        });
-                }
-            
-                if (status === 404) {
-                    const body = (await resp.json().catch(() => ({}))) as Record<string, unknown>;
-                    throw new NotFound({
-                        "code": body["code"] as never,
-                        "msg": body["msg"] as never,
-                        });
-                }
-            
+            if (status === 409) {
+                const bodySchema = z.object({ "detail": ifaceSchemas.models.left.DetailSchema,  });
+                const rawBody = await resp.clone().json().catch(() => undefined);
+                if (rawBody == null || rawBody["detail"] === undefined) throw await parseXidlError(resp);
+                const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
+                if (!decoded.success) throw await parseXidlError(resp);
+                const body = decoded.data;
+                throw new left$Failure({
+                    "detail": body["detail"] as never,
+                    });
+            }
+            if (status === 422) {
+                const bodySchema = z.object({ "reason": z.coerce.string(),  });
+                const rawBody = await resp.clone().json().catch(() => undefined);
+                if (rawBody == null || rawBody["reason"] === undefined) throw await parseXidlError(resp);
+                const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
+                if (!decoded.success) throw await parseXidlError(resp);
+                const body = decoded.data;
+                throw new right$Failure({
+                    "reason": body["reason"] as never,
+                    });
+            }
             throw await parseXidlError(resp);
         }
     
@@ -180,8 +210,13 @@ export interface NotModified {
 export interface PreconditionFailed {
         
             etag: string;
+                hints?: Array<string>;
+                session_id: string;
+                retry_token?: string;
+                attempts?: Array<string>;
                 code: number;
                 msg: string;
+                detail?: string;
             }
 
     
@@ -200,6 +235,28 @@ export interface FileMeta {
                 etag: string;
             }
 
+    export namespace left {
+
+    export interface Detail {
+            
+                message: string;
+                }
+
+
+    export interface Failure {
+            
+                detail: Detail;
+                }
+}
+
+    export namespace right {
+
+    export interface Failure {
+            
+                reason: string;
+                }
+}
+
 export {};
 ===============
 http_exceptions.errors.ts
@@ -208,6 +265,7 @@ http_exceptions.errors.ts
 // Code generated by xidlc-v0.0.1-snapshot. DO NOT EDIT.
 
 
+import type * as types from "./http_exceptions";
 
     /** Typed HTTP error for status 304 responses. */
     export class NotModified extends Error {
@@ -231,20 +289,35 @@ http_exceptions.errors.ts
         readonly status = 412;
         readonly kind = "PreconditionFailed" as const;
         readonly etag: string;
+        readonly hints?: Array<string>;
+        readonly session_id: string;
+        readonly retry_token?: string;
+        readonly attempts?: Array<string>;
         readonly code: number;
     readonly msg: string;
+    readonly detail?: string;
     
     constructor(fields: {
         "etag": string;
+        "hints"?: Array<string>;
+        "session_id": string;
+        "retry_token"?: string;
+        "attempts"?: Array<string>;
         "code": number;
         "msg": string;
+        "detail"?: string;
         
     }) {
         super("PreconditionFailed");
         this.name = "PreconditionFailed";
         this.etag = fields["etag"];
+        this.hints = fields["hints"];
+        this.session_id = fields["session_id"];
+        this.retry_token = fields["retry_token"];
+        this.attempts = fields["attempts"];
         this.code = fields["code"];
         this.msg = fields["msg"];
+        this.detail = fields["detail"];
         
     }
 }
@@ -268,6 +341,40 @@ http_exceptions.errors.ts
         
     }
 }
+
+    /** Typed HTTP error for status 409 responses. */
+    export class left$Failure extends Error {
+        readonly status = 409;
+        readonly kind = "left$Failure" as const;
+        readonly detail: types.left.Detail;
+    
+    constructor(fields: {
+        "detail": types.left.Detail;
+        
+    }) {
+        super("left$Failure");
+        this.name = "left$Failure";
+        this.detail = fields["detail"];
+        
+    }
+}
+
+    /** Typed HTTP error for status 422 responses. */
+    export class right$Failure extends Error {
+        readonly status = 422;
+        readonly kind = "right$Failure" as const;
+        readonly reason: string;
+    
+    constructor(fields: {
+        "reason": string;
+        
+    }) {
+        super("right$Failure");
+        this.name = "right$Failure";
+        this.reason = fields["reason"];
+        
+    }
+}
 ===============
 http_exceptions.iface.d.ts
 ===============
@@ -280,14 +387,6 @@ http_exceptions.iface.d.ts
 
 export interface FilesGetFileRequest {
         id: string;
-            if_none_match?: string;
-        }
-
-    
-
-export interface FilesDeleteFileRequest {
-        id: string;
-            if_match: string;
         }
 
 export {};
@@ -307,16 +406,8 @@ import { xjson } from "xidl-typescript-codec";
     
 export const FilesGetFileRequestSchema = z.object({
         id: z.coerce.string(),
-        if_none_match: z.coerce.string().optional(),
     });
 export type FilesGetFileRequest = z.infer<typeof FilesGetFileRequestSchema>;
-
-    
-export const FilesDeleteFileRequestSchema = z.object({
-        id: z.coerce.string(),
-        if_match: z.coerce.string(),
-    });
-export type FilesDeleteFileRequest = z.infer<typeof FilesDeleteFileRequestSchema>;
 ===============
 http_exceptions.server.ts
 ===============
@@ -324,21 +415,20 @@ http_exceptions.server.ts
 
 
 import type * as types from "./http_exceptions";
-import { NotModified, PreconditionFailed, NotFound } from "./http_exceptions.errors";
+import { NotModified, PreconditionFailed, NotFound, left$Failure, right$Failure } from "./http_exceptions.errors";
 
 import type * as ifaceTypes from "./http_exceptions.iface";
 import * as ifaceSchemas from "./http_exceptions.iface.zod";
 import {
     defineOperation,
+    writeResponseBindings,
     type Awaitable,
 } from "xidl-typescript-server";
 
     
 export interface Files {
     
-        get_file(id: string, if_none_match: string | undefined): Awaitable<types.FileMeta>;
-    
-        delete_file(id: string, if_match: string): Awaitable<void>;
+        get_file(id: string): Awaitable<types.FileMeta>;
     
 }
 
@@ -351,11 +441,11 @@ export const FilesOperations = {
             paths: ["/files/{id}"],
             request: {
                 kind: "object",
-                args: ["id", "if_none_match"],
+                args: ["id"],
                 schema: ifaceSchemas.FilesGetFileRequestSchema,
                 path: [{ parameter: "id", wireName: "id", key: "id", multi: false, catchAll: false }],
                 query: [],
-                headers: [{ wireName: "If-None-Match", key: "if_none_match", multi: false }],
+                headers: [],
                 cookies: [],
                 body: {
                     kind: "none",
@@ -380,25 +470,29 @@ export const FilesOperations = {
                     
                         if (error instanceof NotModified) {
                             const headers = new Headers();
-                            if (error.etag !== undefined) headers.set("ETag", String(error.etag));
+                            writeResponseBindings(headers, { ...error }, [{ wireName: "ETag", key: "etag", multi: false }], false);
+                            writeResponseBindings(headers, { ...error }, [], true);
                             return { status: 304, headers };
                         
                     }
                 
                         if (error instanceof PreconditionFailed) {
                             const headers = new Headers();
-                            if (error.etag !== undefined) headers.set("ETag", String(error.etag));
+                            writeResponseBindings(headers, { ...error }, [{ wireName: "ETag", key: "etag", multi: false }, { wireName: "X-Hint", key: "hints", multi: true }], false);
+                            writeResponseBindings(headers, { ...error }, [{ wireName: "session", key: "session_id", multi: false }, { wireName: "retry", key: "retry_token", multi: false }, { wireName: "attempt", key: "attempts", multi: true }], true);
                             headers.set("Content-Type", "application/json");
                             return {
                                 status: 412,
                                 headers,
-                                body: { "code": error.code, "msg": error.msg, },
+                                body: { "code": error.code, "message": error.msg, "detail": error.detail, },
                             };
                             
                     }
                 
                         if (error instanceof NotFound) {
                             const headers = new Headers();
+                            writeResponseBindings(headers, { ...error }, [], false);
+                            writeResponseBindings(headers, { ...error }, [], true);
                             headers.set("Content-Type", "application/json");
                             return {
                                 status: 404,
@@ -414,18 +508,28 @@ export const FilesOperations = {
         
     }),
     
-        delete_file: defineOperation<Files, "delete_file">({
-            handler: "delete_file",
-            method: "DELETE",
-            path: "/files/{id}",
-            paths: ["/files/{id}"],
+} as const;
+
+    
+export interface Scoped {
+    
+        read(): Awaitable<string>;
+    
+}
+
+export const ScopedOperations = {
+    
+        read: defineOperation<Scoped, "read">({
+            handler: "read",
+            method: "GET",
+            path: "/scoped",
+            paths: ["/scoped"],
             request: {
-                kind: "object",
-                args: ["id", "if_match"],
-                schema: ifaceSchemas.FilesDeleteFileRequestSchema,
-                path: [{ parameter: "id", wireName: "id", key: "id", multi: false, catchAll: false }],
+                kind: "none",
+                args: [],
+                path: [],
                 query: [],
-                headers: [{ wireName: "If-Match", key: "if_match", multi: false }],
+                headers: [],
                 cookies: [],
                 body: {
                     kind: "none",
@@ -435,9 +539,9 @@ export const FilesOperations = {
             },
         },
         response: {
-            contentType: "",
-            bodyMode: "none",
-            bodyFields: [],
+            contentType: "text/plain",
+            bodyMode: "return",
+            bodyFields: [{ wireName: "return", key: "return" }],
             headers: [],
             cookies: [],
             stream: false,
@@ -448,25 +552,28 @@ export const FilesOperations = {
             errors: {
                 match: (error: unknown) => {
                     
-                        if (error instanceof PreconditionFailed) {
+                        if (error instanceof left$Failure) {
                             const headers = new Headers();
-                            if (error.etag !== undefined) headers.set("ETag", String(error.etag));
+                            writeResponseBindings(headers, { ...error }, [], false);
+                            writeResponseBindings(headers, { ...error }, [], true);
                             headers.set("Content-Type", "application/json");
                             return {
-                                status: 412,
+                                status: 409,
                                 headers,
-                                body: { "code": error.code, "msg": error.msg, },
+                                body: { "detail": error.detail, },
                             };
                             
                     }
                 
-                        if (error instanceof NotFound) {
+                        if (error instanceof right$Failure) {
                             const headers = new Headers();
+                            writeResponseBindings(headers, { ...error }, [], false);
+                            writeResponseBindings(headers, { ...error }, [], true);
                             headers.set("Content-Type", "application/json");
                             return {
-                                status: 404,
+                                status: 422,
                                 headers,
-                                body: { "code": error.code, "msg": error.msg, },
+                                body: { "reason": error.reason, },
                             };
                             
                     }
@@ -499,9 +606,19 @@ import { xjson } from "xidl-typescript-codec";
         
             etag: z.coerce.string(),
         
+            hints: z.array(z.coerce.string()).optional(),
+        
+            session_id: z.coerce.string(),
+        
+            retry_token: z.coerce.string().optional(),
+        
+            attempts: z.array(z.coerce.string()).optional(),
+        
             code: z.coerce.number().int().nonnegative(),
         
-            msg: z.coerce.string()
+            msg: z.coerce.string(),
+        
+            detail: z.coerce.string().optional()
         
     });
 
@@ -522,3 +639,25 @@ import { xjson } from "xidl-typescript-codec";
             etag: z.coerce.string()
         
     });
+
+    export namespace left {
+        export const DetailSchema = z.object({
+            
+                message: z.coerce.string()
+            
+        });
+
+        export const FailureSchema = z.object({
+            
+                detail: DetailSchema
+            
+        });
+}
+
+    export namespace right {
+        export const FailureSchema = z.object({
+            
+                reason: z.coerce.string()
+            
+        });
+}

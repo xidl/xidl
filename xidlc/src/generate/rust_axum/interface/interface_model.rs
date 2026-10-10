@@ -178,6 +178,26 @@ pub(crate) struct RenderEnv<'a> {
 }
 
 impl<'a> RenderEnv<'a> {
+    pub(crate) fn relative_type_path(&self, target: &[String], ident: &str) -> String {
+        let common = self
+            .module_path
+            .iter()
+            .zip(target)
+            .take_while(|(a, b)| a == b)
+            .count();
+        std::iter::repeat_n("super".to_string(), self.module_path.len() - common)
+            .chain(
+                target[common..]
+                    .iter()
+                    .map(|part| crate::generate::rust::util::rust_ident(part)),
+            )
+            .chain(std::iter::once(crate::generate::rust::util::rust_ident(
+                ident,
+            )))
+            .collect::<Vec<_>>()
+            .join("::")
+    }
+
     pub(crate) fn new(
         renderer: &'a RustAxumRenderer,
         module_path: &'a [String],

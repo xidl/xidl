@@ -1,0 +1,29 @@
+let headers = (|| -> xidl_rust_axum::Result<::xidl_rust_axum::axum::http::HeaderMap> {
+    let {% if ex.headers | length > 0 or ex.cookies | length > 0 %}mut {% endif %}headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
+    {% for kind in ["headers", "cookies"] %}
+        {% for member in ex[kind] %}
+            {% if member.optional %}
+                for value in err.{{ member.field }}.as_ref().into_iter(){% if member.is_multi %}.flatten(){% endif %} {
+                {% elif member.is_multi %}
+                    for value in &err.{{ member.field }} {
+                    {% else %}
+                        {
+                            let value = &err.{{ member.field }};
+                        {% endif %}
+                        let value = {% if member.item_is_string or member.item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
+                        .map_err(|err| xidl_rust_axum::Error::new(500, format!("exception {{ member.wire_name }}: {err}")))?{% endif %};
+                        {% if kind == "cookies" %}
+                            let value = xidl_rust_axum::cookie::Cookie::new("{{ member.wire_name }}", value).encoded().to_string();
+                        {% endif %}
+                        let value = ::xidl_rust_axum::axum::http::header::HeaderValue::from_str(&value)
+                        .map_err(|err| xidl_rust_axum::Error::new(500, format!("exception {{ member.wire_name }}: {err}")))?;
+                        headers.append({% if kind == "cookies" %}::xidl_rust_axum::axum::http::header::SET_COOKIE{% else %}"{{ member.wire_name }}"{% endif %}, value);
+                    }
+                {% endfor %}
+            {% endfor %}
+            Ok(headers)
+        })();
+        let headers = match headers {
+            Ok(headers) => headers,
+            Err(err) => return ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+        };

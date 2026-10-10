@@ -10,16 +10,36 @@ http_exceptions.rs
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct NotModified {
+    #[serde(rename = "ETag")]
     #[serde(skip)]
     pub etag: String,
 }
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct PreconditionFailed {
+    #[serde(rename = "ETag")]
     #[serde(skip)]
     pub etag: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "X-Hint")]
+    #[serde(skip)]
+    pub hints: Option<Vec<String>>,
+    #[serde(rename = "session")]
+    #[serde(skip)]
+    pub session_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "retry")]
+    #[serde(skip)]
+    pub retry_token: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "attempt")]
+    #[serde(skip)]
+    pub attempts: Option<Vec<String>>,
     pub code: u32,
+    #[serde(rename = "message")]
     pub msg: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub detail: Option<String>,
 }
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
@@ -47,13 +67,7 @@ pub trait Files {
     async fn get_file(
         &self,
         id: String,
-        if_none_match: Option<String>,
     ) -> ::std::result::Result<FileMeta, FilesGetFileError>;
-    async fn delete_file(
-        &self,
-        id: String,
-        if_match: String,
-    ) -> ::std::result::Result<(), FilesDeleteFileError>;
 }
 /// Typed error channel for `get_file`: one variant per
 /// declared `raises(...)` exception, plus the runtime fallback.
@@ -76,12 +90,32 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for FilesGetFileError {
                 ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
             }
             Self::NotModified(err) => {
-                let mut headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
-                if let Ok(header_value) = ::xidl_rust_axum::axum::http::header::HeaderValue::from_str(
-                    &err.etag.to_string(),
-                ) {
-                    headers.insert("ETag", header_value);
-                }
+                let headers = (|| -> xidl_rust_axum::Result<
+                    ::xidl_rust_axum::axum::http::HeaderMap,
+                > {
+                    let mut headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
+                    {
+                        let value = &err.etag;
+                        let value = value.to_string();
+                        let value = ::xidl_rust_axum::axum::http::header::HeaderValue::from_str(
+                                &value,
+                            )
+                            .map_err(|err| xidl_rust_axum::Error::new(
+                                500,
+                                format!("exception ETag: {err}"),
+                            ))?;
+                        headers.append("ETag", value);
+                    }
+                    Ok(headers)
+                })();
+                let headers = match headers {
+                    Ok(headers) => headers,
+                    Err(err) => {
+                        return ::xidl_rust_axum::axum::response::IntoResponse::into_response(
+                            err,
+                        );
+                    }
+                };
                 let mut response = ::xidl_rust_axum::axum::http::Response::builder()
                     .status(
                         ::xidl_rust_axum::axum::http::StatusCode::from_u16(304u16)
@@ -89,16 +123,102 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for FilesGetFileError {
                     )
                     .body(::xidl_rust_axum::axum::body::Body::empty())
                     .expect("error response should build");
-                *response.headers_mut() = headers;
+                response.headers_mut().extend(headers);
                 response
             }
             Self::PreconditionFailed(err) => {
-                let mut headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
-                if let Ok(header_value) = ::xidl_rust_axum::axum::http::header::HeaderValue::from_str(
-                    &err.etag.to_string(),
-                ) {
-                    headers.insert("ETag", header_value);
-                }
+                let headers = (|| -> xidl_rust_axum::Result<
+                    ::xidl_rust_axum::axum::http::HeaderMap,
+                > {
+                    let mut headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
+                    {
+                        let value = &err.etag;
+                        let value = value.to_string();
+                        let value = ::xidl_rust_axum::axum::http::header::HeaderValue::from_str(
+                                &value,
+                            )
+                            .map_err(|err| xidl_rust_axum::Error::new(
+                                500,
+                                format!("exception ETag: {err}"),
+                            ))?;
+                        headers.append("ETag", value);
+                    }
+                    for value in err.hints.as_ref().into_iter().flatten() {
+                        let value = value.to_string();
+                        let value = ::xidl_rust_axum::axum::http::header::HeaderValue::from_str(
+                                &value,
+                            )
+                            .map_err(|err| xidl_rust_axum::Error::new(
+                                500,
+                                format!("exception X-Hint: {err}"),
+                            ))?;
+                        headers.append("X-Hint", value);
+                    }
+                    {
+                        let value = &err.session_id;
+                        let value = value.to_string();
+                        let value = xidl_rust_axum::cookie::Cookie::new("session", value)
+                            .encoded()
+                            .to_string();
+                        let value = ::xidl_rust_axum::axum::http::header::HeaderValue::from_str(
+                                &value,
+                            )
+                            .map_err(|err| xidl_rust_axum::Error::new(
+                                500,
+                                format!("exception session: {err}"),
+                            ))?;
+                        headers
+                            .append(
+                                ::xidl_rust_axum::axum::http::header::SET_COOKIE,
+                                value,
+                            );
+                    }
+                    for value in err.retry_token.as_ref().into_iter() {
+                        let value = value.to_string();
+                        let value = xidl_rust_axum::cookie::Cookie::new("retry", value)
+                            .encoded()
+                            .to_string();
+                        let value = ::xidl_rust_axum::axum::http::header::HeaderValue::from_str(
+                                &value,
+                            )
+                            .map_err(|err| xidl_rust_axum::Error::new(
+                                500,
+                                format!("exception retry: {err}"),
+                            ))?;
+                        headers
+                            .append(
+                                ::xidl_rust_axum::axum::http::header::SET_COOKIE,
+                                value,
+                            );
+                    }
+                    for value in err.attempts.as_ref().into_iter().flatten() {
+                        let value = value.to_string();
+                        let value = xidl_rust_axum::cookie::Cookie::new("attempt", value)
+                            .encoded()
+                            .to_string();
+                        let value = ::xidl_rust_axum::axum::http::header::HeaderValue::from_str(
+                                &value,
+                            )
+                            .map_err(|err| xidl_rust_axum::Error::new(
+                                500,
+                                format!("exception attempt: {err}"),
+                            ))?;
+                        headers
+                            .append(
+                                ::xidl_rust_axum::axum::http::header::SET_COOKIE,
+                                value,
+                            );
+                    }
+                    Ok(headers)
+                })();
+                let headers = match headers {
+                    Ok(headers) => headers,
+                    Err(err) => {
+                        return ::xidl_rust_axum::axum::response::IntoResponse::into_response(
+                            err,
+                        );
+                    }
+                };
                 let body = match xidl_rust_axum::serde_json::to_vec(&err) {
                     Ok(body) => body,
                     Err(err) => {
@@ -118,11 +238,24 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for FilesGetFileError {
                     )
                     .body(::xidl_rust_axum::axum::body::Body::from(body))
                     .expect("error response should build");
-                *response.headers_mut() = headers;
+                response.headers_mut().extend(headers);
                 response
             }
             Self::NotFound(err) => {
-                let mut headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
+                let headers = (|| -> xidl_rust_axum::Result<
+                    ::xidl_rust_axum::axum::http::HeaderMap,
+                > {
+                    let headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
+                    Ok(headers)
+                })();
+                let headers = match headers {
+                    Ok(headers) => headers,
+                    Err(err) => {
+                        return ::xidl_rust_axum::axum::response::IntoResponse::into_response(
+                            err,
+                        );
+                    }
+                };
                 let body = match xidl_rust_axum::serde_json::to_vec(&err) {
                     Ok(body) => body,
                     Err(err) => {
@@ -142,82 +275,7 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for FilesGetFileError {
                     )
                     .body(::xidl_rust_axum::axum::body::Body::from(body))
                     .expect("error response should build");
-                *response.headers_mut() = headers;
-                response
-            }
-        }
-    }
-}
-/// Typed error channel for `delete_file`: one variant per
-/// declared `raises(...)` exception, plus the runtime fallback.
-#[derive(Debug)]
-pub enum FilesDeleteFileError {
-    PreconditionFailed(PreconditionFailed),
-    NotFound(NotFound),
-    Framework(xidl_rust_axum::Error),
-}
-impl From<xidl_rust_axum::Error> for FilesDeleteFileError {
-    fn from(err: xidl_rust_axum::Error) -> Self {
-        Self::Framework(err)
-    }
-}
-impl ::xidl_rust_axum::axum::response::IntoResponse for FilesDeleteFileError {
-    fn into_response(self) -> ::xidl_rust_axum::axum::response::Response {
-        match self {
-            Self::Framework(err) => {
-                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
-            }
-            Self::PreconditionFailed(err) => {
-                let mut headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
-                if let Ok(header_value) = ::xidl_rust_axum::axum::http::header::HeaderValue::from_str(
-                    &err.etag.to_string(),
-                ) {
-                    headers.insert("ETag", header_value);
-                }
-                let body = match xidl_rust_axum::serde_json::to_vec(&err) {
-                    Ok(body) => body,
-                    Err(err) => {
-                        return ::xidl_rust_axum::axum::response::IntoResponse::into_response(
-                            xidl_rust_axum::Error::new(500, format!("{err:?}")),
-                        );
-                    }
-                };
-                let mut response = ::xidl_rust_axum::axum::http::Response::builder()
-                    .status(
-                        ::xidl_rust_axum::axum::http::StatusCode::from_u16(412u16)
-                            .unwrap(),
-                    )
-                    .header(
-                        ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                        "application/json",
-                    )
-                    .body(::xidl_rust_axum::axum::body::Body::from(body))
-                    .expect("error response should build");
-                *response.headers_mut() = headers;
-                response
-            }
-            Self::NotFound(err) => {
-                let mut headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
-                let body = match xidl_rust_axum::serde_json::to_vec(&err) {
-                    Ok(body) => body,
-                    Err(err) => {
-                        return ::xidl_rust_axum::axum::response::IntoResponse::into_response(
-                            xidl_rust_axum::Error::new(500, format!("{err:?}")),
-                        );
-                    }
-                };
-                let mut response = ::xidl_rust_axum::axum::http::Response::builder()
-                    .status(
-                        ::xidl_rust_axum::axum::http::StatusCode::from_u16(404u16)
-                            .unwrap(),
-                    )
-                    .header(
-                        ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                        "application/json",
-                    )
-                    .body(::xidl_rust_axum::axum::body::Body::from(body))
-                    .expect("error response should build");
-                *response.headers_mut() = headers;
+                response.headers_mut().extend(headers);
                 response
             }
         }
@@ -284,7 +342,6 @@ pub struct FilesGetFilePath {
 #[derive(::serde::Deserialize)]
 struct FilesGetFileRequest {
     id: String,
-    if_none_match: Option<String>,
 }
 #[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S> for FilesGetFileRequest
@@ -310,68 +367,7 @@ where
             let FilesGetFilePath { id } = xidl_path;
             let xidl_headers = &parts.headers;
             let _ = xidl_headers;
-            let if_none_match: Option<String> = match xidl_headers.get("If-None-Match") {
-                Some(header_value) => {
-                    let header_str = header_value
-                        .to_str()
-                        .map_err(|err| ::xidl_rust_axum::Error::new(
-                            400,
-                            format!("{err:?}"),
-                        ))?;
-                    Some(header_str.to_string())
-                }
-                None => None,
-            };
-            Ok(Self { id, if_none_match })
-        }
-    }
-}
-#[derive(::serde::Deserialize)]
-pub struct FilesDeleteFilePath {
-    pub id: String,
-}
-#[derive(::serde::Deserialize)]
-struct FilesDeleteFileRequest {
-    id: String,
-    if_match: String,
-}
-#[allow(clippy::manual_async_fn, unused_mut)]
-impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S> for FilesDeleteFileRequest
-where
-    S: Send + Sync,
-{
-    type Rejection = ::xidl_rust_axum::Error;
-    fn from_request(
-        req: ::xidl_rust_axum::axum::extract::Request,
-        state: &S,
-    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
-        async move {
-            let (mut parts, body) = req.into_parts();
-            let _ = &body;
-            let _ = state;
-            let ::xidl_rust_axum::axum::extract::Path(xidl_path) = <::xidl_rust_axum::axum::extract::Path<
-                FilesDeleteFilePath,
-            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
-                S,
-            >>::from_request_parts(&mut parts, state)
-                .await
-                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
-            let FilesDeleteFilePath { id } = xidl_path;
-            let xidl_headers = &parts.headers;
-            let _ = xidl_headers;
-            let if_match: String = match xidl_headers.get("If-Match") {
-                Some(header_value) => {
-                    let header_str = header_value
-                        .to_str()
-                        .map_err(|err| ::xidl_rust_axum::Error::new(
-                            400,
-                            format!("{err:?}"),
-                        ))?;
-                    header_str.to_string()
-                }
-                None => ::core::default::Default::default(),
-            };
-            Ok(Self { id, if_match })
+            Ok(Self { id })
         }
     }
 }
@@ -395,10 +391,6 @@ where
         let _svc = self.inner;
         xidl_rust_axum::axum::Router::new()
             .route("/files/{id}", xidl_rust_axum::axum::routing::get(Self::get_file))
-            .route(
-                "/files/{id}",
-                xidl_rust_axum::axum::routing::delete(Self::delete_file),
-            )
             .with_state(_svc)
     }
     #[allow(
@@ -422,10 +414,9 @@ where
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let FilesGetFileRequest { id, if_none_match } = request;
+        let FilesGetFileRequest { id } = request;
         let id: String = id;
-        let if_none_match: Option<String> = if_none_match;
-        let mut resp = match svc.get_file(id, if_none_match).await {
+        let mut resp = match svc.get_file(id).await {
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: __xidl_out_Files::FileMeta = resp_value.into();
@@ -446,43 +437,6 @@ where
                             500,
                             format!("{err:?}"),
                         ))?
-                };
-                resp
-            }
-            Err(err) => {
-                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
-            }
-        };
-        Ok(resp)
-    }
-    #[allow(
-        clippy::let_and_return,
-        clippy::needless_return,
-        clippy::useless_conversion,
-        unused_mut,
-        unreachable_code,
-        clippy::let_unit_value,
-        unused_variables
-    )]
-    async fn delete_file(
-        ::xidl_rust_axum::axum::extract::State(
-            svc,
-        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
-        headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        uri: ::xidl_rust_axum::axum::http::Uri,
-        request: FilesDeleteFileRequest,
-    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
-        let _ = &headers;
-        let FilesDeleteFileRequest { id, if_match } = request;
-        let id: String = id;
-        let if_match: String = if_match;
-        let mut resp = match svc.delete_file(id, if_match).await {
-            Ok(resp_value) => {
-                let mut resp = {
-                    let _ = resp_value;
-                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(
-                        ::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT,
-                    )
                 };
                 resp
             }
@@ -523,11 +477,7 @@ impl FilesClient {
 #[allow(non_snake_case)]
 impl FilesClient {
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
-    pub async fn get_file(
-        &self,
-        id: String,
-        if_none_match: Option<String>,
-    ) -> Result<FileMeta, FilesGetFileError> {
+    pub async fn get_file(&self, id: String) -> Result<FileMeta, FilesGetFileError> {
         let path = "/files/{id}".to_string();
         let path = path.replace("{id}", &id.to_string());
         let mut req = self
@@ -544,18 +494,6 @@ impl FilesClient {
                     )
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
-        if let Some(if_none_match) = if_none_match {
-            let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
-                    "If-None-Match".as_bytes(),
-                )
-                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-            let header_value_str = if_none_match;
-            let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                    &header_value_str,
-                )
-                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-            req.headers_mut().insert(header_name, header_value);
-        }
         let auth_target = &self.client;
         let _ = auth_target;
         let resp = self
@@ -598,7 +536,10 @@ impl FilesClient {
                 let mut value: PreconditionFailed = resp
                     .json::<PreconditionFailed>()
                     .await
-                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(
+                        status.as_u16(),
+                        format!("exception PreconditionFailed body: {err}"),
+                    ))?;
                 value.etag = match headers.get("ETag") {
                     Some(header_value) => {
                         let header_str = header_value
@@ -611,6 +552,49 @@ impl FilesClient {
                     }
                     None => ::core::default::Default::default(),
                 };
+                value.hints = {
+                    let mut values: Vec<String> = Vec::new();
+                    for header_value in headers.get_all("X-Hint").iter() {
+                        let header_str = header_value
+                            .to_str()
+                            .map_err(|err| xidl_rust_axum::Error::new(
+                                400,
+                                format!("{err:?}"),
+                            ))?;
+                        for header_str in header_str.split(',').map(str::trim) {
+                            let parsed: String = header_str.to_string();
+                            values.push(parsed);
+                        }
+                    }
+                    if headers.contains_key("X-Hint") { Some(values) } else { None }
+                };
+                let cookie_map = xidl_rust_axum::http::parse_set_cookies(
+                    headers.get_all(::xidl_rust_axum::reqwest::header::SET_COOKIE).iter(),
+                );
+                value.session_id = match cookie_map
+                    .get("session")
+                    .and_then(|values| values.first())
+                {
+                    Some(value_str) => value_str.to_string(),
+                    None => ::core::default::Default::default(),
+                };
+                value.retry_token = match cookie_map
+                    .get("retry")
+                    .and_then(|values| values.first())
+                {
+                    Some(value_str) => Some(value_str.to_string()),
+                    None => None,
+                };
+                value.attempts = {
+                    let mut values: Vec<String> = Vec::new();
+                    if let Some(items) = cookie_map.get("attempt") {
+                        for value_str in items {
+                            let parsed: String = value_str.to_string();
+                            values.push(parsed);
+                        }
+                    }
+                    if cookie_map.contains_key("attempt") { Some(values) } else { None }
+                };
                 return Err(FilesGetFileError::PreconditionFailed(value));
             }
             if status.as_u16() == 404 {
@@ -618,7 +602,10 @@ impl FilesClient {
                 let mut value: NotFound = resp
                     .json::<NotFound>()
                     .await
-                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(
+                        status.as_u16(),
+                        format!("exception NotFound body: {err}"),
+                    ))?;
                 return Err(FilesGetFileError::NotFound(value));
             }
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -629,36 +616,240 @@ impl FilesClient {
             )
         }
     }
+}
+#[allow(
+    non_snake_case,
+    unused_attributes,
+    unused_variables,
+    unused_mut,
+    unreachable_code,
+    clippy::let_unit_value
+)]
+#[async_trait::async_trait]
+pub trait Scoped {
+    async fn read(&self) -> ::std::result::Result<String, ScopedReadError>;
+}
+/// Typed error channel for `read`: one variant per
+/// declared `raises(...)` exception, plus the runtime fallback.
+#[derive(Debug)]
+pub enum ScopedReadError {
+    LeftFailure(left::Failure),
+    RightFailure(right::Failure),
+    Framework(xidl_rust_axum::Error),
+}
+impl From<xidl_rust_axum::Error> for ScopedReadError {
+    fn from(err: xidl_rust_axum::Error) -> Self {
+        Self::Framework(err)
+    }
+}
+impl ::xidl_rust_axum::axum::response::IntoResponse for ScopedReadError {
+    fn into_response(self) -> ::xidl_rust_axum::axum::response::Response {
+        match self {
+            Self::Framework(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+            Self::LeftFailure(err) => {
+                let headers = (|| -> xidl_rust_axum::Result<
+                    ::xidl_rust_axum::axum::http::HeaderMap,
+                > {
+                    let headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
+                    Ok(headers)
+                })();
+                let headers = match headers {
+                    Ok(headers) => headers,
+                    Err(err) => {
+                        return ::xidl_rust_axum::axum::response::IntoResponse::into_response(
+                            err,
+                        );
+                    }
+                };
+                let body = match xidl_rust_axum::serde_json::to_vec(&err) {
+                    Ok(body) => body,
+                    Err(err) => {
+                        return ::xidl_rust_axum::axum::response::IntoResponse::into_response(
+                            xidl_rust_axum::Error::new(500, format!("{err:?}")),
+                        );
+                    }
+                };
+                let mut response = ::xidl_rust_axum::axum::http::Response::builder()
+                    .status(
+                        ::xidl_rust_axum::axum::http::StatusCode::from_u16(409u16)
+                            .unwrap(),
+                    )
+                    .header(
+                        ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                        "application/json",
+                    )
+                    .body(::xidl_rust_axum::axum::body::Body::from(body))
+                    .expect("error response should build");
+                response.headers_mut().extend(headers);
+                response
+            }
+            Self::RightFailure(err) => {
+                let headers = (|| -> xidl_rust_axum::Result<
+                    ::xidl_rust_axum::axum::http::HeaderMap,
+                > {
+                    let headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
+                    Ok(headers)
+                })();
+                let headers = match headers {
+                    Ok(headers) => headers,
+                    Err(err) => {
+                        return ::xidl_rust_axum::axum::response::IntoResponse::into_response(
+                            err,
+                        );
+                    }
+                };
+                let body = match xidl_rust_axum::serde_json::to_vec(&err) {
+                    Ok(body) => body,
+                    Err(err) => {
+                        return ::xidl_rust_axum::axum::response::IntoResponse::into_response(
+                            xidl_rust_axum::Error::new(500, format!("{err:?}")),
+                        );
+                    }
+                };
+                let mut response = ::xidl_rust_axum::axum::http::Response::builder()
+                    .status(
+                        ::xidl_rust_axum::axum::http::StatusCode::from_u16(422u16)
+                            .unwrap(),
+                    )
+                    .header(
+                        ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                        "application/json",
+                    )
+                    .body(::xidl_rust_axum::axum::body::Body::from(body))
+                    .expect("error response should build");
+                response.headers_mut().extend(headers);
+                response
+            }
+        }
+    }
+}
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_in_Scoped {
+    use super::*;
+}
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_out_Scoped {
+    use super::*;
+}
+pub struct ScopedServer<T> {
+    inner: ::std::sync::Arc<T>,
+}
+#[allow(non_snake_case)]
+impl<T> ScopedServer<T>
+where
+    T: Scoped + Send + Sync + 'static,
+{
+    pub fn new(inner: T) -> Self {
+        Self {
+            inner: ::std::sync::Arc::new(inner),
+        }
+    }
+    pub fn from_arc(inner: ::std::sync::Arc<T>) -> Self {
+        Self { inner }
+    }
+    pub fn router(self) -> xidl_rust_axum::axum::Router {
+        let _svc = self.inner;
+        xidl_rust_axum::axum::Router::new()
+            .route("/scoped", xidl_rust_axum::axum::routing::get(Self::read))
+            .with_state(_svc)
+    }
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
+    async fn read(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let mut resp = match svc.read().await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: String = resp_value;
+                    let _ = &body_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("text/plain")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(
+                            ::xidl_rust_axum::axum::http::StatusCode::from_u16(200)
+                                .unwrap(),
+                        )
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "text/plain",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+}
+impl<T> xidl_rust_axum::Service for ScopedServer<T>
+where
+    T: Scoped + Send + Sync + 'static,
+{
+    fn into_router(self) -> xidl_rust_axum::axum::Router {
+        self.router()
+    }
+}
+pub struct ScopedClient {
+    client: ::xidl_rust_axum::Client,
+}
+#[allow(non_snake_case)]
+impl ScopedClient {
+    pub fn new(base_url: impl Into<String>) -> Self {
+        Self {
+            client: ::xidl_rust_axum::Client::new(base_url),
+        }
+    }
+    pub fn with_http(
+        base_url: impl Into<String>,
+        http: ::xidl_rust_axum::reqwest::Client,
+    ) -> Self {
+        Self {
+            client: ::xidl_rust_axum::Client::with_http(base_url, http),
+        }
+    }
+}
+#[allow(non_snake_case)]
+impl ScopedClient {
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
-    pub async fn delete_file(
-        &self,
-        id: String,
-        if_match: String,
-    ) -> Result<(), FilesDeleteFileError> {
-        let path = "/files/{id}".to_string();
-        let path = path.replace("{id}", &id.to_string());
+    pub async fn read(&self) -> Result<String, ScopedReadError> {
+        let path = "/scoped".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::DELETE, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
-                xidl_rust_axum::reqwest::header::HeaderValue::from_str("")
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
-        let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
-                "If-Match".as_bytes(),
-            )
-            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-        let header_value_str = if_match;
-        let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                &header_value_str,
-            )
-            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-        req.headers_mut().insert(header_name, header_value);
         let auth_target = &self.client;
         let _ = auth_target;
         let resp = self
@@ -668,43 +859,63 @@ impl FilesClient {
             .await
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         if resp.status().is_success() {
-            Ok(())
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: String = xidl_rust_axum::DeserializeFactory::new("text/plain")
+                .from_slice(&body)?;
+            Ok(body)
         } else {
             let status = resp.status();
-            if status.as_u16() == 412 {
+            if status.as_u16() == 409 {
                 let headers = resp.headers().clone();
-                let mut value: PreconditionFailed = resp
-                    .json::<PreconditionFailed>()
+                let mut value: left::Failure = resp
+                    .json::<left::Failure>()
                     .await
-                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-                value.etag = match headers.get("ETag") {
-                    Some(header_value) => {
-                        let header_str = header_value
-                            .to_str()
-                            .map_err(|err| xidl_rust_axum::Error::new(
-                                400,
-                                format!("{err:?}"),
-                            ))?;
-                        header_str.to_string()
-                    }
-                    None => ::core::default::Default::default(),
-                };
-                return Err(FilesDeleteFileError::PreconditionFailed(value));
+                    .map_err(|err| xidl_rust_axum::Error::new(
+                        status.as_u16(),
+                        format!("exception left::Failure body: {err}"),
+                    ))?;
+                return Err(ScopedReadError::LeftFailure(value));
             }
-            if status.as_u16() == 404 {
+            if status.as_u16() == 422 {
                 let headers = resp.headers().clone();
-                let mut value: NotFound = resp
-                    .json::<NotFound>()
+                let mut value: right::Failure = resp
+                    .json::<right::Failure>()
                     .await
-                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-                return Err(FilesDeleteFileError::NotFound(value));
+                    .map_err(|err| xidl_rust_axum::Error::new(
+                        status.as_u16(),
+                        format!("exception right::Failure body: {err}"),
+                    ))?;
+                return Err(ScopedReadError::RightFailure(value));
             }
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(
-                FilesDeleteFileError::Framework(
+                ScopedReadError::Framework(
                     xidl_rust_axum::Error::from_http_response(status, body),
                 ),
             )
         }
+    }
+}
+pub mod left {
+    #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
+    #[derive(Default)]
+    pub struct Detail {
+        pub message: String,
+    }
+    impl Detail {}
+    #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
+    #[derive(Default)]
+    pub struct Failure {
+        pub detail: Detail,
+    }
+}
+pub mod right {
+    #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
+    #[derive(Default)]
+    pub struct Failure {
+        pub reason: String,
     }
 }

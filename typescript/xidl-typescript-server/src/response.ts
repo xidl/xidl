@@ -27,48 +27,14 @@ export function encodeOperationResponse<TService>(
     );
   }
 
-  const representations = operation.response.representations;
-  if (representations?.length) {
-    // `@http` union: the handler returns `{ kind, value, <out params> }`;
-    // the kind picks the media type, out params ride the response headers.
-    const wrapper = result as { kind?: string; value?: unknown };
-    const representation = representations.find(
-      representation => representation.kind === wrapper.kind,
-    );
-    if (representation) {
-      const headers = new Headers();
-      writeBindings(
-        headers,
-        toRecord(wrapper),
-        operation.response.headers,
-        false,
-      );
-      writeBindings(
-        headers,
-        toRecord(wrapper),
-        operation.response.cookies,
-        true,
-      );
-      headers.set('Content-Type', representation.contentType);
-      const value = wrapper.value;
-      const body =
-        value === undefined || value === null
-          ? null
-          : value instanceof Uint8Array
-            ? (value as BodyInit)
-            : JSON.stringify(value);
-      return new Response(body, { headers, status: 200 });
-    }
-  }
-
   const parsed = operation.response.schema?.parse(result) ?? result;
   const serialized = operation.response.schema
     ? serialize(parsed, operation.response.schema)
     : parsed;
   const record = toRecord(serialized);
   const headers = new Headers();
-  writeBindings(headers, record, operation.response.headers, false);
-  writeBindings(headers, record, operation.response.cookies, true);
+  writeResponseBindings(headers, record, operation.response.headers, false);
+  writeResponseBindings(headers, record, operation.response.cookies, true);
 
   if (operation.response.bodyMode === 'none') {
     return new Response(null, { headers, status: 204 });
@@ -118,7 +84,7 @@ function selectBody(
   );
 }
 
-function writeBindings(
+export function writeResponseBindings(
   headers: Headers,
   record: Record<string, unknown>,
   bindings: ValueBinding[],

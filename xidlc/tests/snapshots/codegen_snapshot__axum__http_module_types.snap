@@ -147,18 +147,18 @@ pub mod demo {
                             400,
                             format!("{err:?}"),
                         ))?;
-                    for part in cookie_str.split(';') {
-                        let part = part.trim();
-                        if part.is_empty() {
-                            continue;
-                        }
-                        let mut iter = part.splitn(2, '=');
-                        let name = iter.next().unwrap_or("").trim();
-                        if name.is_empty() {
-                            continue;
-                        }
-                        let value = iter.next().unwrap_or("").trim().to_string();
-                        cookie_map.entry(name.to_string()).or_default().push(value);
+                    for cookie in xidl_rust_axum::cookie::Cookie::split_parse_encoded(
+                        cookie_str,
+                    ) {
+                        let cookie = cookie
+                            .map_err(|err| xidl_rust_axum::Error::new(
+                                400,
+                                format!("request cookie: {err}"),
+                            ))?;
+                        cookie_map
+                            .entry(cookie.name().to_string())
+                            .or_default()
+                            .push(cookie.value().to_string());
                     }
                 }
                 let session_token: Option<String> = match cookie_map
@@ -480,12 +480,22 @@ pub mod demo {
             let mut cookie_pairs: Vec<String> = Vec::new();
             if let Some(session_token) = session_token {
                 let value_str = session_token;
-                cookie_pairs.push(format!("{}={}", "session_token", value_str));
+                cookie_pairs
+                    .push(
+                        xidl_rust_axum::cookie::Cookie::new("session_token", value_str)
+                            .encoded()
+                            .to_string(),
+                    );
             }
             if let Some(prefs) = prefs {
                 for value in prefs {
                     let value_str = value;
-                    cookie_pairs.push(format!("{}={}", "pref", value_str));
+                    cookie_pairs
+                        .push(
+                            xidl_rust_axum::cookie::Cookie::new("pref", value_str)
+                                .encoded()
+                                .to_string(),
+                        );
                 }
             }
             if !cookie_pairs.is_empty() {

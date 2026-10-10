@@ -56,31 +56,7 @@
                             Self::Framework(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
                             {% for ex in method.raises %}
                                 Self::{{ ex.variant }}(err) => {
-                                    let mut headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
-                                    {% for member in ex.headers %}
-                                        {% if member.is_multi %}
-                                            for value in &err.{{ member.field }} {
-                                                if let Ok(header_value) = ::xidl_rust_axum::axum::http::header::HeaderValue::from_str(&value.to_string()) {
-                                                    headers.append("{{ member.wire_name }}", header_value);
-                                                }
-                                            }
-                                        {% elif member.optional %}
-                                            if let Some(value) = &err.{{ member.field }} {
-                                                if let Ok(header_value) = ::xidl_rust_axum::axum::http::header::HeaderValue::from_str(&value.to_string()) {
-                                                    headers.insert("{{ member.wire_name }}", header_value);
-                                                }
-                                            }
-                                        {% else %}
-                                            if let Ok(header_value) = ::xidl_rust_axum::axum::http::header::HeaderValue::from_str(&err.{{ member.field }}.to_string()) {
-                                                headers.insert("{{ member.wire_name }}", header_value);
-                                            }
-                                        {% endif %}
-                                    {% endfor %}
-                                    {% for member in ex.cookies %}
-                                        if let Ok(header_value) = ::xidl_rust_axum::axum::http::header::HeaderValue::from_str(&format!("{}={}", "{{ member.wire_name }}", err.{{ member.field }})) {
-                                            headers.append(::xidl_rust_axum::axum::http::header::SET_COOKIE, header_value);
-                                        }
-                                    {% endfor %}
+                                    {% include 'interface/exception_headers.rs.j2' %}
                                     {% if ex.has_body %}
                                         let body = match xidl_rust_axum::serde_json::to_vec(&err) {
                                             Ok(body) => body,
@@ -100,7 +76,7 @@
                                         .body(::xidl_rust_axum::axum::body::Body::empty())
                                         .expect("error response should build");
                                     {% endif %}
-                                    *response.headers_mut() = headers;
+                                    response.headers_mut().extend(headers);
                                     response
                                 }
                             {% endfor %}
@@ -314,18 +290,9 @@
                                     let cookie_str = header_value
                                     .to_str()
                                     .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-                                    for part in cookie_str.split(';') {
-                                        let part = part.trim();
-                                        if part.is_empty() {
-                                            continue;
-                                        }
-                                        let mut iter = part.splitn(2, '=');
-                                        let name = iter.next().unwrap_or("").trim();
-                                        if name.is_empty() {
-                                            continue;
-                                        }
-                                        let value = iter.next().unwrap_or("").trim().to_string();
-                                        cookie_map.entry(name.to_string()).or_default().push(value);
+                                    for cookie in xidl_rust_axum::cookie::Cookie::split_parse_encoded(cookie_str) {
+                                        let cookie = cookie.map_err(|err| xidl_rust_axum::Error::new(400, format!("request cookie: {err}")))?;
+                                        cookie_map.entry(cookie.name().to_string()).or_default().push(cookie.value().to_string());
                                     }
                                 }
                                 {% for param in method.cookie_params %}

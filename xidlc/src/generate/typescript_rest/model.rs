@@ -1,5 +1,5 @@
 use crate::generate::typescript::definition::contexts::{
-    ClientParamContext, ParamDeclContext, TsType,
+    ClientParamContext, ParamDeclContext, TsType, ZodSchema,
 };
 use crate::generate::typescript::definition::names::scoped_name;
 use convert_case::Casing;
@@ -74,8 +74,33 @@ pub(super) struct TsRaisesContext {
     pub(super) body: Vec<TsExceptionFieldContext>,
 }
 
+impl TsRaisesContext {
+    pub(super) fn error_ident(
+        exception: &xidl_parser::rest_hir::HttpException,
+        exceptions: &[xidl_parser::rest_hir::HttpException],
+    ) -> String {
+        if exceptions
+            .iter()
+            .filter(|other| other.ident == exception.ident)
+            .count()
+            == 1
+        {
+            exception.ident.clone()
+        } else {
+            exception
+                .module_path
+                .iter()
+                .chain(std::iter::once(&exception.ident))
+                .cloned()
+                .collect::<Vec<_>>()
+                .join("$")
+        }
+    }
+}
+
 #[derive(Clone, Serialize)]
 pub(super) struct TsExceptionMemberContext {
+    pub(super) item_is_string: bool,
     pub(super) field: String,
     pub(super) wire_name: String,
     pub(super) ty: TsType,
@@ -85,7 +110,10 @@ pub(super) struct TsExceptionMemberContext {
 
 #[derive(Clone, Serialize)]
 pub(super) struct TsExceptionFieldContext {
+    pub(super) schema: ZodSchema,
+    pub(super) optional: bool,
     pub(super) field: String,
+    pub(super) wire_name: String,
     pub(super) ty: TsType,
 }
 

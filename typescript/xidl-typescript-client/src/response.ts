@@ -81,6 +81,7 @@ export function readResponseHeader(
   headers: Headers,
   name: string,
   isMulti: boolean,
+  decode: (value: string) => unknown = parseScalar,
 ): unknown {
   const value = headers.get(name);
   if (value === null) {
@@ -91,13 +92,16 @@ export function readResponseHeader(
       .split(',')
       .map(item => item.trim())
       .filter(item => item.length > 0)
-      .map(parseScalar);
+      .map(decode);
   }
-  return parseScalar(value);
+  return decode(value);
 }
 
-export function readResponseCookies(headers: Headers): Map<string, string[]> {
-  const out = new Map<string, string[]>();
+export function readResponseCookies(
+  headers: Headers,
+  decode: (value: string) => unknown = parseScalar,
+): Map<string, unknown[]> {
+  const out = new Map<string, unknown[]>();
   const raw =
     typeof (headers as Headers & { getSetCookie?: () => string[] })
       .getSetCookie === 'function'
@@ -117,7 +121,7 @@ export function readResponseCookies(headers: Headers): Map<string, string[]> {
     const name = pair.slice(0, idx).trim();
     const value = decodeURIComponent(pair.slice(idx + 1));
     const current = out.get(name) ?? [];
-    current.push(parseScalar(value) as string);
+    current.push(decode(value));
     out.set(name, current);
   }
   return out;

@@ -9,7 +9,8 @@ import type * as ifaceTypes from "./{{ file_stem }}.iface";
 import * as ifaceSchemas from "./{{ file_stem }}.iface.zod";
 import {
     defineOperation,
-    type Awaitable,
+    {% if error_imports | length > 0 %}writeResponseBindings,
+    {% endif %}type Awaitable,
 } from "xidl-typescript-server";
 {% for block in blocks %}
     {{ block }}

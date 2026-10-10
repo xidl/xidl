@@ -251,7 +251,7 @@ pub(crate) fn render_op_from_http(
     };
     let response_ty_str = response_ty(http_op, &struct_prefix, &ret);
 
-    let raises = RaisesContext::for_operation(op, http_op, env)?;
+    let raises = RaisesContext::for_operation(http_op, env)?;
     let error_ty = if http_op.meta.raises.is_empty() {
         None
     } else {
