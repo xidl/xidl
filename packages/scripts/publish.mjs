@@ -2,41 +2,13 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, statSync } from 'node:fs';
 
+import { parseArgs, publishEntries, publishPending } from './lib/publish.mjs';
 import {
   assertVersionsAligned,
   binaryPath,
   ensureLicenses,
   readPackages,
 } from './lib/workspace.mjs';
-
-const DEFAULT_REGISTRY = 'https://registry.npmjs.org/';
-
-function parseArgs(argv) {
-  const options = { dryRun: false, registry: DEFAULT_REGISTRY, tag: null };
-  for (let index = 0; index < argv.length; index += 1) {
-    const name = argv[index];
-    if (name === '--dry-run') {
-      options.dryRun = true;
-      continue;
-    }
-    const value = argv[index + 1];
-    if (value === undefined) {
-      throw new Error(`missing value for ${name}`);
-    }
-    switch (name) {
-      case '--registry':
-        options.registry = value;
-        break;
-      case '--tag':
-        options.tag = value;
-        break;
-      default:
-        throw new Error(`unknown argument ${name}`);
-    }
-    index += 1;
-  }
-  return options;
-}
 
 function assertReady(platform) {
   const target = binaryPath(platform);
@@ -50,7 +22,7 @@ function assertReady(platform) {
   }
 }
 
-/** Tell published versions apart from unpublished ones; other failures are fatal. */
+/** Tell published versions apart from unpublished ones; other registry errors propagate. */
 function isPublished(name, version, registry) {
   const result = spawnSync(
     'npm',
@@ -91,26 +63,26 @@ function main() {
     assertReady(platform);
   }
   ensureLicenses(packages);
-  const pending = [
-    ...packages.platforms.map(platform => ({
-      dir: platform.dir,
-      name: platform.entry.package,
-    })),
-    { dir: packages.wrapperDir, name: packages.wrapper.name },
-  ];
-  let skipped = 0;
-  for (const entry of pending) {
-    if (isPublished(entry.name, version, options.registry)) {
-      console.log(`${entry.name}@${version} is already published; skipping`);
-      skipped += 1;
-      continue;
-    }
-    publish(entry.dir, options);
+  const report = publishPending({
+    entries: publishEntries(packages),
+    isPublished: name => isPublished(name, version, options.registry),
+    publish: dir => publish(dir, options),
+    version,
+  });
+  for (const name of report.skipped) {
+    console.log(`${name}@${version} is already published; skipping`);
+  }
+  for (const failure of report.failures) {
+    console.error(`cannot publish ${failure.name}: ${failure.reason}`);
   }
   console.log(
-    `${options.dryRun ? 'dry run: ' : ''}${pending.length - skipped} published, ` +
-      `${skipped} skipped, version ${version}`,
+    `${options.dryRun ? 'dry run: ' : ''}${report.published.length} published, ` +
+      `${report.skipped.length} skipped, ${report.failures.length} failed, ` +
+      `version ${version}`,
   );
+  if (report.failures.length > 0) {
+    process.exitCode = 1;
+  }
 }
 
 try {
