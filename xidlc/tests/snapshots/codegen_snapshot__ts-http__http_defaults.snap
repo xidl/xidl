@@ -298,7 +298,6 @@ import {
             
         }
         return;
-        
     }
     
             async user_options(id: number, revision: number): Promise<void> {
@@ -323,7 +322,6 @@ import {
             
         }
         return;
-        
     }
     
             async replace_user(user_id: number, name: string, age: number): Promise<string> {

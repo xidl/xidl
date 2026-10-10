@@ -90,7 +90,6 @@ import {
                 return { kind: "OctetStream", value, ...buildResponsePayload(undefined, resp, "none", [], [], []) } as { kind: "Json", value: types.FileMeta } | { kind: "OctetStream", value: Uint8Array };
             }
         throw await parseXidlError(resp);
-        
     }
     
             async get_file(path: string): Promise<{ kind: "Json", value: types.FileMeta, etag: string } | { kind: "OctetStream", value: Uint8Array, etag: string }> {
@@ -125,7 +124,6 @@ import {
                 return { kind: "OctetStream", value, ...buildResponsePayload(undefined, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }], []) } as { kind: "Json", value: types.FileMeta, etag: string } | { kind: "OctetStream", value: Uint8Array, etag: string };
             }
         throw await parseXidlError(resp);
-        
     }
     
     

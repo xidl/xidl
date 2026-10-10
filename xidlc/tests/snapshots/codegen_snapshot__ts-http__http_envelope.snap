@@ -95,7 +95,6 @@ import {
                 return { kind: "Text", value, ...buildResponsePayload(undefined, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }, { name: "X-Tag", key: "tags", optional: false, isMulti: true, decode: value => value }], [{ name: "cached", key: "cached", optional: false, isMulti: false }]) } as { kind: "Json", value: types.representations.FileMeta, etag: string, tags: Array<string>, cached: boolean } | { kind: "OctetStream", value: Uint8Array, etag: string, tags: Array<string>, cached: boolean } | { kind: "Text", value: string, etag: string, tags: Array<string>, cached: boolean };
             }
         throw await parseXidlError(resp);
-        
     }
     
             async get_fresh(): Promise<string> {
@@ -140,7 +139,6 @@ import {
             
         }
         return;
-        
     }
     
     

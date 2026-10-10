@@ -120,7 +120,6 @@ import {
             
         }
         return;
-        
     }
     
             watch_attribute_online(): AsyncIterable<boolean> {

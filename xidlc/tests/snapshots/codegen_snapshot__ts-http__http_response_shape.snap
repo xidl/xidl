@@ -98,7 +98,6 @@ import {
         const responseBody = await decodeOptionalResponseBody(resp, "text/plain", this.codecs);
         const responsePayload = buildResponsePayload(responseBody, resp, "return", [{ wireName: "count", key: "count" }], [], []);
         return ifaceSchemas.HttpResponseShapeServiceGetCountResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.HttpResponseShapeServiceGetCountResponseSchema)) as ifaceTypes.HttpResponseShapeServiceGetCountResponse;
-        
     }
     
             async add(a: number, b: number): Promise<ifaceTypes.HttpResponseShapeServiceAddResponse> {
@@ -126,7 +125,6 @@ import {
         const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
         const responsePayload = buildResponsePayload(responseBody, resp, "object", [{ wireName: "return", key: "return" }, { wireName: "sum", key: "sum" }], [], []);
         return ifaceSchemas.HttpResponseShapeServiceAddResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.HttpResponseShapeServiceAddResponseSchema)) as ifaceTypes.HttpResponseShapeServiceAddResponse;
-        
     }
     
             async bump(value: number): Promise<ifaceTypes.HttpResponseShapeServiceBumpResponse> {
@@ -154,7 +152,6 @@ import {
         const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
         const responsePayload = buildResponsePayload(responseBody, resp, "object", [{ wireName: "return", key: "return" }, { wireName: "value", key: "value" }], [], []);
         return ifaceSchemas.HttpResponseShapeServiceBumpResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.HttpResponseShapeServiceBumpResponseSchema)) as ifaceTypes.HttpResponseShapeServiceBumpResponse;
-        
     }
     
             async ping(): Promise<void> {
@@ -176,7 +173,6 @@ import {
             
         }
         return;
-        
     }
     
     
