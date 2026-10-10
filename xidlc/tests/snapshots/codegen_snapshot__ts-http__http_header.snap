@@ -82,7 +82,6 @@ import {
                 
             }
             return await decodeResponseBody<types.test.User>(resp, "application/json", this.codecs);
-            
         }
         
                 async create_user(token: string, session_id: string, name: string): Promise<void> {

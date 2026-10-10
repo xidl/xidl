@@ -79,7 +79,6 @@ import {
             
         }
         return await decodeResponseBody<types.FileMeta>(resp, "application/json", this.codecs);
-        
     }
     
     
@@ -165,7 +164,6 @@ import {
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
-        
     }
     
     

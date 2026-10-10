@@ -77,7 +77,6 @@ import {
                 
             }
             return await decodeResponseBody<types.nm.Item>(resp, "application/json", this.codecs);
-            
         }
         
                 async put_item(item: types.nm.Item): Promise<void> {
@@ -125,7 +124,6 @@ import {
                 
             }
             return await decodeResponseBody<types.nm.Wrapper>(resp, "application/json", this.codecs);
-            
         }
         
         
@@ -168,7 +166,6 @@ import {
                     
                 }
                 return await decodeResponseBody<types.outer.inner.Leaf>(resp, "application/json", this.codecs);
-                
             }
             
             

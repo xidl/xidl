@@ -77,7 +77,6 @@ import {
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
-        
     }
     
             async read_asset(key: string, version: string): Promise<string> {
@@ -102,7 +101,6 @@ import {
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
-        
     }
     
     

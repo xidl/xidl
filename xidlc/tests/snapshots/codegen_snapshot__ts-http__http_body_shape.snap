@@ -182,7 +182,6 @@ import {
             
         }
         return await decodeResponseBody<types.UploadResult>(resp, "application/json", this.codecs);
-        
     }
     
     

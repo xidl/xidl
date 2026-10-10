@@ -95,7 +95,6 @@ import {
             
         }
         return await decodeResponseBody<boolean>(resp, "text/plain", this.codecs);
-        
     }
     
             async set_attribute_online(online: boolean): Promise<void> {

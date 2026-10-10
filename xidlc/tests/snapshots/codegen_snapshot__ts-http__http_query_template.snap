@@ -79,7 +79,6 @@ import {
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
-        
     }
     
             async search(keyword: string, payload: string): Promise<string> {
@@ -106,7 +105,6 @@ import {
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
-        
     }
     
     
