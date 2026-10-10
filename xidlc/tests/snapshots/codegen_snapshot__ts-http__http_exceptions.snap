@@ -110,29 +110,29 @@ export class FilesClient {
         async throwGetFileError(resp: Response): Promise<never> {
             const status = resp.status;
             
-            if (status === 304) {
-                const body = {};
-                throw new NotModified({
-                    "etag": readResponseHeader(resp.headers, "ETag", false) as never,
-                    });
-            }
+                if (status === 304) {
+                    const body = {};
+                    throw new NotModified({
+                        "etag": readResponseHeader(resp.headers, "ETag", false) as never,
+                        });
+                }
             
-            if (status === 412) {
-                const body = (await resp.json().catch(() => ({}))) as Record<string, unknown>;
-                throw new PreconditionFailed({
-                    "etag": readResponseHeader(resp.headers, "ETag", false) as never,
-                    "code": body["code"] as never,
-                    "msg": body["msg"] as never,
-                    });
-            }
+                if (status === 412) {
+                    const body = (await resp.json().catch(() => ({}))) as Record<string, unknown>;
+                    throw new PreconditionFailed({
+                        "etag": readResponseHeader(resp.headers, "ETag", false) as never,
+                        "code": body["code"] as never,
+                        "msg": body["msg"] as never,
+                        });
+                }
             
-            if (status === 404) {
-                const body = (await resp.json().catch(() => ({}))) as Record<string, unknown>;
-                throw new NotFound({
-                    "code": body["code"] as never,
-                    "msg": body["msg"] as never,
-                    });
-            }
+                if (status === 404) {
+                    const body = (await resp.json().catch(() => ({}))) as Record<string, unknown>;
+                    throw new NotFound({
+                        "code": body["code"] as never,
+                        "msg": body["msg"] as never,
+                        });
+                }
             
             throw await parseXidlError(resp);
         }
@@ -140,22 +140,22 @@ export class FilesClient {
         async throwDeleteFileError(resp: Response): Promise<never> {
             const status = resp.status;
             
-            if (status === 412) {
-                const body = (await resp.json().catch(() => ({}))) as Record<string, unknown>;
-                throw new PreconditionFailed({
-                    "etag": readResponseHeader(resp.headers, "ETag", false) as never,
-                    "code": body["code"] as never,
-                    "msg": body["msg"] as never,
-                    });
-            }
+                if (status === 412) {
+                    const body = (await resp.json().catch(() => ({}))) as Record<string, unknown>;
+                    throw new PreconditionFailed({
+                        "etag": readResponseHeader(resp.headers, "ETag", false) as never,
+                        "code": body["code"] as never,
+                        "msg": body["msg"] as never,
+                        });
+                }
             
-            if (status === 404) {
-                const body = (await resp.json().catch(() => ({}))) as Record<string, unknown>;
-                throw new NotFound({
-                    "code": body["code"] as never,
-                    "msg": body["msg"] as never,
-                    });
-            }
+                if (status === 404) {
+                    const body = (await resp.json().catch(() => ({}))) as Record<string, unknown>;
+                    throw new NotFound({
+                        "code": body["code"] as never,
+                        "msg": body["msg"] as never,
+                        });
+                }
             
             throw await parseXidlError(resp);
         }
@@ -209,12 +209,12 @@ http_exceptions.errors.ts
 
 
 
-/** Typed HTTP error for status 304 responses. */
-export class NotModified extends Error {
-    readonly status = 304;
-    readonly kind = "NotModified" as const;
-    readonly etag: string;
-    
+    /** Typed HTTP error for status 304 responses. */
+    export class NotModified extends Error {
+        readonly status = 304;
+        readonly kind = "NotModified" as const;
+        readonly etag: string;
+        
     constructor(fields: {
         "etag": string;
         
@@ -226,12 +226,12 @@ export class NotModified extends Error {
     }
 }
 
-/** Typed HTTP error for status 412 responses. */
-export class PreconditionFailed extends Error {
-    readonly status = 412;
-    readonly kind = "PreconditionFailed" as const;
-    readonly etag: string;
-    readonly code: number;
+    /** Typed HTTP error for status 412 responses. */
+    export class PreconditionFailed extends Error {
+        readonly status = 412;
+        readonly kind = "PreconditionFailed" as const;
+        readonly etag: string;
+        readonly code: number;
     readonly msg: string;
     
     constructor(fields: {
@@ -249,11 +249,11 @@ export class PreconditionFailed extends Error {
     }
 }
 
-/** Typed HTTP error for status 404 responses. */
-export class NotFound extends Error {
-    readonly status = 404;
-    readonly kind = "NotFound" as const;
-    readonly code: number;
+    /** Typed HTTP error for status 404 responses. */
+    export class NotFound extends Error {
+        readonly status = 404;
+        readonly kind = "NotFound" as const;
+        readonly code: number;
     readonly msg: string;
     
     constructor(fields: {
@@ -375,38 +375,38 @@ export const FilesOperations = {
         },
         security: [],
         
-        errors: {
-            match: (error: unknown) => {
-                
-                if (error instanceof NotModified) {
-                    const headers = new Headers();
-                    if (error.etag !== undefined) headers.set("ETag", String(error.etag));
-                    return { status: 304, headers };
+            errors: {
+                match: (error: unknown) => {
                     
-                }
+                        if (error instanceof NotModified) {
+                            const headers = new Headers();
+                            if (error.etag !== undefined) headers.set("ETag", String(error.etag));
+                            return { status: 304, headers };
+                        
+                    }
                 
-                if (error instanceof PreconditionFailed) {
-                    const headers = new Headers();
-                    if (error.etag !== undefined) headers.set("ETag", String(error.etag));
-                    headers.set("Content-Type", "application/json");
-                    return {
-                        status: 412,
-                        headers,
-                        body: { "code": error.code, "msg": error.msg, },
-                    };
-                    
-                }
+                        if (error instanceof PreconditionFailed) {
+                            const headers = new Headers();
+                            if (error.etag !== undefined) headers.set("ETag", String(error.etag));
+                            headers.set("Content-Type", "application/json");
+                            return {
+                                status: 412,
+                                headers,
+                                body: { "code": error.code, "msg": error.msg, },
+                            };
+                            
+                    }
                 
-                if (error instanceof NotFound) {
-                    const headers = new Headers();
-                    headers.set("Content-Type", "application/json");
-                    return {
-                        status: 404,
-                        headers,
-                        body: { "code": error.code, "msg": error.msg, },
-                    };
-                    
-                }
+                        if (error instanceof NotFound) {
+                            const headers = new Headers();
+                            headers.set("Content-Type", "application/json");
+                            return {
+                                status: 404,
+                                headers,
+                                body: { "code": error.code, "msg": error.msg, },
+                            };
+                            
+                    }
                 
                 return undefined;
             },
@@ -445,31 +445,31 @@ export const FilesOperations = {
         },
         security: [],
         
-        errors: {
-            match: (error: unknown) => {
-                
-                if (error instanceof PreconditionFailed) {
-                    const headers = new Headers();
-                    if (error.etag !== undefined) headers.set("ETag", String(error.etag));
-                    headers.set("Content-Type", "application/json");
-                    return {
-                        status: 412,
-                        headers,
-                        body: { "code": error.code, "msg": error.msg, },
-                    };
+            errors: {
+                match: (error: unknown) => {
                     
-                }
+                        if (error instanceof PreconditionFailed) {
+                            const headers = new Headers();
+                            if (error.etag !== undefined) headers.set("ETag", String(error.etag));
+                            headers.set("Content-Type", "application/json");
+                            return {
+                                status: 412,
+                                headers,
+                                body: { "code": error.code, "msg": error.msg, },
+                            };
+                            
+                    }
                 
-                if (error instanceof NotFound) {
-                    const headers = new Headers();
-                    headers.set("Content-Type", "application/json");
-                    return {
-                        status: 404,
-                        headers,
-                        body: { "code": error.code, "msg": error.msg, },
-                    };
-                    
-                }
+                        if (error instanceof NotFound) {
+                            const headers = new Headers();
+                            headers.set("Content-Type", "application/json");
+                            return {
+                                status: 404,
+                                headers,
+                                body: { "code": error.code, "msg": error.msg, },
+                            };
+                            
+                    }
                 
                 return undefined;
             },
