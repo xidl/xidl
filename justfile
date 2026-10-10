@@ -7,7 +7,7 @@ xidlc_snapshot_hash := env_var_or_default("XIDLC_SNAPSHOT_HASH", "snapshot")
 bdd_features := env_var_or_default("BDD_FEATURES", "bdd/features")
 
 # Run all tests
-test: test-rust test-go test-bdd
+test: test-rust test-go test-typescript test-bdd
 
 # Initialize typescript codec
 init:
@@ -23,6 +23,12 @@ test-rust: init
 
 # Test Go
 test-go: test-go-runtime
+
+# Test TypeScript runtimes
+test-typescript: init
+    pnpm --dir typescript/xidl-typescript-codec test
+    pnpm --dir typescript/xidl-typescript-client test
+    pnpm --dir typescript/xidl-typescript-server test
 
 # Test BDD
 test-bdd: init

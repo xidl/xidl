@@ -75,12 +75,9 @@ jobs:
         run: |
           just test-go
 
-      - name: TypeScript server test
-        working-directory: typescript/xidl-typescript-server
+      - name: TypeScript runtime tests
         run: |
-          pnpm install --frozen-lockfile
-          pnpm build
-          pnpm test
+          just test-typescript
 
   clippy:
     runs-on: ubuntu-latest
