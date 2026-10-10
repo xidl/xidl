@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.98.0](https://github.com/xidl/xidl/compare/v0.97.0...v0.98.0) (2026-10-10)
+
+
+### Features
+
+* **http:** compose representation unions and raw bodies with metadata ([349b18c](https://github.com/xidl/xidl/commit/349b18cad3cad32a3f44bdf9059e2ae9153dd5ff))
+* **http:** provide builtin ContentType for closed unions ([376bbf8](https://github.com/xidl/xidl/commit/376bbf8ba0f32fc50746c3489133e9bf15904eda))
+
+
+### Bug Fixes
+
+* **bdd:** wait for server shutdown and cover every CI scenario ([ae2f5ac](https://github.com/xidl/xidl/commit/ae2f5ac60d304795b4fa214ceef7710b4be7d05b))
+* **bdd:** wait out unreaped process groups on Darwin ([d5b66a0](https://github.com/xidl/xidl/commit/d5b66a0e14e2a991b3cff4a47f109ccf7973abde))
+* **http:** keep ContentType in the compiler declaration environment ([371b0b6](https://github.com/xidl/xidl/commit/371b0b618b7a88bb66071b128f83b9ef9d5a9876))
+* **http:** preserve payload field schemas across codecs and generators ([7aafaa3](https://github.com/xidl/xidl/commit/7aafaa3516c8e9fac4c2e71ddfe52dded736cdb0))
+* **http:** reject undefined union body and case projections ([8bfba86](https://github.com/xidl/xidl/commit/8bfba866203f7b100f04ce27f6ade31a261010ba))
+* **http:** retain declaration scopes in union payloads ([b085910](https://github.com/xidl/xidl/commit/b085910da8db1dbe3c91be7ff22b758a98ac3a3d))
+* **openapi:** resolve schema references in declaration scope ([c07cf98](https://github.com/xidl/xidl/commit/c07cf98367b884066e71bde3ea8c8e7cbbf9ec8b))
+* **rust-axum:** resolve types in their declaration scope ([3aaa46d](https://github.com/xidl/xidl/commit/3aaa46d701f82ae7eed3f4cfaac5c739f1f49d56))
+
 ## [0.97.0](https://github.com/xidl/xidl/compare/v0.96.1...v0.97.0) (2026-10-10)
 
 
