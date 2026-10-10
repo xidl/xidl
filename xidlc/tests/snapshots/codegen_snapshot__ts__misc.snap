@@ -1,6 +1,5 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
-assertion_line: 149
 expression: output
 ---
 ===============
@@ -10,8 +9,7 @@ misc.d.ts
 
 
 
-    
-export type Color = "red" | "green" | "blue";
+    export type Color = "red" | "green" | "blue";
 
     
 
@@ -55,8 +53,7 @@ misc.zod.ts
 import { z } from "zod";
 import { xjson } from "xidl-typescript-codec";
 
-    
-export const ColorSchema = z.enum(["red", "green", "blue"]);
+    export const ColorSchema = z.enum(["red", "green", "blue"]);
 
     
 export const FooSeqSchema: z.ZodType<import("./misc").FooSeq> = z.lazy(() => z.array(FooSchema));

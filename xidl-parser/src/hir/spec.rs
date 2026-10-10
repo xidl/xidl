@@ -62,6 +62,7 @@ impl Specification {
             &mut definitions,
         )?;
         let mut spec = Self(definitions);
+        super::builtin::HttpBuiltins::load(&mut spec)?;
         semantic::analyze(&mut spec);
         Ok(spec)
     }
@@ -74,7 +75,7 @@ pub(crate) fn spec_from_typed_ast(
     Specification::lower(value, expand_interfaces).expect("HIR conversion should not fail")
 }
 
-fn collect_defs_with_context(
+pub(super) fn collect_defs_with_context(
     defs: Vec<crate::typed_ast::Definition>,
     modules: &mut Vec<String>,
     expand_interfaces: bool,

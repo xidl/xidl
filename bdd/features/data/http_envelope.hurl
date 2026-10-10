@@ -17,15 +17,23 @@ GET {{base_url}}/file?key=raw
 Accept: application/octet-stream
 HTTP 200
 Content-Type: application/octet-stream
+ETag: meta-v1
 [Asserts]
 body == "envelope-bytes"
+header "X-Tag" contains "001"
+header "X-Tag" contains "\"quoted\""
+cookie "cached" == "false"
 
 GET {{base_url}}/file?key=text
 Accept: text/plain
 HTTP 200
 Content-Type: text/plain
+ETag: meta-v1
 [Asserts]
 body == "envelope-text"
+header "X-Tag" contains "001"
+header "X-Tag" contains "\"quoted\""
+cookie "cached" == "false"
 
 # A supported Accept still rejects a different returned representation.
 GET {{base_url}}/file?key=raw

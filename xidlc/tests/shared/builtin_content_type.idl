@@ -1,0 +1,10 @@
+// Ordinary codegen targets receive the same built-in source declaration.
+module documents {
+    struct Metadata { string title; };
+
+    @http
+    union Payload switch (::ContentType) {
+        case ::ContentType::Json: Metadata meta;
+        case ContentType::Text: string text;
+    };
+};

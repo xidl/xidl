@@ -40,8 +40,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     assert!(!meta.cached);
     let raw = client.get_file("raw".into()).await?;
     assert!(matches!(raw.r#return, FileResponse::OctetStream(bytes) if bytes == b"envelope-bytes"));
+    assert_eq!(raw.etag, "meta-v1");
+    assert_eq!(raw.tags, ["001", "\"quoted\""]);
+    assert!(!raw.cached);
     let text = client.get_file("text".into()).await?;
     assert!(matches!(text.r#return, FileResponse::Text(text) if text == "envelope-text"));
+    assert_eq!(text.etag, "meta-v1");
+    assert_eq!(text.tags, ["001", "\"quoted\""]);
+    assert!(!text.cached);
     assert!(matches!(client.get_file("missing".into()).await, Err(EnvelopeApiGetFileError::NotFound(_))));
     server.abort();
     let listener = tokio::net::TcpListener::bind(format!("127.0.0.1:{port}")).await?;

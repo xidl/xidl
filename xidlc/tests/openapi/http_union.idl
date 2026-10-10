@@ -1,13 +1,6 @@
 #pragma xidlc package Demo API
 #pragma xidlc version v1
 
-enum ContentType {
-    @rename("application/json")
-    Json,
-    @rename("application/octet-stream")
-    OctetStream,
-};
-
 struct FileMeta {
     string id;
     string etag;

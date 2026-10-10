@@ -317,6 +317,7 @@ export interface FileMeta {
 
     export namespace left {
 
+
     export interface Detail {
             
                 message: string;
@@ -331,6 +332,7 @@ export interface FileMeta {
 
     export namespace right {
 
+
     export interface Failure {
             
                 reason: string;
@@ -338,6 +340,7 @@ export interface FileMeta {
 }
 
     export namespace collision {
+
 
     export interface FilesClient {
             
@@ -886,6 +889,7 @@ import { xjson } from "xidl-typescript-codec";
     });
 
     export namespace left {
+
         export const DetailSchema = z.object({
             
                 message: z.coerce.string()
@@ -900,6 +904,7 @@ import { xjson } from "xidl-typescript-codec";
 }
 
     export namespace right {
+
         export const FailureSchema = z.object({
             
                 reason: z.coerce.string()
@@ -908,6 +913,7 @@ import { xjson } from "xidl-typescript-codec";
 }
 
     export namespace collision {
+
         export const FilesClientSchema = z.object({
             
                 reason: z.coerce.string()

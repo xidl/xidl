@@ -9,8 +9,7 @@ enum_empty.d.ts
 
 
 
-    
-export type A = never;
+    export type A = never;
 
 export {};
 ===============
@@ -22,5 +21,4 @@ enum_empty.zod.ts
 import { z } from "zod";
 import { xjson } from "xidl-typescript-codec";
 
-    
-export const ASchema = z.never()
+    export const ASchema = z.never()

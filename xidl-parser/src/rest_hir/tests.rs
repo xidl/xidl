@@ -260,12 +260,11 @@ fn http_union_payloads_keep_their_declaration_scope() {
     let spec = parse(
         r#"
         module domain {
-            enum Mime { @rename("application/json") Json, };
             struct Data { string value; };
             typedef Data Alias, OtherAlias;
             module nested {
-                @http union Payload switch (::domain::Mime) {
-                    case ::domain::Mime::Json: map<string, sequence<OtherAlias>> values;
+                @http union Payload switch (::ContentType) {
+                    case ::ContentType::Json: map<string, sequence<OtherAlias>> values;
                 };
             };
         };
@@ -299,8 +298,7 @@ fn http_union_rejects_extra_body_outputs() {
     for parameter in ["out uint32 count", "inout uint32 count"] {
         let spec = parse(&format!(
             r#"
-            enum Mime {{ Json, }};
-            @http union Payload switch (Mime) {{ case Json: string value; }};
+            @http union Payload switch (ContentType) {{ case Json: string value; }};
             interface Files {{ @get(path="/file") Payload read({parameter}); }};
             "#,
         ));
@@ -315,14 +313,19 @@ fn http_union_rejects_extra_body_outputs() {
 
 #[test]
 fn http_union_rejects_array_case_declarators() {
-    let spec = parse(
+    let typed = crate::parser::parser_text(
         r#"
-        enum Mime { Json, };
-        @http union Payload switch (Mime) { case Json: uint32 values[3]; };
+        @http union Payload switch (ContentType) { case Json: uint32 values[3]; };
         interface Files { @get(path="/file") Payload read(); };
         "#,
-    );
-    let error = super::project(&spec).expect_err("unsupported array case");
+    )
+    .expect("parse idl");
+    let error = hir::Specification::from_typed_ast_with_properties_and_path(
+        typed,
+        HashMap::new(),
+        "input.idl",
+    )
+    .expect_err("unsupported array case");
     assert!(
         error
             .to_string()
@@ -332,15 +335,20 @@ fn http_union_rejects_array_case_declarators() {
 
 #[test]
 fn http_union_rejects_unprojected_case_metadata() {
-    let spec = parse(
+    let typed = crate::parser::parser_text(
         r#"
-        enum Mime { Json, };
         struct Envelope { @header string etag; string value; };
-        @http union Payload switch (Mime) { case Json: @flatten Envelope value; };
+        @http union Payload switch (ContentType) { case Json: @flatten Envelope value; };
         interface Files { @get(path="/file") Payload read(); };
         "#,
-    );
-    let error = super::project(&spec).expect_err("unsupported case metadata");
+    )
+    .expect("parse idl");
+    let error = hir::Specification::from_typed_ast_with_properties_and_path(
+        typed,
+        HashMap::new(),
+        "input.idl",
+    )
+    .expect_err("unsupported case metadata");
     assert!(
         error
             .to_string()

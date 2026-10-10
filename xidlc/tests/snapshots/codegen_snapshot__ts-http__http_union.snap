@@ -170,9 +170,6 @@ http_union.d.ts
 
 
     
-export type ContentType = "application/json" | "application/octet-stream";
-
-    
 
 export interface FileMeta {
         
@@ -191,6 +188,8 @@ export interface NotFound {
     
 
 export type FileResponse = { meta: FileMeta } | { raw: Array<number> };
+
+    export type ContentType = "application/json" | "application/octet-stream" | "text/plain";
 
 export {};
 ===============
@@ -430,9 +429,6 @@ import { z } from "zod";
 import { xjson } from "xidl-typescript-codec";
 
     
-export const ContentTypeSchema = z.enum(["application/json", "application/octet-stream"]);
-
-    
     export const FileMetaSchema = z.object({
         
             id: z.coerce.string(),
@@ -452,3 +448,5 @@ export const ContentTypeSchema = z.enum(["application/json", "application/octet-
 
     
     export const FileResponseSchema = z.union([z.object({ meta: FileMetaSchema }), z.object({ raw: z.array(z.coerce.number().int().nonnegative()) })]);
+
+    export const ContentTypeSchema = z.enum(["application/json", "application/octet-stream", "text/plain"]);

@@ -193,3 +193,42 @@ fn rejects_additional_invalid_stream_shapes() {
         );
     }
 }
+
+#[test]
+fn http_union_rules_are_shared_by_source_generation_targets() {
+    let _guard = test_lock().lock().expect("lock validation tests");
+    for lang in [
+        "hir",
+        "rust",
+        "typescript",
+        "rest-hir",
+        "rust-axum",
+        "typescript-rest",
+        "go-rest",
+        "openapi",
+    ] {
+        for (source, expected) in [
+            (
+                "enum Mime { Json, }; @http union Payload switch(Mime) { case Json: string value; };",
+                "must resolve to the built-in ::ContentType",
+            ),
+            (
+                "@http union Payload switch(ContentType) { default: string value; };",
+                "no default",
+            ),
+            (
+                "@http union Payload switch(ContentType) { case Json: string a; case Json: string b; };",
+                "duplicate ContentType case",
+            ),
+            (
+                "enum Other { Json, }; @http union Payload switch(ContentType) { case Other::Json: string value; };",
+                "must name a member",
+            ),
+        ] {
+            let error = xidlc::generate_from_source(lang, source, HashMap::new())
+                .err()
+                .expect("source generation must reject an invalid HTTP union");
+            assert!(error.to_string().contains(expected), "{lang}: {error}");
+        }
+    }
+}

@@ -5,15 +5,8 @@
 struct FileMeta { string wrong; };
 
 module representations {
-// Representation switching (#296): one route, two media types.
-enum ContentType {
-    @rename("application/json")
-    Json,
-    @rename("application/octet-stream")
-    OctetStream,
-    @rename("text/plain") Text,
-};
-
+// Representation switching (#296): one route, three media types.
+// ContentType is provided by the compiler when an @http union is present.
 struct FileDetails { string label; };
 
 struct FileMeta {
@@ -25,8 +18,8 @@ struct FileMeta {
 
 @http
 union FileResponse switch (ContentType) {
-    case Json: FileMeta meta;
-    case OctetStream: sequence<octet> raw;
+    case ::ContentType::Json: FileMeta meta;
+    case ContentType::OctetStream: sequence<octet> raw;
     case Text: string text;
 };
 

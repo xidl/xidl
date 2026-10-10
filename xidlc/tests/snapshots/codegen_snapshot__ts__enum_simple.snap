@@ -9,8 +9,7 @@ enum_simple.d.ts
 
 
 
-    
-export type A = "B" | "C";
+    export type A = "B" | "C";
 
 export {};
 ===============
@@ -22,5 +21,4 @@ enum_simple.zod.ts
 import { z } from "zod";
 import { xjson } from "xidl-typescript-codec";
 
-    
-export const ASchema = z.enum(["B", "C"]);
+    export const ASchema = z.enum(["B", "C"]);

@@ -19,9 +19,6 @@ impl RustRender for hir::UnionForwardDcl {
 
 impl RustRender for hir::UnionDef {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
-        if crate::generate::utils::has_annotation(&self.annotations, "http") {
-            return render_http_union(self, renderer);
-        }
         render_union_with_config(self, renderer, &[])
     }
 }
@@ -33,25 +30,30 @@ fn render_http_union(def: &hir::UnionDef, renderer: &RustRenderer) -> IdlcResult
         .case
         .iter()
         .map(|case| {
-            let case_ident = match case.label.first() {
-                Some(hir::CaseLabel::Value(hir::ConstExpr::ScopedName(name))) => name
-                    .name
-                    .last()
-                    .cloned()
-                    .unwrap_or_else(|| declarator_name(&case.element.value)),
-                _ => declarator_name(&case.element.value),
+            let [hir::CaseLabel::Value(hir::ConstExpr::ScopedName(name))] = case.label.as_slice()
+            else {
+                return Err(crate::error::IdlcError::rpc(
+                    "HTTP union case requires one ContentType member label",
+                ));
             };
+            let case_ident = name.name.last().ok_or_else(|| {
+                crate::error::IdlcError::rpc("HTTP union case has an empty ContentType label")
+            })?;
             let ty = match &case.element.ty {
                 hir::ElementSpecTy::TypeSpec(ty) => type_with_decl(ty, &case.element.value),
-                hir::ElementSpecTy::ConstrTypeDcl(_) => String::new(),
+                hir::ElementSpecTy::ConstrTypeDcl(_) => {
+                    return Err(crate::error::IdlcError::rpc(
+                        "HTTP union payload requires a named type",
+                    ));
+                }
             };
-            json!({
-                "case": convert_case(&case_ident),
+            Ok(json!({
+                "case": convert_case(case_ident),
                 "ty": ty,
                 "doc": doc_lines_from_annotations(&case.element.annotations),
-            })
+            }))
         })
-        .collect::<Vec<_>>();
+        .collect::<IdlcResult<Vec<_>>>()?;
     let ctx = renderer.enrich_ctx(
         renderer.with_ident(
             json!({
@@ -77,6 +79,9 @@ pub(crate) fn render_union_with_config(
     renderer: &RustRenderer,
     module_path: &[String],
 ) -> IdlcResult<RustRenderOutput> {
+    if crate::generate::utils::has_annotation(&def.annotations, "http") {
+        return render_http_union(def, renderer);
+    }
     let mut fields = Vec::new();
     let mut seen = BTreeSet::new();
     for case in &def.case {
