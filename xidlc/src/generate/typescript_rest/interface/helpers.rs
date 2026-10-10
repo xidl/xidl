@@ -81,7 +81,17 @@ pub(super) fn build_client_params(
             )
         })
         .map(|p| {
-            let base = ts_type_for_type_spec(&p.ty, module_path, TypeRefTarget::Client);
+            let byte_body = matches!(
+                &op.http.request.body.shape,
+                HttpRequestBodyShape::SingleValue { source_param, ty, .. }
+                    if *source_param == p.name
+                        && xidl_parser::rest_hir::is_byte_sequence(ty)
+            );
+            let base = if byte_body {
+                TsType::Primitive("Uint8Array".to_string())
+            } else {
+                ts_type_for_type_spec(&p.ty, module_path, TypeRefTarget::Client)
+            };
             let optional = p.annotations.iter().any(|a| {
                 matches!(
                     a,
@@ -106,6 +116,7 @@ pub(super) fn build_value_params(bindings: &[HttpInputBinding]) -> Vec<ValuePara
     bindings
         .iter()
         .map(|b| ValueParamContext {
+            item_is_string: ValueParamContext::item_is_string(&b.ty),
             raw_name: b.wire_name.clone(),
             access: ts_ident(&b.source_param),
             key_name: b.source_param.clone(),
@@ -117,6 +128,7 @@ pub(super) fn build_value_params(bindings: &[HttpInputBinding]) -> Vec<ValuePara
 
 pub(super) fn build_response_value_params(
     bindings: &[HttpOutputBinding],
+    fields: &[ParamDeclContext],
 ) -> Vec<ValueParamContext> {
     bindings
         .iter()
@@ -126,10 +138,13 @@ pub(super) fn build_response_value_params(
                 HttpOutputSource::Param { name } => name.clone(),
             };
             ValueParamContext {
+                item_is_string: ValueParamContext::item_is_string(&b.ty),
                 raw_name: b.wire_name.clone(),
                 access: ts_ident(&name),
+                optional: fields
+                    .iter()
+                    .any(|field| field.prop == ts_prop_name(&name) && field.optional),
                 key_name: name,
-                optional: false,
                 is_multi: matches!(b.ty, hir::TypeSpec::SequenceType(_)),
             }
         })
@@ -188,13 +203,7 @@ pub(super) fn build_response_body_mode(op: &HttpOperation) -> &'static str {
     match &op.http.response.body.shape {
         HttpResponseBodyShape::Empty => "none",
         HttpResponseBodyShape::ReturnOnly { .. } => "return",
-        HttpResponseBodyShape::SingleValue { source, .. } => {
-            if matches!(source, HttpOutputSource::ReturnValue) {
-                "return"
-            } else {
-                "object"
-            }
-        }
+        HttpResponseBodyShape::SingleValue { .. } => "return",
         HttpResponseBodyShape::Object { .. } => "object",
         HttpResponseBodyShape::Stream { .. } => "return",
     }

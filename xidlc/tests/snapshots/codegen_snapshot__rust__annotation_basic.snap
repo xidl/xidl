@@ -11,6 +11,7 @@ annotation_basic.rs
 #[derive(Default)]
 pub struct S {
     pub a: i32,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub b: Option<i16>,
 }
 impl S {}

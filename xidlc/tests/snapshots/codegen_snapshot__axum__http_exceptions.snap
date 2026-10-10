@@ -303,7 +303,7 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for FilesGetFileError {
         }
     }
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_in_Files {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
@@ -330,7 +330,7 @@ pub(super) mod __xidl_in_Files {
         }
     }
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_out_Files {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
@@ -500,12 +500,12 @@ impl FilesClient {
 impl FilesClient {
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn get_file(&self, id: String) -> Result<FileMeta, FilesGetFileError> {
-        let path = "/files/{id}".to_string();
-        let path = path.replace("{id}", &id.to_string());
+        let xidl_path = "/files/{id}".to_string();
+        let xidl_path = xidl_path.replace("{id}", &id.to_string());
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -745,11 +745,11 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for ScopedReadError {
         }
     }
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_in_Scoped {
     use super::*;
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_out_Scoped {
     use super::*;
 }
@@ -857,11 +857,11 @@ impl ScopedClient {
 impl ScopedClient {
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn read(&self) -> Result<String, ScopedReadError> {
-        let path = "/scoped".to_string();
+        let xidl_path = "/scoped".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -1020,11 +1020,11 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for NamingReadError {
         }
     }
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_in_Naming {
     use super::*;
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_out_Naming {
     use super::*;
 }
@@ -1154,12 +1154,12 @@ impl NamingClient {
 impl NamingClient {
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn read(&self, id: String) -> Result<(), NamingReadError> {
-        let path = "/names/{id}".to_string();
-        let path = path.replace("{id}", &id.to_string());
+        let xidl_path = "/names/{id}".to_string();
+        let xidl_path = xidl_path.replace("{id}", &id.to_string());
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -1211,6 +1211,7 @@ impl NamingClient {
         }
     }
 }
+#[allow(clippy::too_many_arguments, clippy::large_enum_variant)]
 pub mod left {
     #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
     #[derive(Default)]
@@ -1224,6 +1225,7 @@ pub mod left {
         pub detail: Detail,
     }
 }
+#[allow(clippy::too_many_arguments, clippy::large_enum_variant)]
 pub mod right {
     #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
     #[derive(Default)]
@@ -1231,6 +1233,7 @@ pub mod right {
         pub reason: String,
     }
 }
+#[allow(clippy::too_many_arguments, clippy::large_enum_variant)]
 pub mod collision {
     #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
     #[derive(Default)]

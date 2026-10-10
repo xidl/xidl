@@ -67,7 +67,7 @@ pub trait HttpService {
     ) -> ::xidl_rust_axum::Result<CreateSimpleResponse>;
     async fn stop_simple(&self, id: u32) -> ::xidl_rust_axum::Result<()>;
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_in_HttpService {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
@@ -176,7 +176,7 @@ pub(super) mod __xidl_in_HttpService {
         }
     }
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_out_HttpService {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
@@ -325,12 +325,17 @@ where
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
-                    body,
-                    usize::MAX,
+            let xidl_body_bytes = <::xidl_rust_axum::axum::body::Bytes as ::xidl_rust_axum::axum::extract::FromRequest<
+                S,
+            >>::from_request(
+                    ::xidl_rust_axum::axum::extract::Request::from_parts(parts, body),
+                    state,
                 )
                 .await
-                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                .map_err(|err| ::xidl_rust_axum::Error::new(
+                    err.status().as_u16(),
+                    err.body_text(),
+                ))?;
             let xidl_body: HttpServiceCreateSimpleRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
@@ -839,11 +844,11 @@ impl HttpServiceClient {
 impl HttpServiceClient {
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn get_health(&self) -> Result<HealthResponse, xidl_rust_axum::Error> {
-        let path = "/api/v1/health".to_string();
+        let xidl_path = "/api/v1/health".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -880,11 +885,11 @@ impl HttpServiceClient {
     }
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn get_version(&self) -> Result<VersionResponse, xidl_rust_axum::Error> {
-        let path = "/api/v1/app/version".to_string();
+        let xidl_path = "/api/v1/app/version".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -923,11 +928,11 @@ impl HttpServiceClient {
     pub async fn get_memory_info(
         &self,
     ) -> Result<MemoryResponse, xidl_rust_axum::Error> {
-        let path = "/api/v1/app/memory".to_string();
+        let xidl_path = "/api/v1/app/memory".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -964,11 +969,11 @@ impl HttpServiceClient {
     }
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn restart(&self) -> Result<(), xidl_rust_axum::Error> {
-        let path = "/api/v1/app/restart".to_string();
+        let xidl_path = "/api/v1/app/restart".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -997,11 +1002,11 @@ impl HttpServiceClient {
     pub async fn get_state(
         &self,
     ) -> Result<crate::api::state::StateResponse, xidl_rust_axum::Error> {
-        let path = "/api/v1/proxy/state".to_string();
+        let xidl_path = "/api/v1/proxy/state".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -1040,11 +1045,11 @@ impl HttpServiceClient {
     pub async fn get_udp_stats(
         &self,
     ) -> Result<UdpStatsResponse, xidl_rust_axum::Error> {
-        let path = "/api/v1/stats/udp".to_string();
+        let xidl_path = "/api/v1/stats/udp".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -1085,11 +1090,11 @@ impl HttpServiceClient {
         local_addr: String,
         remote_port: u16,
     ) -> Result<CreateSimpleResponse, xidl_rust_axum::Error> {
-        let path = "/api/v1/simple".to_string();
+        let xidl_path = "/api/v1/simple".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -1141,12 +1146,15 @@ impl HttpServiceClient {
     }
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn stop_simple(&self, id: u32) -> Result<(), xidl_rust_axum::Error> {
-        let path = "/api/v1/simple/{id}".to_string();
-        let path = path.replace("{id}", &id.to_string());
+        let xidl_path = "/api/v1/simple/{id}".to_string();
+        let xidl_path = xidl_path.replace("{id}", &id.to_string());
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::DELETE, self.client.url(&path))
+            .request(
+                xidl_rust_axum::reqwest::Method::DELETE,
+                self.client.url(&xidl_path),
+            )
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()

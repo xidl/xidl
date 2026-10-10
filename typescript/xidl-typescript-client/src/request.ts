@@ -135,6 +135,11 @@ export function encodeRequestBody(
   if (custom) {
     return custom(value, schema);
   }
+  if (mime === 'application/octet-stream') {
+    // Raw byte payload: the value is the bytes; callers pass a Uint8Array
+    // (or any BodyInit-compatible view).
+    return value as BodyInit;
+  }
   if (mime === 'application/json' || mime.endsWith('+json')) {
     const serialized = schema ? serialize(value, schema) : value;
     return JSON.stringify(serialized);

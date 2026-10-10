@@ -9,6 +9,7 @@ mod stream;
 #[cfg(test)]
 mod tests;
 
+use crate::error::IdlcResult;
 use crate::jsonrpc::{Artifact, ArtifactFile};
 use crate::openapi::{InfoBuilder, OpenApi, OpenApiBuilder, Tag};
 use serde_json::Value;
@@ -53,11 +54,8 @@ impl crate::jsonrpc::Codegen for OpenApiCodegen {
     }
 }
 
-fn render_openapi_json(
-    spec: &hir::Specification,
-    rest_hir: &RestHirDocument,
-) -> Result<Value, serde_json::Error> {
-    let ctx = render_openapi(spec, rest_hir);
+fn render_openapi_json(spec: &hir::Specification, rest_hir: &RestHirDocument) -> IdlcResult<Value> {
+    let ctx = render_openapi(spec, rest_hir)?;
     let version = select_openapi_version(&ctx);
     let mut value = serde_json::to_value(ctx.document)?;
     if let Some(openapi) = value.get_mut("openapi") {
@@ -78,8 +76,11 @@ fn select_openapi_version(ctx: &RenderedOpenApi) -> &'static str {
 }
 
 /// Renders an OpenAPI document from an XIDL specification and projected REST HIR.
-pub fn render_openapi(spec: &hir::Specification, rest_hir: &RestHirDocument) -> RenderedOpenApi {
-    let ctx = context::OpenApiContext::new(rest_hir).collect(spec, &[], rest_hir);
+pub fn render_openapi(
+    spec: &hir::Specification,
+    rest_hir: &RestHirDocument,
+) -> IdlcResult<RenderedOpenApi> {
+    let ctx = context::OpenApiContext::new(rest_hir).collect(spec, &[], rest_hir)?;
     let mut components = crate::openapi::ComponentsBuilder::new();
     for (name, schema) in ctx.schemas {
         components = components.schema(name, schema);
@@ -100,10 +101,10 @@ pub fn render_openapi(spec: &hir::Specification, rest_hir: &RestHirDocument) -> 
         .tags(tags)
         .build();
 
-    RenderedOpenApi {
+    Ok(RenderedOpenApi {
         document,
         stream_patches: ctx.stream_patches,
-    }
+    })
 }
 
 /// Rendered OpenAPI output plus delayed stream-specific patches needed after serialization.

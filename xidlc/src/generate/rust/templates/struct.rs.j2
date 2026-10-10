@@ -25,6 +25,9 @@ pub struct {{ ident }} {
             #[{{ attr }}]
         {% endfor %}
         {% if enable_serde_attrs %}
+            {% if member.optional %}
+                #[serde(skip_serializing_if = "Option::is_none")]
+            {% endif %}
             {% if member.serde_rename is defined and member.serde_rename %}
                 #[serde(rename = "{{ member.serde_rename }}")]
             {% endif %}

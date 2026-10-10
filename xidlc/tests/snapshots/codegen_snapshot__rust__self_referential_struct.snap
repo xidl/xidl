@@ -11,6 +11,7 @@ self_referential_struct.rs
 #[derive(Default)]
 pub struct Node {
     pub next: Box<Node>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub prev: Option<Box<Node>>,
     pub children: Vec<Node>,
 }

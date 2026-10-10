@@ -1,4 +1,4 @@
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod {{ module.name }} {
     use super::*;
     {% for item in module.items %}
@@ -10,7 +10,7 @@ pub(super) mod {{ module.name }} {
                         #[serde(rename = "{{ field.serde_rename }}")]
                     {% endif %}
                     {% if field.optional %}
-                        #[serde(default)]
+                        #[serde(default, skip_serializing_if = "Option::is_none")]
                     {% endif %}
                     pub {{ field.name }}: {{ field.ty }},
                 {% endfor %}
@@ -40,7 +40,10 @@ pub(super) mod {{ module.name }} {
         {% else %}
             pub enum {{ item.transport_ident }} {
                 {% for variant in item.variants %}
-                    {{ variant }},
+                    {% if variant.serde_rename %}
+                        #[serde(rename = "{{ variant.serde_rename }}")]
+                    {% endif %}
+                    {{ variant.ident }},
                 {% endfor %}
             }
 
@@ -49,7 +52,7 @@ pub(super) mod {{ module.name }} {
                 fn from(value: {{ item.public_path }}) -> Self {
                     match value {
                         {% for variant in item.variants %}
-                            {{ item.public_path }}::{{ variant }} => Self::{{ variant }},
+                            {{ item.public_path }}::{{ variant.ident }} => Self::{{ variant.ident }},
                         {% endfor %}
                     }
                 }
@@ -60,7 +63,7 @@ pub(super) mod {{ module.name }} {
                 fn from(value: {{ item.transport_ident }}) -> Self {
                     match value {
                         {% for variant in item.variants %}
-                            {{ item.transport_ident }}::{{ variant }} => Self::{{ variant }},
+                            {{ item.transport_ident }}::{{ variant.ident }} => Self::{{ variant.ident }},
                         {% endfor %}
                     }
                 }

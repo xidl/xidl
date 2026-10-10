@@ -35,11 +35,11 @@ pub trait HttpEdgeCasesService {
         page_size: u32,
     ) -> ::xidl_rust_axum::Result<String>;
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_in_HttpEdgeCasesService {
     use super::*;
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_out_HttpEdgeCasesService {
     use super::*;
 }
@@ -589,11 +589,11 @@ impl HttpEdgeCasesServiceClient {
 impl HttpEdgeCasesServiceClient {
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn health(&self, trace: String) -> Result<(), xidl_rust_axum::Error> {
-        let path = "/v1/health".to_string();
+        let xidl_path = "/v1/health".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::HEAD, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::HEAD, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -632,12 +632,12 @@ impl HttpEdgeCasesServiceClient {
         uid: u32,
         locale: String,
     ) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/v1/users/{id}".to_string();
-        let path = path.replace("{id}", &uid.to_string());
+        let xidl_path = "/v1/users/{id}".to_string();
+        let xidl_path = xidl_path.replace("{id}", &uid.to_string());
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -678,12 +678,12 @@ impl HttpEdgeCasesServiceClient {
     }
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn dedup_user(&self, id: u32) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/v1/dedup/{id}".to_string();
-        let path = path.replace("{id}", &id.to_string());
+        let xidl_path = "/v1/dedup/{id}".to_string();
+        let xidl_path = xidl_path.replace("{id}", &id.to_string());
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -720,13 +720,13 @@ impl HttpEdgeCasesServiceClient {
         order_id: u32,
         item_id: u32,
     ) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/orders/{order_id}/items/{item_id}".to_string();
-        let path = path.replace("{order_id}", &order_id.to_string());
-        let path = path.replace("{item_id}", &item_id.to_string());
+        let xidl_path = "/orders/{order_id}/items/{item_id}".to_string();
+        let xidl_path = xidl_path.replace("{order_id}", &order_id.to_string());
+        let xidl_path = xidl_path.replace("{item_id}", &item_id.to_string());
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -763,11 +763,11 @@ impl HttpEdgeCasesServiceClient {
         keyword: String,
         page_size: u32,
     ) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/lookup".to_string();
+        let xidl_path = "/lookup".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()

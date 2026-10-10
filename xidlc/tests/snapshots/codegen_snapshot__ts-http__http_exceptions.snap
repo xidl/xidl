@@ -42,36 +42,37 @@ import {
 } from "xidl-typescript-client";
 
     
-export class FilesClient {
-    private readonly baseUrl: string;
-    private readonly fetchImpl: FetchLike;
-    private readonly defaultHeaders: Record<string, string>;
-    private readonly auth?: ClientAuth;
-    private readonly codecs: Record<string, HttpCodec>;
 
-    constructor(baseUrl: string, options: ClientOptions = {}) {
-        this.baseUrl = baseUrl;
-        this.fetchImpl = resolveFetch(options.fetch);
-        this.defaultHeaders = options.headers ?? {};
-        this.auth = options.auth;
-        this.codecs = options.codecs ?? {};
-    }
-    
-        async get_file(id: string): Promise<types.FileMeta> {
-            const parsed = ifaceSchemas.FilesGetFileRequestSchema.parse({ "id": id });
-            let path = "/files/{id}";
-            path = path.replace("{" + "id" + "}", encodePathSegment(id));
-            const query = new URLSearchParams();
-            const headers = new Headers(this.defaultHeaders);
-            const cookies: string[] = [];
-            applyCookies(headers, cookies);
-            applyClientAuth(path, query, headers, this.auth, []);
-            const queryString = query.toString();
-            if (queryString.length > 0) {
-                path = `${path}?${queryString}`;
-            }
-            const url = joinUrl(this.baseUrl, path);
-            headers.set("Accept", "application/json");
+    export class FilesClient {
+        private readonly baseUrl: string;
+        private readonly fetchImpl: FetchLike;
+        private readonly defaultHeaders: Record<string, string>;
+        private readonly auth?: ClientAuth;
+        private readonly codecs: Record<string, HttpCodec>;
+
+        constructor(baseUrl: string, options: ClientOptions = {}) {
+            this.baseUrl = baseUrl;
+            this.fetchImpl = resolveFetch(options.fetch);
+            this.defaultHeaders = options.headers ?? {};
+            this.auth = options.auth;
+            this.codecs = options.codecs ?? {};
+        }
+        
+            async get_file(id: string): Promise<types.FileMeta> {
+                const parsed = ifaceSchemas.FilesGetFileRequestSchema.parse({ "id": id });
+                let xidlPath = "/files/{id}";
+                xidlPath = xidlPath.replace("{" + "id" + "}", encodePathSegment(id));
+                const query = new URLSearchParams();
+                const headers = new Headers(this.defaultHeaders);
+                const cookies: string[] = [];
+                applyCookies(headers, cookies);
+                applyClientAuth(xidlPath, query, headers, this.auth, []);
+                const queryString = query.toString();
+                if (queryString.length > 0) {
+                    xidlPath = `${xidlPath}?${queryString}`;
+                }
+                const url = joinUrl(this.baseUrl, xidlPath);
+                headers.set("Accept", "application/json");
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             await this.throwGetFileError(resp);
@@ -129,34 +130,35 @@ export class FilesClient {
 }
 
     
-export class ScopedClient {
-    private readonly baseUrl: string;
-    private readonly fetchImpl: FetchLike;
-    private readonly defaultHeaders: Record<string, string>;
-    private readonly auth?: ClientAuth;
-    private readonly codecs: Record<string, HttpCodec>;
 
-    constructor(baseUrl: string, options: ClientOptions = {}) {
-        this.baseUrl = baseUrl;
-        this.fetchImpl = resolveFetch(options.fetch);
-        this.defaultHeaders = options.headers ?? {};
-        this.auth = options.auth;
-        this.codecs = options.codecs ?? {};
-    }
-    
-        async read(): Promise<string> {
-            let path = "/scoped";
-            const query = new URLSearchParams();
-            const headers = new Headers(this.defaultHeaders);
-            const cookies: string[] = [];
-            applyCookies(headers, cookies);
-            applyClientAuth(path, query, headers, this.auth, []);
-            const queryString = query.toString();
-            if (queryString.length > 0) {
-                path = `${path}?${queryString}`;
-            }
-            const url = joinUrl(this.baseUrl, path);
-            headers.set("Accept", "text/plain");
+    export class ScopedClient {
+        private readonly baseUrl: string;
+        private readonly fetchImpl: FetchLike;
+        private readonly defaultHeaders: Record<string, string>;
+        private readonly auth?: ClientAuth;
+        private readonly codecs: Record<string, HttpCodec>;
+
+        constructor(baseUrl: string, options: ClientOptions = {}) {
+            this.baseUrl = baseUrl;
+            this.fetchImpl = resolveFetch(options.fetch);
+            this.defaultHeaders = options.headers ?? {};
+            this.auth = options.auth;
+            this.codecs = options.codecs ?? {};
+        }
+        
+            async read(): Promise<string> {
+                let xidlPath = "/scoped";
+                const query = new URLSearchParams();
+                const headers = new Headers(this.defaultHeaders);
+                const cookies: string[] = [];
+                applyCookies(headers, cookies);
+                applyClientAuth(xidlPath, query, headers, this.auth, []);
+                const queryString = query.toString();
+                if (queryString.length > 0) {
+                    xidlPath = `${xidlPath}?${queryString}`;
+                }
+                const url = joinUrl(this.baseUrl, xidlPath);
+                headers.set("Accept", "text/plain");
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             await this.throwReadError(resp);
@@ -197,43 +199,44 @@ export class ScopedClient {
 }
 
     
-export class NamingClient {
-    private readonly baseUrl: string;
-    private readonly fetchImpl: FetchLike;
-    private readonly defaultHeaders: Record<string, string>;
-    private readonly auth?: ClientAuth;
-    private readonly codecs: Record<string, HttpCodec>;
 
-    constructor(baseUrl: string, options: ClientOptions = {}) {
-        this.baseUrl = baseUrl;
-        this.fetchImpl = resolveFetch(options.fetch);
-        this.defaultHeaders = options.headers ?? {};
-        this.auth = options.auth;
-        this.codecs = options.codecs ?? {};
-    }
-    
-        async read(id: string): Promise<void> {
-            const parsed = ifaceSchemas.NamingReadRequestSchema.parse({ "id": id });
-            let path = "/names/{id}";
-            path = path.replace("{" + "id" + "}", encodePathSegment(id));
-            const query = new URLSearchParams();
-            const headers = new Headers(this.defaultHeaders);
-            const cookies: string[] = [];
-            applyCookies(headers, cookies);
-            applyClientAuth(path, query, headers, this.auth, []);
-            const queryString = query.toString();
-            if (queryString.length > 0) {
-                path = `${path}?${queryString}`;
-            }
-            const url = joinUrl(this.baseUrl, path);
-            headers.set("Accept", "");
+    export class NamingClient {
+        private readonly baseUrl: string;
+        private readonly fetchImpl: FetchLike;
+        private readonly defaultHeaders: Record<string, string>;
+        private readonly auth?: ClientAuth;
+        private readonly codecs: Record<string, HttpCodec>;
+
+        constructor(baseUrl: string, options: ClientOptions = {}) {
+            this.baseUrl = baseUrl;
+            this.fetchImpl = resolveFetch(options.fetch);
+            this.defaultHeaders = options.headers ?? {};
+            this.auth = options.auth;
+            this.codecs = options.codecs ?? {};
+        }
+        
+            async read(id: string): Promise<void> {
+                const parsed = ifaceSchemas.NamingReadRequestSchema.parse({ "id": id });
+                let xidlPath = "/names/{id}";
+                xidlPath = xidlPath.replace("{" + "id" + "}", encodePathSegment(id));
+                const query = new URLSearchParams();
+                const headers = new Headers(this.defaultHeaders);
+                const cookies: string[] = [];
+                applyCookies(headers, cookies);
+                applyClientAuth(xidlPath, query, headers, this.auth, []);
+                const queryString = query.toString();
+                if (queryString.length > 0) {
+                    xidlPath = `${xidlPath}?${queryString}`;
+                }
+                const url = joinUrl(this.baseUrl, xidlPath);
+                headers.set("Accept", "");
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             await this.throwReadError(resp);
             
         }
         return;
-        
+            
     }
     
     

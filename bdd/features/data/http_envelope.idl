@@ -1,0 +1,61 @@
+#pragma xidlc package Envelope API
+#pragma xidlc version v1
+
+// Representation switching (#296): one route, two media types.
+enum ContentType {
+    @rename("application/json")
+    Json,
+    @rename("application/octet-stream")
+    OctetStream,
+    @rename("text/plain") Text,
+};
+
+struct FileMeta {
+    string id;
+    string etag;
+};
+
+// Typed error channel (#294): status + headers + body per exception.
+@http(304)
+exception NotModified {
+    @header @rename("ETag") string etag;
+};
+
+@http(412)
+exception PreconditionFailed {
+    @header @rename("ETag") string etag;
+    uint32 code;
+    string msg;
+};
+
+@http(404)
+exception NotFound {
+    uint32 code;
+    string msg;
+};
+
+@http
+union FileResponse switch (ContentType) {
+    case Json: FileMeta meta;
+    case OctetStream: sequence<octet> raw;
+    case Text: string text;
+};
+
+@no_security
+interface EnvelopeApi {
+    @get(path = "/file")
+    FileResponse get_file(
+        @query string key,
+        @header @rename("ETag") out string etag,
+        @header @rename("X-Tag") out sequence<string> tags,
+        @cookie out boolean cached
+    ) raises(NotFound);
+
+    @get(path = "/fresh")
+    string get_fresh() raises(NotModified);
+
+    @delete(path = "/file")
+    void delete_file(
+        @header @rename("If-Match") string if_match
+    ) raises(PreconditionFailed);
+};

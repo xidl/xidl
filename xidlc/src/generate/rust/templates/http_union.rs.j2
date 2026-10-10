@@ -1,0 +1,18 @@
+{%- for line in doc %}
+    /// {{ line }}
+{%- endfor %}
+{% for attr in rust_attrs %}
+    #[{{ attr }}]
+{% endfor %}
+/// HTTP representation union: each case responds with its own media type
+/// and is untagged on the wire.
+#[derive(Debug, Clone, ::serde::Serialize, ::serde::Deserialize)]
+#[serde(untagged)]
+pub enum {{ ident }} {
+    {%- for case in cases %}
+        {%- for line in case.doc %}
+            /// {{ line }}
+        {%- endfor %}
+        {{ case.case }}({{ case.ty }}),
+    {%- endfor %}
+}

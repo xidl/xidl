@@ -46,11 +46,26 @@ pub(super) struct PathParamContext {
 
 #[derive(Clone, Serialize)]
 pub(super) struct ValueParamContext {
+    pub(super) item_is_string: bool,
     pub(super) raw_name: String,
     pub(super) access: String,
     pub(super) key_name: String,
     pub(super) optional: bool,
     pub(super) is_multi: bool,
+}
+
+impl ValueParamContext {
+    pub(super) fn item_is_string(ty: &xidl_parser::hir::TypeSpec) -> bool {
+        use xidl_parser::hir::TypeSpec;
+        match ty {
+            TypeSpec::SequenceType(sequence) => Self::item_is_string(&sequence.ty),
+            TypeSpec::StringType(_)
+            | TypeSpec::WideStringType(_)
+            | TypeSpec::CharType
+            | TypeSpec::WideCharType => true,
+            _ => false,
+        }
+    }
 }
 
 #[derive(Clone, Serialize)]
@@ -59,6 +74,15 @@ pub(super) struct SecurityContext {
     pub(super) location: Option<String>,
     pub(super) name: Option<String>,
     pub(super) realm: Option<String>,
+}
+
+/// One representation of an `@http` union response (typescript-rest).
+#[derive(Clone, Serialize)]
+pub(super) struct TsRepresentationContext {
+    pub(super) kind: String,
+    pub(super) content_type: String,
+    pub(super) value_ty: TsType,
+    pub(super) is_byte: bool,
 }
 
 /// One `raises(...)` entry projected for the typescript-rest generator.
@@ -145,6 +169,7 @@ pub(super) struct ClientMethodContext {
     pub(super) body_single: Option<String>,
     pub(super) response_schema_ref: Option<String>,
     pub(super) response_body_mode: String,
+    pub(super) response_body_entries: Vec<RequestPayloadEntry>,
     pub(super) is_server_stream: bool,
     pub(super) is_client_stream: bool,
     pub(super) is_websocket: bool,
@@ -156,6 +181,9 @@ pub(super) struct ClientMethodContext {
     pub(super) security: Vec<SecurityContext>,
     pub(super) raises: Vec<TsRaisesContext>,
     pub(super) raise_helper: String,
+    pub(super) representations: Vec<TsRepresentationContext>,
+    pub(super) union_wrapper: Option<TsType>,
+    pub(super) union_accept: String,
 }
 
 #[derive(Serialize)]
@@ -197,6 +225,8 @@ pub(super) struct ServerMethodContext {
     pub(super) stream_item_schema_ref: Option<String>,
     pub(super) security: Vec<SecurityContext>,
     pub(super) raises: Vec<TsRaisesContext>,
+    pub(super) representations: Vec<TsRepresentationContext>,
+    pub(super) union_wrapper: Option<TsType>,
 }
 
 #[derive(Clone)]
@@ -237,6 +267,11 @@ pub(super) struct MethodModel {
     pub(super) request_fields: Vec<ParamDeclContext>,
     pub(super) response_fields: Vec<ParamDeclContext>,
     pub(super) raises: Vec<TsRaisesContext>,
+    /// `@http` union representations; non-empty switches the response flow.
+    pub(super) representations: Vec<TsRepresentationContext>,
+    /// Response wrapper for `@http` unions:
+    /// `{ kind; value; <out params> } | ...`.
+    pub(super) union_wrapper: Option<TsType>,
 }
 
 impl MethodModel {
@@ -266,6 +301,7 @@ impl MethodModel {
             body_single: self.body_single,
             response_schema_ref: self.response_schema_ref,
             response_body_mode: self.response_body_mode,
+            response_body_entries: self.response_body_entries,
             is_server_stream: self.is_server_stream,
             is_client_stream: self.is_client_stream,
             is_websocket: self.is_websocket,
@@ -276,6 +312,14 @@ impl MethodModel {
             stream_item_schema_ref: self.stream_item_schema_ref,
             security: self.security,
             raises: self.raises.clone(),
+            representations: self.representations.clone(),
+            union_wrapper: self.union_wrapper.clone(),
+            union_accept: self
+                .representations
+                .iter()
+                .map(|repr| repr.content_type.clone())
+                .collect::<Vec<_>>()
+                .join(", "),
         }
     }
 
@@ -319,6 +363,8 @@ impl MethodModel {
             stream_item_schema_ref: self.stream_item_schema_ref,
             security: self.security,
             raises: self.raises,
+            representations: self.representations,
+            union_wrapper: self.union_wrapper,
         }
     }
 }

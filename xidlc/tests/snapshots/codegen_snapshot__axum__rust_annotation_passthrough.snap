@@ -28,11 +28,11 @@ pub trait RustHttp {
         display_name: String,
     ) -> ::xidl_rust_axum::Result<()>;
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_in_RustHttp {
     use super::*;
 }
-#[allow(non_snake_case, unused_imports)]
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
 pub(super) mod __xidl_out_RustHttp {
     use super::*;
 }
@@ -101,12 +101,17 @@ where
             ) {
                 return Err(::xidl_rust_axum::Error::unsupported_media_type());
             }
-            let xidl_body_bytes = ::xidl_rust_axum::axum::body::to_bytes(
-                    body,
-                    usize::MAX,
+            let xidl_body_bytes = <::xidl_rust_axum::axum::body::Bytes as ::xidl_rust_axum::axum::extract::FromRequest<
+                S,
+            >>::from_request(
+                    ::xidl_rust_axum::axum::extract::Request::from_parts(parts, body),
+                    state,
                 )
                 .await
-                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                .map_err(|err| ::xidl_rust_axum::Error::new(
+                    err.status().as_u16(),
+                    err.body_text(),
+                ))?;
             let xidl_body: RustHttpSetAttributeDisplayNameRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
                     "text/plain",
                 )
@@ -323,12 +328,12 @@ impl RustHttpClient {
 impl RustHttpClient {
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn get_user(&self, user_id: u32) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/users/{user_id}".to_string();
-        let path = path.replace("{user_id}", &user_id.to_string());
+        let xidl_path = "/users/{user_id}".to_string();
+        let xidl_path = xidl_path.replace("{user_id}", &user_id.to_string());
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -363,11 +368,11 @@ impl RustHttpClient {
     pub async fn get_attribute_display_name(
         &self,
     ) -> Result<String, xidl_rust_axum::Error> {
-        let path = "/attribute/display_name".to_string();
+        let xidl_path = "/attribute/display_name".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()
@@ -403,11 +408,11 @@ impl RustHttpClient {
         &self,
         display_name: String,
     ) -> Result<(), xidl_rust_axum::Error> {
-        let path = "/attribute/display_name".to_string();
+        let xidl_path = "/attribute/display_name".to_string();
         let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&xidl_path))
             .build()
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         req.headers_mut()

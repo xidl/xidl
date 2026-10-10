@@ -64,6 +64,7 @@ test('buildResponsePayload merges body, headers and cookies', () => {
     { id: 1 },
     resp,
     'object',
+    [{ key: 'id', wireName: 'id' }],
     [{ isMulti: false, key: 'total', name: 'X-Total', optional: true }],
     [],
   );

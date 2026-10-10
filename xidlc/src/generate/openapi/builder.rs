@@ -8,7 +8,15 @@ use crate::openapi::{Content, RefOr, ResponsesBuilder};
 pub(crate) fn build_operation(method: &MethodInfo) -> crate::openapi::path::Operation {
     let mut responses = ResponsesBuilder::new();
     let mut ok_response = ResponseBuilder::new().description("OK");
-    if let Some(schema) = &method.response_schema {
+    if !method.representations.is_empty() {
+        // `@http` union: one content entry per negotiated representation.
+        for representation in &method.representations {
+            ok_response = ok_response.content(
+                &representation.content_type,
+                Content::new(Some::<RefOr<Schema>>(representation.schema.clone())),
+            );
+        }
+    } else if let Some(schema) = &method.response_schema {
         ok_response = ok_response.content(
             &method.response_content_type,
             Content::new(Some::<RefOr<Schema>>(schema.clone())),

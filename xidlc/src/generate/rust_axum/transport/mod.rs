@@ -1,5 +1,11 @@
 mod convert;
+mod model;
 mod names;
+
+pub use model::{
+    TransportDirection, TransportFieldContext, TransportItemContext, TransportModuleContext,
+    TransportModules, TransportTypeDef, TransportVariantContext, TypeRegistry,
+};
 
 pub(crate) use convert::{decode_expr, encode_expr};
 
@@ -11,55 +17,8 @@ use names::{
     canonical_name, public_path_from_canonical, render_public_scoped, scoped_key, transport_ident,
     transport_module,
 };
-use serde::Serialize;
 use std::collections::{BTreeSet, HashMap};
 use xidl_parser::hir;
-
-#[derive(Clone)]
-pub enum TransportTypeDef {
-    Struct(hir::StructDcl),
-    Enum(hir::EnumDcl),
-    Typedef(hir::TypedefDcl),
-}
-
-pub type TypeRegistry = HashMap<String, TransportTypeDef>;
-
-#[derive(Clone, Copy)]
-pub enum TransportDirection {
-    In,
-    Out,
-}
-
-#[derive(Serialize)]
-pub struct TransportModules {
-    pub inbound: TransportModuleContext,
-    pub outbound: TransportModuleContext,
-}
-
-#[derive(Serialize)]
-pub struct TransportModuleContext {
-    pub name: String,
-    pub items: Vec<TransportItemContext>,
-}
-
-#[derive(Serialize)]
-pub struct TransportItemContext {
-    pub kind: String,
-    pub transport_ident: String,
-    pub public_path: String,
-    pub fields: Vec<TransportFieldContext>,
-    pub variants: Vec<String>,
-}
-
-#[derive(Serialize)]
-pub struct TransportFieldContext {
-    pub name: String,
-    pub ty: String,
-    pub serde_rename: Option<String>,
-    pub optional: bool,
-    pub encode_expr: String,
-    pub decode_expr: String,
-}
 
 pub struct TransportTracker {
     inbound: BTreeSet<String>,
@@ -266,7 +225,10 @@ fn render_enum(
         variants: def
             .member
             .iter()
-            .map(|item| rust_ident(&item.ident))
+            .map(|item| TransportVariantContext {
+                ident: rust_ident(&item.ident),
+                serde_rename: serde_rename_from_annotations(&item.annotations),
+            })
             .collect(),
     }
 }

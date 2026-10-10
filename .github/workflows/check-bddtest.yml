@@ -69,6 +69,8 @@ jobs:
           - shard: rest-serialization
             port-base: 18000
             features: >-
+              bdd/features/http_envelope.feature
+              bdd/features/http_body_shape.feature
               bdd/features/rest.feature:208
               bdd/features/rest.feature:247
     steps:
