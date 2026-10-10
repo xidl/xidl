@@ -1,7 +1,7 @@
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::rust::util::{rust_ident, rust_passthrough_attrs_from_annotations};
 use crate::generate::rust_axum::interface::{
-    ExceptionMemberContext, MethodContext, RaisesContext, RenderEnv,
+    MethodContext, RaisesContext, RenderEnv,
     interface_http::{
         cors_layer, deprecated_context_from_http, http_method_code, http_method_fn,
         http_method_from_hir, reqwest_method_code, security_context,
@@ -11,13 +11,8 @@ use crate::generate::rust_axum::interface::{
         ensure_streaming_constraints, method_struct_prefix, op_decode_expr, op_encode_expr,
         op_return_ty, request_payload_ty, response_ty,
     },
-    interface_types::{
-        axum_type, header_item_is_primitive, header_item_is_string, header_item_ty,
-        render_scoped_name,
-    },
 };
 use crate::generate::rust_axum::transport::{TransportDirection, TransportTracker};
-use convert_case::Casing;
 use xidl_parser::hir;
 use xidl_parser::rest_hir::{
     HttpOperation, HttpRequestBodyShape, HttpResponseBodyShape, HttpStreamPayloadCodec,
@@ -256,7 +251,7 @@ pub(crate) fn render_op_from_http(
     };
     let response_ty_str = response_ty(http_op, &struct_prefix, &ret);
 
-    let raises = raises_contexts(op, http_op, env)?;
+    let raises = RaisesContext::for_operation(op, http_op, env)?;
     let error_ty = if http_op.meta.raises.is_empty() {
         None
     } else {
@@ -353,67 +348,4 @@ pub(crate) fn render_op_from_http(
         raises,
         error_ty,
     })
-}
-
-/// Projects `raises(...)` entries into template contexts, pairing each
-/// operation-level ref (order preserved from the IDL) with its declared
-/// exception.
-fn raises_contexts(
-    op: &hir::OpDcl,
-    http_op: &HttpOperation,
-    env: RenderEnv<'_>,
-) -> IdlcResult<Vec<RaisesContext>> {
-    if http_op.meta.raises.is_empty() {
-        return Ok(Vec::new());
-    }
-    let document = env.renderer.rest_hir()?;
-    let scoped_names = op
-        .raises
-        .as_ref()
-        .map(|raises| raises.0.as_slice())
-        .unwrap_or_default();
-    let mut out = Vec::new();
-    for (refer, scoped) in http_op.meta.raises.iter().zip(scoped_names) {
-        let exception = document
-            .document
-            .exceptions
-            .iter()
-            .find(|e| e.ident == refer.ident && e.module_path == refer.module_path)
-            .ok_or_else(|| {
-                IdlcError::rpc(format!(
-                    "raises('{}') does not resolve to a declared exception",
-                    scoped.name.join("::")
-                ))
-            })?;
-        let members = |source: &Vec<xidl_parser::rest_hir::HttpExceptionMember>| {
-            source
-                .iter()
-                .map(|member| ExceptionMemberContext {
-                    field: rust_ident(&member.field),
-                    wire_name: member.wire_name.clone(),
-                    ty: if member.is_multi {
-                        format!("Vec<{}>", header_item_ty(&member.ty))
-                    } else if member.optional {
-                        format!("Option<{}>", axum_type(&member.ty))
-                    } else {
-                        axum_type(&member.ty)
-                    },
-                    is_multi: member.is_multi,
-                    item_ty: header_item_ty(&member.ty),
-                    item_is_string: header_item_is_string(&member.ty),
-                    item_is_primitive: header_item_is_primitive(&member.ty),
-                    optional: member.optional,
-                })
-                .collect()
-        };
-        out.push(RaisesContext {
-            variant: rust_ident(&exception.ident).to_case(convert_case::Case::Pascal),
-            ty: render_scoped_name(scoped),
-            status: exception.status,
-            headers: members(&exception.headers),
-            cookies: members(&exception.cookies),
-            has_body: !exception.body.is_empty(),
-        });
-    }
-    Ok(out)
 }
