@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.99.1](https://github.com/xidl/xidl/compare/v0.99.0...v0.99.1) (2026-10-10)
+
+
+### Bug Fixes
+
+* **npm:** publish npm packages best effort ([8cbe71e](https://github.com/xidl/xidl/commit/8cbe71e974ce7e94c0bf22b70840fd912c2f70e6))
+
 ## [0.99.0](https://github.com/xidl/xidl/compare/v0.98.0...v0.99.0) (2026-10-10)
 
 
