@@ -1,6 +1,7 @@
 mod interface;
 mod merged;
 mod render;
+mod scope;
 mod transport;
 
 use crate::error::IdlcResult;

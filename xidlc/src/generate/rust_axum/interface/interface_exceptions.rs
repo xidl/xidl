@@ -42,6 +42,7 @@ impl RaisesContext {
                         refer.ident
                     ))
                 })?;
+            let member_env = env.in_declaration(&exception.module_path);
             let members = |source: &Vec<xidl_parser::rest_hir::HttpExceptionMember>| {
                 source
                     .iter()
@@ -49,14 +50,14 @@ impl RaisesContext {
                         field: rust_ident(&member.field),
                         wire_name: member.wire_name.clone(),
                         ty: if member.is_multi {
-                            format!("Vec<{}>", env.header_item_ty(&member.ty))
+                            format!("Vec<{}>", member_env.header_item_ty(&member.ty))
                         } else if member.optional {
-                            format!("Option<{}>", env.axum_type(&member.ty))
+                            format!("Option<{}>", member_env.axum_type(&member.ty))
                         } else {
-                            env.axum_type(&member.ty)
+                            member_env.axum_type(&member.ty)
                         },
                         is_multi: member.is_multi,
-                        item_ty: env.header_item_ty(&member.ty),
+                        item_ty: member_env.header_item_ty(&member.ty),
                         item_is_string: header_item_is_string(&member.ty),
                         item_is_primitive: header_item_is_primitive(&member.ty),
                         optional: member.optional,

@@ -8,6 +8,8 @@ pub enum TransportTypeDef {
     Struct(hir::StructDcl),
     Enum(hir::EnumDcl),
     Typedef(hir::TypedefDcl),
+    /// Declaration rendered directly rather than projected into a wire type.
+    Public,
 }
 
 /// Named declarations available to the transport projector.

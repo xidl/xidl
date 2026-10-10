@@ -191,28 +191,34 @@ pub(crate) struct DeprecatedContext {
 pub(crate) struct RenderEnv<'a> {
     pub(crate) renderer: &'a RustAxumRenderer,
     pub(crate) module_path: &'a [String],
+    declaration_path: &'a [String],
     pub(crate) registry: &'a TypeRegistry,
 }
 
 impl<'a> RenderEnv<'a> {
+    pub(crate) fn scope(&self) -> super::super::scope::TypeScope<'a> {
+        super::super::scope::TypeScope {
+            registry: self.registry,
+            declaration: self.declaration_path,
+            output: self.module_path,
+        }
+    }
+
+    pub(crate) fn in_declaration(self, declaration_path: &'a [String]) -> Self {
+        Self {
+            declaration_path,
+            ..self
+        }
+    }
+
     pub(crate) fn relative_type_path(&self, target: &[String], ident: &str) -> String {
-        let common = self
-            .module_path
+        let canonical = target
             .iter()
-            .zip(target)
-            .take_while(|(a, b)| a == b)
-            .count();
-        std::iter::repeat_n("super".to_string(), self.module_path.len() - common)
-            .chain(
-                target[common..]
-                    .iter()
-                    .map(|part| crate::generate::rust::util::rust_ident(part)),
-            )
-            .chain(std::iter::once(crate::generate::rust::util::rust_ident(
-                ident,
-            )))
+            .map(String::as_str)
+            .chain(std::iter::once(ident))
             .collect::<Vec<_>>()
-            .join("::")
+            .join("::");
+        super::super::scope::TypeScope::relative_path(self.module_path, &canonical)
     }
 
     pub(crate) fn new(
@@ -223,6 +229,7 @@ impl<'a> RenderEnv<'a> {
         Self {
             renderer,
             module_path,
+            declaration_path: module_path,
             registry,
         }
     }

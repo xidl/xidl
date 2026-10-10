@@ -44,24 +44,7 @@ impl RenderEnv<'_> {
     }
 
     pub(crate) fn render_scoped_name(&self, value: &hir::ScopedName) -> String {
-        let mut iter = value.name.iter();
-        let mut parts = Vec::new();
-        if let Some(first) = iter.next() {
-            if !value.is_root && first == "crate" {
-                parts.push("crate".to_string());
-            } else {
-                parts.push(rust_ident(first));
-            }
-        }
-        for part in iter {
-            parts.push(rust_ident(part));
-        }
-        let path = parts.join("::");
-        if value.is_root {
-            format!("::{path}")
-        } else {
-            path
-        }
+        self.scope().render(value)
     }
 }
 
