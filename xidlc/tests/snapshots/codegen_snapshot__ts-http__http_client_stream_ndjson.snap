@@ -124,6 +124,7 @@ import type * as types from "./http_client_stream_ndjson";
 
 import type * as ifaceTypes from "./http_client_stream_ndjson.iface";
 import * as ifaceSchemas from "./http_client_stream_ndjson.iface.zod";
+import { z } from "zod";
 import {
     defineOperation,
     type Awaitable,

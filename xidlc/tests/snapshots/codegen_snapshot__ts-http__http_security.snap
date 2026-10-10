@@ -212,6 +212,7 @@ import type * as types from "./http_security";
 
 import type * as ifaceTypes from "./http_security.iface";
 import * as ifaceSchemas from "./http_security.iface.zod";
+import { z } from "zod";
 import {
     defineOperation,
     type Awaitable,

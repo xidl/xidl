@@ -211,6 +211,7 @@ fn render_struct(
                 )
             };
             fields.push(TransportFieldContext {
+                flatten: crate::generate::utils::has_annotation(&member.annotations, "flatten"),
                 name: name.clone(),
                 ty,
                 serde_rename: rename.clone(),

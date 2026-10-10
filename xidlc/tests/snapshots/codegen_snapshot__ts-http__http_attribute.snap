@@ -123,7 +123,7 @@ import {
             
         }
         return;
-            
+        
     }
     
     
@@ -176,6 +176,7 @@ import type * as types from "./http_attribute";
 
 import type * as ifaceTypes from "./http_attribute.iface";
 import * as ifaceSchemas from "./http_attribute.iface.zod";
+import { z } from "zod";
 import {
     defineOperation,
     type Awaitable,

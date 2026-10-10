@@ -4,7 +4,11 @@ HTTP 200
 Content-Type: application/json
 ETag: meta-v1
 [Asserts]
-jsonpath "$.id" == "meta"
+jsonpath "$.wire_id" == "meta"
+jsonpath "$.label" == "detail"
+jsonpath "$.id" not exists
+jsonpath "$.details" not exists
+jsonpath "$.note" not exists
 header "X-Tag" contains "001"
 header "X-Tag" contains "\"quoted\""
 cookie "cached" == "false"

@@ -3,7 +3,9 @@ use crate::generate::typescript::definition::TypeRefTarget;
 use crate::generate::typescript::definition::contexts::{
     FieldTypeContext, ParamDeclContext, TsType,
 };
-use crate::generate::typescript::definition::type_expr::ts_type_for_type_spec;
+use crate::generate::typescript::definition::type_expr::{
+    ts_type_for_type_spec, zod_schema_for_type_spec_with_prefix,
+};
 use xidl_parser::rest_hir::HttpOperation;
 
 impl TsRepresentationContext {
@@ -16,6 +18,11 @@ impl TsRepresentationContext {
                 kind: repr.case.clone(),
                 content_type: repr.content_type.clone(),
                 value_ty: ts_type_for_type_spec(&repr.ty, module_path, TypeRefTarget::Client),
+                schema: zod_schema_for_type_spec_with_prefix(
+                    &repr.ty,
+                    module_path,
+                    Some("ifaceSchemas.models"),
+                ),
                 is_byte: repr.is_byte,
             })
             .collect()

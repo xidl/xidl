@@ -307,7 +307,7 @@ import {
             
         }
         return;
-            
+        
     }
     
             async user_options(id: number, revision: number): Promise<void> {
@@ -332,7 +332,7 @@ import {
             
         }
         return;
-            
+        
     }
     
             async replace_user(user_id: number, name: string, age: number): Promise<string> {
@@ -620,6 +620,7 @@ import type * as types from "./http_defaults";
 
 import type * as ifaceTypes from "./http_defaults.iface";
 import * as ifaceSchemas from "./http_defaults.iface.zod";
+import { z } from "zod";
 import {
     defineOperation,
     type Awaitable,

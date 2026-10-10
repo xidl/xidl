@@ -82,6 +82,7 @@ pub(super) struct TsRepresentationContext {
     pub(super) kind: String,
     pub(super) content_type: String,
     pub(super) value_ty: TsType,
+    pub(super) schema: ZodSchema,
     pub(super) is_byte: bool,
 }
 

@@ -82,17 +82,18 @@ import {
             const contentType = (resp.headers.get("Content-Type") ?? "").split(";")[0].trim();
             
                 if (contentType === "application/json") {
-                    const value = await decodeResponseBody(resp, "application/json", this.codecs);
-                    return { kind: "Json", value, ...buildResponsePayload(undefined, resp, "none", [], [], []) } as { kind: "Json", value: types.FileMeta } | { kind: "OctetStream", value: Uint8Array };
-                }
-            
+                    const schema = ifaceSchemas.models.FileMetaSchema;
+                const value = schema.parse(await decodeResponseBody(resp, "application/json", this.codecs, schema));
+                return { kind: "Json", value, ...buildResponsePayload(undefined, resp, "none", [], [], []) } as { kind: "Json", value: types.FileMeta } | { kind: "OctetStream", value: Uint8Array };
+            }
+        
                 if (contentType === "application/octet-stream") {
                     const value = new Uint8Array(await resp.arrayBuffer());
-                    return { kind: "OctetStream", value, ...buildResponsePayload(undefined, resp, "none", [], [], []) } as { kind: "Json", value: types.FileMeta } | { kind: "OctetStream", value: Uint8Array };
-                }
-            
-            throw await parseXidlError(resp);
-            
+                return { kind: "OctetStream", value, ...buildResponsePayload(undefined, resp, "none", [], [], []) } as { kind: "Json", value: types.FileMeta } | { kind: "OctetStream", value: Uint8Array };
+            }
+        
+        throw await parseXidlError(resp);
+        
     }
     
             async get_file(path: string): Promise<{ kind: "Json", value: types.FileMeta, etag: string } | { kind: "OctetStream", value: Uint8Array, etag: string }> {
@@ -119,17 +120,18 @@ import {
             const contentType = (resp.headers.get("Content-Type") ?? "").split(";")[0].trim();
             
                 if (contentType === "application/json") {
-                    const value = await decodeResponseBody(resp, "application/json", this.codecs);
-                    return { kind: "Json", value, ...buildResponsePayload(undefined, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }], []) } as { kind: "Json", value: types.FileMeta, etag: string } | { kind: "OctetStream", value: Uint8Array, etag: string };
-                }
-            
+                    const schema = ifaceSchemas.models.FileMetaSchema;
+                const value = schema.parse(await decodeResponseBody(resp, "application/json", this.codecs, schema));
+                return { kind: "Json", value, ...buildResponsePayload(undefined, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }], []) } as { kind: "Json", value: types.FileMeta, etag: string } | { kind: "OctetStream", value: Uint8Array, etag: string };
+            }
+        
                 if (contentType === "application/octet-stream") {
                     const value = new Uint8Array(await resp.arrayBuffer());
-                    return { kind: "OctetStream", value, ...buildResponsePayload(undefined, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }], []) } as { kind: "Json", value: types.FileMeta, etag: string } | { kind: "OctetStream", value: Uint8Array, etag: string };
-                }
-            
-            throw await parseXidlError(resp);
-            
+                return { kind: "OctetStream", value, ...buildResponsePayload(undefined, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }], []) } as { kind: "Json", value: types.FileMeta, etag: string } | { kind: "OctetStream", value: Uint8Array, etag: string };
+            }
+        
+        throw await parseXidlError(resp);
+        
     }
     
     
@@ -299,6 +301,7 @@ import * as $xidlErrors from "./http_union.errors";
 
 import type * as ifaceTypes from "./http_union.iface";
 import * as ifaceSchemas from "./http_union.iface.zod";
+import { z } from "zod";
 import {
     defineOperation,
     writeResponseBindings,
@@ -342,7 +345,7 @@ export const FilesOperations = {
             bodyFields: [{ wireName: "return", key: "return" }],
             headers: [],
             cookies: [],
-            representations: [{ kind: "Json", contentType: "application/json" }, { kind: "OctetStream", contentType: "application/octet-stream" }],
+            representations: [{ kind: "Json", contentType: "application/json", schema: ifaceSchemas.models.FileMetaSchema }, { kind: "OctetStream", contentType: "application/octet-stream" }],
             stream: false,
             
         },
@@ -396,7 +399,7 @@ export const FilesOperations = {
             bodyFields: [{ wireName: "return", key: "return" }],
             headers: [{ wireName: "ETag", key: "etag", multi: false }],
             cookies: [],
-            representations: [{ kind: "Json", contentType: "application/json" }, { kind: "OctetStream", contentType: "application/octet-stream" }],
+            representations: [{ kind: "Json", contentType: "application/json", schema: ifaceSchemas.models.FileMetaSchema }, { kind: "OctetStream", contentType: "application/octet-stream" }],
             stream: false,
             
         },

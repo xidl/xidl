@@ -10,6 +10,21 @@ import {
   xjson,
 } from '../src/index.js';
 
+test('schema metadata travels across separate codec module instances', async () => {
+  const other = await import(
+    new URL('../src/index.ts?second-copy', import.meta.url).href
+  );
+  assert.notStrictEqual(other.xjson, xjson);
+  const schema = z.object({
+    details: xjson(z.object({ label: z.string() }), { flatten: true }),
+    id: xjson(z.string(), { name: 'wire_id' }),
+  });
+  const value = { details: { label: 'detail' }, id: 'item-7' };
+  const wire = { label: 'detail', wire_id: 'item-7' };
+  assert.deepStrictEqual(other.serialize(value, schema), wire);
+  assert.deepStrictEqual(other.deserialize(wire, schema), value);
+});
+
 test('rename and ignore functionality', () => {
   const schema = z.object({
     age: xjson(z.number(), { name: 'user_age' }),

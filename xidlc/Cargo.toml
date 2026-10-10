@@ -56,7 +56,7 @@ xidl-parser.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 miette = { version = "7.6.0", optional = true }
-minijinja = { workspace = true, features = ["loader"] }
+minijinja = { workspace = true, features = ["loader", "json"] }
 convert_case.workspace = true
 clap = { workspace = true, features = ["derive"], optional = true }
 include_dir = "0.7"

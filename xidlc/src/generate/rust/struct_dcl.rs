@@ -5,7 +5,7 @@ use crate::generate::rust::util::{
     serde_rename_from_annotations, type_with_decl,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
-use crate::generate::utils::doc_lines_from_annotations;
+use crate::generate::utils::{doc_lines_from_annotations, has_annotation};
 use serde_json::json;
 use xidl_parser::hir;
 
@@ -35,6 +35,7 @@ pub(crate) fn render_struct_with_config(
             let optional = member.is_optional();
             let rename = serde_rename_from_annotations(&member.annotations);
             let skip = is_skipped_from_annotations(&member.annotations);
+            let flatten = has_annotation(&member.annotations, "flatten");
             let doc = doc_lines_from_annotations(&member.annotations);
             let rust_attrs = rust_passthrough_attrs_from_annotations(&member.annotations);
             member.ident.iter().map(move |decl| {
@@ -51,6 +52,7 @@ pub(crate) fn render_struct_with_config(
                     "name": name,
                     "serde_rename": rename,
                     "serde_skip": skip,
+                    "serde_flatten": flatten,
                     "field_id": field_id.clone(),
                     "optional": optional,
                     "doc": doc,

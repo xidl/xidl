@@ -77,7 +77,7 @@ import {
             
         }
         return;
-            
+        
     }
     
             async get_user(uid: number, locale: string): Promise<string> {
@@ -283,6 +283,7 @@ import type * as types from "./http_edge_cases";
 
 import type * as ifaceTypes from "./http_edge_cases.iface";
 import * as ifaceSchemas from "./http_edge_cases.iface.zod";
+import { z } from "zod";
 import {
     defineOperation,
     type Awaitable,
