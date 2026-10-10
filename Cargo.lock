@@ -3010,7 +3010,8 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter-idl"
-version = "3.18.0"
+version = "3.19.0"
+source = "git+https://github.com/cathaysia/tree-sitter-idl?rev=bba2a7b8#bba2a7b82ee5a6619463da9871adf4bdc7ff08c6"
 dependencies = [
  "cc",
  "tree-sitter",
