@@ -1,0 +1,36 @@
+{
+  "bin": {
+    "xidlc": "bin/xidlc.js"
+  },
+  "description": "XIDL compiler CLI: generates Rust, TypeScript, Go, OpenAPI and JSON-RPC code from .idl interface definitions.",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "bin",
+    "src"
+  ],
+  "keywords": [
+    "codegen",
+    "dds",
+    "idl",
+    "jsonrpc",
+    "omg",
+    "xidl"
+  ],
+  "license": "Apache-2.0",
+  "name": "xidlc",
+  "optionalDependencies": {
+    "xidlc-darwin-arm64": "0.98.0",
+    "xidlc-darwin-x64": "0.98.0",
+    "xidlc-linux-arm64": "0.98.0",
+    "xidlc-linux-x64": "0.98.0",
+    "xidlc-win32-arm64": "0.98.0",
+    "xidlc-win32-x64": "0.98.0"
+  },
+  "repository": {
+    "url": "https://github.com/xidl/xidl"
+  },
+  "type": "module",
+  "version": "0.98.0"
+}

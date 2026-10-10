@@ -1,0 +1,19 @@
+{
+  "cpu": [
+    "arm64"
+  ],
+  "description": "Prebuilt xidlc binary for Linux arm64 (musl, statically linked).",
+  "files": [
+    "bin"
+  ],
+  "license": "Apache-2.0",
+  "name": "xidlc-linux-arm64",
+  "os": [
+    "linux"
+  ],
+  "preferUnplugged": true,
+  "repository": {
+    "url": "https://github.com/xidl/xidl"
+  },
+  "version": "0.98.0"
+}

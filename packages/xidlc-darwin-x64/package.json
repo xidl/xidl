@@ -1,0 +1,19 @@
+{
+  "cpu": [
+    "x64"
+  ],
+  "description": "Prebuilt xidlc binary for macOS x64 (Intel).",
+  "files": [
+    "bin"
+  ],
+  "license": "Apache-2.0",
+  "name": "xidlc-darwin-x64",
+  "os": [
+    "darwin"
+  ],
+  "preferUnplugged": true,
+  "repository": {
+    "url": "https://github.com/xidl/xidl"
+  },
+  "version": "0.98.0"
+}

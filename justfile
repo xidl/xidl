@@ -7,7 +7,7 @@ xidlc_snapshot_hash := env_var_or_default("XIDLC_SNAPSHOT_HASH", "snapshot")
 bdd_features := env_var_or_default("BDD_FEATURES", "bdd/features")
 
 # Run all tests
-test: test-rust test-go test-typescript test-bdd
+test: test-rust test-go test-typescript test-npm test-bdd
 
 # Initialize typescript codec
 init:
@@ -29,6 +29,10 @@ test-typescript: init
     pnpm --dir typescript/xidl-typescript-codec test
     pnpm --dir typescript/xidl-typescript-client test
     pnpm --dir typescript/xidl-typescript-server test
+
+# Test npm wrapper and platform packages
+test-npm:
+    node --test packages/tests/*.test.mjs
 
 # Test BDD
 test-bdd: init
@@ -80,6 +84,14 @@ fmt-jinja:
 # Build xtypes
 build-xtypes:
     cargo r -p xidlc -F cli -F fmt -- gen --out-dir ./xidl-typeobject/src/ rust ./xidl-typeobject/idl/dds_xtypes_typeobject.idl
+
+# Download release binaries into the npm platform packages
+npm-fetch-binaries:
+    node packages/scripts/fetch-binaries.mjs
+
+# Publish the npm packages, platform packages first
+npm-publish:
+    node packages/scripts/publish.mjs
 
 # Start docs dev server
 docs-dev:

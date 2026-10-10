@@ -31,3 +31,5 @@
     </tbody>
 </table>
 </div>
+
+Install the prebuilt binary from npm with `npm install -g xidlc`.
