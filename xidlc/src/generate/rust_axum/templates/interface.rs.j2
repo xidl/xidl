@@ -75,8 +75,10 @@
                         match self {
                             Self::Framework(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
                             {% for ex in method.raises %}
-                                Self::{{ ex.variant }}(err) => {
-                                    {% include 'interface/exception_headers.rs.j2' %}
+                                Self::{{ ex.variant }}({% if ex.has_body or ex.headers | length > 0 or ex.cookies | length > 0 %}err{% else %}_{% endif %}) => {
+                                    {% if ex.headers | length > 0 or ex.cookies | length > 0 %}
+                                        {% include 'interface/exception_headers.rs.j2' %}
+                                    {% endif %}
                                     {% if ex.has_body %}
                                         let body = match xidl_rust_axum::serde_json::to_vec(&err) {
                                             Ok(body) => body,
@@ -85,18 +87,21 @@
                                                 xidl_rust_axum::Error::new(500, format!("{err:?}")));
                                             }
                                         };
-                                        let mut response = ::xidl_rust_axum::axum::http::Response::builder()
-                                        .status(::xidl_rust_axum::axum::http::StatusCode::from_u16({{ ex.status }}u16).unwrap())
-                                        .header(::xidl_rust_axum::axum::http::header::CONTENT_TYPE, "application/json")
-                                        .body(::xidl_rust_axum::axum::body::Body::from(body))
-                                        .expect("error response should build");
+                                        let body = ::xidl_rust_axum::axum::body::Body::from(body);
                                     {% else %}
-                                        let mut response = ::xidl_rust_axum::axum::http::Response::builder()
-                                        .status(::xidl_rust_axum::axum::http::StatusCode::from_u16({{ ex.status }}u16).unwrap())
-                                        .body(::xidl_rust_axum::axum::body::Body::empty())
-                                        .expect("error response should build");
+                                        let body = ::xidl_rust_axum::axum::body::Body::empty();
                                     {% endif %}
-                                    response.headers_mut().extend(headers);
+                                    let mut response = ::xidl_rust_axum::axum::response::Response::new(body);
+                                    *response.status_mut() = ::xidl_rust_axum::axum::http::StatusCode::from_u16({{ ex.status }}u16).unwrap();
+                                    {% if ex.has_body %}
+                                        response.headers_mut().insert(
+                                        ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                                        ::xidl_rust_axum::axum::http::HeaderValue::from_static("application/json"),
+                                        );
+                                    {% endif %}
+                                    {% if ex.headers | length > 0 or ex.cookies | length > 0 %}
+                                        response.headers_mut().extend(headers);
+                                    {% endif %}
                                     response
                                 }
                             {% endfor %}

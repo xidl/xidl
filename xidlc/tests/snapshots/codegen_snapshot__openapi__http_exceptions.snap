@@ -8,6 +8,9 @@ openapi_http_exceptions.json
 {
   "components": {
     "schemas": {
+      "EmptyGone": {
+        "type": "object"
+      },
       "Error": {
         "properties": {
           "code": {
@@ -197,6 +200,9 @@ openapi_http_exceptions.json
               }
             },
             "description": "Error: NotFound"
+          },
+          "410": {
+            "description": "Error: EmptyGone"
           },
           "412": {
             "content": {

@@ -72,3 +72,9 @@ GET {{base_url}}/names/framework
 HTTP 502
 [Asserts]
 jsonpath "$.reason" == "declared framework"
+
+GET {{base_url}}/files/empty
+HTTP 410
+[Asserts]
+bytes count == 0
+header "Content-Type" not exists

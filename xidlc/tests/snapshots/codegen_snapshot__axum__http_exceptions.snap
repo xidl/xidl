@@ -49,6 +49,9 @@ pub struct NotFound {
 }
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
+pub struct EmptyGone {}
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
 pub struct FileMeta {
     pub id: String,
     pub etag: String,
@@ -76,6 +79,7 @@ pub enum FilesGetFileError {
     NotModified(NotModified),
     PreconditionFailed(PreconditionFailed),
     NotFound(NotFound),
+    EmptyGone(EmptyGone),
     Framework(xidl_rust_axum::Error),
 }
 impl ::std::fmt::Display for FilesGetFileError {
@@ -84,6 +88,7 @@ impl ::std::fmt::Display for FilesGetFileError {
             Self::NotModified(_) => f.write_str("HTTP 304: NotModified"),
             Self::PreconditionFailed(_) => f.write_str("HTTP 412: PreconditionFailed"),
             Self::NotFound(_) => f.write_str("HTTP 404: NotFound"),
+            Self::EmptyGone(_) => f.write_str("HTTP 410: EmptyGone"),
             Self::Framework(err) => ::std::fmt::Display::fmt(err, f),
         }
     }
@@ -134,13 +139,12 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for FilesGetFileError {
                         );
                     }
                 };
-                let mut response = ::xidl_rust_axum::axum::http::Response::builder()
-                    .status(
-                        ::xidl_rust_axum::axum::http::StatusCode::from_u16(304u16)
-                            .unwrap(),
+                let body = ::xidl_rust_axum::axum::body::Body::empty();
+                let mut response = ::xidl_rust_axum::axum::response::Response::new(body);
+                *response.status_mut() = ::xidl_rust_axum::axum::http::StatusCode::from_u16(
+                        304u16,
                     )
-                    .body(::xidl_rust_axum::axum::body::Body::empty())
-                    .expect("error response should build");
+                    .unwrap();
                 response.headers_mut().extend(headers);
                 response
             }
@@ -245,35 +249,24 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for FilesGetFileError {
                         );
                     }
                 };
-                let mut response = ::xidl_rust_axum::axum::http::Response::builder()
-                    .status(
-                        ::xidl_rust_axum::axum::http::StatusCode::from_u16(412u16)
-                            .unwrap(),
+                let body = ::xidl_rust_axum::axum::body::Body::from(body);
+                let mut response = ::xidl_rust_axum::axum::response::Response::new(body);
+                *response.status_mut() = ::xidl_rust_axum::axum::http::StatusCode::from_u16(
+                        412u16,
                     )
-                    .header(
+                    .unwrap();
+                response
+                    .headers_mut()
+                    .insert(
                         ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                        "application/json",
-                    )
-                    .body(::xidl_rust_axum::axum::body::Body::from(body))
-                    .expect("error response should build");
+                        ::xidl_rust_axum::axum::http::HeaderValue::from_static(
+                            "application/json",
+                        ),
+                    );
                 response.headers_mut().extend(headers);
                 response
             }
             Self::NotFound(err) => {
-                let headers = (|| -> xidl_rust_axum::Result<
-                    ::xidl_rust_axum::axum::http::HeaderMap,
-                > {
-                    let headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
-                    Ok(headers)
-                })();
-                let headers = match headers {
-                    Ok(headers) => headers,
-                    Err(err) => {
-                        return ::xidl_rust_axum::axum::response::IntoResponse::into_response(
-                            err,
-                        );
-                    }
-                };
                 let body = match xidl_rust_axum::serde_json::to_vec(&err) {
                     Ok(body) => body,
                     Err(err) => {
@@ -282,18 +275,29 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for FilesGetFileError {
                         );
                     }
                 };
-                let mut response = ::xidl_rust_axum::axum::http::Response::builder()
-                    .status(
-                        ::xidl_rust_axum::axum::http::StatusCode::from_u16(404u16)
-                            .unwrap(),
+                let body = ::xidl_rust_axum::axum::body::Body::from(body);
+                let mut response = ::xidl_rust_axum::axum::response::Response::new(body);
+                *response.status_mut() = ::xidl_rust_axum::axum::http::StatusCode::from_u16(
+                        404u16,
                     )
-                    .header(
+                    .unwrap();
+                response
+                    .headers_mut()
+                    .insert(
                         ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                        "application/json",
+                        ::xidl_rust_axum::axum::http::HeaderValue::from_static(
+                            "application/json",
+                        ),
+                    );
+                response
+            }
+            Self::EmptyGone(_) => {
+                let body = ::xidl_rust_axum::axum::body::Body::empty();
+                let mut response = ::xidl_rust_axum::axum::response::Response::new(body);
+                *response.status_mut() = ::xidl_rust_axum::axum::http::StatusCode::from_u16(
+                        410u16,
                     )
-                    .body(::xidl_rust_axum::axum::body::Body::from(body))
-                    .expect("error response should build");
-                response.headers_mut().extend(headers);
+                    .unwrap();
                 response
             }
         }
@@ -626,6 +630,11 @@ impl FilesClient {
                     ))?;
                 return Err(FilesGetFileError::NotFound(value));
             }
+            if status.as_u16() == 410 {
+                let headers = resp.headers().clone();
+                let mut value: EmptyGone = ::core::default::Default::default();
+                return Err(FilesGetFileError::EmptyGone(value));
+            }
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(
                 FilesGetFileError::Framework(
@@ -684,20 +693,6 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for ScopedReadError {
                 ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
             }
             Self::Http409Failure(err) => {
-                let headers = (|| -> xidl_rust_axum::Result<
-                    ::xidl_rust_axum::axum::http::HeaderMap,
-                > {
-                    let headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
-                    Ok(headers)
-                })();
-                let headers = match headers {
-                    Ok(headers) => headers,
-                    Err(err) => {
-                        return ::xidl_rust_axum::axum::response::IntoResponse::into_response(
-                            err,
-                        );
-                    }
-                };
                 let body = match xidl_rust_axum::serde_json::to_vec(&err) {
                     Ok(body) => body,
                     Err(err) => {
@@ -706,35 +701,23 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for ScopedReadError {
                         );
                     }
                 };
-                let mut response = ::xidl_rust_axum::axum::http::Response::builder()
-                    .status(
-                        ::xidl_rust_axum::axum::http::StatusCode::from_u16(409u16)
-                            .unwrap(),
+                let body = ::xidl_rust_axum::axum::body::Body::from(body);
+                let mut response = ::xidl_rust_axum::axum::response::Response::new(body);
+                *response.status_mut() = ::xidl_rust_axum::axum::http::StatusCode::from_u16(
+                        409u16,
                     )
-                    .header(
+                    .unwrap();
+                response
+                    .headers_mut()
+                    .insert(
                         ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                        "application/json",
-                    )
-                    .body(::xidl_rust_axum::axum::body::Body::from(body))
-                    .expect("error response should build");
-                response.headers_mut().extend(headers);
+                        ::xidl_rust_axum::axum::http::HeaderValue::from_static(
+                            "application/json",
+                        ),
+                    );
                 response
             }
             Self::Http422Failure(err) => {
-                let headers = (|| -> xidl_rust_axum::Result<
-                    ::xidl_rust_axum::axum::http::HeaderMap,
-                > {
-                    let headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
-                    Ok(headers)
-                })();
-                let headers = match headers {
-                    Ok(headers) => headers,
-                    Err(err) => {
-                        return ::xidl_rust_axum::axum::response::IntoResponse::into_response(
-                            err,
-                        );
-                    }
-                };
                 let body = match xidl_rust_axum::serde_json::to_vec(&err) {
                     Ok(body) => body,
                     Err(err) => {
@@ -743,18 +726,20 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for ScopedReadError {
                         );
                     }
                 };
-                let mut response = ::xidl_rust_axum::axum::http::Response::builder()
-                    .status(
-                        ::xidl_rust_axum::axum::http::StatusCode::from_u16(422u16)
-                            .unwrap(),
+                let body = ::xidl_rust_axum::axum::body::Body::from(body);
+                let mut response = ::xidl_rust_axum::axum::response::Response::new(body);
+                *response.status_mut() = ::xidl_rust_axum::axum::http::StatusCode::from_u16(
+                        422u16,
                     )
-                    .header(
+                    .unwrap();
+                response
+                    .headers_mut()
+                    .insert(
                         ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                        "application/json",
-                    )
-                    .body(::xidl_rust_axum::axum::body::Body::from(body))
-                    .expect("error response should build");
-                response.headers_mut().extend(headers);
+                        ::xidl_rust_axum::axum::http::HeaderValue::from_static(
+                            "application/json",
+                        ),
+                    );
                 response
             }
         }
@@ -983,20 +968,6 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for NamingReadError {
                 ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
             }
             Self::Http409FilesClient(err) => {
-                let headers = (|| -> xidl_rust_axum::Result<
-                    ::xidl_rust_axum::axum::http::HeaderMap,
-                > {
-                    let headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
-                    Ok(headers)
-                })();
-                let headers = match headers {
-                    Ok(headers) => headers,
-                    Err(err) => {
-                        return ::xidl_rust_axum::axum::response::IntoResponse::into_response(
-                            err,
-                        );
-                    }
-                };
                 let body = match xidl_rust_axum::serde_json::to_vec(&err) {
                     Ok(body) => body,
                     Err(err) => {
@@ -1005,35 +976,23 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for NamingReadError {
                         );
                     }
                 };
-                let mut response = ::xidl_rust_axum::axum::http::Response::builder()
-                    .status(
-                        ::xidl_rust_axum::axum::http::StatusCode::from_u16(409u16)
-                            .unwrap(),
+                let body = ::xidl_rust_axum::axum::body::Body::from(body);
+                let mut response = ::xidl_rust_axum::axum::response::Response::new(body);
+                *response.status_mut() = ::xidl_rust_axum::axum::http::StatusCode::from_u16(
+                        409u16,
                     )
-                    .header(
+                    .unwrap();
+                response
+                    .headers_mut()
+                    .insert(
                         ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                        "application/json",
-                    )
-                    .body(::xidl_rust_axum::axum::body::Body::from(body))
-                    .expect("error response should build");
-                response.headers_mut().extend(headers);
+                        ::xidl_rust_axum::axum::http::HeaderValue::from_static(
+                            "application/json",
+                        ),
+                    );
                 response
             }
             Self::Http502Framework(err) => {
-                let headers = (|| -> xidl_rust_axum::Result<
-                    ::xidl_rust_axum::axum::http::HeaderMap,
-                > {
-                    let headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
-                    Ok(headers)
-                })();
-                let headers = match headers {
-                    Ok(headers) => headers,
-                    Err(err) => {
-                        return ::xidl_rust_axum::axum::response::IntoResponse::into_response(
-                            err,
-                        );
-                    }
-                };
                 let body = match xidl_rust_axum::serde_json::to_vec(&err) {
                     Ok(body) => body,
                     Err(err) => {
@@ -1042,18 +1001,20 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for NamingReadError {
                         );
                     }
                 };
-                let mut response = ::xidl_rust_axum::axum::http::Response::builder()
-                    .status(
-                        ::xidl_rust_axum::axum::http::StatusCode::from_u16(502u16)
-                            .unwrap(),
+                let body = ::xidl_rust_axum::axum::body::Body::from(body);
+                let mut response = ::xidl_rust_axum::axum::response::Response::new(body);
+                *response.status_mut() = ::xidl_rust_axum::axum::http::StatusCode::from_u16(
+                        502u16,
                     )
-                    .header(
+                    .unwrap();
+                response
+                    .headers_mut()
+                    .insert(
                         ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                        "application/json",
-                    )
-                    .body(::xidl_rust_axum::axum::body::Body::from(body))
-                    .expect("error response should build");
-                response.headers_mut().extend(headers);
+                        ::xidl_rust_axum::axum::http::HeaderValue::from_static(
+                            "application/json",
+                        ),
+                    );
                 response
             }
         }

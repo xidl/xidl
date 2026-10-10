@@ -4,6 +4,7 @@ import { Readable } from 'node:stream';
 import { createRouter, XidlServerError } from 'xidl-typescript-server';
 import { FilesClient, NamingClient } from './http_exceptions.client.js';
 import {
+  EmptyGone,
   FilesClient as FilesClientError,
   Framework,
   NotFound,
@@ -20,6 +21,8 @@ import {
 const service: Files = {
   get_file(id) {
     switch (id) {
+      case 'empty':
+        throw new EmptyGone({});
       case 'cached':
         throw new NotModified({ etag: '"v2"' });
       case 'stale':
@@ -107,6 +110,7 @@ server.listen(0, '127.0.0.1', async () => {
         },
       );
     }
+    await assert.rejects(client.get_file('empty'), EmptyGone);
     await assert.rejects(client.get_file('missing'), NotFound);
     await assert.rejects(client.get_file('framework'), { code: 500 });
     await assert.rejects(client.get_file('framework-typed'), {

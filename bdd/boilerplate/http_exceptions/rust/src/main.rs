@@ -1,3 +1,5 @@
+#![deny(warnings)]
+
 use async_trait::async_trait;
 
 pub mod gen {
@@ -11,6 +13,7 @@ struct FileService;
 impl Files for FileService {
     async fn get_file(&self, id: String) -> Result<FileMeta, FilesGetFileError> {
         match id.as_str() {
+            "empty" => Err(FilesGetFileError::EmptyGone(EmptyGone {})),
             "cached" => Err(FilesGetFileError::NotModified(NotModified {
                 etag: "\"v2\"".into(),
             })),
@@ -65,6 +68,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     });
     let client = FilesClient::new(format!("http://{address}"));
     assert_eq!(client.get_file("ok".into()).await?.id, "ok");
+    assert!(matches!(client.get_file("empty".into()).await, Err(FilesGetFileError::EmptyGone(_))));
     let FilesGetFileError::NotModified(cached) =
         client.get_file("cached".into()).await.unwrap_err()
     else {
