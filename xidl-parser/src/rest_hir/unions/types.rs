@@ -23,77 +23,71 @@ impl<'a> TypeDeclarations<'a> {
         types
     }
 
+    fn declare(&mut self, ident: &'a str, kind: DeclarationKind<'a>, scope: &[String]) {
+        self.0.push(Declaration {
+            module_path: scope.to_vec(),
+            ident,
+            kind,
+        });
+    }
+
     fn collect_scope(&mut self, definitions: &'a [hir::Definition], scope: &[String]) {
         for definition in definitions {
             match definition {
                 hir::Definition::ModuleDcl(module) => {
-                    self.0.push(Declaration {
-                        module_path: scope.to_vec(),
-                        ident: &module.ident,
-                        kind: DeclarationKind::Other,
-                    });
+                    self.declare(&module.ident, DeclarationKind::Other, scope);
                     let mut nested = scope.to_vec();
                     nested.push(module.ident.clone());
                     self.collect_scope(&module.definition, &nested);
                 }
-                hir::Definition::TypeDcl(hir::TypeDcl::ConstrTypeDcl(ty))
-                | hir::Definition::ConstrTypeDcl(ty) => self.collect_constructed(ty, scope),
-                hir::Definition::TypeDcl(hir::TypeDcl::TypedefDcl(ty)) => {
-                    if let hir::TypedefType::ConstrTypeDcl(ty) = &ty.ty {
-                        self.collect_constructed(ty, scope);
-                    }
-                    for decl in &ty.decl {
-                        let ident = match decl {
-                            hir::Declarator::SimpleDeclarator(s) => &s.0,
-                            hir::Declarator::ArrayDeclarator(a) => &a.ident,
-                        };
-                        self.0.push(Declaration {
-                            module_path: scope.to_vec(),
-                            ident,
-                            kind: DeclarationKind::Type,
-                        });
-                    }
+                hir::Definition::TypeDcl(ty) => self.collect_type(ty, scope),
+                hir::Definition::ConstrTypeDcl(ty) => self.collect_constructed(ty, scope),
+                hir::Definition::ConstDcl(value) => {
+                    self.declare(&value.ident, DeclarationKind::Other, scope)
                 }
-                hir::Definition::TypeDcl(hir::TypeDcl::NativeDcl(native)) => {
-                    self.0.push(Declaration {
-                        module_path: scope.to_vec(),
-                        ident: &native.decl.0,
-                        kind: DeclarationKind::Type,
-                    });
+                hir::Definition::ExceptDcl(value) => {
+                    self.declare(&value.ident, DeclarationKind::Type, scope)
                 }
-                hir::Definition::ConstDcl(value) => self.0.push(Declaration {
-                    module_path: scope.to_vec(),
-                    ident: &value.ident,
-                    kind: DeclarationKind::Other,
-                }),
-                hir::Definition::ExceptDcl(value) => self.0.push(Declaration {
-                    module_path: scope.to_vec(),
-                    ident: &value.ident,
-                    kind: DeclarationKind::Type,
-                }),
-                hir::Definition::InterfaceDcl(value) => self.0.push(Declaration {
-                    module_path: scope.to_vec(),
-                    ident: match &value.decl {
+                hir::Definition::InterfaceDcl(value) => {
+                    let ident = match &value.decl {
                         hir::InterfaceDclInner::InterfaceDef(def) => &def.header.ident,
                         hir::InterfaceDclInner::InterfaceForwardDcl(def) => &def.ident,
-                    },
-                    kind: DeclarationKind::Other,
-                }),
-                _ => {}
+                    };
+                    self.declare(ident, DeclarationKind::Other, scope);
+                }
+                hir::Definition::Pragma(_) => {}
+            }
+        }
+    }
+
+    fn collect_type(&mut self, ty: &'a hir::TypeDcl, scope: &[String]) {
+        match ty {
+            hir::TypeDcl::ConstrTypeDcl(ty) => self.collect_constructed(ty, scope),
+            hir::TypeDcl::TypedefDcl(ty) => {
+                if let hir::TypedefType::ConstrTypeDcl(ty) = &ty.ty {
+                    self.collect_constructed(ty, scope);
+                }
+                for decl in &ty.decl {
+                    let ident = match decl {
+                        hir::Declarator::SimpleDeclarator(name) => &name.0,
+                        hir::Declarator::ArrayDeclarator(array) => &array.ident,
+                    };
+                    self.declare(ident, DeclarationKind::Type, scope);
+                }
+            }
+            hir::TypeDcl::NativeDcl(native) => {
+                self.declare(&native.decl.0, DeclarationKind::Type, scope)
             }
         }
     }
 
     fn collect_constructed(&mut self, ty: &'a hir::ConstrTypeDcl, scope: &[String]) {
-        self.0.push(Declaration {
-            module_path: scope.to_vec(),
-            ident: ty.ident(),
-            kind: if let hir::ConstrTypeDcl::EnumDcl(v) = ty {
-                DeclarationKind::Enum(v)
-            } else {
-                DeclarationKind::Type
-            },
-        });
+        let kind = if let hir::ConstrTypeDcl::EnumDcl(value) = ty {
+            DeclarationKind::Enum(value)
+        } else {
+            DeclarationKind::Type
+        };
+        self.declare(ty.ident(), kind, scope);
     }
 
     fn resolve(&self, name: &hir::ScopedName, scope: &[String]) -> Option<&Declaration<'a>> {
