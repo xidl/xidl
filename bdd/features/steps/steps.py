@@ -4,7 +4,6 @@ import shutil
 import tempfile
 import time
 import requests
-import signal
 import sys
 import threading
 import re
@@ -12,6 +11,7 @@ import socket
 import json
 import random
 from behave import given, when, then
+from server_process import start_server_process
 
 _test_port_base = int(os.environ.get("XIDL_BDD_PORT_BASE", "12000"))
 _test_port_span = int(os.environ.get("XIDL_BDD_PORT_SPAN", "1000"))
@@ -389,15 +389,6 @@ def wait_for_port(port, timeout=60):
         except (socket.error, ConnectionRefusedError):
             time.sleep(0.5)
     return False
-
-
-def start_server_process(args, **kwargs):
-    if (
-        kwargs.get("stdout") == subprocess.PIPE
-        and kwargs.get("stderr") == subprocess.PIPE
-    ):
-        kwargs["stderr"] = subprocess.STDOUT
-    return subprocess.Popen(args, start_new_session=True, **kwargs)
 
 
 def start_context_server(context, args, **kwargs):
