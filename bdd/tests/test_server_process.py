@@ -59,3 +59,12 @@ while True:
         process.wait(timeout=5)
         stop_server_process(process)
         self.assertEqual(process.returncode, 0)
+
+    def test_unreaped_process_group_is_waited_out(self):
+        process = start_server_process([sys.executable, "-c", "pass"])
+        self.addCleanup(stop_server_process, process)
+        os.waitid(os.P_PID, process.pid, os.WEXITED | os.WNOWAIT)
+        stop_server_process(process)
+        self.assertEqual(process.returncode, 0)
+        with self.assertRaises(ProcessLookupError):
+            os.killpg(process.pid, 0)
