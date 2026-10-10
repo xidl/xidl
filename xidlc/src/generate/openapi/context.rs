@@ -49,11 +49,11 @@ impl OpenApiContext {
     pub(crate) fn collect(
         mut self,
         spec: &hir::Specification,
-        module_path: &[String],
+        scope: SchemaScope<'_>,
         rest_hir: &RestHirDocument,
     ) -> IdlcResult<Self> {
         for def in &spec.0 {
-            self.collect_def(def, module_path, rest_hir)?;
+            self.collect_def(def, scope, rest_hir)?;
         }
         Ok(self)
     }
@@ -61,22 +61,22 @@ impl OpenApiContext {
     fn collect_def(
         &mut self,
         def: &hir::Definition,
-        module_path: &[String],
+        scope: SchemaScope<'_>,
         rest_hir: &RestHirDocument,
     ) -> IdlcResult<()> {
         match def {
             hir::Definition::ModuleDcl(module) => {
-                let mut next_path = module_path.to_vec();
+                let mut next_path = scope.module_path.to_vec();
                 next_path.push(module.ident.clone());
                 for def in &module.definition {
-                    self.collect_def(def, &next_path, rest_hir)?;
+                    self.collect_def(def, scope.in_module(&next_path), rest_hir)?;
                 }
             }
-            hir::Definition::TypeDcl(type_dcl) => self.collect_type_dcl(type_dcl, module_path),
-            hir::Definition::ConstrTypeDcl(constr) => self.collect_constr_type(constr, module_path),
-            hir::Definition::ExceptDcl(except) => self.collect_exception(except, module_path),
+            hir::Definition::TypeDcl(type_dcl) => self.collect_type_dcl(type_dcl, scope)?,
+            hir::Definition::ConstrTypeDcl(constr) => self.collect_constr_type(constr, scope)?,
+            hir::Definition::ExceptDcl(except) => self.collect_exception(except, scope)?,
             hir::Definition::InterfaceDcl(interface) => {
-                self.collect_interface(interface, module_path, rest_hir)?
+                self.collect_interface(interface, scope, rest_hir)?
             }
             hir::Definition::Pragma(_) => {}
             _ => {}
@@ -84,41 +84,47 @@ impl OpenApiContext {
         Ok(())
     }
 
-    fn collect_type_dcl(&mut self, type_dcl: &hir::TypeDcl, module_path: &[String]) {
+    fn collect_type_dcl(
+        &mut self,
+        type_dcl: &hir::TypeDcl,
+        scope: SchemaScope<'_>,
+    ) -> IdlcResult<()> {
         match type_dcl {
             hir::TypeDcl::TypedefDcl(typedef) => {
                 for decl in &typedef.decl {
-                    let name = scoped_name(module_path, &declarator_name(decl));
+                    let name = scoped_name(scope.module_path, &declarator_name(decl));
                     let schema = match &typedef.ty {
-                        hir::TypedefType::TypeSpec(ty) => {
-                            SchemaScope::new(module_path).schema_for_type(ty)
-                        }
+                        hir::TypedefType::TypeSpec(ty) => scope.schema_for_type(ty)?,
                         hir::TypedefType::ConstrTypeDcl(constr) => {
-                            self.collect_constr_type(constr, module_path);
-                            SchemaScope::new(module_path).schema_for_constr_type(constr)
+                            self.collect_constr_type(constr, scope)?;
+                            scope.schema_for_constr_type(constr)
                         }
                     };
                     self.schemas.insert(name, schema);
                 }
             }
-            hir::TypeDcl::ConstrTypeDcl(constr) => self.collect_constr_type(constr, module_path),
+            hir::TypeDcl::ConstrTypeDcl(constr) => self.collect_constr_type(constr, scope)?,
             hir::TypeDcl::NativeDcl(_) => {}
         }
+        Ok(())
     }
 
-    fn collect_constr_type(&mut self, constr: &hir::ConstrTypeDcl, module_path: &[String]) {
+    fn collect_constr_type(
+        &mut self,
+        constr: &hir::ConstrTypeDcl,
+        scope: SchemaScope<'_>,
+    ) -> IdlcResult<()> {
         match constr {
             hir::ConstrTypeDcl::StructDcl(def) => {
-                let name = scoped_name(module_path, &def.ident);
+                let name = scoped_name(scope.module_path, &def.ident);
                 let schema = apply_schema_description(
-                    SchemaScope::new(module_path)
-                        .schema_for_struct_with_annotations(&def.member, &def.annotations),
+                    scope.schema_for_struct_with_annotations(&def.member, &def.annotations)?,
                     doc_text(&def.annotations).as_deref(),
                 );
                 self.schemas.insert(name, schema);
             }
             hir::ConstrTypeDcl::EnumDcl(def) => {
-                let name = scoped_name(module_path, &def.ident);
+                let name = scoped_name(scope.module_path, &def.ident);
                 let values = def
                     .member
                     .iter()
@@ -140,15 +146,15 @@ impl OpenApiContext {
                 self.schemas.insert(name, schema);
             }
             hir::ConstrTypeDcl::UnionDef(def) => {
-                let name = scoped_name(module_path, &def.ident);
+                let name = scoped_name(scope.module_path, &def.ident);
                 let schema = apply_schema_description(
-                    SchemaScope::new(module_path).schema_for_union(def),
+                    scope.schema_for_union(def)?,
                     doc_text(&def.annotations).as_deref(),
                 );
                 self.schemas.insert(name, schema);
             }
             hir::ConstrTypeDcl::BitsetDcl(def) => {
-                let name = scoped_name(module_path, &def.ident);
+                let name = scoped_name(scope.module_path, &def.ident);
                 let schema = RefOr::T(Schema::from(
                     ObjectBuilder::new().schema_type(Type::Integer),
                 ));
@@ -157,7 +163,7 @@ impl OpenApiContext {
                 self.schemas.insert(name, schema);
             }
             hir::ConstrTypeDcl::BitmaskDcl(def) => {
-                let name = scoped_name(module_path, &def.ident);
+                let name = scoped_name(scope.module_path, &def.ident);
                 let schema = RefOr::T(Schema::from(
                     ObjectBuilder::new().schema_type(Type::Integer),
                 ));
@@ -167,10 +173,15 @@ impl OpenApiContext {
             }
             hir::ConstrTypeDcl::StructForwardDcl(_) | hir::ConstrTypeDcl::UnionForwardDcl(_) => {}
         }
+        Ok(())
     }
 
-    fn collect_exception(&mut self, except: &hir::ExceptDcl, module_path: &[String]) {
-        let name = scoped_name(module_path, &except.ident);
+    fn collect_exception(
+        &mut self,
+        except: &hir::ExceptDcl,
+        scope: SchemaScope<'_>,
+    ) -> IdlcResult<()> {
+        let name = scoped_name(scope.module_path, &except.ident);
         // `@header`/`@cookie` members travel as response metadata, not body.
         let body_members: Vec<hir::Member> = except
             .member
@@ -183,35 +194,31 @@ impl OpenApiContext {
             .collect();
         self.schemas.insert(
             name,
-            SchemaScope::new(module_path)
-                .schema_for_struct_with_annotations(&body_members, &except.annotations),
+            scope.schema_for_struct_with_annotations(&body_members, &except.annotations)?,
         );
+        Ok(())
     }
 
     fn collect_interface(
         &mut self,
         interface: &hir::InterfaceDcl,
-        module_path: &[String],
+        scope: SchemaScope<'_>,
         rest_hir: &RestHirDocument,
     ) -> IdlcResult<()> {
         let def = match &interface.decl {
             hir::InterfaceDclInner::InterfaceDef(def) => def,
             _ => return Ok(()),
         };
-        let Some(http_interface) = rest_hir.find_interface(module_path, &def.header.ident) else {
+        let Some(http_interface) = rest_hir.find_interface(scope.module_path, &def.header.ident)
+        else {
             return Ok(());
         };
         self.tags.insert(def.header.ident.clone());
         let mut route_bindings = HashMap::new();
         for method in http_interface.operations.iter().map(|op| {
-            render_http_operation(
-                op,
-                module_path,
-                &def.header.ident,
-                &rest_hir.document.exceptions,
-            )
+            render_http_operation(op, scope, &def.header.ident, &rest_hir.document.exceptions)
         }) {
-            self.collect_method(method, &mut route_bindings)?;
+            self.collect_method(method?, &mut route_bindings)?;
         }
         self.schemas
             .entry("Error".to_string())

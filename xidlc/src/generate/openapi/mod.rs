@@ -81,7 +81,12 @@ pub fn render_openapi(
     spec: &hir::Specification,
     rest_hir: &RestHirDocument,
 ) -> IdlcResult<RenderedOpenApi> {
-    let ctx = context::OpenApiContext::new(rest_hir).collect(spec, &[], rest_hir)?;
+    let names = scope::SchemaNames::collect(spec);
+    let ctx = context::OpenApiContext::new(rest_hir).collect(
+        spec,
+        scope::SchemaScope::new(&names, &[]),
+        rest_hir,
+    )?;
     let mut components = crate::openapi::ComponentsBuilder::new();
     for (name, schema) in ctx.schemas {
         components = components.schema(name, schema);

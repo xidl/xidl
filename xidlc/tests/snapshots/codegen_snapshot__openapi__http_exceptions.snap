@@ -120,7 +120,7 @@ openapi_http_exceptions.json
       "left.Failure": {
         "properties": {
           "detail": {
-            "$ref": "#/components/schemas/Detail"
+            "$ref": "#/components/schemas/left.Detail"
           }
         },
         "required": [

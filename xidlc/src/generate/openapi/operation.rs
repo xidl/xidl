@@ -4,6 +4,7 @@ use super::schema::{
 };
 use super::scope::SchemaScope;
 use super::security::openapi_security_requirement;
+use crate::error::IdlcResult;
 use crate::openapi::path::{HttpMethod as OpenApiHttpMethod, Parameter, ParameterIn};
 use crate::openapi::request_body::RequestBody;
 use crate::openapi::schema::{ObjectBuilder, Schema, Type};
@@ -56,12 +57,11 @@ pub(crate) struct ExceptionResponseInfo {
 
 pub(crate) fn render_http_operation(
     op: &HttpOperation,
-    module_path: &[String],
+    scope: SchemaScope<'_>,
     interface_name: &str,
     exceptions: &[HttpException],
-) -> MethodInfo {
+) -> IdlcResult<MethodInfo> {
     validate_stream_contract(op);
-    let scope = SchemaScope::new(module_path);
 
     let mut parameters = Vec::new();
 
@@ -69,7 +69,7 @@ pub(crate) fn render_http_operation(
         parameters.push(parameter_schema(
             ParameterIn::Path,
             &binding.wire_name,
-            scope.schema_for_type(&binding.ty),
+            scope.schema_for_type(&binding.ty)?,
             true,
             None,
         ));
@@ -78,7 +78,7 @@ pub(crate) fn render_http_operation(
         parameters.push(parameter_schema(
             ParameterIn::Query,
             &binding.wire_name,
-            scope.schema_for_type(&binding.ty),
+            scope.schema_for_type(&binding.ty)?,
             !binding.optional,
             None,
         ));
@@ -87,7 +87,7 @@ pub(crate) fn render_http_operation(
         parameters.push(parameter_schema(
             ParameterIn::Header,
             &binding.wire_name,
-            scope.schema_for_type(&binding.ty),
+            scope.schema_for_type(&binding.ty)?,
             !binding.optional,
             None,
         ));
@@ -96,7 +96,7 @@ pub(crate) fn render_http_operation(
         parameters.push(parameter_schema(
             ParameterIn::Cookie,
             &binding.wire_name,
-            scope.schema_for_type(&binding.ty),
+            scope.schema_for_type(&binding.ty)?,
             !binding.optional,
             None,
         ));
@@ -112,35 +112,35 @@ pub(crate) fn render_http_operation(
                 ObjectBuilder::new().schema_type(Type::String),
             )))
         }
-        HttpRequestBodyShape::SingleValue { ty, .. } => Some(scope.schema_for_type(ty)),
+        HttpRequestBodyShape::SingleValue { ty, .. } => Some(scope.schema_for_type(ty)?),
         HttpRequestBodyShape::Object { fields } => {
             let mut object = ObjectBuilder::new().schema_type(Type::Object);
             for field in fields {
                 object =
-                    object.property(field.field_name.clone(), scope.schema_for_type(&field.ty));
+                    object.property(field.field_name.clone(), scope.schema_for_type(&field.ty)?);
                 if !field.optional {
                     object = object.required(&field.field_name);
                 }
             }
             Some(RefOr::T(Schema::from(object)))
         }
-        HttpRequestBodyShape::Stream { item_ty, .. } => Some(scope.schema_for_type(item_ty)),
+        HttpRequestBodyShape::Stream { item_ty, .. } => Some(scope.schema_for_type(item_ty)?),
     };
 
     let response_schema = match &op.http.response.body.shape {
         HttpResponseBodyShape::Empty => None,
-        HttpResponseBodyShape::ReturnOnly { ty } => Some(scope.schema_for_type(ty)),
-        HttpResponseBodyShape::SingleValue { ty, .. } => Some(scope.schema_for_type(ty)),
+        HttpResponseBodyShape::ReturnOnly { ty } => Some(scope.schema_for_type(ty)?),
+        HttpResponseBodyShape::SingleValue { ty, .. } => Some(scope.schema_for_type(ty)?),
         HttpResponseBodyShape::Object { fields } => {
             let mut object = ObjectBuilder::new().schema_type(Type::Object);
             for field in fields {
                 object =
-                    object.property(field.field_name.clone(), scope.schema_for_type(&field.ty));
+                    object.property(field.field_name.clone(), scope.schema_for_type(&field.ty)?);
                 object = object.required(&field.field_name);
             }
             Some(RefOr::T(Schema::from(object)))
         }
-        HttpResponseBodyShape::Stream { item_ty, .. } => Some(scope.schema_for_type(item_ty)),
+        HttpResponseBodyShape::Stream { item_ty, .. } => Some(scope.schema_for_type(item_ty)?),
     };
 
     let mut final_request_schema = request_schema.clone();
@@ -182,7 +182,7 @@ pub(crate) fn render_http_operation(
 
     let response_status = op.http.response.status.clone();
 
-    MethodInfo {
+    Ok(MethodInfo {
         http_method: method_to_openapi(op.meta.method),
         paths: op
             .meta
@@ -190,7 +190,7 @@ pub(crate) fn render_http_operation(
             .iter()
             .map(|route| openapi_path_template(&route.path))
             .collect(),
-        operation_id: operation_id(module_path, interface_name, &op.meta.name),
+        operation_id: operation_id(scope.module_path, interface_name, &op.meta.name),
         parameters,
         request_body: final_request_schema
             .map(|schema| request_body_schema(schema, &request_content_type)),
@@ -235,27 +235,35 @@ pub(crate) fn render_http_operation(
                         )),
                     ))
                 } else {
-                    scope.schema_for_type(&repr.ty)
+                    scope.schema_for_type(&repr.ty)?
                 };
-                RepresentationInfo {
+                Ok(RepresentationInfo {
                     content_type: repr.content_type.clone(),
                     schema,
-                }
+                })
             })
-            .collect(),
+            .collect::<IdlcResult<Vec<_>>>()?,
         raises: op
             .meta
             .raises
             .iter()
             .filter_map(|refer| {
-                let exception = exceptions
+                exceptions
                     .iter()
-                    .find(|e| e.ident == refer.ident && e.module_path == refer.module_path)?;
+                    .find(|e| e.ident == refer.ident && e.module_path == refer.module_path)
+            })
+            .map(|exception| {
+                let exception_scope = scope.in_module(&exception.module_path);
                 let mut headers: Vec<_> = exception
                     .headers
                     .iter()
-                    .map(|member| (member.wire_name.clone(), scope.schema_for_type(&member.ty)))
-                    .collect();
+                    .map(|member| {
+                        Ok((
+                            member.wire_name.clone(),
+                            exception_scope.schema_for_type(&member.ty)?,
+                        ))
+                    })
+                    .collect::<IdlcResult<_>>()?;
                 if !exception.cookies.is_empty() {
                     headers.push((
                         "Set-Cookie".into(),
@@ -268,15 +276,15 @@ pub(crate) fn render_http_operation(
                         &exception.ident,
                     ))
                 });
-                Some(ExceptionResponseInfo {
+                Ok(ExceptionResponseInfo {
                     status: exception.status.to_string(),
                     ident: exception.ident.clone(),
                     headers,
                     schema,
                 })
             })
-            .collect(),
-    }
+            .collect::<IdlcResult<_>>()?,
+    })
 }
 
 fn validate_stream_contract(op: &HttpOperation) {
