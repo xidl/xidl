@@ -55,7 +55,10 @@ impl TsRaisesContext {
                         ),
                     };
                 Some(TsRaisesContext {
-                    ident: TsRaisesContext::error_ident(exception, exceptions),
+                    ident: format!(
+                        "$xidlErrors.{}",
+                        TsRaisesContext::error_ident(exception, exceptions)
+                    ),
                     status: exception.status,
                     has_body: !exception.body.is_empty(),
                     headers: exception.headers.iter().map(member).collect(),

@@ -19,6 +19,18 @@ impl RaisesContext {
             return Ok(Vec::new());
         }
         let document = env.renderer.rest_hir()?;
+        let variants = http_op
+            .meta
+            .raises
+            .iter()
+            .map(|refer| rust_ident(&refer.ident).to_case(convert_case::Case::Pascal))
+            .collect::<Vec<_>>();
+        let qualify_variants = variants.iter().any(|name| name == "Framework")
+            || variants
+                .iter()
+                .collect::<std::collections::HashSet<_>>()
+                .len()
+                != variants.len();
         let mut out = Vec::new();
         for refer in &http_op.meta.raises {
             let exception = document
@@ -54,24 +66,13 @@ impl RaisesContext {
                     .collect()
             };
             out.push(RaisesContext {
-                variant: if http_op
-                    .meta
-                    .raises
-                    .iter()
-                    .filter(|entry| entry.ident == refer.ident)
-                    .count()
-                    > 1
-                {
-                    refer
-                        .module_path
-                        .iter()
-                        .chain(std::iter::once(&refer.ident))
-                        .cloned()
-                        .collect::<Vec<_>>()
-                        .join("_")
-                        .to_case(convert_case::Case::Pascal)
-                } else {
-                    rust_ident(&exception.ident).to_case(convert_case::Case::Pascal)
+                variant: {
+                    let name = rust_ident(&exception.ident).to_case(convert_case::Case::Pascal);
+                    if qualify_variants {
+                        format!("Http{}{name}", exception.status)
+                    } else {
+                        name
+                    }
                 },
                 ty: env.relative_type_path(&refer.module_path, &refer.ident),
                 status: exception.status,

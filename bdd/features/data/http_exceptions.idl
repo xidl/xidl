@@ -48,3 +48,13 @@ interface Scoped {
     @get(path = "/scoped")
     string read() raises(left::Failure, ::right::Failure);
 };
+
+module collision {
+    @http(409) exception FilesClient { @body string reason; };
+    @http(502) exception Framework { @body string reason; };
+};
+@no_security
+interface Naming {
+    @get(path = "/names/{id}")
+    void read(@path string id) raises(collision::FilesClient, collision::Framework);
+};

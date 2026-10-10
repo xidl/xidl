@@ -2,13 +2,20 @@ import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { Readable } from 'node:stream';
 import { createRouter, XidlServerError } from 'xidl-typescript-server';
-import { FilesClient } from './http_exceptions.client.js';
+import { FilesClient, NamingClient } from './http_exceptions.client.js';
 import {
+  FilesClient as FilesClientError,
+  Framework,
   NotFound,
   NotModified,
   PreconditionFailed,
 } from './http_exceptions.errors.js';
-import { type Files, FilesOperations } from './http_exceptions.server.js';
+import {
+  type Files,
+  FilesOperations,
+  type Naming,
+  NamingOperations,
+} from './http_exceptions.server.js';
 
 const service: Files = {
   get_file(id) {
@@ -40,7 +47,21 @@ const service: Files = {
     }
   },
 };
-const handler = createRouter(Object.values(FilesOperations), service);
+const namingService: Naming = {
+  read(id) {
+    if (id === 'client') throw new FilesClientError({ reason: 'client name' });
+    throw new Framework({ reason: 'declared framework' });
+  },
+};
+const filesHandler = createRouter(Object.values(FilesOperations), service);
+const namingHandler = createRouter(
+  Object.values(NamingOperations),
+  namingService,
+);
+const handler = (request: Request) =>
+  new URL(request.url).pathname.startsWith('/names/')
+    ? namingHandler(request)
+    : filesHandler(request);
 
 const server = createServer(async (req, res) => {
   const response = await handler(
@@ -93,6 +114,17 @@ server.listen(0, '127.0.0.1', async () => {
       status: 412,
     });
 
+    const naming = new NamingClient(`http://127.0.0.1:${address.port}`);
+    await assert.rejects(
+      naming.read('client'),
+      (error: unknown) =>
+        error instanceof FilesClientError && error.reason === 'client name',
+    );
+    await assert.rejects(
+      naming.read('framework'),
+      (error: unknown) =>
+        error instanceof Framework && error.reason === 'declared framework',
+    );
     console.log('generated client exception round trips passed');
     server.close(() => server.listen(port, '127.0.0.1'));
   } catch (error) {

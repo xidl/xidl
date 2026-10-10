@@ -41,6 +41,16 @@ impl Files for FileService {
     }
 }
 
+#[async_trait]
+impl Naming for FileService {
+    async fn read(&self, id: String) -> Result<(), NamingReadError> {
+        match id.as_str() {
+            "client" => Err(NamingReadError::Http409FilesClient(collision::FilesClient { reason: "client name".into() })),
+            _ => Err(NamingReadError::Http502Framework(collision::Framework { reason: "declared framework".into() })),
+        }
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let port = std::env::var("PORT").unwrap_or_else(|_| "8080".into());
@@ -49,11 +59,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let server = tokio::spawn(async move {
         xidl_rust_axum::Server::builder()
             .with_service(FilesServer::new(FileService))
+        .with_service(NamingServer::new(FileService))
             .serve_with_listener(listener)
             .await
     });
     let client = FilesClient::new(format!("http://{address}"));
-    assert_eq!(client.get_file("ok".into()).await.unwrap().id, "ok");
+    assert_eq!(client.get_file("ok".into()).await?.id, "ok");
     let FilesGetFileError::NotModified(cached) =
         client.get_file("cached".into()).await.unwrap_err()
     else {
@@ -92,11 +103,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     ));
     let FilesGetFileError::Framework(error) = client.get_file("framework-typed".into()).await.unwrap_err() else { panic!("expected framework 412") };
     assert_eq!(error.http_status().as_u16(), 412);
+    let raised = client.get_file("missing".into()).await.unwrap_err();
+    assert_eq!(raised.to_string(), "HTTP 404: NotFound");
+    assert!(std::error::Error::source(&raised).is_none());
+    let framework = client.get_file("framework".into()).await.unwrap_err();
+    assert!(std::error::Error::source(&framework).is_some());
+    let naming = NamingClient::new(format!("http://{address}"));
+    assert!(matches!(naming.read("client".into()).await,
+        Err(NamingReadError::Http409FilesClient(error)) if error.reason == "client name"));
+    assert!(matches!(naming.read("framework".into()).await,
+        Err(NamingReadError::Http502Framework(error)) if error.reason == "declared framework"));
     println!("generated client exception round trips passed");
     server.abort();
     let listener = tokio::net::TcpListener::bind(format!("127.0.0.1:{port}")).await?;
     xidl_rust_axum::Server::builder()
         .with_service(FilesServer::new(FileService))
+        .with_service(NamingServer::new(FileService))
         .serve_with_listener(listener)
         .await?;
     Ok(())

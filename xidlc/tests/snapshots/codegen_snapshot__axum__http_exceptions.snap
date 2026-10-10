@@ -78,6 +78,24 @@ pub enum FilesGetFileError {
     NotFound(NotFound),
     Framework(xidl_rust_axum::Error),
 }
+impl ::std::fmt::Display for FilesGetFileError {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match self {
+            Self::NotModified(_) => f.write_str("HTTP 304: NotModified"),
+            Self::PreconditionFailed(_) => f.write_str("HTTP 412: PreconditionFailed"),
+            Self::NotFound(_) => f.write_str("HTTP 404: NotFound"),
+            Self::Framework(err) => ::std::fmt::Display::fmt(err, f),
+        }
+    }
+}
+impl ::std::error::Error for FilesGetFileError {
+    fn source(&self) -> Option<&(dyn ::std::error::Error + 'static)> {
+        match self {
+            Self::Framework(err) => Some(err),
+            _ => None,
+        }
+    }
+}
 impl From<xidl_rust_axum::Error> for FilesGetFileError {
     fn from(err: xidl_rust_axum::Error) -> Self {
         Self::Framework(err)
@@ -633,9 +651,26 @@ pub trait Scoped {
 /// declared `raises(...)` exception, plus the runtime fallback.
 #[derive(Debug)]
 pub enum ScopedReadError {
-    LeftFailure(left::Failure),
-    RightFailure(right::Failure),
+    Http409Failure(left::Failure),
+    Http422Failure(right::Failure),
     Framework(xidl_rust_axum::Error),
+}
+impl ::std::fmt::Display for ScopedReadError {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match self {
+            Self::Http409Failure(_) => f.write_str("HTTP 409: Http409Failure"),
+            Self::Http422Failure(_) => f.write_str("HTTP 422: Http422Failure"),
+            Self::Framework(err) => ::std::fmt::Display::fmt(err, f),
+        }
+    }
+}
+impl ::std::error::Error for ScopedReadError {
+    fn source(&self) -> Option<&(dyn ::std::error::Error + 'static)> {
+        match self {
+            Self::Framework(err) => Some(err),
+            _ => None,
+        }
+    }
 }
 impl From<xidl_rust_axum::Error> for ScopedReadError {
     fn from(err: xidl_rust_axum::Error) -> Self {
@@ -648,7 +683,7 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for ScopedReadError {
             Self::Framework(err) => {
                 ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
             }
-            Self::LeftFailure(err) => {
+            Self::Http409Failure(err) => {
                 let headers = (|| -> xidl_rust_axum::Result<
                     ::xidl_rust_axum::axum::http::HeaderMap,
                 > {
@@ -685,7 +720,7 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for ScopedReadError {
                 response.headers_mut().extend(headers);
                 response
             }
-            Self::RightFailure(err) => {
+            Self::Http422Failure(err) => {
                 let headers = (|| -> xidl_rust_axum::Result<
                     ::xidl_rust_axum::axum::http::HeaderMap,
                 > {
@@ -877,7 +912,7 @@ impl ScopedClient {
                         status.as_u16(),
                         format!("exception left::Failure body: {err}"),
                     ))?;
-                return Err(ScopedReadError::LeftFailure(value));
+                return Err(ScopedReadError::Http409Failure(value));
             }
             if status.as_u16() == 422 {
                 let headers = resp.headers().clone();
@@ -888,11 +923,327 @@ impl ScopedClient {
                         status.as_u16(),
                         format!("exception right::Failure body: {err}"),
                     ))?;
-                return Err(ScopedReadError::RightFailure(value));
+                return Err(ScopedReadError::Http422Failure(value));
             }
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(
                 ScopedReadError::Framework(
+                    xidl_rust_axum::Error::from_http_response(status, body),
+                ),
+            )
+        }
+    }
+}
+#[allow(
+    non_snake_case,
+    unused_attributes,
+    unused_variables,
+    unused_mut,
+    unreachable_code,
+    clippy::let_unit_value
+)]
+#[async_trait::async_trait]
+pub trait Naming {
+    async fn read(&self, id: String) -> ::std::result::Result<(), NamingReadError>;
+}
+/// Typed error channel for `read`: one variant per
+/// declared `raises(...)` exception, plus the runtime fallback.
+#[derive(Debug)]
+pub enum NamingReadError {
+    Http409FilesClient(collision::FilesClient),
+    Http502Framework(collision::Framework),
+    Framework(xidl_rust_axum::Error),
+}
+impl ::std::fmt::Display for NamingReadError {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match self {
+            Self::Http409FilesClient(_) => f.write_str("HTTP 409: Http409FilesClient"),
+            Self::Http502Framework(_) => f.write_str("HTTP 502: Http502Framework"),
+            Self::Framework(err) => ::std::fmt::Display::fmt(err, f),
+        }
+    }
+}
+impl ::std::error::Error for NamingReadError {
+    fn source(&self) -> Option<&(dyn ::std::error::Error + 'static)> {
+        match self {
+            Self::Framework(err) => Some(err),
+            _ => None,
+        }
+    }
+}
+impl From<xidl_rust_axum::Error> for NamingReadError {
+    fn from(err: xidl_rust_axum::Error) -> Self {
+        Self::Framework(err)
+    }
+}
+impl ::xidl_rust_axum::axum::response::IntoResponse for NamingReadError {
+    fn into_response(self) -> ::xidl_rust_axum::axum::response::Response {
+        match self {
+            Self::Framework(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+            Self::Http409FilesClient(err) => {
+                let headers = (|| -> xidl_rust_axum::Result<
+                    ::xidl_rust_axum::axum::http::HeaderMap,
+                > {
+                    let headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
+                    Ok(headers)
+                })();
+                let headers = match headers {
+                    Ok(headers) => headers,
+                    Err(err) => {
+                        return ::xidl_rust_axum::axum::response::IntoResponse::into_response(
+                            err,
+                        );
+                    }
+                };
+                let body = match xidl_rust_axum::serde_json::to_vec(&err) {
+                    Ok(body) => body,
+                    Err(err) => {
+                        return ::xidl_rust_axum::axum::response::IntoResponse::into_response(
+                            xidl_rust_axum::Error::new(500, format!("{err:?}")),
+                        );
+                    }
+                };
+                let mut response = ::xidl_rust_axum::axum::http::Response::builder()
+                    .status(
+                        ::xidl_rust_axum::axum::http::StatusCode::from_u16(409u16)
+                            .unwrap(),
+                    )
+                    .header(
+                        ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                        "application/json",
+                    )
+                    .body(::xidl_rust_axum::axum::body::Body::from(body))
+                    .expect("error response should build");
+                response.headers_mut().extend(headers);
+                response
+            }
+            Self::Http502Framework(err) => {
+                let headers = (|| -> xidl_rust_axum::Result<
+                    ::xidl_rust_axum::axum::http::HeaderMap,
+                > {
+                    let headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
+                    Ok(headers)
+                })();
+                let headers = match headers {
+                    Ok(headers) => headers,
+                    Err(err) => {
+                        return ::xidl_rust_axum::axum::response::IntoResponse::into_response(
+                            err,
+                        );
+                    }
+                };
+                let body = match xidl_rust_axum::serde_json::to_vec(&err) {
+                    Ok(body) => body,
+                    Err(err) => {
+                        return ::xidl_rust_axum::axum::response::IntoResponse::into_response(
+                            xidl_rust_axum::Error::new(500, format!("{err:?}")),
+                        );
+                    }
+                };
+                let mut response = ::xidl_rust_axum::axum::http::Response::builder()
+                    .status(
+                        ::xidl_rust_axum::axum::http::StatusCode::from_u16(502u16)
+                            .unwrap(),
+                    )
+                    .header(
+                        ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                        "application/json",
+                    )
+                    .body(::xidl_rust_axum::axum::body::Body::from(body))
+                    .expect("error response should build");
+                response.headers_mut().extend(headers);
+                response
+            }
+        }
+    }
+}
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_in_Naming {
+    use super::*;
+}
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_out_Naming {
+    use super::*;
+}
+#[derive(::serde::Deserialize)]
+pub struct NamingReadPath {
+    pub id: String,
+}
+#[derive(::serde::Deserialize)]
+struct NamingReadRequest {
+    id: String,
+}
+#[allow(clippy::manual_async_fn, unused_mut)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S> for NamingReadRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
+            let ::xidl_rust_axum::axum::extract::Path(xidl_path) = <::xidl_rust_axum::axum::extract::Path<
+                NamingReadPath,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let NamingReadPath { id } = xidl_path;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
+            Ok(Self { id })
+        }
+    }
+}
+pub struct NamingServer<T> {
+    inner: ::std::sync::Arc<T>,
+}
+#[allow(non_snake_case)]
+impl<T> NamingServer<T>
+where
+    T: Naming + Send + Sync + 'static,
+{
+    pub fn new(inner: T) -> Self {
+        Self {
+            inner: ::std::sync::Arc::new(inner),
+        }
+    }
+    pub fn from_arc(inner: ::std::sync::Arc<T>) -> Self {
+        Self { inner }
+    }
+    pub fn router(self) -> xidl_rust_axum::axum::Router {
+        let _svc = self.inner;
+        xidl_rust_axum::axum::Router::new()
+            .route("/names/{id}", xidl_rust_axum::axum::routing::get(Self::read))
+            .with_state(_svc)
+    }
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
+    async fn read(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
+        request: NamingReadRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
+        let NamingReadRequest { id } = request;
+        let id: String = id;
+        let mut resp = match svc.read(id).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let _ = resp_value;
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(
+                        ::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT,
+                    )
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+}
+impl<T> xidl_rust_axum::Service for NamingServer<T>
+where
+    T: Naming + Send + Sync + 'static,
+{
+    fn into_router(self) -> xidl_rust_axum::axum::Router {
+        self.router()
+    }
+}
+pub struct NamingClient {
+    client: ::xidl_rust_axum::Client,
+}
+#[allow(non_snake_case)]
+impl NamingClient {
+    pub fn new(base_url: impl Into<String>) -> Self {
+        Self {
+            client: ::xidl_rust_axum::Client::new(base_url),
+        }
+    }
+    pub fn with_http(
+        base_url: impl Into<String>,
+        http: ::xidl_rust_axum::reqwest::Client,
+    ) -> Self {
+        Self {
+            client: ::xidl_rust_axum::Client::with_http(base_url, http),
+        }
+    }
+}
+#[allow(non_snake_case)]
+impl NamingClient {
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
+    pub async fn read(&self, id: String) -> Result<(), NamingReadError> {
+        let path = "/names/{id}".to_string();
+        let path = path.replace("{id}", &id.to_string());
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("")
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let auth_target = &self.client;
+        let _ = auth_target;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            Ok(())
+        } else {
+            let status = resp.status();
+            if status.as_u16() == 409 {
+                let headers = resp.headers().clone();
+                let mut value: collision::FilesClient = resp
+                    .json::<collision::FilesClient>()
+                    .await
+                    .map_err(|err| xidl_rust_axum::Error::new(
+                        status.as_u16(),
+                        format!("exception collision::FilesClient body: {err}"),
+                    ))?;
+                return Err(NamingReadError::Http409FilesClient(value));
+            }
+            if status.as_u16() == 502 {
+                let headers = resp.headers().clone();
+                let mut value: collision::Framework = resp
+                    .json::<collision::Framework>()
+                    .await
+                    .map_err(|err| xidl_rust_axum::Error::new(
+                        status.as_u16(),
+                        format!("exception collision::Framework body: {err}"),
+                    ))?;
+                return Err(NamingReadError::Http502Framework(value));
+            }
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(
+                NamingReadError::Framework(
                     xidl_rust_axum::Error::from_http_response(status, body),
                 ),
             )
@@ -916,6 +1267,18 @@ pub mod right {
     #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
     #[derive(Default)]
     pub struct Failure {
+        pub reason: String,
+    }
+}
+pub mod collision {
+    #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
+    #[derive(Default)]
+    pub struct FilesClient {
+        pub reason: String,
+    }
+    #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
+    #[derive(Default)]
+    pub struct Framework {
         pub reason: String,
     }
 }
