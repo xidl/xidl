@@ -10,7 +10,7 @@ http_exceptions.client.ts
 
 import type * as types from "./http_exceptions";
 import { readResponseCookies, readResponseHeader } from "xidl-typescript-client";
-import { NotModified, PreconditionFailed, NotFound, left$Failure, right$Failure } from "./http_exceptions.errors";
+import * as $xidlErrors from "./http_exceptions.errors";
 
 import type * as ifaceTypes from "./http_exceptions.iface";
 import * as ifaceSchemas from "./http_exceptions.iface.zod";
@@ -85,7 +85,7 @@ export class FilesClient {
         async throwGetFileError(resp: Response): Promise<never> {
             const status = resp.status;
             if (status === 304) {
-                throw new NotModified({
+                throw new $xidlErrors.NotModified({
                     "etag": readResponseHeader(resp.headers, "ETag", false, value => value) as never,
                     });
             }
@@ -96,7 +96,7 @@ export class FilesClient {
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
                 if (!decoded.success) throw await parseXidlError(resp);
                 const body = decoded.data;
-                throw new PreconditionFailed({
+                throw new $xidlErrors.PreconditionFailed({
                     "etag": readResponseHeader(resp.headers, "ETag", false, value => value) as never,
                     "hints": (readResponseHeader(resp.headers, "X-Hint", true, value => value) ?? undefined) as never,
                     "session_id": (readResponseCookies(resp.headers, value => value).get("session")?.[0]) as never,
@@ -114,7 +114,7 @@ export class FilesClient {
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
                 if (!decoded.success) throw await parseXidlError(resp);
                 const body = decoded.data;
-                throw new NotFound({
+                throw new $xidlErrors.NotFound({
                     "code": body["code"] as never,
                     "msg": body["msg"] as never,
                     });
@@ -172,7 +172,7 @@ export class ScopedClient {
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
                 if (!decoded.success) throw await parseXidlError(resp);
                 const body = decoded.data;
-                throw new left$Failure({
+                throw new $xidlErrors.left$Failure({
                     "detail": body["detail"] as never,
                     });
             }
@@ -183,7 +183,77 @@ export class ScopedClient {
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
                 if (!decoded.success) throw await parseXidlError(resp);
                 const body = decoded.data;
-                throw new right$Failure({
+                throw new $xidlErrors.right$Failure({
+                    "reason": body["reason"] as never,
+                    });
+            }
+            throw await parseXidlError(resp);
+        }
+    
+}
+
+    
+export class NamingClient {
+    private readonly baseUrl: string;
+    private readonly fetchImpl: FetchLike;
+    private readonly defaultHeaders: Record<string, string>;
+    private readonly auth?: ClientAuth;
+    private readonly codecs: Record<string, HttpCodec>;
+
+    constructor(baseUrl: string, options: ClientOptions = {}) {
+        this.baseUrl = baseUrl;
+        this.fetchImpl = resolveFetch(options.fetch);
+        this.defaultHeaders = options.headers ?? {};
+        this.auth = options.auth;
+        this.codecs = options.codecs ?? {};
+    }
+    
+        async read(id: string): Promise<void> {
+            const parsed = ifaceSchemas.NamingReadRequestSchema.parse({ "id": id });
+            let path = "/names/{id}";
+            path = path.replace("{" + "id" + "}", encodePathSegment(id));
+            const query = new URLSearchParams();
+            const headers = new Headers(this.defaultHeaders);
+            const cookies: string[] = [];
+            applyCookies(headers, cookies);
+            applyClientAuth(path, query, headers, this.auth, []);
+            const queryString = query.toString();
+            if (queryString.length > 0) {
+                path = `${path}?${queryString}`;
+            }
+            const url = joinUrl(this.baseUrl, path);
+            headers.set("Accept", "");
+        const resp = await this.fetchImpl(url, { method: "GET", headers });
+        if (!resp.ok) {
+            await this.throwReadError(resp);
+            
+        }
+        return;
+        
+    }
+    
+    
+        async throwReadError(resp: Response): Promise<never> {
+            const status = resp.status;
+            if (status === 409) {
+                const bodySchema = z.object({ "reason": z.coerce.string(),  });
+                const rawBody = await resp.clone().json().catch(() => undefined);
+                if (rawBody == null || rawBody["reason"] === undefined) throw await parseXidlError(resp);
+                const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
+                if (!decoded.success) throw await parseXidlError(resp);
+                const body = decoded.data;
+                throw new $xidlErrors.FilesClient({
+                    "reason": body["reason"] as never,
+                    });
+            }
+            if (status === 502) {
+                const bodySchema = z.object({ "reason": z.coerce.string(),  });
+                const rawBody = await resp.clone().json().catch(() => undefined);
+                if (rawBody == null || rawBody["reason"] === undefined) throw await parseXidlError(resp);
+                const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
+                if (!decoded.success) throw await parseXidlError(resp);
+                const body = decoded.data;
+                throw new $xidlErrors.Framework({
                     "reason": body["reason"] as never,
                     });
             }
@@ -252,6 +322,20 @@ export interface FileMeta {
     export namespace right {
 
     export interface Failure {
+            
+                reason: string;
+                }
+}
+
+    export namespace collision {
+
+    export interface FilesClient {
+            
+                reason: string;
+                }
+
+
+    export interface Framework {
             
                 reason: string;
                 }
@@ -375,6 +459,40 @@ import type * as types from "./http_exceptions";
         
     }
 }
+
+    /** Typed HTTP error for status 409 responses. */
+    export class FilesClient extends Error {
+        readonly status = 409;
+        readonly kind = "FilesClient" as const;
+        readonly reason: string;
+    
+    constructor(fields: {
+        "reason": string;
+        
+    }) {
+        super("FilesClient");
+        this.name = "FilesClient";
+        this.reason = fields["reason"];
+        
+    }
+}
+
+    /** Typed HTTP error for status 502 responses. */
+    export class Framework extends Error {
+        readonly status = 502;
+        readonly kind = "Framework" as const;
+        readonly reason: string;
+    
+    constructor(fields: {
+        "reason": string;
+        
+    }) {
+        super("Framework");
+        this.name = "Framework";
+        this.reason = fields["reason"];
+        
+    }
+}
 ===============
 http_exceptions.iface.d.ts
 ===============
@@ -386,6 +504,12 @@ http_exceptions.iface.d.ts
     
 
 export interface FilesGetFileRequest {
+        id: string;
+        }
+
+    
+
+export interface NamingReadRequest {
         id: string;
         }
 
@@ -408,6 +532,12 @@ export const FilesGetFileRequestSchema = z.object({
         id: z.coerce.string(),
     });
 export type FilesGetFileRequest = z.infer<typeof FilesGetFileRequestSchema>;
+
+    
+export const NamingReadRequestSchema = z.object({
+        id: z.coerce.string(),
+    });
+export type NamingReadRequest = z.infer<typeof NamingReadRequestSchema>;
 ===============
 http_exceptions.server.ts
 ===============
@@ -415,7 +545,7 @@ http_exceptions.server.ts
 
 
 import type * as types from "./http_exceptions";
-import { NotModified, PreconditionFailed, NotFound, left$Failure, right$Failure } from "./http_exceptions.errors";
+import * as $xidlErrors from "./http_exceptions.errors";
 
 import type * as ifaceTypes from "./http_exceptions.iface";
 import * as ifaceSchemas from "./http_exceptions.iface.zod";
@@ -468,7 +598,7 @@ export const FilesOperations = {
             errors: {
                 match: (error: unknown) => {
                     
-                        if (error instanceof NotModified) {
+                        if (error instanceof $xidlErrors.NotModified) {
                             const headers = new Headers();
                             writeResponseBindings(headers, { ...error }, [{ wireName: "ETag", key: "etag", multi: false }], false);
                             writeResponseBindings(headers, { ...error }, [], true);
@@ -476,7 +606,7 @@ export const FilesOperations = {
                         
                     }
                 
-                        if (error instanceof PreconditionFailed) {
+                        if (error instanceof $xidlErrors.PreconditionFailed) {
                             const headers = new Headers();
                             writeResponseBindings(headers, { ...error }, [{ wireName: "ETag", key: "etag", multi: false }, { wireName: "X-Hint", key: "hints", multi: true }], false);
                             writeResponseBindings(headers, { ...error }, [{ wireName: "session", key: "session_id", multi: false }, { wireName: "retry", key: "retry_token", multi: false }, { wireName: "attempt", key: "attempts", multi: true }], true);
@@ -489,7 +619,7 @@ export const FilesOperations = {
                             
                     }
                 
-                        if (error instanceof NotFound) {
+                        if (error instanceof $xidlErrors.NotFound) {
                             const headers = new Headers();
                             writeResponseBindings(headers, { ...error }, [], false);
                             writeResponseBindings(headers, { ...error }, [], true);
@@ -552,7 +682,7 @@ export const ScopedOperations = {
             errors: {
                 match: (error: unknown) => {
                     
-                        if (error instanceof left$Failure) {
+                        if (error instanceof $xidlErrors.left$Failure) {
                             const headers = new Headers();
                             writeResponseBindings(headers, { ...error }, [], false);
                             writeResponseBindings(headers, { ...error }, [], true);
@@ -565,13 +695,90 @@ export const ScopedOperations = {
                             
                     }
                 
-                        if (error instanceof right$Failure) {
+                        if (error instanceof $xidlErrors.right$Failure) {
                             const headers = new Headers();
                             writeResponseBindings(headers, { ...error }, [], false);
                             writeResponseBindings(headers, { ...error }, [], true);
                             headers.set("Content-Type", "application/json");
                             return {
                                 status: 422,
+                                headers,
+                                body: { "reason": error.reason, },
+                            };
+                            
+                    }
+                
+                return undefined;
+            },
+        },
+        
+    }),
+    
+} as const;
+
+    
+export interface Naming {
+    
+        read(id: string): Awaitable<void>;
+    
+}
+
+export const NamingOperations = {
+    
+        read: defineOperation<Naming, "read">({
+            handler: "read",
+            method: "GET",
+            path: "/names/{id}",
+            paths: ["/names/{id}"],
+            request: {
+                kind: "object",
+                args: ["id"],
+                schema: ifaceSchemas.NamingReadRequestSchema,
+                path: [{ parameter: "id", wireName: "id", key: "id", multi: false, catchAll: false }],
+                query: [],
+                headers: [],
+                cookies: [],
+                body: {
+                    kind: "none",
+                    contentType: "",
+                    fields: [],
+                    
+            },
+        },
+        response: {
+            contentType: "",
+            bodyMode: "none",
+            bodyFields: [],
+            headers: [],
+            cookies: [],
+            stream: false,
+            
+        },
+        security: [],
+        
+            errors: {
+                match: (error: unknown) => {
+                    
+                        if (error instanceof $xidlErrors.FilesClient) {
+                            const headers = new Headers();
+                            writeResponseBindings(headers, { ...error }, [], false);
+                            writeResponseBindings(headers, { ...error }, [], true);
+                            headers.set("Content-Type", "application/json");
+                            return {
+                                status: 409,
+                                headers,
+                                body: { "reason": error.reason, },
+                            };
+                            
+                    }
+                
+                        if (error instanceof $xidlErrors.Framework) {
+                            const headers = new Headers();
+                            writeResponseBindings(headers, { ...error }, [], false);
+                            writeResponseBindings(headers, { ...error }, [], true);
+                            headers.set("Content-Type", "application/json");
+                            return {
+                                status: 502,
                                 headers,
                                 body: { "reason": error.reason, },
                             };
@@ -656,6 +863,20 @@ import { xjson } from "xidl-typescript-codec";
 
     export namespace right {
         export const FailureSchema = z.object({
+            
+                reason: z.coerce.string()
+            
+        });
+}
+
+    export namespace collision {
+        export const FilesClientSchema = z.object({
+            
+                reason: z.coerce.string()
+            
+        });
+
+        export const FrameworkSchema = z.object({
             
                 reason: z.coerce.string()
             

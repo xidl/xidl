@@ -81,6 +81,28 @@ openapi_http_exceptions.json
         ],
         "type": "object"
       },
+      "collision.FilesClient": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
+      "collision.Framework": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
       "left.Detail": {
         "properties": {
           "message": {
@@ -223,6 +245,70 @@ openapi_http_exceptions.json
         ]
       }
     },
+    "/names/{id}": {
+      "get": {
+        "operationId": "Naming.read",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/collision.FilesClient"
+                }
+              }
+            },
+            "description": "Error: FilesClient"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/collision.Framework"
+                }
+              }
+            },
+            "description": "Error: Framework"
+          }
+        },
+        "security": [],
+        "tags": [
+          "Naming"
+        ]
+      }
+    },
     "/scoped": {
       "get": {
         "operationId": "Scoped.read",
@@ -278,6 +364,9 @@ openapi_http_exceptions.json
   "tags": [
     {
       "name": "Files"
+    },
+    {
+      "name": "Naming"
     },
     {
       "name": "Scoped"

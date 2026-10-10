@@ -29,14 +29,14 @@ struct ClientFileContext {
     file_stem: String,
     blocks: Vec<String>,
     imports: Vec<String>,
-    error_imports: Vec<String>,
+    has_errors: bool,
 }
 
 #[derive(Serialize)]
 struct ServerFileContext {
     file_stem: String,
     blocks: Vec<String>,
-    error_imports: Vec<String>,
+    has_errors: bool,
 }
 
 #[derive(Serialize)]
@@ -181,19 +181,9 @@ pub(crate) fn render_spec(
             },
         )?
     };
-    let error_imports = |blocks: &[String]| -> Vec<String> {
-        exception_contexts
-            .iter()
-            .filter(|exception| {
-                blocks
-                    .iter()
-                    .any(|block| ZodImportCollector::is_word_in_text(&exception.ident, block))
-            })
-            .map(|exception| exception.ident.clone())
-            .collect()
-    };
-    let client_error_imports = error_imports(&blocks.client);
-    let server_error_imports = error_imports(&blocks.server);
+    let has_errors = |blocks: &[String]| blocks.iter().any(|block| block.contains("$xidlErrors."));
+    let client_has_errors = has_errors(&blocks.client);
+    let server_has_errors = has_errors(&blocks.server);
 
     Ok(TsHttpOutput {
         types: renderer.render_template(
@@ -218,7 +208,7 @@ pub(crate) fn render_spec(
                 file_stem: file_stem.to_string(),
                 blocks: blocks.client,
                 imports: zod_imports.clone(),
-                error_imports: client_error_imports,
+                has_errors: client_has_errors,
             },
         )?,
         server: renderer.render_template(
@@ -226,7 +216,7 @@ pub(crate) fn render_spec(
             &ServerFileContext {
                 file_stem: file_stem.to_string(),
                 blocks: blocks.server,
-                error_imports: server_error_imports,
+                has_errors: server_has_errors,
             },
         )?,
         errors,

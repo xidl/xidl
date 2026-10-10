@@ -44,6 +44,26 @@
                 Framework(xidl_rust_axum::Error),
             }
 
+            impl ::std::fmt::Display for {{ method.error_ty }} {
+                fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+                match self {
+                    {% for ex in method.raises %}
+                        Self::{{ ex.variant }}(_) => f.write_str("HTTP {{ ex.status }}: {{ ex.variant }}"),
+                    {% endfor %}
+                    Self::Framework(err) => ::std::fmt::Display::fmt(err, f),
+                }
+            }
+            }
+
+            impl ::std::error::Error for {{ method.error_ty }} {
+                fn source(&self) -> Option<&(dyn ::std::error::Error + 'static)> {
+                match self {
+                    Self::Framework(err) => Some(err),
+                    _ => None,
+                }
+            }
+            }
+
             impl From<xidl_rust_axum::Error> for {{ method.error_ty }} {
                 fn from(err: xidl_rust_axum::Error) -> Self {
                     Self::Framework(err)

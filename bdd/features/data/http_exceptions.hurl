@@ -61,3 +61,14 @@ HTTP 500
 [Asserts]
 jsonpath "$.code" == 500
 jsonpath "$.msg" == "storage unavailable"
+
+# Declared errors retain their identity when names overlap generated helpers.
+GET {{base_url}}/names/client
+HTTP 409
+[Asserts]
+jsonpath "$.reason" == "client name"
+
+GET {{base_url}}/names/framework
+HTTP 502
+[Asserts]
+jsonpath "$.reason" == "declared framework"
