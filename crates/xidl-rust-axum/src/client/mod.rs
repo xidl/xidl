@@ -1,28 +1,8 @@
-use crate::Error;
-use crate::auth::api_key::{ApiKeyAuth, ApiKeyLocation};
+use crate::auth::api_key::ApiKeyLocation;
+use crate::{ClientAuth, Error};
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
 use reqwest::header::{AUTHORIZATION, COOKIE, HeaderMap, HeaderValue};
-
-/// Authentication material that generated clients can apply automatically.
-#[derive(Clone, Debug, Default)]
-pub struct ClientAuth {
-    /// Basic auth credential.
-    pub basic: Option<crate::auth::basic::BasicAuth>,
-    /// Bearer token without the `Bearer ` prefix.
-    pub bearer: Option<String>,
-    /// Available API keys.
-    pub api_keys: Vec<ApiKeyAuth>,
-}
-
-impl ClientAuth {
-    /// Finds an API key matching the required location and name.
-    pub fn api_key(&self, location: ApiKeyLocation, name: &str) -> Option<&ApiKeyAuth> {
-        self.api_keys
-            .iter()
-            .find(|key| key.location == location && key.name == name)
-    }
-}
 
 /// Authentication required by a specific generated endpoint.
 #[derive(Clone, Debug)]

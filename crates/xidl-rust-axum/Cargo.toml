@@ -12,10 +12,11 @@ repository.workspace = true
 [features]
 default = ["client", "server", "stream"]
 client = ["dep:reqwest"]
+router = ["dep:axum", "dep:axum-extra", "dep:tower-http"]
 server = [
-  "dep:axum",
-  "dep:axum-extra",
-  "dep:tower-http",
+  "router",
+  "axum/tokio",
+  "axum/http1",
   "dep:hyper",
   "dep:hyper-util",
   "dep:tokio",
@@ -47,7 +48,15 @@ base64 = "0.23"
 serde_urlencoded = "0.7"
 serde_plain = "1.0"
 
-axum = { version = "0.8", features = ["macros"], optional = true }
+axum = { version = "0.8", default-features = false, features = [
+  "form",
+  "json",
+  "query",
+  "macros",
+  "matched-path",
+  "original-uri",
+  "tracing",
+], optional = true }
 axum-extra = { version = "0.12", features = ["typed-header"], optional = true }
 tower-http = { version = "0.7", features = ["cors"], optional = true }
 hyper = { version = "1.8", features = ["server", "client"], optional = true }

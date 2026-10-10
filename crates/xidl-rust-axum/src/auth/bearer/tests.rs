@@ -1,5 +1,5 @@
 use super::*;
-#[cfg(feature = "server")]
+#[cfg(feature = "router")]
 use axum_extra::headers::Header;
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
@@ -37,7 +37,7 @@ fn extract_basic_auth_reports_missing_header() {
     ));
 }
 
-#[cfg(feature = "server")]
+#[cfg(feature = "router")]
 #[test]
 fn bearer_header_decode_accepts_case_insensitive_scheme() {
     let value = HeaderValue::from_static("bearer token-123");
@@ -46,14 +46,14 @@ fn bearer_header_decode_accepts_case_insensitive_scheme() {
     assert_eq!(BearerAuth::from_header(header).token, "token-123");
 }
 
-#[cfg(feature = "server")]
+#[cfg(feature = "router")]
 #[test]
 fn bearer_header_decode_rejects_wrong_scheme() {
     let value = HeaderValue::from_static("Basic token");
     assert!(BearerHeader::decode(&mut std::iter::once(&value)).is_err());
 }
 
-#[cfg(feature = "server")]
+#[cfg(feature = "router")]
 #[test]
 fn bearer_header_encode_omits_space_for_empty_token() {
     let mut encoded = Vec::new();

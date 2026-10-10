@@ -9,6 +9,11 @@
 //! and the [`stream`] module for SSE, NDJSON, and bidirectional WebSocket
 //! transport.
 
+//! Choose `router` without default features to mount generated HTTP routes in
+//! an existing host, including WebAssembly hosts. `server` adds native TCP
+//! serving and connection upgrades. `stream` remains a separate capability;
+//! its WebSocket dependencies require native networking.
+
 mod error;
 /// Error and result types used throughout the runtime.
 pub use error::{Error, ErrorBody, Result};
@@ -17,13 +22,19 @@ pub use error::{Error, ErrorBody, Result};
 mod client;
 #[cfg(feature = "client")]
 /// Client-side HTTP helpers and auth application utilities.
-pub use client::{Client, ClientAuth, ClientAuthRequirement};
+pub use client::{Client, ClientAuthRequirement};
 
 #[cfg(feature = "server")]
 mod server;
 #[cfg(feature = "server")]
-/// Server-side traits and builders for mounting generated services.
-pub use server::{Server, Service};
+/// Server-side builder for listening on native HTTP connections.
+pub use server::Server;
+
+#[cfg(feature = "router")]
+mod service;
+#[cfg(feature = "router")]
+/// Trait for mounting generated services in an Axum router.
+pub use service::Service;
 
 mod request;
 /// Request wrapper preserving headers alongside decoded payload data.
@@ -40,6 +51,8 @@ pub mod stream;
 
 /// Authentication helpers shared by generated handlers and clients.
 pub mod auth;
+/// Credentials shared by generated clients and authenticated handlers.
+pub use auth::ClientAuth;
 /// API key auth types, available without the `client` feature for server use.
 pub use auth::api_key::{ApiKeyAuth, ApiKeyAuthError, ApiKeyLocation, extract_api_key};
 
@@ -47,10 +60,10 @@ pub use auth::api_key::{ApiKeyAuth, ApiKeyAuthError, ApiKeyLocation, extract_api
 /// HTTP connection upgrade helpers.
 pub mod upgrade;
 
-#[cfg(feature = "server")]
+#[cfg(feature = "router")]
 /// Re-export of `axum` so generated code can depend on a single runtime crate.
 pub use axum;
-#[cfg(feature = "server")]
+#[cfg(feature = "router")]
 /// Re-export of `axum-extra` for typed header support.
 pub use axum_extra;
 /// Cookie encoding shared by generated HTTP clients and servers.
@@ -72,6 +85,6 @@ pub use tokio;
 /// Re-export of `tokio-tungstenite` for generated WebSocket clients.
 #[cfg(feature = "stream")]
 pub use tokio_tungstenite;
-#[cfg(feature = "server")]
+#[cfg(feature = "router")]
 /// Re-export of `tower-http` for generated middleware wiring.
 pub use tower_http;
