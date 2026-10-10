@@ -1,10 +1,8 @@
 use super::builder::{build_error_schema, build_operation};
 use super::naming::{declarator_name, openapi_method_name, scoped_name};
 use super::operation::{MethodInfo, render_http_operation};
-use super::schema::{
-    apply_schema_description, doc_text, schema_for_constr_type, schema_for_struct_with_annotations,
-    schema_for_union,
-};
+use super::schema::{apply_schema_description, doc_text};
+use super::scope::SchemaScope;
 use super::security::register_security_schemes;
 use super::stream::{OpenApiStreamPatch, request_stream_content_type, stream_patch_item_schema};
 use crate::error::{IdlcError, IdlcResult};
@@ -92,10 +90,12 @@ impl OpenApiContext {
                 for decl in &typedef.decl {
                     let name = scoped_name(module_path, &declarator_name(decl));
                     let schema = match &typedef.ty {
-                        hir::TypedefType::TypeSpec(ty) => super::schema::schema_for_type(ty),
+                        hir::TypedefType::TypeSpec(ty) => {
+                            SchemaScope::new(module_path).schema_for_type(ty)
+                        }
                         hir::TypedefType::ConstrTypeDcl(constr) => {
                             self.collect_constr_type(constr, module_path);
-                            schema_for_constr_type(constr, module_path)
+                            SchemaScope::new(module_path).schema_for_constr_type(constr)
                         }
                     };
                     self.schemas.insert(name, schema);
@@ -111,7 +111,8 @@ impl OpenApiContext {
             hir::ConstrTypeDcl::StructDcl(def) => {
                 let name = scoped_name(module_path, &def.ident);
                 let schema = apply_schema_description(
-                    schema_for_struct_with_annotations(&def.member, &def.annotations),
+                    SchemaScope::new(module_path)
+                        .schema_for_struct_with_annotations(&def.member, &def.annotations),
                     doc_text(&def.annotations).as_deref(),
                 );
                 self.schemas.insert(name, schema);
@@ -141,7 +142,7 @@ impl OpenApiContext {
             hir::ConstrTypeDcl::UnionDef(def) => {
                 let name = scoped_name(module_path, &def.ident);
                 let schema = apply_schema_description(
-                    schema_for_union(def),
+                    SchemaScope::new(module_path).schema_for_union(def),
                     doc_text(&def.annotations).as_deref(),
                 );
                 self.schemas.insert(name, schema);
@@ -182,7 +183,8 @@ impl OpenApiContext {
             .collect();
         self.schemas.insert(
             name,
-            schema_for_struct_with_annotations(&body_members, &except.annotations),
+            SchemaScope::new(module_path)
+                .schema_for_struct_with_annotations(&body_members, &except.annotations),
         );
     }
 
