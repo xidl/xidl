@@ -17,10 +17,10 @@
                     #[{{ attr }}]
                 {% endfor %}
             {% endif %}
-            {% if method.deprecated -%}
+            {%- if method.deprecated %}
                 #[deprecated{% if method.deprecated_note %}(note = "{{ method.deprecated_note }}"){% endif %}]
-            {%- endif %}
-            {% set ret_ty %}{% if method.is_server_stream %}{% if method.is_byte_stream %}xidl_rust_axum::stream::ByteStream{% else %}xidl_rust_axum::stream::SseStream<{{ method.response_ty }}>{% endif %}{% elif method.is_bidi_stream %}(){% elif method.is_upgrade %}::xidl_rust_axum::axum::response::Response{% else %}{{ method.response_ty }}{% endif %}{% endset %}
+            {% endif -%}
+            {%- set ret_ty %}{% if method.is_server_stream %}{% if method.is_byte_stream %}xidl_rust_axum::stream::ByteStream{% else %}xidl_rust_axum::stream::SseStream<{{ method.response_ty }}>{% endif %}{% elif method.is_bidi_stream %}(){% elif method.is_upgrade %}::xidl_rust_axum::axum::response::Response{% else %}{{ method.response_ty }}{% endif %}{% endset %}
                 async fn {{ method.name }}(
                 &self{% if method.is_server_stream or method.is_client_stream or method.is_bidi_stream %},
                 req: ::xidl_rust_axum::Request<{{ method.request_payload_ty }}>{% if method.handshake_params | length > 0 %},
