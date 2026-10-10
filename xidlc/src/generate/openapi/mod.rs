@@ -3,6 +3,7 @@ mod context;
 mod naming;
 mod operation;
 mod schema;
+mod scope;
 mod security;
 mod stream;
 

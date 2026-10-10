@@ -1,3 +1,4 @@
+use super::scope::SchemaScope;
 use crate::generate::openapi::naming::declarator_name;
 use crate::generate::utils::{doc_lines_from_annotations, has_annotation};
 use crate::openapi::path::{Parameter, ParameterBuilder, ParameterIn};
@@ -45,92 +46,7 @@ pub(crate) fn parameter_schema(
 
 #[cfg(test)]
 pub(crate) fn schema_for_struct(members: &[hir::Member]) -> RefOr<Schema> {
-    schema_for_struct_with_annotations(members, &[])
-}
-
-pub(crate) fn schema_for_struct_with_annotations(
-    members: &[hir::Member],
-    container_annotations: &[hir::Annotation],
-) -> RefOr<Schema> {
-    let mut object = ObjectBuilder::new().schema_type(Type::Object);
-    let mut flattened = Vec::new();
-    for member in members {
-        if hir::is_skipped(&member.annotations) {
-            continue;
-        }
-        let optional = member.is_optional();
-        let doc = doc_text(&member.annotations);
-        for decl in &member.ident {
-            let name = hir::effective_wire_name(
-                &declarator_name(decl),
-                &member.annotations,
-                container_annotations,
-            );
-            let schema =
-                apply_schema_description(schema_for_decl(&member.ty, decl), doc.as_deref());
-            if has_annotation(&member.annotations, "flatten") {
-                flattened.push(schema);
-                continue;
-            }
-            object = object.property(name.clone(), schema);
-            if !optional {
-                object = object.required(name);
-            }
-        }
-    }
-    let object = RefOr::T(Schema::from(object));
-    if flattened.is_empty() {
-        object
-    } else {
-        let mut combined = AllOf::new();
-        combined.items.push(object);
-        combined.items.extend(flattened);
-        RefOr::T(Schema::from(combined))
-    }
-}
-
-pub(crate) fn schema_for_union(def: &hir::UnionDef) -> RefOr<Schema> {
-    let mut variants = Vec::new();
-    for case in &def.case {
-        let decl = &case.element.value;
-        let name = declarator_name(decl);
-        let schema = apply_schema_description(
-            schema_for_element(&case.element.ty, decl),
-            doc_text(&case.element.annotations).as_deref(),
-        );
-        let object = ObjectBuilder::new()
-            .schema_type(Type::Object)
-            .property(name.clone(), schema)
-            .required(name);
-        variants.push(RefOr::T(Schema::from(object)));
-    }
-    let mut one_of = OneOf::new();
-    one_of.items = variants;
-    RefOr::T(Schema::from(one_of))
-}
-
-fn schema_for_element(ty: &hir::ElementSpecTy, decl: &hir::Declarator) -> RefOr<Schema> {
-    match ty {
-        hir::ElementSpecTy::TypeSpec(spec) => schema_for_decl(spec, decl),
-        hir::ElementSpecTy::ConstrTypeDcl(constr) => schema_for_constr_type(constr, &[]),
-    }
-}
-
-fn schema_for_decl(ty: &hir::TypeSpec, decl: &hir::Declarator) -> RefOr<Schema> {
-    let mut schema = schema_for_type(ty);
-    if let hir::Declarator::ArrayDeclarator(array) = decl {
-        for len in &array.len {
-            let mut array_schema = ArrayBuilder::new().items(schema);
-            if let Some(size) =
-                xidl_parser::hir::const_expr_to_i64(&len.0).filter(|size| *size >= 0)
-            {
-                let size = size as usize;
-                array_schema = array_schema.min_items(Some(size)).max_items(Some(size));
-            }
-            schema = RefOr::T(Schema::from(array_schema));
-        }
-    }
-    schema
+    SchemaScope::new(&[]).schema_for_struct_with_annotations(members, &[])
 }
 
 pub(crate) fn apply_schema_description(
@@ -174,51 +90,6 @@ pub(crate) fn apply_deprecation_note(
     Some(note)
 }
 
-pub(crate) fn schema_for_type(ty: &hir::TypeSpec) -> RefOr<Schema> {
-    match ty {
-        hir::TypeSpec::IntegerType(value) => integer_schema(value),
-        hir::TypeSpec::FloatingPtType | hir::TypeSpec::FixedPtType(_) => RefOr::T(Schema::from(
-            ObjectBuilder::new()
-                .schema_type(Type::Number)
-                .format(Some(SchemaFormat::KnownFormat(KnownFormat::Double))),
-        )),
-        hir::TypeSpec::CharType
-        | hir::TypeSpec::WideCharType
-        | hir::TypeSpec::StringType(_)
-        | hir::TypeSpec::WideStringType(_) => {
-            RefOr::T(Schema::from(ObjectBuilder::new().schema_type(Type::String)))
-        }
-        hir::TypeSpec::Boolean => RefOr::T(Schema::from(
-            ObjectBuilder::new().schema_type(Type::Boolean),
-        )),
-        hir::TypeSpec::AnyType | hir::TypeSpec::ObjectType | hir::TypeSpec::ValueBaseType => {
-            RefOr::T(Schema::from(ObjectBuilder::new()))
-        }
-        hir::TypeSpec::ScopedName(value) => schema_ref(&scoped_name_ref(value)),
-        hir::TypeSpec::SequenceType(seq) => {
-            let mut schema = ArrayBuilder::new().items(schema_for_type(&seq.ty));
-            if let Some(size) = seq
-                .len
-                .as_ref()
-                .and_then(|len| xidl_parser::hir::const_expr_to_i64(&len.0))
-                .filter(|size| *size >= 0)
-            {
-                let size = size as usize;
-                schema = schema.min_items(Some(size)).max_items(Some(size));
-            }
-            RefOr::T(Schema::from(schema))
-        }
-        hir::TypeSpec::MapType(map) => RefOr::T(Schema::from(
-            ObjectBuilder::new()
-                .schema_type(Type::Object)
-                .additional_properties(Some(schema_for_type(&map.value))),
-        )),
-        hir::TypeSpec::TemplateType(_) => {
-            RefOr::T(Schema::from(ObjectBuilder::new().schema_type(Type::Object)))
-        }
-    }
-}
-
 fn integer_schema(value: &hir::IntegerType) -> RefOr<Schema> {
     let mut object = ObjectBuilder::new().schema_type(Type::Integer);
     match value {
@@ -244,35 +115,6 @@ fn integer_schema(value: &hir::IntegerType) -> RefOr<Schema> {
     RefOr::T(Schema::from(object))
 }
 
-pub(crate) fn schema_for_constr_type(
-    constr: &hir::ConstrTypeDcl,
-    module_path: &[String],
-) -> RefOr<Schema> {
-    match constr {
-        hir::ConstrTypeDcl::StructDcl(def) => {
-            schema_ref(&super::naming::scoped_name(module_path, &def.ident))
-        }
-        hir::ConstrTypeDcl::EnumDcl(def) => {
-            schema_ref(&super::naming::scoped_name(module_path, &def.ident))
-        }
-        hir::ConstrTypeDcl::UnionDef(def) => {
-            schema_ref(&super::naming::scoped_name(module_path, &def.ident))
-        }
-        hir::ConstrTypeDcl::BitsetDcl(def) => {
-            schema_ref(&super::naming::scoped_name(module_path, &def.ident))
-        }
-        hir::ConstrTypeDcl::BitmaskDcl(def) => {
-            schema_ref(&super::naming::scoped_name(module_path, &def.ident))
-        }
-        hir::ConstrTypeDcl::StructForwardDcl(def) => {
-            schema_ref(&super::naming::scoped_name(module_path, &def.ident))
-        }
-        hir::ConstrTypeDcl::UnionForwardDcl(def) => {
-            schema_ref(&super::naming::scoped_name(module_path, &def.ident))
-        }
-    }
-}
-
 pub(crate) fn error_schema_ref() -> RefOr<Schema> {
     schema_ref("Error")
 }
@@ -283,4 +125,169 @@ pub(crate) fn schema_ref(name: &str) -> RefOr<Schema> {
 
 fn scoped_name_ref(value: &hir::ScopedName) -> String {
     value.name.join(".")
+}
+
+impl SchemaScope<'_> {
+    pub(crate) fn schema_for_struct_with_annotations(
+        self,
+        members: &[hir::Member],
+        container_annotations: &[hir::Annotation],
+    ) -> RefOr<Schema> {
+        let mut object = ObjectBuilder::new().schema_type(Type::Object);
+        let mut flattened = Vec::new();
+        for member in members {
+            if hir::is_skipped(&member.annotations) {
+                continue;
+            }
+            let optional = member.is_optional();
+            let doc = doc_text(&member.annotations);
+            for decl in &member.ident {
+                let name = hir::effective_wire_name(
+                    &declarator_name(decl),
+                    &member.annotations,
+                    container_annotations,
+                );
+                let schema = apply_schema_description(
+                    self.schema_for_decl(&member.ty, decl),
+                    doc.as_deref(),
+                );
+                if has_annotation(&member.annotations, "flatten") {
+                    flattened.push(schema);
+                    continue;
+                }
+                object = object.property(name.clone(), schema);
+                if !optional {
+                    object = object.required(name);
+                }
+            }
+        }
+        let object = RefOr::T(Schema::from(object));
+        if flattened.is_empty() {
+            object
+        } else {
+            let mut combined = AllOf::new();
+            combined.items.push(object);
+            combined.items.extend(flattened);
+            RefOr::T(Schema::from(combined))
+        }
+    }
+
+    pub(crate) fn schema_for_union(self, def: &hir::UnionDef) -> RefOr<Schema> {
+        let mut variants = Vec::new();
+        for case in &def.case {
+            let decl = &case.element.value;
+            let name = declarator_name(decl);
+            let schema = apply_schema_description(
+                self.schema_for_element(&case.element.ty, decl),
+                doc_text(&case.element.annotations).as_deref(),
+            );
+            let object = ObjectBuilder::new()
+                .schema_type(Type::Object)
+                .property(name.clone(), schema)
+                .required(name);
+            variants.push(RefOr::T(Schema::from(object)));
+        }
+        let mut one_of = OneOf::new();
+        one_of.items = variants;
+        RefOr::T(Schema::from(one_of))
+    }
+
+    fn schema_for_element(self, ty: &hir::ElementSpecTy, decl: &hir::Declarator) -> RefOr<Schema> {
+        match ty {
+            hir::ElementSpecTy::TypeSpec(spec) => self.schema_for_decl(spec, decl),
+            hir::ElementSpecTy::ConstrTypeDcl(constr) => {
+                SchemaScope::new(&[]).schema_for_constr_type(constr)
+            }
+        }
+    }
+
+    fn schema_for_decl(self, ty: &hir::TypeSpec, decl: &hir::Declarator) -> RefOr<Schema> {
+        let mut schema = self.schema_for_type(ty);
+        if let hir::Declarator::ArrayDeclarator(array) = decl {
+            for len in &array.len {
+                let mut array_schema = ArrayBuilder::new().items(schema);
+                if let Some(size) =
+                    xidl_parser::hir::const_expr_to_i64(&len.0).filter(|size| *size >= 0)
+                {
+                    let size = size as usize;
+                    array_schema = array_schema.min_items(Some(size)).max_items(Some(size));
+                }
+                schema = RefOr::T(Schema::from(array_schema));
+            }
+        }
+        schema
+    }
+
+    pub(crate) fn schema_for_type(self, ty: &hir::TypeSpec) -> RefOr<Schema> {
+        match ty {
+            hir::TypeSpec::IntegerType(value) => integer_schema(value),
+            hir::TypeSpec::FloatingPtType | hir::TypeSpec::FixedPtType(_) => {
+                RefOr::T(Schema::from(
+                    ObjectBuilder::new()
+                        .schema_type(Type::Number)
+                        .format(Some(SchemaFormat::KnownFormat(KnownFormat::Double))),
+                ))
+            }
+            hir::TypeSpec::CharType
+            | hir::TypeSpec::WideCharType
+            | hir::TypeSpec::StringType(_)
+            | hir::TypeSpec::WideStringType(_) => {
+                RefOr::T(Schema::from(ObjectBuilder::new().schema_type(Type::String)))
+            }
+            hir::TypeSpec::Boolean => RefOr::T(Schema::from(
+                ObjectBuilder::new().schema_type(Type::Boolean),
+            )),
+            hir::TypeSpec::AnyType | hir::TypeSpec::ObjectType | hir::TypeSpec::ValueBaseType => {
+                RefOr::T(Schema::from(ObjectBuilder::new()))
+            }
+            hir::TypeSpec::ScopedName(value) => schema_ref(&scoped_name_ref(value)),
+            hir::TypeSpec::SequenceType(seq) => {
+                let mut schema = ArrayBuilder::new().items(self.schema_for_type(&seq.ty));
+                if let Some(size) = seq
+                    .len
+                    .as_ref()
+                    .and_then(|len| xidl_parser::hir::const_expr_to_i64(&len.0))
+                    .filter(|size| *size >= 0)
+                {
+                    let size = size as usize;
+                    schema = schema.min_items(Some(size)).max_items(Some(size));
+                }
+                RefOr::T(Schema::from(schema))
+            }
+            hir::TypeSpec::MapType(map) => RefOr::T(Schema::from(
+                ObjectBuilder::new()
+                    .schema_type(Type::Object)
+                    .additional_properties(Some(self.schema_for_type(&map.value))),
+            )),
+            hir::TypeSpec::TemplateType(_) => {
+                RefOr::T(Schema::from(ObjectBuilder::new().schema_type(Type::Object)))
+            }
+        }
+    }
+
+    pub(crate) fn schema_for_constr_type(self, constr: &hir::ConstrTypeDcl) -> RefOr<Schema> {
+        match constr {
+            hir::ConstrTypeDcl::StructDcl(def) => {
+                schema_ref(&super::naming::scoped_name(self.module_path, &def.ident))
+            }
+            hir::ConstrTypeDcl::EnumDcl(def) => {
+                schema_ref(&super::naming::scoped_name(self.module_path, &def.ident))
+            }
+            hir::ConstrTypeDcl::UnionDef(def) => {
+                schema_ref(&super::naming::scoped_name(self.module_path, &def.ident))
+            }
+            hir::ConstrTypeDcl::BitsetDcl(def) => {
+                schema_ref(&super::naming::scoped_name(self.module_path, &def.ident))
+            }
+            hir::ConstrTypeDcl::BitmaskDcl(def) => {
+                schema_ref(&super::naming::scoped_name(self.module_path, &def.ident))
+            }
+            hir::ConstrTypeDcl::StructForwardDcl(def) => {
+                schema_ref(&super::naming::scoped_name(self.module_path, &def.ident))
+            }
+            hir::ConstrTypeDcl::UnionForwardDcl(def) => {
+                schema_ref(&super::naming::scoped_name(self.module_path, &def.ident))
+            }
+        }
+    }
 }
