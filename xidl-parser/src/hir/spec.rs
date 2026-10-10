@@ -25,30 +25,45 @@ impl Specification {
     pub fn from_typed_ast_with_properties_and_path(
         value: crate::typed_ast::Specification,
         properties: ParserProperties,
-        path: impl AsRef<Path>,
+        _path: impl AsRef<Path>,
     ) -> crate::error::ParserResult<Self> {
-        spec_from_typed_ast_with_path(value, expand_interface(&properties), path.as_ref())
+        Self::lower(value, expand_interface(&properties))
     }
 
     pub fn from_typed_ast_with_path(
         value: crate::typed_ast::Specification,
-        path: impl AsRef<Path>,
+        _path: impl AsRef<Path>,
     ) -> crate::error::ParserResult<Self> {
-        spec_from_typed_ast_with_path(value, true, path.as_ref())
+        Self::lower(value, true)
     }
 
     pub fn project_typed_ast_with_properties_and_path(
         value: crate::typed_ast::Specification,
         properties: ParserProperties,
-        path: impl AsRef<Path>,
+        _path: impl AsRef<Path>,
     ) -> crate::error::ParserResult<ProjectedHir> {
-        let spec =
-            spec_from_typed_ast_with_path(value, expand_interface(&properties), path.as_ref())?;
+        let spec = Self::lower(value, expand_interface(&properties))?;
         match hir_projection_kind(&properties) {
             HirProjectionKind::Rpc => Ok(ProjectedHir::Rpc(spec)),
             HirProjectionKind::Http => rest_hir::project(&spec).map(ProjectedHir::Http),
             HirProjectionKind::JsonRpc => jsonrpc_hir::project(&spec).map(ProjectedHir::JsonRpc),
         }
+    }
+
+    fn lower(
+        value: crate::typed_ast::Specification,
+        expand_interfaces: bool,
+    ) -> crate::error::ParserResult<Self> {
+        let mut definitions = Vec::new();
+        collect_defs_with_context(
+            value.0,
+            &mut Vec::new(),
+            expand_interfaces,
+            &mut definitions,
+        )?;
+        let mut spec = Self(definitions);
+        semantic::analyze(&mut spec);
+        Ok(spec)
     }
 }
 
@@ -56,34 +71,7 @@ pub(crate) fn spec_from_typed_ast(
     value: crate::typed_ast::Specification,
     expand_interfaces: bool,
 ) -> Specification {
-    let mut definitions = Vec::new();
-    collect_defs_with_context(
-        value.0,
-        &mut Vec::new(),
-        expand_interfaces,
-        &mut definitions,
-    )
-    .expect("HIR conversion should not fail");
-    let mut spec = Specification(definitions);
-    semantic::analyze(&mut spec);
-    spec
-}
-
-fn spec_from_typed_ast_with_path(
-    value: crate::typed_ast::Specification,
-    expand_interfaces: bool,
-    _path: &Path,
-) -> crate::error::ParserResult<Specification> {
-    let mut definitions = Vec::new();
-    collect_defs_with_context(
-        value.0,
-        &mut Vec::new(),
-        expand_interfaces,
-        &mut definitions,
-    )?;
-    let mut spec = Specification(definitions);
-    semantic::analyze(&mut spec);
-    Ok(spec)
+    Specification::lower(value, expand_interfaces).expect("HIR conversion should not fail")
 }
 
 fn collect_defs_with_context(
