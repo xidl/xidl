@@ -58,7 +58,7 @@ import {
             this.codecs = options.codecs ?? {};
         }
         
-            async get_file(key: string): Promise<{ kind: "Json", value: types.FileMeta, etag: string, tags: Array<string>, cached: boolean } | { kind: "OctetStream", value: Uint8Array, etag: string, tags: Array<string>, cached: boolean } | { kind: "Text", value: string, etag: string, tags: Array<string>, cached: boolean }> {
+            async get_file(key: string): Promise<{ kind: "Json", value: types.representations.FileMeta, etag: string, tags: Array<string>, cached: boolean } | { kind: "OctetStream", value: Uint8Array, etag: string, tags: Array<string>, cached: boolean } | { kind: "Text", value: string, etag: string, tags: Array<string>, cached: boolean }> {
                 const parsed = ifaceSchemas.EnvelopeApiGetFileRequestSchema.parse({ "key": key });
                 let xidlPath = "/file";
                 const query = new URLSearchParams();
@@ -83,17 +83,17 @@ import {
             
                 if (contentType === "application/json") {
                     const value = await decodeResponseBody(resp, "application/json", this.codecs);
-                    return { kind: "Json", value, ...buildResponsePayload(undefined, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }, { name: "X-Tag", key: "tags", optional: false, isMulti: true, decode: value => value }], [{ name: "cached", key: "cached", optional: false, isMulti: false }]) } as { kind: "Json", value: types.FileMeta, etag: string, tags: Array<string>, cached: boolean } | { kind: "OctetStream", value: Uint8Array, etag: string, tags: Array<string>, cached: boolean } | { kind: "Text", value: string, etag: string, tags: Array<string>, cached: boolean };
+                    return { kind: "Json", value, ...buildResponsePayload(undefined, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }, { name: "X-Tag", key: "tags", optional: false, isMulti: true, decode: value => value }], [{ name: "cached", key: "cached", optional: false, isMulti: false }]) } as { kind: "Json", value: types.representations.FileMeta, etag: string, tags: Array<string>, cached: boolean } | { kind: "OctetStream", value: Uint8Array, etag: string, tags: Array<string>, cached: boolean } | { kind: "Text", value: string, etag: string, tags: Array<string>, cached: boolean };
                 }
             
                 if (contentType === "application/octet-stream") {
                     const value = new Uint8Array(await resp.arrayBuffer());
-                    return { kind: "OctetStream", value, ...buildResponsePayload(undefined, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }, { name: "X-Tag", key: "tags", optional: false, isMulti: true, decode: value => value }], [{ name: "cached", key: "cached", optional: false, isMulti: false }]) } as { kind: "Json", value: types.FileMeta, etag: string, tags: Array<string>, cached: boolean } | { kind: "OctetStream", value: Uint8Array, etag: string, tags: Array<string>, cached: boolean } | { kind: "Text", value: string, etag: string, tags: Array<string>, cached: boolean };
+                    return { kind: "OctetStream", value, ...buildResponsePayload(undefined, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }, { name: "X-Tag", key: "tags", optional: false, isMulti: true, decode: value => value }], [{ name: "cached", key: "cached", optional: false, isMulti: false }]) } as { kind: "Json", value: types.representations.FileMeta, etag: string, tags: Array<string>, cached: boolean } | { kind: "OctetStream", value: Uint8Array, etag: string, tags: Array<string>, cached: boolean } | { kind: "Text", value: string, etag: string, tags: Array<string>, cached: boolean };
                 }
             
                 if (contentType === "text/plain") {
                     const value = await decodeResponseBody(resp, "text/plain", this.codecs);
-                    return { kind: "Text", value, ...buildResponsePayload(undefined, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }, { name: "X-Tag", key: "tags", optional: false, isMulti: true, decode: value => value }], [{ name: "cached", key: "cached", optional: false, isMulti: false }]) } as { kind: "Json", value: types.FileMeta, etag: string, tags: Array<string>, cached: boolean } | { kind: "OctetStream", value: Uint8Array, etag: string, tags: Array<string>, cached: boolean } | { kind: "Text", value: string, etag: string, tags: Array<string>, cached: boolean };
+                    return { kind: "Text", value, ...buildResponsePayload(undefined, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }, { name: "X-Tag", key: "tags", optional: false, isMulti: true, decode: value => value }], [{ name: "cached", key: "cached", optional: false, isMulti: false }]) } as { kind: "Json", value: types.representations.FileMeta, etag: string, tags: Array<string>, cached: boolean } | { kind: "OctetStream", value: Uint8Array, etag: string, tags: Array<string>, cached: boolean } | { kind: "Text", value: string, etag: string, tags: Array<string>, cached: boolean };
                 }
             
             throw await parseXidlError(resp);
@@ -201,14 +201,10 @@ http_envelope.d.ts
 
 
     
-export type ContentType = "application/json" | "application/octet-stream" | "text/plain";
-
-    
 
 export interface FileMeta {
         
-            id: string;
-                etag: string;
+            wrong: string;
             }
 
     
@@ -235,9 +231,19 @@ export interface NotFound {
                 msg: string;
             }
 
-    
+    export namespace representations {
+    export type ContentType = "application/json" | "application/octet-stream" | "text/plain";
 
-export type FileResponse = { meta: FileMeta } | { raw: Array<number> } | { text: string };
+
+    export interface FileMeta {
+            
+                id: string;
+                    etag: string;
+                }
+
+
+    export type FileResponse = { meta: FileMeta } | { raw: Array<number> } | { text: string };
+}
 
 export {};
 ===============
@@ -327,7 +333,7 @@ export interface EnvelopeApiGetFileRequest {
     
 
 export interface EnvelopeApiGetFileResponse {
-        return: types.FileResponse;
+        return: types.representations.FileResponse;
             etag: string;
             tags: Array<string>;
             cached: boolean;
@@ -361,7 +367,7 @@ export type EnvelopeApiGetFileRequest = z.infer<typeof EnvelopeApiGetFileRequest
 
     
 export const EnvelopeApiGetFileResponseSchema = z.object({
-        return: models.FileResponseSchema,
+        return: models.representations.FileResponseSchema,
         etag: z.coerce.string(),
         tags: z.array(z.coerce.string()),
         cached: z.coerce.boolean(),
@@ -568,14 +574,9 @@ import { z } from "zod";
 import { xjson } from "xidl-typescript-codec";
 
     
-export const ContentTypeSchema = z.enum(["application/json", "application/octet-stream", "text/plain"]);
-
-    
     export const FileMetaSchema = z.object({
         
-            id: z.coerce.string(),
-        
-            etag: z.coerce.string()
+            wrong: z.coerce.string()
         
     });
 
@@ -606,5 +607,16 @@ export const ContentTypeSchema = z.enum(["application/json", "application/octet-
         
     });
 
-    
-    export const FileResponseSchema = z.union([z.object({ meta: FileMetaSchema }), z.object({ raw: z.array(z.coerce.number().int().nonnegative()) }), z.object({ text: z.coerce.string() })]);
+    export namespace representations {
+    export const ContentTypeSchema = z.enum(["application/json", "application/octet-stream", "text/plain"]);
+
+        export const FileMetaSchema = z.object({
+            
+                id: z.coerce.string(),
+            
+                etag: z.coerce.string()
+            
+        });
+
+        export const FileResponseSchema = z.union([z.object({ meta: FileMetaSchema }), z.object({ raw: z.array(z.coerce.number().int().nonnegative()) }), z.object({ text: z.coerce.string() })]);
+}

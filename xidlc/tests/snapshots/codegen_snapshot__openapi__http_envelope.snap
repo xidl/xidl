@@ -8,14 +8,6 @@ openapi_http_envelope.json
 {
   "components": {
     "schemas": {
-      "ContentType": {
-        "enum": [
-          "application/json",
-          "application/octet-stream",
-          "text/plain"
-        ],
-        "type": "string"
-      },
       "Error": {
         "properties": {
           "code": {
@@ -36,6 +28,62 @@ openapi_http_envelope.json
       },
       "FileMeta": {
         "properties": {
+          "wrong": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "wrong"
+        ],
+        "type": "object"
+      },
+      "NotFound": {
+        "properties": {
+          "code": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "msg": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "msg"
+        ],
+        "type": "object"
+      },
+      "NotModified": {
+        "type": "object"
+      },
+      "PreconditionFailed": {
+        "properties": {
+          "code": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "msg": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "msg"
+        ],
+        "type": "object"
+      },
+      "representations.ContentType": {
+        "enum": [
+          "application/json",
+          "application/octet-stream",
+          "text/plain"
+        ],
+        "type": "string"
+      },
+      "representations.FileMeta": {
+        "properties": {
           "etag": {
             "type": "string"
           },
@@ -49,7 +97,7 @@ openapi_http_envelope.json
         ],
         "type": "object"
       },
-      "FileResponse": {
+      "representations.FileResponse": {
         "oneOf": [
           {
             "properties": {
@@ -90,43 +138,6 @@ openapi_http_envelope.json
             "type": "object"
           }
         ]
-      },
-      "NotFound": {
-        "properties": {
-          "code": {
-            "format": "int32",
-            "minimum": 0,
-            "type": "integer"
-          },
-          "msg": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "code",
-          "msg"
-        ],
-        "type": "object"
-      },
-      "NotModified": {
-        "type": "object"
-      },
-      "PreconditionFailed": {
-        "properties": {
-          "code": {
-            "format": "int32",
-            "minimum": 0,
-            "type": "integer"
-          },
-          "msg": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "code",
-          "msg"
-        ],
-        "type": "object"
       }
     }
   },
@@ -213,7 +224,7 @@ openapi_http_envelope.json
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FileMeta"
+                  "$ref": "#/components/schemas/representations.FileMeta"
                 }
               },
               "application/octet-stream": {

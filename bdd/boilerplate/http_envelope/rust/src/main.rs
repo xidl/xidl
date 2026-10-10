@@ -2,6 +2,7 @@ use async_trait::async_trait;
 
 pub mod gen { include!("../{{MODULE_NAME}}.rs"); }
 use gen::*;
+use gen::representations::{FileMeta, FileResponse};
 
 struct Files;
 #[async_trait]
