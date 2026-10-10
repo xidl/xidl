@@ -1,3 +1,6 @@
+// The examples embed generated fixtures; the generator's whitespace is
+// not under our control here.
+#![allow(unknown_lints, clippy::empty_line_after_outer_attr)]
 #![allow(deprecated)]
 
 pub mod hello_world {
