@@ -1,12 +1,12 @@
-#[cfg(feature = "server")]
+#[cfg(feature = "router")]
 use axum_extra::headers::{Error as HeaderError, Header};
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
 use http::HeaderMap;
-#[cfg(feature = "server")]
+#[cfg(feature = "router")]
 use http::HeaderValue;
 use http::header::AUTHORIZATION;
-#[cfg(feature = "server")]
+#[cfg(feature = "router")]
 use http::header::HeaderName;
 
 /// Parsed HTTP Basic auth credentials.
@@ -88,7 +88,7 @@ impl BearerHeader {
     }
 }
 
-#[cfg(feature = "server")]
+#[cfg(feature = "router")]
 impl Header for BearerHeader {
     fn name() -> &'static HeaderName {
         &AUTHORIZATION

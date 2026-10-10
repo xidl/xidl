@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-#[cfg(feature = "server")]
+#[cfg(feature = "router")]
 use axum::response::{IntoResponse, Response};
 use http::StatusCode;
 use serde::{Deserialize, Serialize};
@@ -277,7 +277,7 @@ impl From<Error> for ErrorBody {
     }
 }
 
-#[cfg(feature = "server")]
+#[cfg(feature = "router")]
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
         let status = self.http_status();
@@ -303,7 +303,7 @@ pub struct ErrorBody {
 mod tests {
     use super::*;
 
-    #[cfg(feature = "server")]
+    #[cfg(feature = "router")]
     #[test]
     fn invalid_error_code_falls_back_to_internal_server_error() {
         let response = Error::new(42, "boom").into_response();

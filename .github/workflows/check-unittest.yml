@@ -153,3 +153,5 @@ jobs:
       - name: Check wasm compilation
         run: |
           cargo check -p xidl-rust-axum --target wasm32-unknown-unknown --no-default-features --features client
+          cargo check -p xidl-rust-axum --target wasm32-unknown-unknown --no-default-features --features router
+          bash ci/check-router-wasm.sh
