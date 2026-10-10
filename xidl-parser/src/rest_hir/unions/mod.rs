@@ -1,7 +1,9 @@
 mod types;
 
 use super::mapping::is_byte_sequence;
-use super::model::{HttpOperation, HttpRepresentation, HttpUnion};
+use super::model::{
+    HttpOperation, HttpOutputSource, HttpRepresentation, HttpResponseBodyShape, HttpUnion,
+};
 use super::semantics::has_annotation;
 use crate::error::{ParseError, ParserResult};
 use crate::hir;
@@ -67,6 +69,18 @@ impl HttpUnion {
         })?;
         let mut cases = Vec::new();
         for case in &union.case {
+            if has_annotation(&case.element.annotations, "flatten") {
+                return Err(ParseError::Message(format!(
+                    "@http union '{}': @flatten on cases is unsupported; declare response headers and cookies as operation output parameters",
+                    union.ident
+                )));
+            }
+            if matches!(case.element.value, hir::Declarator::ArrayDeclarator(_)) {
+                return Err(ParseError::Message(format!(
+                    "@http union '{}': array case declarators are unsupported; use a sequence or named struct payload",
+                    union.ident
+                )));
+            }
             if case.label.len() != 1
                 || case
                     .label
@@ -201,6 +215,19 @@ impl HttpRepresentation {
         if operation.meta.stream.kind.is_some() || has_upgrade {
             return Err(ParseError::Message(format!(
                 "operation '{}': @http union return types are only supported on non-stream, non-upgrade operations",
+                operation.meta.name
+            )));
+        }
+        if !matches!(
+            operation.http.response.body.shape,
+            HttpResponseBodyShape::ReturnOnly { .. }
+                | HttpResponseBodyShape::SingleValue {
+                    source: HttpOutputSource::ReturnValue,
+                    ..
+                }
+        ) {
+            return Err(ParseError::Message(format!(
+                "operation '{}': @http union responses cannot have additional body outputs; use header or cookie output parameters",
                 operation.meta.name
             )));
         }

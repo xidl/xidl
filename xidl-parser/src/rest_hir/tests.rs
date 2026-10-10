@@ -293,3 +293,57 @@ fn http_union_payloads_keep_their_declaration_scope() {
     assert!(name.is_root);
     assert_eq!(name.name, ["domain", "OtherAlias"]);
 }
+
+#[test]
+fn http_union_rejects_extra_body_outputs() {
+    for parameter in ["out uint32 count", "inout uint32 count"] {
+        let spec = parse(&format!(
+            r#"
+            enum Mime {{ Json, }};
+            @http union Payload switch (Mime) {{ case Json: string value; }};
+            interface Files {{ @get(path="/file") Payload read({parameter}); }};
+            "#,
+        ));
+        let error = super::project(&spec).expect_err("ambiguous union body outputs");
+        assert!(
+            error
+                .to_string()
+                .contains("cannot have additional body outputs")
+        );
+    }
+}
+
+#[test]
+fn http_union_rejects_array_case_declarators() {
+    let spec = parse(
+        r#"
+        enum Mime { Json, };
+        @http union Payload switch (Mime) { case Json: uint32 values[3]; };
+        interface Files { @get(path="/file") Payload read(); };
+        "#,
+    );
+    let error = super::project(&spec).expect_err("unsupported array case");
+    assert!(
+        error
+            .to_string()
+            .contains("array case declarators are unsupported")
+    );
+}
+
+#[test]
+fn http_union_rejects_unprojected_case_metadata() {
+    let spec = parse(
+        r#"
+        enum Mime { Json, };
+        struct Envelope { @header string etag; string value; };
+        @http union Payload switch (Mime) { case Json: @flatten Envelope value; };
+        interface Files { @get(path="/file") Payload read(); };
+        "#,
+    );
+    let error = super::project(&spec).expect_err("unsupported case metadata");
+    assert!(
+        error
+            .to_string()
+            .contains("@flatten on cases is unsupported")
+    );
+}
