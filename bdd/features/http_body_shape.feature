@@ -1,3 +1,4 @@
+@bdd_rest-serialization
 Feature: Response body values and explicit upload media types
   Scenario Outline: Bare values preserve response headers and uploaded bytes
     Given a REST IDL file "bdd/features/data/http_body_shape.idl"

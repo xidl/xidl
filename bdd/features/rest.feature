@@ -3,6 +3,7 @@ Feature: REST API Generation and Communication
   I want to generate REST API code with various features and ensure they work
   So that I can build robust microservices
 
+  @bdd_jsonrpc-and-rest-core
   Scenario Outline: Basic REST Communication
     Given a REST IDL file "bdd/features/data/complex_rest.idl"
     When I generate <lang> code for the IDL
@@ -18,6 +19,7 @@ Feature: REST API Generation and Communication
       | ts   |
       | nextjs |
 
+  @bdd_jsonrpc-and-rest-core
   Scenario Outline: REST with Unions and Attributes
     Given a REST IDL file "bdd/features/data/all_scenarios.idl"
     When I generate <lang> code for the IDL
@@ -31,6 +33,7 @@ Feature: REST API Generation and Communication
       | go   |
       | ts   |
 
+  @bdd_jsonrpc-and-rest-core
   Scenario Outline: REST Attributes
     Given a REST IDL file "bdd/features/data/all_scenarios.idl"
     When I generate <lang> code for the IDL
@@ -44,6 +47,7 @@ Feature: REST API Generation and Communication
       | go   |
       | ts   |
 
+  @bdd_jsonrpc-and-rest-core
   Scenario Outline: REST Streaming
     Given a REST IDL file "bdd/features/data/streaming.idl"
     When I generate <lang> code for the IDL
@@ -57,6 +61,7 @@ Feature: REST API Generation and Communication
       | go   |
       | ts   |
 
+  @bdd_rest-media-and-any
   Scenario Outline: REST Form-urlencoded
     Given a REST IDL file "bdd/features/data/media_types.idl"
     When I generate <lang> code for the IDL
@@ -70,24 +75,28 @@ Feature: REST API Generation and Communication
       | go   |
       | ts   |
 
+  @bdd_rest-media-and-any
   Scenario: TypeScript REST Schema Imports
     Given a REST IDL file "bdd/features/data/complex_rest.idl"
     When I generate ts code for the IDL
     Then the generated ts code should be valid
     And the generated ts iface zod file should import the model schemas
 
+  @bdd_rest-media-and-any
   Scenario: TypeScript recursive type schemas compile and load lazily
     Given a REST IDL file "bdd/features/data/recursive.idl"
     When I generate ts code for the IDL
     Then the generated ts code should be valid
     And the generated ts recursive zod schema should load and parse at runtime
 
+  @bdd_rest-media-and-any
   Scenario: TypeScript module-scoped types compile and load across generated files
     Given a REST IDL file "bdd/features/data/module_scope.idl"
     When I generate ts code for the IDL
     Then the generated ts code should be valid
     And the generated module-scoped zod schemas should load and parse at runtime
 
+  @bdd_rest-media-and-any
   Scenario Outline: REST Flatten Any and StructWithAny (Issue 171)
     Given a REST IDL file "bdd/features/data/issue_171.idl"
     When I generate <lang> code for the IDL
@@ -109,6 +118,7 @@ Feature: REST API Generation and Communication
     And I can run the generated <lang> server using boilerplate
     Then I can run hurl tests against the server
 
+    @bdd_rest-boilerplate-a
     Examples:
       | idl              | lang |
       | complex_rest     | rust |
@@ -117,11 +127,17 @@ Feature: REST API Generation and Communication
       | city_rest        | rust |
       | city_rest        | go   |
       | city_rest        | ts   |
+    @bdd_rest-boilerplate-b
+    Examples:
+      | idl              | lang |
       | rest_server      | rust |
       | rest_server      | go   |
       | rest_server      | ts   |
       | byte_stream      | rust |
       | byte_stream      | ts   |
+    @bdd_rest-boilerplate-c
+    Examples:
+      | idl              | lang |
       | rest_media_types | rust |
       | rest_media_types | go   |
       | rest_media_types | ts   |
@@ -129,6 +145,7 @@ Feature: REST API Generation and Communication
       | e2e_test         | go   |
       | e2e_test         | ts   |
 
+  @bdd_rest-errors
   Scenario Outline: REST Bad Path - Not Found
     Given a REST IDL file "bdd/features/data/complex_rest.idl"
     When I generate <lang> code for the IDL
@@ -142,6 +159,7 @@ Feature: REST API Generation and Communication
       | go   |
       | ts   |
 
+  @bdd_rest-errors
   Scenario Outline: REST Bad Path - Invalid Parameter
     Given a REST IDL file "bdd/features/data/complex_rest.idl"
     When I generate <lang> code for the IDL
@@ -155,6 +173,7 @@ Feature: REST API Generation and Communication
       | go   |
       | ts   |
 
+  @bdd_rest-errors
   Scenario: REST Bad Path - Invalid Parameter (Rust)
     Given a REST IDL file "bdd/features/data/complex_rest.idl"
     When I generate rust code for the IDL
@@ -162,6 +181,7 @@ Feature: REST API Generation and Communication
     And I can run the generated rust server and client
     Then the client gets a 400 error with msg containing "cannot parse" when requesting GET "/abc"
 
+  @bdd_rest-errors
   Scenario Outline: REST Bad Path - Not Acceptable
     Given a REST IDL file "bdd/features/data/rest_media_types.idl"
     When I generate <lang> code for the IDL
@@ -177,6 +197,7 @@ Feature: REST API Generation and Communication
       | go   |
       | ts   |
 
+  @bdd_rest-errors
   Scenario Outline: REST Bad Path - Unsupported Media Type
     Given a REST IDL file "bdd/features/data/rest_media_types.idl"
     When I generate <lang> code for the IDL
@@ -192,6 +213,7 @@ Feature: REST API Generation and Communication
       | go   |
       | ts   |
 
+  @bdd_rest-serialization
   Scenario Outline: REST Complex Streaming with Auth
     Given a REST IDL file "bdd/features/data/full_streaming.idl"
     When I generate <lang> code for the IDL
@@ -205,6 +227,7 @@ Feature: REST API Generation and Communication
       | go   |
       | ts   |
 
+  @bdd_rest-serialization
   Scenario Outline: REST Msgpack Produces
     Given a REST IDL file "bdd/features/data/rest_media_types.idl"
     When I generate <lang> code for the IDL
@@ -217,6 +240,7 @@ Feature: REST API Generation and Communication
       | go   |
       | ts   |
 
+  @bdd_rest-serialization
   Scenario Outline: REST Serialization Rules
     Given a REST IDL file "bdd/features/data/serialization.idl"
     When I generate <lang> code for the IDL
@@ -244,6 +268,7 @@ Feature: REST API Generation and Communication
       | go   |
       | ts   |
 
+  @bdd_rest-serialization
   Scenario Outline: REST Optional Header and Cookie
     Given a REST IDL file "bdd/features/data/optional_header_cookie.idl"
     When I generate <lang> code for the IDL

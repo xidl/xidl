@@ -1,3 +1,4 @@
+@bdd_rest-errors
 Feature: CORS Support
   As a developer
   I want to ensure CORS headers are correctly applied based on IDL annotations

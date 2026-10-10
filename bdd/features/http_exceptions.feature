@@ -1,3 +1,4 @@
+@bdd_rest-errors
 Feature: Typed HTTP exception contracts
   Exceptions preserve their status, response metadata and JSON body on the wire.
 

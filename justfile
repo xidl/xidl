@@ -27,6 +27,8 @@ test-go: test-go-runtime
 # Test BDD
 test-bdd: init
     python3 -m pip install -r bdd/requirements.txt
+    python3 -m unittest discover -s bdd/tests
+    python3 ci/check-bdd-shards.py
     python3 -m behave {{bdd_features}}
 
 # Test Go codegen

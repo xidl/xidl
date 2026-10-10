@@ -13,3 +13,4 @@ typescript/xidl-typescript-server/dist/
 /bdd/gen/
 /bdd/.temp/
 /python/tests/generated/
+/bdd/**/__pycache__/

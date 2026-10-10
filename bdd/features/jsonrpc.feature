@@ -1,3 +1,4 @@
+@bdd_jsonrpc-and-rest-core
 Feature: JSON-RPC API Generation and Communication
   As a developer
   I want to generate JSON-RPC API code with various features and ensure they work

@@ -17,62 +17,18 @@ jobs:
         include:
           - shard: jsonrpc-and-rest-core
             port-base: 12000
-            features: >-
-              bdd/features/jsonrpc.feature
-              bdd/features/rest.feature:6
-              bdd/features/rest.feature:21
-              bdd/features/rest.feature:34
-              bdd/features/rest.feature:47
           - shard: rest-media-and-any
             port-base: 13000
-            features: >-
-              bdd/features/rest.feature:60
-              bdd/features/rest.feature:73
-              bdd/features/rest.feature:79
           - shard: rest-boilerplate-a
             port-base: 14000
-            features: >-
-              bdd/features/rest.feature:102
-              bdd/features/rest.feature:103
-              bdd/features/rest.feature:104
-              bdd/features/rest.feature:105
-              bdd/features/rest.feature:106
           - shard: rest-boilerplate-b
             port-base: 15000
-            features: >-
-              bdd/features/rest.feature:107
-              bdd/features/rest.feature:108
-              bdd/features/rest.feature:109
-              bdd/features/rest.feature:110
-              bdd/features/rest.feature:111
           - shard: rest-boilerplate-c
             port-base: 16000
-            features: >-
-              bdd/features/rest.feature:112
-              bdd/features/rest.feature:113
-              bdd/features/rest.feature:114
-              bdd/features/rest.feature:115
-              bdd/features/rest.feature:116
-              bdd/features/rest.feature:117
-              bdd/features/rest.feature:118
           - shard: rest-errors
             port-base: 17000
-            features: >-
-              bdd/features/http_exceptions.feature
-              bdd/features/rest.feature:120
-              bdd/features/rest.feature:133
-              bdd/features/rest.feature:146
-              bdd/features/rest.feature:153
-              bdd/features/rest.feature:168
-              bdd/features/rest.feature:183
-              bdd/features/rest.feature:196
           - shard: rest-serialization
             port-base: 18000
-            features: >-
-              bdd/features/http_envelope.feature
-              bdd/features/http_body_shape.feature
-              bdd/features/rest.feature:208
-              bdd/features/rest.feature:247
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -101,13 +57,14 @@ jobs:
         env:
           XIDL_BDD_PORT_BASE: ${{ matrix.port-base }}
         run: |
-          BDD_FEATURES="${{ matrix.features }}" just test-bdd
+          BDD_FEATURES="bdd/features --tags=@bdd_${{ matrix.shard }}" just test-bdd
 
   bddtest:
     name: bddtest
     runs-on: ubuntu-latest
     needs: bddtest-shard
+    if: ${{ always() }}
     steps:
       - name: BDD shards passed
         run: |
-          echo "all bdd shards passed"
+          test "${{ needs.bddtest-shard.result }}" = "success"
