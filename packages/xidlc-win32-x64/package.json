@@ -1,0 +1,19 @@
+{
+  "cpu": [
+    "x64"
+  ],
+  "description": "Prebuilt xidlc binary for Windows x64.",
+  "files": [
+    "bin"
+  ],
+  "license": "Apache-2.0",
+  "name": "xidlc-win32-x64",
+  "os": [
+    "win32"
+  ],
+  "preferUnplugged": true,
+  "repository": {
+    "url": "https://github.com/xidl/xidl"
+  },
+  "version": "0.98.0"
+}

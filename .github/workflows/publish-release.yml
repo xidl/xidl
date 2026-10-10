@@ -128,3 +128,36 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.ref_type == 'tag' && github.ref || 'refs/tags/nightly' }}
           features: fmt,cli
+
+  publish-npm:
+    name: Publish npm packages
+    needs:
+      - ensure-managed-release
+      - upload-assets
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: latest
+
+      - name: Download release binaries
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node packages/scripts/fetch-binaries.mjs \
+            --ref "${GITHUB_REF_NAME}" \
+            --repo "${GITHUB_REPOSITORY}"
+
+      - name: Publish packages
+        run: |
+          node packages/scripts/publish.mjs --registry=https://registry.npmjs.org/

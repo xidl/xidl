@@ -144,6 +144,71 @@
         {
           "path": "golang/xidl-go/go.mod",
           "type": "generic"
+        },
+        {
+          "jsonpath": "$.version",
+          "path": "packages/xidlc/package.json",
+          "type": "json"
+        },
+        {
+          "jsonpath": "$.optionalDependencies.xidlc-darwin-arm64",
+          "path": "packages/xidlc/package.json",
+          "type": "json"
+        },
+        {
+          "jsonpath": "$.optionalDependencies.xidlc-darwin-x64",
+          "path": "packages/xidlc/package.json",
+          "type": "json"
+        },
+        {
+          "jsonpath": "$.optionalDependencies.xidlc-linux-arm64",
+          "path": "packages/xidlc/package.json",
+          "type": "json"
+        },
+        {
+          "jsonpath": "$.optionalDependencies.xidlc-linux-x64",
+          "path": "packages/xidlc/package.json",
+          "type": "json"
+        },
+        {
+          "jsonpath": "$.optionalDependencies.xidlc-win32-arm64",
+          "path": "packages/xidlc/package.json",
+          "type": "json"
+        },
+        {
+          "jsonpath": "$.optionalDependencies.xidlc-win32-x64",
+          "path": "packages/xidlc/package.json",
+          "type": "json"
+        },
+        {
+          "jsonpath": "$.version",
+          "path": "packages/xidlc-darwin-arm64/package.json",
+          "type": "json"
+        },
+        {
+          "jsonpath": "$.version",
+          "path": "packages/xidlc-darwin-x64/package.json",
+          "type": "json"
+        },
+        {
+          "jsonpath": "$.version",
+          "path": "packages/xidlc-linux-arm64/package.json",
+          "type": "json"
+        },
+        {
+          "jsonpath": "$.version",
+          "path": "packages/xidlc-linux-x64/package.json",
+          "type": "json"
+        },
+        {
+          "jsonpath": "$.version",
+          "path": "packages/xidlc-win32-arm64/package.json",
+          "type": "json"
+        },
+        {
+          "jsonpath": "$.version",
+          "path": "packages/xidlc-win32-x64/package.json",
+          "type": "json"
         }
       ],
       "release-type": "simple"

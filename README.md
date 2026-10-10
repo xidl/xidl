@@ -75,6 +75,12 @@ Install `xidlc`:
 cargo install xidlc
 ```
 
+Or install the prebuilt binary from npm:
+
+```bash
+npm install -g xidlc
+```
+
 Format IDL files:
 
 ```bash

@@ -79,6 +79,10 @@ jobs:
         run: |
           just test-typescript
 
+      - name: npm package tests
+        run: |
+          just test-npm
+
   clippy:
     runs-on: ubuntu-latest
     steps:
