@@ -3,12 +3,14 @@ Feature: HTTP representations and exceptions compose on one route
   Scenario Outline: Negotiation uses the returned representation and retains metadata
     Given a REST IDL file "bdd/features/data/http_envelope.idl"
     And another REST IDL file "bdd/features/data/http_envelope_secondary.idl"
-    When I generate <lang> code for the IDL
+    When I generate <lang> code for the IDL using <invocations> invocations
     Then the generated <lang> code should be valid
     And I can run the generated <lang> server using boilerplate
     Then I can run hurl tests against the server
 
     Examples:
-      | lang |
-      | rust |
-      | ts   |
+      | lang | invocations |
+      | rust | one         |
+      | rust | separate    |
+      | ts   | one         |
+      | ts   | separate    |

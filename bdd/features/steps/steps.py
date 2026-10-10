@@ -78,7 +78,8 @@ def step_impl(context, idl_file):
 
 
 @when("I generate {lang} code for the IDL")
-def step_impl(context, lang):
+@when("I generate {lang} code for the IDL using {invocations} invocations")
+def step_impl(context, lang, invocations="one"):
     context.lang = lang
     cmd_lang = lang
     if lang == "rust" and context.protocol == "rest":
@@ -108,12 +109,20 @@ def step_impl(context, lang):
         cmd_lang,
     ]
     cmd.extend(["--client", "--server"])
-    cmd.extend(context.idl_files)
-    result = subprocess.run(cmd, capture_output=True, text=True, cwd=os.getcwd())
-    if result.returncode != 0:
-        print(f"Gen stdout: {result.stdout}")
-        print(f"Gen stderr: {result.stderr}")
-    assert result.returncode == 0
+    assert invocations in ("one", "separate"), invocations
+    batches = (
+        [context.idl_files]
+        if invocations == "one"
+        else [[idl_file] for idl_file in context.idl_files]
+    )
+    for files in batches:
+        result = subprocess.run(
+            cmd + files, capture_output=True, text=True, cwd=os.getcwd()
+        )
+        if result.returncode != 0:
+            print(f"Gen stdout: {result.stdout}")
+            print(f"Gen stderr: {result.stderr}")
+        assert result.returncode == 0
 
     if lang == "python":
         for f in os.listdir(context.lang_dir):
