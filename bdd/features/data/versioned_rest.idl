@@ -13,6 +13,17 @@ struct Item {
     @optional string note;
 };
 
+@http(404)
+exception NotFound {
+    string id;
+};
+
+@added(ApiVersions::v2)
+@http(409)
+exception Conflict {
+    string reason;
+};
+
 interface Items {
     @get(path = "/items/{id}")
     Item get(@path string id);
@@ -24,4 +35,7 @@ interface Items {
     @removed(ApiVersions::v2)
     @get(path = "/legacy")
     string legacy();
+
+    @post(path = "/items/{id}/adopt")
+    Item adopt(@path string id) raises(NotFound, Conflict);
 };

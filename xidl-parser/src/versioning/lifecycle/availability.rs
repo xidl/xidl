@@ -47,6 +47,7 @@ pub(crate) enum SiteKind {
     Interface,
     Operation,
     Parameter,
+    Attribute,
     /// Annotatable declarations that `@added`/`@removed` cannot target.
     Unsupported,
 }
@@ -66,6 +67,7 @@ impl SiteKind {
             Self::Interface => "interface",
             Self::Operation => "operation",
             Self::Parameter => "parameter",
+            Self::Attribute => "attribute",
             Self::Unsupported => "declaration",
         }
     }

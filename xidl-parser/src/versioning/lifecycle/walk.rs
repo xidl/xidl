@@ -1,6 +1,6 @@
 //! Structural walk over every annotation-carrying site of a specification.
 
-use super::super::paths::{declarator_name, declarators_name, join};
+use super::super::paths::{attribute_name, declarator_name, declarators_name, join};
 use super::availability::{Availability, Site, SiteKind, VersionVisitor};
 use crate::error::ParserResult;
 use crate::hir::{
@@ -153,8 +153,8 @@ fn walk_export<V: VersionVisitor>(
         Export::AttrDcl(attribute) => {
             enter(
                 visitor,
-                SiteKind::Unsupported,
-                &join(path, "attribute"),
+                SiteKind::Attribute,
+                &join(path, &attribute_name(attribute)),
                 path,
                 &attribute.annotations,
                 None,

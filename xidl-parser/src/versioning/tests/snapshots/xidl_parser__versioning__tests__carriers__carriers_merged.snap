@@ -309,21 +309,6 @@ expression: json
                     }
                   },
                   {
-                    "AttrDcl": {
-                      "annotations": [],
-                      "decl": {
-                        "ReadonlyAttrSpec": {
-                          "ty": {
-                            "IntegerType": "U16"
-                          },
-                          "declarator": {
-                            "SimpleDeclarator": "port"
-                          }
-                        }
-                      }
-                    }
-                  },
-                  {
                     "ConstDcl": {
                       "annotations": [],
                       "ty": {
@@ -335,6 +320,31 @@ expression: json
                           "IntegerLiteral": "1"
                         }
                       }
+                    }
+                  },
+                  {
+                    "OpDcl": {
+                      "annotations": [],
+                      "ty": {
+                        "TypeSpec": {
+                          "ScopedName": {
+                            "name": [
+                              "Derived"
+                            ],
+                            "is_root": false
+                          }
+                        }
+                      },
+                      "ident": "deliver",
+                      "parameter": [],
+                      "raises": [
+                        {
+                          "name": [
+                            "Failure"
+                          ],
+                          "is_root": false
+                        }
+                      ]
                     }
                   }
                 ]
@@ -567,6 +577,48 @@ expression: json
                 "ident": [
                   {
                     "SimpleDeclarator": "detail"
+                  }
+                ],
+                "default": null,
+                "field_id": null,
+                "recursive": false
+              }
+            ]
+          }
+        },
+        {
+          "ExceptDcl": {
+            "annotations": [
+              {
+                "ScopedName": {
+                  "name": {
+                    "name": [
+                      "http"
+                    ],
+                    "is_root": false
+                  },
+                  "params": {
+                    "ConstExpr": {
+                      "Literal": {
+                        "IntegerLiteral": "409"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "ident": "Conflict",
+            "member": [
+              {
+                "annotations": [],
+                "ty": {
+                  "StringType": {
+                    "bound": null
+                  }
+                },
+                "ident": [
+                  {
+                    "SimpleDeclarator": "reason"
                   }
                 ],
                 "default": null,
@@ -844,6 +896,48 @@ expression: json
                         {
                           "name": [
                             "Failure"
+                          ],
+                          "is_root": false
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "OpDcl": {
+                      "annotations": [],
+                      "ty": {
+                        "TypeSpec": {
+                          "ScopedName": {
+                            "name": [
+                              "Derived"
+                            ],
+                            "is_root": false
+                          }
+                        }
+                      },
+                      "ident": "deliver",
+                      "parameter": [
+                        {
+                          "annotations": [],
+                          "attr": null,
+                          "ty": {
+                            "StringType": {
+                              "bound": null
+                            }
+                          },
+                          "declarator": "note"
+                        }
+                      ],
+                      "raises": [
+                        {
+                          "name": [
+                            "Failure"
+                          ],
+                          "is_root": false
+                        },
+                        {
+                          "name": [
+                            "Conflict"
                           ],
                           "is_root": false
                         }

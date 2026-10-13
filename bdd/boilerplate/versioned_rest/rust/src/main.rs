@@ -18,6 +18,19 @@ impl gen::v1::Items for Items {
     async fn legacy(&self) -> ::xidl_rust_axum::Result<String> {
         Ok("legacy".to_string())
     }
+
+    async fn adopt(
+        &self,
+        id: String,
+    ) -> ::std::result::Result<gen::v1::Item, gen::v1::ItemsAdoptError> {
+        if id == "1" {
+            return Ok(gen::v1::Item {
+                name: "item".to_string(),
+            });
+        }
+        // `Conflict` only exists from v2 on, so v1 has no channel for it.
+        Err(gen::v1::ItemsAdoptError::NotFound(gen::v1::NotFound { id }))
+    }
 }
 
 #[async_trait]
@@ -34,6 +47,22 @@ impl gen::v2::Items for Items {
             name: "item".to_string(),
             note: Some("v2".to_string()),
         }])
+    }
+
+    async fn adopt(
+        &self,
+        id: String,
+    ) -> ::std::result::Result<gen::v2::Item, gen::v2::ItemsAdoptError> {
+        match id.as_str() {
+            "1" => Ok(gen::v2::Item {
+                name: "item".to_string(),
+                note: Some("v2".to_string()),
+            }),
+            "2" => Err(gen::v2::ItemsAdoptError::Conflict(gen::v2::Conflict {
+                reason: "taken".to_string(),
+            })),
+            _ => Err(gen::v2::ItemsAdoptError::NotFound(gen::v2::NotFound { id })),
+        }
     }
 }
 

@@ -1,9 +1,9 @@
 //! Projection of interfaces, their exports, operations and parameters.
 
 use super::super::lifecycle::{Availability, SiteKind, availability};
-use super::super::paths::{declarators_name, join};
+use super::super::paths::{attribute_name, declarators_name, join};
 use super::projector::Projector;
-use super::references::{touch_interface_parent, touch_names, touch_type};
+use super::references::{relativize_names, touch_interface_parent, touch_type};
 use super::strip_annotations;
 use crate::error::ParserResult;
 use crate::hir::{
@@ -56,9 +56,9 @@ impl<'a> Projector<'a> {
             Export::OpDcl(operation) => {
                 Ok(self.operation(operation, parent, path)?.map(Export::OpDcl))
             }
-            Export::AttrDcl(attribute) => Ok(Some(Export::AttrDcl(
-                self.attribute(attribute, parent, path)?,
-            ))),
+            Export::AttrDcl(attribute) => Ok(self
+                .attribute(attribute, parent, path)?
+                .map(Export::AttrDcl)),
             Export::TypeDcl(type_dcl) => {
                 Ok(self.type_dcl(type_dcl, parent, path)?.map(Export::TypeDcl))
             }
@@ -100,7 +100,7 @@ impl<'a> Projector<'a> {
             self.references.extend(references);
         }
         if let Some(raises) = &mut projected.raises {
-            touch_names(&mut raises.0, &mut self.references, &here);
+            relativize_names(&mut raises.0);
         }
         Ok(Some(projected))
     }
@@ -129,17 +129,20 @@ impl<'a> Projector<'a> {
         attribute: &AttrDcl,
         parent: Availability,
         path: &str,
-    ) -> ParserResult<AttrDcl> {
-        let here = join(path, "attribute");
-        let site = self.site(&here, path, SiteKind::Unsupported, &attribute.annotations);
-        let _ = availability(&site, parent, self.timeline)?;
+    ) -> ParserResult<Option<AttrDcl>> {
+        let here = join(path, &attribute_name(attribute));
+        let site = self.site(&here, path, SiteKind::Attribute, &attribute.annotations);
+        let own = availability(&site, parent, self.timeline)?;
+        if !own.contains(self.version) {
+            return Ok(None);
+        }
         let mut projected = attribute.clone();
         projected.annotations = strip_annotations(&attribute.annotations);
         match &mut projected.decl {
             AttrDclInner::ReadonlyAttrSpec(spec) => {
                 touch_type(&mut spec.ty, &mut self.references, &here);
                 if let ReadonlyAttrDeclarator::RaisesExpr(raises) = &mut spec.declarator {
-                    touch_names(&mut raises.0, &mut self.references, &here);
+                    relativize_names(&mut raises.0);
                 }
             }
             AttrDclInner::AttrSpec(spec) => {
@@ -148,19 +151,19 @@ impl<'a> Projector<'a> {
                 {
                     match raises {
                         AttrRaisesExpr::Case1(get, set) => {
-                            touch_names(&mut get.expr.0, &mut self.references, &here);
+                            relativize_names(&mut get.expr.0);
                             if let Some(set) = set {
-                                touch_names(&mut set.expr.0, &mut self.references, &here);
+                                relativize_names(&mut set.expr.0);
                             }
                         }
                         AttrRaisesExpr::SetExcepExpr(set) => {
-                            touch_names(&mut set.expr.0, &mut self.references, &here);
+                            relativize_names(&mut set.expr.0);
                         }
                     }
                 }
             }
         }
-        Ok(projected)
+        Ok(Some(projected))
     }
 
     pub(super) fn members(

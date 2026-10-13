@@ -54,13 +54,13 @@ pub(super) fn touch_scoped(
     }
 }
 
-pub(super) fn touch_names(
-    names: &mut [ScopedName],
-    references: &mut Vec<(String, String)>,
-    decl: &str,
-) {
+/// Relativizes a `raises(...)` list without registering references.
+///
+/// Exception sets are the one position without an annotation slot: an entry
+/// whose exception this version removed is pruned instead of reported.
+pub(super) fn relativize_names(names: &mut [ScopedName]) {
     for name in names {
-        touch_scoped(name, references, decl);
+        name.is_root = false;
     }
 }
 

@@ -197,6 +197,78 @@ struct Pet {
     }
 }
 
+fn raised_exceptions(spec: &Specification) -> Vec<String> {
+    projected_module(spec)
+        .definition
+        .iter()
+        .find_map(|definition| match definition {
+            Definition::InterfaceDcl(interface) => Some(interface),
+            _ => None,
+        })
+        .map(|interface| match &interface.decl {
+            crate::hir::InterfaceDclInner::InterfaceDef(def) => def
+                .interface_body
+                .as_ref()
+                .map(|body| {
+                    body.0
+                        .iter()
+                        .filter_map(|export| match export {
+                            crate::hir::Export::OpDcl(operation) => Some(operation),
+                            _ => None,
+                        })
+                        .flat_map(|operation| {
+                            operation
+                                .raises
+                                .as_ref()
+                                .map(|raises| {
+                                    raises
+                                        .0
+                                        .iter()
+                                        .map(|name| name.name.join("::"))
+                                        .collect::<Vec<_>>()
+                                })
+                                .unwrap_or_default()
+                        })
+                        .collect::<Vec<_>>()
+                })
+                .unwrap_or_default(),
+            crate::hir::InterfaceDclInner::InterfaceForwardDcl(_) => Vec::new(),
+        })
+        .unwrap_or_default()
+}
+
+#[test]
+fn projection_prunes_raises_entries_of_removed_exceptions() {
+    let (spec, record) = analyze(
+        r#"
+@version
+enum Versions { v1, v2 };
+
+@http(404)
+exception NotFound {
+    string id;
+};
+
+@added(Versions::v2)
+@http(409)
+exception Conflict {
+    string reason;
+};
+
+interface Pets {
+    @post(path = "/pets/{id}")
+    void adopt(@path string id) raises(NotFound, Conflict);
+};
+"#,
+    );
+    let versions = project_ids(&record);
+    let v1 = versioning::project(&spec, &record, versions[0]).expect("v1 projection");
+    let v2 = versioning::project(&spec, &record, versions[1]).expect("v2 projection");
+
+    assert_eq!(raised_exceptions(&v1), vec!["NotFound"]);
+    assert_eq!(raised_exceptions(&v2), vec!["NotFound", "Conflict"]);
+}
+
 #[test]
 fn merge_keeps_one_module_per_version_in_order() {
     let (spec, record) = analyze(VERSIONED);

@@ -44,6 +44,7 @@ pub(crate) fn project_version(
         }
     }
     projector.check_references()?;
+    projector.prune_raises(&mut body);
     let mut definitions = version_pragmas(pragmas, &def.value);
     definitions.push(Definition::ModuleDcl(ModuleDcl {
         annotations: Vec::new(),
