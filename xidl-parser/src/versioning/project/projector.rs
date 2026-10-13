@@ -9,8 +9,9 @@ use super::references::touch_type;
 use super::strip_annotations;
 use crate::error::ParserResult;
 use crate::hir::{
-    Annotation, ConstDcl, Definition, ExceptDcl, ModuleDcl, TypeDcl, TypeSpec, TypedefDcl,
-    TypedefType,
+    Annotation, AttrDclInner, AttrDeclarator, AttrRaisesExpr, ConstDcl, Definition, ExceptDcl,
+    Export, InterfaceDclInner, ModuleDcl, ReadonlyAttrDeclarator, ScopedName, TypeDcl, TypeSpec,
+    TypedefDcl, TypedefType,
 };
 use std::collections::BTreeSet;
 
@@ -37,6 +38,76 @@ impl<'a> Projector<'a> {
             dropped: BTreeSet::new(),
             references: Vec::new(),
         }
+    }
+
+    /// Drops `raises(...)` entries whose exception this projection removed.
+    ///
+    /// An exception set has no annotation slot, so an operation can only raise
+    /// a versioned exception in the versions that declare it.
+    pub(super) fn prune_raises(&self, definitions: &mut [Definition]) {
+        for definition in definitions {
+            self.prune_definition(definition);
+        }
+    }
+
+    fn prune_definition(&self, definition: &mut Definition) {
+        match definition {
+            Definition::ModuleDcl(module) => self.prune_raises(&mut module.definition),
+            Definition::InterfaceDcl(interface) => {
+                let InterfaceDclInner::InterfaceDef(def) = &mut interface.decl else {
+                    return;
+                };
+                let Some(body) = &mut def.interface_body else {
+                    return;
+                };
+                for export in &mut body.0 {
+                    self.prune_export(export);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    fn prune_export(&self, export: &mut Export) {
+        match export {
+            Export::OpDcl(operation) => {
+                if let Some(raises) = operation.raises.as_mut() {
+                    self.prune_names(&mut raises.0);
+                }
+            }
+            Export::AttrDcl(attribute) => match &mut attribute.decl {
+                AttrDclInner::ReadonlyAttrSpec(spec) => {
+                    if let ReadonlyAttrDeclarator::RaisesExpr(raises) = &mut spec.declarator {
+                        self.prune_names(&mut raises.0);
+                    }
+                }
+                AttrDclInner::AttrSpec(spec) => {
+                    if let AttrDeclarator::WithRaises { raises, .. } = &mut spec.declarator {
+                        match raises {
+                            AttrRaisesExpr::Case1(get, set) => {
+                                self.prune_names(&mut get.expr.0);
+                                if let Some(set) = set {
+                                    self.prune_names(&mut set.expr.0);
+                                }
+                            }
+                            AttrRaisesExpr::SetExcepExpr(set) => {
+                                self.prune_names(&mut set.expr.0);
+                            }
+                        }
+                    }
+                }
+            },
+            _ => {}
+        }
+    }
+
+    fn prune_names(&self, names: &mut Vec<ScopedName>) {
+        names.retain(|name| {
+            name.name
+                .last()
+                .map(|last| !self.dropped.contains(last) || self.kept.contains(last))
+                .unwrap_or(true)
+        });
     }
 
     /// Reports references to declarations that this projection drops.

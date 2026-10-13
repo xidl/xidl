@@ -1448,6 +1448,9 @@ def step_impl(context, lang):
     assert "fn list" in v2_body and "fn list" not in v1_body, (
         "the v2 module holds @added operations and v1 lacks them"
     )
+    assert "Conflict" not in v1_body and "Conflict" in v2_body, (
+        "versioned exceptions raise only from the version that declares them"
+    )
 
 
 @when("I generate openapi documents for every API version")

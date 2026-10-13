@@ -70,7 +70,8 @@ value becomes the document version.
 
 Both can appear on modules, type declarations (structs, unions, enums,
 exceptions, typedefs, bitsets, bitmasks), struct/union members, enumerators,
-bitmask values, interfaces, operations and operation parameters.
+bitmask values, interfaces, operations, operation parameters and interface
+attributes.
 
 Rules:
 
@@ -84,6 +85,9 @@ Rules:
   struct added in v2 is an error.
 - A surviving declaration must not reference a type that the projected version
   drops. Such a reference is reported with the declaration and the version.
+- `raises(...)` entries are the one filtered position. An exception set has no
+  annotation slot, so an operation raises a versioned exception only in the
+  versions that declare it: older projections drop the entry.
 
 Unimplemented versioning annotations (`@versioned`, `@renamedFrom`,
 `@madeOptional`, `@madeRequired`, `@typeChangedFrom`,

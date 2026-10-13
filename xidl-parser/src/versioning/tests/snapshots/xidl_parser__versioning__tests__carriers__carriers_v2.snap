@@ -245,6 +245,48 @@ expression: "&snapshots[1]"
           }
         },
         {
+          "ExceptDcl": {
+            "annotations": [
+              {
+                "ScopedName": {
+                  "name": {
+                    "name": [
+                      "http"
+                    ],
+                    "is_root": false
+                  },
+                  "params": {
+                    "ConstExpr": {
+                      "Literal": {
+                        "IntegerLiteral": "409"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "ident": "Conflict",
+            "member": [
+              {
+                "annotations": [],
+                "ty": {
+                  "StringType": {
+                    "bound": null
+                  }
+                },
+                "ident": [
+                  {
+                    "SimpleDeclarator": "reason"
+                  }
+                ],
+                "default": null,
+                "field_id": null,
+                "recursive": false
+              }
+            ]
+          }
+        },
+        {
           "TypeDcl": {
             "ConstrTypeDcl": {
               "UnionDef": {
@@ -512,6 +554,48 @@ expression: "&snapshots[1]"
                         {
                           "name": [
                             "Failure"
+                          ],
+                          "is_root": false
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "OpDcl": {
+                      "annotations": [],
+                      "ty": {
+                        "TypeSpec": {
+                          "ScopedName": {
+                            "name": [
+                              "Derived"
+                            ],
+                            "is_root": false
+                          }
+                        }
+                      },
+                      "ident": "deliver",
+                      "parameter": [
+                        {
+                          "annotations": [],
+                          "attr": null,
+                          "ty": {
+                            "StringType": {
+                              "bound": null
+                            }
+                          },
+                          "declarator": "note"
+                        }
+                      ],
+                      "raises": [
+                        {
+                          "name": [
+                            "Failure"
+                          ],
+                          "is_root": false
+                        },
+                        {
+                          "name": [
+                            "Conflict"
                           ],
                           "is_root": false
                         }

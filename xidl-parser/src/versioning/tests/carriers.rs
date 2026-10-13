@@ -46,6 +46,12 @@ exception Failure {
     @optional string detail;
 };
 
+@added(Versions::v2)
+@http(409)
+exception Conflict {
+    string reason;
+};
+
 union Choice switch (long) {
     case 0: @added(Versions::v2) Derived value;
     case 1: Base fallback;
@@ -68,7 +74,10 @@ struct Forward;
 
 interface Api {
     attribute Base current;
+
+    @added(Versions::v2)
     readonly attribute uint16 port;
+
     const long MAX = 1;
 
     @added(Versions::v2)
@@ -78,6 +87,8 @@ interface Api {
 
     @added(Versions::v2)
     Derived fetch(@added(Versions::v2) @optional string filter) raises(Failure);
+
+    Derived deliver(@added(Versions::v2) string note) raises(Failure, Conflict);
 };
 "#;
 

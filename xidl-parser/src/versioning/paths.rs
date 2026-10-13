@@ -17,6 +17,25 @@ pub(crate) fn declarator_name(declarator: &crate::hir::Declarator) -> String {
     }
 }
 
+/// Name of an interface attribute, including every declarator.
+pub(crate) fn attribute_name(attribute: &crate::hir::AttrDcl) -> String {
+    use crate::hir::{AttrDclInner, AttrDeclarator, ReadonlyAttrDeclarator};
+    match &attribute.decl {
+        AttrDclInner::ReadonlyAttrSpec(spec) => match &spec.declarator {
+            ReadonlyAttrDeclarator::SimpleDeclarator(simple) => simple.0.clone(),
+            ReadonlyAttrDeclarator::RaisesExpr(_) => "attribute".to_string(),
+        },
+        AttrDclInner::AttrSpec(spec) => match &spec.declarator {
+            AttrDeclarator::SimpleDeclarator(declarators) => declarators
+                .iter()
+                .map(|simple| simple.0.clone())
+                .collect::<Vec<_>>()
+                .join(", "),
+            AttrDeclarator::WithRaises { declarator, .. } => declarator.0.clone(),
+        },
+    }
+}
+
 /// Comma separated names of a declarator list.
 pub(crate) fn declarators_name(declarators: &[crate::hir::Declarator]) -> String {
     declarators

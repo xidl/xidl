@@ -314,21 +314,6 @@ expression: "&snapshots[0]"
                     }
                   },
                   {
-                    "AttrDcl": {
-                      "annotations": [],
-                      "decl": {
-                        "ReadonlyAttrSpec": {
-                          "ty": {
-                            "IntegerType": "U16"
-                          },
-                          "declarator": {
-                            "SimpleDeclarator": "port"
-                          }
-                        }
-                      }
-                    }
-                  },
-                  {
                     "ConstDcl": {
                       "annotations": [],
                       "ty": {
@@ -340,6 +325,31 @@ expression: "&snapshots[0]"
                           "IntegerLiteral": "1"
                         }
                       }
+                    }
+                  },
+                  {
+                    "OpDcl": {
+                      "annotations": [],
+                      "ty": {
+                        "TypeSpec": {
+                          "ScopedName": {
+                            "name": [
+                              "Derived"
+                            ],
+                            "is_root": false
+                          }
+                        }
+                      },
+                      "ident": "deliver",
+                      "parameter": [],
+                      "raises": [
+                        {
+                          "name": [
+                            "Failure"
+                          ],
+                          "is_root": false
+                        }
+                      ]
                     }
                   }
                 ]
