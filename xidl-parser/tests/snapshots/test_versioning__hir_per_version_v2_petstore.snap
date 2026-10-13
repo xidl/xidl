@@ -1,0 +1,154 @@
+---
+source: xidl-parser/tests/test-versioning.rs
+expression: "serde_json::to_string_pretty(&v2.spec).expect(\"serialize\")"
+---
+[
+  {
+    "Pragma": {
+      "XidlcPackage": "versioned_petstore"
+    }
+  },
+  {
+    "Pragma": {
+      "XidlcOpenApiVersion": "2.0"
+    }
+  },
+  {
+    "ModuleDcl": {
+      "annotations": [],
+      "ident": "v2",
+      "definition": [
+        {
+          "TypeDcl": {
+            "ConstrTypeDcl": {
+              "StructDcl": {
+                "annotations": [],
+                "ident": "Pet",
+                "parent": [],
+                "member": [
+                  {
+                    "annotations": [],
+                    "ty": {
+                      "StringType": {
+                        "bound": null
+                      }
+                    },
+                    "ident": [
+                      {
+                        "SimpleDeclarator": "id"
+                      }
+                    ],
+                    "default": null,
+                    "field_id": 1,
+                    "recursive": false
+                  },
+                  {
+                    "annotations": [
+                      {
+                        "Optional": {
+                          "value": null
+                        }
+                      }
+                    ],
+                    "ty": {
+                      "StringType": {
+                        "bound": null
+                      }
+                    },
+                    "ident": [
+                      {
+                        "SimpleDeclarator": "note"
+                      }
+                    ],
+                    "default": null,
+                    "field_id": 2,
+                    "recursive": false
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "InterfaceDcl": {
+            "annotations": [],
+            "decl": {
+              "InterfaceDef": {
+                "header": {
+                  "ident": "Pets",
+                  "parent": null
+                },
+                "interface_body": [
+                  {
+                    "OpDcl": {
+                      "annotations": [
+                        {
+                          "ScopedName": {
+                            "name": {
+                              "name": [
+                                "get"
+                              ],
+                              "is_root": false
+                            },
+                            "params": {
+                              "Params": [
+                                {
+                                  "ident": "path",
+                                  "value": {
+                                    "Literal": {
+                                      "StringLiteral": "\"/pets/{id}\""
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      ],
+                      "ty": {
+                        "TypeSpec": {
+                          "ScopedName": {
+                            "name": [
+                              "Pet"
+                            ],
+                            "is_root": false
+                          }
+                        }
+                      },
+                      "ident": "get",
+                      "parameter": [
+                        {
+                          "annotations": [
+                            {
+                              "ScopedName": {
+                                "name": {
+                                  "name": [
+                                    "path"
+                                  ],
+                                  "is_root": false
+                                },
+                                "params": null
+                              }
+                            }
+                          ],
+                          "attr": null,
+                          "ty": {
+                            "StringType": {
+                              "bound": null
+                            }
+                          },
+                          "declarator": "id"
+                        }
+                      ],
+                      "raises": null
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+]

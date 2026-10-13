@@ -1,5 +1,6 @@
 use xidl_parser::hir::ParserProperties;
 use xidl_parser::rest_hir::ProjectedHir;
+use xidl_parser::versioning::{self, VersionedProjection};
 
 use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir, ArtifactJsonRpcHir};
 
@@ -19,7 +20,7 @@ impl crate::jsonrpc::Codegen for HirGen {
     fn generate(
         &self,
         _input_hir: crate::jsonrpc::CodegenInput,
-        _input: String,
+        input: String,
         props: ::xidl_parser::hir::ParserProperties,
     ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
         let source: String = serde_json::from_value(props.get("idl").unwrap().clone()).unwrap();
@@ -28,63 +29,93 @@ impl crate::jsonrpc::Codegen for HirGen {
 
         let typed = xidl_parser::parser::parser_text_with_resolver(
             &source,
-            Some(&_input),
+            Some(&input),
             &mut xidl_parser::hir::FsIncludeResolver,
         )
         .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
-        let projected =
-            xidl_parser::hir::Specification::project_typed_ast_with_properties_and_path(
-                typed,
-                props.clone(),
-                std::path::Path::new(&_input),
-            )
-            .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
+        let projections = xidl_parser::hir::Specification::project_typed_ast_versions(
+            typed,
+            props.clone(),
+            std::path::Path::new(&input),
+        )
+        .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
 
-        match projected {
-            ProjectedHir::Rpc(hir) => {
-                if target_lang == "hir" {
-                    Ok(vec![Artifact::new_file(ArtifactFile {
-                        path: _input,
-                        content: serde_json::to_string(&hir)?,
-                    })])
-                } else {
-                    Ok(vec![Artifact::new_hir(ArtifactHir {
-                        lang: target_lang,
-                        hir,
-                        props,
-                    })])
-                }
-            }
-            ProjectedHir::Http(rest_hir) => {
-                if target_lang == "rest-hir" {
-                    Ok(vec![Artifact::new_file(ArtifactFile {
-                        path: _input.replace(".idl", ".rest_hir.json"),
-                        content: serde_json::to_string_pretty(&rest_hir)?,
-                    })])
-                } else {
-                    Ok(vec![Artifact::new_rest_hir(
-                        crate::jsonrpc::ArtifactRestHir {
-                            lang: target_lang,
-                            rest_hir,
-                            props,
-                        },
-                    )])
-                }
-            }
-            ProjectedHir::JsonRpc(jsonrpc_hir) => {
-                if target_lang == "jsonrpc-hir" {
-                    Ok(vec![Artifact::new_file(ArtifactFile {
-                        path: _input.replace(".idl", ".jsonrpc_hir.json"),
-                        content: serde_json::to_string_pretty(&jsonrpc_hir)?,
-                    })])
-                } else {
-                    Ok(vec![Artifact::new_jsonrpc_hir(ArtifactJsonRpcHir {
-                        lang: target_lang,
-                        jsonrpc_hir,
-                        props,
-                    })])
-                }
+        let mut artifacts = Vec::new();
+        for projection in projections {
+            let props = projection_properties(props.clone(), &projection);
+            artifacts.push(projection_artifact(
+                projection,
+                &target_lang,
+                &input,
+                props,
+            )?);
+        }
+        Ok(artifacts)
+    }
+}
+
+/// Adds the projected API version to the properties seen by the target.
+fn projection_properties(
+    mut props: ParserProperties,
+    projection: &VersionedProjection,
+) -> ParserProperties {
+    if let Some(version) = &projection.version {
+        props.insert(
+            versioning::API_VERSION_PROPERTY.to_string(),
+            serde_json::Value::String(version.ident.clone()),
+        );
+    }
+    props
+}
+
+fn projection_artifact(
+    projection: VersionedProjection,
+    target_lang: &str,
+    input: &str,
+    props: ParserProperties,
+) -> Result<Artifact, crate::jsonrpc::RpcError> {
+    Ok(match projection.hir {
+        ProjectedHir::Rpc(hir) => {
+            if target_lang == "hir" {
+                Artifact::new_file(ArtifactFile {
+                    path: input.to_string(),
+                    content: serde_json::to_string(&hir)?,
+                })
+            } else {
+                Artifact::new_hir(ArtifactHir {
+                    lang: target_lang.to_string(),
+                    hir,
+                    props,
+                })
             }
         }
-    }
+        ProjectedHir::Http(rest_hir) => {
+            if target_lang == "rest-hir" {
+                Artifact::new_file(ArtifactFile {
+                    path: input.replace(".idl", ".rest_hir.json"),
+                    content: serde_json::to_string_pretty(&rest_hir)?,
+                })
+            } else {
+                Artifact::new_rest_hir(crate::jsonrpc::ArtifactRestHir {
+                    lang: target_lang.to_string(),
+                    rest_hir,
+                    props,
+                })
+            }
+        }
+        ProjectedHir::JsonRpc(jsonrpc_hir) => {
+            if target_lang == "jsonrpc-hir" {
+                Artifact::new_file(ArtifactFile {
+                    path: input.replace(".idl", ".jsonrpc_hir.json"),
+                    content: serde_json::to_string_pretty(&jsonrpc_hir)?,
+                })
+            } else {
+                Artifact::new_jsonrpc_hir(ArtifactJsonRpcHir {
+                    lang: target_lang.to_string(),
+                    jsonrpc_hir,
+                    props,
+                })
+            }
+        }
+    })
 }

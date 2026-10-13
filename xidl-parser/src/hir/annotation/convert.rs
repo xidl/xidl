@@ -168,6 +168,22 @@ impl From<crate::typed_ast::AnnotationAppl> for Annotation {
                     }
                 }
                 "skip" => return Self::Skip,
+                "version" => {
+                    if params.is_none() {
+                        return Self::Version;
+                    }
+                }
+                "added" | "removed" => {
+                    if let Some(AnnotationParams::ConstExpr(ConstExpr::ScopedName(version))) =
+                        params.as_ref()
+                    {
+                        let version = version.clone();
+                        return match name.to_ascii_lowercase().as_str() {
+                            "added" => Self::Added { version },
+                            _ => Self::Removed { version },
+                        };
+                    }
+                }
                 _ => {}
             }
         }

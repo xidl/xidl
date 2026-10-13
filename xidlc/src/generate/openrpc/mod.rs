@@ -23,26 +23,40 @@ impl crate::jsonrpc::Codegen for OpenRpcCodegen {
     }
 
     fn get_properties(&self) -> Result<ParserProperties, crate::jsonrpc::RpcError> {
-        Ok(std::collections::HashMap::from([(
-            "hir_kind".to_string(),
-            serde_json::Value::String("jsonrpc".to_string()),
-        )]))
+        Ok(std::collections::HashMap::from([
+            (
+                "hir_kind".to_string(),
+                serde_json::Value::String("jsonrpc".to_string()),
+            ),
+            (
+                xidl_parser::versioning::VERSION_LAYOUT_PROPERTY.to_string(),
+                serde_json::Value::String(xidl_parser::versioning::LAYOUT_PER_VERSION.to_string()),
+            ),
+        ]))
     }
 
     fn generate(
         &self,
         input_hir: crate::jsonrpc::CodegenInput,
         _path: String,
-        _props: ParserProperties,
+        props: ParserProperties,
     ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
         let hir = input_hir.into_jsonrpc_hir();
         let openrpc = render_openrpc(&hir);
         let content = serde_json::to_string_pretty(&openrpc)?;
-        Ok(vec![Artifact::new_file(ArtifactFile {
-            path: "openrpc.json".to_string(),
-            content,
-        })])
+        let path = match api_version(&props) {
+            Some(version) => format!("openrpc.{version}.json"),
+            None => "openrpc.json".to_string(),
+        };
+        Ok(vec![Artifact::new_file(ArtifactFile { path, content })])
     }
+}
+
+/// API version of this projection, set by the HIR stage for versioned contracts.
+fn api_version(props: &ParserProperties) -> Option<&str> {
+    props
+        .get(xidl_parser::versioning::API_VERSION_PROPERTY)
+        .and_then(serde_json::Value::as_str)
 }
 
 pub fn render_openrpc(doc: &JsonRpcHirDocument) -> Value {

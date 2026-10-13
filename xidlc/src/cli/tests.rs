@@ -81,3 +81,62 @@ fn supports_typescript_rest_server_only() {
     assert!(!args.client);
     assert!(args.server);
 }
+
+#[test]
+fn parses_single_api_version_selection() {
+    let cli = Cli::try_parse_from(["xidlc", "gen", "--api-version", "v2", "openapi", "demo.idl"])
+        .expect("version flag should parse");
+    let Command::Gen(args) = cli.command else {
+        panic!("expected gen command");
+    };
+    let props = args.version_props();
+
+    assert_eq!(
+        props
+            .get(versioning::API_VERSION_PROPERTY)
+            .and_then(|value| value.as_str()),
+        Some("v2")
+    );
+    assert!(!props.contains_key(versioning::API_VERSIONS_PROPERTY));
+}
+
+#[test]
+fn parses_multiple_api_version_selection() {
+    let cli = Cli::try_parse_from([
+        "xidlc",
+        "gen",
+        "--api-versions",
+        "v1,v3",
+        "rust",
+        "demo.idl",
+    ])
+    .expect("version flag should parse");
+    let Command::Gen(args) = cli.command else {
+        panic!("expected gen command");
+    };
+    let props = args.version_props();
+
+    assert_eq!(
+        props
+            .get(versioning::API_VERSIONS_PROPERTY)
+            .and_then(|value| value.as_str()),
+        Some("v1,v3")
+    );
+    assert!(!props.contains_key(versioning::API_VERSION_PROPERTY));
+}
+
+#[test]
+fn rejects_conflicting_api_version_selection() {
+    let result = Cli::try_parse_from([
+        "xidlc",
+        "gen",
+        "--api-version",
+        "v1",
+        "--api-versions",
+        "v2",
+        "rust",
+        "demo.idl",
+    ]);
+
+    assert!(result.is_err(), "conflicting flags should not parse");
+}

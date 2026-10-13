@@ -4,8 +4,10 @@ use crate::driver;
 use crate::driver::ArgsGenerate;
 use crate::error::{IdlcError, IdlcResult};
 use clap::{Args, CommandFactory, Parser, Subcommand};
+use std::collections::HashMap;
 use std::ffi::OsString;
 use std::path::PathBuf;
+use xidl_parser::versioning;
 
 #[derive(Debug, Parser)]
 #[command(name = "xidlc", about = "XIDL Compiler", version)]
@@ -43,6 +45,16 @@ struct ArgsGen {
     out_dir: String,
     #[arg(long = "dry-run", default_value_t = false)]
     dry_run: bool,
+    /// Generate only this API version (version enum member name or value).
+    #[arg(
+        long = "api-version",
+        value_name = "VERSION",
+        conflicts_with = "api_versions"
+    )]
+    api_version: Option<String>,
+    /// Generate these API versions, comma separated, or `*` for every version.
+    #[arg(long = "api-versions", value_name = "VERSIONS")]
+    api_versions: Option<String>,
     #[command(subcommand)]
     lang: GenLang,
 }
@@ -118,6 +130,24 @@ struct SharedGenArgs {
 }
 
 impl ArgsGen {
+    /// Version selection passed to the driver as generation properties.
+    fn version_props(&self) -> HashMap<String, serde_json::Value> {
+        let mut props = HashMap::new();
+        if let Some(version) = &self.api_version {
+            props.insert(
+                versioning::API_VERSION_PROPERTY.to_string(),
+                serde_json::Value::String(version.clone()),
+            );
+        }
+        if let Some(versions) = &self.api_versions {
+            props.insert(
+                versioning::API_VERSIONS_PROPERTY.to_string(),
+                serde_json::Value::String(versions.clone()),
+            );
+        }
+        props
+    }
+
     fn into_driver_args(self) -> IdlcResult<ArgsGenerate> {
         let shared = SharedGenArgs {
             out_dir: self.out_dir,
@@ -249,13 +279,14 @@ impl Cli {
         match self.command {
             Command::Gen(args) => {
                 let help_command = args.lang.help_command();
+                let version_props = args.version_props();
                 let args = args.into_driver_args()?;
                 if args.files.is_empty() {
                     help_command.clone().print_help()?;
                     println!();
                     return Ok(());
                 }
-                driver::Driver::run(args)
+                driver::Driver::run_with_props(args, version_props)
             }
             Command::Fmt(args) => args.execute(),
             Command::Import(args) => {

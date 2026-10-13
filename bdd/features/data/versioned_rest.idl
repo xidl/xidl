@@ -1,0 +1,27 @@
+#pragma xidlc package versioned_rest
+
+@version
+enum ApiVersions {
+    @rename("1.0") v1,
+    @rename("2.0") v2,
+};
+
+struct Item {
+    string name;
+
+    @added(ApiVersions::v2)
+    @optional string note;
+};
+
+interface Items {
+    @get(path = "/items/{id}")
+    Item get(@path string id);
+
+    @added(ApiVersions::v2)
+    @get(path = "/items")
+    sequence<Item> list();
+
+    @removed(ApiVersions::v2)
+    @get(path = "/legacy")
+    string legacy();
+};

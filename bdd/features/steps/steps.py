@@ -385,18 +385,22 @@ def start_context_server(context, args, **kwargs):
     return process
 
 
-def wait_for_server(context, timeout=60):
+def wait_for_port(process, port, timeout=60):
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
-        assert context.server_process.poll() is None, (
+        assert process.poll() is None, (
             "Server exited before readiness; see captured server log"
         )
         try:
-            with socket.create_connection(("127.0.0.1", context.port), timeout=1):
+            with socket.create_connection(("127.0.0.1", port), timeout=1):
                 return
         except OSError:
             time.sleep(0.1)
-    raise AssertionError(f"Timed out waiting for port {context.port}")
+    raise AssertionError(f"Timed out waiting for port {port}")
+
+
+def wait_for_server(context, timeout=60):
+    wait_for_port(context.server_process, context.port, timeout)
 
 
 def run_server_logging(process, prefix):
@@ -1403,3 +1407,208 @@ def step_impl(context):
         "c2",
     ], f"Expected ['c1', 'c2'], got {data['multi_cookie_echo']}"
     conn.close()
+
+
+# --- API versioning ---------------------------------------------------------
+
+
+@given('a versioned REST IDL file "{idl_file}"')
+def step_impl(context, idl_file):
+    context.idl_file = os.path.abspath(idl_file)
+    context.idl_files = [context.idl_file]
+    context.protocol = "rest"
+    context.versioned = True
+    base_temp = os.path.join(os.getcwd(), "bdd", ".temp")
+    os.makedirs(base_temp, exist_ok=True)
+    context.temp_dir = tempfile.mkdtemp(dir=base_temp)
+    context.lang_dir = os.path.join(context.temp_dir, "gen")
+    os.makedirs(context.lang_dir)
+    context.port, context.port_guard = reserve_test_port()
+    context.port_v2, context.port_v2_guard = reserve_test_port()
+
+
+@then("the generated {lang} code should contain the API version modules")
+def step_impl(context, lang):
+    module_name = get_module_name(context.lang_dir)
+    source = os.path.join(context.lang_dir, module_name + ".rs")
+    assert os.path.exists(source), f"missing generated module: {source}"
+    with open(source, "r") as f:
+        content = f.read()
+
+    v1_start = content.find("pub mod v1")
+    v2_start = content.find("pub mod v2")
+    assert v1_start >= 0 and v2_start > v1_start, (
+        f"expected one module per API version, got:\n{content[:500]}"
+    )
+    v1_body = content[v1_start:v2_start]
+    v2_body = content[v2_start:]
+    assert "fn legacy" in v1_body and "fn legacy" not in v2_body, (
+        "the v1 module keeps @removed operations and v2 drops them"
+    )
+    assert "fn list" in v2_body and "fn list" not in v1_body, (
+        "the v2 module holds @added operations and v1 lacks them"
+    )
+
+
+@when("I generate openapi documents for every API version")
+def step_impl(context):
+    context.lang = "openapi"
+    cmd = [
+        "cargo",
+        "run",
+        "-p",
+        "xidlc",
+        "--features",
+        "cli,fmt",
+        "--",
+        "gen",
+        "-o",
+        context.lang_dir,
+        "openapi",
+        context.idl_file,
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True, cwd=os.getcwd())
+    if result.returncode != 0:
+        print(f"Gen stdout: {result.stdout}")
+        print(f"Gen stderr: {result.stderr}")
+    assert result.returncode == 0
+
+
+@then("each API version has its own openapi document")
+def step_impl(context):
+    idl_name = get_idl_name(context)
+    documents = {}
+    for version in ("v1", "v2"):
+        path = os.path.join(context.lang_dir, f"openapi_{idl_name}.{version}.json")
+        assert os.path.exists(path), f"missing openapi document: {path}"
+        with open(path, "r") as f:
+            documents[version] = json.load(f)
+
+    assert documents["v1"]["info"]["version"] == "1.0"
+    assert documents["v2"]["info"]["version"] == "2.0"
+
+    v1_paths = documents["v1"]["paths"]
+    v2_paths = documents["v2"]["paths"]
+    assert "/legacy" in v1_paths and "/legacy" not in v2_paths
+    assert "/items" in v2_paths and "/items" not in v1_paths
+
+    v1_item = documents["v1"]["components"]["schemas"]["v1.Item"]
+    v2_item = documents["v2"]["components"]["schemas"]["v2.Item"]
+    assert "note" not in v1_item["properties"]
+    assert "note" in v2_item["properties"]
+
+
+@then("I can run the generated {lang} servers for every API version using boilerplate")
+def step_impl(context, lang):
+    assert lang == "rust", "the versioned server boilerplate is implemented for rust"
+    idl_name = get_idl_name(context)
+    src_dir = os.path.join(os.getcwd(), "bdd", "boilerplate", idl_name, lang)
+    assert os.path.isdir(src_dir), f"missing boilerplate: {src_dir}"
+    module_name = get_module_name(context.lang_dir)
+
+    shutil.copy(os.path.join(src_dir, "Cargo.toml"), context.lang_dir)
+    os.makedirs(os.path.join(context.lang_dir, "src"), exist_ok=True)
+    shutil.copy(
+        os.path.join(src_dir, "src", "main.rs"),
+        os.path.join(context.lang_dir, "src", "main.rs"),
+    )
+    cargo_toml_path = os.path.join(context.lang_dir, "Cargo.toml")
+    with open(cargo_toml_path, "r") as f:
+        content = f.read()
+    content = content.replace(
+        "{{RUST_XIDL_RUST_AXUM_PATH}}", os.path.abspath("./crates/xidl-rust-axum")
+    )
+    with open(cargo_toml_path, "w") as f:
+        f.write(content)
+
+    main_rs_path = os.path.join(context.lang_dir, "src", "main.rs")
+    with open(main_rs_path, "r") as f:
+        content = f.read()
+    content = content.replace("{{MODULE_NAME}}", module_name)
+    with open(main_rs_path, "w") as f:
+        f.write(content)
+
+    env = os.environ.copy()
+    env["PORT"] = str(context.port)
+    env["PORT_V2"] = str(context.port_v2)
+    env["CARGO_TARGET_DIR"] = os.path.join(
+        os.path.abspath("."), "bdd", ".temp", "rust_target"
+    )
+    if getattr(context, "port_v2_guard", None) is not None:
+        context.port_v2_guard.close()
+        context.port_v2_guard = None
+    context.server_process = start_context_server(
+        context,
+        ["cargo", "run"],
+        cwd=context.lang_dir,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        env=env,
+    )
+    wait_for_port(context.server_process, context.port, timeout=180)
+    wait_for_port(context.server_process, context.port_v2, timeout=180)
+
+
+@then('I can run hurl tests for API version "{version}" against the server')
+def step_impl(context, version):
+    assert shutil.which("hurl") is not None, "missing hurl CLI in PATH"
+    idl_name = get_idl_name(context)
+    hurl_file = os.path.join(
+        os.getcwd(), "bdd", "features", "data", f"{idl_name}.{version}.hurl"
+    )
+    assert os.path.exists(hurl_file), f"missing hurl script: {hurl_file}"
+    port = context.port if version == "v1" else context.port_v2
+    cmd = [
+        "hurl",
+        "--test",
+        "--variable",
+        f"base_url=http://127.0.0.1:{port}",
+        hurl_file,
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True, cwd=context.lang_dir)
+    if result.returncode != 0:
+        print(f"Hurl file: {hurl_file}")
+        print(f"Hurl stdout: {result.stdout}")
+        print(f"Hurl stderr: {result.stderr}")
+    assert result.returncode == 0
+
+
+@when('I generate the "{version}" API version of the IDL as openapi')
+def step_impl(context, version):
+    context.lang = "openapi"
+    cmd = [
+        "cargo",
+        "run",
+        "-p",
+        "xidlc",
+        "--features",
+        "cli,fmt",
+        "--",
+        "gen",
+        "--api-version",
+        version,
+        "-o",
+        context.lang_dir,
+        "openapi",
+        context.idl_file,
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True, cwd=os.getcwd())
+    if result.returncode != 0:
+        print(f"Gen stdout: {result.stdout}")
+        print(f"Gen stderr: {result.stderr}")
+    assert result.returncode == 0
+
+
+@then('only the "{version}" openapi document is generated')
+def step_impl(context, version):
+    idl_name = get_idl_name(context)
+    expected = os.path.join(context.lang_dir, f"openapi_{idl_name}.{version}.json")
+    assert os.path.exists(expected), f"missing openapi document: {expected}"
+    for other in ("v1", "v2"):
+        if other == version:
+            continue
+        unexpected = os.path.join(context.lang_dir, f"openapi_{idl_name}.{other}.json")
+        assert not os.path.exists(unexpected), (
+            f"--api-version {version} must not emit {unexpected}"
+        )
