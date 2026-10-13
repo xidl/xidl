@@ -1,0 +1,5 @@
+#pragma xidlc package versioning_plain
+
+struct Pet {
+    string id;
+};

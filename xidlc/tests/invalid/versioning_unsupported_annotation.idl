@@ -1,0 +1,13 @@
+#pragma xidlc package versioning_invalid
+
+@version
+enum ApiVersions {
+    v1,
+    v2,
+};
+
+struct Pet {
+    string id;
+    @madeOptional(ApiVersions::v2)
+    string nickname;
+};

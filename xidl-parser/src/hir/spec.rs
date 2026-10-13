@@ -5,6 +5,7 @@ use super::{
 use crate::jsonrpc_hir;
 use crate::rest_hir::{self, HirProjectionKind, ProjectedHir};
 use crate::semantic;
+use crate::versioning::{self, VersionedProjection};
 use serde_json::Value;
 use std::path::Path;
 
@@ -37,29 +38,98 @@ impl Specification {
         Self::lower(value, true)
     }
 
-    pub fn project_typed_ast_with_properties_and_path(
+    /// Lowers a typed AST and returns one HIR projection per requested version.
+    ///
+    /// Unversioned specifications produce exactly one projection without a
+    /// version. Versioned specifications produce one merged projection holding
+    /// one module per selected version (`merged` layout, the default), or one
+    /// projection per selected version (`per_version` layout).
+    pub fn project_typed_ast_versions(
         value: crate::typed_ast::Specification,
         properties: ParserProperties,
         _path: impl AsRef<Path>,
+    ) -> crate::error::ParserResult<Vec<VersionedProjection>> {
+        let layout = versioning::VersionLayout::from_properties(&properties)?;
+        let selection = versioning::selection_from_properties(&properties)?;
+        let expand = expand_interface(&properties);
+        let source = Self::lower_source(value)?;
+        let Some(record) = versioning::analyze(&source)? else {
+            if let Some(selection) = &selection {
+                return Err(versioning::unversioned_selection_error(selection));
+            }
+            let spec = Self::finalize(source, expand)?;
+            return Ok(vec![VersionedProjection {
+                version: None,
+                hir: Self::project_hir(spec, &properties)?,
+            }]);
+        };
+        let versions = versioning::selected_versions(selection.as_ref(), &record)?;
+        match layout {
+            versioning::VersionLayout::Merged => {
+                let spec = versioning::merge(&source, &record, &versions)?;
+                let spec = Self::finalize(spec, expand)?;
+                Ok(vec![VersionedProjection {
+                    version: None,
+                    hir: Self::project_hir(spec, &properties)?,
+                }])
+            }
+            versioning::VersionLayout::PerVersion => {
+                let mut projections = Vec::new();
+                for version in versions {
+                    let spec = versioning::project(&source, &record, version)?;
+                    let spec = Self::finalize(spec, expand)?;
+                    projections.push(VersionedProjection {
+                        version: record.timeline().get(version).cloned(),
+                        hir: Self::project_hir(spec, &properties)?,
+                    });
+                }
+                Ok(projections)
+            }
+        }
+    }
+
+    /// Lowers a typed AST and projects the first request of the merged layout.
+    ///
+    /// Callers that need per-version output use [`Self::project_typed_ast_versions`].
+    pub fn project_typed_ast_with_properties_and_path(
+        value: crate::typed_ast::Specification,
+        properties: ParserProperties,
+        path: impl AsRef<Path>,
     ) -> crate::error::ParserResult<ProjectedHir> {
-        let spec = Self::lower(value, expand_interface(&properties))?;
-        match hir_projection_kind(&properties) {
+        let mut projections = Self::project_typed_ast_versions(value, properties, path)?;
+        match projections.len() {
+            1 => Ok(projections.remove(0).hir),
+            _ => Err(crate::error::ParseError::Message(
+                "xidl versioning: per-version layout requires project_typed_ast_versions"
+                    .to_string(),
+            )),
+        }
+    }
+
+    fn project_hir(
+        spec: Specification,
+        properties: &ParserProperties,
+    ) -> crate::error::ParserResult<ProjectedHir> {
+        match hir_projection_kind(properties) {
             HirProjectionKind::Rpc => Ok(ProjectedHir::Rpc(spec)),
             HirProjectionKind::Http => rest_hir::project(&spec).map(ProjectedHir::Http),
             HirProjectionKind::JsonRpc => jsonrpc_hir::project(&spec).map(ProjectedHir::JsonRpc),
         }
     }
 
-    fn lower(
-        value: crate::typed_ast::Specification,
-        expand_interfaces: bool,
-    ) -> crate::error::ParserResult<Self> {
+    /// Builds the source HIR: definitions plus shared source validation.
+    fn lower_source(value: crate::typed_ast::Specification) -> crate::error::ParserResult<Self> {
         let mut definitions = Vec::new();
         collect_defs(value.0, &mut definitions);
-        let mut spec = Self(definitions);
+        let spec = Self(definitions);
         // All source targets share HTTP declaration validation; builtins belong
         // to its temporary type environment, not the generated user models.
         rest_hir::HttpUnion::validate_source(&spec.0)?;
+        Ok(spec)
+    }
+
+    /// Runs interface expansion and semantic analysis on an already lowered spec.
+    fn finalize(mut spec: Self, expand_interfaces: bool) -> crate::error::ParserResult<Self> {
         // Validate lexical source scopes before adding RPC wrapper declarations
         // at their generated scopes.
         if expand_interfaces {
@@ -67,6 +137,17 @@ impl Specification {
         }
         semantic::analyze(&mut spec);
         Ok(spec)
+    }
+
+    fn lower(
+        value: crate::typed_ast::Specification,
+        expand_interfaces: bool,
+    ) -> crate::error::ParserResult<Self> {
+        let spec = Self::lower_source(value)?;
+        // API versioning annotations are validated on every compile, even when
+        // no version is projected.
+        versioning::analyze(&spec)?;
+        Self::finalize(spec, expand_interfaces)
     }
 
     fn expand_interfaces(

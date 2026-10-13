@@ -1,0 +1,17 @@
+#pragma xidlc package versioning_invalid
+
+@version
+enum ApiVersions {
+    v1,
+    v2,
+};
+
+@removed(ApiVersions::v2)
+struct Old {
+    string id;
+};
+
+struct Pet {
+    string id;
+    Old old;
+};

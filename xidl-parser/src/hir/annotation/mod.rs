@@ -127,6 +127,18 @@ pub enum Annotation {
         rule: RenameRule,
     },
     Skip,
+    /// The `@version` marker that designates an enum as the API version timeline.
+    Version,
+    /// The `@added(Version::member)` lifecycle annotation: the declaration exists
+    /// from that version onward.
+    Added {
+        version: ScopedName,
+    },
+    /// The `@removed(Version::member)` lifecycle annotation: the declaration is
+    /// removed at that version.
+    Removed {
+        version: ScopedName,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

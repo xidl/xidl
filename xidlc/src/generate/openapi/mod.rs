@@ -27,17 +27,23 @@ impl crate::jsonrpc::Codegen for OpenApiCodegen {
     }
 
     fn get_properties(&self) -> Result<ParserProperties, crate::jsonrpc::RpcError> {
-        Ok(HashMap::from([(
-            "hir_kind".to_string(),
-            serde_json::Value::String("http".to_string()),
-        )]))
+        Ok(HashMap::from([
+            (
+                "hir_kind".to_string(),
+                serde_json::Value::String("http".to_string()),
+            ),
+            (
+                xidl_parser::versioning::VERSION_LAYOUT_PROPERTY.to_string(),
+                serde_json::Value::String(xidl_parser::versioning::LAYOUT_PER_VERSION.to_string()),
+            ),
+        ]))
     }
 
     fn generate(
         &self,
         input_hir: crate::jsonrpc::CodegenInput,
         input: String,
-        _props: ParserProperties,
+        props: ParserProperties,
     ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
         let rest_hir = input_hir.into_rest_hir();
         let openapi = render_openapi_json(&rest_hir.spec, &rest_hir)?;
@@ -47,12 +53,20 @@ impl crate::jsonrpc::Codegen for OpenApiCodegen {
             .file_stem()
             .and_then(|value| value.to_str())
             .unwrap_or("openapi");
+        let path = match api_version(&props) {
+            Some(version) => format!("openapi_{stem}.{version}.json"),
+            None => format!("openapi_{stem}.json"),
+        };
 
-        Ok(vec![Artifact::new_file(ArtifactFile {
-            path: format!("openapi_{stem}.json"),
-            content,
-        })])
+        Ok(vec![Artifact::new_file(ArtifactFile { path, content })])
     }
+}
+
+/// API version of this projection, set by the HIR stage for versioned contracts.
+fn api_version(props: &ParserProperties) -> Option<&str> {
+    props
+        .get(xidl_parser::versioning::API_VERSION_PROPERTY)
+        .and_then(serde_json::Value::as_str)
 }
 
 fn render_openapi_json(spec: &hir::Specification, rest_hir: &RestHirDocument) -> IdlcResult<Value> {

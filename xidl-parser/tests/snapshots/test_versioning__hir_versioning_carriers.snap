@@ -1,0 +1,344 @@
+---
+source: xidl-parser/tests/test-versioning.rs
+expression: hir
+---
+Specification(
+    [
+        Pragma(
+            XidlcPackage(
+                "carriers",
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                EnumDcl(
+                    EnumDcl {
+                        annotations: [
+                            Version,
+                        ],
+                        ident: "Versions",
+                        member: [
+                            Enumerator {
+                                annotations: [
+                                    Rename {
+                                        name: "1.0",
+                                    },
+                                ],
+                                ident: "v1",
+                            },
+                            Enumerator {
+                                annotations: [
+                                    Rename {
+                                        name: "2.0",
+                                    },
+                                ],
+                                ident: "v2",
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "StructCarrier",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [
+                                    Added {
+                                        version: ScopedName {
+                                            name: [
+                                                "Versions",
+                                                "v2",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    },
+                                ],
+                                ty: IntegerType(
+                                    I32,
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "member",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                                recursive: false,
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                UnionDef(
+                    UnionDef {
+                        annotations: [],
+                        ident: "UnionCarrier",
+                        switch_type_spec: IntegerType(
+                            I32,
+                        ),
+                        case: [
+                            Case {
+                                label: [
+                                    Value(
+                                        Literal(
+                                            IntegerLiteral(
+                                                IntegerLiteral(
+                                                    "0",
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [
+                                        Added {
+                                            version: ScopedName {
+                                                name: [
+                                                    "Versions",
+                                                    "v2",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        },
+                                    ],
+                                    ty: TypeSpec(
+                                        IntegerType(
+                                            I32,
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "value",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                EnumDcl(
+                    EnumDcl {
+                        annotations: [],
+                        ident: "EnumCarrier",
+                        member: [
+                            Enumerator {
+                                annotations: [
+                                    Added {
+                                        version: ScopedName {
+                                            name: [
+                                                "Versions",
+                                                "v2",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    },
+                                ],
+                                ident: "Value",
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        ExceptDcl(
+            ExceptDcl {
+                annotations: [
+                    ScopedName {
+                        name: ScopedName {
+                            name: [
+                                "http",
+                            ],
+                            is_root: false,
+                        },
+                        params: Some(
+                            ConstExpr(
+                                Literal(
+                                    IntegerLiteral(
+                                        IntegerLiteral(
+                                            "404",
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    },
+                ],
+                ident: "ExceptionCarrier",
+                member: [
+                    Member {
+                        annotations: [
+                            Added {
+                                version: ScopedName {
+                                    name: [
+                                        "Versions",
+                                        "v2",
+                                    ],
+                                    is_root: false,
+                                },
+                            },
+                        ],
+                        ty: StringType(
+                            StringType {
+                                bound: None,
+                            },
+                        ),
+                        ident: [
+                            SimpleDeclarator(
+                                SimpleDeclarator(
+                                    "member",
+                                ),
+                            ),
+                        ],
+                        default: None,
+                        field_id: None,
+                        recursive: false,
+                    },
+                ],
+            },
+        ),
+        TypeDcl(
+            TypedefDcl(
+                TypedefDcl {
+                    annotations: [
+                        Added {
+                            version: ScopedName {
+                                name: [
+                                    "Versions",
+                                    "v2",
+                                ],
+                                is_root: false,
+                            },
+                        },
+                    ],
+                    ty: TypeSpec(
+                        IntegerType(
+                            I32,
+                        ),
+                    ),
+                    decl: [
+                        SimpleDeclarator(
+                            SimpleDeclarator(
+                                "TypedefCarrier",
+                            ),
+                        ),
+                    ],
+                },
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                BitmaskDcl(
+                    BitmaskDcl {
+                        annotations: [],
+                        ident: "BitmaskCarrier",
+                        value: [
+                            BitValue {
+                                position: 0,
+                                annotations: [
+                                    Added {
+                                        version: ScopedName {
+                                            name: [
+                                                "Versions",
+                                                "v2",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    },
+                                ],
+                                ident: "A",
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        InterfaceDcl(
+            InterfaceDcl {
+                annotations: [],
+                decl: InterfaceDef(
+                    InterfaceDef {
+                        header: InterfaceHeader {
+                            ident: "InterfaceCarrier",
+                            parent: None,
+                        },
+                        interface_body: Some(
+                            InterfaceBody(
+                                [
+                                    OpDcl(
+                                        OpDcl {
+                                            annotations: [
+                                                Added {
+                                                    version: ScopedName {
+                                                        name: [
+                                                            "Versions",
+                                                            "v2",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                },
+                                            ],
+                                            ty: TypeSpec(
+                                                IntegerType(
+                                                    I32,
+                                                ),
+                                            ),
+                                            ident: "operation",
+                                            parameter: Some(
+                                                ParameterDcls(
+                                                    [
+                                                        ParamDcl {
+                                                            annotations: [
+                                                                Added {
+                                                                    version: ScopedName {
+                                                                        name: [
+                                                                            "Versions",
+                                                                            "v2",
+                                                                        ],
+                                                                        is_root: false,
+                                                                    },
+                                                                },
+                                                            ],
+                                                            attr: None,
+                                                            ty: IntegerType(
+                                                                I32,
+                                                            ),
+                                                            declarator: SimpleDeclarator(
+                                                                "parameter",
+                                                            ),
+                                                        },
+                                                    ],
+                                                ),
+                                            ),
+                                            raises: None,
+                                        },
+                                    ),
+                                ],
+                            ),
+                        ),
+                    },
+                ),
+            },
+        ),
+    ],
+)

@@ -1,0 +1,133 @@
+---
+source: xidl-parser/src/versioning/tests/project.rs
+expression: projected
+---
+Specification(
+    [
+        Pragma(
+            XidlcPackage(
+                "versioned",
+            ),
+        ),
+        Pragma(
+            XidlcOpenApiVersion(
+                "2.0",
+            ),
+        ),
+        ModuleDcl(
+            ModuleDcl {
+                annotations: [],
+                ident: "v2",
+                definition: [
+                    TypeDcl(
+                        ConstrTypeDcl(
+                            StructDcl(
+                                StructDcl {
+                                    annotations: [],
+                                    ident: "Item",
+                                    parent: [],
+                                    member: [
+                                        Member {
+                                            annotations: [],
+                                            ty: StringType(
+                                                StringType {
+                                                    bound: None,
+                                                },
+                                            ),
+                                            ident: [
+                                                SimpleDeclarator(
+                                                    SimpleDeclarator(
+                                                        "id",
+                                                    ),
+                                                ),
+                                            ],
+                                            default: None,
+                                            field_id: Some(
+                                                1,
+                                            ),
+                                            recursive: false,
+                                        },
+                                    ],
+                                },
+                            ),
+                        ),
+                    ),
+                    TypeDcl(
+                        ConstrTypeDcl(
+                            StructDcl(
+                                StructDcl {
+                                    annotations: [],
+                                    ident: "Pet",
+                                    parent: [],
+                                    member: [
+                                        Member {
+                                            annotations: [],
+                                            ty: StringType(
+                                                StringType {
+                                                    bound: None,
+                                                },
+                                            ),
+                                            ident: [
+                                                SimpleDeclarator(
+                                                    SimpleDeclarator(
+                                                        "id",
+                                                    ),
+                                                ),
+                                            ],
+                                            default: None,
+                                            field_id: Some(
+                                                1,
+                                            ),
+                                            recursive: false,
+                                        },
+                                        Member {
+                                            annotations: [],
+                                            ty: ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "Item",
+                                                    ],
+                                                    is_root: false,
+                                                },
+                                            ),
+                                            ident: [
+                                                SimpleDeclarator(
+                                                    SimpleDeclarator(
+                                                        "item",
+                                                    ),
+                                                ),
+                                            ],
+                                            default: None,
+                                            field_id: Some(
+                                                2,
+                                            ),
+                                            recursive: false,
+                                        },
+                                        Member {
+                                            annotations: [],
+                                            ty: IntegerType(
+                                                I32,
+                                            ),
+                                            ident: [
+                                                SimpleDeclarator(
+                                                    SimpleDeclarator(
+                                                        "age",
+                                                    ),
+                                                ),
+                                            ],
+                                            default: None,
+                                            field_id: Some(
+                                                3,
+                                            ),
+                                            recursive: false,
+                                        },
+                                    ],
+                                },
+                            ),
+                        ),
+                    ),
+                ],
+            },
+        ),
+    ],
+)

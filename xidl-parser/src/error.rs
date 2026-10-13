@@ -12,6 +12,8 @@ pub enum ParseError {
     UnexpectedNode(String),
     /// Failure reported by tree-sitter itself.
     TreeSitterError(String),
+    /// Failure reported by API versioning analysis or projection.
+    Versioning(crate::versioning::VersioningError),
 }
 
 impl fmt::Display for ParseError {
@@ -21,6 +23,7 @@ impl fmt::Display for ParseError {
             Self::Utf8Error(err) => write!(f, "{err}"),
             Self::UnexpectedNode(node) => write!(f, "Unexpected node: {node}"),
             Self::TreeSitterError(message) => write!(f, "TreeSitterError: {message}"),
+            Self::Versioning(error) => write!(f, "{error}"),
         }
     }
 }
@@ -29,6 +32,7 @@ impl Error for ParseError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
             Self::Utf8Error(err) => Some(err),
+            Self::Versioning(error) => Some(error),
             _ => None,
         }
     }
@@ -37,6 +41,12 @@ impl Error for ParseError {
 impl From<std::str::Utf8Error> for ParseError {
     fn from(err: std::str::Utf8Error) -> Self {
         Self::Utf8Error(err)
+    }
+}
+
+impl From<crate::versioning::VersioningError> for ParseError {
+    fn from(err: crate::versioning::VersioningError) -> Self {
+        Self::Versioning(err)
     }
 }
 

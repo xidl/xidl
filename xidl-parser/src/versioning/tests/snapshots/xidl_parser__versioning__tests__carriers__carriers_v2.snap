@@ -1,0 +1,529 @@
+---
+source: xidl-parser/src/versioning/tests/carriers.rs
+expression: "&snapshots[1]"
+---
+[
+  {
+    "Pragma": {
+      "XidlcPackage": "carriers_sink"
+    }
+  },
+  {
+    "Pragma": {
+      "XidlcOpenApiVersion": "v2"
+    }
+  },
+  {
+    "ModuleDcl": {
+      "annotations": [],
+      "ident": "v2",
+      "definition": [
+        {
+          "ModuleDcl": {
+            "annotations": [],
+            "ident": "nested",
+            "definition": [
+              {
+                "TypeDcl": {
+                  "ConstrTypeDcl": {
+                    "StructDcl": {
+                      "annotations": [],
+                      "ident": "Added",
+                      "parent": [],
+                      "member": [
+                        {
+                          "annotations": [],
+                          "ty": {
+                            "StringType": {
+                              "bound": null
+                            }
+                          },
+                          "ident": [
+                            {
+                              "SimpleDeclarator": "id"
+                            }
+                          ],
+                          "default": null,
+                          "field_id": 1,
+                          "recursive": false
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "TypeDcl": {
+            "ConstrTypeDcl": {
+              "StructDcl": {
+                "annotations": [],
+                "ident": "Base",
+                "parent": [],
+                "member": [
+                  {
+                    "annotations": [],
+                    "ty": {
+                      "StringType": {
+                        "bound": null
+                      }
+                    },
+                    "ident": [
+                      {
+                        "SimpleDeclarator": "id"
+                      }
+                    ],
+                    "default": null,
+                    "field_id": 1,
+                    "recursive": false
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "TypeDcl": {
+            "ConstrTypeDcl": {
+              "StructDcl": {
+                "annotations": [],
+                "ident": "Derived",
+                "parent": [
+                  {
+                    "name": [
+                      "Base"
+                    ],
+                    "is_root": false
+                  }
+                ],
+                "member": [
+                  {
+                    "annotations": [],
+                    "ty": {
+                      "StringType": {
+                        "bound": null
+                      }
+                    },
+                    "ident": [
+                      {
+                        "SimpleDeclarator": "extra"
+                      }
+                    ],
+                    "default": null,
+                    "field_id": 1,
+                    "recursive": false
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "TypeDcl": {
+            "TypedefDcl": {
+              "annotations": [],
+              "ty": {
+                "TypeSpec": {
+                  "SequenceType": {
+                    "ty": {
+                      "ScopedName": {
+                        "name": [
+                          "Derived"
+                        ],
+                        "is_root": false
+                      }
+                    },
+                    "len": null
+                  }
+                }
+              },
+              "decl": [
+                {
+                  "SimpleDeclarator": "DerivedSeq"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "TypeDcl": {
+            "TypedefDcl": {
+              "annotations": [],
+              "ty": {
+                "TypeSpec": {
+                  "StringType": {
+                    "bound": null
+                  }
+                }
+              },
+              "decl": [
+                {
+                  "SimpleDeclarator": "Label"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "ConstDcl": {
+            "annotations": [],
+            "ty": {
+              "IntegerType": "I32"
+            },
+            "ident": "LIMIT",
+            "value": {
+              "Literal": {
+                "IntegerLiteral": "10"
+              }
+            }
+          }
+        },
+        {
+          "ExceptDcl": {
+            "annotations": [
+              {
+                "ScopedName": {
+                  "name": {
+                    "name": [
+                      "http"
+                    ],
+                    "is_root": false
+                  },
+                  "params": {
+                    "ConstExpr": {
+                      "Literal": {
+                        "IntegerLiteral": "404"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "ident": "Failure",
+            "member": [
+              {
+                "annotations": [],
+                "ty": {
+                  "StringType": {
+                    "bound": null
+                  }
+                },
+                "ident": [
+                  {
+                    "SimpleDeclarator": "message"
+                  }
+                ],
+                "default": null,
+                "field_id": null,
+                "recursive": false
+              },
+              {
+                "annotations": [
+                  {
+                    "Optional": {
+                      "value": null
+                    }
+                  }
+                ],
+                "ty": {
+                  "StringType": {
+                    "bound": null
+                  }
+                },
+                "ident": [
+                  {
+                    "SimpleDeclarator": "detail"
+                  }
+                ],
+                "default": null,
+                "field_id": null,
+                "recursive": false
+              }
+            ]
+          }
+        },
+        {
+          "TypeDcl": {
+            "ConstrTypeDcl": {
+              "UnionDef": {
+                "annotations": [],
+                "ident": "Choice",
+                "switch_type_spec": {
+                  "IntegerType": "I32"
+                },
+                "case": [
+                  {
+                    "label": [
+                      {
+                        "Value": {
+                          "Literal": {
+                            "IntegerLiteral": "0"
+                          }
+                        }
+                      }
+                    ],
+                    "element": {
+                      "annotations": [],
+                      "ty": {
+                        "TypeSpec": {
+                          "ScopedName": {
+                            "name": [
+                              "Derived"
+                            ],
+                            "is_root": false
+                          }
+                        }
+                      },
+                      "value": {
+                        "SimpleDeclarator": "value"
+                      },
+                      "field_id": 1,
+                      "recursive": false
+                    }
+                  },
+                  {
+                    "label": [
+                      {
+                        "Value": {
+                          "Literal": {
+                            "IntegerLiteral": "1"
+                          }
+                        }
+                      }
+                    ],
+                    "element": {
+                      "annotations": [],
+                      "ty": {
+                        "TypeSpec": {
+                          "ScopedName": {
+                            "name": [
+                              "Base"
+                            ],
+                            "is_root": false
+                          }
+                        }
+                      },
+                      "value": {
+                        "SimpleDeclarator": "fallback"
+                      },
+                      "field_id": 2,
+                      "recursive": false
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "TypeDcl": {
+            "ConstrTypeDcl": {
+              "EnumDcl": {
+                "annotations": [],
+                "ident": "Kind",
+                "member": [
+                  {
+                    "annotations": [],
+                    "ident": "Extra"
+                  },
+                  {
+                    "annotations": [],
+                    "ident": "Basic"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "TypeDcl": {
+            "ConstrTypeDcl": {
+              "BitmaskDcl": {
+                "annotations": [],
+                "ident": "Flags",
+                "value": [
+                  {
+                    "position": 0,
+                    "annotations": [],
+                    "ident": "Extra"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "TypeDcl": {
+            "ConstrTypeDcl": {
+              "BitsetDcl": {
+                "annotations": [],
+                "ident": "Mask",
+                "parent": {
+                  "name": [
+                    "Base"
+                  ],
+                  "is_root": false
+                },
+                "field": [
+                  {
+                    "ident": "bit",
+                    "pos": {
+                      "Literal": {
+                        "IntegerLiteral": "1"
+                      }
+                    },
+                    "ty": null
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "TypeDcl": {
+            "ConstrTypeDcl": {
+              "StructForwardDcl": {
+                "annotations": [],
+                "ident": "Forward"
+              }
+            }
+          }
+        },
+        {
+          "InterfaceDcl": {
+            "annotations": [],
+            "decl": {
+              "InterfaceDef": {
+                "header": {
+                  "ident": "Api",
+                  "parent": null
+                },
+                "interface_body": [
+                  {
+                    "AttrDcl": {
+                      "annotations": [],
+                      "decl": {
+                        "AttrSpec": {
+                          "ty": {
+                            "ScopedName": {
+                              "name": [
+                                "Base"
+                              ],
+                              "is_root": false
+                            }
+                          },
+                          "declarator": {
+                            "SimpleDeclarator": [
+                              "current"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "AttrDcl": {
+                      "annotations": [],
+                      "decl": {
+                        "ReadonlyAttrSpec": {
+                          "ty": {
+                            "IntegerType": "U16"
+                          },
+                          "declarator": {
+                            "SimpleDeclarator": "port"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "ConstDcl": {
+                      "annotations": [],
+                      "ty": {
+                        "IntegerType": "I32"
+                      },
+                      "ident": "MAX",
+                      "value": {
+                        "Literal": {
+                          "IntegerLiteral": "1"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "ExceptDcl": {
+                      "annotations": [],
+                      "ident": "Inner",
+                      "member": [
+                        {
+                          "annotations": [],
+                          "ty": {
+                            "StringType": {
+                              "bound": null
+                            }
+                          },
+                          "ident": [
+                            {
+                              "SimpleDeclarator": "why"
+                            }
+                          ],
+                          "default": null,
+                          "field_id": null,
+                          "recursive": false
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "OpDcl": {
+                      "annotations": [],
+                      "ty": {
+                        "TypeSpec": {
+                          "ScopedName": {
+                            "name": [
+                              "Derived"
+                            ],
+                            "is_root": false
+                          }
+                        }
+                      },
+                      "ident": "fetch",
+                      "parameter": [
+                        {
+                          "annotations": [
+                            {
+                              "Optional": {
+                                "value": null
+                              }
+                            }
+                          ],
+                          "attr": null,
+                          "ty": {
+                            "StringType": {
+                              "bound": null
+                            }
+                          },
+                          "declarator": "filter"
+                        }
+                      ],
+                      "raises": [
+                        {
+                          "name": [
+                            "Failure"
+                          ],
+                          "is_root": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+]

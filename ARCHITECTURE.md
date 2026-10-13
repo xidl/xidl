@@ -162,6 +162,30 @@ This pattern is expected to generalize. There is no `jsonrpc_hir` today, but it
 would be architecturally consistent to add one in the future if JSON-RPC
 semantics become complex enough to justify a shared protocol layer.
 
+## API Versioning Flow
+
+Versioned contracts add one projection that runs before any protocol projection:
+
+1. Parse IDL.
+2. Lower to `hir`.
+3. In `xidl-parser/src/versioning`, validate the `@version` enum and the
+   `@added`/`@removed` intervals, then wrap each selected version in
+   `module <version> { ... }` and strip the lifecycle annotations.
+4. Continue with the ordinary pipeline (`hir`, `rest_hir`, or `jsonrpc_hir`) on
+   the projected specification.
+
+Consequences:
+
+- Generators contain no version logic. They receive one module per version and
+  render it with the module support they already have.
+- The merged layout keeps every version module in one specification, so code
+  targets emit a single file holding one module per version.
+- OpenAPI and OpenRPC declare the `per_version` layout; the HIR stage runs once
+  per version and emits `openapi_<stem>.<version>.json` (or
+  `openrpc.<version>.json`) with `info.version` set to the version value.
+- Unversioned contracts take the identity path, which keeps the existing
+  snapshot corpus byte-identical.
+
 ## Why `typed_ast`, `hir`, and `rest_hir` Exist
 
 These three layers exist because XIDL has to solve three different problems at
@@ -327,6 +351,8 @@ Important subtrees:
 
 - `xidl-parser/src/typed_ast/`: syntax-shaped typed AST
 - `xidl-parser/src/hir/`: semantic HIR
+- `xidl-parser/src/versioning/`: `@version` timeline, lifecycle validation, and
+  per-version HIR projection
 - `xidl-parser/tests/`: parser and lowering tests
 
 ### Compiler Driver and Built-In Generators

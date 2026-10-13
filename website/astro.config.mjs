@@ -85,6 +85,10 @@ export default defineConfig({
               label: 'Language Support',
               link: '/guide/language-support/',
             },
+            {
+              label: 'API Versioning',
+              link: '/guide/versioning/',
+            },
           ],
           label: 'Guide',
         },

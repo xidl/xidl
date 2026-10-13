@@ -8,6 +8,9 @@ def after_scenario(context, scenario):
     if hasattr(context, "port_guard") and context.port_guard is not None:
         context.port_guard.close()
         context.port_guard = None
+    if hasattr(context, "port_v2_guard") and context.port_v2_guard is not None:
+        context.port_v2_guard.close()
+        context.port_v2_guard = None
     if hasattr(context, "server_process"):
         stop_server_process(context.server_process)
     if hasattr(context, "server_log_thread"):

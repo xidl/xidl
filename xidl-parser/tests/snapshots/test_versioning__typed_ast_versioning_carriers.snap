@@ -1,0 +1,947 @@
+---
+source: xidl-parser/tests/test-versioning.rs
+expression: ast
+---
+Specification(
+    [
+        PreprocCall(
+            PreprocCall {
+                directive: PreprocDirective(
+                    "#pragma",
+                ),
+                argument: Some(
+                    PreprocArg(
+                        "xidlc package carriers",
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [
+                    AnnotationAppl {
+                        name: ScopedName(
+                            ScopedName {
+                                scoped_name: None,
+                                identifier: Identifier(
+                                    "version",
+                                ),
+                                node_text: "version",
+                            },
+                        ),
+                        params: None,
+                        builtin: None,
+                        is_extend: false,
+                        extra: [],
+                    },
+                ],
+                decl: ConstrTypeDcl(
+                    EnumDcl(
+                        EnumDcl {
+                            ident: Identifier(
+                                "Versions",
+                            ),
+                            member: [
+                                Enumerator {
+                                    annotations: [
+                                        AnnotationAppl {
+                                            name: ScopedName(
+                                                ScopedName {
+                                                    scoped_name: None,
+                                                    identifier: Identifier(
+                                                        "rename",
+                                                    ),
+                                                    node_text: "rename",
+                                                },
+                                            ),
+                                            params: Some(
+                                                Params(
+                                                    [
+                                                        Positional(
+                                                            ConstExpr(
+                                                                XorExpr(
+                                                                    AndExpr(
+                                                                        ShiftExpr(
+                                                                            AddExpr(
+                                                                                MultExpr(
+                                                                                    UnaryExpr(
+                                                                                        PrimaryExpr(
+                                                                                            Literal(
+                                                                                                StringLiteral(
+                                                                                                    "\"1.0\"",
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ],
+                                                ),
+                                            ),
+                                            builtin: None,
+                                            is_extend: false,
+                                            extra: [],
+                                        },
+                                    ],
+                                    ident: Identifier(
+                                        "v1",
+                                    ),
+                                },
+                                Enumerator {
+                                    annotations: [
+                                        AnnotationAppl {
+                                            name: ScopedName(
+                                                ScopedName {
+                                                    scoped_name: None,
+                                                    identifier: Identifier(
+                                                        "rename",
+                                                    ),
+                                                    node_text: "rename",
+                                                },
+                                            ),
+                                            params: Some(
+                                                Params(
+                                                    [
+                                                        Positional(
+                                                            ConstExpr(
+                                                                XorExpr(
+                                                                    AndExpr(
+                                                                        ShiftExpr(
+                                                                            AddExpr(
+                                                                                MultExpr(
+                                                                                    UnaryExpr(
+                                                                                        PrimaryExpr(
+                                                                                            Literal(
+                                                                                                StringLiteral(
+                                                                                                    "\"2.0\"",
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ],
+                                                ),
+                                            ),
+                                            builtin: None,
+                                            is_extend: false,
+                                            extra: [],
+                                        },
+                                    ],
+                                    ident: Identifier(
+                                        "v2",
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDef(
+                            StructDef {
+                                ident: Identifier(
+                                    "StructCarrier",
+                                ),
+                                parent: [],
+                                member: [
+                                    Member {
+                                        annotations: [
+                                            AnnotationAppl {
+                                                name: ScopedName(
+                                                    ScopedName {
+                                                        scoped_name: None,
+                                                        identifier: Identifier(
+                                                            "added",
+                                                        ),
+                                                        node_text: "added",
+                                                    },
+                                                ),
+                                                params: Some(
+                                                    Params(
+                                                        [
+                                                            Positional(
+                                                                ConstExpr(
+                                                                    XorExpr(
+                                                                        AndExpr(
+                                                                            ShiftExpr(
+                                                                                AddExpr(
+                                                                                    MultExpr(
+                                                                                        UnaryExpr(
+                                                                                            PrimaryExpr(
+                                                                                                ScopedName(
+                                                                                                    ScopedName {
+                                                                                                        scoped_name: Some(
+                                                                                                            ScopedName {
+                                                                                                                scoped_name: None,
+                                                                                                                identifier: Identifier(
+                                                                                                                    "Versions",
+                                                                                                                ),
+                                                                                                                node_text: "Versions",
+                                                                                                            },
+                                                                                                        ),
+                                                                                                        identifier: Identifier(
+                                                                                                            "v2",
+                                                                                                        ),
+                                                                                                        node_text: "Versions::v2",
+                                                                                                    },
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ],
+                                                    ),
+                                                ),
+                                                builtin: None,
+                                                is_extend: false,
+                                                extra: [],
+                                            },
+                                        ],
+                                        ty: SimpleTypeSpec(
+                                            BaseTypeSpec(
+                                                IntegerType(
+                                                    SignedInt(
+                                                        SignedLongInt(
+                                                            SignedLongInt,
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                        ident: Declarators(
+                                            [
+                                                SimpleDeclarator(
+                                                    SimpleDeclarator(
+                                                        Identifier(
+                                                            "member",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ],
+                                        ),
+                                        default: None,
+                                    },
+                                ],
+                            },
+                        ),
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    UnionDcl(
+                        UnionDef(
+                            UnionDef {
+                                ident: Identifier(
+                                    "UnionCarrier",
+                                ),
+                                switch_type_spec: IntegerType(
+                                    SignedInt(
+                                        SignedLongInt(
+                                            SignedLongInt,
+                                        ),
+                                    ),
+                                ),
+                                case: [
+                                    Case {
+                                        label: [
+                                            Case(
+                                                ConstExpr(
+                                                    XorExpr(
+                                                        AndExpr(
+                                                            ShiftExpr(
+                                                                AddExpr(
+                                                                    MultExpr(
+                                                                        UnaryExpr(
+                                                                            PrimaryExpr(
+                                                                                Literal(
+                                                                                    IntegerLiteral(
+                                                                                        DecNumber(
+                                                                                            "0",
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ],
+                                        element: ElementSpec {
+                                            annotations: [
+                                                AnnotationAppl {
+                                                    name: ScopedName(
+                                                        ScopedName {
+                                                            scoped_name: None,
+                                                            identifier: Identifier(
+                                                                "added",
+                                                            ),
+                                                            node_text: "added",
+                                                        },
+                                                    ),
+                                                    params: Some(
+                                                        Params(
+                                                            [
+                                                                Positional(
+                                                                    ConstExpr(
+                                                                        XorExpr(
+                                                                            AndExpr(
+                                                                                ShiftExpr(
+                                                                                    AddExpr(
+                                                                                        MultExpr(
+                                                                                            UnaryExpr(
+                                                                                                PrimaryExpr(
+                                                                                                    ScopedName(
+                                                                                                        ScopedName {
+                                                                                                            scoped_name: Some(
+                                                                                                                ScopedName {
+                                                                                                                    scoped_name: None,
+                                                                                                                    identifier: Identifier(
+                                                                                                                        "Versions",
+                                                                                                                    ),
+                                                                                                                    node_text: "Versions",
+                                                                                                                },
+                                                                                                            ),
+                                                                                                            identifier: Identifier(
+                                                                                                                "v2",
+                                                                                                            ),
+                                                                                                            node_text: "Versions::v2",
+                                                                                                        },
+                                                                                                    ),
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ],
+                                                        ),
+                                                    ),
+                                                    builtin: None,
+                                                    is_extend: false,
+                                                    extra: [],
+                                                },
+                                            ],
+                                            ty: TypeSpec(
+                                                SimpleTypeSpec(
+                                                    BaseTypeSpec(
+                                                        IntegerType(
+                                                            SignedInt(
+                                                                SignedLongInt(
+                                                                    SignedLongInt,
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                            value: SimpleDeclarator(
+                                                SimpleDeclarator(
+                                                    Identifier(
+                                                        "value",
+                                                    ),
+                                                ),
+                                            ),
+                                        },
+                                    },
+                                ],
+                            },
+                        ),
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    EnumDcl(
+                        EnumDcl {
+                            ident: Identifier(
+                                "EnumCarrier",
+                            ),
+                            member: [
+                                Enumerator {
+                                    annotations: [
+                                        AnnotationAppl {
+                                            name: ScopedName(
+                                                ScopedName {
+                                                    scoped_name: None,
+                                                    identifier: Identifier(
+                                                        "added",
+                                                    ),
+                                                    node_text: "added",
+                                                },
+                                            ),
+                                            params: Some(
+                                                Params(
+                                                    [
+                                                        Positional(
+                                                            ConstExpr(
+                                                                XorExpr(
+                                                                    AndExpr(
+                                                                        ShiftExpr(
+                                                                            AddExpr(
+                                                                                MultExpr(
+                                                                                    UnaryExpr(
+                                                                                        PrimaryExpr(
+                                                                                            ScopedName(
+                                                                                                ScopedName {
+                                                                                                    scoped_name: Some(
+                                                                                                        ScopedName {
+                                                                                                            scoped_name: None,
+                                                                                                            identifier: Identifier(
+                                                                                                                "Versions",
+                                                                                                            ),
+                                                                                                            node_text: "Versions",
+                                                                                                        },
+                                                                                                    ),
+                                                                                                    identifier: Identifier(
+                                                                                                        "v2",
+                                                                                                    ),
+                                                                                                    node_text: "Versions::v2",
+                                                                                                },
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ],
+                                                ),
+                                            ),
+                                            builtin: None,
+                                            is_extend: false,
+                                            extra: [],
+                                        },
+                                    ],
+                                    ident: Identifier(
+                                        "Value",
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        ExceptDcl(
+            ExceptDcl {
+                annotations: [
+                    AnnotationAppl {
+                        name: ScopedName(
+                            ScopedName {
+                                scoped_name: None,
+                                identifier: Identifier(
+                                    "http",
+                                ),
+                                node_text: "http",
+                            },
+                        ),
+                        params: Some(
+                            Params(
+                                [
+                                    Positional(
+                                        ConstExpr(
+                                            XorExpr(
+                                                AndExpr(
+                                                    ShiftExpr(
+                                                        AddExpr(
+                                                            MultExpr(
+                                                                UnaryExpr(
+                                                                    PrimaryExpr(
+                                                                        Literal(
+                                                                            IntegerLiteral(
+                                                                                DecNumber(
+                                                                                    "404",
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        ),
+                        builtin: None,
+                        is_extend: false,
+                        extra: [],
+                    },
+                ],
+                ident: Identifier(
+                    "ExceptionCarrier",
+                ),
+                member: [
+                    Member {
+                        annotations: [
+                            AnnotationAppl {
+                                name: ScopedName(
+                                    ScopedName {
+                                        scoped_name: None,
+                                        identifier: Identifier(
+                                            "added",
+                                        ),
+                                        node_text: "added",
+                                    },
+                                ),
+                                params: Some(
+                                    Params(
+                                        [
+                                            Positional(
+                                                ConstExpr(
+                                                    XorExpr(
+                                                        AndExpr(
+                                                            ShiftExpr(
+                                                                AddExpr(
+                                                                    MultExpr(
+                                                                        UnaryExpr(
+                                                                            PrimaryExpr(
+                                                                                ScopedName(
+                                                                                    ScopedName {
+                                                                                        scoped_name: Some(
+                                                                                            ScopedName {
+                                                                                                scoped_name: None,
+                                                                                                identifier: Identifier(
+                                                                                                    "Versions",
+                                                                                                ),
+                                                                                                node_text: "Versions",
+                                                                                            },
+                                                                                        ),
+                                                                                        identifier: Identifier(
+                                                                                            "v2",
+                                                                                        ),
+                                                                                        node_text: "Versions::v2",
+                                                                                    },
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ],
+                                    ),
+                                ),
+                                builtin: None,
+                                is_extend: false,
+                                extra: [],
+                            },
+                        ],
+                        ty: TemplateTypeSpec(
+                            StringType(
+                                StringType {
+                                    bound: None,
+                                },
+                            ),
+                        ),
+                        ident: Declarators(
+                            [
+                                SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        Identifier(
+                                            "member",
+                                        ),
+                                    ),
+                                ),
+                            ],
+                        ),
+                        default: None,
+                    },
+                ],
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [
+                    AnnotationAppl {
+                        name: ScopedName(
+                            ScopedName {
+                                scoped_name: None,
+                                identifier: Identifier(
+                                    "added",
+                                ),
+                                node_text: "added",
+                            },
+                        ),
+                        params: Some(
+                            Params(
+                                [
+                                    Positional(
+                                        ConstExpr(
+                                            XorExpr(
+                                                AndExpr(
+                                                    ShiftExpr(
+                                                        AddExpr(
+                                                            MultExpr(
+                                                                UnaryExpr(
+                                                                    PrimaryExpr(
+                                                                        ScopedName(
+                                                                            ScopedName {
+                                                                                scoped_name: Some(
+                                                                                    ScopedName {
+                                                                                        scoped_name: None,
+                                                                                        identifier: Identifier(
+                                                                                            "Versions",
+                                                                                        ),
+                                                                                        node_text: "Versions",
+                                                                                    },
+                                                                                ),
+                                                                                identifier: Identifier(
+                                                                                    "v2",
+                                                                                ),
+                                                                                node_text: "Versions::v2",
+                                                                            },
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        ),
+                        builtin: None,
+                        is_extend: false,
+                        extra: [],
+                    },
+                ],
+                decl: TypedefDcl(
+                    TypedefDcl {
+                        decl: TypeDeclarator {
+                            ty: SimpleTypeSpec(
+                                BaseTypeSpec(
+                                    IntegerType(
+                                        SignedInt(
+                                            SignedLongInt(
+                                                SignedLongInt,
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                            decl: AnyDeclarators(
+                                [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            Identifier(
+                                                "TypedefCarrier",
+                                            ),
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        },
+                    },
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    BitmaskDcl(
+                        BitmaskDcl {
+                            ident: Identifier(
+                                "BitmaskCarrier",
+                            ),
+                            value: [
+                                BitValue {
+                                    annotations: [
+                                        AnnotationAppl {
+                                            name: ScopedName(
+                                                ScopedName {
+                                                    scoped_name: None,
+                                                    identifier: Identifier(
+                                                        "added",
+                                                    ),
+                                                    node_text: "added",
+                                                },
+                                            ),
+                                            params: Some(
+                                                Params(
+                                                    [
+                                                        Positional(
+                                                            ConstExpr(
+                                                                XorExpr(
+                                                                    AndExpr(
+                                                                        ShiftExpr(
+                                                                            AddExpr(
+                                                                                MultExpr(
+                                                                                    UnaryExpr(
+                                                                                        PrimaryExpr(
+                                                                                            ScopedName(
+                                                                                                ScopedName {
+                                                                                                    scoped_name: Some(
+                                                                                                        ScopedName {
+                                                                                                            scoped_name: None,
+                                                                                                            identifier: Identifier(
+                                                                                                                "Versions",
+                                                                                                            ),
+                                                                                                            node_text: "Versions",
+                                                                                                        },
+                                                                                                    ),
+                                                                                                    identifier: Identifier(
+                                                                                                        "v2",
+                                                                                                    ),
+                                                                                                    node_text: "Versions::v2",
+                                                                                                },
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ],
+                                                ),
+                                            ),
+                                            builtin: None,
+                                            is_extend: false,
+                                            extra: [],
+                                        },
+                                    ],
+                                    ident: Identifier(
+                                        "A",
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        InterfaceDcl(
+            InterfaceDcl {
+                annotations: [],
+                decl: InterfaceDef(
+                    InterfaceDef {
+                        header: InterfaceHeader {
+                            kind: InterfaceKind,
+                            ident: Identifier(
+                                "InterfaceCarrier",
+                            ),
+                            parent: None,
+                        },
+                        interface_body: Some(
+                            InterfaceBody(
+                                [
+                                    OpDcl(
+                                        OpDcl {
+                                            annotations: [
+                                                AnnotationAppl {
+                                                    name: ScopedName(
+                                                        ScopedName {
+                                                            scoped_name: None,
+                                                            identifier: Identifier(
+                                                                "added",
+                                                            ),
+                                                            node_text: "added",
+                                                        },
+                                                    ),
+                                                    params: Some(
+                                                        Params(
+                                                            [
+                                                                Positional(
+                                                                    ConstExpr(
+                                                                        XorExpr(
+                                                                            AndExpr(
+                                                                                ShiftExpr(
+                                                                                    AddExpr(
+                                                                                        MultExpr(
+                                                                                            UnaryExpr(
+                                                                                                PrimaryExpr(
+                                                                                                    ScopedName(
+                                                                                                        ScopedName {
+                                                                                                            scoped_name: Some(
+                                                                                                                ScopedName {
+                                                                                                                    scoped_name: None,
+                                                                                                                    identifier: Identifier(
+                                                                                                                        "Versions",
+                                                                                                                    ),
+                                                                                                                    node_text: "Versions",
+                                                                                                                },
+                                                                                                            ),
+                                                                                                            identifier: Identifier(
+                                                                                                                "v2",
+                                                                                                            ),
+                                                                                                            node_text: "Versions::v2",
+                                                                                                        },
+                                                                                                    ),
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ],
+                                                        ),
+                                                    ),
+                                                    builtin: None,
+                                                    is_extend: false,
+                                                    extra: [],
+                                                },
+                                            ],
+                                            ty: TypeSpec(
+                                                SimpleTypeSpec(
+                                                    BaseTypeSpec(
+                                                        IntegerType(
+                                                            SignedInt(
+                                                                SignedLongInt(
+                                                                    SignedLongInt,
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                            ident: Identifier(
+                                                "operation",
+                                            ),
+                                            parameter: Some(
+                                                ParameterDcls(
+                                                    [
+                                                        ParamDcl {
+                                                            annotations: [
+                                                                AnnotationAppl {
+                                                                    name: ScopedName(
+                                                                        ScopedName {
+                                                                            scoped_name: None,
+                                                                            identifier: Identifier(
+                                                                                "added",
+                                                                            ),
+                                                                            node_text: "added",
+                                                                        },
+                                                                    ),
+                                                                    params: Some(
+                                                                        Params(
+                                                                            [
+                                                                                Positional(
+                                                                                    ConstExpr(
+                                                                                        XorExpr(
+                                                                                            AndExpr(
+                                                                                                ShiftExpr(
+                                                                                                    AddExpr(
+                                                                                                        MultExpr(
+                                                                                                            UnaryExpr(
+                                                                                                                PrimaryExpr(
+                                                                                                                    ScopedName(
+                                                                                                                        ScopedName {
+                                                                                                                            scoped_name: Some(
+                                                                                                                                ScopedName {
+                                                                                                                                    scoped_name: None,
+                                                                                                                                    identifier: Identifier(
+                                                                                                                                        "Versions",
+                                                                                                                                    ),
+                                                                                                                                    node_text: "Versions",
+                                                                                                                                },
+                                                                                                                            ),
+                                                                                                                            identifier: Identifier(
+                                                                                                                                "v2",
+                                                                                                                            ),
+                                                                                                                            node_text: "Versions::v2",
+                                                                                                                        },
+                                                                                                                    ),
+                                                                                                                ),
+                                                                                                            ),
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ],
+                                                                        ),
+                                                                    ),
+                                                                    builtin: None,
+                                                                    is_extend: false,
+                                                                    extra: [],
+                                                                },
+                                                            ],
+                                                            attr: None,
+                                                            ty: SimpleTypeSpec(
+                                                                BaseTypeSpec(
+                                                                    IntegerType(
+                                                                        SignedInt(
+                                                                            SignedLongInt(
+                                                                                SignedLongInt,
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                            declarator: SimpleDeclarator(
+                                                                Identifier(
+                                                                    "parameter",
+                                                                ),
+                                                            ),
+                                                        },
+                                                    ],
+                                                ),
+                                            ),
+                                            raises: None,
+                                        },
+                                    ),
+                                ],
+                            ),
+                        ),
+                    },
+                ),
+            },
+        ),
+    ],
+)
