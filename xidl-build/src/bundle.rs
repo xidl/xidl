@@ -17,6 +17,8 @@ impl BundleBackend {
             server: spec.server,
             mock: spec.mock,
             dry_run: false,
+            api_version: spec.api_version.clone(),
+            api_versions: spec.api_versions.clone(),
             files: spec.inputs.clone(),
         };
         xidlc::driver::Driver::run(args).map_err(Self::map_error)

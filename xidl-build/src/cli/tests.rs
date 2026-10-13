@@ -13,7 +13,21 @@ fn spec(lang: &str, client: bool, server: bool, mock: bool) -> GenerateSpec {
         client,
         server,
         mock,
+        api_version: None,
+        api_versions: None,
         inputs: vec![PathBuf::from("api/city.idl")],
+    }
+}
+
+fn versioned_spec(
+    lang: &str,
+    api_version: Option<&str>,
+    api_versions: Option<&str>,
+) -> GenerateSpec {
+    GenerateSpec {
+        api_version: api_version.map(ToString::to_string),
+        api_versions: api_versions.map(ToString::to_string),
+        ..spec(lang, true, true, false)
     }
 }
 
@@ -106,4 +120,37 @@ fn failure_message_prefers_stderr_over_stdout() {
     let message = CliBackend::failure_message(&output);
     assert!(message.contains("boom"), "unexpected message: {message}");
     assert!(!message.contains("notice"), "unexpected message: {message}");
+}
+
+#[test]
+fn api_version_selection_is_passed_before_the_language() {
+    let command = CliBackend::build_command(&versioned_spec("openapi", Some("v1"), None))
+        .expect("versioned request must build");
+    assert_eq!(
+        argv_of(&command),
+        vec![
+            "gen",
+            "--out-dir",
+            "/tmp/xidl-build-test-out",
+            "--api-version",
+            "v1",
+            "openapi",
+            "api/city.idl"
+        ]
+    );
+
+    let command = CliBackend::build_command(&versioned_spec("openapi", None, Some("v1,v3")))
+        .expect("versioned request must build");
+    assert_eq!(
+        argv_of(&command),
+        vec![
+            "gen",
+            "--out-dir",
+            "/tmp/xidl-build-test-out",
+            "--api-versions",
+            "v1,v3",
+            "openapi",
+            "api/city.idl"
+        ]
+    );
 }

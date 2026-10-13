@@ -5,7 +5,7 @@ use super::{
 use crate::jsonrpc_hir;
 use crate::rest_hir::{self, HirProjectionKind, ProjectedHir};
 use crate::semantic;
-use crate::versioning::{self, VersionedProjection};
+use crate::versioning::{self, VersionedProjection, VersioningRecord};
 use serde_json::Value;
 use std::path::Path;
 
@@ -53,12 +53,13 @@ impl Specification {
         let selection = versioning::selection_from_properties(&properties)?;
         let expand = expand_interface(&properties);
         let source = Self::lower_source(value)?;
-        let Some(record) = versioning::analyze(&source)? else {
+        let Some(record) = VersioningRecord::analyze(&source)? else {
             if let Some(selection) = &selection {
                 return Err(versioning::unversioned_selection_error(selection));
             }
             let spec = Self::finalize(source, expand)?;
             return Ok(vec![VersionedProjection {
+                versions: Vec::new(),
                 version: None,
                 hir: Self::project_hir(spec, &properties)?,
             }]);
@@ -66,9 +67,14 @@ impl Specification {
         let versions = versioning::selected_versions(selection.as_ref(), &record)?;
         match layout {
             versioning::VersionLayout::Merged => {
-                let spec = versioning::merge(&source, &record, &versions)?;
+                let spec = record.merge(&source, &versions)?;
                 let spec = Self::finalize(spec, expand)?;
+                let selected = versions
+                    .iter()
+                    .filter_map(|version| record.timeline().get(*version).cloned())
+                    .collect();
                 Ok(vec![VersionedProjection {
+                    versions: selected,
                     version: None,
                     hir: Self::project_hir(spec, &properties)?,
                 }])
@@ -76,10 +82,12 @@ impl Specification {
             versioning::VersionLayout::PerVersion => {
                 let mut projections = Vec::new();
                 for version in versions {
-                    let spec = versioning::project(&source, &record, version)?;
+                    let spec = record.project(&source, version)?;
                     let spec = Self::finalize(spec, expand)?;
+                    let definition = record.timeline().get(version).cloned();
                     projections.push(VersionedProjection {
-                        version: record.timeline().get(version).cloned(),
+                        versions: definition.clone().into_iter().collect(),
+                        version: definition,
                         hir: Self::project_hir(spec, &properties)?,
                     });
                 }
@@ -146,7 +154,7 @@ impl Specification {
         let spec = Self::lower_source(value)?;
         // API versioning annotations are validated on every compile, even when
         // no version is projected.
-        versioning::analyze(&spec)?;
+        VersioningRecord::analyze(&spec)?;
         Self::finalize(spec, expand_interfaces)
     }
 

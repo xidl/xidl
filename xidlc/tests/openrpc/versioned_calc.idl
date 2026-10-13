@@ -1,0 +1,21 @@
+#pragma xidlc package versioned_calc
+
+@version
+enum ApiVersions {
+    @rename("1.0") v1,
+    @rename("2.0") v2,
+};
+
+struct Sum {
+    int64 total;
+};
+
+interface Calc {
+    int64 add(int64 a, int64 b);
+
+    @added(ApiVersions::v2)
+    Sum total(sequence<int64> values);
+
+    @removed(ApiVersions::v2)
+    int64 legacy(int64 a);
+};

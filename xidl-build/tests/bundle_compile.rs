@@ -57,3 +57,59 @@ fn bundle_backend_reports_compile_diagnostics() {
     }
     let _ = fs::remove_dir_all(&scratch);
 }
+
+const VERSIONED_IDL: &str = r#"
+#pragma xidlc package hello_versioned
+
+@version
+enum ApiVersions {
+    @rename("1.0") v1,
+    @rename("2.0") v2,
+};
+
+struct Hello {
+    string message;
+    @added(ApiVersions::v2)
+    @optional string note;
+};
+
+interface Greeter {
+    @get(path = "/hello")
+    Hello hello();
+};
+"#;
+
+#[test]
+fn bundle_backend_selects_and_renames_a_versioned_document() {
+    let scratch = scratch_dir("versioned");
+    let out_dir = scratch.join("out");
+    fs::create_dir_all(&out_dir).expect("failed to create output dir");
+    let input = scratch.join("versioned.idl");
+    fs::write(&input, VERSIONED_IDL).expect("failed to write input idl");
+
+    xidl_build::Builder::new()
+        .with_lang("openapi")
+        .with_api_version("v1")
+        .with_output_filename("api.json")
+        .with_out_dir(&out_dir)
+        .compile(&[&input])
+        .expect("versioned openapi generation should succeed");
+
+    let document = fs::read_to_string(out_dir.join("api.json")).expect("renamed document");
+    assert!(document.contains("\"version\": \"1.0\""), "{document}");
+
+    let failure = xidl_build::Builder::new()
+        .with_lang("openapi")
+        .with_output_filename("api.json")
+        .with_out_dir(&out_dir)
+        .compile(&[&input])
+        .expect_err("several versioned documents need an explicit selection");
+    match failure {
+        Error::Compile(message) => assert!(
+            message.contains("one document per API version"),
+            "unexpected message: {message}"
+        ),
+        other => panic!("expected Error::Compile, got {other:?}"),
+    }
+    let _ = fs::remove_dir_all(&scratch);
+}

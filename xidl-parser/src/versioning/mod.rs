@@ -27,6 +27,8 @@ pub use error::VersioningError;
 pub(crate) use timeline::VersionSelection;
 pub use timeline::{VersionDef, VersionId, VersionTimeline};
 
+use lifecycle::VersionVisitor as _;
+
 use crate::error::{ParseError, ParserResult};
 use crate::hir::{ParserProperties, Specification};
 use crate::rest_hir::ProjectedHir;
@@ -37,6 +39,12 @@ pub const API_VERSION_PROPERTY: &str = "api_version";
 pub const API_VERSIONS_PROPERTY: &str = "api_versions";
 /// Generation property that selects the version output layout.
 pub const VERSION_LAYOUT_PROPERTY: &str = "version_layout";
+/// Generation property that lists the API version modules of a projection.
+///
+/// The HIR stage sets it for every versioned contract; targets that cannot
+/// render module-scoped output yet use it to fail loudly instead of emitting
+/// code that does not compile.
+pub const API_VERSION_MODULES_PROPERTY: &str = "api_version_modules";
 /// Layout value: one specification holding one module per version.
 pub const LAYOUT_MERGED: &str = "merged";
 /// Layout value: one projection per version.
@@ -45,7 +53,10 @@ pub const LAYOUT_PER_VERSION: &str = "per_version";
 /// One HIR projection produced from a specification.
 #[derive(Debug)]
 pub struct VersionedProjection {
-    /// API version of this projection; `None` for unversioned specifications.
+    /// API versions this projection contains; empty for unversioned contracts.
+    pub versions: Vec<VersionDef>,
+    /// Target version of a single-version projection; `None` for merged and
+    /// unversioned projections.
     pub version: Option<VersionDef>,
     /// The projected HIR.
     pub hir: ProjectedHir,
@@ -58,9 +69,45 @@ pub struct VersioningRecord {
 }
 
 impl VersioningRecord {
+    /// Validates every API versioning annotation of a specification.
+    ///
+    /// Validation always runs, even when no version is projected. Returns
+    /// `None` for specifications without a `@version` enum, and fails when
+    /// lifecycle annotations appear without one.
+    pub fn analyze(spec: &Specification) -> ParserResult<Option<VersioningRecord>> {
+        let discovery = lifecycle::discover(&spec.0)?;
+        let Some((ident, members)) = discovery.version_enum else {
+            if let Some((annotation, decl)) = discovery.saw_lifecycle {
+                return Err(VersioningError::MissingVersionEnum { annotation, decl }.into());
+            }
+            return Ok(None);
+        };
+        let timeline = VersionTimeline::from_members(ident, &members)?;
+        let mut validator = lifecycle::LifecycleValidator {
+            timeline: &timeline,
+        };
+        validator.walk(&spec.0, "", lifecycle::Availability::full())?;
+        Ok(Some(VersioningRecord { timeline }))
+    }
+
     /// The version history declared by the `@version` enum.
     pub fn timeline(&self) -> &VersionTimeline {
         &self.timeline
+    }
+
+    /// Projects `version` into an ordinary specification.
+    pub fn project(&self, spec: &Specification, version: VersionId) -> ParserResult<Specification> {
+        project::project_version(spec, &self.timeline, version)
+    }
+
+    /// Projects every selected version into one specification with one module
+    /// per version, in timeline order.
+    pub fn merge(
+        &self,
+        spec: &Specification,
+        versions: &[VersionId],
+    ) -> ParserResult<Specification> {
+        project::merge_versions(spec, &self.timeline, versions)
     }
 }
 
@@ -93,27 +140,6 @@ impl VersionLayout {
     }
 }
 
-/// Validates every API versioning annotation of a specification.
-///
-/// Validation always runs, even when no version is projected. Returns `None`
-/// for specifications without a `@version` enum, and fails when lifecycle
-/// annotations appear without one.
-pub fn analyze(spec: &Specification) -> ParserResult<Option<VersioningRecord>> {
-    let discovery = lifecycle::discover(&spec.0)?;
-    let Some((ident, members)) = discovery.version_enum else {
-        if let Some((annotation, decl)) = discovery.saw_lifecycle {
-            return Err(VersioningError::MissingVersionEnum { annotation, decl }.into());
-        }
-        return Ok(None);
-    };
-    let timeline = VersionTimeline::from_members(ident, &members)?;
-    let mut validator = lifecycle::LifecycleValidator {
-        timeline: &timeline,
-    };
-    lifecycle::walk(&spec.0, "", lifecycle::Availability::full(), &mut validator)?;
-    Ok(Some(VersioningRecord { timeline }))
-}
-
 /// Reads the requested version selection from generation properties.
 ///
 /// A selection property on a specification without a `@version` enum is an
@@ -141,23 +167,4 @@ pub(crate) fn unversioned_selection_error(selection: &VersionSelection) -> Parse
         selection: selection.describe(),
     }
     .into()
-}
-
-/// Projects `version` of a versioned specification.
-pub fn project(
-    spec: &Specification,
-    record: &VersioningRecord,
-    version: VersionId,
-) -> ParserResult<Specification> {
-    project::project_version(spec, &record.timeline, version)
-}
-
-/// Projects every selected version into one specification with one module per
-/// version.
-pub fn merge(
-    spec: &Specification,
-    record: &VersioningRecord,
-    versions: &[VersionId],
-) -> ParserResult<Specification> {
-    project::merge_versions(spec, &record.timeline, versions)
 }

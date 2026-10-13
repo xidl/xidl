@@ -210,3 +210,23 @@ fn availability_contains_selected_versions() {
         .collect::<Vec<_>>();
     assert_eq!(selected, vec!["v2"]);
 }
+
+#[test]
+fn child_interval_disjoint_from_parent_is_rejected() {
+    let timeline = timeline();
+    let parent_added = Availability { from: 1, until: 3 };
+    let error = expect_error(availability(
+        &site("Pet.age", SiteKind::Member, &[removed("Versions", "v2")]),
+        parent_added,
+        &timeline,
+    ));
+    assert!(matches!(error, VersioningError::ChildOutsideParent { .. }));
+
+    let parent_removed = Availability { from: 0, until: 1 };
+    let error = expect_error(availability(
+        &site("Pet.age", SiteKind::Member, &[added("Versions", "v2")]),
+        parent_removed,
+        &timeline,
+    ));
+    assert!(matches!(error, VersioningError::ChildOutsideParent { .. }));
+}

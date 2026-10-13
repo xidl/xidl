@@ -20,6 +20,7 @@ pub fn generate(
     input_path: &Path,
     props: HashMap<String, serde_json::Value>,
 ) -> IdlcResult<Vec<Artifact>> {
+    crate::generate::versioning::reject_versioned_modules("rust-jsonrpc", &props)?;
     let file_name = input_path.file_stem().unwrap().to_str().unwrap();
     let filename = format!("{file_name}.rs");
 

@@ -3,7 +3,6 @@
 use super::super::VersioningError;
 use super::super::timeline::VersionTimeline;
 use super::availability::{Availability, Site, VersionVisitor, availability, raw_versioning_name};
-use super::walk::walk;
 use crate::error::ParserResult;
 use crate::hir::{Annotation, Definition, Enumerator};
 
@@ -95,7 +94,7 @@ pub(crate) fn discover(definitions: &[Definition]) -> ParserResult<Discovery> {
             saw_lifecycle: None,
         },
     };
-    walk(definitions, "", Availability::full(), &mut visitor)?;
+    visitor.walk(definitions, "", Availability::full())?;
     Ok(visitor.discovery)
 }
 

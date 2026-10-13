@@ -19,16 +19,33 @@ pub struct ArgsGenerate {
     pub server: bool,
     pub dry_run: bool,
     pub mock: bool,
+    /// One API version of a versioned contract, by member ident or value.
+    pub api_version: Option<String>,
+    /// Several API versions, comma separated, or `*` for every version.
+    pub api_versions: Option<String>,
     pub files: Vec<PathBuf>,
 }
 
 impl ArgsGenerate {
     pub fn generator_props(&self) -> HashMap<String, serde_json::Value> {
-        HashMap::from([
+        let mut props = HashMap::from([
             ("enable_client".into(), self.client.into()),
             ("enable_server".into(), self.server.into()),
             ("mock".into(), self.mock.into()),
-        ])
+        ]);
+        if let Some(version) = &self.api_version {
+            props.insert(
+                xidl_parser::versioning::API_VERSION_PROPERTY.to_string(),
+                serde_json::Value::String(version.clone()),
+            );
+        }
+        if let Some(versions) = &self.api_versions {
+            props.insert(
+                xidl_parser::versioning::API_VERSIONS_PROPERTY.to_string(),
+                serde_json::Value::String(versions.clone()),
+            );
+        }
+        props
     }
 }
 

@@ -3,7 +3,9 @@
 use super::super::lifecycle::{Availability, SiteKind, availability};
 use super::super::paths::{declarator_name, join};
 use super::projector::Projector;
-use super::references::{touch_scoped, touch_switch_type, touch_type};
+use super::references::{
+    touch_const_expr, touch_declarators, touch_scoped, touch_switch_type, touch_type,
+};
 use super::strip_annotations;
 use crate::error::ParserResult;
 use crate::hir::{
@@ -42,7 +44,7 @@ impl<'a> Projector<'a> {
                 let here = join(path, &value.ident);
                 let site = self.site(&here, path, SiteKind::Type, &value.annotations);
                 let own = availability(&site, parent, self.timeline)?;
-                self.note_declaration(&value.ident, own.contains(self.version));
+                self.note_declaration(&here, own.contains(self.version));
                 if !own.contains(self.version) {
                     return Ok(None);
                 }
@@ -57,7 +59,7 @@ impl<'a> Projector<'a> {
                 let here = join(path, &value.ident);
                 let site = self.site(&here, path, SiteKind::Type, &value.annotations);
                 let own = availability(&site, parent, self.timeline)?;
-                self.note_declaration(&value.ident, own.contains(self.version));
+                self.note_declaration(&here, own.contains(self.version));
                 if !own.contains(self.version) {
                     return Ok(None);
                 }
@@ -91,7 +93,7 @@ impl<'a> Projector<'a> {
         let here = join(path, &value.ident);
         let site = self.site(&here, path, SiteKind::Type, &value.annotations);
         let own = availability(&site, parent, self.timeline)?;
-        self.note_declaration(&value.ident, own.contains(self.version));
+        self.note_declaration(&here, own.contains(self.version));
         if !own.contains(self.version) {
             return Ok(None);
         }
@@ -115,13 +117,19 @@ impl<'a> Projector<'a> {
             .iter()
             .any(|annotation| matches!(annotation, Annotation::Version))
         {
-            // The version enum itself never appears in a projection.
+            // The version enum itself never appears in a projection, so
+            // references to it must be reported instead of silently kept.
+            let here = join(path, &value.ident);
+            self.note_declaration(&here, false);
+            for member in &value.member {
+                self.note_declaration(&join(&here, &member.ident), false);
+            }
             return Ok(None);
         }
         let here = join(path, &value.ident);
         let site = self.site(&here, path, SiteKind::Type, &value.annotations);
         let own = availability(&site, parent, self.timeline)?;
-        self.note_declaration(&value.ident, own.contains(self.version));
+        self.note_declaration(&here, own.contains(self.version));
         if !own.contains(self.version) {
             return Ok(None);
         }
@@ -135,6 +143,7 @@ impl<'a> Projector<'a> {
                 &member.annotations,
             );
             let member_own = availability(&site, own, self.timeline)?;
+            self.note_declaration(&member_path, member_own.contains(self.version));
             if !member_own.contains(self.version) {
                 continue;
             }
@@ -157,7 +166,7 @@ impl<'a> Projector<'a> {
         let here = join(path, &value.ident);
         let site = self.site(&here, path, SiteKind::Type, &value.annotations);
         let own = availability(&site, parent, self.timeline)?;
-        self.note_declaration(&value.ident, own.contains(self.version));
+        self.note_declaration(&here, own.contains(self.version));
         if !own.contains(self.version) {
             return Ok(None);
         }
@@ -176,6 +185,12 @@ impl<'a> Projector<'a> {
             if !case_own.contains(self.version) {
                 continue;
             }
+            let mut labels = case.label.clone();
+            for label in &mut labels {
+                if let crate::hir::CaseLabel::Value(expr) = label {
+                    touch_const_expr(expr, &mut self.references, &case_path);
+                }
+            }
             let mut element = ElementSpec {
                 annotations: strip_annotations(&case.element.annotations),
                 ty: case.element.ty.clone(),
@@ -183,6 +198,11 @@ impl<'a> Projector<'a> {
                 field_id: case.element.field_id,
                 recursive: case.element.recursive,
             };
+            touch_declarators(
+                std::slice::from_mut(&mut element.value),
+                &mut self.references,
+                &case_path,
+            );
             match &mut element.ty {
                 ElementSpecTy::TypeSpec(ty) => touch_type(ty, &mut self.references, &case_path),
                 ElementSpecTy::ConstrTypeDcl(constr) => {
@@ -193,6 +213,7 @@ impl<'a> Projector<'a> {
                 }
             }
             let mut projected = case.clone();
+            projected.label = labels;
             projected.element = element;
             cases.push(projected);
         }
@@ -214,7 +235,7 @@ impl<'a> Projector<'a> {
         let here = join(path, ident);
         let site = self.site(&here, path, SiteKind::Type, annotations);
         let own = availability(&site, parent, self.timeline)?;
-        self.note_declaration(ident, own.contains(self.version));
+        self.note_declaration(&here, own.contains(self.version));
         if !own.contains(self.version) {
             return Ok(None);
         }

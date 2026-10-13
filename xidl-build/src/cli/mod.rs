@@ -62,6 +62,12 @@ impl CliBackend {
         let mut command = Command::new("xidlc");
         command.arg("gen");
         command.arg("--out-dir").arg(&spec.out_dir);
+        if let Some(version) = &spec.api_version {
+            command.arg("--api-version").arg(version);
+        }
+        if let Some(versions) = &spec.api_versions {
+            command.arg("--api-versions").arg(versions);
+        }
         command.arg(&spec.lang);
         if client_server_lang {
             if spec.client {

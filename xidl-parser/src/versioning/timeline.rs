@@ -29,18 +29,24 @@ pub struct VersionDef {
 /// Ordered API version history declared by the `@version` enum.
 #[derive(Debug, Clone)]
 pub struct VersionTimeline {
+    enum_path: Vec<String>,
     enum_ident: String,
     versions: Vec<VersionDef>,
 }
 
 impl VersionTimeline {
     pub(crate) fn from_members(
-        enum_ident: String,
+        enum_path: String,
         members: &[Enumerator],
     ) -> Result<Self, VersioningError> {
         if members.is_empty() {
-            return Err(VersioningError::EmptyVersionEnum { ident: enum_ident });
+            return Err(VersioningError::EmptyVersionEnum { ident: enum_path });
         }
+        let enum_path = enum_path
+            .split("::")
+            .map(ToString::to_string)
+            .collect::<Vec<_>>();
+        let enum_ident = enum_path.last().cloned().unwrap_or_default();
         let mut versions = Vec::new();
         let mut values: BTreeMap<String, String> = BTreeMap::new();
         for member in members {
@@ -59,6 +65,7 @@ impl VersionTimeline {
             });
         }
         Ok(Self {
+            enum_path,
             enum_ident,
             versions,
         })
@@ -129,14 +136,12 @@ impl VersionTimeline {
     /// Returns `None` when the reference does not name a declared version of
     /// this timeline.
     pub(crate) fn resolve(&self, reference: &ScopedName) -> Option<VersionId> {
-        let segments = &reference.name;
-        if segments.len() < 2 {
+        let (member, prefix) = reference.name.split_last()?;
+        let qualified = prefix == self.enum_path.as_slice()
+            || (prefix.len() == 1 && prefix[0] == self.enum_ident);
+        if !qualified {
             return None;
         }
-        if segments[segments.len() - 2] != self.enum_ident {
-            return None;
-        }
-        let member = segments.last()?;
         let index = self.versions.iter().position(|def| &def.ident == member)?;
         Some(VersionId(index))
     }
@@ -185,8 +190,14 @@ impl VersionSelection {
 
     fn single(raw: &str) -> ParserResult<Self> {
         let raw = raw.trim();
-        if raw.is_empty() || raw == "*" {
+        if raw.is_empty() {
             return Err(VersioningError::EmptySelection.into());
+        }
+        if raw == "*" {
+            return Err(VersioningError::SelectionRequiresOneVersion {
+                selection: raw.to_string(),
+            }
+            .into());
         }
         Ok(Self::Versions(vec![raw.to_string()]))
     }

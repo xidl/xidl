@@ -54,7 +54,7 @@ impl crate::jsonrpc::Codegen for HirGen {
     }
 }
 
-/// Adds the projected API version to the properties seen by the target.
+/// Adds the projected API versions to the properties seen by the target.
 fn projection_properties(
     mut props: ParserProperties,
     projection: &VersionedProjection,
@@ -63,6 +63,17 @@ fn projection_properties(
         props.insert(
             versioning::API_VERSION_PROPERTY.to_string(),
             serde_json::Value::String(version.ident.clone()),
+        );
+    }
+    if !projection.versions.is_empty() {
+        let modules = projection
+            .versions
+            .iter()
+            .map(|version| serde_json::Value::String(version.ident.clone()))
+            .collect();
+        props.insert(
+            versioning::API_VERSION_MODULES_PROPERTY.to_string(),
+            serde_json::Value::Array(modules),
         );
     }
     props

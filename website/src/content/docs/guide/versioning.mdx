@@ -58,8 +58,8 @@ enum ApiVersions {
 
 The member name (`v2025_06`) is the stable machine name used in output paths
 and selection flags; the value (`2025-06`) is what versioned documents carry.
-A versioned contract ignores `#pragma xidlc version`; the projected version
-value becomes the document version.
+Per-version documents ignore `#pragma xidlc version` and use the projected
+version value as `info.version`.
 
 ## Lifecycle annotations
 
@@ -88,6 +88,9 @@ Rules:
 - `raises(...)` entries are the one filtered position. An exception set has no
   annotation slot, so an operation raises a versioned exception only in the
   versions that declare it: older projections drop the entry.
+- Root-qualified references (`::Models::Item`) keep pointing at the same
+  declaration: projection rewrites them relative to the version module, so they
+  resolve inside `module <version>` rather than at the file root.
 
 Unimplemented versioning annotations (`@versioned`, `@renamedFrom`,
 `@madeOptional`, `@madeRequired`, `@typeChangedFrom`,
@@ -144,6 +147,24 @@ xidlc gen openapi -o dist petstore.idl
 xidlc gen openapi --api-version v1 -o dist petstore.idl
 xidlc gen rust --api-versions v1,v3 -o dist petstore.idl
 ```
+
+`xidl-build` exposes the same selection through `Builder::with_api_version` and
+`Builder::with_api_versions`.
+
+## Target support
+
+Versioned contracts project into one module per version, so they need targets
+whose module support renders a single module per API version:
+
+| Target | Versioned contracts |
+| --- | --- |
+| `rust`, `rust-axum`, `typescript`, `typescript-rest` | supported |
+| `openapi`, `openrpc` | supported, one document per version |
+| `go`, `go-rest`, `rust-jsonrpc` | rejected with a clear error |
+
+The remaining targets already misinterpret modules today (they repeat the
+module wrapper or reference unqualified type names), so generation for them
+fails loudly instead of emitting code that does not compile.
 
 Serving several versions from one implementation (runtime conversion) is not
 part of this feature; each version module is an ordinary generated server that

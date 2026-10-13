@@ -4,8 +4,8 @@ use super::super::VersioningError;
 use super::super::lifecycle::{Availability, Site, SiteKind, availability};
 use super::super::paths::{declarators_name, join};
 use super::super::timeline::{VersionDef, VersionId, VersionTimeline};
-use super::references::touch_const_type;
-use super::references::touch_type;
+use super::declarations::for_each_declaration;
+use super::references::{Reference, touch_const_expr, touch_const_type, touch_type};
 use super::strip_annotations;
 use crate::error::ParserResult;
 use crate::hir::{
@@ -19,9 +19,9 @@ pub(super) struct Projector<'a> {
     pub(super) timeline: &'a VersionTimeline,
     pub(super) version: VersionId,
     pub(super) def: &'a VersionDef,
-    kept: BTreeSet<String>,
-    dropped: BTreeSet<String>,
-    pub(super) references: Vec<(String, String)>,
+    kept_paths: BTreeSet<String>,
+    dropped_paths: BTreeSet<String>,
+    pub(super) references: Vec<Reference>,
 }
 
 impl<'a> Projector<'a> {
@@ -34,8 +34,8 @@ impl<'a> Projector<'a> {
             timeline,
             version,
             def,
-            kept: BTreeSet::new(),
-            dropped: BTreeSet::new(),
+            kept_paths: BTreeSet::new(),
+            dropped_paths: BTreeSet::new(),
             references: Vec::new(),
         }
     }
@@ -102,21 +102,16 @@ impl<'a> Projector<'a> {
     }
 
     fn prune_names(&self, names: &mut Vec<ScopedName>) {
-        names.retain(|name| {
-            name.name
-                .last()
-                .map(|last| !self.dropped.contains(last) || self.kept.contains(last))
-                .unwrap_or(true)
-        });
+        names.retain(|name| !self.reference_unavailable(&name.name));
     }
 
     /// Reports references to declarations that this projection drops.
     pub(super) fn check_references(&self) -> ParserResult<()> {
-        for (decl, reference) in &self.references {
-            if self.dropped.contains(reference) && !self.kept.contains(reference) {
+        for reference in &self.references {
+            if self.reference_unavailable(&reference.segments) {
                 return Err(VersioningError::DanglingReference {
-                    decl: decl.clone(),
-                    reference: reference.clone(),
+                    decl: reference.decl.clone(),
+                    reference: reference.rendered(),
                     version: self.def.ident.clone(),
                 }
                 .into());
@@ -125,14 +120,47 @@ impl<'a> Projector<'a> {
         Ok(())
     }
 
-    pub(super) fn note_declaration(&mut self, ident: &str, is_kept: bool) {
-        if ident.is_empty() {
+    /// Whether no surviving declaration can satisfy a reference.
+    ///
+    /// Paths are matched by suffix so a scoped reference such as `models::Item`
+    /// is only reported when every declaration it could name is gone, which
+    /// keeps same-named declarations in other modules from masking a dangling
+    /// reference.
+    fn reference_unavailable(&self, segments: &[String]) -> bool {
+        if segments.is_empty() {
+            return false;
+        }
+        let target = segments.join("::");
+        let matches = |path: &String| path == &target || path.ends_with(&format!("::{target}"));
+        if self.kept_paths.iter().any(matches) {
+            return false;
+        }
+        self.dropped_paths.iter().any(matches)
+    }
+
+    pub(super) fn note_declaration(&mut self, path: &str, is_kept: bool) {
+        if path.is_empty() {
             return;
         }
         if is_kept {
-            self.kept.insert(ident.to_string());
+            self.kept_paths.insert(path.to_string());
         } else {
-            self.dropped.insert(ident.to_string());
+            self.dropped_paths.insert(path.to_string());
+        }
+    }
+
+    /// Records every declaration inside a dropped subtree as dropped.
+    pub(super) fn note_dropped_subtree(&mut self, definition: &Definition, path: &str) {
+        let mut paths = Vec::new();
+        for_each_declaration(
+            std::slice::from_ref(definition),
+            path,
+            &mut |declared: &str| {
+                paths.push(declared.to_string());
+            },
+        );
+        for declared in paths {
+            self.note_declaration(&declared, false);
         }
     }
 
@@ -189,6 +217,7 @@ impl<'a> Projector<'a> {
         let site = self.site(&here, path, SiteKind::Module, &module.annotations);
         let own = availability(&site, parent, self.timeline)?;
         if !own.contains(self.version) {
+            self.note_dropped_subtree(&Definition::ModuleDcl(module.clone()), path);
             return Ok(None);
         }
         let mut definitions = Vec::new();
@@ -219,7 +248,7 @@ impl<'a> Projector<'a> {
                 let here = join(path, &native.decl.0);
                 let site = self.site(&here, path, SiteKind::Type, &native.annotations);
                 let own = availability(&site, parent, self.timeline)?;
-                self.note_declaration(&native.decl.0, own.contains(self.version));
+                self.note_declaration(&here, own.contains(self.version));
                 if !own.contains(self.version) {
                     return Ok(None);
                 }
@@ -240,14 +269,18 @@ impl<'a> Projector<'a> {
         let here = join(path, &names);
         let site = self.site(&here, path, SiteKind::Type, &typedef.annotations);
         let own = availability(&site, parent, self.timeline)?;
-        for name in names.split(", ") {
-            self.note_declaration(name, own.contains(self.version));
+        for declarator in &typedef.decl {
+            self.note_declaration(
+                &join(path, &super::super::paths::declarator_name(declarator)),
+                own.contains(self.version),
+            );
         }
         if !own.contains(self.version) {
             return Ok(None);
         }
         let mut projected = typedef.clone();
         projected.annotations = strip_annotations(&typedef.annotations);
+        super::references::touch_declarators(&mut projected.decl, &mut self.references, &here);
         match &typedef.ty {
             TypedefType::TypeSpec(ty) => {
                 let mut ty = ty.clone();
@@ -273,13 +306,14 @@ impl<'a> Projector<'a> {
         let here = join(path, &const_dcl.ident);
         let site = self.site(&here, path, SiteKind::Unsupported, &const_dcl.annotations);
         let own = availability(&site, parent, self.timeline)?;
-        self.note_declaration(&const_dcl.ident, own.contains(self.version));
+        self.note_declaration(&here, own.contains(self.version));
         if !own.contains(self.version) {
             return Ok(None);
         }
         let mut projected = const_dcl.clone();
         projected.annotations = strip_annotations(&const_dcl.annotations);
         touch_const_type(&mut projected.ty, &mut self.references, &here);
+        touch_const_expr(&mut projected.value, &mut self.references, &here);
         Ok(Some(projected))
     }
 
@@ -292,7 +326,7 @@ impl<'a> Projector<'a> {
         let here = join(path, &except.ident);
         let site = self.site(&here, path, SiteKind::Type, &except.annotations);
         let own = availability(&site, parent, self.timeline)?;
-        self.note_declaration(&except.ident, own.contains(self.version));
+        self.note_declaration(&here, own.contains(self.version));
         if !own.contains(self.version) {
             return Ok(None);
         }

@@ -1,6 +1,6 @@
 use super::*;
 use crate::error::ParseError;
-use crate::versioning::{self, VersioningError};
+use crate::versioning::{VersioningError, VersioningRecord};
 
 fn analyze_error(text: &str) -> VersioningError {
     match lower_error(text) {
@@ -33,7 +33,11 @@ struct Pet {
 #[test]
 fn unversioned_specifications_are_accepted() {
     let spec = parse("struct Pet { string id; };");
-    assert!(versioning::analyze(&spec).expect("analysis").is_none());
+    assert!(
+        VersioningRecord::analyze(&spec)
+            .expect("analysis")
+            .is_none()
+    );
 }
 
 #[test]

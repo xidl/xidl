@@ -18,6 +18,7 @@ pub fn generate(
     input_path: &Path,
     props: HashMap<String, serde_json::Value>,
 ) -> IdlcResult<Vec<Artifact>> {
+    crate::generate::versioning::reject_versioned_modules("go-rest", &props)?;
     GoRestRenderMode::from_properties(&props)?;
     let spec = rest_hir.spec.clone();
     let stem = input_path
