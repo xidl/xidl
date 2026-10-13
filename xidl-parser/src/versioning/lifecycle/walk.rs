@@ -3,9 +3,7 @@
 use super::super::paths::{attribute_name, declarator_name, declarators_name, join};
 use super::availability::{Availability, Site, SiteKind, VersionVisitor};
 use crate::error::ParserResult;
-use crate::hir::{
-    Annotation, ConstrTypeDcl, Definition, Enumerator, Export, InterfaceDclInner, TypeDcl,
-};
+use crate::hir::{ConstrTypeDcl, Definition, Export, InterfaceDclInner, TypeDcl};
 
 /// Walks every annotation-carrying site of a specification in source order.
 pub(crate) fn walk<V: VersionVisitor>(
@@ -32,11 +30,7 @@ fn walk_definition<V: VersionVisitor>(
             let here = join(path, &module.ident);
             let inner = enter(
                 visitor,
-                SiteKind::Module,
-                &here,
-                path,
-                &module.annotations,
-                None,
+                Site::new(SiteKind::Module, &here, path, &module.annotations),
                 parent,
             )?;
             walk(&module.definition, &here, inner, visitor)
@@ -46,11 +40,12 @@ fn walk_definition<V: VersionVisitor>(
         Definition::ConstDcl(const_dcl) => {
             enter(
                 visitor,
-                SiteKind::Unsupported,
-                &join(path, &const_dcl.ident),
-                path,
-                &const_dcl.annotations,
-                None,
+                Site::new(
+                    SiteKind::Unsupported,
+                    &join(path, &const_dcl.ident),
+                    path,
+                    &const_dcl.annotations,
+                ),
                 parent,
             )?;
             Ok(())
@@ -59,11 +54,7 @@ fn walk_definition<V: VersionVisitor>(
             let here = join(path, &except.ident);
             let inner = enter(
                 visitor,
-                SiteKind::Type,
-                &here,
-                path,
-                &except.annotations,
-                None,
+                Site::new(SiteKind::Type, &here, path, &except.annotations),
                 parent,
             )?;
             walk_members(visitor, &except.member, &here, inner)
@@ -76,11 +67,7 @@ fn walk_definition<V: VersionVisitor>(
             let here = join(path, &ident);
             let inner = enter(
                 visitor,
-                SiteKind::Interface,
-                &here,
-                path,
-                &interface.annotations,
-                None,
+                Site::new(SiteKind::Interface, &here, path, &interface.annotations),
                 parent,
             )?;
             let InterfaceDclInner::InterfaceDef(def) = &interface.decl else {
@@ -106,11 +93,12 @@ fn walk_members<V: VersionVisitor>(
     for member in members {
         enter(
             visitor,
-            SiteKind::Member,
-            &join(path, &declarators_name(&member.ident)),
-            path,
-            &member.annotations,
-            None,
+            Site::new(
+                SiteKind::Member,
+                &join(path, &declarators_name(&member.ident)),
+                path,
+                &member.annotations,
+            ),
             parent,
         )?;
     }
@@ -128,22 +116,19 @@ fn walk_export<V: VersionVisitor>(
             let here = join(path, &operation.ident);
             let inner = enter(
                 visitor,
-                SiteKind::Operation,
-                &here,
-                path,
-                &operation.annotations,
-                None,
+                Site::new(SiteKind::Operation, &here, path, &operation.annotations),
                 parent,
             )?;
             if let Some(parameters) = &operation.parameter {
                 for parameter in &parameters.0 {
                     enter(
                         visitor,
-                        SiteKind::Parameter,
-                        &join(&here, &parameter.declarator.0),
-                        &here,
-                        &parameter.annotations,
-                        None,
+                        Site::new(
+                            SiteKind::Parameter,
+                            &join(&here, &parameter.declarator.0),
+                            &here,
+                            &parameter.annotations,
+                        ),
                         inner,
                     )?;
                 }
@@ -153,11 +138,12 @@ fn walk_export<V: VersionVisitor>(
         Export::AttrDcl(attribute) => {
             enter(
                 visitor,
-                SiteKind::Attribute,
-                &join(path, &attribute_name(attribute)),
-                path,
-                &attribute.annotations,
-                None,
+                Site::new(
+                    SiteKind::Attribute,
+                    &join(path, &attribute_name(attribute)),
+                    path,
+                    &attribute.annotations,
+                ),
                 parent,
             )?;
             Ok(())
@@ -166,11 +152,12 @@ fn walk_export<V: VersionVisitor>(
         Export::ConstDcl(const_dcl) => {
             enter(
                 visitor,
-                SiteKind::Unsupported,
-                &join(path, &const_dcl.ident),
-                path,
-                &const_dcl.annotations,
-                None,
+                Site::new(
+                    SiteKind::Unsupported,
+                    &join(path, &const_dcl.ident),
+                    path,
+                    &const_dcl.annotations,
+                ),
                 parent,
             )?;
             Ok(())
@@ -179,11 +166,7 @@ fn walk_export<V: VersionVisitor>(
             let here = join(path, &except.ident);
             let inner = enter(
                 visitor,
-                SiteKind::Type,
-                &here,
-                path,
-                &except.annotations,
-                None,
+                Site::new(SiteKind::Type, &here, path, &except.annotations),
                 parent,
             )?;
             walk_members(visitor, &except.member, &here, inner)
@@ -202,11 +185,12 @@ fn walk_type_dcl<V: VersionVisitor>(
         TypeDcl::TypedefDcl(typedef) => {
             enter(
                 visitor,
-                SiteKind::Type,
-                &join(path, &declarators_name(&typedef.decl)),
-                path,
-                &typedef.annotations,
-                None,
+                Site::new(
+                    SiteKind::Type,
+                    &join(path, &declarators_name(&typedef.decl)),
+                    path,
+                    &typedef.annotations,
+                ),
                 parent,
             )?;
             Ok(())
@@ -214,11 +198,12 @@ fn walk_type_dcl<V: VersionVisitor>(
         TypeDcl::NativeDcl(native) => {
             enter(
                 visitor,
-                SiteKind::Type,
-                &join(path, &native.decl.0),
-                path,
-                &native.annotations,
-                None,
+                Site::new(
+                    SiteKind::Type,
+                    &join(path, &native.decl.0),
+                    path,
+                    &native.annotations,
+                ),
                 parent,
             )?;
             Ok(())
@@ -237,11 +222,7 @@ fn walk_constr<V: VersionVisitor>(
             let here = join(path, &value.ident);
             let inner = enter(
                 visitor,
-                SiteKind::Type,
-                &here,
-                path,
-                &value.annotations,
-                None,
+                Site::new(SiteKind::Type, &here, path, &value.annotations),
                 parent,
             )?;
             walk_members(visitor, &value.member, &here, inner)
@@ -249,11 +230,12 @@ fn walk_constr<V: VersionVisitor>(
         ConstrTypeDcl::StructForwardDcl(value) => {
             enter(
                 visitor,
-                SiteKind::Type,
-                &join(path, &value.ident),
-                path,
-                &value.annotations,
-                None,
+                Site::new(
+                    SiteKind::Type,
+                    &join(path, &value.ident),
+                    path,
+                    &value.annotations,
+                ),
                 parent,
             )?;
             Ok(())
@@ -262,21 +244,19 @@ fn walk_constr<V: VersionVisitor>(
             let here = join(path, &value.ident);
             let inner = enter(
                 visitor,
-                SiteKind::Type,
-                &here,
-                path,
-                &value.annotations,
-                Some(&value.member),
+                Site::new(SiteKind::Type, &here, path, &value.annotations)
+                    .with_enum_members(&value.member),
                 parent,
             )?;
             for member in &value.member {
                 enter(
                     visitor,
-                    SiteKind::Enumerator,
-                    &join(&here, &member.ident),
-                    &here,
-                    &member.annotations,
-                    None,
+                    Site::new(
+                        SiteKind::Enumerator,
+                        &join(&here, &member.ident),
+                        &here,
+                        &member.annotations,
+                    ),
                     inner,
                 )?;
             }
@@ -286,21 +266,18 @@ fn walk_constr<V: VersionVisitor>(
             let here = join(path, &value.ident);
             let inner = enter(
                 visitor,
-                SiteKind::Type,
-                &here,
-                path,
-                &value.annotations,
-                None,
+                Site::new(SiteKind::Type, &here, path, &value.annotations),
                 parent,
             )?;
             for case in &value.case {
                 enter(
                     visitor,
-                    SiteKind::Member,
-                    &join(&here, &declarator_name(&case.element.value)),
-                    &here,
-                    &case.element.annotations,
-                    None,
+                    Site::new(
+                        SiteKind::Member,
+                        &join(&here, &declarator_name(&case.element.value)),
+                        &here,
+                        &case.element.annotations,
+                    ),
                     inner,
                 )?;
             }
@@ -309,11 +286,12 @@ fn walk_constr<V: VersionVisitor>(
         ConstrTypeDcl::UnionForwardDcl(value) => {
             enter(
                 visitor,
-                SiteKind::Type,
-                &join(path, &value.ident),
-                path,
-                &value.annotations,
-                None,
+                Site::new(
+                    SiteKind::Type,
+                    &join(path, &value.ident),
+                    path,
+                    &value.annotations,
+                ),
                 parent,
             )?;
             Ok(())
@@ -321,11 +299,12 @@ fn walk_constr<V: VersionVisitor>(
         ConstrTypeDcl::BitsetDcl(value) => {
             enter(
                 visitor,
-                SiteKind::Type,
-                &join(path, &value.ident),
-                path,
-                &value.annotations,
-                None,
+                Site::new(
+                    SiteKind::Type,
+                    &join(path, &value.ident),
+                    path,
+                    &value.annotations,
+                ),
                 parent,
             )?;
             Ok(())
@@ -334,21 +313,18 @@ fn walk_constr<V: VersionVisitor>(
             let here = join(path, &value.ident);
             let inner = enter(
                 visitor,
-                SiteKind::Type,
-                &here,
-                path,
-                &value.annotations,
-                None,
+                Site::new(SiteKind::Type, &here, path, &value.annotations),
                 parent,
             )?;
             for bit in &value.value {
                 enter(
                     visitor,
-                    SiteKind::BitmaskValue,
-                    &join(&here, &bit.ident),
-                    &here,
-                    &bit.annotations,
-                    None,
+                    Site::new(
+                        SiteKind::BitmaskValue,
+                        &join(&here, &bit.ident),
+                        &here,
+                        &bit.annotations,
+                    ),
                     inner,
                 )?;
             }
@@ -359,19 +335,8 @@ fn walk_constr<V: VersionVisitor>(
 
 fn enter<V: VersionVisitor>(
     visitor: &mut V,
-    kind: SiteKind,
-    path: &str,
-    parent_path: &str,
-    annotations: &[Annotation],
-    enum_members: Option<&[Enumerator]>,
+    site: Site<'_>,
     parent: Availability,
 ) -> ParserResult<Availability> {
-    let site = Site {
-        path: path.to_string(),
-        parent_path: parent_path.to_string(),
-        kind,
-        annotations,
-        enum_members,
-    };
     visitor.enter(&site, parent)
 }

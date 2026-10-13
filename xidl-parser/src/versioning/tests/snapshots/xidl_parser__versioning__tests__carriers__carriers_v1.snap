@@ -21,8 +21,38 @@ expression: "&snapshots[0]"
         {
           "ModuleDcl": {
             "annotations": [],
-            "ident": "nested",
-            "definition": []
+            "ident": "retired",
+            "definition": [
+              {
+                "TypeDcl": {
+                  "ConstrTypeDcl": {
+                    "StructDcl": {
+                      "annotations": [],
+                      "ident": "Legacy",
+                      "parent": [],
+                      "member": [
+                        {
+                          "annotations": [],
+                          "ty": {
+                            "StringType": {
+                              "bound": null
+                            }
+                          },
+                          "ident": [
+                            {
+                              "SimpleDeclarator": "id"
+                            }
+                          ],
+                          "default": null,
+                          "field_id": 1,
+                          "recursive": false
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         {

@@ -3,7 +3,9 @@
 use super::super::lifecycle::{Availability, SiteKind, availability};
 use super::super::paths::{attribute_name, declarators_name, join};
 use super::projector::Projector;
-use super::references::{relativize_names, touch_interface_parent, touch_type};
+use super::references::{
+    Reference, relativize_names, touch_declarators, touch_interface_parent, touch_type,
+};
 use super::strip_annotations;
 use crate::error::ParserResult;
 use crate::hir::{
@@ -25,7 +27,7 @@ impl<'a> Projector<'a> {
         let here = join(path, &ident);
         let site = self.site(&here, path, SiteKind::Interface, &interface.annotations);
         let own = availability(&site, parent, self.timeline)?;
-        self.note_declaration(&ident, own.contains(self.version));
+        self.note_declaration(&here, own.contains(self.version));
         if !own.contains(self.version) {
             return Ok(None);
         }
@@ -110,7 +112,7 @@ impl<'a> Projector<'a> {
         parameter: &ParamDcl,
         parent: Availability,
         path: &str,
-        references: &mut Vec<(String, String)>,
+        references: &mut Vec<Reference>,
     ) -> ParserResult<Option<ParamDcl>> {
         let here = join(path, &parameter.declarator.0);
         let site = self.site(&here, path, SiteKind::Parameter, &parameter.annotations);
@@ -184,6 +186,7 @@ impl<'a> Projector<'a> {
             let mut projected = member.clone();
             projected.annotations = strip_annotations(&member.annotations);
             touch_type(&mut projected.ty, &mut references, &here);
+            touch_declarators(&mut projected.ident, &mut references, &here);
             kept.push(projected);
         }
         self.references.extend(references);

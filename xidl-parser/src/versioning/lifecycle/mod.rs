@@ -6,7 +6,6 @@ mod discovery;
 mod walk;
 
 pub(crate) use availability::{
-    Availability, Site, SiteKind, availability, is_versioning_annotation,
+    Availability, Site, SiteKind, VersionVisitor, availability, is_versioning_annotation,
 };
 pub(crate) use discovery::{LifecycleValidator, discover};
-pub(crate) use walk::walk;

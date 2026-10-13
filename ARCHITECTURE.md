@@ -180,9 +180,10 @@ Consequences:
   render it with the module support they already have.
 - The merged layout keeps every version module in one specification, so code
   targets emit a single file holding one module per version.
-- OpenAPI and OpenRPC declare the `per_version` layout; the HIR stage runs once
-  per version and emits `openapi_<stem>.<version>.json` (or
-  `openrpc.<version>.json`) with `info.version` set to the version value.
+- OpenAPI and OpenRPC declare the `per_version` layout; the HIR stage parses
+  once and emits one artifact per version, so the targets produce
+  `openapi_<stem>.<version>.json` (or `openrpc.<version>.json`) with
+  `info.version` set to the version value.
 - Unversioned contracts take the identity path, which keeps the existing
   snapshot corpus byte-identical.
 

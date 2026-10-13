@@ -89,15 +89,10 @@ fn parses_single_api_version_selection() {
     let Command::Gen(args) = cli.command else {
         panic!("expected gen command");
     };
-    let props = args.version_props();
+    let args = args.into_driver_args().expect("args should convert");
 
-    assert_eq!(
-        props
-            .get(versioning::API_VERSION_PROPERTY)
-            .and_then(|value| value.as_str()),
-        Some("v2")
-    );
-    assert!(!props.contains_key(versioning::API_VERSIONS_PROPERTY));
+    assert_eq!(args.api_version.as_deref(), Some("v2"));
+    assert!(args.api_versions.is_none());
 }
 
 #[test]
@@ -114,15 +109,10 @@ fn parses_multiple_api_version_selection() {
     let Command::Gen(args) = cli.command else {
         panic!("expected gen command");
     };
-    let props = args.version_props();
+    let args = args.into_driver_args().expect("args should convert");
 
-    assert_eq!(
-        props
-            .get(versioning::API_VERSIONS_PROPERTY)
-            .and_then(|value| value.as_str()),
-        Some("v1,v3")
-    );
-    assert!(!props.contains_key(versioning::API_VERSION_PROPERTY));
+    assert_eq!(args.api_versions.as_deref(), Some("v1,v3"));
+    assert!(args.api_version.is_none());
 }
 
 #[test]

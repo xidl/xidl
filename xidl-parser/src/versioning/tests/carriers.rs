@@ -1,5 +1,5 @@
 use super::*;
-use crate::versioning;
+use crate::versioning::{VERSION_LAYOUT_PROPERTY, VersionLayout};
 
 /// Fixture that exercises every supported versioning carrier.
 const KITCHEN_SINK: &str = r#"
@@ -12,9 +12,17 @@ enum Versions {
     v2,
 };
 
+@added(Versions::v2)
 module nested {
     @added(Versions::v2)
     struct Added {
+        string id;
+    };
+};
+
+@removed(Versions::v2)
+module retired {
+    struct Legacy {
         string id;
     };
 };
@@ -102,7 +110,7 @@ fn projection_handles_every_supported_carrier() {
         .collect::<Vec<_>>();
     let mut snapshots = Vec::new();
     for version in versions {
-        let projected = versioning::project(&spec, &record, version).expect("projection");
+        let projected = record.project(&spec, version).expect("projection");
         snapshots.push(serde_json::to_string_pretty(&projected).expect("serialize"));
     }
 
@@ -118,7 +126,7 @@ fn merged_projection_handles_every_supported_carrier() {
         .iter()
         .map(|(id, _)| id)
         .collect::<Vec<_>>();
-    let merged = versioning::merge(&spec, &record, &versions).expect("merge");
+    let merged = record.merge(&spec, &versions).expect("merge");
     let json = serde_json::to_string_pretty(&merged).expect("serialize");
 
     insta::assert_snapshot!("carriers_merged", json);
@@ -127,22 +135,16 @@ fn merged_projection_handles_every_supported_carrier() {
 #[test]
 fn version_layout_reads_generation_properties() {
     assert_eq!(
-        versioning::VersionLayout::from_properties(&properties(&[])).expect("layout"),
-        versioning::VersionLayout::Merged
+        VersionLayout::from_properties(&properties(&[])).expect("layout"),
+        VersionLayout::Merged
     );
     assert_eq!(
-        versioning::VersionLayout::from_properties(&properties(&[(
-            versioning::VERSION_LAYOUT_PROPERTY,
-            "per_version"
-        )]))
-        .expect("layout"),
-        versioning::VersionLayout::PerVersion
+        VersionLayout::from_properties(&properties(&[(VERSION_LAYOUT_PROPERTY, "per_version")]))
+            .expect("layout"),
+        VersionLayout::PerVersion
     );
     assert!(matches!(
-        versioning::VersionLayout::from_properties(&properties(&[(
-            versioning::VERSION_LAYOUT_PROPERTY,
-            "sideways"
-        )])),
+        VersionLayout::from_properties(&properties(&[(VERSION_LAYOUT_PROPERTY, "sideways")])),
         Err(crate::error::ParseError::Versioning(
             crate::versioning::VersioningError::UnknownVersionLayout { .. }
         ))

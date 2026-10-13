@@ -86,10 +86,47 @@ pub(crate) struct Site<'a> {
     pub(crate) enum_members: Option<&'a [Enumerator]>,
 }
 
+impl<'a> Site<'a> {
+    /// Builds a site that carries no enum members.
+    pub(crate) fn new(
+        kind: SiteKind,
+        path: &str,
+        parent_path: &str,
+        annotations: &'a [Annotation],
+    ) -> Self {
+        Self {
+            path: path.to_string(),
+            parent_path: parent_path.to_string(),
+            kind,
+            annotations,
+            enum_members: None,
+        }
+    }
+
+    /// Attaches the members of an enum declaration.
+    pub(crate) fn with_enum_members(mut self, members: &'a [Enumerator]) -> Self {
+        self.enum_members = Some(members);
+        self
+    }
+}
+
 /// Callback invoked for every site while walking a specification.
 pub(crate) trait VersionVisitor {
     /// Returns the availability that applies to the site's descendants.
     fn enter(&mut self, site: &Site<'_>, parent: Availability) -> ParserResult<Availability>;
+
+    /// Walks every annotation-carrying site of a specification in source order.
+    fn walk(
+        &mut self,
+        definitions: &[crate::hir::Definition],
+        path: &str,
+        parent: Availability,
+    ) -> ParserResult<()>
+    where
+        Self: Sized,
+    {
+        super::walk::walk(definitions, path, parent, self)
+    }
 }
 
 /// Computes the availability of one site, validating its lifecycle annotations.
@@ -187,7 +224,7 @@ pub(crate) fn availability(
     }
 
     if let Some(version) = added {
-        if version.index() < parent.from {
+        if version.index() < parent.from || version.index() >= parent.until {
             return Err(VersioningError::ChildOutsideParent {
                 decl: site.path.clone(),
                 parent: site.parent_path.clone(),
@@ -197,7 +234,7 @@ pub(crate) fn availability(
         }
     }
     if let Some(version) = removed {
-        if version.index() >= parent.until {
+        if version.index() >= parent.until || version.index() <= parent.from {
             return Err(VersioningError::ChildOutsideParent {
                 decl: site.path.clone(),
                 parent: site.parent_path.clone(),

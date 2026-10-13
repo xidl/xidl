@@ -18,6 +18,8 @@ pub(crate) struct GenerateSpec {
     pub(crate) client: bool,
     pub(crate) server: bool,
     pub(crate) mock: bool,
+    pub(crate) api_version: Option<String>,
+    pub(crate) api_versions: Option<String>,
     pub(crate) inputs: Vec<PathBuf>,
 }
 
@@ -47,6 +49,8 @@ pub struct Builder {
     client: bool,
     server: bool,
     mock: bool,
+    api_version: Option<String>,
+    api_versions: Option<String>,
 }
 
 impl Default for Builder {
@@ -58,6 +62,8 @@ impl Default for Builder {
             client: true,
             server: true,
             mock: false,
+            api_version: None,
+            api_versions: None,
         }
     }
 }
@@ -115,6 +121,25 @@ impl Builder {
         self
     }
 
+    /// Generates only this API version of a versioned contract.
+    ///
+    /// Accepts a `@version` enum member ident (`v2`) or its display value
+    /// (`2.0`). Versioned contracts emit one module per version, so selecting
+    /// one keeps SDK output single-versioned.
+    pub fn with_api_version(mut self, version: impl Into<String>) -> Self {
+        self.api_version = Some(version.into());
+        self
+    }
+
+    /// Generates these API versions of a versioned contract.
+    ///
+    /// Accepts a comma separated list of member idents or display values, or
+    /// `*` for every declared version.
+    pub fn with_api_versions(mut self, versions: impl Into<String>) -> Self {
+        self.api_versions = Some(versions.into());
+        self
+    }
+
     /// Enables or disables client-side artifact generation.
     pub fn with_client(mut self, value: bool) -> Self {
         self.client = value;
@@ -162,6 +187,8 @@ impl Builder {
             client: self.client,
             server: self.server,
             mock: self.mock,
+            api_version: self.api_version.clone(),
+            api_versions: self.api_versions.clone(),
             inputs: inputs.iter().map(|p| p.as_ref().to_path_buf()).collect(),
         };
         #[cfg(feature = "bundle")]
@@ -173,6 +200,29 @@ impl Builder {
             self.apply_output_filename(&spec.out_dir, custom_name, &spec.inputs)?;
         }
         Ok(())
+    }
+
+    /// Versioned documents of a single-file generator, e.g.
+    /// `openapi_petstore.v1.json` for `openapi_petstore.json`.
+    fn versioned_documents(out_dir: &Path, default_name: &str) -> Result<Vec<PathBuf>, Error> {
+        let Some(base) = default_name.strip_suffix(".json") else {
+            return Ok(Vec::new());
+        };
+        let mut documents = Vec::new();
+        for entry in fs::read_dir(out_dir)? {
+            let path = entry?.path();
+            let Some(file_name) = path.file_name().and_then(|name| name.to_str()) else {
+                continue;
+            };
+            let Some(rest) = file_name.strip_prefix(base) else {
+                continue;
+            };
+            if rest.starts_with('.') && file_name.ends_with(".json") {
+                documents.push(path);
+            }
+        }
+        documents.sort();
+        Ok(documents)
     }
 
     fn apply_output_filename(
@@ -206,13 +256,32 @@ impl Builder {
         };
 
         let src = out_dir.join(&default_name);
-        if !src.exists() {
-            return Err(Error::Compile(format!(
-                "generated file '{}' does not exist in '{}'",
-                default_name,
-                out_dir.display()
-            )));
-        }
+        let src = if src.exists() {
+            src
+        } else {
+            let documents = Self::versioned_documents(out_dir, &default_name)?;
+            match documents.as_slice() {
+                [] => {
+                    return Err(Error::Compile(format!(
+                        "generated file '{}' does not exist in '{}'",
+                        default_name,
+                        out_dir.display()
+                    )));
+                }
+                [single] => single.clone(),
+                many => {
+                    let names = many
+                        .iter()
+                        .filter_map(|path| path.file_name().and_then(|name| name.to_str()))
+                        .collect::<Vec<_>>()
+                        .join(", ");
+                    return Err(Error::Compile(format!(
+                        "generated output has one document per API version ({names}); \
+                         select one with Builder::with_api_version"
+                    )));
+                }
+            }
+        };
 
         let dst = if custom_name.is_absolute() {
             custom_name.to_path_buf()

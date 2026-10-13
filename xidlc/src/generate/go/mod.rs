@@ -16,6 +16,7 @@ pub fn generate_with_properties(
     input_path: &Path,
     properties: &ParserProperties,
 ) -> IdlcResult<Vec<Artifact>> {
+    crate::generate::versioning::reject_versioned_modules("go", properties)?;
     let stem = input_path
         .file_stem()
         .and_then(|value| value.to_str())

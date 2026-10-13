@@ -21,6 +21,7 @@ impl crate::jsonrpc::Codegen for TypedAstGen {
         input: String,
         props: ParserProperties,
     ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
+        crate::generate::versioning::reject_version_selection("typed-ast", &props)?;
         let hir = input_hir.into_rpc_hir();
         let source: String = serde_json::from_value(props.get("idl").unwrap().clone()).unwrap();
         let target_lang: String =

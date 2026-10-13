@@ -159,3 +159,34 @@ fn selection_resolves_and_sorts_by_declaration_order() {
         ))
     ));
 }
+
+#[test]
+fn nested_version_enums_resolve_by_ident_or_path() {
+    let timeline = VersionTimeline::from_members(
+        "core::ApiVersions".to_string(),
+        &[member("v1", None), member("v2", None)],
+    )
+    .expect("timeline");
+
+    assert_eq!(timeline.enum_ident(), "ApiVersions");
+    assert_eq!(
+        timeline
+            .resolve(&reference("ApiVersions", "v2"))
+            .map(|id| id.index()),
+        Some(1)
+    );
+    assert_eq!(
+        timeline
+            .resolve(&ScopedName {
+                name: vec![
+                    "core".to_string(),
+                    "ApiVersions".to_string(),
+                    "v2".to_string()
+                ],
+                is_root: false,
+            })
+            .map(|id| id.index()),
+        Some(1)
+    );
+    assert!(timeline.resolve(&reference("Other", "v2")).is_none());
+}

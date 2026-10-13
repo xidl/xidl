@@ -1,0 +1,190 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+openrpc.v1.json
+===============
+{
+  "components": {
+    "schemas": {
+      "v1.Sum": {
+        "properties": {
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "versioned_calc",
+    "version": "1.0"
+  },
+  "methods": [
+    {
+      "name": "v1.Calc.add",
+      "params": [
+        {
+          "name": "a",
+          "required": true,
+          "schema": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        {
+          "name": "b",
+          "required": true,
+          "schema": {
+            "format": "int64",
+            "type": "integer"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "properties": {
+            "return": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "return"
+          ],
+          "type": "object"
+        }
+      }
+    },
+    {
+      "name": "v1.Calc.legacy",
+      "params": [
+        {
+          "name": "a",
+          "required": true,
+          "schema": {
+            "format": "int64",
+            "type": "integer"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "properties": {
+            "return": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "return"
+          ],
+          "type": "object"
+        }
+      }
+    }
+  ],
+  "openrpc": "1.3.2"
+}
+===============
+openrpc.v2.json
+===============
+{
+  "components": {
+    "schemas": {
+      "v2.Sum": {
+        "properties": {
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "versioned_calc",
+    "version": "2.0"
+  },
+  "methods": [
+    {
+      "name": "v2.Calc.add",
+      "params": [
+        {
+          "name": "a",
+          "required": true,
+          "schema": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        {
+          "name": "b",
+          "required": true,
+          "schema": {
+            "format": "int64",
+            "type": "integer"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "properties": {
+            "return": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "return"
+          ],
+          "type": "object"
+        }
+      }
+    },
+    {
+      "name": "v2.Calc.total",
+      "params": [
+        {
+          "name": "values",
+          "required": true,
+          "schema": {
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "properties": {
+            "return": {
+              "$ref": "#/components/schemas/Sum"
+            }
+          },
+          "required": [
+            "return"
+          ],
+          "type": "object"
+        }
+      }
+    }
+  ],
+  "openrpc": "1.3.2"
+}

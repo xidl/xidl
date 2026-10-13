@@ -27,6 +27,10 @@ Feature: API versioning
     When I generate the "v1" API version of the IDL as openapi
     Then only the "v1" openapi document is generated
 
+  Scenario: targets without versioned module support fail loudly
+    Given a versioned REST IDL file "bdd/features/data/versioned_rest.idl"
+    When I generate go code for the IDL and expect failure containing "cannot render one module per API version yet"
+
   Scenario: unimplemented versioning annotations are rejected
     Given a versioned REST IDL file "bdd/features/data/versioning_unsupported.idl"
     When I generate rust code for the IDL and expect failure containing "is not supported yet"

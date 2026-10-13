@@ -1,7 +1,7 @@
 use super::*;
 use crate::error::ParseError;
-use crate::hir::{ConstrTypeDcl, Declarator, Definition, ModuleDcl, Pragma, TypeDcl, TypeSpec};
-use crate::versioning::{self, VersioningError};
+use crate::hir::{ConstrTypeDcl, Definition, TypeDcl, TypeSpec};
+use crate::versioning::VersioningError;
 
 const VERSIONED: &str = r#"
 #pragma xidlc package versioned
@@ -29,67 +29,12 @@ struct Pet {
 };
 "#;
 
-fn declarator_name(declarator: &Declarator) -> String {
-    match declarator {
-        Declarator::SimpleDeclarator(simple) => simple.0.clone(),
-        Declarator::ArrayDeclarator(array) => array.ident.clone(),
-    }
-}
-
-fn projected_module(spec: &Specification) -> &ModuleDcl {
-    spec.0
-        .iter()
-        .find_map(|definition| match definition {
-            Definition::ModuleDcl(module) => Some(module),
-            _ => None,
-        })
-        .expect("projection should wrap definitions in a module")
-}
-
-fn struct_members(spec: &Specification, ident: &str) -> Vec<String> {
-    for definition in &projected_module(spec).definition {
-        if let Definition::TypeDcl(TypeDcl::ConstrTypeDcl(ConstrTypeDcl::StructDcl(value))) =
-            definition
-        {
-            if value.ident == ident {
-                return value
-                    .member
-                    .iter()
-                    .map(|member| declarator_name(&member.ident[0]))
-                    .collect();
-            }
-        }
-    }
-    Vec::new()
-}
-
-fn has_enum(spec: &Specification, ident: &str) -> bool {
-    projected_module(spec).definition.iter().any(|definition| {
-        matches!(
-            definition,
-            Definition::TypeDcl(TypeDcl::ConstrTypeDcl(ConstrTypeDcl::EnumDcl(value)))
-                if value.ident == ident
-        )
-    })
-}
-
-fn version_pragma(spec: &Specification) -> Option<String> {
-    spec.0.iter().find_map(|definition| match definition {
-        Definition::Pragma(Pragma::XidlcOpenApiVersion(value)) => Some(value.clone()),
-        _ => None,
-    })
-}
-
-fn project_ids(record: &crate::versioning::VersioningRecord) -> Vec<crate::versioning::VersionId> {
-    record.timeline().iter().map(|(id, _)| id).collect()
-}
-
 #[test]
 fn projection_selects_members_per_version() {
     let (spec, record) = analyze(VERSIONED);
     let mut signatures = Vec::new();
     for version in project_ids(&record) {
-        let projected = versioning::project(&spec, &record, version).expect("projection");
+        let projected = record.project(&spec, version).expect("projection");
         let ident = record
             .timeline()
             .get(version)
@@ -119,7 +64,7 @@ fn projection_selects_members_per_version() {
 fn projection_wraps_the_version_and_sets_the_document_version() {
     let (spec, record) = analyze(VERSIONED);
     let version = project_ids(&record)[0];
-    let projected = versioning::project(&spec, &record, version).expect("projection");
+    let projected = record.project(&spec, version).expect("projection");
 
     assert_eq!(projected_module(&projected).ident, "v1");
     assert_eq!(version_pragma(&projected).as_deref(), Some("1.0"));
@@ -129,7 +74,7 @@ fn projection_wraps_the_version_and_sets_the_document_version() {
 fn projection_removes_the_version_enum_and_lifecycle_annotations() {
     let (spec, record) = analyze(VERSIONED);
     let version = project_ids(&record)[1];
-    let projected = versioning::project(&spec, &record, version).expect("projection");
+    let projected = record.project(&spec, version).expect("projection");
     let json = serde_json::to_string(&projected).expect("serialize");
 
     assert!(!has_enum(&projected, "Versions"));
@@ -142,7 +87,7 @@ fn projection_removes_the_version_enum_and_lifecycle_annotations() {
 fn projection_makes_root_references_relative() {
     let (spec, record) = analyze(VERSIONED);
     let version = project_ids(&record)[0];
-    let projected = versioning::project(&spec, &record, version).expect("projection");
+    let projected = record.project(&spec, version).expect("projection");
 
     let item = projected_module(&projected)
         .definition
@@ -182,8 +127,8 @@ struct Pet {
     );
     let versions = project_ids(&record);
 
-    versioning::project(&spec, &record, versions[0]).expect("v1 keeps Old");
-    match versioning::project(&spec, &record, versions[1]) {
+    record.project(&spec, versions[0]).expect("v1 keeps Old");
+    match record.project(&spec, versions[1]) {
         Err(ParseError::Versioning(VersioningError::DanglingReference {
             decl,
             reference,
@@ -195,46 +140,6 @@ struct Pet {
         }
         other => panic!("expected a dangling reference error, got {other:?}"),
     }
-}
-
-fn raised_exceptions(spec: &Specification) -> Vec<String> {
-    projected_module(spec)
-        .definition
-        .iter()
-        .find_map(|definition| match definition {
-            Definition::InterfaceDcl(interface) => Some(interface),
-            _ => None,
-        })
-        .map(|interface| match &interface.decl {
-            crate::hir::InterfaceDclInner::InterfaceDef(def) => def
-                .interface_body
-                .as_ref()
-                .map(|body| {
-                    body.0
-                        .iter()
-                        .filter_map(|export| match export {
-                            crate::hir::Export::OpDcl(operation) => Some(operation),
-                            _ => None,
-                        })
-                        .flat_map(|operation| {
-                            operation
-                                .raises
-                                .as_ref()
-                                .map(|raises| {
-                                    raises
-                                        .0
-                                        .iter()
-                                        .map(|name| name.name.join("::"))
-                                        .collect::<Vec<_>>()
-                                })
-                                .unwrap_or_default()
-                        })
-                        .collect::<Vec<_>>()
-                })
-                .unwrap_or_default(),
-            crate::hir::InterfaceDclInner::InterfaceForwardDcl(_) => Vec::new(),
-        })
-        .unwrap_or_default()
 }
 
 #[test]
@@ -262,8 +167,8 @@ interface Pets {
 "#,
     );
     let versions = project_ids(&record);
-    let v1 = versioning::project(&spec, &record, versions[0]).expect("v1 projection");
-    let v2 = versioning::project(&spec, &record, versions[1]).expect("v2 projection");
+    let v1 = record.project(&spec, versions[0]).expect("v1 projection");
+    let v2 = record.project(&spec, versions[1]).expect("v2 projection");
 
     assert_eq!(raised_exceptions(&v1), vec!["NotFound"]);
     assert_eq!(raised_exceptions(&v2), vec!["NotFound", "Conflict"]);
@@ -273,7 +178,7 @@ interface Pets {
 fn merge_keeps_one_module_per_version_in_order() {
     let (spec, record) = analyze(VERSIONED);
     let versions = project_ids(&record);
-    let merged = versioning::merge(&spec, &record, &versions).expect("merge");
+    let merged = record.merge(&spec, &versions).expect("merge");
 
     let modules = merged
         .0
@@ -298,7 +203,9 @@ fn merge_keeps_one_module_per_version_in_order() {
 fn merge_respects_the_selected_subset() {
     let (spec, record) = analyze(VERSIONED);
     let versions = project_ids(&record);
-    let merged = versioning::merge(&spec, &record, &[versions[2], versions[0]]).expect("merge");
+    let merged = record
+        .merge(&spec, &[versions[2], versions[0]])
+        .expect("merge");
 
     let modules = merged
         .0
@@ -315,7 +222,7 @@ fn merge_respects_the_selected_subset() {
 fn projection_snapshot_locks_the_desugaring() {
     let (spec, record) = analyze(VERSIONED);
     let versions = project_ids(&record);
-    let projected = versioning::project(&spec, &record, versions[1]).expect("projection");
+    let projected = record.project(&spec, versions[1]).expect("projection");
 
     insta::assert_debug_snapshot!("projection_v2", projected);
 }

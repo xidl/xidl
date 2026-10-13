@@ -71,6 +71,8 @@ pub enum VersioningError {
     ConflictingSelection { first: String, second: String },
     /// The requested version selection is empty.
     EmptySelection,
+    /// `api_version` received `*`, which only `api_versions` accepts.
+    SelectionRequiresOneVersion { selection: String },
     /// The version layout property holds an unknown value.
     UnknownVersionLayout { value: String },
 }
@@ -187,6 +189,10 @@ impl fmt::Display for VersioningError {
             Self::EmptySelection => write!(
                 f,
                 "xidl versioning: the version selection is empty; name at least one version or use \"*\""
+            ),
+            Self::SelectionRequiresOneVersion { selection } => write!(
+                f,
+                "xidl versioning: {selection} selects one version; use the plural version property with \"*\" for every version"
             ),
             Self::UnknownVersionLayout { value } => write!(
                 f,

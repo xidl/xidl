@@ -1,6 +1,7 @@
 //! Per-version projection of a versioned specification.
 
 mod compound;
+mod declarations;
 mod interface;
 mod projector;
 mod references;
