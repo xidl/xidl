@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.100.0](https://github.com/xidl/xidl/compare/v0.99.1...v0.100.0) (2026-10-14)
+
+
+### Features
+
+* **versioning:** derive every API version from one IDL ([7d09309](https://github.com/xidl/xidl/commit/7d09309d7ba374eabf567a06c9613f9896667497))
+
+
+### Bug Fixes
+
+* **versioning:** match references by full path and guard weak targets ([98208e1](https://github.com/xidl/xidl/commit/98208e12e953cc85245970fd741e26dd6689c6ee))
+* **versioning:** prune versioned raises entries and project attributes ([7800ea4](https://github.com/xidl/xidl/commit/7800ea4f8f3566d7ec374f3b887c19c44e62fafa))
+
 ## [0.99.1](https://github.com/xidl/xidl/compare/v0.99.0...v0.99.1) (2026-10-10)
 
 
