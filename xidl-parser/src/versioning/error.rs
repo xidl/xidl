@@ -22,6 +22,10 @@ pub enum VersioningError {
     MalformedVersionReference { annotation: String, decl: String },
     /// `@version` carries arguments; the marker takes none.
     MalformedVersionMarker { decl: String },
+    /// `@version(header = "...")` names something that is not an RFC 7230 token.
+    MalformedVersionHeader { decl: String },
+    /// The `@version` enum declares the version header more than once.
+    DuplicateVersionHeader { decl: String },
     /// A lifecycle annotation references a version the timeline does not declare.
     UnknownVersionReference {
         annotation: String,
@@ -120,6 +124,14 @@ impl fmt::Display for VersioningError {
             Self::MalformedVersionMarker { decl } => {
                 write!(f, "xidl versioning: @version on {decl} takes no arguments")
             }
+            Self::MalformedVersionHeader { decl } => write!(
+                f,
+                "xidl versioning: @version(header) on {decl} requires a non-empty RFC 7230 token"
+            ),
+            Self::DuplicateVersionHeader { decl } => write!(
+                f,
+                "xidl versioning: @version on {decl} declares the version header more than once"
+            ),
             Self::UnknownVersionReference {
                 annotation,
                 decl,
