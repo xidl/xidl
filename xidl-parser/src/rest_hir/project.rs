@@ -2,7 +2,7 @@ use crate::error::{ParseError, ParserResult};
 use crate::hir;
 use std::collections::HashSet;
 
-use super::attr::project_attribute;
+use super::attr::project_attribute_group;
 use super::mapping;
 use super::model::{HttpException, HttpExceptionRef, HttpRepresentation, HttpUnion};
 use super::project_params::project_params;
@@ -17,20 +17,36 @@ use super::semantics::{
 use super::validate::{
     effective_basic_auth_realm, effective_deprecated, validate_head_constraints,
     validate_request_shape, validate_route_bindings, validate_stream_method, validate_stream_shape,
-    validate_unique_route_bindings, validate_upgrade_constraints, validate_websocket_stream_items,
+    validate_unique_header_params, validate_unique_route_bindings, validate_upgrade_constraints,
+    validate_version_header, validate_websocket_stream_items,
 };
 use super::{
     HttpDocumentMetadata, HttpDocumentServer, HttpInterface, HttpOperation, HttpOperationMeta,
-    HttpOperationSource, RestHirDocument,
+    HttpOperationSource, ProjectOptions, RestHirDocument,
 };
 
 pub fn project(spec: &hir::Specification) -> ParserResult<RestHirDocument> {
+    project_with_options(spec, &ProjectOptions::default())
+}
+
+/// Projects a specification with stage-level typed metadata.
+pub fn project_with_options(
+    spec: &hir::Specification,
+    options: &ProjectOptions,
+) -> ParserResult<RestHirDocument> {
     let mut ctx = ProjectionContext::default();
     // Exceptions and `@http` unions first: operations resolve against them.
     ctx.collect_exceptions(&spec.0, &[])?;
     ctx.document.http_unions = HttpUnion::collect(&spec.0)?;
     ctx.collect_spec(spec, &[])?;
     ctx.document.exceptions = ctx.exceptions;
+    ctx.document.version_header = options.version_header.clone();
+    ctx.document.version_values = options.version_values.iter().cloned().collect();
+    validate_version_header(ctx.document.version_header.as_deref(), &ctx.interfaces)
+        .map_err(parse_err)?;
+    for interface in &ctx.interfaces {
+        validate_unique_header_params(interface).map_err(parse_err)?;
+    }
     Ok(RestHirDocument {
         spec: spec.clone(),
         document: ctx.document,
@@ -185,41 +201,6 @@ fn project_interface(
         module_path: module_path.to_vec(),
         operations,
     }))
-}
-
-fn project_attribute_group(
-    interface_name: &str,
-    module_path: &[String],
-    interface_annotations: &[hir::Annotation],
-    attr: &hir::AttrDcl,
-) -> ParserResult<Vec<HttpOperation>> {
-    validate_http_annotations(
-        &format!("attribute in interface '{interface_name}'"),
-        &attr.annotations,
-    )
-    .map_err(ParseError::Message)?;
-    if has_annotation(&attr.annotations, "cors") {
-        return Err(ParseError::Message(format!(
-            "attribute in interface '{interface_name}': @cors is only supported on interfaces and methods"
-        )));
-    }
-    let cors = effective_cors(interface_annotations, &[]).map_err(ParseError::Message)?;
-    let deprecated = effective_deprecated(interface_annotations, &attr.annotations)
-        .map_err(ParseError::Message)?;
-    let security = effective_security_with_origin(interface_annotations, &attr.annotations)
-        .map_err(ParseError::Message)?;
-    let mut operations = project_attribute(
-        interface_name,
-        module_path,
-        attr,
-        security,
-        deprecated,
-        has_annotation(&attr.annotations, "server_stream"),
-    );
-    for operation in &mut operations {
-        operation.meta.cors = cors.clone();
-    }
-    Ok(operations)
 }
 
 fn project_operation(

@@ -1,3 +1,5 @@
+mod version_header;
+
 use std::collections::HashMap;
 
 use crate::hir;

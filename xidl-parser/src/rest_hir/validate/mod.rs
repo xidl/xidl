@@ -8,8 +8,10 @@ use super::semantics::{
 use super::{HttpMethod, HttpParam, HttpParamKind, HttpRoute, RestHirResult};
 
 mod routes;
+mod version_header;
 
 pub(super) use routes::validate_unique_route_bindings;
+pub(super) use version_header::{validate_unique_header_params, validate_version_header};
 
 #[cfg(test)]
 mod tests;
