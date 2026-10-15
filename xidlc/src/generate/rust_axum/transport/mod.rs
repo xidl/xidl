@@ -230,6 +230,10 @@ fn render_struct(
         kind: "struct".to_string(),
         transport_ident: transport_ident(canonical),
         public_path: TypeScope::relative_path(scope.output, canonical),
+        has_skipped_members: def
+            .member
+            .iter()
+            .any(|member| is_skipped_from_annotations(&member.annotations)),
         fields,
         variants: Vec::new(),
     })
@@ -247,6 +251,7 @@ fn render_enum(
             "super::{}",
             TypeScope::relative_path(module_path, canonical)
         ),
+        has_skipped_members: false,
         fields: Vec::new(),
         variants: def
             .member

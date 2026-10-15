@@ -140,15 +140,8 @@ pub(super) mod __xidl_out_HttpClientStreamReportService {
         }
     }
 }
-#[derive(::serde::Serialize)]
-pub struct HttpClientStreamReportServiceUploadPartsRequestOutBody {
-    #[serde(default)]
-    pub chunk: __xidl_out_HttpClientStreamReportService::UploadChunk,
-}
-#[derive(::serde::Deserialize)]
-pub struct HttpClientStreamReportServiceUploadPartsRequestInBody {
-    pub chunk: __xidl_in_HttpClientStreamReportService::UploadChunk,
-}
+pub type HttpClientStreamReportServiceUploadPartsRequestOutBody = __xidl_out_HttpClientStreamReportService::UploadChunk;
+pub type HttpClientStreamReportServiceUploadPartsRequestInBody = __xidl_in_HttpClientStreamReportService::UploadChunk;
 #[derive(::serde::Serialize, ::serde::Deserialize)]
 pub struct HttpClientStreamReportServiceUploadPartsRequest {
     pub chunk: UploadChunk,
