@@ -65,6 +65,14 @@ pub fn generate(
             content: output.errors,
         }));
     }
+    if let Some(adapters) = crate::generate::adapter::render::adapters_artifact(
+        &spec, &rest_hir, &props, file_name, &renderer,
+    )? {
+        artifacts.push(Artifact::new_file(ArtifactFile {
+            path: format!("{file_name}.adapters.ts"),
+            content: adapters,
+        }));
+    }
     let non_interface = strip_interfaces(spec);
     if !non_interface.0.is_empty() {
         artifacts.push(Artifact::new_hir(ArtifactHir {

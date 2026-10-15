@@ -3,7 +3,7 @@ mod attr;
 pub(crate) mod contexts;
 mod http;
 mod interface_render;
-mod method;
+pub(crate) mod method;
 mod module_render;
 pub(crate) mod names;
 mod operation;

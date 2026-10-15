@@ -1,3 +1,4 @@
+pub(crate) mod adapter;
 mod const_expr;
 #[cfg(feature = "gen-go")]
 pub mod go;

@@ -55,6 +55,10 @@ impl crate::jsonrpc::Codegen for HirGen {
 }
 
 /// Adds the projected API versions to the properties seen by the target.
+///
+/// The timeline and the unprojected intervals travel along so the adapter
+/// stage can pair versions from one channel; projections strip the lifecycle
+/// annotations those facts are read from.
 fn projection_properties(
     mut props: ParserProperties,
     projection: &VersionedProjection,
@@ -74,6 +78,23 @@ fn projection_properties(
         props.insert(
             versioning::API_VERSION_MODULES_PROPERTY.to_string(),
             serde_json::Value::Array(modules),
+        );
+        let timeline = projection
+            .versions
+            .iter()
+            .map(|version| serde_json::to_value(version).unwrap_or(serde_json::Value::Null))
+            .collect();
+        props.insert(
+            versioning::API_VERSION_TIMELINE_PROPERTY.to_string(),
+            serde_json::Value::Array(timeline),
+        );
+    }
+    if !projection.intervals.is_empty() {
+        let intervals =
+            serde_json::to_value(&projection.intervals).unwrap_or(serde_json::Value::Null);
+        props.insert(
+            versioning::API_VERSION_INTERVALS_PROPERTY.to_string(),
+            intervals,
         );
     }
     props

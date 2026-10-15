@@ -61,6 +61,7 @@ impl Specification {
             return Ok(vec![VersionedProjection {
                 versions: Vec::new(),
                 version: None,
+                intervals: Vec::new(),
                 hir: Self::project_hir(spec, &properties)?,
             }]);
         };
@@ -73,9 +74,11 @@ impl Specification {
                     .iter()
                     .filter_map(|version| record.timeline().get(*version).cloned())
                     .collect();
+                let intervals = record.member_intervals(&source)?;
                 Ok(vec![VersionedProjection {
                     versions: selected,
                     version: None,
+                    intervals,
                     hir: Self::project_hir(spec, &properties)?,
                 }])
             }
@@ -88,6 +91,7 @@ impl Specification {
                     projections.push(VersionedProjection {
                         versions: definition.clone().into_iter().collect(),
                         version: definition,
+                        intervals: Vec::new(),
                         hir: Self::project_hir(spec, &properties)?,
                     });
                 }

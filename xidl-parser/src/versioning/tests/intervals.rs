@@ -61,7 +61,9 @@ struct Pet {
     assert_eq!((pet.from, pet.until), (0, 2));
 
     assert!(
-        !intervals.iter().any(|interval| interval.path == "Versions::v1"),
+        !intervals
+            .iter()
+            .any(|interval| interval.path == "Versions::v1"),
         "the version enum's own timeline is not reported"
     );
 }
@@ -130,7 +132,10 @@ interface Depot {
 fn unversioned_specifications_have_no_record_to_read_from() {
     let spec = parse("struct Pet { string id; };");
     let record = crate::versioning::VersioningRecord::analyze(&spec).expect("analysis");
-    assert!(record.is_none(), "an unversioned specification has no record");
+    assert!(
+        record.is_none(),
+        "an unversioned specification has no record"
+    );
 }
 
 #[test]

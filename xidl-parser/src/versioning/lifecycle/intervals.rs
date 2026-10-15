@@ -4,8 +4,8 @@
 //! once; it derives its pairing from these intervals instead of re-reading
 //! lifecycle annotations, which the projection strips from version modules.
 
-use super::super::{IntervalKind, MemberInterval};
 use super::super::timeline::VersionTimeline;
+use super::super::{IntervalKind, MemberInterval};
 use super::availability::{Availability, Site, SiteKind, VersionVisitor, availability};
 use crate::error::ParserResult;
 use crate::hir::Definition;
