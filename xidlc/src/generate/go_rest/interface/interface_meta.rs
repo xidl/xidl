@@ -75,25 +75,14 @@ pub(crate) fn build_method_meta(
             HttpRequestBodyShape::Object { .. } => {
                 (Some(format!("{struct_prefix}RequestBody")), None, None)
             }
+            // One body parameter is the request body as-is, flatten or not.
             HttpRequestBodyShape::SingleValue {
-                source_param,
-                flatten,
-                ty,
-            } => {
-                let is_text = matches!(
-                    op.http.request.body.codec,
-                    Some(xidl_parser::rest_hir::HttpBodyCodec::Text)
-                );
-                if *flatten || is_text {
-                    (
-                        None,
-                        Some(source_param.to_case(Case::Pascal)),
-                        Some(definition::go_type(ty)),
-                    )
-                } else {
-                    (Some(format!("{struct_prefix}RequestBody")), None, None)
-                }
-            }
+                source_param, ty, ..
+            } => (
+                None,
+                Some(source_param.to_case(Case::Pascal)),
+                Some(definition::go_type(ty)),
+            ),
             _ => (None, None, None),
         };
 
