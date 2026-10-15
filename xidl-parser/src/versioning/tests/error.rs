@@ -150,6 +150,34 @@ fn every_diagnostic_names_the_failing_contract() {
             },
             "unknown version layout",
         ),
+        (
+            VersioningError::DuplicateWireName {
+                container: "Pet".to_string(),
+                wire: "a".to_string(),
+                first: "Pet::a".to_string(),
+                second: "Pet::b".to_string(),
+                version: "1.0".to_string(),
+            },
+            "both serialize as \"a\"",
+        ),
+        (
+            VersioningError::MalformedVersionSelector {
+                decl: "Versions".to_string(),
+            },
+            "requires exactly one of header = \"...\" or query = \"...\"",
+        ),
+        (
+            VersioningError::SelectorOutsideVersionEnum {
+                decl: "Pet".to_string(),
+            },
+            "must sit on the @version enum",
+        ),
+        (
+            VersioningError::DuplicateVersionSelector {
+                decl: "Versions".to_string(),
+            },
+            "multiple @version_selector declarations",
+        ),
     ];
 
     for (error, needle) in cases {

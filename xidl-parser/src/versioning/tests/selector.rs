@@ -130,6 +130,37 @@ fn selector_without_version_marker_is_rejected() {
 }
 
 #[test]
+fn header_tokens_accept_the_full_rfc_7230_token_charset() {
+    let (_, record) = analyze(&selector_text(
+        "@version_selector(header = \"x!#$%&'*+-.^_`|~019.ver\")",
+    ));
+    let selector = record.selector().expect("every token character is legal");
+    assert_eq!(selector.location, VersionSelectorLocation::Header);
+    assert_eq!(selector.name, "x!#$%&'*+-.^_`|~019.ver");
+}
+
+#[test]
+fn query_names_reject_structural_characters() {
+    for name in [
+        "api=version",
+        "api#version",
+        "api%version",
+        "api\tversion",
+        "api·version",
+    ] {
+        let error = super::lower_error(&selector_text(&format!(
+            "@version_selector(query = \"{name}\")"
+        )));
+        assert!(
+            error
+                .to_string()
+                .contains("requires exactly one of header = \"...\" or query = \"...\""),
+            "`{name}` should be malformed: {error}"
+        );
+    }
+}
+
+#[test]
 fn two_selectors_on_one_enum_are_rejected() {
     let error = super::lower_error(&selector_text(
         "@version_selector(header = \"Api-Version\")\n@version_selector(query = \"api-version\")",

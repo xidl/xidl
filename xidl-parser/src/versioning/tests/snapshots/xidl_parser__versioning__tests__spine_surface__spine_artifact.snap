@@ -1,0 +1,227 @@
+---
+source: xidl-parser/src/versioning/tests/spine.rs
+expression: json
+---
+{
+  "selector": {
+    "location": "header",
+    "name": "Api-Version"
+  },
+  "timeline": [
+    {
+      "ident": "v1",
+      "value": "2025-01"
+    },
+    {
+      "ident": "v2",
+      "value": "2025-06"
+    },
+    {
+      "ident": "v3",
+      "value": "2026-01"
+    }
+  ],
+  "surfaces": [
+    {
+      "version": {
+        "ident": "v1",
+        "value": "2025-01"
+      },
+      "digest": "md5:4ac9244414332f7a0cf155407c5cde85",
+      "entries": 8
+    },
+    {
+      "version": {
+        "ident": "v2",
+        "value": "2025-06"
+      },
+      "digest": "md5:55629821a7eed53ffafc4a4b581ca7e0",
+      "entries": 7
+    },
+    {
+      "version": {
+        "ident": "v3",
+        "value": "2026-01"
+      },
+      "digest": "md5:c6ddf801260a458d1b3cb43879fd2d56",
+      "entries": 8
+    }
+  ],
+  "correspondence": [
+    {
+      "from": "v1",
+      "to": "v2",
+      "from_subject": "Pet::id",
+      "to_subject": "Pet::id",
+      "container": "Pet",
+      "wire_name": "id",
+      "kind": "mechanical",
+      "evidence": "same"
+    },
+    {
+      "from": "v1",
+      "to": "v2",
+      "from_subject": null,
+      "to_subject": "Pet::note",
+      "container": "Pet",
+      "wire_name": "note",
+      "kind": "added",
+      "evidence": "interval-start"
+    },
+    {
+      "from": "v1",
+      "to": "v2",
+      "from_subject": "Pet::size",
+      "to_subject": "Pet::size2_",
+      "container": "Pet",
+      "wire_name": "size",
+      "kind": "renamed",
+      "evidence": "explicit-rename"
+    },
+    {
+      "from": "v1",
+      "to": "v2",
+      "from_subject": "Pet::user_id",
+      "to_subject": "Pet::userId",
+      "container": "Pet",
+      "wire_name": "userId",
+      "kind": "name-shifted",
+      "evidence": "wire-name-match"
+    },
+    {
+      "from": "v1",
+      "to": "v2",
+      "from_subject": "Pet::flag",
+      "to_subject": "Pet::flag",
+      "container": "Pet",
+      "wire_name": "flag",
+      "kind": "mechanical",
+      "evidence": "same"
+    },
+    {
+      "from": "v1",
+      "to": "v2",
+      "from_subject": "Pet::hint",
+      "to_subject": "Pet::hint",
+      "container": "Pet",
+      "wire_name": "hint",
+      "kind": "mechanical",
+      "evidence": "same"
+    },
+    {
+      "from": "v1",
+      "to": "v2",
+      "from_subject": "Store::find",
+      "to_subject": "Store::find",
+      "container": "Store",
+      "wire_name": "find",
+      "kind": "mechanical",
+      "evidence": "same"
+    },
+    {
+      "from": "v1",
+      "to": "v2",
+      "from_subject": "Pet::weight",
+      "to_subject": null,
+      "container": "Pet",
+      "wire_name": "weight",
+      "kind": "removed",
+      "evidence": "interval-end"
+    },
+    {
+      "from": "v1",
+      "to": "v2",
+      "from_subject": "Pet::code",
+      "to_subject": null,
+      "container": "Pet",
+      "wire_name": "code",
+      "kind": "removed",
+      "evidence": "interval-end"
+    },
+    {
+      "from": "v2",
+      "to": "v3",
+      "from_subject": "Pet::id",
+      "to_subject": "Pet::id",
+      "container": "Pet",
+      "wire_name": "id",
+      "kind": "mechanical",
+      "evidence": "same"
+    },
+    {
+      "from": "v2",
+      "to": "v3",
+      "from_subject": "Pet::note",
+      "to_subject": "Pet::note",
+      "container": "Pet",
+      "wire_name": "note",
+      "kind": "mechanical",
+      "evidence": "same"
+    },
+    {
+      "from": "v2",
+      "to": "v3",
+      "from_subject": "Pet::size2_",
+      "to_subject": "Pet::size2_",
+      "container": "Pet",
+      "wire_name": "size",
+      "kind": "mechanical",
+      "evidence": "same"
+    },
+    {
+      "from": "v2",
+      "to": "v3",
+      "from_subject": "Pet::userId",
+      "to_subject": "Pet::userId",
+      "container": "Pet",
+      "wire_name": "userId",
+      "kind": "mechanical",
+      "evidence": "same"
+    },
+    {
+      "from": "v2",
+      "to": "v3",
+      "from_subject": null,
+      "to_subject": "Pet::code2_",
+      "container": "Pet",
+      "wire_name": "code",
+      "kind": "added",
+      "evidence": {
+        "resumes-after-gap": {
+          "gap": 1,
+          "confirmed": true
+        }
+      }
+    },
+    {
+      "from": "v2",
+      "to": "v3",
+      "from_subject": "Pet::flag",
+      "to_subject": "Pet::flag2_",
+      "container": "Pet",
+      "wire_name": "flag",
+      "kind": "type-changed",
+      "evidence": "same"
+    },
+    {
+      "from": "v2",
+      "to": "v3",
+      "from_subject": "Pet::hint",
+      "to_subject": "Pet::hint2_",
+      "container": "Pet",
+      "wire_name": "hint",
+      "kind": "optionalized",
+      "evidence": "same"
+    },
+    {
+      "from": "v2",
+      "to": "v3",
+      "from_subject": "Store::find",
+      "to_subject": "Store::find",
+      "container": "Store",
+      "wire_name": "find",
+      "kind": "mechanical",
+      "evidence": "same"
+    }
+  ]
+}

@@ -12,6 +12,7 @@ mod project;
 mod references;
 mod selector;
 mod spine;
+mod spine_surface;
 mod timeline;
 
 /// Lowers IDL text into source HIR without interface expansion.
@@ -185,4 +186,28 @@ fn raised_exceptions(spec: &Specification) -> Vec<String> {
             crate::hir::InterfaceDclInner::InterfaceForwardDcl(_) => Vec::new(),
         })
         .unwrap_or_default()
+}
+
+/// The spine test timeline: three dated versions.
+pub(super) const TIMELINE: &str = "
+@version
+enum ApiVersions {
+    @rename(\"2025-01\") v2025_01,
+    @rename(\"2025-06\") v2025_06,
+    @rename(\"2026-01\") v2026_01,
+};
+";
+
+/// Derives the spine of an IDL text, or `None` when it is not versioned.
+pub(super) fn spine_of(text: &str) -> Option<crate::versioning::Spine> {
+    let typed = crate::parser::parser_text(text).expect("IDL should parse");
+    crate::hir::Specification::versioning_spine(typed).expect("spine should build")
+}
+
+/// Derives the spine of an IDL text, expecting a failure.
+pub(super) fn spine_err(text: &str) -> String {
+    let typed = crate::parser::parser_text(text).expect("IDL should parse");
+    crate::hir::Specification::versioning_spine(typed)
+        .expect_err("spine should fail")
+        .to_string()
 }
