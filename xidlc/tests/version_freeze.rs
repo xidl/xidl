@@ -30,6 +30,26 @@ interface Pets {
 };
 "#;
 
+const SELECTOR_CONTRACT: &str = r#"
+#pragma xidlc package billing
+
+@version
+@version_selector(header = "Api-Version")
+enum BillingVersions {
+    @rename("2025-01") v1,
+    @rename("2025-06") v2,
+};
+
+struct Invoice {
+    string id;
+};
+
+interface Billing {
+    @get(path = "/invoices/{id}")
+    Invoice get(@path string id);
+};
+"#;
+
 struct Workspace {
     dir: PathBuf,
 }
@@ -106,6 +126,66 @@ fn lock_pass_drift_update_cycle() {
             "--update",
         ])
         .expect("intentional change should rewrite the lock");
+    workspace
+        .run(&[
+            "xidlc",
+            "version",
+            "verify",
+            contract.to_str().expect("utf-8"),
+        ])
+        .expect("verify should pass after the door");
+}
+
+#[test]
+fn selector_drift_is_frozen_too() {
+    let workspace = Workspace::new("selector");
+    let contract = workspace.contract_path("billing", SELECTOR_CONTRACT);
+
+    workspace
+        .run(&[
+            "xidlc",
+            "version",
+            "verify",
+            contract.to_str().expect("utf-8"),
+            "--update",
+        ])
+        .expect("the selector contract should freeze");
+    let lock =
+        fs::read_to_string(workspace.dir.join("billing.versions.lock.json")).expect("read lock");
+    assert!(
+        lock.contains("header:Api-Version"),
+        "lock should freeze the selector: {lock}"
+    );
+
+    // Renaming the selector header is a breaking wire change for every
+    // released version, so the freeze must catch it without a digest change.
+    fs::write(
+        &contract,
+        SELECTOR_CONTRACT.replace(
+            "@version_selector(header = \"Api-Version\")",
+            "@version_selector(header = \"X-Billing-Version\")",
+        ),
+    )
+    .expect("write renamed-selector contract");
+    let error = workspace
+        .run(&[
+            "xidlc",
+            "version",
+            "verify",
+            contract.to_str().expect("utf-8"),
+        ])
+        .expect_err("a renamed selector header is drift");
+    assert!(error.contains("version selector changed"), "{error}");
+
+    workspace
+        .run(&[
+            "xidlc",
+            "version",
+            "verify",
+            contract.to_str().expect("utf-8"),
+            "--update",
+        ])
+        .expect("intentional selector change should rewrite the lock");
     workspace
         .run(&[
             "xidlc",

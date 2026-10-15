@@ -1,10 +1,12 @@
 //! `xidlc version`: derived spine artifacts and the release-freeze gate.
 //!
-//! `manifest` prints the version spine (timeline, per-version wire-surface
-//! digests, adjacent-pair correspondence) of each contract. `verify` compares
-//! the digests of released versions against a checked-in lock file so an
-//! unannotated edit or a library upgrade that silently changes an old version
-//! fails CI; `--update` is the explicit door for intentional changes.
+//! `manifest` prints the version spine (selector, timeline, per-version
+//! wire-surface digests, adjacent-pair correspondence) of each contract.
+//! `verify` compares the frozen identity of released versions — the wire
+//! version selector and each version's surface digest — against a checked-in
+//! lock file so an unannotated edit or a library upgrade that silently changes
+//! an old version fails CI; `--update` is the explicit door for intentional
+//! changes.
 
 use std::path::{Path, PathBuf};
 
@@ -80,17 +82,39 @@ fn spine_for(file: &Path) -> IdlcResult<Option<xidl_parser::versioning::Spine>> 
     Ok(spine)
 }
 
-fn digests(spine: &xidl_parser::versioning::Spine) -> serde_json::Map<String, serde_json::Value> {
-    spine
-        .surfaces
-        .iter()
-        .map(|surface| {
-            (
-                surface.version.ident.clone(),
-                serde_json::Value::String(surface.digest.clone()),
-            )
-        })
-        .collect()
+/// The frozen identity of one contract: the wire version selector (when the
+/// contract declares one) plus every released version's surface digest.
+fn contract_state(
+    spine: &xidl_parser::versioning::Spine,
+) -> serde_json::Map<String, serde_json::Value> {
+    let mut state = serde_json::Map::new();
+    state.insert(
+        "selector".to_string(),
+        match &spine.selector {
+            Some(selector) => serde_json::Value::String(format!(
+                "{}:{}",
+                selector.location.as_str(),
+                selector.name
+            )),
+            None => serde_json::Value::Null,
+        },
+    );
+    state.insert(
+        "versions".to_string(),
+        serde_json::Value::Object(
+            spine
+                .surfaces
+                .iter()
+                .map(|surface| {
+                    (
+                        surface.version.ident.clone(),
+                        serde_json::Value::String(surface.digest.clone()),
+                    )
+                })
+                .collect(),
+        ),
+    );
+    state
 }
 
 fn verify(args: &ArgsVerify) -> IdlcResult<()> {
@@ -104,7 +128,7 @@ fn verify(args: &ArgsVerify) -> IdlcResult<()> {
             continue;
         };
         let name = contract_name(file);
-        let current = digests(&spine);
+        let current = contract_state(&spine);
         if args.update {
             write_lock(&lock_path, &name, &current)?;
             continue;
@@ -144,7 +168,7 @@ fn lock_path_for(file: &Path) -> PathBuf {
 }
 
 /// Rewrites one contract's entry inside the lock file, preserving every
-/// other contract's frozen digests.
+/// other contract's frozen identity.
 fn write_lock(
     lock_path: &Path,
     name: &str,
@@ -178,10 +202,8 @@ fn read_lock(lock_path: &Path) -> IdlcResult<serde_json::Value> {
     Ok(lock)
 }
 
-/// Compares frozen digests against the current spine; returns the drift
-/// report when released versions changed.
-/// Compares one contract's frozen digests against its current spine; returns
-/// the drift report when a released version changed.
+/// Compares one contract's frozen identity against its current spine; returns
+/// the drift report when the selector or a released version changed.
 fn compare(
     lock_path: &Path,
     name: &str,
@@ -195,8 +217,27 @@ fn compare(
         .cloned()
         .unwrap_or_default();
     let mut report = Vec::new();
-    for (version, digest) in &frozen {
-        match current.get(version) {
+    let frozen_selector = frozen.get("selector").unwrap_or(&serde_json::Value::Null);
+    let current_selector = current.get("selector").unwrap_or(&serde_json::Value::Null);
+    if frozen_selector != current_selector {
+        report.push(format!(
+            "version selector changed: {} → {}",
+            describe_selector(frozen_selector),
+            describe_selector(current_selector)
+        ));
+    }
+    let frozen_versions = frozen
+        .get("versions")
+        .and_then(serde_json::Value::as_object)
+        .cloned()
+        .unwrap_or_default();
+    let current_versions = current
+        .get("versions")
+        .and_then(serde_json::Value::as_object)
+        .cloned()
+        .unwrap_or_default();
+    for (version, digest) in &frozen_versions {
+        match current_versions.get(version) {
             Some(now) if now == digest => {}
             Some(now) => report.push(format!(
                 "released version {version} changed: {} → {}",
@@ -209,8 +250,8 @@ fn compare(
             )),
         }
     }
-    for version in current.keys() {
-        if !frozen.contains_key(version) {
+    for version in current_versions.keys() {
+        if !frozen_versions.contains_key(version) {
             report.push(format!("new version {version} is not frozen yet"));
         }
     }
@@ -223,4 +264,12 @@ fn compare(
             report.join("\n")
         )))
     }
+}
+
+/// Renders a frozen selector value for drift reports.
+fn describe_selector(value: &serde_json::Value) -> String {
+    value
+        .as_str()
+        .map(|selector| selector.to_string())
+        .unwrap_or_else(|| "none".to_string())
 }
