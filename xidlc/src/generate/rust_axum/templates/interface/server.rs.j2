@@ -43,6 +43,10 @@ T: {{ ident }} + Send + Sync + 'static,
         request: {{ method.request_struct }}{% endif %}
         ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
             let _ = &headers;
+            {% if api_version %}
+                let xidl_requested_api_version = xidl_rust_axum::api_version::ApiVersionLocation::{{ api_version.location }}.extract(&headers, &uri, "{{ api_version.name }}");
+                svc.resolve_api_version(xidl_requested_api_version.as_deref())?;
+            {% endif %}
             {% if method.representations | length == 0 and method.response_content_type and method.response_content_type != "" and not method.is_bidi_stream and not method.is_upgrade %}
                 if !xidl_rust_axum::http::accepts_media_type(&headers, "{{ method.response_content_type }}") {
                     return Err(xidl_rust_axum::Error::not_acceptable());

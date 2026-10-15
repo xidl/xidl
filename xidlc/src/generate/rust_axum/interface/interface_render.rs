@@ -87,8 +87,43 @@ pub(crate) fn render_interface_def(
         "outbound_transport": transport_modules.outbound,
         "has_interface_security": has_interface_security,
         "interface_auth_ty": interface_auth_ty,
+        "api_version": api_version_context(&rest_hir, env.module_path),
     });
     out.source
         .push(env.renderer.render_template("interface.rs.j2", &ctx)?);
     Ok(out)
+}
+
+/// Resolves the wire version identity of one projected interface: the declared
+/// selector plus the wire value of the version module the interface sits in.
+///
+/// Returns `None` for unversioned contracts and for selectors whose version
+/// module cannot be resolved, so unversioned output stays byte-identical.
+fn api_version_context(
+    rest_hir: &xidl_parser::rest_hir::RestHirDocument,
+    module_path: &[String],
+) -> serde_json::Value {
+    let Some(selector) = &rest_hir.document.version_selector else {
+        return serde_json::Value::Null;
+    };
+    let Some(root) = module_path.first() else {
+        return serde_json::Value::Null;
+    };
+    let Some(version) = rest_hir
+        .document
+        .api_versions
+        .iter()
+        .find(|version| &version.ident == root)
+    else {
+        return serde_json::Value::Null;
+    };
+    let location = match selector.location {
+        hir::VersionSelectorLocation::Header => "Header",
+        hir::VersionSelectorLocation::Query => "Query",
+    };
+    json!({
+        "location": location,
+        "name": selector.name,
+        "value": version.value,
+    })
 }

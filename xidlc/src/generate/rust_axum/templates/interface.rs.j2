@@ -11,6 +11,17 @@
     #[allow(non_snake_case, unused_attributes, unused_variables, unused_mut, unreachable_code, clippy::let_unit_value)]
     #[async_trait::async_trait]
     pub trait {{ ident }} {
+        {% if api_version %}
+            /// Resolves the raw API version a request declared.
+            ///
+            /// The default policy serves only `{{ api_version.value }}` and
+            /// answers `400` for anything else; override it to apply aliases,
+            /// pinned accounts or a default version.
+            fn resolve_api_version(&self, raw: ::std::option::Option<&str>) -> ::std::result::Result<(), xidl_rust_axum::api_version::UnsupportedApiVersion> {
+                let _ = self;
+                xidl_rust_axum::api_version::resolve_strict(raw, "{{ api_version.value }}")
+            }
+        {% endif %}
         {% for method in methods %}
             {% if method.rust_attrs and method.rust_attrs | length > 0 %}
                 {% for attr in method.rust_attrs %}

@@ -40,8 +40,12 @@ mod request;
 /// Request wrapper preserving headers alongside decoded payload data.
 pub use request::Request;
 
+/// Wire version identity: declared API version selector handling.
+pub mod api_version;
 /// HTTP content negotiation and serde-related helpers.
 pub mod http;
+/// Version selector location and typed unsupported-version errors.
+pub use api_version::{ApiVersionLocation, UnsupportedApiVersion};
 mod serde_factory;
 /// MIME-aware serialization and deserialization helpers.
 pub use serde_factory::{DeserializeFactory, SerializeFactory};
