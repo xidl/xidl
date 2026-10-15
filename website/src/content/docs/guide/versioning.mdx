@@ -76,8 +76,9 @@ enum ApiVersions {
 ```
 
 The declaration is a closed choice — exactly one of `header = "..."` or
-`query = "..."` with a non-empty name. Every target renders it from this one
-declaration:
+`query = "..."` naming a valid header token or query parameter. The name must
+not collide with an operation's request parameters. Targets render it from
+this one declaration:
 
 - **OpenAPI:** every per-version document carries the selector as a required
   parameter pinned to that version's value (`enum: ["2025-01"]`).
@@ -85,10 +86,32 @@ declaration:
   resolves it through `resolve_api_version` on the service trait. The default
   policy serves only the module's own version and answers a typed `400`
   (`UnsupportedApiVersion`) otherwise — never silently the latest version.
-  Override the trait method to apply aliases, pinned accounts or a default.
+  Override the trait method to apply aliases, pinned accounts or a default;
+  it receives the request path, so per-path exemptions such as health probes
+  are one method away:
+
+  ```rust
+  fn resolve_api_version(
+      &self,
+      raw: Option<&str>,
+      path: &str,
+  ) -> Result<(), xidl_rust_axum::api_version::UnsupportedApiVersion> {
+      if path == "/health" {
+          return Ok(());
+      }
+      xidl_rust_axum::api_version::resolve_strict(raw, "2025-01")
+  }
+  ```
+
 - **rust-axum clients:** every generated client pins its version module's
-  value on every request (`pub const API_VERSION`) and exposes it as one
-  constant.
+  value on every request — header, query parameter and WebSocket handshake
+  alike — and exposes it as one constant (`pub const API_VERSION`).
+
+The published OpenAPI document always describes the strict pin, even when a
+server's resolver accepts more: clients built from the document satisfy the
+default policy, and looser runtime policy stays an explicit, per-server
+decision. Other targets (TypeScript, Go) gain the selector with their
+versioned-module support.
 
 ## Lifecycle annotations
 
