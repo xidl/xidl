@@ -146,6 +146,10 @@ pub(super) struct TsExceptionFieldContext {
 pub(super) struct ClientClassContext {
     pub(super) client_name: String,
     pub(super) methods: Vec<ClientMethodContext>,
+    /// Request header carrying the API version, when declared.
+    pub(super) version_header: Option<String>,
+    /// The version value this client pins on every request.
+    pub(super) api_version: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -194,6 +198,8 @@ pub(super) struct ClientMethodContext {
 pub(super) struct ServerClassContext {
     pub(super) service_name: String,
     pub(super) methods: Vec<ServerMethodContext>,
+    /// Request header the generated server echoes back, when declared.
+    pub(super) version_header: Option<String>,
 }
 
 #[derive(Serialize)]

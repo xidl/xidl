@@ -46,6 +46,12 @@ pub(crate) fn render_interface(
         render_request_types(&mut out, method, module_path, renderer)?;
         render_response_types(&mut out, method, module_path, renderer)?;
     }
+    // The version this client pins: the document version for per-version
+    // output, otherwise the enclosing version module's value.
+    let api_version = rest_hir.document.version.clone().or_else(|| {
+        let module = module_path.last()?;
+        rest_hir.document.version_values.get(module).cloned()
+    });
     out.client.push(
         renderer.render_template(
             "http/client_class.ts.j2",
@@ -56,6 +62,8 @@ pub(crate) fn render_interface(
                     .cloned()
                     .map(MethodModel::into_client_context)
                     .collect(),
+                version_header: rest_hir.document.version_header.clone(),
+                api_version,
             },
         )?,
     );
@@ -63,8 +71,11 @@ pub(crate) fn render_interface(
         websocket_helpers::render_websocket_helpers(&methods);
     out.client.extend(ws_client_helpers);
     out.server.extend(ws_server_helpers);
-    out.server
-        .push(ServerClass::new(&def.header.ident, module_path, methods).render(renderer)?);
+    let version_header = rest_hir.document.version_header.clone();
+    out.server.push(
+        ServerClass::new(&def.header.ident, module_path, methods, version_header)
+            .render(renderer)?,
+    );
 
     Ok(out)
 }

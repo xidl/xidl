@@ -66,6 +66,8 @@ export interface OperationResponseSpec {
   contentType: string;
   cookies: ValueBinding[];
   headers: ValueBinding[];
+  /** Request header echoed back on every response, when present. */
+  echoHeader?: string;
   schema?: XidlSchema;
   stream: boolean;
   streamSchema?: XidlSchema;
