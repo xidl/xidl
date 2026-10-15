@@ -1,0 +1,19 @@
+#pragma xidlc package versioned_selector
+
+@version
+@version_selector(header = "Api-Version")
+enum ApiVersions {
+    @rename("2025-01") v1,
+    @rename("2025-06") v2,
+};
+
+struct Pet {
+    string id;
+    @added(ApiVersions::v2)
+    @optional string note;
+};
+
+interface Pets {
+    @get(path = "/pets/{id}")
+    Pet get(@path string id);
+};

@@ -7,13 +7,39 @@ use super::security::register_security_schemes;
 use super::stream::{OpenApiStreamPatch, request_stream_content_type, stream_patch_item_schema};
 use crate::error::IdlcResult;
 use crate::openapi::RefOr;
-use crate::openapi::path::PathItem;
+use crate::openapi::path::{Parameter, ParameterBuilder, ParameterIn, PathItem};
 use crate::openapi::schema::{ObjectBuilder, Schema, Type};
 use crate::openapi::server::Server;
 use std::collections::{BTreeMap, BTreeSet};
 use std::mem;
 use xidl_parser::hir;
-use xidl_parser::rest_hir::{RestHirDocument, semantics::has_annotation};
+use xidl_parser::rest_hir::{HttpVersionSelector, RestHirDocument, semantics::has_annotation};
+
+/// Builds the version-selector parameter of a projected version document.
+///
+/// Every operation of a per-version document pins the version's wire value, so
+/// the selector renders as a required string parameter constrained to that one
+/// value.
+fn version_selector_parameter(selector: &HttpVersionSelector, version: &str) -> Parameter {
+    let location = match selector.location {
+        hir::VersionSelectorLocation::Header => ParameterIn::Header,
+        hir::VersionSelectorLocation::Query => ParameterIn::Query,
+    };
+    let schema = RefOr::T(Schema::from(
+        ObjectBuilder::new()
+            .schema_type(Type::String)
+            .enum_values(Some([serde_json::Value::String(version.to_string())])),
+    ));
+    ParameterBuilder::new()
+        .name(selector.name.clone())
+        .parameter_in(location)
+        .required(crate::openapi::Required::True)
+        .description(Some(format!(
+            "API version selector; this document describes {version}."
+        )))
+        .schema(Some(schema))
+        .build()
+}
 
 #[derive(Default)]
 pub(crate) struct OpenApiContext {
@@ -24,6 +50,7 @@ pub(crate) struct OpenApiContext {
     pub(crate) info_version: Option<String>,
     pub(crate) servers: Vec<Server>,
     pub(crate) tags: BTreeSet<String>,
+    pub(crate) version_selector: Option<HttpVersionSelector>,
     pub(crate) stream_patches: Vec<OpenApiStreamPatch>,
 }
 
@@ -32,6 +59,7 @@ impl OpenApiContext {
         Self {
             info_title: rest_hir.document.package.clone(),
             info_version: rest_hir.document.version.clone(),
+            version_selector: rest_hir.document.version_selector.clone(),
             servers: rest_hir
                 .document
                 .servers
@@ -225,7 +253,12 @@ impl OpenApiContext {
         Ok(())
     }
 
-    fn collect_method(&mut self, method: MethodInfo) -> IdlcResult<()> {
+    fn collect_method(&mut self, mut method: MethodInfo) -> IdlcResult<()> {
+        if let (Some(selector), Some(version)) = (&self.version_selector, &self.info_version) {
+            method
+                .parameters
+                .insert(0, version_selector_parameter(selector, version));
+        }
         if let Some(security_requirements) = &method.security_requirements {
             register_security_schemes(&mut self.security_schemes, security_requirements);
         }
