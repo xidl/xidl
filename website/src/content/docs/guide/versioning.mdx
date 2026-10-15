@@ -61,6 +61,35 @@ and selection flags; the value (`2025-06`) is what versioned documents carry.
 Per-version documents ignore `#pragma xidlc version` and use the projected
 version value as `info.version`.
 
+## Declaring the wire version selector
+
+A request states which version it speaks through a **version selector**: one
+HTTP header or one query parameter, declared next to the `@version` marker:
+
+```idl
+@version
+@version_selector(header = "Api-Version")
+enum ApiVersions {
+    @rename("2025-01") v2025_01,
+    @rename("2025-06") v2025_06,
+};
+```
+
+The declaration is a closed choice — exactly one of `header = "..."` or
+`query = "..."` with a non-empty name. Every target renders it from this one
+declaration:
+
+- **OpenAPI:** every per-version document carries the selector as a required
+  parameter pinned to that version's value (`enum: ["2025-01"]`).
+- **rust-axum servers:** every generated handler extracts the selector and
+  resolves it through `resolve_api_version` on the service trait. The default
+  policy serves only the module's own version and answers a typed `400`
+  (`UnsupportedApiVersion`) otherwise — never silently the latest version.
+  Override the trait method to apply aliases, pinned accounts or a default.
+- **rust-axum clients:** every generated client pins its version module's
+  value on every request (`pub const API_VERSION`) and exposes it as one
+  constant.
+
 ## Lifecycle annotations
 
 | Annotation | Meaning |
@@ -194,6 +223,7 @@ xidlc version verify petstore.idl --update   # rewrite the lock (intentional cha
 ```
 
 `verify` reads `<contract>.versions.lock.json` beside the contract and fails
-when a released version's digest changed — the gate that catches unannotated
-edits (or library upgrades) silently rewriting history. The lock is an
-ordinary checked-in file; `--update` is the explicit, reviewed way to move it.
+when a released version's digest changed **or the declared selector moved** —
+renaming a selector header breaks every client at once, so the freeze covers
+it without waiting for a surface digest to change. The lock is an ordinary
+checked-in file; `--update` is the explicit, reviewed way to move it.

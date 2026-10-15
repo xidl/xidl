@@ -181,9 +181,10 @@ One derived artifact accompanies the projection:
   per version's canonical wire surface plus an adjacent-pair correspondence
   table classified by the double-signal continuity rule (an explicit
   `@rename` whose wire name confirms a trajectory is a rename fact; a bare
-  coincidence stays on the review side). `xidlc version manifest` prints it;
-  `xidlc version verify` freezes released digests against a checked-in lock
-  file.
+  coincidence stays on the review side). A declared `@version_selector`
+  travels on the spine as wire identity. `xidlc version manifest` prints it;
+  `xidlc version verify` freezes released digests and the selector against a
+  checked-in lock file.
 
 Consequences:
 
