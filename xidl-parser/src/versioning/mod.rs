@@ -14,6 +14,7 @@
 //! merged form keeps one module per selected version so generators can stay
 //! version-free.
 
+mod claims;
 mod error;
 mod lifecycle;
 mod paths;
@@ -80,6 +81,7 @@ impl VersioningRecord {
             if let Some((annotation, decl)) = discovery.saw_lifecycle {
                 return Err(VersioningError::MissingVersionEnum { annotation, decl }.into());
             }
+            claims::check(spec, None)?;
             return Ok(None);
         };
         let timeline = VersionTimeline::from_members(ident, &members)?;
@@ -87,6 +89,7 @@ impl VersioningRecord {
             timeline: &timeline,
         };
         validator.walk(&spec.0, "", lifecycle::Availability::full())?;
+        claims::check(spec, Some(&timeline))?;
         Ok(Some(VersioningRecord { timeline }))
     }
 

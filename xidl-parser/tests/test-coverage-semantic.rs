@@ -19,7 +19,7 @@ fn converts_semantic_matrix_without_interface_expansion() {
 
         union Choice switch (long) {
             case 0: @id(9) long same;
-            case 1: long same;
+            case 1: @id(9) long same_other;
             default: short other;
         };
 

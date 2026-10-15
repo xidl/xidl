@@ -6,6 +6,7 @@ use serde_json::Value;
 
 mod analyze;
 mod carriers;
+mod claims;
 mod error;
 mod lifecycle;
 mod project;

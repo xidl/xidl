@@ -522,7 +522,7 @@ Specification(
                                                     declarator: SimpleDeclarator(
                                                         SimpleDeclarator(
                                                             Identifier(
-                                                                "attr1",
+                                                                "attr4",
                                                             ),
                                                         ),
                                                     ),
@@ -549,7 +549,7 @@ Specification(
                                                     declarator: SimpleDeclarator(
                                                         SimpleDeclarator(
                                                             Identifier(
-                                                                "attr1",
+                                                                "attr5",
                                                             ),
                                                         ),
                                                     ),
@@ -577,17 +577,17 @@ Specification(
                                                         [
                                                             SimpleDeclarator(
                                                                 Identifier(
-                                                                    "attr1",
+                                                                    "attr6",
                                                                 ),
                                                             ),
                                                             SimpleDeclarator(
                                                                 Identifier(
-                                                                    "attr2",
+                                                                    "attr7",
                                                                 ),
                                                             ),
                                                             SimpleDeclarator(
                                                                 Identifier(
-                                                                    "attr3",
+                                                                    "attr8",
                                                                 ),
                                                             ),
                                                         ],
@@ -615,7 +615,7 @@ Specification(
                                                     declarator: WithRaises {
                                                         declarator: SimpleDeclarator(
                                                             Identifier(
-                                                                "attr1",
+                                                                "attr9",
                                                             ),
                                                         ),
                                                         raises: Case1(
@@ -658,7 +658,7 @@ Specification(
                                                     declarator: WithRaises {
                                                         declarator: SimpleDeclarator(
                                                             Identifier(
-                                                                "attr1",
+                                                                "attr10",
                                                             ),
                                                         ),
                                                         raises: Case1(
@@ -729,7 +729,7 @@ Specification(
                                                     declarator: WithRaises {
                                                         declarator: SimpleDeclarator(
                                                             Identifier(
-                                                                "attr1",
+                                                                "attr11",
                                                             ),
                                                         ),
                                                         raises: SetExcepExpr(

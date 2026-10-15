@@ -243,9 +243,9 @@ fn raises_resolves_relative_and_absolute_qualified_names() {
     let spec = parse(
         r#"
         module Left { @http(409) exception Failure { string reason; }; };
-        module Right { @http(422) exception Failure { string reason; }; };
+        module Right { @http(422) exception Refusal { string reason; }; };
         @no_security interface Files {
-            @get(path="/file") string read() raises(Left::Failure, ::Right::Failure);
+            @get(path="/file") string read() raises(Left::Failure, ::Right::Refusal);
         };
     "#,
     );

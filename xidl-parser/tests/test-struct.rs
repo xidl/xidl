@@ -44,6 +44,24 @@ const TEST_CASES: &[(&str, &str)] = &[
     ),
 ];
 
+// The HIR runs the canonical wire-name check, so repeated declarator names
+// that the raw grammar accepts must stay out of the lowered fixture.
+const HIR_TEST_CASES: &[(&str, &str)] = &[(
+    "struct_def",
+    r#"
+            struct HelloWorld {
+                u8 a;
+                u16 b[10];
+                string c[10][20];
+                sequence<u8> c2;
+                string<20> d;
+                wstring<20> d2;
+                // fixed<1,2> d;
+                any d3;
+            };
+        "#,
+)];
+
 #[test]
 fn test_typed_ast() {
     for (name, text) in TEST_CASES {
@@ -55,7 +73,7 @@ fn test_typed_ast() {
 
 #[test]
 fn test_hir() {
-    for (name, text) in TEST_CASES {
+    for (name, text) in HIR_TEST_CASES {
         let typed = xidl_parser::parser::parser_text(text).unwrap();
         let hir = xidl_parser::hir::Specification::from(typed);
         let snapshot = format!("hir__{name}");

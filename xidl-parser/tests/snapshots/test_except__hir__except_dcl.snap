@@ -118,7 +118,7 @@ Specification(
                         ident: [
                             SimpleDeclarator(
                                 SimpleDeclarator(
-                                    "c",
+                                    "c2",
                                 ),
                             ),
                         ],
@@ -174,7 +174,7 @@ Specification(
                         ident: [
                             SimpleDeclarator(
                                 SimpleDeclarator(
-                                    "d",
+                                    "d2",
                                 ),
                             ),
                         ],
@@ -209,7 +209,7 @@ Specification(
                         ident: [
                             SimpleDeclarator(
                                 SimpleDeclarator(
-                                    "d",
+                                    "d3",
                                 ),
                             ),
                         ],
