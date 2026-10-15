@@ -120,11 +120,11 @@ Specification(
                 ty: IntegerType(
                     I32,
                 ),
-                ident: "A_func1_Hash",
+                ident: "A_func2_Hash",
                 value: Literal(
                     IntegerLiteral(
                         IntegerLiteral(
-                            "4091574330",
+                            "327966437",
                         ),
                     ),
                 ),
@@ -152,11 +152,11 @@ Specification(
                 ty: IntegerType(
                     I32,
                 ),
-                ident: "A_func1_Hash",
+                ident: "A_func3_Hash",
                 value: Literal(
                     IntegerLiteral(
                         IntegerLiteral(
-                            "4091574330",
+                            "4191255235",
                         ),
                     ),
                 ),
@@ -200,11 +200,11 @@ Specification(
                 ty: IntegerType(
                     I32,
                 ),
-                ident: "A_func1_Hash",
+                ident: "A_func4_Hash",
                 value: Literal(
                     IntegerLiteral(
                         IntegerLiteral(
-                            "4091574330",
+                            "1202728253",
                         ),
                     ),
                 ),
@@ -216,11 +216,11 @@ Specification(
                 ty: IntegerType(
                     I32,
                 ),
-                ident: "A_func1_Hash",
+                ident: "A_func5_Hash",
                 value: Literal(
                     IntegerLiteral(
                         IntegerLiteral(
-                            "4091574330",
+                            "1339070845",
                         ),
                     ),
                 ),
@@ -232,27 +232,11 @@ Specification(
                 ty: IntegerType(
                     I32,
                 ),
-                ident: "A_func1_Hash",
+                ident: "A_func6_Hash",
                 value: Literal(
                     IntegerLiteral(
                         IntegerLiteral(
-                            "4091574330",
-                        ),
-                    ),
-                ),
-            },
-        ),
-        ConstDcl(
-            ConstDcl {
-                annotations: [],
-                ty: IntegerType(
-                    I32,
-                ),
-                ident: "A_get_attribute_attr1_Hash",
-                value: Literal(
-                    IntegerLiteral(
-                        IntegerLiteral(
-                            "608996360",
+                            "2431207424",
                         ),
                     ),
                 ),
@@ -280,11 +264,11 @@ Specification(
                 ty: IntegerType(
                     I32,
                 ),
-                ident: "A_get_attribute_attr1_Hash",
+                ident: "A_get_attribute_attr4_Hash",
                 value: Literal(
                     IntegerLiteral(
                         IntegerLiteral(
-                            "608996360",
+                            "3573244217",
                         ),
                     ),
                 ),
@@ -296,11 +280,11 @@ Specification(
                 ty: IntegerType(
                     I32,
                 ),
-                ident: "A_get_attribute_attr1_Hash",
+                ident: "A_get_attribute_attr5_Hash",
                 value: Literal(
                     IntegerLiteral(
                         IntegerLiteral(
-                            "608996360",
+                            "3938161725",
                         ),
                     ),
                 ),
@@ -312,11 +296,11 @@ Specification(
                 ty: IntegerType(
                     I32,
                 ),
-                ident: "A_set_attribute_attr1_Hash",
+                ident: "A_get_attribute_attr6_Hash",
                 value: Literal(
                     IntegerLiteral(
                         IntegerLiteral(
-                            "2553876227",
+                            "3548327458",
                         ),
                     ),
                 ),
@@ -328,11 +312,11 @@ Specification(
                 ty: IntegerType(
                     I32,
                 ),
-                ident: "A_get_attribute_attr2_Hash",
+                ident: "A_set_attribute_attr6_Hash",
                 value: Literal(
                     IntegerLiteral(
                         IntegerLiteral(
-                            "2525005575",
+                            "2775037450",
                         ),
                     ),
                 ),
@@ -344,11 +328,11 @@ Specification(
                 ty: IntegerType(
                     I32,
                 ),
-                ident: "A_set_attribute_attr2_Hash",
+                ident: "A_get_attribute_attr7_Hash",
                 value: Literal(
                     IntegerLiteral(
                         IntegerLiteral(
-                            "2258850027",
+                            "528478128",
                         ),
                     ),
                 ),
@@ -360,11 +344,11 @@ Specification(
                 ty: IntegerType(
                     I32,
                 ),
-                ident: "A_get_attribute_attr3_Hash",
+                ident: "A_set_attribute_attr7_Hash",
                 value: Literal(
                     IntegerLiteral(
                         IntegerLiteral(
-                            "3118622849",
+                            "2948076555",
                         ),
                     ),
                 ),
@@ -376,11 +360,11 @@ Specification(
                 ty: IntegerType(
                     I32,
                 ),
-                ident: "A_set_attribute_attr3_Hash",
+                ident: "A_get_attribute_attr8_Hash",
                 value: Literal(
                     IntegerLiteral(
                         IntegerLiteral(
-                            "700810472",
+                            "598292480",
                         ),
                     ),
                 ),
@@ -392,11 +376,11 @@ Specification(
                 ty: IntegerType(
                     I32,
                 ),
-                ident: "A_get_attribute_attr1_Hash",
+                ident: "A_set_attribute_attr8_Hash",
                 value: Literal(
                     IntegerLiteral(
                         IntegerLiteral(
-                            "608996360",
+                            "574899803",
                         ),
                     ),
                 ),
@@ -408,11 +392,11 @@ Specification(
                 ty: IntegerType(
                     I32,
                 ),
-                ident: "A_set_attribute_attr1_Hash",
+                ident: "A_get_attribute_attr9_Hash",
                 value: Literal(
                     IntegerLiteral(
                         IntegerLiteral(
-                            "2553876227",
+                            "1855248277",
                         ),
                     ),
                 ),
@@ -424,11 +408,11 @@ Specification(
                 ty: IntegerType(
                     I32,
                 ),
-                ident: "A_get_attribute_attr1_Hash",
+                ident: "A_set_attribute_attr9_Hash",
                 value: Literal(
                     IntegerLiteral(
                         IntegerLiteral(
-                            "608996360",
+                            "1607077416",
                         ),
                     ),
                 ),
@@ -440,11 +424,11 @@ Specification(
                 ty: IntegerType(
                     I32,
                 ),
-                ident: "A_set_attribute_attr1_Hash",
+                ident: "A_get_attribute_attr10_Hash",
                 value: Literal(
                     IntegerLiteral(
                         IntegerLiteral(
-                            "2553876227",
+                            "1878784274",
                         ),
                     ),
                 ),
@@ -456,11 +440,11 @@ Specification(
                 ty: IntegerType(
                     I32,
                 ),
-                ident: "A_get_attribute_attr1_Hash",
+                ident: "A_set_attribute_attr10_Hash",
                 value: Literal(
                     IntegerLiteral(
                         IntegerLiteral(
-                            "608996360",
+                            "77948628",
                         ),
                     ),
                 ),
@@ -472,11 +456,27 @@ Specification(
                 ty: IntegerType(
                     I32,
                 ),
-                ident: "A_set_attribute_attr1_Hash",
+                ident: "A_get_attribute_attr11_Hash",
                 value: Literal(
                     IntegerLiteral(
                         IntegerLiteral(
-                            "2553876227",
+                            "3635664097",
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                annotations: [],
+                ty: IntegerType(
+                    I32,
+                ),
+                ident: "A_set_attribute_attr11_Hash",
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "3203042648",
                         ),
                     ),
                 ),
@@ -615,7 +615,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_func1_In",
+                        ident: "A_func2_In",
                         parent: [],
                         member: [
                             Member {
@@ -653,7 +653,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_func1_Out",
+                        ident: "A_func2_Out",
                         parent: [],
                         member: [
                             Member {
@@ -691,7 +691,7 @@ Specification(
                 UnionDef(
                     UnionDef {
                         annotations: [],
-                        ident: "A_func1_Result",
+                        ident: "A_func2_Result",
                         switch_type_spec: IntegerType(
                             I32,
                         ),
@@ -716,7 +716,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_func1_Out",
+                                                    "A_func2_Out",
                                                 ],
                                                 is_root: false,
                                             },
@@ -779,7 +779,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_func1_In",
+                        ident: "A_func3_In",
                         parent: [],
                         member: [
                             Member {
@@ -817,7 +817,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_func1_Out",
+                        ident: "A_func3_Out",
                         parent: [],
                         member: [
                             Member {
@@ -855,7 +855,7 @@ Specification(
                 UnionDef(
                     UnionDef {
                         annotations: [],
-                        ident: "A_func1_Result",
+                        ident: "A_func3_Result",
                         switch_type_spec: IntegerType(
                             I32,
                         ),
@@ -880,7 +880,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_func1_Out",
+                                                    "A_func3_Out",
                                                 ],
                                                 is_root: false,
                                             },
@@ -1015,7 +1015,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_func1_In",
+                        ident: "A_func4_In",
                         parent: [],
                         member: [
                             Member {
@@ -1051,7 +1051,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_func1_Out",
+                        ident: "A_func4_Out",
                         parent: [],
                         member: [
                             Member {
@@ -1087,7 +1087,7 @@ Specification(
                 UnionDef(
                     UnionDef {
                         annotations: [],
-                        ident: "A_func1_Result",
+                        ident: "A_func4_Result",
                         switch_type_spec: IntegerType(
                             I32,
                         ),
@@ -1112,7 +1112,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_func1_Out",
+                                                    "A_func4_Out",
                                                 ],
                                                 is_root: false,
                                             },
@@ -1139,7 +1139,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_func1_In",
+                        ident: "A_func5_In",
                         parent: [],
                         member: [
                             Member {
@@ -1175,7 +1175,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_func1_Out",
+                        ident: "A_func5_Out",
                         parent: [],
                         member: [
                             Member {
@@ -1211,7 +1211,7 @@ Specification(
                 UnionDef(
                     UnionDef {
                         annotations: [],
-                        ident: "A_func1_Result",
+                        ident: "A_func5_Result",
                         switch_type_spec: IntegerType(
                             I32,
                         ),
@@ -1236,7 +1236,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_func1_Out",
+                                                    "A_func5_Out",
                                                 ],
                                                 is_root: false,
                                             },
@@ -1299,7 +1299,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_func1_In",
+                        ident: "A_func6_In",
                         parent: [],
                         member: [
                             Member {
@@ -1335,7 +1335,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_func1_Out",
+                        ident: "A_func6_Out",
                         parent: [],
                         member: [
                             Member {
@@ -1371,7 +1371,7 @@ Specification(
                 UnionDef(
                     UnionDef {
                         annotations: [],
-                        ident: "A_func1_Result",
+                        ident: "A_func6_Result",
                         switch_type_spec: IntegerType(
                             I32,
                         ),
@@ -1396,7 +1396,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_func1_Out",
+                                                    "A_func6_Out",
                                                 ],
                                                 is_root: false,
                                             },
@@ -1657,7 +1657,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_get_attribute_attr1_In",
+                        ident: "A_get_attribute_attr4_In",
                         parent: [],
                         member: [
                             Member {
@@ -1695,7 +1695,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_get_attribute_attr1_Out",
+                        ident: "A_get_attribute_attr4_Out",
                         parent: [],
                         member: [
                             Member {
@@ -1731,7 +1731,7 @@ Specification(
                 UnionDef(
                     UnionDef {
                         annotations: [],
-                        ident: "A_get_attribute_attr1_Result",
+                        ident: "A_get_attribute_attr4_Result",
                         switch_type_spec: IntegerType(
                             I32,
                         ),
@@ -1756,7 +1756,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr1_Out",
+                                                    "A_get_attribute_attr4_Out",
                                                 ],
                                                 is_root: false,
                                             },
@@ -1783,7 +1783,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_get_attribute_attr1_In",
+                        ident: "A_get_attribute_attr5_In",
                         parent: [],
                         member: [
                             Member {
@@ -1821,7 +1821,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_get_attribute_attr1_Out",
+                        ident: "A_get_attribute_attr5_Out",
                         parent: [],
                         member: [
                             Member {
@@ -1857,7 +1857,7 @@ Specification(
                 UnionDef(
                     UnionDef {
                         annotations: [],
-                        ident: "A_get_attribute_attr1_Result",
+                        ident: "A_get_attribute_attr5_Result",
                         switch_type_spec: IntegerType(
                             I32,
                         ),
@@ -1882,7 +1882,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr1_Out",
+                                                    "A_get_attribute_attr5_Out",
                                                 ],
                                                 is_root: false,
                                             },
@@ -1909,7 +1909,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_get_attribute_attr1_In",
+                        ident: "A_get_attribute_attr6_In",
                         parent: [],
                         member: [
                             Member {
@@ -1947,7 +1947,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_get_attribute_attr1_Out",
+                        ident: "A_get_attribute_attr6_Out",
                         parent: [],
                         member: [
                             Member {
@@ -1983,7 +1983,7 @@ Specification(
                 UnionDef(
                     UnionDef {
                         annotations: [],
-                        ident: "A_get_attribute_attr1_Result",
+                        ident: "A_get_attribute_attr6_Result",
                         switch_type_spec: IntegerType(
                             I32,
                         ),
@@ -2008,7 +2008,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr1_Out",
+                                                    "A_get_attribute_attr6_Out",
                                                 ],
                                                 is_root: false,
                                             },
@@ -2035,7 +2035,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_set_attribute_attr1_In",
+                        ident: "A_set_attribute_attr6_In",
                         parent: [],
                         member: [
                             Member {
@@ -2051,7 +2051,7 @@ Specification(
                                 ident: [
                                     SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "attr1",
+                                            "attr6",
                                         ),
                                     ),
                                 ],
@@ -2071,7 +2071,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_set_attribute_attr1_Out",
+                        ident: "A_set_attribute_attr6_Out",
                         parent: [],
                         member: [
                             Member {
@@ -2109,7 +2109,7 @@ Specification(
                 UnionDef(
                     UnionDef {
                         annotations: [],
-                        ident: "A_set_attribute_attr1_Result",
+                        ident: "A_set_attribute_attr6_Result",
                         switch_type_spec: IntegerType(
                             I32,
                         ),
@@ -2134,7 +2134,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr1_Out",
+                                                    "A_set_attribute_attr6_Out",
                                                 ],
                                                 is_root: false,
                                             },
@@ -2161,7 +2161,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_get_attribute_attr2_In",
+                        ident: "A_get_attribute_attr7_In",
                         parent: [],
                         member: [
                             Member {
@@ -2199,259 +2199,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_get_attribute_attr2_Out",
-                        parent: [],
-                        member: [
-                            Member {
-                                annotations: [],
-                                ty: ScopedName(
-                                    ScopedName {
-                                        name: [
-                                            "u8",
-                                        ],
-                                        is_root: false,
-                                    },
-                                ),
-                                ident: [
-                                    SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "return_",
-                                        ),
-                                    ),
-                                ],
-                                default: None,
-                                field_id: Some(
-                                    1,
-                                ),
-                                recursive: false,
-                            },
-                        ],
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
-                UnionDef(
-                    UnionDef {
-                        annotations: [],
-                        ident: "A_get_attribute_attr2_Result",
-                        switch_type_spec: IntegerType(
-                            I32,
-                        ),
-                        case: [
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "dds",
-                                                    "RETCODE_OK",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_get_attribute_attr2_Out",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "result",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                    recursive: false,
-                                },
-                            },
-                        ],
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
-                StructDcl(
-                    StructDcl {
-                        annotations: [],
-                        ident: "A_set_attribute_attr2_In",
-                        parent: [],
-                        member: [
-                            Member {
-                                annotations: [],
-                                ty: ScopedName(
-                                    ScopedName {
-                                        name: [
-                                            "u8",
-                                        ],
-                                        is_root: false,
-                                    },
-                                ),
-                                ident: [
-                                    SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "attr2",
-                                        ),
-                                    ),
-                                ],
-                                default: None,
-                                field_id: Some(
-                                    1,
-                                ),
-                                recursive: false,
-                            },
-                        ],
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
-                StructDcl(
-                    StructDcl {
-                        annotations: [],
-                        ident: "A_set_attribute_attr2_Out",
-                        parent: [],
-                        member: [
-                            Member {
-                                annotations: [],
-                                ty: ScopedName(
-                                    ScopedName {
-                                        name: [
-                                            "dds",
-                                            "rpc",
-                                            "UnusedMember",
-                                        ],
-                                        is_root: false,
-                                    },
-                                ),
-                                ident: [
-                                    SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "dummy",
-                                        ),
-                                    ),
-                                ],
-                                default: None,
-                                field_id: Some(
-                                    1,
-                                ),
-                                recursive: false,
-                            },
-                        ],
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
-                UnionDef(
-                    UnionDef {
-                        annotations: [],
-                        ident: "A_set_attribute_attr2_Result",
-                        switch_type_spec: IntegerType(
-                            I32,
-                        ),
-                        case: [
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "dds",
-                                                    "RETCODE_OK",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_set_attribute_attr2_Out",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "result",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                    recursive: false,
-                                },
-                            },
-                        ],
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
-                StructDcl(
-                    StructDcl {
-                        annotations: [],
-                        ident: "A_get_attribute_attr3_In",
-                        parent: [],
-                        member: [
-                            Member {
-                                annotations: [],
-                                ty: ScopedName(
-                                    ScopedName {
-                                        name: [
-                                            "dds",
-                                            "rpc",
-                                            "UnusedMember",
-                                        ],
-                                        is_root: false,
-                                    },
-                                ),
-                                ident: [
-                                    SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "dummy",
-                                        ),
-                                    ),
-                                ],
-                                default: None,
-                                field_id: Some(
-                                    1,
-                                ),
-                                recursive: false,
-                            },
-                        ],
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
-                StructDcl(
-                    StructDcl {
-                        annotations: [],
-                        ident: "A_get_attribute_attr3_Out",
+                        ident: "A_get_attribute_attr7_Out",
                         parent: [],
                         member: [
                             Member {
@@ -2487,7 +2235,7 @@ Specification(
                 UnionDef(
                     UnionDef {
                         annotations: [],
-                        ident: "A_get_attribute_attr3_Result",
+                        ident: "A_get_attribute_attr7_Result",
                         switch_type_spec: IntegerType(
                             I32,
                         ),
@@ -2512,7 +2260,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr3_Out",
+                                                    "A_get_attribute_attr7_Out",
                                                 ],
                                                 is_root: false,
                                             },
@@ -2539,7 +2287,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_set_attribute_attr3_In",
+                        ident: "A_set_attribute_attr7_In",
                         parent: [],
                         member: [
                             Member {
@@ -2555,7 +2303,7 @@ Specification(
                                 ident: [
                                     SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "attr3",
+                                            "attr7",
                                         ),
                                     ),
                                 ],
@@ -2575,7 +2323,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_set_attribute_attr3_Out",
+                        ident: "A_set_attribute_attr7_Out",
                         parent: [],
                         member: [
                             Member {
@@ -2613,7 +2361,7 @@ Specification(
                 UnionDef(
                     UnionDef {
                         annotations: [],
-                        ident: "A_set_attribute_attr3_Result",
+                        ident: "A_set_attribute_attr7_Result",
                         switch_type_spec: IntegerType(
                             I32,
                         ),
@@ -2638,7 +2386,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr3_Out",
+                                                    "A_set_attribute_attr7_Out",
                                                 ],
                                                 is_root: false,
                                             },
@@ -2665,7 +2413,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_get_attribute_attr1_In",
+                        ident: "A_get_attribute_attr8_In",
                         parent: [],
                         member: [
                             Member {
@@ -2703,7 +2451,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_get_attribute_attr1_Out",
+                        ident: "A_get_attribute_attr8_Out",
                         parent: [],
                         member: [
                             Member {
@@ -2739,7 +2487,7 @@ Specification(
                 UnionDef(
                     UnionDef {
                         annotations: [],
-                        ident: "A_get_attribute_attr1_Result",
+                        ident: "A_get_attribute_attr8_Result",
                         switch_type_spec: IntegerType(
                             I32,
                         ),
@@ -2764,7 +2512,259 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr1_Out",
+                                                    "A_get_attribute_attr8_Out",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "result",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "A_set_attribute_attr8_In",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "u8",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "attr8",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                                recursive: false,
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "A_set_attribute_attr8_Out",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "UnusedMember",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "dummy",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                                recursive: false,
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                UnionDef(
+                    UnionDef {
+                        annotations: [],
+                        ident: "A_set_attribute_attr8_Result",
+                        switch_type_spec: IntegerType(
+                            I32,
+                        ),
+                        case: [
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "RETCODE_OK",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_set_attribute_attr8_Out",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "result",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "A_get_attribute_attr9_In",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "UnusedMember",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "dummy",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                                recursive: false,
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "A_get_attribute_attr9_Out",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "u8",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "return_",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                                recursive: false,
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                UnionDef(
+                    UnionDef {
+                        annotations: [],
+                        ident: "A_get_attribute_attr9_Result",
+                        switch_type_spec: IntegerType(
+                            I32,
+                        ),
+                        case: [
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "RETCODE_OK",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr9_Out",
                                                 ],
                                                 is_root: false,
                                             },
@@ -2827,7 +2827,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_set_attribute_attr1_In",
+                        ident: "A_set_attribute_attr9_In",
                         parent: [],
                         member: [
                             Member {
@@ -2843,7 +2843,7 @@ Specification(
                                 ident: [
                                     SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "attr1",
+                                            "attr9",
                                         ),
                                     ),
                                 ],
@@ -2863,7 +2863,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_set_attribute_attr1_Out",
+                        ident: "A_set_attribute_attr9_Out",
                         parent: [],
                         member: [
                             Member {
@@ -2901,7 +2901,7 @@ Specification(
                 UnionDef(
                     UnionDef {
                         annotations: [],
-                        ident: "A_set_attribute_attr1_Result",
+                        ident: "A_set_attribute_attr9_Result",
                         switch_type_spec: IntegerType(
                             I32,
                         ),
@@ -2926,7 +2926,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr1_Out",
+                                                    "A_set_attribute_attr9_Out",
                                                 ],
                                                 is_root: false,
                                             },
@@ -2953,7 +2953,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_get_attribute_attr1_In",
+                        ident: "A_get_attribute_attr10_In",
                         parent: [],
                         member: [
                             Member {
@@ -2991,7 +2991,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_get_attribute_attr1_Out",
+                        ident: "A_get_attribute_attr10_Out",
                         parent: [],
                         member: [
                             Member {
@@ -3027,7 +3027,7 @@ Specification(
                 UnionDef(
                     UnionDef {
                         annotations: [],
-                        ident: "A_get_attribute_attr1_Result",
+                        ident: "A_get_attribute_attr10_Result",
                         switch_type_spec: IntegerType(
                             I32,
                         ),
@@ -3052,7 +3052,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr1_Out",
+                                                    "A_get_attribute_attr10_Out",
                                                 ],
                                                 is_root: false,
                                             },
@@ -3187,7 +3187,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_set_attribute_attr1_In",
+                        ident: "A_set_attribute_attr10_In",
                         parent: [],
                         member: [
                             Member {
@@ -3203,7 +3203,7 @@ Specification(
                                 ident: [
                                     SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "attr1",
+                                            "attr10",
                                         ),
                                     ),
                                 ],
@@ -3223,7 +3223,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_set_attribute_attr1_Out",
+                        ident: "A_set_attribute_attr10_Out",
                         parent: [],
                         member: [
                             Member {
@@ -3261,7 +3261,7 @@ Specification(
                 UnionDef(
                     UnionDef {
                         annotations: [],
-                        ident: "A_set_attribute_attr1_Result",
+                        ident: "A_set_attribute_attr10_Result",
                         switch_type_spec: IntegerType(
                             I32,
                         ),
@@ -3286,7 +3286,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr1_Out",
+                                                    "A_set_attribute_attr10_Out",
                                                 ],
                                                 is_root: false,
                                             },
@@ -3349,7 +3349,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_get_attribute_attr1_In",
+                        ident: "A_get_attribute_attr11_In",
                         parent: [],
                         member: [
                             Member {
@@ -3387,7 +3387,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_get_attribute_attr1_Out",
+                        ident: "A_get_attribute_attr11_Out",
                         parent: [],
                         member: [
                             Member {
@@ -3423,7 +3423,7 @@ Specification(
                 UnionDef(
                     UnionDef {
                         annotations: [],
-                        ident: "A_get_attribute_attr1_Result",
+                        ident: "A_get_attribute_attr11_Result",
                         switch_type_spec: IntegerType(
                             I32,
                         ),
@@ -3448,7 +3448,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr1_Out",
+                                                    "A_get_attribute_attr11_Out",
                                                 ],
                                                 is_root: false,
                                             },
@@ -3475,7 +3475,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_set_attribute_attr1_In",
+                        ident: "A_set_attribute_attr11_In",
                         parent: [],
                         member: [
                             Member {
@@ -3491,7 +3491,7 @@ Specification(
                                 ident: [
                                     SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "attr1",
+                                            "attr11",
                                         ),
                                     ),
                                 ],
@@ -3511,7 +3511,7 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A_set_attribute_attr1_Out",
+                        ident: "A_set_attribute_attr11_Out",
                         parent: [],
                         member: [
                             Member {
@@ -3549,7 +3549,7 @@ Specification(
                 UnionDef(
                     UnionDef {
                         annotations: [],
-                        ident: "A_set_attribute_attr1_Result",
+                        ident: "A_set_attribute_attr11_Result",
                         switch_type_spec: IntegerType(
                             I32,
                         ),
@@ -3574,7 +3574,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr1_Out",
+                                                    "A_set_attribute_attr11_Out",
                                                 ],
                                                 is_root: false,
                                             },
@@ -3713,7 +3713,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_func1_Hash",
+                                                    "A_func2_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -3726,7 +3726,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_func1_In",
+                                                    "A_func2_In",
                                                 ],
                                                 is_root: false,
                                             },
@@ -3734,187 +3734,7 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "func1",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        2,
-                                    ),
-                                    recursive: false,
-                                },
-                            },
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_func1_Hash",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_func1_In",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "func1",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        2,
-                                    ),
-                                    recursive: false,
-                                },
-                            },
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_func1_Hash",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_func1_In",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "func1",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        2,
-                                    ),
-                                    recursive: false,
-                                },
-                            },
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_func1_Hash",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_func1_In",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "func1",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        2,
-                                    ),
-                                    recursive: false,
-                                },
-                            },
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_func1_Hash",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_func1_In",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "func1",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        2,
-                                    ),
-                                    recursive: false,
-                                },
-                            },
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_get_attribute_attr1_Hash",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_get_attribute_attr1_In",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "get_attribute_attr1",
+                                            "func2",
                                         ),
                                     ),
                                     field_id: Some(
@@ -3929,7 +3749,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr1_Hash",
+                                                    "A_func3_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -3942,7 +3762,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr1_In",
+                                                    "A_func3_In",
                                                 ],
                                                 is_root: false,
                                             },
@@ -3950,115 +3770,7 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "get_attribute_attr1",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        3,
-                                    ),
-                                    recursive: false,
-                                },
-                            },
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_get_attribute_attr1_Hash",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_get_attribute_attr1_In",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "get_attribute_attr1",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        3,
-                                    ),
-                                    recursive: false,
-                                },
-                            },
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_get_attribute_attr1_Hash",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_get_attribute_attr1_In",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "get_attribute_attr1",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        3,
-                                    ),
-                                    recursive: false,
-                                },
-                            },
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_set_attribute_attr1_Hash",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_set_attribute_attr1_In",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "set_attribute_attr1",
+                                            "func3",
                                         ),
                                     ),
                                     field_id: Some(
@@ -4073,7 +3785,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr2_Hash",
+                                                    "A_func4_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4086,7 +3798,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr2_In",
+                                                    "A_func4_In",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4094,7 +3806,7 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "get_attribute_attr2",
+                                            "func4",
                                         ),
                                     ),
                                     field_id: Some(
@@ -4109,7 +3821,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr2_Hash",
+                                                    "A_func5_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4122,7 +3834,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr2_In",
+                                                    "A_func5_In",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4130,7 +3842,7 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "set_attribute_attr2",
+                                            "func5",
                                         ),
                                     ),
                                     field_id: Some(
@@ -4145,7 +3857,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr3_Hash",
+                                                    "A_func6_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4158,7 +3870,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr3_In",
+                                                    "A_func6_In",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4166,7 +3878,7 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "get_attribute_attr3",
+                                            "func6",
                                         ),
                                     ),
                                     field_id: Some(
@@ -4181,7 +3893,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr3_Hash",
+                                                    "A_get_attribute_attr1_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4194,7 +3906,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr3_In",
+                                                    "A_get_attribute_attr1_In",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4202,7 +3914,7 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "set_attribute_attr3",
+                                            "get_attribute_attr1",
                                         ),
                                     ),
                                     field_id: Some(
@@ -4217,7 +3929,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr1_Hash",
+                                                    "A_get_attribute_attr4_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4230,7 +3942,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr1_In",
+                                                    "A_get_attribute_attr4_In",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4238,11 +3950,11 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "get_attribute_attr1",
+                                            "get_attribute_attr4",
                                         ),
                                     ),
                                     field_id: Some(
-                                        3,
+                                        9,
                                     ),
                                     recursive: false,
                                 },
@@ -4253,7 +3965,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr1_Hash",
+                                                    "A_get_attribute_attr5_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4266,7 +3978,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr1_In",
+                                                    "A_get_attribute_attr5_In",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4274,11 +3986,11 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "set_attribute_attr1",
+                                            "get_attribute_attr5",
                                         ),
                                     ),
                                     field_id: Some(
-                                        4,
+                                        10,
                                     ),
                                     recursive: false,
                                 },
@@ -4289,7 +4001,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr1_Hash",
+                                                    "A_get_attribute_attr6_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4302,7 +4014,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr1_In",
+                                                    "A_get_attribute_attr6_In",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4310,11 +4022,11 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "get_attribute_attr1",
+                                            "get_attribute_attr6",
                                         ),
                                     ),
                                     field_id: Some(
-                                        3,
+                                        11,
                                     ),
                                     recursive: false,
                                 },
@@ -4325,7 +4037,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr1_Hash",
+                                                    "A_set_attribute_attr6_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4338,7 +4050,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr1_In",
+                                                    "A_set_attribute_attr6_In",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4346,11 +4058,11 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "set_attribute_attr1",
+                                            "set_attribute_attr6",
                                         ),
                                     ),
                                     field_id: Some(
-                                        4,
+                                        12,
                                     ),
                                     recursive: false,
                                 },
@@ -4361,7 +4073,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr1_Hash",
+                                                    "A_get_attribute_attr7_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4374,7 +4086,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr1_In",
+                                                    "A_get_attribute_attr7_In",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4382,11 +4094,11 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "get_attribute_attr1",
+                                            "get_attribute_attr7",
                                         ),
                                     ),
                                     field_id: Some(
-                                        3,
+                                        13,
                                     ),
                                     recursive: false,
                                 },
@@ -4397,7 +4109,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr1_Hash",
+                                                    "A_set_attribute_attr7_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4410,7 +4122,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr1_In",
+                                                    "A_set_attribute_attr7_In",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4418,11 +4130,299 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "set_attribute_attr1",
+                                            "set_attribute_attr7",
                                         ),
                                     ),
                                     field_id: Some(
-                                        4,
+                                        14,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr8_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr8_In",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "get_attribute_attr8",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        15,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_set_attribute_attr8_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_set_attribute_attr8_In",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "set_attribute_attr8",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        16,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr9_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr9_In",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "get_attribute_attr9",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        17,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_set_attribute_attr9_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_set_attribute_attr9_In",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "set_attribute_attr9",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        18,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr10_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr10_In",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "get_attribute_attr10",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        19,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_set_attribute_attr10_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_set_attribute_attr10_In",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "set_attribute_attr10",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        20,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr11_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr11_In",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "get_attribute_attr11",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        21,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_set_attribute_attr11_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_set_attribute_attr11_In",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "set_attribute_attr11",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        22,
                                     ),
                                     recursive: false,
                                 },
@@ -4574,7 +4574,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_func1_Hash",
+                                                    "A_func2_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4587,7 +4587,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_func1_Result",
+                                                    "A_func2_Result",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4595,187 +4595,7 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "func1",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        2,
-                                    ),
-                                    recursive: false,
-                                },
-                            },
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_func1_Hash",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_func1_Result",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "func1",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        2,
-                                    ),
-                                    recursive: false,
-                                },
-                            },
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_func1_Hash",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_func1_Result",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "func1",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        2,
-                                    ),
-                                    recursive: false,
-                                },
-                            },
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_func1_Hash",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_func1_Result",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "func1",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        2,
-                                    ),
-                                    recursive: false,
-                                },
-                            },
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_func1_Hash",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_func1_Result",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "func1",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        2,
-                                    ),
-                                    recursive: false,
-                                },
-                            },
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_get_attribute_attr1_Hash",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_get_attribute_attr1_Result",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "get_attribute_attr1",
+                                            "func2",
                                         ),
                                     ),
                                     field_id: Some(
@@ -4790,7 +4610,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr1_Hash",
+                                                    "A_func3_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4803,7 +4623,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr1_Result",
+                                                    "A_func3_Result",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4811,115 +4631,7 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "get_attribute_attr1",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        3,
-                                    ),
-                                    recursive: false,
-                                },
-                            },
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_get_attribute_attr1_Hash",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_get_attribute_attr1_Result",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "get_attribute_attr1",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        3,
-                                    ),
-                                    recursive: false,
-                                },
-                            },
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_get_attribute_attr1_Hash",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_get_attribute_attr1_Result",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "get_attribute_attr1",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        3,
-                                    ),
-                                    recursive: false,
-                                },
-                            },
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_set_attribute_attr1_Hash",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_set_attribute_attr1_Result",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "set_attribute_attr1",
+                                            "func3",
                                         ),
                                     ),
                                     field_id: Some(
@@ -4934,7 +4646,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr2_Hash",
+                                                    "A_func4_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4947,7 +4659,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr2_Result",
+                                                    "A_func4_Result",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4955,7 +4667,7 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "get_attribute_attr2",
+                                            "func4",
                                         ),
                                     ),
                                     field_id: Some(
@@ -4970,7 +4682,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr2_Hash",
+                                                    "A_func5_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4983,7 +4695,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr2_Result",
+                                                    "A_func5_Result",
                                                 ],
                                                 is_root: false,
                                             },
@@ -4991,7 +4703,7 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "set_attribute_attr2",
+                                            "func5",
                                         ),
                                     ),
                                     field_id: Some(
@@ -5006,7 +4718,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr3_Hash",
+                                                    "A_func6_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -5019,7 +4731,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr3_Result",
+                                                    "A_func6_Result",
                                                 ],
                                                 is_root: false,
                                             },
@@ -5027,7 +4739,7 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "get_attribute_attr3",
+                                            "func6",
                                         ),
                                     ),
                                     field_id: Some(
@@ -5042,7 +4754,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr3_Hash",
+                                                    "A_get_attribute_attr1_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -5055,7 +4767,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr3_Result",
+                                                    "A_get_attribute_attr1_Result",
                                                 ],
                                                 is_root: false,
                                             },
@@ -5063,7 +4775,7 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "set_attribute_attr3",
+                                            "get_attribute_attr1",
                                         ),
                                     ),
                                     field_id: Some(
@@ -5078,7 +4790,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr1_Hash",
+                                                    "A_get_attribute_attr4_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -5091,7 +4803,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr1_Result",
+                                                    "A_get_attribute_attr4_Result",
                                                 ],
                                                 is_root: false,
                                             },
@@ -5099,11 +4811,11 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "get_attribute_attr1",
+                                            "get_attribute_attr4",
                                         ),
                                     ),
                                     field_id: Some(
-                                        3,
+                                        9,
                                     ),
                                     recursive: false,
                                 },
@@ -5114,7 +4826,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr1_Hash",
+                                                    "A_get_attribute_attr5_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -5127,7 +4839,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr1_Result",
+                                                    "A_get_attribute_attr5_Result",
                                                 ],
                                                 is_root: false,
                                             },
@@ -5135,11 +4847,11 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "set_attribute_attr1",
+                                            "get_attribute_attr5",
                                         ),
                                     ),
                                     field_id: Some(
-                                        4,
+                                        10,
                                     ),
                                     recursive: false,
                                 },
@@ -5150,7 +4862,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr1_Hash",
+                                                    "A_get_attribute_attr6_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -5163,7 +4875,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr1_Result",
+                                                    "A_get_attribute_attr6_Result",
                                                 ],
                                                 is_root: false,
                                             },
@@ -5171,11 +4883,11 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "get_attribute_attr1",
+                                            "get_attribute_attr6",
                                         ),
                                     ),
                                     field_id: Some(
-                                        3,
+                                        11,
                                     ),
                                     recursive: false,
                                 },
@@ -5186,7 +4898,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr1_Hash",
+                                                    "A_set_attribute_attr6_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -5199,7 +4911,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr1_Result",
+                                                    "A_set_attribute_attr6_Result",
                                                 ],
                                                 is_root: false,
                                             },
@@ -5207,11 +4919,11 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "set_attribute_attr1",
+                                            "set_attribute_attr6",
                                         ),
                                     ),
                                     field_id: Some(
-                                        4,
+                                        12,
                                     ),
                                     recursive: false,
                                 },
@@ -5222,7 +4934,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr1_Hash",
+                                                    "A_get_attribute_attr7_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -5235,7 +4947,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_get_attribute_attr1_Result",
+                                                    "A_get_attribute_attr7_Result",
                                                 ],
                                                 is_root: false,
                                             },
@@ -5243,11 +4955,11 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "get_attribute_attr1",
+                                            "get_attribute_attr7",
                                         ),
                                     ),
                                     field_id: Some(
-                                        3,
+                                        13,
                                     ),
                                     recursive: false,
                                 },
@@ -5258,7 +4970,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr1_Hash",
+                                                    "A_set_attribute_attr7_Hash",
                                                 ],
                                                 is_root: false,
                                             },
@@ -5271,7 +4983,7 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "A_set_attribute_attr1_Result",
+                                                    "A_set_attribute_attr7_Result",
                                                 ],
                                                 is_root: false,
                                             },
@@ -5279,11 +4991,299 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "set_attribute_attr1",
+                                            "set_attribute_attr7",
                                         ),
                                     ),
                                     field_id: Some(
-                                        4,
+                                        14,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr8_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr8_Result",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "get_attribute_attr8",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        15,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_set_attribute_attr8_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_set_attribute_attr8_Result",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "set_attribute_attr8",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        16,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr9_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr9_Result",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "get_attribute_attr9",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        17,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_set_attribute_attr9_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_set_attribute_attr9_Result",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "set_attribute_attr9",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        18,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr10_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr10_Result",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "get_attribute_attr10",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        19,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_set_attribute_attr10_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_set_attribute_attr10_Result",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "set_attribute_attr10",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        20,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr11_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr11_Result",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "get_attribute_attr11",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        21,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_set_attribute_attr11_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_set_attribute_attr11_Result",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "set_attribute_attr11",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        22,
                                     ),
                                     recursive: false,
                                 },
@@ -5408,7 +5408,7 @@ Specification(
                                         OpDcl {
                                             annotations: [],
                                             ty: Void,
-                                            ident: "func1",
+                                            ident: "func2",
                                             parameter: None,
                                             raises: Some(
                                                 RaisesExpr(
@@ -5428,7 +5428,7 @@ Specification(
                                         OpDcl {
                                             annotations: [],
                                             ty: Void,
-                                            ident: "func1",
+                                            ident: "func3",
                                             parameter: None,
                                             raises: Some(
                                                 RaisesExpr(
@@ -5460,7 +5460,7 @@ Specification(
                                         OpDcl {
                                             annotations: [],
                                             ty: Void,
-                                            ident: "func1",
+                                            ident: "func4",
                                             parameter: Some(
                                                 ParameterDcls(
                                                     [
@@ -5516,7 +5516,7 @@ Specification(
                                         OpDcl {
                                             annotations: [],
                                             ty: Void,
-                                            ident: "func1",
+                                            ident: "func5",
                                             parameter: Some(
                                                 ParameterDcls(
                                                     [
@@ -5579,7 +5579,7 @@ Specification(
                                         OpDcl {
                                             annotations: [],
                                             ty: Void,
-                                            ident: "func1",
+                                            ident: "func6",
                                             parameter: Some(
                                                 ParameterDcls(
                                                     [
@@ -5687,7 +5687,7 @@ Specification(
                                                     ),
                                                     declarator: SimpleDeclarator(
                                                         SimpleDeclarator(
-                                                            "attr1",
+                                                            "attr4",
                                                         ),
                                                     ),
                                                 },
@@ -5709,7 +5709,7 @@ Specification(
                                                     ),
                                                     declarator: SimpleDeclarator(
                                                         SimpleDeclarator(
-                                                            "attr1",
+                                                            "attr5",
                                                         ),
                                                     ),
                                                 },
@@ -5732,13 +5732,13 @@ Specification(
                                                     declarator: SimpleDeclarator(
                                                         [
                                                             SimpleDeclarator(
-                                                                "attr1",
+                                                                "attr6",
                                                             ),
                                                             SimpleDeclarator(
-                                                                "attr2",
+                                                                "attr7",
                                                             ),
                                                             SimpleDeclarator(
-                                                                "attr3",
+                                                                "attr8",
                                                             ),
                                                         ],
                                                     ),
@@ -5761,7 +5761,7 @@ Specification(
                                                     ),
                                                     declarator: WithRaises {
                                                         declarator: SimpleDeclarator(
-                                                            "attr1",
+                                                            "attr9",
                                                         ),
                                                         raises: Case1(
                                                             GetExcepExpr {
@@ -5798,7 +5798,7 @@ Specification(
                                                     ),
                                                     declarator: WithRaises {
                                                         declarator: SimpleDeclarator(
-                                                            "attr1",
+                                                            "attr10",
                                                         ),
                                                         raises: Case1(
                                                             GetExcepExpr {
@@ -5860,7 +5860,7 @@ Specification(
                                                     ),
                                                     declarator: WithRaises {
                                                         declarator: SimpleDeclarator(
-                                                            "attr1",
+                                                            "attr11",
                                                         ),
                                                         raises: SetExcepExpr(
                                                             SetExcepExpr {

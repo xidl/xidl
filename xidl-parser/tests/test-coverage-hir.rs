@@ -38,7 +38,7 @@ fn hir_conversion_handles_union_field_ids_bitfields_and_typedef_shapes() {
 
         union Choice switch (long) {
             case 0: @id(9) long same;
-            case 1: long same;
+            case 1: @id(9) long same_other;
             default: short other;
         };
 

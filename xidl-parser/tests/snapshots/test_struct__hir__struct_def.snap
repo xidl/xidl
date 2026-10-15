@@ -9,153 +9,6 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
-                        ident: "A",
-                        parent: [],
-                        member: [],
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
-                StructDcl(
-                    StructDcl {
-                        annotations: [],
-                        ident: "A",
-                        parent: [],
-                        member: [
-                            Member {
-                                annotations: [],
-                                ty: IntegerType(
-                                    I32,
-                                ),
-                                ident: [
-                                    SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "a",
-                                        ),
-                                    ),
-                                ],
-                                default: None,
-                                field_id: Some(
-                                    1,
-                                ),
-                                recursive: false,
-                            },
-                        ],
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
-                StructDcl(
-                    StructDcl {
-                        annotations: [],
-                        ident: "A",
-                        parent: [],
-                        member: [
-                            Member {
-                                annotations: [],
-                                ty: ScopedName(
-                                    ScopedName {
-                                        name: [
-                                            "A",
-                                            "b",
-                                        ],
-                                        is_root: true,
-                                    },
-                                ),
-                                ident: [
-                                    SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "a",
-                                        ),
-                                    ),
-                                ],
-                                default: None,
-                                field_id: Some(
-                                    1,
-                                ),
-                                recursive: false,
-                            },
-                        ],
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
-                StructDcl(
-                    StructDcl {
-                        annotations: [],
-                        ident: "A",
-                        parent: [
-                            ScopedName {
-                                name: [
-                                    "B",
-                                ],
-                                is_root: false,
-                            },
-                        ],
-                        member: [],
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
-                StructDcl(
-                    StructDcl {
-                        annotations: [],
-                        ident: "_A",
-                        parent: [],
-                        member: [],
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
-                StructDcl(
-                    StructDcl {
-                        annotations: [],
-                        ident: "_Custom",
-                        parent: [],
-                        member: [
-                            Member {
-                                annotations: [],
-                                ty: ScopedName(
-                                    ScopedName {
-                                        name: [
-                                            "Inner",
-                                        ],
-                                        is_root: false,
-                                    },
-                                ),
-                                ident: [
-                                    SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "var_inner",
-                                        ),
-                                    ),
-                                ],
-                                default: None,
-                                field_id: Some(
-                                    1,
-                                ),
-                                recursive: false,
-                            },
-                        ],
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
-                StructDcl(
-                    StructDcl {
-                        annotations: [],
                         ident: "HelloWorld",
                         parent: [],
                         member: [
@@ -274,7 +127,7 @@ Specification(
                                 ident: [
                                     SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "c",
+                                            "c2",
                                         ),
                                     ),
                                 ],
@@ -334,7 +187,7 @@ Specification(
                                 ident: [
                                     SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "d",
+                                            "d2",
                                         ),
                                     ),
                                 ],
@@ -350,7 +203,7 @@ Specification(
                                 ident: [
                                     SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "d",
+                                            "d3",
                                         ),
                                     ),
                                 ],
