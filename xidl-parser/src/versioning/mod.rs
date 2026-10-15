@@ -14,6 +14,7 @@
 //! merged form keeps one module per selected version so generators can stay
 //! version-free.
 
+mod claims;
 mod error;
 mod lifecycle;
 mod paths;
@@ -99,7 +100,7 @@ impl VersioningRecord {
             return Ok(None);
         };
         let timeline = VersionTimeline::from_members(ident, &members)?;
-        surface::ClaimWalker::check(spec, &timeline)?;
+        claims::ClaimWalker::check(spec, &timeline)?;
         let mut validator = lifecycle::LifecycleValidator {
             timeline: &timeline,
         };
