@@ -1,0 +1,36 @@
+#pragma xidlc package version_spine
+
+@version
+@version_selector(header = "Api-Version")
+enum ApiVersions {
+    @rename("2025-01") v1,
+    @rename("2025-06") v2,
+};
+
+@rename_all("camelCase")
+struct Item {
+    string item_id;
+
+    @added(ApiVersions::v2)
+    @optional string note;
+
+    @added(ApiVersions::v1)
+    @removed(ApiVersions::v2)
+    long size;
+
+    @added(ApiVersions::v2)
+    @rename("size")
+    long size2_;
+
+    @added(ApiVersions::v1)
+    @removed(ApiVersions::v2)
+    long weight_class;
+
+    @added(ApiVersions::v2)
+    long weightClass;
+};
+
+interface Store {
+    @get(path = "/items/{id}")
+    Item get(@path string id);
+};
