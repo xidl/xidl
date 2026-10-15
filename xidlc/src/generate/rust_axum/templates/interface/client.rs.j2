@@ -486,6 +486,13 @@
                                     {% endfor %}
                                 {% endif %}
                                 let mut auth_headers = xidl_rust_axum::reqwest::header::HeaderMap::new();
+                                {% if metadata.version_header and api_version %}
+                                    auth_headers.insert(
+                                    "{{ metadata.version_header }}",
+                                    xidl_rust_axum::reqwest::header::HeaderValue::from_str(Self::API_VERSION)
+                                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?,
+                                    );
+                                {% endif %}
                                 {% if method.has_basic_auth %}
                                     auth_target.apply_auth_headers(
                                     &mut auth_headers,
@@ -521,6 +528,13 @@
                                     {% endfor %}
                                 {% endif %}
                                 let mut auth_headers = xidl_rust_axum::reqwest::header::HeaderMap::new();
+                                {% if metadata.version_header and api_version %}
+                                    auth_headers.insert(
+                                    "{{ metadata.version_header }}",
+                                    xidl_rust_axum::reqwest::header::HeaderValue::from_str(Self::API_VERSION)
+                                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?,
+                                    );
+                                {% endif %}
                                 {% if method.has_basic_auth %}
                                     auth_target.apply_auth_headers(
                                     &mut auth_headers,
@@ -544,7 +558,17 @@
                                 {% endfor %}
                                 return xidl_rust_axum::stream::open_bidi_client_with_headers::<{{ method.request_item_ty }}, {{ method.response_ty }}>(&ws_url, auth_headers).await;
                             {% else %}
-                                return xidl_rust_axum::stream::open_bidi_client::<{{ method.request_item_ty }}, {{ method.response_ty }}>(&ws_url).await;
+                                {% if metadata.version_header and api_version %}
+                                    let mut auth_headers = xidl_rust_axum::reqwest::header::HeaderMap::new();
+                                    auth_headers.insert(
+                                    "{{ metadata.version_header }}",
+                                    xidl_rust_axum::reqwest::header::HeaderValue::from_str(Self::API_VERSION)
+                                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?,
+                                    );
+                                    return xidl_rust_axum::stream::open_bidi_client_with_headers::<{{ method.request_item_ty }}, {{ method.response_ty }}>(&ws_url, auth_headers).await;
+                                {% else %}
+                                    return xidl_rust_axum::stream::open_bidi_client::<{{ method.request_item_ty }}, {{ method.response_ty }}>(&ws_url).await;
+                                {% endif %}
                             {% endif %}
                         {% elif method.is_client_stream %}
                             {% if method.is_byte_stream %}
