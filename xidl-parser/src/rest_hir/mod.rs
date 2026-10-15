@@ -16,6 +16,7 @@ use serde::{Deserialize, Serialize};
 pub use mapping::is_byte_sequence;
 pub use model::*;
 pub use project::project;
+pub(crate) use route::canonical_http_binding;
 pub use semantics::{UpgradeMode, WebSocketCodec, WebSocketConfig};
 
 /// Selects the projected HIR shape produced from typed AST input.

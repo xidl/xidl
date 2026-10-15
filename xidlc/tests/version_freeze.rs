@@ -246,3 +246,73 @@ interface Warehouse {
         "{error}"
     );
 }
+
+#[test]
+fn route_rename_drifts_the_freeze() {
+    let workspace = Workspace::new("freeze-routes");
+    let contract = workspace.contract_path(
+        "store",
+        r#"
+#pragma xidlc package store
+
+@version
+enum ApiVersions {
+    @rename("2025-01") v1,
+    @rename("2025-06") v2,
+};
+
+struct Item {
+    string id;
+};
+
+interface Store {
+    @get(path = "/things/{id}")
+    Item get(@path string id);
+};
+"#,
+    );
+
+    workspace
+        .run(&[
+            "xidlc",
+            "version",
+            "verify",
+            contract.to_str().expect("utf-8"),
+            "--update",
+        ])
+        .expect("the original routes should freeze");
+
+    // Moving a route is a breaking wire change for every client, even though
+    // the operation ident, signature and types stay identical.
+    fs::write(
+        &contract,
+        r#"
+#pragma xidlc package store
+
+@version
+enum ApiVersions {
+    @rename("2025-01") v1,
+    @rename("2025-06") v2,
+};
+
+struct Item {
+    string id;
+};
+
+interface Store {
+    @get(path = "/items/{id}")
+    Item get(@path string id);
+};
+"#,
+    )
+    .expect("write route-renamed contract");
+    let error = workspace
+        .run(&[
+            "xidlc",
+            "version",
+            "verify",
+            contract.to_str().expect("utf-8"),
+        ])
+        .expect_err("a route rename is release drift");
+    assert!(error.contains("release freeze violated"), "{error}");
+}

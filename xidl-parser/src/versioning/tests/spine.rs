@@ -210,3 +210,45 @@ fn unversioned_contracts_have_no_spine() {
     let spine = spine_of("struct Pet { long id; };");
     assert!(spine.is_none());
 }
+
+#[test]
+fn digests_are_sensitive_to_http_bindings() {
+    let text = |path: &str| {
+        format!(
+            "{TIMELINE}
+interface Store {{
+    @get(path = \"{path}\")
+    Item get(long id);
+}};
+
+struct Item {{
+    string sku;
+}};
+"
+        )
+    };
+    let original = spine_of(&text("/things/{id}")).expect("versioned");
+    let moved = spine_of(&text("/items/{id}")).expect("versioned");
+    assert_ne!(
+        original.surfaces[0].digest, moved.surfaces[0].digest,
+        "a route rename must drift the frozen surface"
+    );
+    let streamed = spine_of(&format!(
+        "{TIMELINE}
+interface Store {{
+    @get(path = \"/things/{{id}}\")
+    @server_stream
+    Item get(long id);
+}};
+
+struct Item {{
+    string sku;
+}};
+"
+    ))
+    .expect("versioned");
+    assert_ne!(
+        original.surfaces[0].digest, streamed.surfaces[0].digest,
+        "a protocol change must drift the frozen surface"
+    );
+}

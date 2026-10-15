@@ -138,3 +138,36 @@ fn route_helpers_normalize_and_format_paths() {
     };
     assert_eq!(readonly_attr_names(&spec), vec!["status".to_string()]);
 }
+
+#[test]
+fn canonical_binding_renders_methods_paths_and_protocols() {
+    let bare_verb = Annotation::Builtin {
+        name: "post".to_string(),
+        params: None,
+    };
+    assert_eq!(
+        canonical_http_binding(&[builtin("get", "path = \" //things///{id}// \"")]).as_deref(),
+        Some("get /things/{id}")
+    );
+    assert_eq!(
+        canonical_http_binding(&[bare_verb]).as_deref(),
+        Some("post")
+    );
+    assert_eq!(
+        canonical_http_binding(&[builtin("path", "\"/things\"")]).as_deref(),
+        Some("path /things")
+    );
+    assert_eq!(
+        canonical_http_binding(&[
+            builtin("get", "path = \"/feed\""),
+            builtin("server_stream", ""),
+        ])
+        .as_deref(),
+        Some("get /feed, server-stream")
+    );
+    assert_eq!(
+        canonical_http_binding(&[builtin("upgrade", "")]).as_deref(),
+        Some("upgrade")
+    );
+    assert_eq!(canonical_http_binding(&[builtin("deprecated", "")]), None);
+}

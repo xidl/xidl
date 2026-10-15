@@ -1,7 +1,10 @@
 use crate::hir;
 use std::collections::{BTreeSet, HashSet};
 
-use super::semantics::{annotation_name, annotation_params, normalize_annotation_params};
+use super::semantics::{
+    annotation_name, annotation_params, has_annotation, normalize_annotation_params,
+    parse_upgrade_protocol,
+};
 use super::validate::HttpParamDirection;
 use super::{HttpMethod, HttpParamKind, HttpRoute, RestHirResult};
 
@@ -267,6 +270,86 @@ fn method_from_annotation(annotation: &hir::Annotation) -> Option<HttpMethod> {
         "options" => Some(HttpMethod::Options),
         _ => None,
     }
+}
+
+/// The canonical HTTP binding an operation declares, as wire-surface identity.
+///
+/// One effective method with its normalized paths, standalone `@path`
+/// shorthands, and one stream or upgrade protocol token — the facts a route
+/// rename or a protocol change would silently break. `None` when the
+/// operation declares no HTTP binding at all, so non-HTTP operations keep
+/// their surface representation byte-identical.
+pub(crate) fn canonical_http_binding(annotations: &[hir::Annotation]) -> Option<String> {
+    let mut method: Option<String> = None;
+    let mut paths: Vec<String> = Vec::new();
+    let mut shorthands: Vec<String> = Vec::new();
+    for annotation in annotations {
+        let Some(name) = annotation_name(annotation) else {
+            continue;
+        };
+        if method_from_annotation(annotation).is_some() {
+            method = Some(name.to_ascii_lowercase());
+            let path = annotation_params(annotation)
+                .map(normalize_annotation_params)
+                .and_then(|params| {
+                    params
+                        .get("value")
+                        .cloned()
+                        .or_else(|| params.get("path").cloned())
+                });
+            if let Some(path) = path {
+                paths.push(normalize_path(&path));
+            }
+            continue;
+        }
+        if name.eq_ignore_ascii_case("path")
+            && let Some(path) = annotation_params(annotation)
+                .map(normalize_annotation_params)
+                .and_then(|params| {
+                    params
+                        .get("value")
+                        .cloned()
+                        .or_else(|| params.get("path").cloned())
+                })
+        {
+            shorthands.push(normalize_path(&path));
+        }
+    }
+    let mut segments: Vec<String> = Vec::new();
+    match (&method, paths.as_slice()) {
+        (Some(method), []) => segments.push(method.clone()),
+        (Some(method), paths) => {
+            for path in paths {
+                segments.push(format!("{method} {path}"));
+            }
+        }
+        (None, _) => {}
+    }
+    for path in &shorthands {
+        segments.push(format!("path {path}"));
+    }
+    if has_annotation(annotations, "server_stream") {
+        segments.push("server-stream".to_string());
+    }
+    if has_annotation(annotations, "client_stream") {
+        segments.push("client-stream".to_string());
+    }
+    if has_annotation(annotations, "bidi_stream") {
+        segments.push("bidi-stream".to_string());
+    }
+    if has_annotation(annotations, "upgrade") {
+        match parse_upgrade_protocol(annotations) {
+            Ok(Some(protocol)) => segments.push(format!("upgrade({protocol})")),
+            Ok(None) => segments.push("upgrade".to_string()),
+            Err(_) => segments.push("upgrade".to_string()),
+        }
+    }
+    if segments.is_empty() {
+        return None;
+    }
+    segments.sort();
+    segments.dedup();
+    Some(segments.join(", "))
 }
 
 pub(super) fn readonly_attr_names(spec: &hir::ReadonlyAttrSpec) -> Vec<String> {

@@ -29,6 +29,10 @@ pub(crate) struct SurfaceEntry {
     pub wire_name: String,
     /// Canonical representation of the declared type or signature.
     pub type_repr: String,
+    /// Canonical HTTP binding of an operation — method, routes, stream or
+    /// upgrade protocol — empty for non-HTTP entries. Part of the digest so a
+    /// route rename between contract revisions drifts the freeze.
+    pub http_repr: String,
     /// Whether the declaration is `@optional`.
     pub optional: bool,
     /// The explicit `@rename` argument, if any; the rename evidence of the
@@ -111,11 +115,12 @@ impl VersionSurface {
         let mut canonical = String::new();
         for entry in &self.entries {
             canonical.push_str(&format!(
-                "{}\t{}\t{}\t{}\t{}\n",
+                "{}\t{}\t{}\t{}\t{}\t{}\n",
                 entry.label(),
                 entry.container,
                 entry.wire_name,
                 entry.type_repr,
+                entry.http_repr,
                 entry.optional
             ));
         }
@@ -153,6 +158,8 @@ fn walk_definition(definition: &Definition, path: &str, entries: &mut Vec<Surfac
                                 container: here.clone(),
                                 wire_name: op.ident.clone(),
                                 type_repr: operation_repr(op),
+                                http_repr: crate::rest_hir::canonical_http_binding(&op.annotations)
+                                    .unwrap_or_default(),
                                 optional: false,
                                 explicit_rename: field_rename(&op.annotations),
                                 kind: SurfaceKind::Operation,
@@ -184,6 +191,7 @@ fn walk_constr_type(
                     container: here.clone(),
                     wire_name: wire_name_of(&member.ident, &member.annotations, &def.annotations),
                     type_repr: "enum".to_string(),
+                    http_repr: String::new(),
                     optional: false,
                     explicit_rename: field_rename(&member.annotations),
                     kind: SurfaceKind::Variant,
@@ -201,6 +209,7 @@ fn walk_constr_type(
                     container: here.clone(),
                     wire_name: wire_name_of(&name, &case.element.annotations, &def.annotations),
                     type_repr: element_type_repr(&case.element),
+                    http_repr: String::new(),
                     optional: false,
                     explicit_rename: field_rename(&case.element.annotations),
                     kind: SurfaceKind::Field,
@@ -236,6 +245,7 @@ fn walk_fields(
                 container: container.to_string(),
                 wire_name: wire_name_of(&name, &member.annotations, container_annotations),
                 type_repr: repr,
+                http_repr: String::new(),
                 optional: member.is_optional(),
                 explicit_rename: field_rename(&member.annotations),
                 kind: SurfaceKind::Field,
