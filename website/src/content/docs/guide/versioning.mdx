@@ -61,6 +61,34 @@ and selection flags; the value (`2025-06`) is what versioned documents carry.
 Per-version documents ignore `#pragma xidlc version` and use the projected
 version value as `info.version`.
 
+## The version header
+
+`@version(header = "...")` declares the request header that carries the API
+version:
+
+```idl
+@version(header = "X-Api-Version")
+enum ApiVersions {
+    @rename("2025-01") v2025_01,
+    @rename("2025-06") v2025_06,
+};
+```
+
+The name must be a non-empty RFC 7230 token, one header per contract, and it
+must not collide with a request header parameter or an `@api_key` header
+scheme of any operation. OpenAPI declares the header on every operation with
+`required: false` and as a response header; generated clients export
+`API_VERSION`, pin the header on every request, and generated servers echo
+the received value back without interpreting it.
+
+**Servers never resolve the version.** A request without the header, or with
+a version the route does not support, succeeds unless the application checks
+it itself: the generated code treats the header as opaque metadata. Gateways
+or handlers that must enforce version routing read the header at the
+application layer. Browser WebSocket handshakes cannot set request headers;
+how bidirectional streams carry the version is still being decided, so
+generated bidirectional-stream clients do not pin one yet.
+
 ## Lifecycle annotations
 
 | Annotation | Meaning |
