@@ -188,6 +188,10 @@
 
         #[allow(non_snake_case)]
         impl {{ ident }}Client {
+            {% if metadata.version_header and api_version %}
+                /// The API version value this client pins on every request.
+                pub const API_VERSION: &'static str = "{{ api_version }}";
+            {% endif %}
             {% for server in metadata.servers  %}
                 {% if server.description %}
                     /// service: {{ server.description }}
@@ -300,6 +304,13 @@
                         )
                         .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
                         );
+                        {% if metadata.version_header and api_version %}
+                            req.headers_mut().insert(
+                            "{{ metadata.version_header }}",
+                            xidl_rust_axum::reqwest::header::HeaderValue::from_str(Self::API_VERSION)
+                            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?,
+                            );
+                        {% endif %}
                         {% if method.is_upgrade %}
                             req.headers_mut().insert(
                             xidl_rust_axum::reqwest::header::UPGRADE,

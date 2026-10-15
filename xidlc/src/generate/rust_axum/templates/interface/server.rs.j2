@@ -529,6 +529,16 @@ T: {{ ident }} + Send + Sync + 'static,
                                     );
                                 {% endif %}
                             {% endif %}
+                            {% if metadata.version_header %}
+                                {# The server never resolves the version; it echoes the received value back. #}
+                                if let Some(version_value) = headers.get("{{ metadata.version_header }}") {
+                                    let version_header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
+                                    "{{ metadata.version_header }}".as_bytes(),
+                                    )
+                                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                                    resp.headers_mut().insert(version_header_name, version_value.clone());
+                                }
+                            {% endif %}
                             Ok(resp)
                         {% endif %}
                     }
