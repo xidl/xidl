@@ -144,8 +144,10 @@ fn rejects_missing_query_template_bindings() {
 }
 
 #[test]
-fn rejects_duplicate_route_bindings_for_axum() {
-    for lang in ["axum", "go-rest"] {
+fn rejects_duplicate_route_bindings_for_http_targets() {
+    // The invariant lives in `rest_hir`, so every HTTP target rejects it,
+    // including the ones that used to have no check of their own.
+    for lang in ["rest-hir", "axum", "ts-rest", "go-rest", "openapi"] {
         let err = generate_error(lang, "http_unary_duplicate_route_binding.idl");
         assert!(
             err.contains("duplicate HTTP route binding"),

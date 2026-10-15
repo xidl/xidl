@@ -1,15 +1,14 @@
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::rust::util::{rust_ident, rust_passthrough_attrs_from_annotations};
 use crate::generate::rust_axum::RustAxumRenderOutput;
+use crate::generate::rust_axum::interface::RenderEnv;
 use crate::generate::rust_axum::interface::interface_attr::render_attr_operation_from_http;
 use crate::generate::rust_axum::interface::interface_http::{
     attr_operation_names, security_context,
 };
 use crate::generate::rust_axum::interface::interface_method::render_op_from_http;
-use crate::generate::rust_axum::interface::{MethodContext, RenderEnv};
 use crate::generate::rust_axum::transport::TransportTracker;
 use serde_json::json;
-use std::collections::HashMap;
 use xidl_parser::hir;
 use xidl_parser::rest_hir::HttpOperationSource;
 use xidl_parser::rest_hir::semantics::effective_security_with_origin;
@@ -70,7 +69,6 @@ pub(crate) fn render_interface_def(
         }
     }
 
-    ensure_unique_route_bindings(&methods)?;
     let transport_modules = transport.render_modules(env.registry, env.module_path)?;
     let interface_security_profile =
         effective_security_with_origin(interface_annotations, &[]).map_err(IdlcError::rpc)?;
@@ -93,20 +91,4 @@ pub(crate) fn render_interface_def(
     out.source
         .push(env.renderer.render_template("interface.rs.j2", &ctx)?);
     Ok(out)
-}
-
-fn ensure_unique_route_bindings(methods: &[MethodContext]) -> IdlcResult<()> {
-    let mut route_bindings = HashMap::new();
-    for method in methods {
-        for path in &method.paths {
-            let key = format!("{} {}", method.reqwest_method, path);
-            if let Some(previous) = route_bindings.insert(key.clone(), method.raw_name.clone()) {
-                return Err(IdlcError::rpc(format!(
-                    "duplicate HTTP route binding: {key} (methods: {previous}, {})",
-                    method.raw_name
-                )));
-            }
-        }
-    }
-    Ok(())
 }

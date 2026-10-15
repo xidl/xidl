@@ -17,7 +17,7 @@ use super::semantics::{
 use super::validate::{
     effective_basic_auth_realm, effective_deprecated, validate_head_constraints,
     validate_request_shape, validate_route_bindings, validate_stream_method, validate_stream_shape,
-    validate_upgrade_constraints, validate_websocket_stream_items,
+    validate_unique_route_bindings, validate_upgrade_constraints, validate_websocket_stream_items,
 };
 use super::{
     HttpDocumentMetadata, HttpDocumentServer, HttpInterface, HttpOperation, HttpOperationMeta,
@@ -177,6 +177,8 @@ fn project_interface(
             }
         }
     }
+
+    validate_unique_route_bindings(&def.header.ident, &operations).map_err(parse_err)?;
 
     Ok(Some(HttpInterface {
         name: def.header.ident.clone(),

@@ -7,6 +7,10 @@ use super::semantics::{
 };
 use super::{HttpMethod, HttpParam, HttpParamKind, HttpRoute, RestHirResult};
 
+mod routes;
+
+pub(super) use routes::validate_unique_route_bindings;
+
 #[cfg(test)]
 mod tests;
 

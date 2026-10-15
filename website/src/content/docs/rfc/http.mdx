@@ -84,6 +84,26 @@ Before conflict detection and actual binding, all routes are normalized:
 4. Remove trailing `/` characters.
 5. Maintain case; do not automatically rewrite segment content.
 
+## Route Uniqueness
+
+One interface is one route table, so a duplicate binding is rejected during projection.
+
+Rules:
+
+- Within one interface, a normalized path can be bound at most once per HTTP verb.
+- Identical paths may appear in different interfaces; each interface is mounted by the
+  generated entry point separately.
+- Use an `@http union` when one route must serve several representations.
+
+The compiler reports the interface, the method and path, and both operations:
+
+```text
+duplicate HTTP route binding in interface 'DirectoryApi': GET /users/{id} (operations: get_user, fetch_user)
+```
+
+Because the check runs while the contract is projected, every target rejects the same
+contract, and a versioned contract is checked once per projected API version.
+
 ## Automatic Path Generation
 
 When a method has no explicit path:

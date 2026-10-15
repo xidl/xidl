@@ -153,9 +153,9 @@ fn render_openapi_json_rejects_duplicate_route_bindings() {
         };
         "#,
     );
-    let error = render_openapi_json_from_spec(&spec)
-        .expect_err("duplicate route binding should be a structured error");
-    assert!(error.to_string().contains("duplicate HTTP route binding"));
+    let payload = panic::catch_unwind(AssertUnwindSafe(|| render_openapi_json_from_spec(&spec)))
+        .expect_err("duplicate route binding should fail projection");
+    assert!(panic_message(payload).contains("duplicate HTTP route binding"));
 }
 
 #[test]
