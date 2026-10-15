@@ -1,13 +1,13 @@
 use super::builder::{build_error_schema, build_operation};
 use super::naming::{declarator_name, openapi_method_name, scoped_name};
 use super::operation::{MethodInfo, render_http_operation};
-use super::schema::{apply_schema_description, doc_text};
+use super::schema::{apply_schema_description, doc_text, parameter_schema};
 use super::scope::SchemaScope;
 use super::security::register_security_schemes;
 use super::stream::{OpenApiStreamPatch, request_stream_content_type, stream_patch_item_schema};
 use crate::error::IdlcResult;
 use crate::openapi::RefOr;
-use crate::openapi::path::PathItem;
+use crate::openapi::path::{ParameterIn, PathItem};
 use crate::openapi::schema::{ObjectBuilder, Schema, Type};
 use crate::openapi::server::Server;
 use std::collections::{BTreeMap, BTreeSet};
@@ -217,12 +217,55 @@ impl OpenApiContext {
         for method in http_interface.operations.iter().map(|op| {
             render_http_operation(op, scope, &def.header.ident, &rest_hir.document.exceptions)
         }) {
-            self.collect_method(method?)?;
+            let mut method = method?;
+            self.apply_version_header(&mut method, rest_hir);
+            self.collect_method(method)?;
         }
         self.schemas
             .entry("Error".to_string())
             .or_insert_with(build_error_schema);
         Ok(())
+    }
+
+    /// Declares the API version header on every operation: a request
+    /// parameter clients may omit, and a response header the generated
+    /// servers echo back.
+    fn apply_version_header(&self, method: &mut MethodInfo, rest_hir: &RestHirDocument) {
+        let Some(header) = rest_hir.document.version_header.as_deref() else {
+            return;
+        };
+        let description = match &rest_hir.document.version {
+            Some(version) => format!("API version; this document describes {version}."),
+            None => "API version.".to_string(),
+        };
+        let mut schema = ObjectBuilder::new().schema_type(Type::String);
+        if let Some(version) = &rest_hir.document.version {
+            schema = schema.enum_values(Some([version.as_str()]));
+        }
+        let schema_ref = RefOr::T(Schema::from(schema));
+        let insert_at = method
+            .parameters
+            .iter()
+            .take_while(|parameter| {
+                matches!(
+                    parameter.parameter_in,
+                    ParameterIn::Path | ParameterIn::Query
+                )
+            })
+            .count();
+        method.parameters.insert(
+            insert_at,
+            parameter_schema(
+                ParameterIn::Header,
+                header,
+                schema_ref.clone(),
+                false,
+                Some(description.clone()),
+            ),
+        );
+        method
+            .response_headers
+            .push((header.to_string(), schema_ref));
     }
 
     fn collect_method(&mut self, method: MethodInfo) -> IdlcResult<()> {
