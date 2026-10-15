@@ -274,3 +274,125 @@ interface Pets {
         "{message}"
     );
 }
+
+#[test]
+fn query_selector_collision_fails_http_projection() {
+    let source = r#"
+#pragma xidlc package query_collision
+
+@version
+@version_selector(query = "api-version")
+enum ApiVersions {
+    @rename("1.0") v1,
+    @rename("2.0") v2,
+};
+
+interface Pets {
+    @get(path = "/pets")
+    Pet list(@query @rename("api-version") string client_name);
+};
+"#;
+    let typed = parse(source);
+    let error = xidl_parser::hir::Specification::project_typed_ast_versions(
+        typed,
+        http_properties(&[(VERSION_LAYOUT_PROPERTY, json!(LAYOUT_PER_VERSION))]),
+        "collision.idl",
+    )
+    .expect_err("a query parameter under the selector name should fail projection");
+    let message = error.to_string();
+    assert!(
+        message.contains("binds query parameter 'api-version'"),
+        "{message}"
+    );
+}
+
+#[test]
+fn header_selector_collisions_ignore_case() {
+    // HTTP header names are case-insensitive on the wire, so case alone
+    // cannot separate a header parameter from the selector.
+    let source = r#"
+#pragma xidlc package header_case
+
+@version
+@version_selector(header = "Api-Version")
+enum ApiVersions {
+    @rename("1.0") v1,
+    @rename("2.0") v2,
+};
+
+interface Pets {
+    @get(path = "/pets")
+    Pet list(@header @rename("api-version") string client_name);
+};
+"#;
+    let typed = parse(source);
+    let error = xidl_parser::hir::Specification::project_typed_ast_versions(
+        typed,
+        http_properties(&[(VERSION_LAYOUT_PROPERTY, json!(LAYOUT_PER_VERSION))]),
+        "collision.idl",
+    )
+    .expect_err("case alone must not separate a header parameter from the selector");
+    let message = error.to_string();
+    assert!(
+        message.contains("binds header parameter 'api-version'"),
+        "{message}"
+    );
+}
+
+#[test]
+fn query_selector_collisions_respect_case() {
+    // Query parameter names are case-sensitive, so a case-only difference is
+    // a different name and not a collision.
+    let source = r#"
+#pragma xidlc package query_case
+
+@version
+@version_selector(query = "api-version")
+enum ApiVersions {
+    @rename("1.0") v1,
+    @rename("2.0") v2,
+};
+
+interface Pets {
+    @get(path = "/pets")
+    Pet list(@query @rename("API-VERSION") string client_name);
+};
+"#;
+    let typed = parse(source);
+    let projections = xidl_parser::hir::Specification::project_typed_ast_versions(
+        typed,
+        http_properties(&[(VERSION_LAYOUT_PROPERTY, json!(LAYOUT_PER_VERSION))]),
+        "case.idl",
+    )
+    .expect("a case-different query name cannot collide with the selector");
+    assert_eq!(projections.len(), 2);
+}
+
+#[test]
+fn body_parameters_may_carry_the_selector_name() {
+    // The selector owns the request header or query channel only; a body
+    // field binds a different wire slot, so the same text is not a collision.
+    let source = r#"
+#pragma xidlc package body_name
+
+@version
+@version_selector(header = "Api-Version")
+enum ApiVersions {
+    @rename("1.0") v1,
+    @rename("2.0") v2,
+};
+
+interface Pets {
+    @post(path = "/pets")
+    Pet create(@rename("Api-Version") string api_version);
+};
+"#;
+    let typed = parse(source);
+    let projections = xidl_parser::hir::Specification::project_typed_ast_versions(
+        typed,
+        http_properties(&[(VERSION_LAYOUT_PROPERTY, json!(LAYOUT_PER_VERSION))]),
+        "body.idl",
+    )
+    .expect("a body field under the selector name is not a collision");
+    assert_eq!(projections.len(), 2);
+}
