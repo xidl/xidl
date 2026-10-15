@@ -13,6 +13,7 @@ impl ServerClass {
         interface_name: &str,
         module_path: &[String],
         methods: Vec<MethodModel>,
+        version_header: Option<String>,
     ) -> Self {
         Self {
             context: ServerClassContext {
@@ -21,6 +22,7 @@ impl ServerClass {
                     .into_iter()
                     .map(|method| method.into_server_context(module_path))
                     .collect(),
+                version_header,
             },
         }
     }
