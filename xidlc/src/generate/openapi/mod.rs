@@ -69,7 +69,10 @@ fn api_version(props: &ParserProperties) -> Option<&str> {
         .and_then(serde_json::Value::as_str)
 }
 
-fn render_openapi_json(spec: &hir::Specification, rest_hir: &RestHirDocument) -> IdlcResult<Value> {
+pub(crate) fn render_openapi_json(
+    spec: &hir::Specification,
+    rest_hir: &RestHirDocument,
+) -> IdlcResult<Value> {
     let ctx = render_openapi(spec, rest_hir)?;
     let version = select_openapi_version(&ctx);
     let mut value = serde_json::to_value(ctx.document)?;

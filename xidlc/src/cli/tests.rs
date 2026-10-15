@@ -14,6 +14,7 @@ fn parses_gen_subcommand_with_lang_enum_and_files() {
         },
         Command::Fmt(_) => panic!("expected gen command"),
         Command::Import(_) => panic!("expected gen command"),
+        Command::Version(_) => panic!("expected gen command"),
     }
 }
 
