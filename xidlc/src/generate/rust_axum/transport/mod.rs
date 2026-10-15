@@ -12,7 +12,7 @@ pub(crate) use convert::{decode_expr, encode_expr};
 use super::scope::TypeScope;
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::rust::util::{
-    array_type, declarator_dims, declarator_name, rust_ident, serde_rename_from_annotations,
+    array_type, declarator_dims, declarator_name, is_skipped_from_annotations, rust_ident,
 };
 use names::{canonical_name, transport_ident, transport_module};
 use std::collections::{BTreeSet, HashMap};
@@ -186,10 +186,15 @@ fn render_struct(
     };
     let mut fields = Vec::new();
     for member in &def.member {
-        let rename = serde_rename_from_annotations(&member.annotations);
+        if is_skipped_from_annotations(&member.annotations) {
+            continue;
+        }
         for decl in &member.ident {
-            let name = rust_ident(&declarator_name(decl));
+            let raw = declarator_name(decl);
+            let name = rust_ident(&raw);
             let ty = member_ty(member, decl, direction, module_name, scope)?;
+            let wire = hir::effective_wire_name(&raw, &member.annotations, &def.annotations);
+            let serde_rename = (wire != name).then_some(wire);
             let (enc, dec) = if member.is_optional() {
                 let e = encode_expr("value", &member.ty, scope)?;
                 let d = decode_expr("value", &member.ty, scope)?;
@@ -214,7 +219,7 @@ fn render_struct(
                 flatten: crate::generate::utils::has_annotation(&member.annotations, "flatten"),
                 name: name.clone(),
                 ty,
-                serde_rename: rename.clone(),
+                serde_rename,
                 optional: member.is_optional(),
                 encode_expr: enc,
                 decode_expr: dec,
@@ -246,9 +251,15 @@ fn render_enum(
         variants: def
             .member
             .iter()
-            .map(|item| TransportVariantContext {
-                ident: rust_ident(&item.ident),
-                serde_rename: serde_rename_from_annotations(&item.annotations),
+            .map(|item| {
+                let ident = rust_ident(&item.ident);
+                let wire =
+                    hir::effective_wire_name(&item.ident, &item.annotations, &def.annotations);
+                let serde_rename = (wire != ident).then_some(wire);
+                TransportVariantContext {
+                    ident,
+                    serde_rename,
+                }
             })
             .collect(),
     }
