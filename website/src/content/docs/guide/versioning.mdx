@@ -241,8 +241,27 @@ one is reported as a review item instead, so tooling never invents semantics.
 
 ```bash
 xidlc version manifest petstore.idl          # print the spine as JSON
+xidlc version diff petstore.idl              # review the newest adjacent pair
 xidlc version verify petstore.idl            # compare against the lock file
 xidlc version verify petstore.idl --update   # rewrite the lock (intentional change)
+```
+
+`diff` renders one adjacent version pair (`--from`/`--to`, member ident or
+display value; the newest pair by default) as a review report: every added,
+removed, renamed, type-changed and optionalized fact with its evidence, plus
+the review side — wire coincidences and unconfirmed resumes — marked so
+adapters never rely on them unchecked. `--format json` emits the same
+correspondence cells for tooling:
+
+```text
+$ xidlc version diff petstore.idl
+diff 2025-01 (v1) → 2025-06 (v2)
+selector: header "Api-Version"
+  added         - → Pet::note  [interval-start]
+  removed       Pet::color → -  [interval-end]
+  renamed       Pet::age → Pet::age2_  [explicit-rename]
+mechanical cells: 2
+summary: 1 added, 1 removed, 1 renamed, 0 review
 ```
 
 `verify` reads `<contract>.versions.lock.json` beside the contract and fails
