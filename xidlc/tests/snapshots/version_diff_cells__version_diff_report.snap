@@ -1,0 +1,13 @@
+---
+source: xidlc/tests/version_diff.rs
+expression: out
+---
+diff 2025-01 (v1) → 2025-06 (v2)
+selector: header "Api-Version"
+  added         - → Pet::note  [interval-start]
+  renamed       Pet::size → Pet::size2_  [explicit-rename]
+  name-shifted  Pet::user_id → Pet::userId  [wire-name-match]
+              ^ review before adapters rely on it
+  removed       Pet::weight → -  [interval-end]
+mechanical cells: 2
+summary: 1 added, 1 removed, 1 renamed, 1 name-shifted, 1 review

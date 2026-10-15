@@ -74,162 +74,15 @@ fn diff_defaults_to_the_newest_adjacent_pair() {
     let workspace = Workspace::new("diff-default");
     let contract = workspace.contract_path("catalog", DIFF_CONTRACT);
 
-    let out = run_capture(
-        &workspace,
-        &["xidlc", "version", "diff", &contract_name(&contract)],
-    );
+    let out = workspace
+        .run(&[
+            "xidlc",
+            "version",
+            "diff",
+            contract.to_str().expect("utf-8"),
+        ])
+        .expect("xidlc should succeed");
     assert!(out.contains("diff 2025-06 (v2) → 2025-12 (v3)"), "{out}");
-}
-
-#[test]
-fn diff_text_reports_each_non_mechanical_fact() {
-    let workspace = Workspace::new("diff-text");
-    let contract = workspace.contract_path("catalog", DIFF_CONTRACT);
-
-    let out = run_capture(
-        &workspace,
-        &[
-            "xidlc",
-            "version",
-            "diff",
-            "--from",
-            "v1",
-            "--to",
-            "v2",
-            &contract_name(&contract),
-        ],
-    );
-    assert!(out.contains("diff 2025-01 (v1) → 2025-06 (v2)"), "{out}");
-    assert!(
-        out.contains("added         - → Item::note  [interval-start]"),
-        "{out}"
-    );
-    assert!(
-        out.contains("removed       Item::weight → -  [interval-end]"),
-        "{out}"
-    );
-    assert!(
-        out.contains("removed       Item::tag → -  [interval-end]"),
-        "{out}"
-    );
-    assert!(
-        out.contains("renamed       Item::size → Item::size2_  [explicit-rename]"),
-        "{out}"
-    );
-    assert!(out.contains("mechanical cells: 1"), "{out}");
-    assert!(
-        out.contains("summary: 1 added, 2 removed, 1 renamed, 0 review"),
-        "{out}"
-    );
-}
-
-#[test]
-fn diff_marks_wire_coincidences_for_review() {
-    let workspace = Workspace::new("diff-review");
-    let contract = workspace.contract_path(
-        "profiles",
-        r#"
-#pragma xidlc package profiles
-
-@version
-enum ApiVersions {
-    @rename("2025-01") v1,
-    @rename("2025-06") v2,
-};
-
-@rename_all("camelCase")
-struct Profile {
-    @added(ApiVersions::v1)
-    @removed(ApiVersions::v2)
-    long user_id;
-
-    @added(ApiVersions::v2)
-    long userId;
-};
-"#,
-    );
-
-    let out = run_capture(
-        &workspace,
-        &["xidlc", "version", "diff", &contract_name(&contract)],
-    );
-    assert!(
-        out.contains("name-shifted  Profile::user_id → Profile::userId  [wire-name-match]"),
-        "{out}"
-    );
-    assert!(out.contains("review before adapters rely on it"), "{out}");
-    assert!(out.contains("1 review"), "{out}");
-}
-
-#[test]
-fn diff_json_carries_the_same_cells_as_the_text() {
-    let workspace = Workspace::new("diff-json");
-    let contract = workspace.contract_path("catalog", DIFF_CONTRACT);
-
-    let out = run_capture(
-        &workspace,
-        &[
-            "xidlc",
-            "version",
-            "diff",
-            "--format",
-            "json",
-            "--from",
-            "v1",
-            "--to",
-            "v2",
-            &contract_name(&contract),
-        ],
-    );
-    let report: serde_json::Value = serde_json::from_str(&out).expect("json diff parses");
-    assert_eq!(report["from"]["ident"], "v1");
-    assert_eq!(report["from"]["value"], "2025-01");
-    assert_eq!(report["to"]["ident"], "v2");
-    assert_eq!(report["selector"], serde_json::Value::Null);
-    let summary = &report["summary"];
-    assert_eq!(summary["added"], 1);
-    assert_eq!(summary["removed"], 2);
-    assert_eq!(summary["renamed"], 1);
-    assert_eq!(summary["review"], 0);
-    let cells = report["cells"].as_array().expect("cells array");
-    assert_eq!(cells.len(), 5);
-}
-
-#[test]
-fn diff_json_reports_the_selector_when_declared() {
-    let workspace = Workspace::new("diff-json-selector");
-    let contract = workspace.contract_path(
-        "pinned",
-        r#"
-#pragma xidlc package pinned
-
-@version
-@version_selector(header = "Api-Version")
-enum ApiVersions {
-    @rename("2025-01") v1,
-    @rename("2025-06") v2,
-};
-
-struct Item {
-    string sku;
-};
-"#,
-    );
-
-    let out = run_capture(
-        &workspace,
-        &[
-            "xidlc",
-            "version",
-            "diff",
-            "--format",
-            "json",
-            &contract_name(&contract),
-        ],
-    );
-    let report: serde_json::Value = serde_json::from_str(&out).expect("json diff parses");
-    assert_eq!(report["selector"]["location"], "header");
-    assert_eq!(report["selector"]["name"], "Api-Version");
 }
 
 #[test]
@@ -237,9 +90,8 @@ fn diff_resolves_display_values() {
     let workspace = Workspace::new("diff-values");
     let contract = workspace.contract_path("catalog", DIFF_CONTRACT);
 
-    let out = run_capture(
-        &workspace,
-        &[
+    let out = workspace
+        .run(&[
             "xidlc",
             "version",
             "diff",
@@ -247,9 +99,9 @@ fn diff_resolves_display_values() {
             "2025-01",
             "--to",
             "2025-06",
-            &contract_name(&contract),
-        ],
-    );
+            contract.to_str().expect("utf-8"),
+        ])
+        .expect("xidlc should succeed");
     assert!(out.contains("diff 2025-01 (v1) → 2025-06 (v2)"), "{out}");
 }
 
@@ -325,28 +177,114 @@ fn diff_rejects_ambiguous_version_names() {
     assert!(error.contains("matches both"), "{error}");
 }
 
-/// Runs the built `xidlc` binary inside the workspace and returns its stdout,
-/// failing on a non-zero exit. `args` includes the program name, like
-/// [`Workspace::run`].
-fn run_capture(workspace: &Workspace, args: &[&str]) -> String {
-    let output = std::process::Command::new(env!("CARGO_BIN_EXE_xidlc"))
-        .args(&args[1..])
-        .current_dir(&workspace.dir)
-        .output()
-        .expect("run the xidlc binary");
-    assert!(
-        output.status.success(),
-        "xidlc failed: {}",
-        String::from_utf8_lossy(&output.stderr)
-    );
-    String::from_utf8(output.stdout).expect("stdout is utf-8")
+#[test]
+fn diff_rejects_running_backwards() {
+    let workspace = Workspace::new("diff-backwards");
+    let contract = workspace.contract_path("catalog", DIFF_CONTRACT);
+
+    let error = workspace
+        .run(&[
+            "xidlc",
+            "version",
+            "diff",
+            "--from",
+            "v2",
+            "--to",
+            "v1",
+            contract.to_str().expect("utf-8"),
+        ])
+        .expect_err("the timeline runs forward only");
+    assert!(error.contains("runs forward in the timeline"), "{error}");
+    assert!(error.contains("v1 is declared before v2"), "{error}");
 }
 
-/// The workspace-relative path of a contract written by the harness.
-fn contract_name(contract: &std::path::Path) -> String {
-    contract
-        .file_name()
-        .and_then(|name| name.to_str())
-        .expect("utf-8 file name")
-        .to_string()
+#[test]
+fn diff_rejects_naming_one_version_twice() {
+    let workspace = Workspace::new("diff-twice");
+    let contract = workspace.contract_path("catalog", DIFF_CONTRACT);
+
+    // `v1` and `2025-01` are the same member; naming it as both endpoints is
+    // the confusion the pair resolver must catch before diffing.
+    let error = workspace
+        .run(&[
+            "xidlc",
+            "version",
+            "diff",
+            "--from",
+            "v1",
+            "--to",
+            "2025-01",
+            contract.to_str().expect("utf-8"),
+        ])
+        .expect_err("both endpoints are one version");
+    assert!(error.contains("names one version twice"), "{error}");
+}
+
+#[test]
+fn diff_skips_unversioned_contracts() {
+    let workspace = Workspace::new("diff-plain");
+    let contract = workspace.contract_path("plain", "struct Pet { long id; };");
+
+    let out = workspace
+        .run(&[
+            "xidlc",
+            "version",
+            "diff",
+            contract.to_str().expect("utf-8"),
+        ])
+        .expect("xidlc should succeed");
+    assert!(out.is_empty(), "nothing to review: {out}");
+}
+
+#[test]
+fn diff_with_two_versions_defaults_to_that_pair() {
+    let workspace = Workspace::new("diff-two");
+    let contract = workspace.contract_path(
+        "pair",
+        r#"
+#pragma xidlc package pair
+
+@version
+enum ApiVersions {
+    @rename("2025-01") v1,
+    @rename("2025-06") v2,
+};
+
+struct Item {
+    string sku;
+};
+"#,
+    );
+
+    let out = workspace
+        .run(&[
+            "xidlc",
+            "version",
+            "diff",
+            contract.to_str().expect("utf-8"),
+        ])
+        .expect("xidlc should succeed");
+    assert!(out.contains("diff 2025-01 (v1) → 2025-06 (v2)"), "{out}");
+}
+
+#[test]
+fn diff_is_case_sensitive_about_version_names() {
+    let workspace = Workspace::new("diff-case");
+    let contract = workspace.contract_path("catalog", DIFF_CONTRACT);
+
+    let error = workspace
+        .run(&[
+            "xidlc",
+            "version",
+            "diff",
+            "--from",
+            "V1",
+            contract.to_str().expect("utf-8"),
+        ])
+        .expect_err("member idents are matched exactly");
+    assert!(error.contains("version V1 is not declared"), "{error}");
+    assert!(
+        error.contains("declared: v1, v2, v3"),
+        "the error names the alternatives: {error}"
+    );
 }

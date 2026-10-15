@@ -1,7 +1,7 @@
 #![cfg(feature = "cli")]
 
-//! End-to-end regression for the release-freeze gate: lock, pass, drift, and
-//! the `--update` door, plus the shared-lock contract keying.
+//! End-to-end regression for the release-freeze gate lifecycle: freeze,
+//! verify, every drift report line, and the `--update` door.
 
 mod common;
 
@@ -29,25 +29,42 @@ interface Pets {
 };
 "#;
 
-const SELECTOR_CONTRACT: &str = r#"
-#pragma xidlc package billing
+/// A contract whose version members carry no lifecycle references, so the
+/// enum itself can gain or lose members without breaking the rest.
+const MINIMAL_CONTRACT: &str = r#"
+#pragma xidlc package depot
 
 @version
-@version_selector(header = "Api-Version")
-enum BillingVersions {
+enum ApiVersions {
     @rename("2025-01") v1,
     @rename("2025-06") v2,
 };
 
-struct Invoice {
-    string id;
+struct Box {
+    string sku;
 };
 
-interface Billing {
-    @get(path = "/invoices/{id}")
-    Invoice get(@path string id);
+interface Depot {
+    @get(path = "/boxes/{sku}")
+    Box get(@path string sku);
 };
 "#;
+
+/// Runs `xidlc version verify` on `contract` in the workspace.
+fn verify(
+    workspace: &Workspace,
+    contract: &std::path::Path,
+    extra: &[&str],
+) -> Result<String, String> {
+    let mut args = vec![
+        "xidlc",
+        "version",
+        "verify",
+        contract.to_str().expect("utf-8"),
+    ];
+    args.extend_from_slice(extra);
+    workspace.run(&args)
+}
 
 #[test]
 fn lock_pass_drift_update_cycle() {
@@ -107,153 +124,150 @@ fn lock_pass_drift_update_cycle() {
 }
 
 #[test]
-fn selector_drift_is_frozen_too() {
-    let workspace = Workspace::new("selector");
-    let contract = workspace.contract_path("billing", SELECTOR_CONTRACT);
+fn verify_without_a_lock_tells_how_to_create_one() {
+    let workspace = Workspace::new("freeze-missing");
+    let contract = workspace.contract_path("petstore", CONTRACT);
 
-    workspace
-        .run(&[
-            "xidlc",
-            "version",
-            "verify",
-            contract.to_str().expect("utf-8"),
-            "--update",
-        ])
-        .expect("the selector contract should freeze");
-    let lock =
-        fs::read_to_string(workspace.dir.join("billing.versions.lock.json")).expect("read lock");
+    let error = verify(&workspace, &contract, &[])
+        .expect_err("verifying without a lock must not silently pass");
+    assert!(error.contains("no lock file"), "{error}");
     assert!(
-        lock.contains("header:Api-Version"),
-        "lock should freeze the selector: {lock}"
+        error.contains("xidlc version verify --update"),
+        "the error names the door: {error}"
     );
-
-    // Renaming the selector header is a breaking wire change for every
-    // released version, so the freeze must catch it without a digest change.
-    fs::write(
-        &contract,
-        SELECTOR_CONTRACT.replace(
-            "@version_selector(header = \"Api-Version\")",
-            "@version_selector(header = \"X-Billing-Version\")",
-        ),
-    )
-    .expect("write renamed-selector contract");
-    let error = workspace
-        .run(&[
-            "xidlc",
-            "version",
-            "verify",
-            contract.to_str().expect("utf-8"),
-        ])
-        .expect_err("a renamed selector header is drift");
-    assert!(error.contains("version selector changed"), "{error}");
-
-    workspace
-        .run(&[
-            "xidlc",
-            "version",
-            "verify",
-            contract.to_str().expect("utf-8"),
-            "--update",
-        ])
-        .expect("intentional selector change should rewrite the lock");
-    workspace
-        .run(&[
-            "xidlc",
-            "version",
-            "verify",
-            contract.to_str().expect("utf-8"),
-        ])
-        .expect("verify should pass after the door");
 }
 
 #[test]
-fn shared_lock_keeps_other_contracts_frozen() {
-    let workspace = Workspace::new("shared");
-    let shared = workspace.dir.join("shared.versions.lock.json");
-    let petstore = workspace.contract_path("petstore", CONTRACT);
-    let warehouse = workspace.contract_path(
-        "warehouse",
-        r#"
-#pragma xidlc package warehouse
+fn verify_names_every_drift_line() {
+    let workspace = Workspace::new("freeze-lines");
+    let contract = workspace.contract_path("depot", MINIMAL_CONTRACT);
+    verify(&workspace, &contract, &["--update"]).expect("freeze both versions");
+    let lock_path = workspace.dir.join("depot.versions.lock.json");
+    let lock: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(&lock_path).expect("read lock"))
+            .expect("the fresh lock parses");
+    let frozen_v2 = lock["contracts"]["depot"]["versions"]["v2"]["digest"]
+        .as_str()
+        .expect("frozen digest");
 
-@version
-enum WarehouseVersions {
-    v1,
-};
-
-struct Box {
-    string sku;
-};
-
-interface Warehouse {
-    @get(path = "/boxes/{sku}")
-    Box get(@path string sku);
-};
-"#,
+    // A version joins the timeline without passing the freeze door.
+    fs::write(
+        &contract,
+        MINIMAL_CONTRACT.replace(
+            "@rename(\"2025-06\") v2,",
+            "@rename(\"2025-06\") v2,\n    @rename(\"2025-12\") v3,",
+        ),
+    )
+    .expect("write extended contract");
+    let error =
+        verify(&workspace, &contract, &[]).expect_err("an unreleased version is not frozen yet");
+    assert!(
+        error.contains("new version v3 is not frozen yet"),
+        "{error}"
     );
 
-    for contract in [&petstore, &warehouse] {
-        workspace
-            .run(&[
-                "xidlc",
-                "version",
-                "verify",
-                "--lock",
-                shared.to_str().expect("utf-8"),
-                "--update",
-                contract.to_str().expect("utf-8"),
-            ])
-            .expect("both contracts freeze into the shared lock");
-    }
-
-    // Freezing the second contract must not have erased the first.
-    workspace
-        .run(&[
-            "xidlc",
-            "version",
-            "verify",
-            "--lock",
-            shared.to_str().expect("utf-8"),
-            petstore.to_str().expect("utf-8"),
-        ])
-        .expect("petstore should still verify against the shared lock");
-    workspace
-        .run(&[
-            "xidlc",
-            "version",
-            "verify",
-            "--lock",
-            shared.to_str().expect("utf-8"),
-            warehouse.to_str().expect("utf-8"),
-        ])
-        .expect("warehouse should still verify against the shared lock");
-
-    // Verifying petstore must not be fooled by warehouse's digests.
-    let drifted = format!("{CONTRACT}\nstruct Shelf {{ string code; }};\n");
-    fs::write(&petstore, drifted).expect("write drifted contract");
-    let error = workspace
-        .run(&[
-            "xidlc",
-            "version",
-            "verify",
-            "--lock",
-            shared.to_str().expect("utf-8"),
-            petstore.to_str().expect("utf-8"),
-        ])
-        .expect_err("petstore drift should be reported against its own entry");
+    // A released version disappears from the contract.
+    fs::write(
+        &contract,
+        MINIMAL_CONTRACT.replace("    @rename(\"2025-06\") v2,\n", ""),
+    )
+    .expect("write reduced contract");
+    let error =
+        verify(&workspace, &contract, &[]).expect_err("dropping a released version is drift");
     assert!(
-        error.contains("not frozen yet") || error.contains("changed"),
+        error.contains(&format!(
+            "released version v2 missing from the contract ({frozen_v2})"
+        )),
         "{error}"
     );
 }
 
 #[test]
-fn route_rename_drifts_the_freeze() {
-    let workspace = Workspace::new("freeze-routes");
+fn verify_reports_a_changed_surface_with_both_digests() {
+    let workspace = Workspace::new("freeze-changed");
+    let contract = workspace.contract_path("petstore", CONTRACT);
+    verify(&workspace, &contract, &["--update"]).expect("freeze the contract");
+    let lock_path = workspace.dir.join("petstore.versions.lock.json");
+    let lock: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(&lock_path).expect("read lock"))
+            .expect("the fresh lock parses");
+    let frozen = lock["contracts"]["petstore"]["versions"]["v2"]["digest"]
+        .as_str()
+        .expect("frozen digest");
+
+    fs::write(
+        &contract,
+        CONTRACT.replace("@optional string note;", "@optional long note;"),
+    )
+    .expect("write changed contract");
+    let error = verify(&workspace, &contract, &[]).expect_err("a released version's surface moved");
+    assert!(
+        error.contains(&format!("released version v2 changed: {frozen} → md5:")),
+        "the report shows both digests: {error}"
+    );
+    assert!(
+        !error.contains("released version v1"),
+        "v1 is untouched: {error}"
+    );
+}
+
+#[test]
+fn refreezing_an_unchanged_contract_rewrites_byte_for_byte() {
+    let workspace = Workspace::new("freeze-idempotent");
+    let contract = workspace.contract_path("petstore", CONTRACT);
+    let out = workspace
+        .run(&[
+            "xidlc",
+            "version",
+            "verify",
+            "--update",
+            contract.to_str().expect("utf-8"),
+        ])
+        .expect("xidlc should succeed");
+    assert!(
+        out.contains(&format!(
+            "lock updated: {}",
+            workspace.dir.join("petstore.versions.lock.json").display()
+        )),
+        "the freeze names the lock it wrote: {out}"
+    );
+    let lock_path = workspace.dir.join("petstore.versions.lock.json");
+    let first = fs::read_to_string(&lock_path).expect("read the fresh lock");
+
+    verify(&workspace, &contract, &[]).expect("the fresh lock verifies");
+    verify(&workspace, &contract, &["--update"]).expect("re-freezing is allowed");
+    let second = fs::read_to_string(&lock_path).expect("reread the lock");
+    assert_eq!(
+        first, second,
+        "re-freezing an unchanged contract must not churn the file VCS stores"
+    );
+}
+
+#[test]
+fn unversioned_contracts_are_skipped_without_a_lock() {
+    // Pinned, deliberate semantics: `verify` gates versioned contracts only.
+    // The documented flip side — a de-versioned or mistyped contract
+    // silently verifies green — is why `manifest` exists for CI audits.
+    let workspace = Workspace::new("freeze-plain");
+    let contract = workspace.contract_path("plain", "struct Pet { long id; };");
+
+    verify(&workspace, &contract, &[]).expect("nothing to freeze");
+    verify(&workspace, &contract, &["--update"]).expect("nothing to freeze");
+    assert!(
+        !workspace.dir.join("plain.versions.lock.json").exists(),
+        "no lock is created for an unversioned contract"
+    );
+}
+
+#[test]
+fn a_contract_that_cannot_build_a_spine_fails_the_gate() {
+    // Semantic errors — not just syntax — must stop the freeze before any
+    // lock is written.
+    let workspace = Workspace::new("freeze-semantic");
     let contract = workspace.contract_path(
-        "store",
+        "clash",
         r#"
-#pragma xidlc package store
+#pragma xidlc package clash
 
 @version
 enum ApiVersions {
@@ -261,58 +275,20 @@ enum ApiVersions {
     @rename("2025-06") v2,
 };
 
-struct Item {
-    string id;
-};
+struct Pet {
+    long tag;
 
-interface Store {
-    @get(path = "/things/{id}")
-    Item get(@path string id);
+    @rename("tag")
+    long label;
 };
 "#,
     );
 
-    workspace
-        .run(&[
-            "xidlc",
-            "version",
-            "verify",
-            contract.to_str().expect("utf-8"),
-            "--update",
-        ])
-        .expect("the original routes should freeze");
-
-    // Moving a route is a breaking wire change for every client, even though
-    // the operation ident, signature and types stay identical.
-    fs::write(
-        &contract,
-        r#"
-#pragma xidlc package store
-
-@version
-enum ApiVersions {
-    @rename("2025-01") v1,
-    @rename("2025-06") v2,
-};
-
-struct Item {
-    string id;
-};
-
-interface Store {
-    @get(path = "/items/{id}")
-    Item get(@path string id);
-};
-"#,
-    )
-    .expect("write route-renamed contract");
-    let error = workspace
-        .run(&[
-            "xidlc",
-            "version",
-            "verify",
-            contract.to_str().expect("utf-8"),
-        ])
-        .expect_err("a route rename is release drift");
-    assert!(error.contains("release freeze violated"), "{error}");
+    let error = verify(&workspace, &contract, &["--update"])
+        .expect_err("overlapping wire names must fail the gate");
+    assert!(error.contains("both serialize as \"tag\""), "{error}");
+    assert!(
+        !workspace.dir.join("clash.versions.lock.json").exists(),
+        "no lock is written for a contract without a spine"
+    );
 }

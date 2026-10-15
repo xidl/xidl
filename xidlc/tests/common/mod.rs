@@ -1,10 +1,8 @@
 //! Shared harness for the `xidlc version` subcommand end-to-end tests.
 
-use clap::Parser as _;
 use std::fs;
 use std::path::PathBuf;
 use std::process;
-use xidlc::cli::Cli;
 
 pub struct Workspace {
     pub dir: PathBuf,
@@ -23,9 +21,20 @@ impl Workspace {
         path
     }
 
-    pub fn run(&self, args: &[&str]) -> Result<(), String> {
-        let cli = Cli::try_parse_from(args).expect("parse version args");
-        cli.run().map_err(|error| error.to_string())
+    /// Runs the built `xidlc` binary inside the workspace — the exact process
+    /// a release gate would run. `args` includes the program name. `Ok`
+    /// carries stdout on exit success; `Err` carries stderr on failure.
+    pub fn run(&self, args: &[&str]) -> Result<String, String> {
+        let output = std::process::Command::new(env!("CARGO_BIN_EXE_xidlc"))
+            .args(&args[1..])
+            .current_dir(&self.dir)
+            .output()
+            .expect("run the xidlc binary");
+        if output.status.success() {
+            Ok(String::from_utf8(output.stdout).expect("stdout is utf-8"))
+        } else {
+            Err(String::from_utf8_lossy(&output.stderr).into_owned())
+        }
     }
 }
 
