@@ -1,5 +1,6 @@
 ---
 source: xidlc/tests/versioned_adapters.rs
+assertion_line: 44
 expression: output
 ---
 ===============
@@ -13,9 +14,9 @@ import type * as ifaceTypes from "./versioned_adapters.iface";
 import * as ifaceSchemas from "./versioned_adapters.iface.zod";
 
 /**
- * Data carried when a projection would have to invent information.
- * The service renders it as a wire error; xidl never fabricates members.
- */
+* Data carried when a projection would have to invent information.
+* The service renders it as a wire error; xidl never fabricates members.
+*/
 export interface UnsupportedProjection {
     version: string;
     direction: "upcast" | "downcast";
@@ -25,13 +26,13 @@ export interface UnsupportedProjection {
 
 /** The projected value, or why the projection refused. */
 export type VersionedResult<T> =
-    | { ok: true; value: T }
-    | { ok: false; error: UnsupportedProjection };
+| { ok: true; value: T }
+| { ok: false; error: UnsupportedProjection };
 
 /** Outcome that keeps the head value when the projection refuses. */
 export type ProjectionOutcome<T> =
-    | { projected: true; value: T }
-    | { projected: false };
+| { projected: true; value: T }
+| { projected: false };
 
 /** Marker a hook sets to prove a retired member was consciously dropped. */
 export const IGNORED = "xidl.ignored";
@@ -44,303 +45,303 @@ const err = (error: UnsupportedProjection): VersionedResult<never> => ({
 });
 
 /**
- * Hooks the application implements. Every body must be pure: no I/O, no
- * clock, no database — the same input must always project the same way.
- */
+* Hooks the application implements. Every body must be pure: no I/O, no
+* clock, no database — the same input must always project the same way.
+*/
 export interface VersionAdapters {
-    parcelUpcastFromV1(source: types.v1.Parcel): VersionedResult<ParcelUpcastDecisionFromV1>;
-    parcelDowncastToV1(source: types.v2.Parcel): VersionedResult<ParcelDowncastDecisionToV1>;
-    statusUpcastFromV1(value: "lost"): VersionedResult<types.v2.Status>;
-    statusDowncastToV1(value: "delayed"): VersionedResult<types.v1.Status>;
-    depotShipRequestUpcastFromV1(source: ifaceTypes.v1.DepotShipRequest): VersionedResult<DepotShipRequestUpcastDecisionFromV1>;
-    /** Map a head-only error onto the served version's vocabulary. */
+        parcelUpcastFromV1(source: types.v1.Parcel): VersionedResult<ParcelUpcastDecisionFromV1>;
+        parcelDowncastToV1(source: types.v2.Parcel): VersionedResult<ParcelDowncastDecisionToV1>;
+        statusUpcastFromV1(value: "lost"): VersionedResult<types.v2.Status>;
+        statusDowncastToV1(value: "delayed"): VersionedResult<types.v1.Status>;
+        depotShipRequestUpcastFromV1(source: ifaceTypes.v1.DepotShipRequest): VersionedResult<DepotShipRequestUpcastDecisionFromV1>;
+        /** Map a head-only error onto the served version's vocabulary. */
     depotGetCarrierRejectedDowncastToV1(head: { kind: "CarrierRejected"; payload: unknown }): VersionedResult<{ kind: string; payload: unknown }>;
-}
-/** Decision fields a hook supplies; IGNORED proves a member was dropped. */
-export interface ParcelUpcastDecisionFromV1 {
-    return_label: Ignored;
-    color: Ignored;
-    code_v1: Ignored;
-    code_v2: string;
-    carrier: string;
-}
-/** Decision fields a hook supplies; IGNORED proves a member was dropped. */
-export interface ParcelDowncastDecisionToV1 {
-    return_label: types.v1.Sku;
-    code_v1: string;
-}
-/** Decision fields a hook supplies; IGNORED proves a member was dropped. */
-export interface DepotShipRequestUpcastDecisionFromV1 {
-    lane: string;
-}
-
-
-
-export function upcastParcelFromV1(source: types.v1.Parcel, adapters: VersionAdapters): VersionedResult<types.v2.Parcel> {
-    const decision = adapters.parcelUpcastFromV1(source);
-    if (!decision.ok) {
-        return decision;
     }
-    const converted0 = upcastSkuFromV1(source["sku"], adapters);
-    if (!converted0.ok) {
-        return converted0;
-    }
-    return ok({
-        sku: converted0.value,
-        code_v2: decision.value["code_v2"],
-        carrier: decision.value["carrier"],
-    });
-}
-export function downcastParcelToV1(source: types.v2.Parcel, adapters: VersionAdapters): VersionedResult<types.v1.Parcel> {
-    const decision = adapters.parcelDowncastToV1(source);
-    if (!decision.ok) {
-        return decision;
-    }
-    const converted0 = downcastSkuToV1(source["sku"], adapters);
-    if (!converted0.ok) {
-        return converted0;
-    }
-    return ok({
-        sku: converted0.value,
-        return_label: decision.value["return_label"],
-        code_v1: decision.value["code_v1"],
-    });
-}
-export function downcastParcelNotFoundToV1(source: types.v2.ParcelNotFound, adapters: VersionAdapters): VersionedResult<types.v1.ParcelNotFound> {
-    return ok({
-        sku: source["sku"],
-    });
-}
-export function upcastSkuFromV1(source: types.v1.Sku, adapters: VersionAdapters): VersionedResult<types.v2.Sku> {
-    return ok({
-        value: source["value"],
-    });
-}
-export function downcastSkuToV1(source: types.v2.Sku, adapters: VersionAdapters): VersionedResult<types.v1.Sku> {
-    return ok({
-        value: source["value"],
-    });
-}
-export function upcastStatusFromV1(source: types.v1.Status, adapters: VersionAdapters): VersionedResult<types.v2.Status> {
-    switch (source) {
-        case "processing":
-            return ok(source);
-        default:
-            return adapters.statusUpcastFromV1(source);
-    }
-}
-export function downcastStatusToV1(source: types.v2.Status, adapters: VersionAdapters): VersionedResult<types.v1.Status> {
-    switch (source) {
-        case "processing":
-            return ok(source);
-        default:
-            return adapters.statusDowncastToV1(source);
-    }
-}
-export function upcastDepotGetRequestFromV1(source: ifaceTypes.v1.DepotGetRequest, adapters: VersionAdapters): VersionedResult<ifaceTypes.v2.DepotGetRequest> {
-    const converted1 = source["status"] === undefined ? ok(undefined) : upcastStatusFromV1(source["status"], adapters);
-    if (!converted1.ok) {
-        return converted1;
-    }
-    return ok({
-        sku: source["sku"],
-        status: converted1.value,
-    });
-}
-export function upcastDepotShipRequestFromV1(source: ifaceTypes.v1.DepotShipRequest, adapters: VersionAdapters): VersionedResult<ifaceTypes.v2.DepotShipRequest> {
-    const decision = adapters.depotShipRequestUpcastFromV1(source);
-    if (!decision.ok) {
-        return decision;
-    }
-    const converted0 = upcastParcelFromV1(source["parcel"], adapters);
-    if (!converted0.ok) {
-        return converted0;
-    }
-    return ok({
-        parcel: converted0.value,
-        lane: decision.value["lane"],
-    });
-}
-/** Decodes a raw 2025-01 request and upcasts it to the head version. */
-export function decodeAndUpcastDepotGetFromV1(raw: unknown, adapters: VersionAdapters): VersionedResult<ifaceTypes.v2.DepotGetRequest> {
-    const parsed = ifaceSchemas.v1.DepotGetRequestSchema.strict().safeParse(raw);
-    if (!parsed.success) {
-        return err({
-            version: "2025-01",
-            direction: "upcast",
-            typePath: "Depot::get",
-            reason: `request does not match version 2025-01: ${parsed.error.issues.map((issue) => issue.message).join("; ")}`,
-        });
-    }
-    return upcastDepotGetRequestFromV1(parsed.data, adapters);
-}
-/** Projects a head result onto version 2025-01. */
-export function downcastDepotGetResultToV1(value: types.v2.Parcel, adapters: VersionAdapters): VersionedResult<types.v1.Parcel> {
-    return downcastParcelToV1(value, adapters);
-}
-
-/** Keeps the head result when the projection refuses. */
-export function downcastDepotGetOutcomeToV1(value: types.v2.Parcel, adapters: VersionAdapters): ProjectionOutcome<types.v1.Parcel> {
-    const projected = downcastParcelToV1(value, adapters);
-    return projected.ok ? { projected: true, value: projected.value } : { projected: false };
-}
-/** Decodes a raw 2025-01 request and upcasts it to the head version. */
-export function decodeAndUpcastDepotShipFromV1(raw: unknown, adapters: VersionAdapters): VersionedResult<ifaceTypes.v2.DepotShipRequest> {
-    const parsed = ifaceSchemas.v1.DepotShipRequestSchema.strict().safeParse(raw);
-    if (!parsed.success) {
-        return err({
-            version: "2025-01",
-            direction: "upcast",
-            typePath: "Depot::ship",
-            reason: `request does not match version 2025-01: ${parsed.error.issues.map((issue) => issue.message).join("; ")}`,
-        });
-    }
-    return upcastDepotShipRequestFromV1(parsed.data, adapters);
-}
-/** Projects a head result onto version 2025-01. */
-export function downcastDepotShipResultToV1(value: types.v2.Status, adapters: VersionAdapters): VersionedResult<types.v1.Status> {
-    return downcastStatusToV1(value, adapters);
-}
-
-/** Keeps the head result when the projection refuses. */
-export function downcastDepotShipOutcomeToV1(value: types.v2.Status, adapters: VersionAdapters): ProjectionOutcome<types.v1.Status> {
-    const projected = downcastStatusToV1(value, adapters);
-    return projected.ok ? { projected: true, value: projected.value } : { projected: false };
-}
-export function downcastCarrierRejectedToV2(source: types.v3.CarrierRejected, adapters: VersionAdapters): VersionedResult<types.v2.CarrierRejected> {
-    return ok({
-        carrier: source["carrier"],
-    });
-}
-export function upcastParcelFromV2(source: types.v2.Parcel, adapters: VersionAdapters): VersionedResult<types.v3.Parcel> {
-    const converted0 = upcastSkuFromV2(source["sku"], adapters);
-    if (!converted0.ok) {
-        return converted0;
-    }
-    return ok({
-        sku: converted0.value,
-        code_v2: source["code_v2"],
-        carrier: source["carrier"],
-        note: source["note"],
-    });
-}
-export function downcastParcelToV2(source: types.v3.Parcel, adapters: VersionAdapters): VersionedResult<types.v2.Parcel> {
-    const converted0 = downcastSkuToV2(source["sku"], adapters);
-    if (!converted0.ok) {
-        return converted0;
-    }
-    return ok({
-        sku: converted0.value,
-        code_v2: source["code_v2"],
-        carrier: source["carrier"],
-        note: source["note"],
-    });
-}
-export function downcastParcelNotFoundToV2(source: types.v3.ParcelNotFound, adapters: VersionAdapters): VersionedResult<types.v2.ParcelNotFound> {
-    return ok({
-        sku: source["sku"],
-    });
-}
-export function upcastSkuFromV2(source: types.v2.Sku, adapters: VersionAdapters): VersionedResult<types.v3.Sku> {
-    return ok({
-        value: source["value"],
-    });
-}
-export function downcastSkuToV2(source: types.v3.Sku, adapters: VersionAdapters): VersionedResult<types.v2.Sku> {
-    return ok({
-        value: source["value"],
-    });
-}
-export function upcastStatusFromV2(source: types.v2.Status, adapters: VersionAdapters): VersionedResult<types.v3.Status> {
-    switch (source) {
-        case "processing":
-            return ok(source);
-        case "delayed":
-            return ok(source);
-        default: {
-            const exhaustive: never = source;
-            return ok(exhaustive);
+    /** Decision fields a hook supplies; IGNORED proves a member was dropped. */
+    export interface ParcelUpcastDecisionFromV1 {
+            return_label: Ignored;
+            color: Ignored;
+            code_v1: Ignored;
+            code_v2: string;
+            carrier: string;
         }
-    }
-}
-export function downcastStatusToV2(source: types.v3.Status, adapters: VersionAdapters): VersionedResult<types.v2.Status> {
-    switch (source) {
-        case "processing":
-            return ok(source);
-        case "delayed":
-            return ok(source);
-        default: {
-            const exhaustive: never = source;
-            return ok(exhaustive);
+    /** Decision fields a hook supplies; IGNORED proves a member was dropped. */
+    export interface ParcelDowncastDecisionToV1 {
+            return_label: types.v1.Sku;
+            code_v1: string;
         }
-    }
-}
-export function upcastDepotGetRequestFromV2(source: ifaceTypes.v2.DepotGetRequest, adapters: VersionAdapters): VersionedResult<ifaceTypes.v3.DepotGetRequest> {
-    const converted1 = source["status"] === undefined ? ok(undefined) : upcastStatusFromV2(source["status"], adapters);
-    if (!converted1.ok) {
-        return converted1;
-    }
-    return ok({
-        sku: source["sku"],
-        status: converted1.value,
-    });
-}
-export function upcastDepotShipRequestFromV2(source: ifaceTypes.v2.DepotShipRequest, adapters: VersionAdapters): VersionedResult<ifaceTypes.v3.DepotShipRequest> {
-    const converted0 = upcastParcelFromV2(source["parcel"], adapters);
-    if (!converted0.ok) {
-        return converted0;
-    }
-    return ok({
-        parcel: converted0.value,
-        lane: source["lane"],
-    });
-}
-/** Decodes a raw 2025-06 request and upcasts it to the head version. */
-export function decodeAndUpcastDepotGetFromV2(raw: unknown, adapters: VersionAdapters): VersionedResult<ifaceTypes.v3.DepotGetRequest> {
-    const parsed = ifaceSchemas.v2.DepotGetRequestSchema.strict().safeParse(raw);
-    if (!parsed.success) {
-        return err({
-            version: "2025-06",
-            direction: "upcast",
-            typePath: "Depot::get",
-            reason: `request does not match version 2025-06: ${parsed.error.issues.map((issue) => issue.message).join("; ")}`,
-        });
-    }
-    return upcastDepotGetRequestFromV2(parsed.data, adapters);
-}
-/** Projects a head result onto version 2025-06. */
-export function downcastDepotGetResultToV2(value: types.v3.Parcel, adapters: VersionAdapters): VersionedResult<types.v2.Parcel> {
-    return downcastParcelToV2(value, adapters);
-}
+    /** Decision fields a hook supplies; IGNORED proves a member was dropped. */
+    export interface DepotShipRequestUpcastDecisionFromV1 {
+            lane: string;
+        }
 
-/** Keeps the head result when the projection refuses. */
-export function downcastDepotGetOutcomeToV2(value: types.v3.Parcel, adapters: VersionAdapters): ProjectionOutcome<types.v2.Parcel> {
-    const projected = downcastParcelToV2(value, adapters);
-    return projected.ok ? { projected: true, value: projected.value } : { projected: false };
-}
-/** Decodes a raw 2025-06 request and upcasts it to the head version. */
-export function decodeAndUpcastDepotShipFromV2(raw: unknown, adapters: VersionAdapters): VersionedResult<ifaceTypes.v3.DepotShipRequest> {
-    const parsed = ifaceSchemas.v2.DepotShipRequestSchema.strict().safeParse(raw);
-    if (!parsed.success) {
-        return err({
-            version: "2025-06",
-            direction: "upcast",
-            typePath: "Depot::ship",
-            reason: `request does not match version 2025-06: ${parsed.error.issues.map((issue) => issue.message).join("; ")}`,
-        });
-    }
-    return upcastDepotShipRequestFromV2(parsed.data, adapters);
-}
-/** Projects a head result onto version 2025-06. */
-export function downcastDepotShipResultToV2(value: types.v3.Status, adapters: VersionAdapters): VersionedResult<types.v2.Status> {
-    return downcastStatusToV2(value, adapters);
-}
 
-/** Keeps the head result when the projection refuses. */
-export function downcastDepotShipOutcomeToV2(value: types.v3.Status, adapters: VersionAdapters): ProjectionOutcome<types.v2.Status> {
-    const projected = downcastStatusToV2(value, adapters);
-    return projected.ok ? { projected: true, value: projected.value } : { projected: false };
-}
+
+        export function upcastParcelFromV1(source: types.v1.Parcel, adapters: VersionAdapters): VersionedResult<types.v2.Parcel> {
+                const decision = adapters.parcelUpcastFromV1(source);
+                if (!decision.ok) {
+                    return decision;
+                }
+                    const converted0 = upcastSkuFromV1(source["sku"], adapters);
+                if (!converted0.ok) {
+                    return converted0;
+                }
+            return ok({
+                    sku: converted0.value,
+                    code_v2: decision.value["code_v2"],
+                    carrier: decision.value["carrier"],
+            });
+    }
+        export function downcastParcelToV1(source: types.v2.Parcel, adapters: VersionAdapters): VersionedResult<types.v1.Parcel> {
+                const decision = adapters.parcelDowncastToV1(source);
+                if (!decision.ok) {
+                    return decision;
+                }
+                    const converted0 = downcastSkuToV1(source["sku"], adapters);
+                if (!converted0.ok) {
+                    return converted0;
+                }
+            return ok({
+                    sku: converted0.value,
+                    return_label: decision.value["return_label"],
+                    code_v1: decision.value["code_v1"],
+            });
+    }
+        export function downcastParcelNotFoundToV1(source: types.v2.ParcelNotFound, adapters: VersionAdapters): VersionedResult<types.v1.ParcelNotFound> {
+            return ok({
+                    sku: source["sku"],
+            });
+    }
+        export function upcastSkuFromV1(source: types.v1.Sku, adapters: VersionAdapters): VersionedResult<types.v2.Sku> {
+            return ok({
+                    value: source["value"],
+            });
+    }
+        export function downcastSkuToV1(source: types.v2.Sku, adapters: VersionAdapters): VersionedResult<types.v1.Sku> {
+            return ok({
+                    value: source["value"],
+            });
+    }
+        export function upcastStatusFromV1(source: types.v1.Status, adapters: VersionAdapters): VersionedResult<types.v2.Status> {
+            switch (source) {
+                    case "processing":
+                    return ok(source);
+                    default:
+                    return adapters.statusUpcastFromV1(source);
+            }
+    }
+        export function downcastStatusToV1(source: types.v2.Status, adapters: VersionAdapters): VersionedResult<types.v1.Status> {
+            switch (source) {
+                    case "processing":
+                    return ok(source);
+                    default:
+                    return adapters.statusDowncastToV1(source);
+            }
+    }
+        export function upcastDepotGetRequestFromV1(source: ifaceTypes.v1.DepotGetRequest, adapters: VersionAdapters): VersionedResult<ifaceTypes.v2.DepotGetRequest> {
+                    const converted1 = source["status"] === undefined ? ok(undefined) : upcastStatusFromV1(source["status"], adapters);
+                if (!converted1.ok) {
+                    return converted1;
+                }
+            return ok({
+                    sku: source["sku"],
+                    status: converted1.value,
+            });
+    }
+        export function upcastDepotShipRequestFromV1(source: ifaceTypes.v1.DepotShipRequest, adapters: VersionAdapters): VersionedResult<ifaceTypes.v2.DepotShipRequest> {
+                const decision = adapters.depotShipRequestUpcastFromV1(source);
+                if (!decision.ok) {
+                    return decision;
+                }
+                    const converted0 = upcastParcelFromV1(source["parcel"], adapters);
+                if (!converted0.ok) {
+                    return converted0;
+                }
+            return ok({
+                    parcel: converted0.value,
+                    lane: decision.value["lane"],
+            });
+    }
+            /** Decodes a raw 2025-01 request and upcasts it to the head version. */
+            export function decodeAndUpcastDepotGetFromV1(raw: unknown, adapters: VersionAdapters): VersionedResult<ifaceTypes.v2.DepotGetRequest> {
+                const parsed = ifaceSchemas.v1.DepotGetRequestSchema.strict().safeParse(raw);
+                if (!parsed.success) {
+                    return err({
+                        version: "2025-01",
+                        direction: "upcast",
+                        typePath: "Depot::get",
+                        reason: `request does not match version 2025-01: ${parsed.error.issues.map((issue) => issue.message).join("; ")}`,
+                    });
+                }
+                return upcastDepotGetRequestFromV1(parsed.data, adapters);
+            }
+            /** Projects a head result onto version 2025-01. */
+            export function downcastDepotGetResultToV1(value: types.v2.Parcel, adapters: VersionAdapters): VersionedResult<types.v1.Parcel> {
+                return downcastParcelToV1(value, adapters);
+            }
+
+            /** Keeps the head result when the projection refuses. */
+            export function downcastDepotGetOutcomeToV1(value: types.v2.Parcel, adapters: VersionAdapters): ProjectionOutcome<types.v1.Parcel> {
+                const projected = downcastParcelToV1(value, adapters);
+                return projected.ok ? { projected: true, value: projected.value } : { projected: false };
+            }
+            /** Decodes a raw 2025-01 request and upcasts it to the head version. */
+            export function decodeAndUpcastDepotShipFromV1(raw: unknown, adapters: VersionAdapters): VersionedResult<ifaceTypes.v2.DepotShipRequest> {
+                const parsed = ifaceSchemas.v1.DepotShipRequestSchema.strict().safeParse(raw);
+                if (!parsed.success) {
+                    return err({
+                        version: "2025-01",
+                        direction: "upcast",
+                        typePath: "Depot::ship",
+                        reason: `request does not match version 2025-01: ${parsed.error.issues.map((issue) => issue.message).join("; ")}`,
+                    });
+                }
+                return upcastDepotShipRequestFromV1(parsed.data, adapters);
+            }
+            /** Projects a head result onto version 2025-01. */
+            export function downcastDepotShipResultToV1(value: types.v2.Status, adapters: VersionAdapters): VersionedResult<types.v1.Status> {
+                return downcastStatusToV1(value, adapters);
+            }
+
+            /** Keeps the head result when the projection refuses. */
+            export function downcastDepotShipOutcomeToV1(value: types.v2.Status, adapters: VersionAdapters): ProjectionOutcome<types.v1.Status> {
+                const projected = downcastStatusToV1(value, adapters);
+                return projected.ok ? { projected: true, value: projected.value } : { projected: false };
+            }
+        export function downcastCarrierRejectedToV2(source: types.v3.CarrierRejected, adapters: VersionAdapters): VersionedResult<types.v2.CarrierRejected> {
+            return ok({
+                    carrier: source["carrier"],
+            });
+    }
+        export function upcastParcelFromV2(source: types.v2.Parcel, adapters: VersionAdapters): VersionedResult<types.v3.Parcel> {
+                    const converted0 = upcastSkuFromV2(source["sku"], adapters);
+                if (!converted0.ok) {
+                    return converted0;
+                }
+            return ok({
+                    sku: converted0.value,
+                    code_v2: source["code_v2"],
+                    carrier: source["carrier"],
+                    note: source["note"],
+            });
+    }
+        export function downcastParcelToV2(source: types.v3.Parcel, adapters: VersionAdapters): VersionedResult<types.v2.Parcel> {
+                    const converted0 = downcastSkuToV2(source["sku"], adapters);
+                if (!converted0.ok) {
+                    return converted0;
+                }
+            return ok({
+                    sku: converted0.value,
+                    code_v2: source["code_v2"],
+                    carrier: source["carrier"],
+                    note: source["note"],
+            });
+    }
+        export function downcastParcelNotFoundToV2(source: types.v3.ParcelNotFound, adapters: VersionAdapters): VersionedResult<types.v2.ParcelNotFound> {
+            return ok({
+                    sku: source["sku"],
+            });
+    }
+        export function upcastSkuFromV2(source: types.v2.Sku, adapters: VersionAdapters): VersionedResult<types.v3.Sku> {
+            return ok({
+                    value: source["value"],
+            });
+    }
+        export function downcastSkuToV2(source: types.v3.Sku, adapters: VersionAdapters): VersionedResult<types.v2.Sku> {
+            return ok({
+                    value: source["value"],
+            });
+    }
+        export function upcastStatusFromV2(source: types.v2.Status, adapters: VersionAdapters): VersionedResult<types.v3.Status> {
+            switch (source) {
+                    case "processing":
+                    return ok(source);
+                    case "delayed":
+                    return ok(source);
+                    default: {
+                        const exhaustive: never = source;
+                        return ok(exhaustive);
+                    }
+            }
+    }
+        export function downcastStatusToV2(source: types.v3.Status, adapters: VersionAdapters): VersionedResult<types.v2.Status> {
+            switch (source) {
+                    case "processing":
+                    return ok(source);
+                    case "delayed":
+                    return ok(source);
+                    default: {
+                        const exhaustive: never = source;
+                        return ok(exhaustive);
+                    }
+            }
+    }
+        export function upcastDepotGetRequestFromV2(source: ifaceTypes.v2.DepotGetRequest, adapters: VersionAdapters): VersionedResult<ifaceTypes.v3.DepotGetRequest> {
+                    const converted1 = source["status"] === undefined ? ok(undefined) : upcastStatusFromV2(source["status"], adapters);
+                if (!converted1.ok) {
+                    return converted1;
+                }
+            return ok({
+                    sku: source["sku"],
+                    status: converted1.value,
+            });
+    }
+        export function upcastDepotShipRequestFromV2(source: ifaceTypes.v2.DepotShipRequest, adapters: VersionAdapters): VersionedResult<ifaceTypes.v3.DepotShipRequest> {
+                    const converted0 = upcastParcelFromV2(source["parcel"], adapters);
+                if (!converted0.ok) {
+                    return converted0;
+                }
+            return ok({
+                    parcel: converted0.value,
+                    lane: source["lane"],
+            });
+    }
+            /** Decodes a raw 2025-06 request and upcasts it to the head version. */
+            export function decodeAndUpcastDepotGetFromV2(raw: unknown, adapters: VersionAdapters): VersionedResult<ifaceTypes.v3.DepotGetRequest> {
+                const parsed = ifaceSchemas.v2.DepotGetRequestSchema.strict().safeParse(raw);
+                if (!parsed.success) {
+                    return err({
+                        version: "2025-06",
+                        direction: "upcast",
+                        typePath: "Depot::get",
+                        reason: `request does not match version 2025-06: ${parsed.error.issues.map((issue) => issue.message).join("; ")}`,
+                    });
+                }
+                return upcastDepotGetRequestFromV2(parsed.data, adapters);
+            }
+            /** Projects a head result onto version 2025-06. */
+            export function downcastDepotGetResultToV2(value: types.v3.Parcel, adapters: VersionAdapters): VersionedResult<types.v2.Parcel> {
+                return downcastParcelToV2(value, adapters);
+            }
+
+            /** Keeps the head result when the projection refuses. */
+            export function downcastDepotGetOutcomeToV2(value: types.v3.Parcel, adapters: VersionAdapters): ProjectionOutcome<types.v2.Parcel> {
+                const projected = downcastParcelToV2(value, adapters);
+                return projected.ok ? { projected: true, value: projected.value } : { projected: false };
+            }
+            /** Decodes a raw 2025-06 request and upcasts it to the head version. */
+            export function decodeAndUpcastDepotShipFromV2(raw: unknown, adapters: VersionAdapters): VersionedResult<ifaceTypes.v3.DepotShipRequest> {
+                const parsed = ifaceSchemas.v2.DepotShipRequestSchema.strict().safeParse(raw);
+                if (!parsed.success) {
+                    return err({
+                        version: "2025-06",
+                        direction: "upcast",
+                        typePath: "Depot::ship",
+                        reason: `request does not match version 2025-06: ${parsed.error.issues.map((issue) => issue.message).join("; ")}`,
+                    });
+                }
+                return upcastDepotShipRequestFromV2(parsed.data, adapters);
+            }
+            /** Projects a head result onto version 2025-06. */
+            export function downcastDepotShipResultToV2(value: types.v3.Status, adapters: VersionAdapters): VersionedResult<types.v2.Status> {
+                return downcastStatusToV2(value, adapters);
+            }
+
+            /** Keeps the head result when the projection refuses. */
+            export function downcastDepotShipOutcomeToV2(value: types.v3.Status, adapters: VersionAdapters): ProjectionOutcome<types.v2.Status> {
+                const projected = downcastStatusToV2(value, adapters);
+                return projected.ok ? { projected: true, value: projected.value } : { projected: false };
+            }
 
 export {};
 ===============

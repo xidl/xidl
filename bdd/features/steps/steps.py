@@ -80,6 +80,15 @@ def step_impl(context, idl_file):
 @when("I generate {lang} code for the IDL")
 @when("I generate {lang} code for the IDL using {invocations} invocations")
 def step_impl(context, lang, invocations="one"):
+    _generate_code(context, lang, invocations=invocations)
+
+
+@when("I generate ts code for the IDL with version adapters enabled")
+def step_impl(context):
+    _generate_code(context, "ts", extra_args=["--version-adapters"])
+
+
+def _generate_code(context, lang, invocations="one", extra_args=()):
     context.lang = lang
     cmd_lang = lang
     if lang == "rust" and context.protocol == "rest":
@@ -109,6 +118,7 @@ def step_impl(context, lang, invocations="one"):
         cmd_lang,
     ]
     cmd.extend(["--client", "--server"])
+    cmd.extend(extra_args)
     assert invocations in ("one", "separate"), invocations
     batches = (
         [context.idl_files]
@@ -1268,7 +1278,25 @@ def step_impl(context, key, value):
 
 @when('I generate {lang} code for the IDL and expect failure containing "{snippet}"')
 def step_impl(context, lang, snippet):
-    cmd_lang = "rust-axum" if lang == "rust" else lang
+    _generate_and_expect_failure(context, lang, snippet, extra_args=[])
+
+
+@when(
+    "I generate {lang} code for the IDL with version adapters enabled "
+    'and expect failure containing "{snippet}"'
+)
+def step_impl(context, lang, snippet):
+    _generate_and_expect_failure(
+        context, lang, snippet, extra_args=["--version-adapters"]
+    )
+
+
+def _generate_and_expect_failure(context, lang, snippet, extra_args):
+    cmd_lang = {
+        "rust": "rust-axum",
+        "ts": "typescript-rest",
+        "nextjs": "typescript-rest",
+    }.get(lang, lang)
     cmd = [
         "cargo",
         "run",
@@ -1283,8 +1311,9 @@ def step_impl(context, lang, snippet):
         cmd_lang,
         "--client",
         "--server",
-        context.idl_file,
     ]
+    cmd.extend(extra_args)
+    cmd.append(context.idl_file)
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=os.getcwd())
     assert result.returncode != 0, "expected codegen to fail"
     combined = f"{result.stdout}\n{result.stderr}"
@@ -1615,3 +1644,53 @@ def step_impl(context, version):
         assert not os.path.exists(unexpected), (
             f"--api-version {version} must not emit {unexpected}"
         )
+
+
+@then("the generated ts adapters should require head decisions")
+def step_impl(context):
+    adapters = None
+    for f in os.listdir(context.lang_dir):
+        if f.endswith(".adapters.ts"):
+            adapters = os.path.join(context.lang_dir, f)
+    assert adapters is not None, "the adapters artifact must be generated"
+    content = open(adapters).read()
+    assert "export interface VersionAdapters" in content, content[:500]
+    assert "export const IGNORED" in content, (
+        "retired members must be acknowledged with the IGNORED marker"
+    )
+    # A member the older version still sends and the head removed must become
+    # a decision field typed IGNORED, never a silent drop or a default.
+    assert "color: Ignored" in content, content[:2000]
+    assert "ref_v1: Ignored" in content, content[:2000]
+    # A member the head requires must become a decision field the hook supplies.
+    assert "owner: string" in content, content[:2000]
+    # The downcast hook must resupply what the older version still requires.
+    assert "ref_v1: string" in content, content[:2000]
+
+
+@then("the generated ts adapters should expose the version entry points")
+def step_impl(context):
+    adapters = None
+    for f in os.listdir(context.lang_dir):
+        if f.endswith(".adapters.ts"):
+            adapters = os.path.join(context.lang_dir, f)
+    assert adapters is not None, "the adapters artifact must be generated"
+    content = open(adapters).read()
+    assert "decodeAndUpcastItemsGetFromV1" in content, (
+        "a v1 request must be decodable and upcast against the v1 schema"
+    )
+    assert "downcastItemsGetResultToV1" in content, (
+        "a head result must be projectable onto v1"
+    )
+    assert "downcastItemsGetOutcomeToV1" in content, (
+        "a head outcome must keep its head shape when projection refuses"
+    )
+    assert "itemsGetLockedDowncastToV1" in content, (
+        "an exception the older version cannot raise needs a mapping hook"
+    )
+
+
+@then("the generated ts code should not contain version adapters")
+def step_impl(context):
+    leftovers = [f for f in os.listdir(context.lang_dir) if f.endswith(".adapters.ts")]
+    assert leftovers == [], f"adapters must stay off unless enabled, found: {leftovers}"

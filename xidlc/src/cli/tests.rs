@@ -130,3 +130,29 @@ fn rejects_conflicting_api_version_selection() {
 
     assert!(result.is_err(), "conflicting flags should not parse");
 }
+
+#[test]
+fn version_adapters_stay_off_until_requested() {
+    let cli = Cli::try_parse_from(["xidlc", "gen", "typescript-rest", "demo.idl"])
+        .expect("rust command should parse");
+    let Command::Gen(args) = cli.command else {
+        panic!("expected gen command");
+    };
+    let args = args.into_driver_args().expect("args should convert");
+    assert!(!args.version_adapters);
+
+    let cli = Cli::try_parse_from([
+        "xidlc",
+        "gen",
+        "typescript-rest",
+        "--version-adapters",
+        "demo.idl",
+    ])
+    .expect("flagged command should parse");
+    let Command::Gen(args) = cli.command else {
+        panic!("expected gen command");
+    };
+    let args = args.into_driver_args().expect("args should convert");
+    assert!(args.version_adapters);
+    assert!(args.generator_props()["enable_version_adapters"] == serde_json::Value::Bool(true));
+}
