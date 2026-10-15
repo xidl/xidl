@@ -7,11 +7,9 @@ body == "inherited"
 # E2eHttpScopeMatrix - default_scope
 POST {{base_url}}/v2/scope/default
 {
-    "request_body": {
-        "name": "scope-test",
-        "tags": [],
-        "labels": {}
-    }
+    "name": "scope-test",
+    "tags": [],
+    "labels": {}
 }
 HTTP 200
 [Asserts]

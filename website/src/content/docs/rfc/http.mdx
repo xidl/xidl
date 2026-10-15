@@ -140,6 +140,35 @@ Default inference practices:
 - Unlabeled request parameters for `GET` / `DELETE` / `HEAD` / `OPTIONS` usually go to Query.
 - Unlabeled request parameters for `POST` / `PUT` / `PATCH` usually go to Body.
 
+## Request Body Shape
+
+The body parameters of one operation decide the JSON request body:
+
+- Exactly one `@body` parameter: the request body is that parameter's type
+  as-is. `@body Item item` sends an `Item` — no wrapper object.
+
+  ```idl
+  interface Store {
+      @post(path = "/items")
+      Item create(@body Item item);
+  };
+  ```
+
+- Several `@body` parameters: the request body is an object with one property
+  per body parameter, keyed by its canonical wire name.
+
+  ```idl
+  interface Store {
+      @post(path = "/items")
+      Item create(@body Item item, @body Tag tag);
+  };
+  // request body: {"item": {...}, "tag": {...}}
+  ```
+
+`@flatten` on a `@body` parameter does not change the wire shape; it is a
+generated-model composition hint and is only legal as the operation's single
+body parameter.
+
 ## Request Side and Response Side
 
 Direction rules:
