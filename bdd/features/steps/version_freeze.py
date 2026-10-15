@@ -100,9 +100,9 @@ def step_impl(context):
     )
     assert sorted(index["released"]) == copies, index
     for value in index["released"]:
-        assert os.path.exists(
-            os.path.join(context.copies_dir, f"{value}.json")
-        ), f"missing frozen copy for {value}"
+        assert os.path.exists(os.path.join(context.copies_dir, f"{value}.json")), (
+            f"missing frozen copy for {value}"
+        )
         with open(os.path.join(context.copies_dir, f"{value}.json"), "r") as handle:
             document = json.load(handle)
         assert document["info"]["version"] == value, document.get("info")
@@ -114,7 +114,9 @@ def step_impl(context):
         path = os.path.join(context.copies_dir, f"{value}.json")
         with open(path, "rb") as handle:
             context.frozen_bytes = context.frozen_bytes or {}
-        assert path in context.frozen_bytes, "the first freeze should have recorded bytes"
+        assert path in context.frozen_bytes, (
+            "the first freeze should have recorded bytes"
+        )
         with open(path, "rb") as handle:
             assert handle.read() == context.frozen_bytes[path], f"{value} drifted"
 
@@ -180,7 +182,7 @@ def step_impl(context):
     assert "xidlc version verify --update" in context.failure, context.failure
 
 
-@when("I insert the version \"{value}\" before the released ones")
+@when('I insert the version "{value}" before the released ones')
 def step_impl(context, value):
     _edit_contract(
         context,
