@@ -37,41 +37,44 @@ pub(super) mod {{ module.name }} {
                         {% for field in item.fields %}
                             {{ field.name }}{% if field.name != field.decode_expr %}: {{ field.decode_expr }}{% endif %},
                         {% endfor %}
-                    }
-                }
-            }
-        {% else %}
-            pub enum {{ item.transport_ident }} {
-                {% for variant in item.variants %}
-                    {% if variant.serde_rename %}
-                        #[serde(rename = "{{ variant.serde_rename }}")]
+                        {% if item.has_skipped_members %}{# Members the wire never carries (@skip) fall back to Default. #}
+                        ..::core::default::Default::default()
                     {% endif %}
-                    {{ variant.ident }},
-                {% endfor %}
-            }
-
-            #[allow(unused_variables, unreachable_code)]
-            impl From<{{ item.public_path }}> for {{ item.transport_ident }} {
-                fn from(value: {{ item.public_path }}) -> Self {
-                    match value {
-                        {% for variant in item.variants %}
-                            {{ item.public_path }}::{{ variant.ident }} => Self::{{ variant.ident }},
-                        {% endfor %}
-                    }
                 }
             }
+        }
+    {% else %}
+        pub enum {{ item.transport_ident }} {
+            {% for variant in item.variants %}
+                {% if variant.serde_rename %}
+                    #[serde(rename = "{{ variant.serde_rename }}")]
+                {% endif %}
+                {{ variant.ident }},
+            {% endfor %}
+        }
 
-            #[allow(unused_variables, unreachable_code)]
-            impl From<{{ item.transport_ident }}> for {{ item.public_path }} {
-                fn from(value: {{ item.transport_ident }}) -> Self {
-                    match value {
-                        {% for variant in item.variants %}
-                            {{ item.transport_ident }}::{{ variant.ident }} => Self::{{ variant.ident }},
-                        {% endfor %}
-                    }
+        #[allow(unused_variables, unreachable_code)]
+        impl From<{{ item.public_path }}> for {{ item.transport_ident }} {
+            fn from(value: {{ item.public_path }}) -> Self {
+                match value {
+                    {% for variant in item.variants %}
+                        {{ item.public_path }}::{{ variant.ident }} => Self::{{ variant.ident }},
+                    {% endfor %}
                 }
             }
-        {% endif %}
+        }
+
+        #[allow(unused_variables, unreachable_code)]
+        impl From<{{ item.transport_ident }}> for {{ item.public_path }} {
+            fn from(value: {{ item.transport_ident }}) -> Self {
+                match value {
+                    {% for variant in item.variants %}
+                        {{ item.transport_ident }}::{{ variant.ident }} => Self::{{ variant.ident }},
+                    {% endfor %}
+                }
+            }
+        }
+    {% endif %}
 
     {% endfor %}
 }

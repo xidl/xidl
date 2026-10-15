@@ -73,6 +73,7 @@ fn render_modules_returns_structured_transport_context() {
     assert_eq!(modules.inbound.name, "__xidl_in_DemoApi");
     assert_eq!(item.transport_ident, "demo_Widget");
     assert_eq!(item.public_path, "super::Widget");
+    assert!(!item.has_skipped_members);
     assert_eq!(fields.len(), 2);
     assert_eq!(fields[0].name, "count");
     assert_eq!(fields[0].ty, "Option<i32>");
@@ -81,4 +82,37 @@ fn render_modules_returns_structured_transport_context() {
     assert_eq!(fields[0].decode_expr, "value.count");
     assert_eq!(fields[1].name, "enabled");
     assert_eq!(fields[1].ty, "bool");
+}
+
+#[test]
+fn skipped_members_mark_the_public_struct_for_default_fallback() {
+    let mut widget = widget_struct();
+    widget.member[1].annotations = vec![Annotation::Skip];
+
+    let mut tracker = TransportTracker::new("DemoApi");
+    let registry =
+        TypeRegistry::from([("demo::Widget".to_string(), TransportTypeDef::Struct(widget))]);
+
+    tracker
+        .map_type(
+            &TypeSpec::ScopedName(ScopedName {
+                name: vec!["demo".to_string(), "Widget".to_string()],
+                is_root: false,
+            }),
+            TransportDirection::Out,
+            super::super::scope::TypeScope::new(&registry, &["demo".to_string()]),
+        )
+        .expect("track widget type");
+
+    let modules = tracker
+        .render_modules(&registry, &["demo".to_string()])
+        .expect("render transport modules");
+    let item = modules
+        .outbound
+        .items
+        .first()
+        .expect("expected one transport item");
+
+    assert_eq!(tracked_item_fields(item).len(), 1);
+    assert!(item.has_skipped_members);
 }

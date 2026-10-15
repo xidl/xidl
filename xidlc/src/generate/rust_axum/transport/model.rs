@@ -42,6 +42,8 @@ pub struct TransportItemContext {
     pub kind: String,
     pub transport_ident: String,
     pub public_path: String,
+    /// Structs only: whether the public type declares members the wire never carries.
+    pub has_skipped_members: bool,
     pub fields: Vec<TransportFieldContext>,
     pub variants: Vec<TransportVariantContext>,
 }

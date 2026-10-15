@@ -233,15 +233,8 @@ where
         }
     }
 }
-#[derive(::serde::Serialize)]
-pub struct HttpDefaultsServiceCreateUserRequestOutBody {
-    #[serde(default)]
-    pub req: __xidl_out_HttpDefaultsService::CreateUserRequest,
-}
-#[derive(::serde::Deserialize)]
-pub struct HttpDefaultsServiceCreateUserRequestInBody {
-    pub req: __xidl_in_HttpDefaultsService::CreateUserRequest,
-}
+pub type HttpDefaultsServiceCreateUserRequestOutBody = __xidl_out_HttpDefaultsService::CreateUserRequest;
+pub type HttpDefaultsServiceCreateUserRequestInBody = __xidl_in_HttpDefaultsService::CreateUserRequest;
 #[derive(::serde::Deserialize)]
 struct HttpDefaultsServiceCreateUserRequest {
     req: __xidl_in_HttpDefaultsService::CreateUserRequest,
@@ -284,7 +277,7 @@ where
                     "application/json",
                 )
                 .from_slice(&xidl_body_bytes)?;
-            let HttpDefaultsServiceCreateUserRequestInBody { req } = xidl_body;
+            let req = xidl_body;
             Ok(Self { req })
         }
     }
@@ -398,15 +391,8 @@ where
         }
     }
 }
-#[derive(::serde::Serialize)]
-pub struct HttpDefaultsServicePreviewUserRequestOutBody {
-    #[serde(default)]
-    pub req: __xidl_out_HttpDefaultsService::CreateUserRequest,
-}
-#[derive(::serde::Deserialize)]
-pub struct HttpDefaultsServicePreviewUserRequestInBody {
-    pub req: __xidl_in_HttpDefaultsService::CreateUserRequest,
-}
+pub type HttpDefaultsServicePreviewUserRequestOutBody = __xidl_out_HttpDefaultsService::CreateUserRequest;
+pub type HttpDefaultsServicePreviewUserRequestInBody = __xidl_in_HttpDefaultsService::CreateUserRequest;
 #[derive(::serde::Deserialize)]
 struct HttpDefaultsServicePreviewUserRequest {
     req: __xidl_in_HttpDefaultsService::CreateUserRequest,
@@ -449,7 +435,7 @@ where
                     "application/json",
                 )
                 .from_slice(&xidl_body_bytes)?;
-            let HttpDefaultsServicePreviewUserRequestInBody { req } = xidl_body;
+            let req = xidl_body;
             Ok(Self { req })
         }
     }
@@ -1727,9 +1713,7 @@ impl HttpDefaultsServiceClient {
             );
         let auth_target = &self.client;
         let _ = auth_target;
-        let body = HttpDefaultsServiceCreateUserRequestOutBody {
-            req: req.into(),
-        };
+        let body: __xidl_out_HttpDefaultsService::CreateUserRequest = req.into();
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;
         req.headers_mut()
@@ -1889,9 +1873,7 @@ impl HttpDefaultsServiceClient {
             );
         let auth_target = &self.client;
         let _ = auth_target;
-        let body = HttpDefaultsServicePreviewUserRequestOutBody {
-            req: req.into(),
-        };
+        let body: __xidl_out_HttpDefaultsService::CreateUserRequest = req.into();
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;
         req.headers_mut()
