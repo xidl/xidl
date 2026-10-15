@@ -208,10 +208,17 @@ fn field_templates(
             } else {
                 effective_wire_name(raw_name, &member.annotations, container_annotations)
             };
+            // An absent optional member stays absent on the wire: the codec
+            // omits nil pointers instead of writing null.
+            let tag = if is_optional {
+                format!("{wire_name},omitempty")
+            } else {
+                wire_name
+            };
             fields.push(FieldTemplate {
                 name: field,
                 ty,
-                tag: wire_name,
+                tag,
             });
         }
     }
