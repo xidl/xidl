@@ -52,26 +52,26 @@ import {
             this.baseUrl = baseUrl;
             this.fetchImpl = resolveFetch(options.fetch);
             this.defaultHeaders = options.headers ?? {};
-            this.auth = options.auth;
-            this.codecs = options.codecs ?? {};
-        }
-        
-            async get_user(id: number, lang: string): Promise<string> {
-                const parsed = ifaceSchemas.HttpAnnoServiceGetUserRequestSchema.parse({ "id": id, "lang": lang });
-                let xidlPath = "/v1/users/{id}";
-                xidlPath = xidlPath.replace("{" + "id" + "}", encodePathSegment(id));
-                const query = new URLSearchParams();
-                appendParam(query, "lang", lang, false, false);
-                const headers = new Headers(this.defaultHeaders);
-                const cookies: string[] = [];
-                applyCookies(headers, cookies);
-                applyClientAuth(xidlPath, query, headers, this.auth, []);
-                const queryString = query.toString();
-                if (queryString.length > 0) {
-                    xidlPath = `${xidlPath}?${queryString}`;
-                }
-                const url = joinUrl(this.baseUrl, xidlPath);
-                headers.set("Accept", "text/plain");
+                this.auth = options.auth;
+                this.codecs = options.codecs ?? {};
+            }
+            
+                async get_user(id: number, lang: string): Promise<string> {
+                    const parsed = ifaceSchemas.HttpAnnoServiceGetUserRequestSchema.parse({ "id": id, "lang": lang });
+                    let xidlPath = "/v1/users/{id}";
+                    xidlPath = xidlPath.replace("{" + "id" + "}", encodePathSegment(id));
+                    const query = new URLSearchParams();
+                    appendParam(query, "lang", lang, false, false);
+                    const headers = new Headers(this.defaultHeaders);
+                    const cookies: string[] = [];
+                    applyCookies(headers, cookies);
+                    applyClientAuth(xidlPath, query, headers, this.auth, []);
+                    const queryString = query.toString();
+                    if (queryString.length > 0) {
+                        xidlPath = `${xidlPath}?${queryString}`;
+                    }
+                    const url = joinUrl(this.baseUrl, xidlPath);
+                    headers.set("Accept", "text/plain");
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
@@ -80,20 +80,20 @@ import {
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
     }
     
-            async create_user(name: string, age: number): Promise<string> {
-                const parsed = ifaceSchemas.HttpAnnoServiceCreateUserRequestSchema.parse({ "name": name, "age": age });
-                let xidlPath = "/create_user";
-                const query = new URLSearchParams();
-                const headers = new Headers(this.defaultHeaders);
-                const cookies: string[] = [];
-                applyCookies(headers, cookies);
-                applyClientAuth(xidlPath, query, headers, this.auth, []);
-                const queryString = query.toString();
-                if (queryString.length > 0) {
-                    xidlPath = `${xidlPath}?${queryString}`;
-                }
-                const url = joinUrl(this.baseUrl, xidlPath);
-                const xidlBody = { "name": parsed["name"], "age": parsed["age"] };
+                async create_user(name: string, age: number): Promise<string> {
+                    const parsed = ifaceSchemas.HttpAnnoServiceCreateUserRequestSchema.parse({ "name": name, "age": age });
+                    let xidlPath = "/create_user";
+                    const query = new URLSearchParams();
+                    const headers = new Headers(this.defaultHeaders);
+                    const cookies: string[] = [];
+                    applyCookies(headers, cookies);
+                    applyClientAuth(xidlPath, query, headers, this.auth, []);
+                    const queryString = query.toString();
+                    if (queryString.length > 0) {
+                        xidlPath = `${xidlPath}?${queryString}`;
+                    }
+                    const url = joinUrl(this.baseUrl, xidlPath);
+                    const xidlBody = { "name": parsed["name"], "age": parsed["age"] };
         headers.set("Content-Type", "application/json");
         
         headers.set("Accept", "text/plain");
@@ -105,21 +105,21 @@ import {
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
     }
     
-            async get_name(name: string): Promise<string> {
-                const parsed = ifaceSchemas.HttpAnnoServiceGetNameRequestSchema.parse({ "name": name });
-                let xidlPath = "/get_name";
-                const query = new URLSearchParams();
-                appendParam(query, "name", name, false, false);
-                const headers = new Headers(this.defaultHeaders);
-                const cookies: string[] = [];
-                applyCookies(headers, cookies);
-                applyClientAuth(xidlPath, query, headers, this.auth, []);
-                const queryString = query.toString();
-                if (queryString.length > 0) {
-                    xidlPath = `${xidlPath}?${queryString}`;
-                }
-                const url = joinUrl(this.baseUrl, xidlPath);
-                headers.set("Accept", "text/plain");
+                async get_name(name: string): Promise<string> {
+                    const parsed = ifaceSchemas.HttpAnnoServiceGetNameRequestSchema.parse({ "name": name });
+                    let xidlPath = "/get_name";
+                    const query = new URLSearchParams();
+                    appendParam(query, "name", name, false, false);
+                    const headers = new Headers(this.defaultHeaders);
+                    const cookies: string[] = [];
+                    applyCookies(headers, cookies);
+                    applyClientAuth(xidlPath, query, headers, this.auth, []);
+                    const queryString = query.toString();
+                    if (queryString.length > 0) {
+                        xidlPath = `${xidlPath}?${queryString}`;
+                    }
+                    const url = joinUrl(this.baseUrl, xidlPath);
+                    headers.set("Accept", "text/plain");
         const resp = await this.fetchImpl(url, { method: "POST", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
@@ -128,22 +128,22 @@ import {
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
     }
     
-            async search_user(keyword: string, page: number): Promise<string> {
-                const parsed = ifaceSchemas.HttpAnnoServiceSearchUserRequestSchema.parse({ "keyword": keyword, "page": page });
-                let xidlPath = "/search_user";
-                const query = new URLSearchParams();
-                appendParam(query, "keyword", keyword, false, false);
-                appendParam(query, "page", page, false, false);
-                const headers = new Headers(this.defaultHeaders);
-                const cookies: string[] = [];
-                applyCookies(headers, cookies);
-                applyClientAuth(xidlPath, query, headers, this.auth, []);
-                const queryString = query.toString();
-                if (queryString.length > 0) {
-                    xidlPath = `${xidlPath}?${queryString}`;
-                }
-                const url = joinUrl(this.baseUrl, xidlPath);
-                headers.set("Accept", "text/plain");
+                async search_user(keyword: string, page: number): Promise<string> {
+                    const parsed = ifaceSchemas.HttpAnnoServiceSearchUserRequestSchema.parse({ "keyword": keyword, "page": page });
+                    let xidlPath = "/search_user";
+                    const query = new URLSearchParams();
+                    appendParam(query, "keyword", keyword, false, false);
+                    appendParam(query, "page", page, false, false);
+                    const headers = new Headers(this.defaultHeaders);
+                    const cookies: string[] = [];
+                    applyCookies(headers, cookies);
+                    applyClientAuth(xidlPath, query, headers, this.auth, []);
+                    const queryString = query.toString();
+                    if (queryString.length > 0) {
+                        xidlPath = `${xidlPath}?${queryString}`;
+                    }
+                    const url = joinUrl(this.baseUrl, xidlPath);
+                    headers.set("Accept", "text/plain");
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
@@ -152,22 +152,22 @@ import {
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
     }
     
-            async get_user_alias(user_id: number, locale: string): Promise<string> {
-                const parsed = ifaceSchemas.HttpAnnoServiceGetUserAliasRequestSchema.parse({ "user_id": user_id, "locale": locale });
-                let xidlPath = "/get_user_alias/{id}";
-                xidlPath = xidlPath.replace("{" + "id" + "}", encodePathSegment(user_id));
-                const query = new URLSearchParams();
-                appendParam(query, "lang", locale, false, false);
-                const headers = new Headers(this.defaultHeaders);
-                const cookies: string[] = [];
-                applyCookies(headers, cookies);
-                applyClientAuth(xidlPath, query, headers, this.auth, []);
-                const queryString = query.toString();
-                if (queryString.length > 0) {
-                    xidlPath = `${xidlPath}?${queryString}`;
-                }
-                const url = joinUrl(this.baseUrl, xidlPath);
-                headers.set("Accept", "text/plain");
+                async get_user_alias(user_id: number, locale: string): Promise<string> {
+                    const parsed = ifaceSchemas.HttpAnnoServiceGetUserAliasRequestSchema.parse({ "user_id": user_id, "locale": locale });
+                    let xidlPath = "/get_user_alias/{id}";
+                    xidlPath = xidlPath.replace("{" + "id" + "}", encodePathSegment(user_id));
+                    const query = new URLSearchParams();
+                    appendParam(query, "lang", locale, false, false);
+                    const headers = new Headers(this.defaultHeaders);
+                    const cookies: string[] = [];
+                    applyCookies(headers, cookies);
+                    applyClientAuth(xidlPath, query, headers, this.auth, []);
+                    const queryString = query.toString();
+                    if (queryString.length > 0) {
+                        xidlPath = `${xidlPath}?${queryString}`;
+                    }
+                    const url = joinUrl(this.baseUrl, xidlPath);
+                    headers.set("Accept", "text/plain");
         const resp = await this.fetchImpl(url, { method: "POST", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
@@ -176,20 +176,20 @@ import {
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
     }
     
-            async add(a: number, b: number): Promise<ifaceTypes.HttpAnnoServiceAddResponse> {
-                const parsed = ifaceSchemas.HttpAnnoServiceAddRequestSchema.parse({ "a": a, "b": b });
-                let xidlPath = "/add";
-                const query = new URLSearchParams();
-                const headers = new Headers(this.defaultHeaders);
-                const cookies: string[] = [];
-                applyCookies(headers, cookies);
-                applyClientAuth(xidlPath, query, headers, this.auth, []);
-                const queryString = query.toString();
-                if (queryString.length > 0) {
-                    xidlPath = `${xidlPath}?${queryString}`;
-                }
-                const url = joinUrl(this.baseUrl, xidlPath);
-                const xidlBody = { "a": parsed["a"], "b": parsed["b"] };
+                async add(a: number, b: number): Promise<ifaceTypes.HttpAnnoServiceAddResponse> {
+                    const parsed = ifaceSchemas.HttpAnnoServiceAddRequestSchema.parse({ "a": a, "b": b });
+                    let xidlPath = "/add";
+                    const query = new URLSearchParams();
+                    const headers = new Headers(this.defaultHeaders);
+                    const cookies: string[] = [];
+                    applyCookies(headers, cookies);
+                    applyClientAuth(xidlPath, query, headers, this.auth, []);
+                    const queryString = query.toString();
+                    if (queryString.length > 0) {
+                        xidlPath = `${xidlPath}?${queryString}`;
+                    }
+                    const url = joinUrl(this.baseUrl, xidlPath);
+                    const xidlBody = { "a": parsed["a"], "b": parsed["b"] };
         headers.set("Content-Type", "application/json");
         
         headers.set("Accept", "application/json");
@@ -203,20 +203,20 @@ import {
         return ifaceSchemas.HttpAnnoServiceAddResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.HttpAnnoServiceAddResponseSchema)) as ifaceTypes.HttpAnnoServiceAddResponse;
     }
     
-            async bump(value: number): Promise<ifaceTypes.HttpAnnoServiceBumpResponse> {
-                const parsed = ifaceSchemas.HttpAnnoServiceBumpRequestSchema.parse({ "value": value });
-                let xidlPath = "/bump";
-                const query = new URLSearchParams();
-                const headers = new Headers(this.defaultHeaders);
-                const cookies: string[] = [];
-                applyCookies(headers, cookies);
-                applyClientAuth(xidlPath, query, headers, this.auth, []);
-                const queryString = query.toString();
-                if (queryString.length > 0) {
-                    xidlPath = `${xidlPath}?${queryString}`;
-                }
-                const url = joinUrl(this.baseUrl, xidlPath);
-                const xidlBody = parsed["value"];
+                async bump(value: number): Promise<ifaceTypes.HttpAnnoServiceBumpResponse> {
+                    const parsed = ifaceSchemas.HttpAnnoServiceBumpRequestSchema.parse({ "value": value });
+                    let xidlPath = "/bump";
+                    const query = new URLSearchParams();
+                    const headers = new Headers(this.defaultHeaders);
+                    const cookies: string[] = [];
+                    applyCookies(headers, cookies);
+                    applyClientAuth(xidlPath, query, headers, this.auth, []);
+                    const queryString = query.toString();
+                    if (queryString.length > 0) {
+                        xidlPath = `${xidlPath}?${queryString}`;
+                    }
+                    const url = joinUrl(this.baseUrl, xidlPath);
+                    const xidlBody = parsed["value"];
         headers.set("Content-Type", "text/plain");
         
         headers.set("Accept", "application/json");
@@ -230,19 +230,19 @@ import {
         return ifaceSchemas.HttpAnnoServiceBumpResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.HttpAnnoServiceBumpResponseSchema)) as ifaceTypes.HttpAnnoServiceBumpResponse;
     }
     
-            async get_count(): Promise<ifaceTypes.HttpAnnoServiceGetCountResponse> {
-                let xidlPath = "/get_count";
-                const query = new URLSearchParams();
-                const headers = new Headers(this.defaultHeaders);
-                const cookies: string[] = [];
-                applyCookies(headers, cookies);
-                applyClientAuth(xidlPath, query, headers, this.auth, []);
-                const queryString = query.toString();
-                if (queryString.length > 0) {
-                    xidlPath = `${xidlPath}?${queryString}`;
-                }
-                const url = joinUrl(this.baseUrl, xidlPath);
-                headers.set("Accept", "text/plain");
+                async get_count(): Promise<ifaceTypes.HttpAnnoServiceGetCountResponse> {
+                    let xidlPath = "/get_count";
+                    const query = new URLSearchParams();
+                    const headers = new Headers(this.defaultHeaders);
+                    const cookies: string[] = [];
+                    applyCookies(headers, cookies);
+                    applyClientAuth(xidlPath, query, headers, this.auth, []);
+                    const queryString = query.toString();
+                    if (queryString.length > 0) {
+                        xidlPath = `${xidlPath}?${queryString}`;
+                    }
+                    const url = joinUrl(this.baseUrl, xidlPath);
+                    headers.set("Accept", "text/plain");
         const resp = await this.fetchImpl(url, { method: "POST", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
@@ -253,19 +253,19 @@ import {
         return ifaceSchemas.HttpAnnoServiceGetCountResponseSchema.parse(deserialize(responsePayload, ifaceSchemas.HttpAnnoServiceGetCountResponseSchema)) as ifaceTypes.HttpAnnoServiceGetCountResponse;
     }
     
-            async ping(): Promise<void> {
-                let xidlPath = "/ping";
-                const query = new URLSearchParams();
-                const headers = new Headers(this.defaultHeaders);
-                const cookies: string[] = [];
-                applyCookies(headers, cookies);
-                applyClientAuth(xidlPath, query, headers, this.auth, []);
-                const queryString = query.toString();
-                if (queryString.length > 0) {
-                    xidlPath = `${xidlPath}?${queryString}`;
-                }
-                const url = joinUrl(this.baseUrl, xidlPath);
-                headers.set("Accept", "");
+                async ping(): Promise<void> {
+                    let xidlPath = "/ping";
+                    const query = new URLSearchParams();
+                    const headers = new Headers(this.defaultHeaders);
+                    const cookies: string[] = [];
+                    applyCookies(headers, cookies);
+                    applyClientAuth(xidlPath, query, headers, this.auth, []);
+                    const queryString = query.toString();
+                    if (queryString.length > 0) {
+                        xidlPath = `${xidlPath}?${queryString}`;
+                    }
+                    const url = joinUrl(this.baseUrl, xidlPath);
+                    headers.set("Accept", "");
         const resp = await this.fetchImpl(url, { method: "POST", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);

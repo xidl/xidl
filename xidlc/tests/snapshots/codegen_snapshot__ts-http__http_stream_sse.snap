@@ -52,43 +52,43 @@ import {
             this.baseUrl = baseUrl;
             this.fetchImpl = resolveFetch(options.fetch);
             this.defaultHeaders = options.headers ?? {};
-            this.auth = options.auth;
-            this.codecs = options.codecs ?? {};
-        }
-        
-            watch_topic(topic: string, lang: string): AsyncIterable<string> {
-                const parsed = ifaceSchemas.HttpStreamSseServiceWatchTopicRequestSchema.parse({ "topic": topic, "lang": lang });
-                let xidlPath = "/events/{topic}";
-                xidlPath = xidlPath.replace("{" + "topic" + "}", encodePathSegment(topic));
-                const query = new URLSearchParams();
-                appendParam(query, "lang", lang, false, false);
-                const headers = new Headers(this.defaultHeaders);
-                const cookies: string[] = [];
-                applyCookies(headers, cookies);
-                applyClientAuth(xidlPath, query, headers, this.auth, []);
-                const queryString = query.toString();
-                if (queryString.length > 0) {
-                    xidlPath = `${xidlPath}?${queryString}`;
-                }
-                const url = joinUrl(this.baseUrl, xidlPath);
-                return sseJsonStream<string>(this.fetchImpl, url, { method: "GET", headers }, undefined);
+                this.auth = options.auth;
+                this.codecs = options.codecs ?? {};
+            }
             
-            
+                watch_topic(topic: string, lang: string): AsyncIterable<string> {
+                    const parsed = ifaceSchemas.HttpStreamSseServiceWatchTopicRequestSchema.parse({ "topic": topic, "lang": lang });
+                    let xidlPath = "/events/{topic}";
+                    xidlPath = xidlPath.replace("{" + "topic" + "}", encodePathSegment(topic));
+                    const query = new URLSearchParams();
+                    appendParam(query, "lang", lang, false, false);
+                    const headers = new Headers(this.defaultHeaders);
+                    const cookies: string[] = [];
+                    applyCookies(headers, cookies);
+                    applyClientAuth(xidlPath, query, headers, this.auth, []);
+                    const queryString = query.toString();
+                    if (queryString.length > 0) {
+                        xidlPath = `${xidlPath}?${queryString}`;
+                    }
+                    const url = joinUrl(this.baseUrl, xidlPath);
+                    return sseJsonStream<string>(this.fetchImpl, url, { method: "GET", headers }, undefined);
+                
+                
     }
     
-            async get_attribute_online(): Promise<boolean> {
-                let xidlPath = "/attribute/online";
-                const query = new URLSearchParams();
-                const headers = new Headers(this.defaultHeaders);
-                const cookies: string[] = [];
-                applyCookies(headers, cookies);
-                applyClientAuth(xidlPath, query, headers, this.auth, []);
-                const queryString = query.toString();
-                if (queryString.length > 0) {
-                    xidlPath = `${xidlPath}?${queryString}`;
-                }
-                const url = joinUrl(this.baseUrl, xidlPath);
-                headers.set("Accept", "text/plain");
+                async get_attribute_online(): Promise<boolean> {
+                    let xidlPath = "/attribute/online";
+                    const query = new URLSearchParams();
+                    const headers = new Headers(this.defaultHeaders);
+                    const cookies: string[] = [];
+                    applyCookies(headers, cookies);
+                    applyClientAuth(xidlPath, query, headers, this.auth, []);
+                    const queryString = query.toString();
+                    if (queryString.length > 0) {
+                        xidlPath = `${xidlPath}?${queryString}`;
+                    }
+                    const url = joinUrl(this.baseUrl, xidlPath);
+                    headers.set("Accept", "text/plain");
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
@@ -97,20 +97,20 @@ import {
         return await decodeResponseBody<boolean>(resp, "text/plain", this.codecs);
     }
     
-            async set_attribute_online(online: boolean): Promise<void> {
-                const parsed = ifaceSchemas.HttpStreamSseServiceSetAttributeOnlineRequestSchema.parse({ "online": online });
-                let xidlPath = "/attribute/online";
-                const query = new URLSearchParams();
-                const headers = new Headers(this.defaultHeaders);
-                const cookies: string[] = [];
-                applyCookies(headers, cookies);
-                applyClientAuth(xidlPath, query, headers, this.auth, []);
-                const queryString = query.toString();
-                if (queryString.length > 0) {
-                    xidlPath = `${xidlPath}?${queryString}`;
-                }
-                const url = joinUrl(this.baseUrl, xidlPath);
-                const xidlBody = parsed["online"];
+                async set_attribute_online(online: boolean): Promise<void> {
+                    const parsed = ifaceSchemas.HttpStreamSseServiceSetAttributeOnlineRequestSchema.parse({ "online": online });
+                    let xidlPath = "/attribute/online";
+                    const query = new URLSearchParams();
+                    const headers = new Headers(this.defaultHeaders);
+                    const cookies: string[] = [];
+                    applyCookies(headers, cookies);
+                    applyClientAuth(xidlPath, query, headers, this.auth, []);
+                    const queryString = query.toString();
+                    if (queryString.length > 0) {
+                        xidlPath = `${xidlPath}?${queryString}`;
+                    }
+                    const url = joinUrl(this.baseUrl, xidlPath);
+                    const xidlBody = parsed["online"];
         headers.set("Content-Type", "text/plain");
         
         headers.set("Accept", "");
@@ -122,21 +122,21 @@ import {
         return;
     }
     
-            watch_attribute_online(): AsyncIterable<boolean> {
-                let xidlPath = "/HttpStreamSseService/watch_attribute_online";
-                const query = new URLSearchParams();
-                const headers = new Headers(this.defaultHeaders);
-                const cookies: string[] = [];
-                applyCookies(headers, cookies);
-                applyClientAuth(xidlPath, query, headers, this.auth, []);
-                const queryString = query.toString();
-                if (queryString.length > 0) {
-                    xidlPath = `${xidlPath}?${queryString}`;
-                }
-                const url = joinUrl(this.baseUrl, xidlPath);
-                return sseJsonStream<boolean>(this.fetchImpl, url, { method: "GET", headers }, undefined);
-            
-            
+                watch_attribute_online(): AsyncIterable<boolean> {
+                    let xidlPath = "/HttpStreamSseService/watch_attribute_online";
+                    const query = new URLSearchParams();
+                    const headers = new Headers(this.defaultHeaders);
+                    const cookies: string[] = [];
+                    applyCookies(headers, cookies);
+                    applyClientAuth(xidlPath, query, headers, this.auth, []);
+                    const queryString = query.toString();
+                    if (queryString.length > 0) {
+                        xidlPath = `${xidlPath}?${queryString}`;
+                    }
+                    const url = joinUrl(this.baseUrl, xidlPath);
+                    return sseJsonStream<boolean>(this.fetchImpl, url, { method: "GET", headers }, undefined);
+                
+                
     }
     
     

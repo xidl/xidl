@@ -52,23 +52,23 @@ import {
             this.baseUrl = baseUrl;
             this.fetchImpl = resolveFetch(options.fetch);
             this.defaultHeaders = options.headers ?? {};
-            this.auth = options.auth;
-            this.codecs = options.codecs ?? {};
-        }
-        
-            async get_attribute_version(): Promise<string> {
-                let xidlPath = "/attribute/version";
-                const query = new URLSearchParams();
-                const headers = new Headers(this.defaultHeaders);
-                const cookies: string[] = [];
-                applyCookies(headers, cookies);
-                applyClientAuth(xidlPath, query, headers, this.auth, []);
-                const queryString = query.toString();
-                if (queryString.length > 0) {
-                    xidlPath = `${xidlPath}?${queryString}`;
-                }
-                const url = joinUrl(this.baseUrl, xidlPath);
-                headers.set("Accept", "text/plain");
+                this.auth = options.auth;
+                this.codecs = options.codecs ?? {};
+            }
+            
+                async get_attribute_version(): Promise<string> {
+                    let xidlPath = "/attribute/version";
+                    const query = new URLSearchParams();
+                    const headers = new Headers(this.defaultHeaders);
+                    const cookies: string[] = [];
+                    applyCookies(headers, cookies);
+                    applyClientAuth(xidlPath, query, headers, this.auth, []);
+                    const queryString = query.toString();
+                    if (queryString.length > 0) {
+                        xidlPath = `${xidlPath}?${queryString}`;
+                    }
+                    const url = joinUrl(this.baseUrl, xidlPath);
+                    headers.set("Accept", "text/plain");
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
@@ -77,19 +77,19 @@ import {
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
     }
     
-            async get_attribute_name(): Promise<string> {
-                let xidlPath = "/attribute/name";
-                const query = new URLSearchParams();
-                const headers = new Headers(this.defaultHeaders);
-                const cookies: string[] = [];
-                applyCookies(headers, cookies);
-                applyClientAuth(xidlPath, query, headers, this.auth, []);
-                const queryString = query.toString();
-                if (queryString.length > 0) {
-                    xidlPath = `${xidlPath}?${queryString}`;
-                }
-                const url = joinUrl(this.baseUrl, xidlPath);
-                headers.set("Accept", "text/plain");
+                async get_attribute_name(): Promise<string> {
+                    let xidlPath = "/attribute/name";
+                    const query = new URLSearchParams();
+                    const headers = new Headers(this.defaultHeaders);
+                    const cookies: string[] = [];
+                    applyCookies(headers, cookies);
+                    applyClientAuth(xidlPath, query, headers, this.auth, []);
+                    const queryString = query.toString();
+                    if (queryString.length > 0) {
+                        xidlPath = `${xidlPath}?${queryString}`;
+                    }
+                    const url = joinUrl(this.baseUrl, xidlPath);
+                    headers.set("Accept", "text/plain");
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             throw await parseXidlError(resp);
@@ -98,20 +98,20 @@ import {
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
     }
     
-            async set_attribute_name(name: string): Promise<void> {
-                const parsed = ifaceSchemas.HttpAttributeServiceSetAttributeNameRequestSchema.parse({ "name": name });
-                let xidlPath = "/attribute/name";
-                const query = new URLSearchParams();
-                const headers = new Headers(this.defaultHeaders);
-                const cookies: string[] = [];
-                applyCookies(headers, cookies);
-                applyClientAuth(xidlPath, query, headers, this.auth, []);
-                const queryString = query.toString();
-                if (queryString.length > 0) {
-                    xidlPath = `${xidlPath}?${queryString}`;
-                }
-                const url = joinUrl(this.baseUrl, xidlPath);
-                const xidlBody = parsed["name"];
+                async set_attribute_name(name: string): Promise<void> {
+                    const parsed = ifaceSchemas.HttpAttributeServiceSetAttributeNameRequestSchema.parse({ "name": name });
+                    let xidlPath = "/attribute/name";
+                    const query = new URLSearchParams();
+                    const headers = new Headers(this.defaultHeaders);
+                    const cookies: string[] = [];
+                    applyCookies(headers, cookies);
+                    applyClientAuth(xidlPath, query, headers, this.auth, []);
+                    const queryString = query.toString();
+                    if (queryString.length > 0) {
+                        xidlPath = `${xidlPath}?${queryString}`;
+                    }
+                    const url = joinUrl(this.baseUrl, xidlPath);
+                    const xidlBody = parsed["name"];
         headers.set("Content-Type", "text/plain");
         
         headers.set("Accept", "");

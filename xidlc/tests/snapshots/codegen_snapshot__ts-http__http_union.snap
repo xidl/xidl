@@ -54,25 +54,25 @@ import {
             this.baseUrl = baseUrl;
             this.fetchImpl = resolveFetch(options.fetch);
             this.defaultHeaders = options.headers ?? {};
-            this.auth = options.auth;
-            this.codecs = options.codecs ?? {};
-        }
-        
-            async get_meta(path: string): Promise<{ kind: "Json", value: types.FileMeta } | { kind: "OctetStream", value: Uint8Array }> {
-                const parsed = ifaceSchemas.FilesGetMetaRequestSchema.parse({ "path": path });
-                let xidlPath = "/meta";
-                const query = new URLSearchParams();
-                appendParam(query, "path", path, false, false);
-                const headers = new Headers(this.defaultHeaders);
-                const cookies: string[] = [];
-                applyCookies(headers, cookies);
-                applyClientAuth(xidlPath, query, headers, this.auth, []);
-                const queryString = query.toString();
-                if (queryString.length > 0) {
-                    xidlPath = `${xidlPath}?${queryString}`;
-                }
-                const url = joinUrl(this.baseUrl, xidlPath);
-                headers.set("Accept", "application/json, application/octet-stream");
+                this.auth = options.auth;
+                this.codecs = options.codecs ?? {};
+            }
+            
+                async get_meta(path: string): Promise<{ kind: "Json", value: types.FileMeta } | { kind: "OctetStream", value: Uint8Array }> {
+                    const parsed = ifaceSchemas.FilesGetMetaRequestSchema.parse({ "path": path });
+                    let xidlPath = "/meta";
+                    const query = new URLSearchParams();
+                    appendParam(query, "path", path, false, false);
+                    const headers = new Headers(this.defaultHeaders);
+                    const cookies: string[] = [];
+                    applyCookies(headers, cookies);
+                    applyClientAuth(xidlPath, query, headers, this.auth, []);
+                    const queryString = query.toString();
+                    if (queryString.length > 0) {
+                        xidlPath = `${xidlPath}?${queryString}`;
+                    }
+                    const url = joinUrl(this.baseUrl, xidlPath);
+                    headers.set("Accept", "application/json, application/octet-stream");
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             await this.throwGetMetaError(resp);
@@ -92,21 +92,21 @@ import {
         throw await parseXidlError(resp);
     }
     
-            async get_file(path: string): Promise<{ kind: "Json", value: types.FileMeta, etag: string } | { kind: "OctetStream", value: Uint8Array, etag: string }> {
-                const parsed = ifaceSchemas.FilesGetFileRequestSchema.parse({ "path": path });
-                let xidlPath = "/file";
-                const query = new URLSearchParams();
-                appendParam(query, "path", path, false, false);
-                const headers = new Headers(this.defaultHeaders);
-                const cookies: string[] = [];
-                applyCookies(headers, cookies);
-                applyClientAuth(xidlPath, query, headers, this.auth, []);
-                const queryString = query.toString();
-                if (queryString.length > 0) {
-                    xidlPath = `${xidlPath}?${queryString}`;
-                }
-                const url = joinUrl(this.baseUrl, xidlPath);
-                headers.set("Accept", "application/json, application/octet-stream");
+                async get_file(path: string): Promise<{ kind: "Json", value: types.FileMeta, etag: string } | { kind: "OctetStream", value: Uint8Array, etag: string }> {
+                    const parsed = ifaceSchemas.FilesGetFileRequestSchema.parse({ "path": path });
+                    let xidlPath = "/file";
+                    const query = new URLSearchParams();
+                    appendParam(query, "path", path, false, false);
+                    const headers = new Headers(this.defaultHeaders);
+                    const cookies: string[] = [];
+                    applyCookies(headers, cookies);
+                    applyClientAuth(xidlPath, query, headers, this.auth, []);
+                    const queryString = query.toString();
+                    if (queryString.length > 0) {
+                        xidlPath = `${xidlPath}?${queryString}`;
+                    }
+                    const url = joinUrl(this.baseUrl, xidlPath);
+                    headers.set("Accept", "application/json, application/octet-stream");
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
             await this.throwGetFileError(resp);

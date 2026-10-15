@@ -52,29 +52,29 @@ import {
             this.baseUrl = baseUrl;
             this.fetchImpl = resolveFetch(options.fetch);
             this.defaultHeaders = options.headers ?? {};
-            this.auth = options.auth;
-            this.codecs = options.codecs ?? {};
-        }
-        
-            watch_project(project_id: string, cursor: string | undefined, trace_id: string): AsyncIterable<types.ProjectEvent> {
-                const parsed = ifaceSchemas.HttpStreamSseBindingsServiceWatchProjectRequestSchema.parse({ "project_id": project_id, "cursor": cursor, "trace_id": trace_id });
-                let xidlPath = "/projects/{project_id}/events";
-                xidlPath = xidlPath.replace("{" + "project_id" + "}", encodePathSegment(project_id));
-                const query = new URLSearchParams();
-                appendParam(query, "cursor", cursor, true, false);
-                const headers = new Headers(this.defaultHeaders);
-                appendHeader(headers, "X-Trace-Id", trace_id, false, false);
-                const cookies: string[] = [];
-                applyCookies(headers, cookies);
-                applyClientAuth(xidlPath, query, headers, this.auth, []);
-                const queryString = query.toString();
-                if (queryString.length > 0) {
-                    xidlPath = `${xidlPath}?${queryString}`;
-                }
-                const url = joinUrl(this.baseUrl, xidlPath);
-                return sseJsonStream<types.ProjectEvent>(this.fetchImpl, url, { method: "GET", headers }, ifaceSchemas.models.ProjectEventSchema);
+                this.auth = options.auth;
+                this.codecs = options.codecs ?? {};
+            }
             
-            
+                watch_project(project_id: string, cursor: string | undefined, trace_id: string): AsyncIterable<types.ProjectEvent> {
+                    const parsed = ifaceSchemas.HttpStreamSseBindingsServiceWatchProjectRequestSchema.parse({ "project_id": project_id, "cursor": cursor, "trace_id": trace_id });
+                    let xidlPath = "/projects/{project_id}/events";
+                    xidlPath = xidlPath.replace("{" + "project_id" + "}", encodePathSegment(project_id));
+                    const query = new URLSearchParams();
+                    appendParam(query, "cursor", cursor, true, false);
+                    const headers = new Headers(this.defaultHeaders);
+                    appendHeader(headers, "X-Trace-Id", trace_id, false, false);
+                    const cookies: string[] = [];
+                    applyCookies(headers, cookies);
+                    applyClientAuth(xidlPath, query, headers, this.auth, []);
+                    const queryString = query.toString();
+                    if (queryString.length > 0) {
+                        xidlPath = `${xidlPath}?${queryString}`;
+                    }
+                    const url = joinUrl(this.baseUrl, xidlPath);
+                    return sseJsonStream<types.ProjectEvent>(this.fetchImpl, url, { method: "GET", headers }, ifaceSchemas.models.ProjectEventSchema);
+                
+                
     }
     
     

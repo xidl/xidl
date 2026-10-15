@@ -39,6 +39,7 @@ export function encodeOperationResponse<TService>(
     if (representation) {
       assertAccepts(requestHeaders, representation.contentType);
       const headers = new Headers();
+      echoHeader(operation.response, headers, requestHeaders);
       writeResponseBindings(
         headers,
         toRecord(wrapper),
@@ -78,6 +79,7 @@ export function encodeOperationResponse<TService>(
     : parsed;
   const record = toRecord(serialized);
   const headers = new Headers();
+  echoHeader(operation.response, headers, requestHeaders);
   writeResponseBindings(headers, record, operation.response.headers, false);
   writeResponseBindings(headers, record, operation.response.cookies, true);
 
@@ -100,6 +102,25 @@ export function encodeOperationResponse<TService>(
       status: operation.response.status,
     },
   );
+}
+
+/**
+ * Echoes the API version header back verbatim: the server never resolves
+ * the version, it only mirrors what the client sent.
+ */
+function echoHeader(
+  response: { echoHeader?: string },
+  headers: Headers,
+  requestHeaders: Headers,
+): void {
+  const name = response.echoHeader;
+  if (!name) {
+    return;
+  }
+  const value = requestHeaders.get(name);
+  if (value !== null) {
+    headers.set(name, value);
+  }
 }
 
 function toRecord(value: unknown): Record<string, unknown> {

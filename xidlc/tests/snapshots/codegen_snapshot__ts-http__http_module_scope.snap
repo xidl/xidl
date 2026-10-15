@@ -52,25 +52,25 @@ import {
                 this.baseUrl = baseUrl;
                 this.fetchImpl = resolveFetch(options.fetch);
                 this.defaultHeaders = options.headers ?? {};
-                this.auth = options.auth;
-                this.codecs = options.codecs ?? {};
-            }
-            
-                async get_item(id: string): Promise<types.nm.Item> {
-                    const parsed = ifaceSchemas.nm.ItemServiceGetItemRequestSchema.parse({ "id": id });
-                    let xidlPath = "/item/{id}";
-                    xidlPath = xidlPath.replace("{" + "id" + "}", encodePathSegment(id));
-                    const query = new URLSearchParams();
-                    const headers = new Headers(this.defaultHeaders);
-                    const cookies: string[] = [];
-                    applyCookies(headers, cookies);
-                    applyClientAuth(xidlPath, query, headers, this.auth, []);
-                    const queryString = query.toString();
-                    if (queryString.length > 0) {
-                        xidlPath = `${xidlPath}?${queryString}`;
-                    }
-                    const url = joinUrl(this.baseUrl, xidlPath);
-                    headers.set("Accept", "application/json");
+                    this.auth = options.auth;
+                    this.codecs = options.codecs ?? {};
+                }
+                
+                    async get_item(id: string): Promise<types.nm.Item> {
+                        const parsed = ifaceSchemas.nm.ItemServiceGetItemRequestSchema.parse({ "id": id });
+                        let xidlPath = "/item/{id}";
+                        xidlPath = xidlPath.replace("{" + "id" + "}", encodePathSegment(id));
+                        const query = new URLSearchParams();
+                        const headers = new Headers(this.defaultHeaders);
+                        const cookies: string[] = [];
+                        applyCookies(headers, cookies);
+                        applyClientAuth(xidlPath, query, headers, this.auth, []);
+                        const queryString = query.toString();
+                        if (queryString.length > 0) {
+                            xidlPath = `${xidlPath}?${queryString}`;
+                        }
+                        const url = joinUrl(this.baseUrl, xidlPath);
+                        headers.set("Accept", "application/json");
             const resp = await this.fetchImpl(url, { method: "GET", headers });
             if (!resp.ok) {
                 throw await parseXidlError(resp);
@@ -79,20 +79,20 @@ import {
             return await decodeResponseBody<types.nm.Item>(resp, "application/json", this.codecs);
         }
         
-                async put_item(item: types.nm.Item): Promise<void> {
-                    const parsed = ifaceSchemas.nm.ItemServicePutItemRequestSchema.parse({ "item": item });
-                    let xidlPath = "/items";
-                    const query = new URLSearchParams();
-                    const headers = new Headers(this.defaultHeaders);
-                    const cookies: string[] = [];
-                    applyCookies(headers, cookies);
-                    applyClientAuth(xidlPath, query, headers, this.auth, []);
-                    const queryString = query.toString();
-                    if (queryString.length > 0) {
-                        xidlPath = `${xidlPath}?${queryString}`;
-                    }
-                    const url = joinUrl(this.baseUrl, xidlPath);
-                    const xidlBody = { "item": parsed["item"] };
+                    async put_item(item: types.nm.Item): Promise<void> {
+                        const parsed = ifaceSchemas.nm.ItemServicePutItemRequestSchema.parse({ "item": item });
+                        let xidlPath = "/items";
+                        const query = new URLSearchParams();
+                        const headers = new Headers(this.defaultHeaders);
+                        const cookies: string[] = [];
+                        applyCookies(headers, cookies);
+                        applyClientAuth(xidlPath, query, headers, this.auth, []);
+                        const queryString = query.toString();
+                        if (queryString.length > 0) {
+                            xidlPath = `${xidlPath}?${queryString}`;
+                        }
+                        const url = joinUrl(this.baseUrl, xidlPath);
+                        const xidlBody = { "item": parsed["item"] };
             headers.set("Content-Type", "application/json");
             
             headers.set("Accept", "");
@@ -104,19 +104,19 @@ import {
             return;
         }
         
-                async get_wrapper(): Promise<types.nm.Wrapper> {
-                    let xidlPath = "/wrapper";
-                    const query = new URLSearchParams();
-                    const headers = new Headers(this.defaultHeaders);
-                    const cookies: string[] = [];
-                    applyCookies(headers, cookies);
-                    applyClientAuth(xidlPath, query, headers, this.auth, []);
-                    const queryString = query.toString();
-                    if (queryString.length > 0) {
-                        xidlPath = `${xidlPath}?${queryString}`;
-                    }
-                    const url = joinUrl(this.baseUrl, xidlPath);
-                    headers.set("Accept", "application/json");
+                    async get_wrapper(): Promise<types.nm.Wrapper> {
+                        let xidlPath = "/wrapper";
+                        const query = new URLSearchParams();
+                        const headers = new Headers(this.defaultHeaders);
+                        const cookies: string[] = [];
+                        applyCookies(headers, cookies);
+                        applyClientAuth(xidlPath, query, headers, this.auth, []);
+                        const queryString = query.toString();
+                        if (queryString.length > 0) {
+                            xidlPath = `${xidlPath}?${queryString}`;
+                        }
+                        const url = joinUrl(this.baseUrl, xidlPath);
+                        headers.set("Accept", "application/json");
             const resp = await this.fetchImpl(url, { method: "GET", headers });
             if (!resp.ok) {
                 throw await parseXidlError(resp);
@@ -142,23 +142,23 @@ import {
                     this.baseUrl = baseUrl;
                     this.fetchImpl = resolveFetch(options.fetch);
                     this.defaultHeaders = options.headers ?? {};
-                    this.auth = options.auth;
-                    this.codecs = options.codecs ?? {};
-                }
-                
-                    async get_leaf(): Promise<types.outer.inner.Leaf> {
-                        let xidlPath = "/leaf";
-                        const query = new URLSearchParams();
-                        const headers = new Headers(this.defaultHeaders);
-                        const cookies: string[] = [];
-                        applyCookies(headers, cookies);
-                        applyClientAuth(xidlPath, query, headers, this.auth, []);
-                        const queryString = query.toString();
-                        if (queryString.length > 0) {
-                            xidlPath = `${xidlPath}?${queryString}`;
-                        }
-                        const url = joinUrl(this.baseUrl, xidlPath);
-                        headers.set("Accept", "application/json");
+                        this.auth = options.auth;
+                        this.codecs = options.codecs ?? {};
+                    }
+                    
+                        async get_leaf(): Promise<types.outer.inner.Leaf> {
+                            let xidlPath = "/leaf";
+                            const query = new URLSearchParams();
+                            const headers = new Headers(this.defaultHeaders);
+                            const cookies: string[] = [];
+                            applyCookies(headers, cookies);
+                            applyClientAuth(xidlPath, query, headers, this.auth, []);
+                            const queryString = query.toString();
+                            if (queryString.length > 0) {
+                                xidlPath = `${xidlPath}?${queryString}`;
+                            }
+                            const url = joinUrl(this.baseUrl, xidlPath);
+                            headers.set("Accept", "application/json");
                 const resp = await this.fetchImpl(url, { method: "GET", headers });
                 if (!resp.ok) {
                     throw await parseXidlError(resp);
