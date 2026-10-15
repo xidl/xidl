@@ -15,10 +15,13 @@
             /// Resolves the raw API version a request declared.
             ///
             /// The default policy serves only `{{ api_version.value }}` and
-            /// answers `400` for anything else; override it to apply aliases,
-            /// pinned accounts or a default version.
-            fn resolve_api_version(&self, raw: ::std::option::Option<&str>) -> ::std::result::Result<(), xidl_rust_axum::api_version::UnsupportedApiVersion> {
+            /// answers `400` for anything else. Override it to apply aliases,
+            /// pinned accounts, a default version, or per-path exemptions
+            /// (the `path` argument carries the request path, so health
+            /// probes can be served without a selector).
+            fn resolve_api_version(&self, raw: ::std::option::Option<&str>, path: &str) -> ::std::result::Result<(), xidl_rust_axum::api_version::UnsupportedApiVersion> {
                 let _ = self;
+                let _ = path;
                 xidl_rust_axum::api_version::resolve_strict(raw, "{{ api_version.value }}")
             }
         {% endif %}

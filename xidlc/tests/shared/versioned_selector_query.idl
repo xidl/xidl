@@ -1,0 +1,22 @@
+#pragma xidlc package versioned_selector_query
+
+@version
+@version_selector(query = "api-version")
+enum ApiVersions {
+    @rename("2025-01") v1,
+    @rename("2025-06") v2,
+};
+
+interface Chat {
+    @get(path = "/history")
+    string history(@query string room);
+
+    @bidi_stream
+    @path("/chat")
+    void chat(
+        in string room,
+        in string text,
+        out string from,
+        out string reply
+    );
+};

@@ -304,17 +304,6 @@
                         )
                         .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
                         );
-                        {% if api_version %}
-                            {% if api_version.location == "Header" %}
-                                req.headers_mut().insert(
-                                "{{ api_version.name }}",
-                                xidl_rust_axum::reqwest::header::HeaderValue::from_str(Self::API_VERSION)
-                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
-                                );
-                            {% else %}
-                                req.url_mut().query_pairs_mut().append_pair("{{ api_version.name }}", Self::API_VERSION);
-                            {% endif %}
-                        {% endif %}
                         {% if method.is_upgrade %}
                             req.headers_mut().insert(
                             xidl_rust_axum::reqwest::header::UPGRADE,
@@ -413,6 +402,24 @@
                                 req.url_mut().set_query(Some(&query));
                             }
                         {% endif %}
+                        {% if api_version and not method.is_bidi_stream %}
+                            {% if api_version.location == "Header" %}
+                                req.headers_mut().insert(
+                                "{{ api_version.name }}",
+                                xidl_rust_axum::reqwest::header::HeaderValue::from_str(Self::API_VERSION)
+                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+                                );
+                            {% else %}
+                                let xidl_version_query = xidl_rust_axum::serde_urlencoded::to_string([("{{ api_version.name }}", Self::API_VERSION)])
+                                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                                let xidl_existing_query = req.url_mut().query().unwrap_or_default().to_string();
+                                if xidl_existing_query.is_empty() {
+                                    req.url_mut().set_query(Some(&xidl_version_query));
+                                } else {
+                                    req.url_mut().set_query(Some(&::std::format!("{xidl_existing_query}&{xidl_version_query}")));
+                                }
+                            {% endif %}
+                        {% endif %}
                         {% if method.auth_source_method and method.auth_param %}
                             {% if method.auth_ty == "xidl_rust_axum::ClientAuth" %}
                                 let auth_client = self.client.with_auth_override(Some({{ method.auth_param }}));
@@ -477,6 +484,20 @@
                                     ws_url.push_str(&query);
                                 }
                             {% endif %}
+                            {% if api_version and api_version.location == "Query" %}
+                                let xidl_version_query = xidl_rust_axum::serde_urlencoded::to_string([("{{ api_version.name }}", Self::API_VERSION)])
+                                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                                ws_url.push(if ws_url.contains('?') { '&' } else { '?' });
+                                ws_url.push_str(&xidl_version_query);
+                            {% endif %}
+                            {% if api_version and api_version.location == "Header" %}
+                                let mut xidl_version_headers = xidl_rust_axum::reqwest::header::HeaderMap::new();
+                                xidl_version_headers.insert(
+                                "{{ api_version.name }}",
+                                xidl_rust_axum::reqwest::header::HeaderValue::from_str(Self::API_VERSION)
+                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+                                );
+                            {% endif %}
                             {% if method.auth_source_interface and (method.has_basic_auth or method.has_bearer_auth or method.api_key_requirements | length > 0) %}
                                 {% if method.api_key_requirements | length > 0 %}
                                     {% for api_key in method.api_key_requirements %}
@@ -490,6 +511,9 @@
                                     {% endfor %}
                                 {% endif %}
                                 let mut auth_headers = xidl_rust_axum::reqwest::header::HeaderMap::new();
+                                {% if api_version and api_version.location == "Header" %}
+                                    auth_headers.extend(xidl_version_headers);
+                                {% endif %}
                                 {% if method.has_basic_auth %}
                                     auth_target.apply_auth_headers(
                                     &mut auth_headers,
@@ -525,6 +549,9 @@
                                     {% endfor %}
                                 {% endif %}
                                 let mut auth_headers = xidl_rust_axum::reqwest::header::HeaderMap::new();
+                                {% if api_version and api_version.location == "Header" %}
+                                    auth_headers.extend(xidl_version_headers);
+                                {% endif %}
                                 {% if method.has_basic_auth %}
                                     auth_target.apply_auth_headers(
                                     &mut auth_headers,
@@ -548,7 +575,11 @@
                                 {% endfor %}
                                 return xidl_rust_axum::stream::open_bidi_client_with_headers::<{{ method.request_item_ty }}, {{ method.response_ty }}>(&ws_url, auth_headers).await;
                             {% else %}
-                                return xidl_rust_axum::stream::open_bidi_client::<{{ method.request_item_ty }}, {{ method.response_ty }}>(&ws_url).await;
+                                {% if api_version and api_version.location == "Header" %}
+                                    return xidl_rust_axum::stream::open_bidi_client_with_headers::<{{ method.request_item_ty }}, {{ method.response_ty }}>(&ws_url, xidl_version_headers).await;
+                                {% else %}
+                                    return xidl_rust_axum::stream::open_bidi_client::<{{ method.request_item_ty }}, {{ method.response_ty }}>(&ws_url).await;
+                                {% endif %}
                             {% endif %}
                         {% elif method.is_client_stream %}
                             {% if method.is_byte_stream %}
