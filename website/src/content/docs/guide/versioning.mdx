@@ -97,6 +97,14 @@ Unimplemented versioning annotations (`@versioned`, `@renamedFrom`,
 `@returnTypeChangedFrom`, `@defaultVersion`) are rejected with an explicit
 error instead of being silently ignored.
 
+### Wire names stay unique per version
+
+Effective wire names (after `@rename` and `@rename_all`) must be unique
+inside one struct, exception, union or enum **for every version**. Renames
+are encoded as disjoint intervals, so one container may hold many
+declarations; two declarations available in the same version that serialize
+to the same key are rejected, because they would emit one JSON field twice.
+
 ### Renames and other changes in phase 1
 
 Phase 1 implements `@added` and `@removed` only. A rename or a shape change is
@@ -169,3 +177,23 @@ fails loudly instead of emitting code that does not compile.
 Serving several versions from one implementation (runtime conversion) is not
 part of this feature; each version module is an ordinary generated server that
 can be started on its own.
+
+## The version spine
+
+Every versioned contract derives a **version spine**: the ordered timeline,
+one canonical digest per version's wire surface, and a correspondence table
+that says how every field, variant and operation carried between adjacent
+versions. Renames declared with the disjoint-interval encoding are recognized
+as confirmed rename facts; a wire name that coincidentally matches an older
+one is reported as a review item instead, so tooling never invents semantics.
+
+```bash
+xidlc version manifest petstore.idl          # print the spine as JSON
+xidlc version verify petstore.idl            # compare against the lock file
+xidlc version verify petstore.idl --update   # rewrite the lock (intentional change)
+```
+
+`verify` reads `<contract>.versions.lock.json` beside the contract and fails
+when a released version's digest changed — the gate that catches unannotated
+edits (or library upgrades) silently rewriting history. The lock is an
+ordinary checked-in file; `--update` is the explicit, reviewed way to move it.

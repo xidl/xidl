@@ -1,4 +1,5 @@
 mod fmt;
+mod version;
 
 use crate::driver;
 use crate::driver::ArgsGenerate;
@@ -21,6 +22,8 @@ enum Command {
     Fmt(fmt::ArgsFormat),
     #[command(name = "import")]
     Import(ArgsImport),
+    /// Version spine artifacts and the release-freeze gate.
+    Version(version::ArgsVersion),
 }
 
 #[derive(Debug, Args)]
@@ -277,6 +280,7 @@ impl Cli {
                 driver::Driver::run(args)
             }
             Command::Fmt(args) => args.execute(),
+            Command::Version(args) => args.execute(),
             Command::Import(args) => {
                 let out_dir = PathBuf::from(&args.out_dir);
                 if !out_dir.exists() {

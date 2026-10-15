@@ -14,7 +14,31 @@ fn parses_gen_subcommand_with_lang_enum_and_files() {
         },
         Command::Fmt(_) => panic!("expected gen command"),
         Command::Import(_) => panic!("expected gen command"),
+        Command::Version(_) => panic!("expected gen command"),
     }
+}
+
+#[test]
+fn parses_version_verify_with_lock_and_update() {
+    let cli = Cli::try_parse_from([
+        "xidlc",
+        "version",
+        "verify",
+        "--lock",
+        "frozen.lock.json",
+        "--update",
+        "demo.idl",
+    ])
+    .expect("parse cli");
+    let Command::Version(args) = cli.command else {
+        panic!("expected version command");
+    };
+    let super::version::VersionCommand::Verify(verify) = args.command else {
+        panic!("expected verify subcommand");
+    };
+    assert_eq!(verify.files, vec![PathBuf::from("demo.idl")]);
+    assert_eq!(verify.lock, Some(PathBuf::from("frozen.lock.json")));
+    assert!(verify.update);
 }
 
 #[test]
