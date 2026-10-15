@@ -775,7 +775,7 @@ import { xjson } from "xidl-typescript-codec";
             
                 details: xjson(representations.FileDetailsSchema, {"flatten":true}),
             
-                note: z.coerce.string().optional()
+                note: z.coerce.string().nullish().transform((value) => value ?? undefined)
             
         });
 

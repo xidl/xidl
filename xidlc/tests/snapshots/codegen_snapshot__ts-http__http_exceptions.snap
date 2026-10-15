@@ -78,7 +78,8 @@ import {
             await this.throwGetFileError(resp);
             
         }
-        return await decodeResponseBody<types.FileMeta>(resp, "application/json", this.codecs);
+        const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
+        return ifaceSchemas.models.FileMetaSchema.parse(deserialize(responseBody, ifaceSchemas.models.FileMetaSchema)) as types.FileMeta;
     }
     
     
@@ -619,6 +620,7 @@ export const FilesOperations = {
             bodyFields: [{ wireName: "return", key: "return" }],
             headers: [],
             cookies: [],
+            schema: ifaceSchemas.models.FileMetaSchema,
             stream: false,
             
         },
@@ -852,19 +854,19 @@ import { xjson } from "xidl-typescript-codec";
         
             etag: xjson(z.coerce.string(), {"name":"ETag"}),
         
-            hints: xjson(z.array(z.coerce.string()).optional(), {"name":"X-Hint"}),
+            hints: xjson(z.array(z.coerce.string()).nullish().transform((value) => value ?? undefined), {"name":"X-Hint"}),
         
             session_id: xjson(z.coerce.string(), {"name":"session"}),
         
-            retry_token: xjson(z.coerce.string().optional(), {"name":"retry"}),
+            retry_token: xjson(z.coerce.string().nullish().transform((value) => value ?? undefined), {"name":"retry"}),
         
-            attempts: xjson(z.array(z.coerce.string()).optional(), {"name":"attempt"}),
+            attempts: xjson(z.array(z.coerce.string()).nullish().transform((value) => value ?? undefined), {"name":"attempt"}),
         
             code: z.coerce.number().int().nonnegative(),
         
             msg: xjson(z.coerce.string(), {"name":"message"}),
         
-            detail: z.coerce.string().optional()
+            detail: z.coerce.string().nullish().transform((value) => value ?? undefined)
         
     });
 

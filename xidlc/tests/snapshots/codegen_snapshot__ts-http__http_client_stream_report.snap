@@ -75,8 +75,9 @@ import {
                 throw await parseXidlError(resp);
             
         }
-        return await decodeResponseBody<types.UploadSummary>(resp, "application/json", this.codecs);
-        
+        const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
+        const responsePayload = buildResponsePayload(responseBody, resp, "return", [{ wireName: "return", key: "return" }], [], []);
+        return ifaceSchemas.models.UploadSummarySchema.parse(deserialize(responsePayload, ifaceSchemas.models.UploadSummarySchema)) as types.UploadSummary;
         
     }
     
@@ -193,6 +194,7 @@ export const HttpClientStreamReportServiceOperations = {
             bodyFields: [{ wireName: "return", key: "return" }],
             headers: [],
             cookies: [],
+            schema: ifaceSchemas.models.UploadSummarySchema,
             stream: false,
             
         },

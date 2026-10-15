@@ -177,7 +177,8 @@ import {
             throw await parseXidlError(resp);
             
         }
-        return await decodeResponseBody<types.UploadResult>(resp, "application/json", this.codecs);
+        const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
+        return ifaceSchemas.models.UploadResultSchema.parse(deserialize(responseBody, ifaceSchemas.models.UploadResultSchema)) as types.UploadResult;
     }
     
     
@@ -514,6 +515,7 @@ export const BodyShapeOperations = {
             bodyFields: [{ wireName: "return", key: "return" }],
             headers: [],
             cookies: [],
+            schema: ifaceSchemas.models.UploadResultSchema,
             stream: false,
             
         },

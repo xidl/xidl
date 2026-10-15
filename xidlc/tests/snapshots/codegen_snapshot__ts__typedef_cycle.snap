@@ -37,7 +37,7 @@ export const FooAliasSchema: z.ZodType<import("./typedef_cycle").FooAlias> = z.l
     
 export const FooSchema: z.ZodType<import("./typedef_cycle").Foo> = z.lazy(() => z.object({
     
-        next: FooAliasSchema.optional(),
+        next: FooAliasSchema.nullish().transform((value) => value ?? undefined),
     
         more: z.array(FooAliasSchema)
     

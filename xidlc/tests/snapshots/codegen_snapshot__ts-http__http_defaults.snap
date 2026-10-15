@@ -117,11 +117,11 @@ import {
                     xidlPath = `${xidlPath}?${queryString}`;
                 }
                 const url = joinUrl(this.baseUrl, xidlPath);
-                const xidlBody = { "req": parsed["req"] };
+                const xidlBody = parsed["req"];
         headers.set("Content-Type", "application/json");
         
         headers.set("Accept", "text/plain");
-        const resp = await this.fetchImpl(url, { method: "POST", headers, body: encodeRequestBody(xidlBody, "application/json", this.codecs, ifaceSchemas.HttpDefaultsServiceCreateUserRequestSchema) });
+        const resp = await this.fetchImpl(url, { method: "POST", headers, body: encodeRequestBody(xidlBody, "application/json", this.codecs, ifaceSchemas.models.CreateUserRequestSchema) });
         if (!resp.ok) {
             throw await parseXidlError(resp);
             
@@ -192,11 +192,11 @@ import {
                     xidlPath = `${xidlPath}?${queryString}`;
                 }
                 const url = joinUrl(this.baseUrl, xidlPath);
-                const xidlBody = { "req": parsed["req"] };
+                const xidlBody = parsed["req"];
         headers.set("Content-Type", "application/json");
         
         headers.set("Accept", "text/plain");
-        const resp = await this.fetchImpl(url, { method: "GET", headers, body: encodeRequestBody(xidlBody, "application/json", this.codecs, ifaceSchemas.HttpDefaultsServicePreviewUserRequestSchema) });
+        const resp = await this.fetchImpl(url, { method: "GET", headers, body: encodeRequestBody(xidlBody, "application/json", this.codecs, ifaceSchemas.models.CreateUserRequestSchema) });
         if (!resp.ok) {
             throw await parseXidlError(resp);
             
@@ -731,7 +731,8 @@ export const HttpDefaultsServiceOperations = {
                     kind: "value",
                     contentType: "application/json",
                     fields: [{ wireName: "req", key: "req" }],
-                    schema: ifaceSchemas.HttpDefaultsServiceCreateUserRequestSchema,
+                    singleKey: "req",
+                    schema: ifaceSchemas.models.CreateUserRequestSchema,
                 
             },
         },
@@ -837,7 +838,8 @@ export const HttpDefaultsServiceOperations = {
                     kind: "value",
                     contentType: "application/json",
                     fields: [{ wireName: "req", key: "req" }],
-                    schema: ifaceSchemas.HttpDefaultsServicePreviewUserRequestSchema,
+                    singleKey: "req",
+                    schema: ifaceSchemas.models.CreateUserRequestSchema,
                 
             },
         },

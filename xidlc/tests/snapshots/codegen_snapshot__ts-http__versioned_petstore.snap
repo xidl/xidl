@@ -76,7 +76,8 @@ import {
                 throw await parseXidlError(resp);
                 
             }
-            return await decodeResponseBody<types.v1.Pet>(resp, "application/json", this.codecs);
+            const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
+            return ifaceSchemas.models.v1.PetSchema.parse(deserialize(responseBody, ifaceSchemas.models.v1.PetSchema)) as types.v1.Pet;
         }
         
                 async legacy(): Promise<string> {
@@ -141,7 +142,8 @@ import {
                 throw await parseXidlError(resp);
                 
             }
-            return await decodeResponseBody<types.v2.Pet>(resp, "application/json", this.codecs);
+            const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
+            return ifaceSchemas.models.v2.PetSchema.parse(deserialize(responseBody, ifaceSchemas.models.v2.PetSchema)) as types.v2.Pet;
         }
         
                 async list(): Promise<Array<types.v2.Pet>> {
@@ -299,6 +301,7 @@ import {
                 bodyFields: [{ wireName: "return", key: "return" }],
                 headers: [],
                 cookies: [],
+                schema: ifaceSchemas.models.v1.PetSchema,
                 stream: false,
                 
             },
@@ -380,6 +383,7 @@ import {
                 bodyFields: [{ wireName: "return", key: "return" }],
                 headers: [],
                 cookies: [],
+                schema: ifaceSchemas.models.v2.PetSchema,
                 stream: false,
                 
             },
@@ -448,7 +452,7 @@ import { xjson } from "xidl-typescript-codec";
             
                 id: z.coerce.string(),
             
-                note: z.coerce.string().optional()
+                note: z.coerce.string().nullish().transform((value) => value ?? undefined)
             
         });
 }

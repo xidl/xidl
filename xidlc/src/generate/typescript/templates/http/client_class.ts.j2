@@ -73,6 +73,8 @@
             }
         {%- endfor %}
         throw await parseXidlError(resp);
+        {%- elif method.response_schema_is_model %}{# The body travels as the bare model value, so it parses without response wrapping. #}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs);
+        return ifaceSchemas.{{ method.response_schema_ref }}Schema.parse(deserialize(responseBody, ifaceSchemas.{{ method.response_schema_ref }}Schema)) as {{ render_type(method.return_ty) }};
         {%- elif method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs);
         const responsePayload = buildResponsePayload(responseBody, resp, "{{ method.response_body_mode }}", [{% for entry in method.response_body_entries %}{ wireName: "{{ entry.raw_name }}", key: "{{ entry.key_name }}" }{% if not loop.last %}, {% endif %}{% endfor %}], {{ response_value_specs(method.response_header_params) }}, {{ response_value_specs(method.response_cookie_params) }});
         return ifaceSchemas.{{ method.response_schema_ref }}Schema.parse(deserialize(responsePayload, ifaceSchemas.{{ method.response_schema_ref }}Schema)) as {{ render_type(method.return_ty) }};

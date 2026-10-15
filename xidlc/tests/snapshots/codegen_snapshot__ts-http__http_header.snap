@@ -81,7 +81,8 @@ import {
                 throw await parseXidlError(resp);
                 
             }
-            return await decodeResponseBody<types.test.User>(resp, "application/json", this.codecs);
+            const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
+            return ifaceSchemas.models.test.UserSchema.parse(deserialize(responseBody, ifaceSchemas.models.test.UserSchema)) as types.test.User;
         }
         
                 async create_user(token: string, session_id: string, name: string): Promise<void> {
@@ -103,7 +104,7 @@ import {
             headers.set("Content-Type", "text/plain");
             
             headers.set("Accept", "");
-            const resp = await this.fetchImpl(url, { method: "POST", headers, body: encodeRequestBody(xidlBody, "text/plain", this.codecs, ifaceSchemas.test.HeaderServiceCreateUserRequestSchema) });
+            const resp = await this.fetchImpl(url, { method: "POST", headers, body: encodeRequestBody(xidlBody, "text/plain", this.codecs, undefined) });
             if (!resp.ok) {
                 throw await parseXidlError(resp);
                 
@@ -247,6 +248,7 @@ import {
                 bodyFields: [{ wireName: "return", key: "return" }],
                 headers: [],
                 cookies: [],
+                schema: ifaceSchemas.models.test.UserSchema,
                 stream: false,
                 
             },
@@ -272,8 +274,7 @@ import {
                         contentType: "text/plain",
                         fields: [{ wireName: "name", key: "name" }],
                         singleKey: "name",
-                        schema: ifaceSchemas.test.HeaderServiceCreateUserRequestSchema,
-                    
+                        
                 },
             },
             response: {

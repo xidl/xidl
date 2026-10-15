@@ -19,12 +19,25 @@ use xidl_parser::rest_hir::{
     semantics::HttpStreamKind,
 };
 
+/// Inputs for lowering one REST operation into its client/server model.
+pub(super) struct OperationModelInput<'a> {
+    pub(super) interface_name: &'a str,
+    pub(super) module_path: &'a [String],
+    pub(super) op: &'a HttpOperation,
+    pub(super) exceptions: &'a [xidl_parser::rest_hir::HttpException],
+    /// Switched-union idents; their schemas keep raw response passthrough.
+    pub(super) union_idents: &'a std::collections::BTreeSet<String>,
+}
+
 impl MethodModel {
     pub(super) fn for_operation(
-        interface_name: &str,
-        module_path: &[String],
-        op: &HttpOperation,
-        exceptions: &[xidl_parser::rest_hir::HttpException],
+        OperationModelInput {
+            interface_name,
+            module_path,
+            op,
+            exceptions,
+            union_idents,
+        }: OperationModelInput<'_>,
     ) -> IdlcResult<MethodModel> {
         validate_stream_support(op)?;
         let prefix = method_struct_prefix(interface_name, &op.meta.name);
@@ -91,7 +104,23 @@ impl MethodModel {
             .map(|name| scoped_name(module_path, name));
         let response_schema_ref = response_name
             .as_ref()
-            .map(|name| scoped_name(module_path, name));
+            .map(|name| scoped_name(module_path, name))
+            .or_else(|| match op.signature.return_type.as_ref()? {
+                hir::TypeSpec::ScopedName(scoped) => {
+                    let parts = crate::generate::typescript::definition::names::scoped_name_parts(
+                        scoped,
+                        module_path,
+                    );
+                    // Switched-union schemas do not yet match the `{tag, data}`
+                    // wire shape, so those responses keep raw passthrough.
+                    let is_union = parts
+                        .last()
+                        .map(|name| union_idents.contains(name))
+                        .unwrap_or(false);
+                    (!is_union).then(|| format!("models.{}", parts.join(".")))
+                }
+                _ => None,
+            });
 
         let representations = TsRepresentationContext::for_operation(op, module_path);
         let union_wrapper = TsRepresentationContext::response_type(
@@ -152,23 +181,15 @@ impl MethodModel {
 
         let (body_entries, body_single) = match &op.http.request.body.shape {
             HttpRequestBodyShape::Empty => (Vec::new(), None),
-            HttpRequestBodyShape::SingleValue {
-                source_param,
-                flatten,
-                ty,
-                ..
-            } => {
+            HttpRequestBodyShape::SingleValue { source_param, .. } => {
                 let entries = vec![RequestPayloadEntry {
                     raw_name: source_param.clone(),
                     key_name: source_param.clone(),
                     access: ts_ident(source_param),
                 }];
-                let is_text = matches!(
-                    op.http.request.body.codec,
-                    Some(xidl_parser::rest_hir::HttpBodyCodec::Text)
-                );
-                let single =
-                    (*flatten || is_text || is_byte_sequence(ty)).then(|| source_param.clone());
+                // One body parameter is the request body as-is, flatten or
+                // not; text and byte bodies always travel as the raw value.
+                let single = Some(source_param.clone());
                 (entries, single)
             }
             HttpRequestBodyShape::Object { fields } => {
@@ -242,10 +263,10 @@ impl MethodModel {
 
         let body_schema_ref = match &op.http.request.body.shape {
             HttpRequestBodyShape::Empty => None,
-            HttpRequestBodyShape::SingleValue { flatten, ty, .. } => {
+            HttpRequestBodyShape::SingleValue { ty, .. } => {
                 if is_byte_sequence(ty) {
                     None
-                } else if *flatten {
+                } else {
                     match ty {
                         hir::TypeSpec::ScopedName(scoped) => {
                             let parts =
@@ -257,8 +278,6 @@ impl MethodModel {
                         }
                         _ => None,
                     }
-                } else {
-                    request_schema_ref.clone()
                 }
             }
             HttpRequestBodyShape::Object { .. } => request_schema_ref.clone(),

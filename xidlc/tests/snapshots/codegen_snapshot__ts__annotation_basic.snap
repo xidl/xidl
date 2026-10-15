@@ -42,7 +42,7 @@ import { xjson } from "xidl-typescript-codec";
         
             a: z.coerce.number().int(),
         
-            b: z.coerce.number().int().optional()
+            b: z.coerce.number().int().nullish().transform((value) => value ?? undefined)
         
     });
 

@@ -76,7 +76,8 @@ import {
                 throw await parseXidlError(resp);
                 
             }
-            return await decodeResponseBody<types.nm.Item>(resp, "application/json", this.codecs);
+            const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
+            return ifaceSchemas.models.nm.ItemSchema.parse(deserialize(responseBody, ifaceSchemas.models.nm.ItemSchema)) as types.nm.Item;
         }
         
                 async put_item(item: types.nm.Item): Promise<void> {
@@ -92,11 +93,11 @@ import {
                         xidlPath = `${xidlPath}?${queryString}`;
                     }
                     const url = joinUrl(this.baseUrl, xidlPath);
-                    const xidlBody = { "item": parsed["item"] };
+                    const xidlBody = parsed["item"];
             headers.set("Content-Type", "application/json");
             
             headers.set("Accept", "");
-            const resp = await this.fetchImpl(url, { method: "PUT", headers, body: encodeRequestBody(xidlBody, "application/json", this.codecs, ifaceSchemas.nm.ItemServicePutItemRequestSchema) });
+            const resp = await this.fetchImpl(url, { method: "PUT", headers, body: encodeRequestBody(xidlBody, "application/json", this.codecs, ifaceSchemas.models.nm.ItemSchema) });
             if (!resp.ok) {
                 throw await parseXidlError(resp);
                 
@@ -122,7 +123,8 @@ import {
                 throw await parseXidlError(resp);
                 
             }
-            return await decodeResponseBody<types.nm.Wrapper>(resp, "application/json", this.codecs);
+            const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
+            return ifaceSchemas.models.nm.WrapperSchema.parse(deserialize(responseBody, ifaceSchemas.models.nm.WrapperSchema)) as types.nm.Wrapper;
         }
         
         
@@ -164,7 +166,8 @@ import {
                     throw await parseXidlError(resp);
                     
                 }
-                return await decodeResponseBody<types.outer.inner.Leaf>(resp, "application/json", this.codecs);
+                const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
+                return ifaceSchemas.models.outer.inner.LeafSchema.parse(deserialize(responseBody, ifaceSchemas.models.outer.inner.LeafSchema)) as types.outer.inner.Leaf;
             }
             
             
@@ -323,6 +326,7 @@ import {
                 bodyFields: [{ wireName: "return", key: "return" }],
                 headers: [],
                 cookies: [],
+                schema: ifaceSchemas.models.nm.ItemSchema,
                 stream: false,
                 
             },
@@ -347,7 +351,8 @@ import {
                         kind: "value",
                         contentType: "application/json",
                         fields: [{ wireName: "item", key: "item" }],
-                        schema: ifaceSchemas.nm.ItemServicePutItemRequestSchema,
+                        singleKey: "item",
+                        schema: ifaceSchemas.models.nm.ItemSchema,
                     
                 },
             },
@@ -391,6 +396,7 @@ import {
                 bodyFields: [{ wireName: "return", key: "return" }],
                 headers: [],
                 cookies: [],
+                schema: ifaceSchemas.models.nm.WrapperSchema,
                 stream: false,
                 
             },
@@ -436,6 +442,7 @@ import {
                     bodyFields: [{ wireName: "return", key: "return" }],
                     headers: [],
                     cookies: [],
+                    schema: ifaceSchemas.models.outer.inner.LeafSchema,
                     stream: false,
                     
                 },
@@ -461,7 +468,7 @@ import { xjson } from "xidl-typescript-codec";
         
             id: z.coerce.string(),
         
-            children: z.array(ItemSchema).optional()
+            children: z.array(ItemSchema).nullish().transform((value) => value ?? undefined)
         
     }));
 

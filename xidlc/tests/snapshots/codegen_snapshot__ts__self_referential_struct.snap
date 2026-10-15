@@ -47,7 +47,7 @@ export const NodeSchema: z.ZodType<import("./self_referential_struct").Node> = z
     
         next: NodeSchema,
     
-        prev: NodeSchema.optional(),
+        prev: NodeSchema.nullish().transform((value) => value ?? undefined),
     
         children: z.array(NodeSchema)
     
