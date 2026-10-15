@@ -10,6 +10,7 @@ mod error;
 mod lifecycle;
 mod project;
 mod references;
+mod spine;
 mod timeline;
 
 /// Lowers IDL text into source HIR without interface expansion.

@@ -72,7 +72,7 @@ impl Specification {
                 let selected = versions
                     .iter()
                     .filter_map(|version| record.timeline().get(*version).cloned())
-                    .collect();
+                    .collect::<Vec<_>>();
                 Ok(vec![VersionedProjection {
                     versions: selected,
                     version: None,
@@ -94,6 +94,22 @@ impl Specification {
                 Ok(projections)
             }
         }
+    }
+
+    /// Builds the version spine of a typed AST: per-version wire-surface
+    /// digests plus the adjacent-pair correspondence table.
+    ///
+    /// Lowering and versioning validation run exactly as in generation, so a
+    /// contract that cannot compile cannot produce a spine. Returns `None`
+    /// for specifications without a `@version` enum.
+    pub fn versioning_spine(
+        value: crate::typed_ast::Specification,
+    ) -> crate::error::ParserResult<Option<versioning::Spine>> {
+        let spec = Self::lower_source(value)?;
+        let Some(record) = VersioningRecord::analyze(&spec)? else {
+            return Ok(None);
+        };
+        versioning::Spine::build(&record, &spec).map(Some)
     }
 
     /// Lowers a typed AST and projects the first request of the merged layout.

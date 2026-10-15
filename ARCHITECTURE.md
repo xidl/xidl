@@ -169,10 +169,21 @@ Versioned contracts add one projection that runs before any protocol projection:
 1. Parse IDL.
 2. Lower to `hir`.
 3. In `xidl-parser/src/versioning`, validate the `@version` enum and the
-   `@added`/`@removed` intervals, then wrap each selected version in
-   `module <version> { ... }` and strip the lifecycle annotations.
+   `@added`/`@removed` intervals (including per-version wire-name
+   uniqueness), then wrap each selected version in `module <version> { ... }`
+   and strip the lifecycle annotations.
 4. Continue with the ordinary pipeline (`hir`, `rest_hir`, or `jsonrpc_hir`) on
    the projected specification.
+
+One derived artifact accompanies the projection:
+
+- The **version spine** (`xidl-parser/src/versioning/spine.rs`): one digest
+  per version's canonical wire surface plus an adjacent-pair correspondence
+  table classified by the double-signal continuity rule (an explicit
+  `@rename` whose wire name confirms a trajectory is a rename fact; a bare
+  coincidence stays on the review side). `xidlc version manifest` prints it;
+  `xidlc version verify` freezes released digests against a checked-in lock
+  file.
 
 Consequences:
 

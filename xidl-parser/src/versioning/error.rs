@@ -75,6 +75,15 @@ pub enum VersioningError {
     SelectionRequiresOneVersion { selection: String },
     /// The version layout property holds an unknown value.
     UnknownVersionLayout { value: String },
+    /// Two declarations available in the same version resolve to the same
+    /// effective wire name inside one container.
+    DuplicateWireName {
+        container: String,
+        wire: String,
+        first: String,
+        second: String,
+        version: String,
+    },
 }
 
 impl fmt::Display for VersioningError {
@@ -197,6 +206,16 @@ impl fmt::Display for VersioningError {
             Self::UnknownVersionLayout { value } => write!(
                 f,
                 "xidl versioning: unknown version layout \"{value}\"; expected \"merged\" or \"per_version\""
+            ),
+            Self::DuplicateWireName {
+                container,
+                wire,
+                first,
+                second,
+                version,
+            } => write!(
+                f,
+                "xidl versioning: {first} and {second} both serialize as \"{wire}\" in version {version}; effective wire names must stay unique inside {container} for every version"
             ),
         }
     }

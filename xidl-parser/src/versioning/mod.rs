@@ -18,12 +18,15 @@ mod error;
 mod lifecycle;
 mod paths;
 mod project;
+mod spine;
+mod surface;
 mod timeline;
 
 #[cfg(test)]
 mod tests;
 
 pub use error::VersioningError;
+pub use spine::{CellKind, CorrespondenceCell, Evidence, Spine, SurfaceSummary};
 pub(crate) use timeline::VersionSelection;
 pub use timeline::{VersionDef, VersionId, VersionTimeline};
 
@@ -83,6 +86,7 @@ impl VersioningRecord {
             return Ok(None);
         };
         let timeline = VersionTimeline::from_members(ident, &members)?;
+        surface::ClaimWalker::check(spec, &timeline)?;
         let mut validator = lifecycle::LifecycleValidator {
             timeline: &timeline,
         };
