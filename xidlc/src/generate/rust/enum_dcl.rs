@@ -1,7 +1,6 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::util::{
     rust_derive_info_with_extra, rust_passthrough_attrs_from_annotations,
-    serde_rename_all_from_annotations, serde_rename_from_annotations,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
@@ -16,7 +15,9 @@ impl RustRender for hir::EnumDcl {
             .iter()
             .map(|member| {
                 let rust_name = crate::generate::rust::util::rust_ident(&member.ident);
-                let rename = serde_rename_from_annotations(&member.annotations);
+                let wire_name =
+                    hir::effective_wire_name(&member.ident, &member.annotations, &self.annotations);
+                let rename = (wire_name != member.ident).then_some(wire_name);
                 let doc = doc_lines_from_annotations(&member.annotations);
                 let rust_attrs = rust_passthrough_attrs_from_annotations(&member.annotations);
                 let is_default = member
@@ -50,7 +51,6 @@ impl RustRender for hir::EnumDcl {
                     "derive": derive.all,
                     "has_serde_serialize": derive.has_serde_serialize,
                     "has_serde_deserialize": derive.has_serde_deserialize,
-                    "serde_rename_all": serde_rename_all_from_annotations(&self.annotations).map(|r| r.as_str()),
                     "rust_attrs": rust_passthrough_attrs_from_annotations(&self.annotations),
                 }),
                 &self.ident,

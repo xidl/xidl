@@ -11,27 +11,27 @@ interface HelloWorld: Parent1, Parent2, Parent3 {
 
 interface A: B, C, D {
     void func1();
-    void func1() raises(A);
-    void func1() raises(A, B, C);
-    void func1(
+    void func2() raises(A);
+    void func3() raises(A, B, C);
+    void func4(
         in u8 attr,
         out u16 attr
     );
-    void func1(
+    void func5(
         in u8 attr,
         out u16 attr
     ) raises(A);
-    void func1(
+    void func6(
         in u8 attr,
         out u16 attr
     ) raises(A, B, C);
     readonly attribute u8 attr1, attr2, attr3;
-    readonly attribute u8 attr1 raises(A);
-    readonly attribute u8 attr1 raises(A, B, C);
-    attribute u8 attr1, attr2, attr3;
-    attribute u8 attr1 getraises(A);
-    attribute u8 attr1 getraises(A, B, C) setraises(A);
-    attribute u8 attr1 setraises(A);
+    readonly attribute u8 attr4 raises(A);
+    readonly attribute u8 attr5 raises(A, B, C);
+    attribute u8 attr6, attr7, attr8;
+    attribute u8 attr9 getraises(A);
+    attribute u8 attr10 getraises(A, B, C) setraises(A);
+    attribute u8 attr11 setraises(A);
 };
 
 interface A {

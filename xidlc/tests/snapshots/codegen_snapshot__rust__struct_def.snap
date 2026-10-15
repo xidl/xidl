@@ -13,22 +13,22 @@ pub struct A {}
 impl A {}
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
-pub struct A {
+pub struct A1 {
     pub a: i32,
 }
-impl A {}
+impl A1 {}
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
-pub struct A {
-    pub a: ::A::b,
+pub struct A2 {
+    pub a: ::A1::b,
 }
-impl A {}
+impl A2 {}
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
-pub struct A {
+pub struct A3 {
     pub base: B,
 }
-impl A {}
+impl A3 {}
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct _A {}
@@ -45,9 +45,9 @@ pub struct HelloWorld {
     pub a: u8,
     pub b: [u16; 10],
     pub c: [[String; 20]; 10],
-    pub c: Vec<u8>,
-    pub d: String,
-    pub d: String,
-    pub d: ::serde_json::Value,
+    pub c1: Vec<u8>,
+    pub d1: String,
+    pub d2: String,
+    pub d3: ::serde_json::Value,
 }
 impl HelloWorld {}

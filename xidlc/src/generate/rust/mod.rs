@@ -72,14 +72,10 @@ impl crate::jsonrpc::Codegen for RustCodegen {
 mod tests {
     use super::RustRenderer;
     use super::generate_with_properties;
-    use crate::generate::rust::util::{
-        serde_rename_all_from_annotations, serde_rename_from_annotations,
-    };
     use serde_json::json;
     use std::collections::HashMap;
     use std::path::Path;
     use xidl_parser::hir;
-    use xidl_parser::hir::RenameRule;
 
     #[test]
     fn preserves_numeric_file_stem_in_output_path() {
@@ -95,27 +91,6 @@ mod tests {
     }
 
     #[test]
-    fn custom_annotation_helpers_read_standard_params() {
-        let annotations = vec![
-            hir::Annotation::Rename {
-                name: "wireName".into(),
-            },
-            hir::Annotation::RenameAll {
-                rule: RenameRule::CamelCase,
-            },
-        ];
-
-        assert_eq!(
-            serde_rename_from_annotations(&annotations),
-            Some("wireName".to_string())
-        );
-        assert_eq!(
-            serde_rename_all_from_annotations(&annotations),
-            Some(RenameRule::CamelCase)
-        );
-    }
-
-    #[test]
     fn struct_template_uses_serde_rename_semantics() {
         let renderer = RustRenderer::new(HashMap::new()).expect("renderer");
         let rendered = renderer
@@ -126,7 +101,6 @@ mod tests {
                     "rust_attrs": [],
                     "derive": ["::serde::Serialize", "::serde::Deserialize"],
                     "enable_serde_attrs": true,
-                    "serde_rename_all": "camelCase",
                     "ident": "RenameStruct",
                     "parent": null,
                     "members": [{
@@ -141,8 +115,11 @@ mod tests {
             )
             .expect("render struct template");
 
-        assert!(rendered.contains("#[serde(rename_all = \"camelCase\")]"));
         assert!(rendered.contains("#[serde(rename = \"wireName\")]"));
+        assert!(
+            !rendered.contains("rename_all"),
+            "the struct template never re-derives names at runtime"
+        );
     }
 
     #[test]
@@ -157,7 +134,6 @@ mod tests {
                     "ident": "RenameEnum",
                     "has_serde_serialize": true,
                     "has_serde_deserialize": true,
-                    "serde_rename_all": "SCREAMING-KEBAB-CASE",
                     "members": [{
                         "doc": [],
                         "rust_attrs": [],
@@ -169,7 +145,10 @@ mod tests {
             )
             .expect("render enum template");
 
-        assert!(rendered.contains("#[serde(rename_all = \"SCREAMING-KEBAB-CASE\")]"));
         assert!(rendered.contains("#[serde(rename = \"wire-value\")]"));
+        assert!(
+            !rendered.contains("rename_all"),
+            "the enum template never re-derives names at runtime"
+        );
     }
 }

@@ -7,9 +7,6 @@
 {%- if derive and derive | length > 0 %}
     #[derive({{ derive | join(", ") }})]
 {%- endif %}
-{% if enable_serde_attrs and serde_rename_all %}
-    #[serde(rename_all = "{{ serde_rename_all }}")]
-{% endif %}
 #[derive(Default)]
 pub struct {{ ident }} {
     {% for member in members %}

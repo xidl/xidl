@@ -1,7 +1,7 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::util::{
     declarator_name, rust_derive_info_with_extra, rust_passthrough_attrs_from_annotations,
-    serde_rename_all_from_annotations, serde_rename_from_annotations, type_with_decl,
+    type_with_decl,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
@@ -24,18 +24,22 @@ impl RustRender for hir::ExceptDcl {
                     || has_annotation(&member.annotations, "header")
                     || has_annotation(&member.annotations, "cookie");
                 member.ident.iter().map(move |decl| {
-                    let name = crate::generate::rust::util::rust_ident(&declarator_name(decl));
+                    let raw_name = declarator_name(decl);
+                    let name = crate::generate::rust::util::rust_ident(&raw_name);
                     let mut ty = type_with_decl(&member.ty, decl);
                     let optional = member.is_optional();
                     if optional {
                         ty = format!("Option<{ty}>");
                     }
+                    let wire_name =
+                        hir::effective_wire_name(&raw_name, &member.annotations, &self.annotations);
+                    let rename = (wire_name != raw_name).then_some(wire_name);
                     json!({
                         "ty": ty,
                         "name": name,
                         "serde_skip": skip,
                         "optional": optional,
-                        "serde_rename": serde_rename_from_annotations(&member.annotations),
+                        "serde_rename": rename,
                         "doc": doc,
                         "rust_attrs": rust_attrs,
                     })
@@ -47,7 +51,6 @@ impl RustRender for hir::ExceptDcl {
             renderer.with_ident(
                 json!({
                     "members": members,
-                    "serde_rename_all": serde_rename_all_from_annotations(&self.annotations).map(|r| r.as_str()),
                     "derive": derive.all,
                     "enable_serde_attrs": derive.enable_serde_attrs(),
                     "rust_attrs": rust_passthrough_attrs_from_annotations(&self.annotations),

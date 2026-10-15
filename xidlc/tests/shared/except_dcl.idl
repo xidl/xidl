@@ -2,8 +2,8 @@ exception HelloWorld {
     u8 a;
     u16 b[10];
     string c[10][20];
-    sequence<u8> c;
-    string<20> d;
-    wstring<20> d;
-    fixed<1,2> d;
+    sequence<u8> c1;
+    string<20> d1;
+    wstring<20> d2;
+    fixed<1,2> d3;
 };
