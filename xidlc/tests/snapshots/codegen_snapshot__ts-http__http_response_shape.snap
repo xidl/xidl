@@ -144,7 +144,7 @@ import {
         headers.set("Content-Type", "text/plain");
         
         headers.set("Accept", "application/json");
-        const resp = await this.fetchImpl(url, { method: "POST", headers, body: encodeRequestBody(xidlBody, "text/plain", this.codecs, ifaceSchemas.HttpResponseShapeServiceBumpRequestSchema) });
+        const resp = await this.fetchImpl(url, { method: "POST", headers, body: encodeRequestBody(xidlBody, "text/plain", this.codecs, undefined) });
         if (!resp.ok) {
             throw await parseXidlError(resp);
             
@@ -423,8 +423,7 @@ export const HttpResponseShapeServiceOperations = {
                     contentType: "text/plain",
                     fields: [{ wireName: "value", key: "value" }],
                     singleKey: "value",
-                    schema: ifaceSchemas.HttpResponseShapeServiceBumpRequestSchema,
-                
+                    
             },
         },
         response: {

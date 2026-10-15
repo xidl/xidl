@@ -16,10 +16,10 @@ export interface HelloWorld {
             a: u8;
                 b: Array<u16>;
                 c: Array<Array<string>>;
-                c: Array<u8>;
-                d: string;
-                d: string;
-                d: number;
+                c1: Array<u8>;
+                d1: string;
+                d2: string;
+                d3: number;
             }
 
 export {};
@@ -41,12 +41,12 @@ import { xjson } from "xidl-typescript-codec";
         
             c: z.array(z.array(z.coerce.string()).length(10)).length(20),
         
-            c: z.array(u8Schema),
+            c1: z.array(u8Schema),
         
-            d: z.coerce.string(),
+            d1: z.coerce.string(),
         
-            d: z.coerce.string(),
+            d2: z.coerce.string(),
         
-            d: z.number()
+            d3: z.number()
         
     });

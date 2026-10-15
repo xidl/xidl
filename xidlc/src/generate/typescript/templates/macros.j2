@@ -32,6 +32,6 @@
 
 {% macro render_field_zod(field) -%}
     {%- if field.xjson_meta %}xjson({% endif -%}
-        {{ render_zod(field.schema) }}{% if field.optional %}.optional(){% endif -%}
+        {{ render_zod(field.schema) }}{% if field.optional %}.nullish().transform((value) => value ?? undefined){% endif -%}
         {%- if field.xjson_meta %}, {{ field.xjson_meta | tojson }}){% endif -%}
         {%- endmacro %}

@@ -17,21 +17,21 @@ export interface A {
 
     
 
-export interface A {
+export interface A1 {
         
             a: number;
             }
 
     
 
-export interface A {
+export interface A2 {
         
-            a: A.b;
+            a: A1.b;
             }
 
     
 
-export interface A extends B {
+export interface A3 extends B {
     
         }
 
@@ -55,10 +55,10 @@ export interface HelloWorld {
             a: u8;
                 b: Array<u16>;
                 c: Array<Array<string>>;
-                c: Array<u8>;
-                d: string;
-                d: string;
-                d: any;
+                c1: Array<u8>;
+                d1: string;
+                d2: string;
+                d3: any;
             }
 
 export {};
@@ -77,21 +77,21 @@ import { xjson } from "xidl-typescript-codec";
     });
 
     
-    export const ASchema = z.object({
+    export const A1Schema = z.object({
         
             a: z.coerce.number().int()
         
     });
 
     
-    export const ASchema = z.object({
+    export const A2Schema = z.object({
         
-            a: A.bSchema
+            a: A1.bSchema
         
     });
 
     
-    export const ASchema = z.object({
+    export const A3Schema = z.object({
         
     });
 
@@ -116,12 +116,12 @@ import { xjson } from "xidl-typescript-codec";
         
             c: z.array(z.array(z.coerce.string()).length(10)).length(20),
         
-            c: z.array(u8Schema),
+            c1: z.array(u8Schema),
         
-            d: z.coerce.string(),
+            d1: z.coerce.string(),
         
-            d: z.coerce.string(),
+            d2: z.coerce.string(),
         
-            d: z.any()
+            d3: z.any()
         
     });

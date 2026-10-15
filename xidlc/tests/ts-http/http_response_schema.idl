@@ -1,0 +1,38 @@
+#pragma xidlc package Demo API
+#pragma xidlc version v1
+
+@rename_all("camelCase")
+enum ShapeKind {
+    kind_round,
+    @rename("squared") kind_square
+};
+
+@rename_all("camelCase")
+struct Shape {
+    @rename("shape_id") string id;
+    @skip string internal_note;
+    @optional string note;
+    ShapeKind kind;
+};
+
+union Area switch (ShapeKind) {
+    case KindRound: uint8 circle;
+    case KindSquare: uint8 square;
+    default: uint8 fallback;
+};
+
+@no_security
+interface Shapes {
+    // Struct return: the response validates and renames through the model schema.
+    @get(path = "/shapes/{id}")
+    Shape get_shape(string id);
+
+    // Switched-union return: responses keep raw passthrough until the union
+    // wire shape is unified across generators.
+    @get(path = "/areas/{id}")
+    Area get_area(string id);
+
+    // Scalar return: no model schema applies.
+    @get(path = "/count")
+    uint32 count_shapes();
+};

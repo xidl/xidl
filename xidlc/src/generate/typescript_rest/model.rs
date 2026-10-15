@@ -169,6 +169,9 @@ pub(super) struct ClientMethodContext {
     pub(super) body_entries: Vec<RequestPayloadEntry>,
     pub(super) body_single: Option<String>,
     pub(super) response_schema_ref: Option<String>,
+    /// The response schema is a bare model schema, so the body parses without
+    /// response wrapping.
+    pub(super) response_schema_is_model: bool,
     pub(super) response_body_mode: String,
     pub(super) response_body_entries: Vec<RequestPayloadEntry>,
     pub(super) is_server_stream: bool,
@@ -302,7 +305,11 @@ impl MethodModel {
             response_cookie_params: self.response_cookie_params,
             body_entries: self.body_entries,
             body_single: self.body_single,
-            response_schema_ref: self.response_schema_ref,
+            response_schema_ref: self.response_schema_ref.clone(),
+            response_schema_is_model: self
+                .response_schema_ref
+                .as_deref()
+                .is_some_and(|value| value.starts_with("models.")),
             response_body_mode: self.response_body_mode,
             response_body_entries: self.response_body_entries,
             is_server_stream: self.is_server_stream,

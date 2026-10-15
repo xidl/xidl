@@ -115,7 +115,7 @@ import {
         headers.set("Content-Type", "text/plain");
         
         headers.set("Accept", "");
-        const resp = await this.fetchImpl(url, { method: "POST", headers, body: encodeRequestBody(xidlBody, "text/plain", this.codecs, ifaceSchemas.HttpAttributeServiceSetAttributeNameRequestSchema) });
+        const resp = await this.fetchImpl(url, { method: "POST", headers, body: encodeRequestBody(xidlBody, "text/plain", this.codecs, undefined) });
         if (!resp.ok) {
             throw await parseXidlError(resp);
             
@@ -276,8 +276,7 @@ export const HttpAttributeServiceOperations = {
                     contentType: "text/plain",
                     fields: [{ wireName: "name", key: "name" }],
                     singleKey: "name",
-                    schema: ifaceSchemas.HttpAttributeServiceSetAttributeNameRequestSchema,
-                
+                    
             },
         },
         response: {

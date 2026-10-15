@@ -184,6 +184,7 @@ export const HttpStreamSseBindingsServiceOperations = {
             bodyFields: [{ wireName: "return", key: "return" }],
             headers: [],
             cookies: [],
+            schema: ifaceSchemas.models.ProjectEventSchema,
             stream: true,
             streamSchema: ifaceSchemas.models.ProjectEventSchema,
             
