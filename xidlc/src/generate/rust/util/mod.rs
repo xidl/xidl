@@ -21,8 +21,4 @@ pub use self::util_types::{
     bitfield_type, render_const, rust_const_type, rust_ident, rust_integer_type, rust_literal,
     rust_scoped_name, rust_switch_type, rust_type,
 };
-#[allow(unused_imports)]
-pub use xidl_parser::hir::{
-    field_rename as serde_rename_from_annotations, is_skipped as is_skipped_from_annotations,
-    rename_all as serde_rename_all_from_annotations,
-};
+pub use xidl_parser::hir::is_skipped as is_skipped_from_annotations;

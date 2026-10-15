@@ -13,8 +13,8 @@ pub struct HelloWorld {
     pub a: u8,
     pub b: [u16; 10],
     pub c: [[String; 20]; 10],
-    pub c: Vec<u8>,
-    pub d: String,
-    pub d: String,
-    pub d: f64,
+    pub c1: Vec<u8>,
+    pub d1: String,
+    pub d2: String,
+    pub d3: f64,
 }

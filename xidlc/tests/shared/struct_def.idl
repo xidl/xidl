@@ -1,11 +1,11 @@
 struct A {};
-struct A {
+struct A1 {
     int32 a;
 };
-struct A {
-    ::A::b a;
+struct A2 {
+    ::A1::b a;
 };
-struct A: B {};
+struct A3: B {};
 
 struct _A {};
 
@@ -17,8 +17,8 @@ struct HelloWorld {
     u8 a;
     u16 b[10];
     string c[10][20];
-    sequence<u8> c;
-    string<20> d;
-    wstring<20> d;
-    any d;
+    sequence<u8> c1;
+    string<20> d1;
+    wstring<20> d2;
+    any d3;
 };

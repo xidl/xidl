@@ -1,8 +1,7 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::util::{
     declarator_name, is_skipped_from_annotations, rust_derive_info_with_extra,
-    rust_passthrough_attrs_from_annotations, rust_scoped_name, serde_rename_all_from_annotations,
-    serde_rename_from_annotations, type_with_decl,
+    rust_passthrough_attrs_from_annotations, rust_scoped_name, type_with_decl,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::{doc_lines_from_annotations, has_annotation};
@@ -33,13 +32,13 @@ pub(crate) fn render_struct_with_config(
         .flat_map(|member| {
             let field_id = member.field_id.map(|value| format!("{value}u32"));
             let optional = member.is_optional();
-            let rename = serde_rename_from_annotations(&member.annotations);
             let skip = is_skipped_from_annotations(&member.annotations);
             let flatten = has_annotation(&member.annotations, "flatten");
             let doc = doc_lines_from_annotations(&member.annotations);
             let rust_attrs = rust_passthrough_attrs_from_annotations(&member.annotations);
             member.ident.iter().map(move |decl| {
-                let name = crate::generate::rust::util::rust_ident(&declarator_name(decl));
+                let raw_name = declarator_name(decl);
+                let name = crate::generate::rust::util::rust_ident(&raw_name);
                 let mut ty = type_with_decl(&member.ty, decl);
                 if member.recursive {
                     ty = format!("Box<{ty}>");
@@ -47,6 +46,9 @@ pub(crate) fn render_struct_with_config(
                 if optional {
                     ty = format!("Option<{ty}>");
                 }
+                let wire_name =
+                    hir::effective_wire_name(&raw_name, &member.annotations, &def.annotations);
+                let rename = (wire_name != raw_name).then_some(wire_name);
                 json!({
                     "ty": ty,
                     "name": name,
@@ -69,7 +71,6 @@ pub(crate) fn render_struct_with_config(
             "members": members,
             "derive": derive.all,
             "enable_serde_attrs": derive.enable_serde_attrs(),
-            "serde_rename_all": serde_rename_all_from_annotations(&def.annotations).map(|r| r.as_str()),
             "rust_attrs": rust_passthrough_attrs_from_annotations(&def.annotations),
         }),
         &doc_lines_from_annotations(&def.annotations),
