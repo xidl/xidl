@@ -5,12 +5,15 @@ use super::mapping;
 use super::route::{attribute_path, default_path, operation_id, readonly_attr_names};
 use super::semantics::{
     DeprecatedInfo, HttpSecurityProfile, HttpStreamCodec, HttpStreamConfig, HttpStreamKind,
+    effective_cors, effective_security_with_origin, has_annotation, validate_http_annotations,
 };
+use super::validate::effective_deprecated;
 use super::{
     HttpMethod, HttpOperation, HttpOperationMeta, HttpOperationSignature, HttpOperationSource,
     HttpParam, HttpParamKind, HttpRoute, HttpSignatureParam, HttpSignatureParamAnnotation,
     HttpSignatureParamDirection,
 };
+use crate::error::{ParseError, ParserResult};
 
 #[cfg(test)]
 mod tests;
@@ -307,4 +310,39 @@ struct AttributeOperationArgs<'a> {
     response_params: Vec<HttpParam>,
     return_type: Option<hir::TypeSpec>,
     signature: HttpOperationSignature,
+}
+
+pub(super) fn project_attribute_group(
+    interface_name: &str,
+    module_path: &[String],
+    interface_annotations: &[hir::Annotation],
+    attr: &hir::AttrDcl,
+) -> ParserResult<Vec<HttpOperation>> {
+    validate_http_annotations(
+        &format!("attribute in interface '{interface_name}'"),
+        &attr.annotations,
+    )
+    .map_err(ParseError::Message)?;
+    if has_annotation(&attr.annotations, "cors") {
+        return Err(ParseError::Message(format!(
+            "attribute in interface '{interface_name}': @cors is only supported on interfaces and methods"
+        )));
+    }
+    let cors = effective_cors(interface_annotations, &[]).map_err(ParseError::Message)?;
+    let deprecated = effective_deprecated(interface_annotations, &attr.annotations)
+        .map_err(ParseError::Message)?;
+    let security = effective_security_with_origin(interface_annotations, &attr.annotations)
+        .map_err(ParseError::Message)?;
+    let mut operations = project_attribute(
+        interface_name,
+        module_path,
+        attr,
+        security,
+        deprecated,
+        has_annotation(&attr.annotations, "server_stream"),
+    );
+    for operation in &mut operations {
+        operation.meta.cors = cors.clone();
+    }
+    Ok(operations)
 }
