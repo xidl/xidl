@@ -58,6 +58,8 @@ pub struct VersionedProjection {
     /// Target version of a single-version projection; `None` for merged and
     /// unversioned projections.
     pub version: Option<VersionDef>,
+    /// The request header declared via `@version(header = "...")`.
+    pub version_header: Option<String>,
     /// The projected HIR.
     pub hir: ProjectedHir,
 }
@@ -66,6 +68,7 @@ pub struct VersionedProjection {
 #[derive(Debug, Clone)]
 pub struct VersioningRecord {
     timeline: VersionTimeline,
+    header: Option<String>,
 }
 
 impl VersioningRecord {
@@ -87,7 +90,15 @@ impl VersioningRecord {
             timeline: &timeline,
         };
         validator.walk(&spec.0, "", lifecycle::Availability::full())?;
-        Ok(Some(VersioningRecord { timeline }))
+        Ok(Some(VersioningRecord {
+            timeline,
+            header: discovery.version_header,
+        }))
+    }
+
+    /// The request header declared via `@version(header = "...")`.
+    pub fn header(&self) -> Option<&str> {
+        self.header.as_deref()
     }
 
     /// The version history declared by the `@version` enum.

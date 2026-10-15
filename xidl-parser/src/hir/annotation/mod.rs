@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
 mod convert;
+pub(super) mod params;
 #[cfg(test)]
 mod tests;
 
@@ -129,6 +130,11 @@ pub enum Annotation {
     Skip,
     /// The `@version` marker that designates an enum as the API version timeline.
     Version,
+    /// The `@version(header = "Name")` form: the API version travels as the
+    /// named request header. Only valid next to the `@version` enum marker.
+    VersionHeader {
+        name: String,
+    },
     /// The `@added(Version::member)` lifecycle annotation: the declaration exists
     /// from that version onward.
     Added {

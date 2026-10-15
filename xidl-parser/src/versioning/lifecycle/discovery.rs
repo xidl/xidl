@@ -12,6 +12,8 @@ pub(crate) struct Discovery {
     pub(crate) version_enum: Option<(String, Vec<Enumerator>)>,
     /// First `@added`/`@removed` found outside a versioned specification.
     pub(crate) saw_lifecycle: Option<(String, String)>,
+    /// The request header name declared via `@version(header = "...")`.
+    pub(crate) version_header: Option<String>,
 }
 
 struct DiscoverVisitor {
@@ -22,9 +24,26 @@ impl VersionVisitor for DiscoverVisitor {
     fn enter(&mut self, site: &Site<'_>, _parent: Availability) -> ParserResult<Availability> {
         let mut marker = false;
         let mut lifecycle: Vec<String> = Vec::new();
+        let mut header: Option<String> = None;
         for annotation in site.annotations {
             match annotation {
                 Annotation::Version => marker = true,
+                Annotation::VersionHeader { name } => {
+                    marker = true;
+                    if header.is_some() {
+                        return Err(VersioningError::DuplicateVersionHeader {
+                            decl: site.path.clone(),
+                        }
+                        .into());
+                    }
+                    if !is_header_token(name) {
+                        return Err(VersioningError::MalformedVersionHeader {
+                            decl: site.path.clone(),
+                        }
+                        .into());
+                    }
+                    header = Some(name.clone());
+                }
                 Annotation::Added { .. } => lifecycle.push("@added".to_string()),
                 Annotation::Removed { .. } => lifecycle.push("@removed".to_string()),
                 other => {
@@ -82,8 +101,34 @@ impl VersionVisitor for DiscoverVisitor {
             .into());
         }
         self.discovery.version_enum = Some((site.path.clone(), members.to_vec()));
+        self.discovery.version_header = header;
         Ok(Availability::full())
     }
+}
+
+/// Whether `name` is a valid RFC 7230 header-field token.
+fn is_header_token(name: &str) -> bool {
+    !name.is_empty()
+        && name.chars().all(|ch| {
+            ch.is_ascii_alphanumeric()
+                || matches!(
+                    ch,
+                    '!' | '#'
+                        | '$'
+                        | '%'
+                        | '&'
+                        | '\''
+                        | '*'
+                        | '+'
+                        | '-'
+                        | '.'
+                        | '^'
+                        | '_'
+                        | '`'
+                        | '|'
+                        | '~'
+                )
+        })
 }
 
 /// Finds the `@version` enum and reports `@version` misuse.
@@ -92,6 +137,7 @@ pub(crate) fn discover(definitions: &[Definition]) -> ParserResult<Discovery> {
         discovery: Discovery {
             version_enum: None,
             saw_lifecycle: None,
+            version_header: None,
         },
     };
     visitor.walk(definitions, "", Availability::full())?;
