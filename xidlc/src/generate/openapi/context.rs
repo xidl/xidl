@@ -5,12 +5,12 @@ use super::schema::{apply_schema_description, doc_text};
 use super::scope::SchemaScope;
 use super::security::register_security_schemes;
 use super::stream::{OpenApiStreamPatch, request_stream_content_type, stream_patch_item_schema};
-use crate::error::{IdlcError, IdlcResult};
+use crate::error::IdlcResult;
 use crate::openapi::RefOr;
 use crate::openapi::path::PathItem;
 use crate::openapi::schema::{ObjectBuilder, Schema, Type};
 use crate::openapi::server::Server;
-use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeSet};
 use std::mem;
 use xidl_parser::hir;
 use xidl_parser::rest_hir::{RestHirDocument, semantics::has_annotation};
@@ -214,11 +214,10 @@ impl OpenApiContext {
             return Ok(());
         };
         self.tags.insert(def.header.ident.clone());
-        let mut route_bindings = HashMap::new();
         for method in http_interface.operations.iter().map(|op| {
             render_http_operation(op, scope, &def.header.ident, &rest_hir.document.exceptions)
         }) {
-            self.collect_method(method?, &mut route_bindings)?;
+            self.collect_method(method?)?;
         }
         self.schemas
             .entry("Error".to_string())
@@ -226,40 +225,17 @@ impl OpenApiContext {
         Ok(())
     }
 
-    fn collect_method(
-        &mut self,
-        method: MethodInfo,
-        route_bindings: &mut HashMap<String, String>,
-    ) -> IdlcResult<()> {
+    fn collect_method(&mut self, method: MethodInfo) -> IdlcResult<()> {
         if let Some(security_requirements) = &method.security_requirements {
             register_security_schemes(&mut self.security_schemes, security_requirements);
         }
 
         for path in method.paths.clone() {
-            self.register_route_binding(&method, &path, route_bindings)?;
             self.collect_stream_patches(&method, &path);
             self.paths = mem::take(&mut self.paths).path(
                 path,
                 PathItem::new(method.http_method.clone(), build_operation(&method)),
             );
-        }
-        Ok(())
-    }
-
-    fn register_route_binding(
-        &self,
-        method: &MethodInfo,
-        path: &str,
-        route_bindings: &mut HashMap<String, String>,
-    ) -> IdlcResult<()> {
-        let key = format!("{} {path}", openapi_method_name(&method.http_method));
-        if let Some(previous) = route_bindings.insert(key.clone(), method.operation_id.clone()) {
-            return Err(IdlcError::rpc(format!(
-                "duplicate HTTP route binding: {key} (operations: {previous}, {}); \
-                 give each operation a distinct path, or use an @http union for \
-                 content negotiation on one route",
-                method.operation_id
-            )));
         }
         Ok(())
     }

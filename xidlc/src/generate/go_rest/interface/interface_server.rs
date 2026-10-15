@@ -1,6 +1,5 @@
-use crate::error::{IdlcError, IdlcResult};
+use crate::error::IdlcResult;
 use crate::generate::go_rest::{HttpMethod, MethodMeta, definition};
-use std::collections::HashMap;
 use std::fmt::Write;
 use xidl_parser::rest_hir::semantics::HttpStreamKind;
 
@@ -23,10 +22,9 @@ pub(super) fn render_server(
         "func Register{interface_name}Handler(r gin.IRouter, svc {interface_name}Service) {{"
     )
     .unwrap();
-    let mut seen_routes = HashMap::<String, String>::new();
     for method in methods {
         for path in &method.paths {
-            register_route(out, method, path, &mut seen_routes, renderer)?;
+            register_route(out, method, path, renderer)?;
         }
     }
     writeln!(out, "}}").unwrap();
@@ -38,21 +36,8 @@ fn register_route(
     out: &mut String,
     method: &MethodMeta,
     path: &str,
-    seen_routes: &mut HashMap<String, String>,
     renderer: &GoRestRenderer,
 ) -> IdlcResult<()> {
-    let route_key = format!(
-        "{} {}",
-        definition::http_method_name(method.http_method),
-        path
-    );
-    if let Some(previous) = seen_routes.insert(route_key.clone(), method.method_name.clone()) {
-        return Err(IdlcError::rpc(format!(
-            "duplicate HTTP route binding: {route_key} (methods: {previous}, {})",
-            method.method_name
-        )));
-    }
-
     let gin_method = match method.http_method {
         HttpMethod::Get => "GET",
         HttpMethod::Post => "POST",
