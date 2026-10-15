@@ -85,9 +85,10 @@ the received value back without interpreting it.
 a version the route does not support, succeeds unless the application checks
 it itself: the generated code treats the header as opaque metadata. Gateways
 or handlers that must enforce version routing read the header at the
-application layer. Browser WebSocket handshakes cannot set request headers;
-how bidirectional streams carry the version is still being decided, so
-generated bidirectional-stream clients do not pin one yet.
+application layer. Browser WebSocket handshakes cannot set request headers, so a
+browser falls back to the default version; picking a version in the
+browser stays an application concern. Native bidirectional-stream
+clients attach the same header at handshake time.
 
 ## Lifecycle annotations
 
