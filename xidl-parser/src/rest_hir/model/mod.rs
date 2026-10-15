@@ -67,6 +67,28 @@ pub struct HttpDocumentMetadata {
     /// Document-level `@http` unions: content-negotiated representations.
     #[serde(default)]
     pub http_unions: Vec<HttpUnion>,
+    /// Ordered API versions of a versioned contract: enum member ident plus
+    /// wire value. Empty for unversioned contracts.
+    #[serde(default)]
+    pub api_versions: Vec<HttpApiVersion>,
+    /// How requests state the API version, when the contract declares a
+    /// `@version_selector`.
+    #[serde(default)]
+    pub version_selector: Option<HttpVersionSelector>,
+}
+
+/// One declared API version: enum member ident and its wire value.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct HttpApiVersion {
+    pub ident: String,
+    pub value: String,
+}
+
+/// The declared wire version selector of a versioned contract.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct HttpVersionSelector {
+    pub location: hir::VersionSelectorLocation,
+    pub name: String,
 }
 
 /// An `exception` declaration with its HTTP error-channel semantics.

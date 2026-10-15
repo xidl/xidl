@@ -9,6 +9,30 @@ pub enum Pragma {
         base_url: String,
         description: Option<String>,
     },
+    /// Compiler-synthesized wire identity of a projected API version: the
+    /// ordered version values and, when declared, the version selector.
+    XidlcApiVersions {
+        selector: Option<PragmaVersionSelector>,
+        versions: Vec<PragmaApiVersion>,
+    },
+}
+
+/// The version selector part of a synthesized `XidlcApiVersions` pragma.
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+pub struct PragmaVersionSelector {
+    /// `"header"` or `"query"`.
+    pub location: String,
+    /// The header or query parameter name.
+    pub name: String,
+}
+
+/// One declared API version inside a synthesized `XidlcApiVersions` pragma.
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+pub struct PragmaApiVersion {
+    /// The enum member ident.
+    pub ident: String,
+    /// The wire value: the `@rename("...")` argument, or the ident.
+    pub value: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]

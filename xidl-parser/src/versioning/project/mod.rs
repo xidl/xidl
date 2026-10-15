@@ -7,10 +7,14 @@ mod projector;
 mod references;
 
 use super::VersioningError;
+use super::VersioningRecord;
 use super::lifecycle::is_versioning_annotation;
-use super::timeline::{VersionId, VersionTimeline};
+use super::timeline::VersionId;
 use crate::error::ParserResult;
-use crate::hir::{Annotation, Definition, ModuleDcl, Pragma, Specification};
+use crate::hir::{
+    Annotation, Definition, ModuleDcl, Pragma, PragmaApiVersion, PragmaVersionSelector,
+    Specification,
+};
 
 use super::lifecycle::Availability;
 use projector::Projector;
@@ -18,14 +22,16 @@ use projector::Projector;
 /// Projects one version of a versioned specification.
 ///
 /// The result keeps top-level pragmas, replaces the document version with the
-/// projected version value, and wraps the projected declarations in
-/// `module <version-ident> { ... }`. Lifecycle annotations and the `@version`
-/// enum are removed.
+/// projected version value, synthesizes the wire-identity pragma (declared
+/// versions and, when present, the version selector), and wraps the projected
+/// declarations in `module <version-ident> { ... }`. Lifecycle annotations and
+/// the `@version` enum are removed.
 pub(crate) fn project_version(
+    record: &VersioningRecord,
     spec: &Specification,
-    timeline: &VersionTimeline,
     version: VersionId,
 ) -> ParserResult<Specification> {
+    let timeline = record.timeline();
     let Some(def) = timeline.get(version) else {
         return Err(VersioningError::UnknownVersion {
             index: version.index(),
@@ -47,6 +53,7 @@ pub(crate) fn project_version(
     projector.check_references()?;
     projector.prune_raises(&mut body);
     let mut definitions = version_pragmas(pragmas, &def.value);
+    definitions.push(identity_pragma(record));
     definitions.push(Definition::ModuleDcl(ModuleDcl {
         annotations: Vec::new(),
         ident: def.ident.clone(),
@@ -59,15 +66,16 @@ pub(crate) fn project_version(
 /// version, in timeline order.
 ///
 /// The document version pragma is dropped: a merged contract describes several
-/// versions at once and no single version value applies to it.
+/// versions at once and no single version value applies to it. The
+/// wire-identity pragma is kept once from the first projection.
 pub(crate) fn merge_versions(
+    record: &VersioningRecord,
     spec: &Specification,
-    timeline: &VersionTimeline,
     versions: &[VersionId],
 ) -> ParserResult<Specification> {
     let mut definitions = Vec::new();
     for (index, version) in versions.iter().enumerate() {
-        let projected = project_version(spec, timeline, *version)?;
+        let projected = project_version(record, spec, *version)?;
         for definition in projected.0 {
             match definition {
                 Definition::Pragma(Pragma::XidlcOpenApiVersion(_)) => {}
@@ -81,6 +89,24 @@ pub(crate) fn merge_versions(
         }
     }
     Ok(Specification(definitions))
+}
+
+/// Builds the compiler-synthesized wire-identity pragma of the projection.
+fn identity_pragma(record: &VersioningRecord) -> Definition {
+    Definition::Pragma(Pragma::XidlcApiVersions {
+        selector: record.selector().map(|selector| PragmaVersionSelector {
+            location: selector.location.as_str().to_string(),
+            name: selector.name.clone(),
+        }),
+        versions: record
+            .timeline()
+            .iter()
+            .map(|(_, def)| PragmaApiVersion {
+                ident: def.ident.clone(),
+                value: def.value.clone(),
+            })
+            .collect(),
+    })
 }
 
 fn version_pragmas(pragmas: Vec<Definition>, value: &str) -> Vec<Definition> {

@@ -84,6 +84,13 @@ pub enum VersioningError {
         second: String,
         version: String,
     },
+    /// `@version_selector` arguments are malformed: missing, both locations,
+    /// or an empty name.
+    MalformedVersionSelector { decl: String },
+    /// `@version_selector` appears on a declaration other than the `@version` enum.
+    SelectorOutsideVersionEnum { decl: String },
+    /// Two `@version_selector` declarations exist in one specification.
+    DuplicateVersionSelector { first: String, second: String },
 }
 
 impl fmt::Display for VersioningError {
@@ -216,6 +223,18 @@ impl fmt::Display for VersioningError {
             } => write!(
                 f,
                 "xidl versioning: {first} and {second} both serialize as \"{wire}\" in version {version}; effective wire names must stay unique inside {container} for every version"
+            ),
+            Self::MalformedVersionSelector { decl } => write!(
+                f,
+                "xidl versioning: @version_selector on {decl} requires exactly one of header = \"...\" or query = \"...\" with a non-empty name"
+            ),
+            Self::SelectorOutsideVersionEnum { decl } => write!(
+                f,
+                "xidl versioning: @version_selector on {decl} must sit on the @version enum"
+            ),
+            Self::DuplicateVersionSelector { first, second } => write!(
+                f,
+                "xidl versioning: multiple @version_selector declarations: {first} and {second}"
             ),
         }
     }

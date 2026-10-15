@@ -14,6 +14,23 @@ expression: "serde_json::to_string_pretty(&v2.spec).expect(\"serialize\")"
     }
   },
   {
+    "Pragma": {
+      "XidlcApiVersions": {
+        "selector": null,
+        "versions": [
+          {
+            "ident": "v1",
+            "value": "1.0"
+          },
+          {
+            "ident": "v2",
+            "value": "2.0"
+          }
+        ]
+      }
+    }
+  },
+  {
     "ModuleDcl": {
       "annotations": [],
       "ident": "v2",

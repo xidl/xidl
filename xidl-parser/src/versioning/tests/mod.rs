@@ -10,6 +10,7 @@ mod error;
 mod lifecycle;
 mod project;
 mod references;
+mod selector;
 mod spine;
 mod timeline;
 

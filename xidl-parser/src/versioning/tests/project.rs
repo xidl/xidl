@@ -195,7 +195,21 @@ fn merge_keeps_one_module_per_version_in_order() {
         .iter()
         .filter(|definition| matches!(definition, Definition::Pragma(_)))
         .count();
-    assert_eq!(pragmas, 1);
+    assert_eq!(pragmas, 2);
+    let identity = merged
+        .0
+        .iter()
+        .filter(|definition| {
+            matches!(
+                definition,
+                Definition::Pragma(Pragma::XidlcApiVersions { .. })
+            )
+        })
+        .count();
+    assert_eq!(
+        identity, 1,
+        "the merged projection keeps one identity pragma"
+    );
     assert!(version_pragma(&merged).is_none());
 }
 

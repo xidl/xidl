@@ -184,6 +184,28 @@ impl From<crate::typed_ast::AnnotationAppl> for Annotation {
                         };
                     }
                 }
+                "version_selector" => {
+                    if let Some(p) = &params {
+                        let normalized = normalize_annotation_params(p);
+                        let selected = match (normalized.get("header"), normalized.get("query")) {
+                            (Some(name), None) => {
+                                Some((super::VersionSelectorLocation::Header, name))
+                            }
+                            (None, Some(name)) => {
+                                Some((super::VersionSelectorLocation::Query, name))
+                            }
+                            _ => None,
+                        };
+                        if let Some((location, name)) = selected {
+                            if !name.trim().is_empty() {
+                                return Self::VersionSelector {
+                                    location,
+                                    name: name.clone(),
+                                };
+                            }
+                        }
+                    }
+                }
                 _ => {}
             }
         }

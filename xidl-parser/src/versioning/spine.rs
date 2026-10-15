@@ -98,6 +98,8 @@ pub struct SurfaceSummary {
 /// The derived version spine of a versioned specification.
 #[derive(Debug, Clone, Serialize)]
 pub struct Spine {
+    /// The declared wire version selector, when the contract declares one.
+    pub selector: Option<super::VersionSelector>,
     /// Ordered version history, as declared.
     pub timeline: Vec<VersionDef>,
     /// Per-version canonical wire-surface digest, in timeline order.
@@ -139,6 +141,7 @@ impl Spine {
         }
 
         Ok(Spine {
+            selector: record.selector().cloned(),
             timeline: record
                 .timeline()
                 .iter()

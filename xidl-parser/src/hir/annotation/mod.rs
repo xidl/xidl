@@ -139,6 +139,32 @@ pub enum Annotation {
     Removed {
         version: ScopedName,
     },
+    /// The `@version_selector(header = "...")` / `(query = "...")` declaration:
+    /// how a request states which API version it speaks.
+    VersionSelector {
+        location: VersionSelectorLocation,
+        name: String,
+    },
+}
+
+/// Where a declared version selector travels on the wire.
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum VersionSelectorLocation {
+    /// The version travels in a request header.
+    Header,
+    /// The version travels as a request query parameter.
+    Query,
+}
+
+impl VersionSelectorLocation {
+    /// The pragma-level name of the location.
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Header => "header",
+            Self::Query => "query",
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

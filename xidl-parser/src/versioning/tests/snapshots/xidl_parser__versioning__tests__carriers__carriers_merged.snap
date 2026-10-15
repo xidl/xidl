@@ -9,6 +9,23 @@ expression: json
     }
   },
   {
+    "Pragma": {
+      "XidlcApiVersions": {
+        "selector": null,
+        "versions": [
+          {
+            "ident": "v1",
+            "value": "v1"
+          },
+          {
+            "ident": "v2",
+            "value": "v2"
+          }
+        ]
+      }
+    }
+  },
+  {
     "ModuleDcl": {
       "annotations": [],
       "ident": "v1",

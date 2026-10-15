@@ -32,6 +32,8 @@ pub use timeline::{VersionDef, VersionId, VersionTimeline};
 
 use lifecycle::VersionVisitor as _;
 
+use serde::Serialize;
+
 use crate::error::{ParseError, ParserResult};
 use crate::hir::{ParserProperties, Specification};
 use crate::rest_hir::ProjectedHir;
@@ -69,6 +71,17 @@ pub struct VersionedProjection {
 #[derive(Debug, Clone)]
 pub struct VersioningRecord {
     timeline: VersionTimeline,
+    selector: Option<VersionSelector>,
+}
+
+/// How a request states which API version it speaks, as declared by
+/// `@version_selector` on the `@version` enum.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct VersionSelector {
+    /// Where the version travels on the wire.
+    pub location: crate::hir::VersionSelectorLocation,
+    /// The header or query parameter name, as it appears on the wire.
+    pub name: String,
 }
 
 impl VersioningRecord {
@@ -91,7 +104,10 @@ impl VersioningRecord {
             timeline: &timeline,
         };
         validator.walk(&spec.0, "", lifecycle::Availability::full())?;
-        Ok(Some(VersioningRecord { timeline }))
+        Ok(Some(VersioningRecord {
+            timeline,
+            selector: discovery.selector,
+        }))
     }
 
     /// The version history declared by the `@version` enum.
@@ -99,9 +115,14 @@ impl VersioningRecord {
         &self.timeline
     }
 
+    /// The declared wire version selector, when the contract declares one.
+    pub fn selector(&self) -> Option<&VersionSelector> {
+        self.selector.as_ref()
+    }
+
     /// Projects `version` into an ordinary specification.
     pub fn project(&self, spec: &Specification, version: VersionId) -> ParserResult<Specification> {
-        project::project_version(spec, &self.timeline, version)
+        project::project_version(self, spec, version)
     }
 
     /// Projects every selected version into one specification with one module
@@ -111,7 +132,7 @@ impl VersioningRecord {
         spec: &Specification,
         versions: &[VersionId],
     ) -> ParserResult<Specification> {
-        project::merge_versions(spec, &self.timeline, versions)
+        project::merge_versions(self, spec, versions)
     }
 }
 

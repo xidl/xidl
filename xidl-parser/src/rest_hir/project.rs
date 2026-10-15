@@ -4,7 +4,10 @@ use std::collections::HashSet;
 
 use super::attr::project_attribute;
 use super::mapping;
-use super::model::{HttpException, HttpExceptionRef, HttpRepresentation, HttpUnion};
+use super::model::{
+    HttpApiVersion, HttpException, HttpExceptionRef, HttpRepresentation, HttpUnion,
+    HttpVersionSelector,
+};
 use super::project_params::project_params;
 use super::route::{
     auto_default_method_path, operation_id, parse_route_template, route_from_annotations,
@@ -123,6 +126,25 @@ impl ProjectionContext {
                 self.document.servers.push(HttpDocumentServer {
                     base_url: base_url.clone(),
                     description: description.clone(),
+                });
+            }
+            hir::Pragma::XidlcApiVersions { selector, versions } => {
+                self.document.api_versions = versions
+                    .iter()
+                    .map(|version| HttpApiVersion {
+                        ident: version.ident.clone(),
+                        value: version.value.clone(),
+                    })
+                    .collect();
+                self.document.version_selector = selector.as_ref().and_then(|selector| {
+                    Some(HttpVersionSelector {
+                        location: match selector.location.as_str() {
+                            "query" => hir::VersionSelectorLocation::Query,
+                            "header" => hir::VersionSelectorLocation::Header,
+                            _ => return None,
+                        },
+                        name: selector.name.clone(),
+                    })
                 });
             }
             _ => {}
