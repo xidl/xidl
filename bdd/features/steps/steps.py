@@ -1616,3 +1616,22 @@ def step_impl(context, version):
         assert not os.path.exists(unexpected), (
             f"--api-version {version} must not emit {unexpected}"
         )
+
+
+@then("the generated {lang} client pins the API version header")
+def step_impl(context, lang):
+    module_name = get_module_name(context.lang_dir)
+    source = os.path.join(context.lang_dir, module_name + ".rs")
+    with open(source, "r") as f:
+        content = f.read()
+    v1_body = content[content.find("pub mod v1") : content.find("pub mod v2")]
+    assert 'pub const API_VERSION: &\'static str = "2025-01";' in v1_body, (
+        "the v1 client exports the version value it pins"
+    )
+    assert "Self::API_VERSION" in v1_body, (
+        "the v1 client sends the version header on its requests"
+    )
+    v2_body = content[content.find("pub mod v2") :]
+    assert 'pub const API_VERSION: &\'static str = "2025-06";' in v2_body, (
+        "the v2 client pins its own version value"
+    )

@@ -27,6 +27,14 @@ Feature: API versioning
     When I generate the "v1" API version of the IDL as openapi
     Then only the "v1" openapi document is generated
 
+  Scenario: the version header round-trips on every generated server
+    Given a versioned REST IDL file "bdd/features/data/versioned_header.idl"
+    When I generate rust code for the IDL
+    Then the generated rust client pins the API version header
+    And I can run the generated rust servers for every API version using boilerplate
+    Then I can run hurl tests for API version "v1" against the server
+    And I can run hurl tests for API version "v2" against the server
+
   Scenario: targets without versioned module support fail loudly
     Given a versioned REST IDL file "bdd/features/data/versioned_rest.idl"
     When I generate go code for the IDL and expect failure containing "cannot render one module per API version yet"
