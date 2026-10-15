@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.100.1](https://github.com/xidl/xidl/compare/v0.100.0...v0.100.1) (2026-10-15)
+
+
+### Bug Fixes
+
+* **rest:** reject duplicate route bindings in every HTTP target ([a467258](https://github.com/xidl/xidl/commit/a467258c7ea99657c8e3c8349998ead49a1311a8))
+
 ## [0.100.0](https://github.com/xidl/xidl/compare/v0.99.1...v0.100.0) (2026-10-14)
 
 
