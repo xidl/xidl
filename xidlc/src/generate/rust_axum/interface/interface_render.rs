@@ -78,8 +78,15 @@ pub(crate) fn render_interface_def(
         || !interface_security.api_key_requirements.is_empty();
     let interface_auth_ty = interface_security.auth_ty;
 
+    // The version this interface's module pins: the document version for
+    // per-version output, otherwise the enclosing version module's value.
+    let api_version = rest_hir.document.version.clone().or_else(|| {
+        let module = env.module_path.last()?;
+        rest_hir.document.version_values.get(module).cloned()
+    });
     let ctx = json!({
         "metadata": rest_hir.document,
+        "api_version": api_version,
         "ident": rust_ident(&def.header.ident),
         "methods": methods,
         "rust_attrs": rust_passthrough_attrs_from_annotations(interface_annotations),
