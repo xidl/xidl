@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "xidl-typescript-codec": "file:{{TS_XIDL_TYPESCRIPT_CODEC_PATH}}",
+    "xidl-typescript-server": "file:{{TS_XIDL_TYPESCRIPT_SERVER_PATH}}",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  },
+  "name": "test-ts-server",
+  "type": "module",
+  "version": "1.0.0"
+}

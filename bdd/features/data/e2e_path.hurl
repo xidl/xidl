@@ -13,9 +13,7 @@ jsonpath "$[1]" == "query_val"
 
 # E2ePathSever - op_with_params
 POST {{base_url}}/v1/op_with_params/path_val
-{
-    "a": {}
-}
+{}
 HTTP 200
 [Asserts]
 jsonpath "$[0]" == "path_val"

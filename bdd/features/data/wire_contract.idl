@@ -1,0 +1,22 @@
+#pragma xidlc package wire_contract
+
+// Every wire name in this contract is decided here: explicit @rename wins,
+// @rename_all rewrites the rest, @skip members never reach the wire.
+@rename_all("camelCase")
+enum Color {
+    color_red,
+    @rename("blue") color_blue,
+};
+
+@rename_all("camelCase")
+struct Item {
+    @rename("item_id") string id;
+    @skip string internal_note;
+    @optional string memo;
+    Color color;
+};
+
+interface Store {
+    @post(path = "/items")
+    Item echo(Item item);
+};

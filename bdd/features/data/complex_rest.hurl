@@ -2,11 +2,9 @@
 POST {{base_url}}/
 Content-Type: application/json
 {
-  "user": {
-    "id": 1,
-    "name": "Alice",
-    "roles": ["admin"]
-  }
+  "id": 1,
+  "name": "Alice",
+  "roles": ["admin"]
 }
 HTTP 200
 [Asserts]

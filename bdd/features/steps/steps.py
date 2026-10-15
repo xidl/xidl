@@ -920,9 +920,10 @@ def step_impl(context, value):
 
 @then('the client can create a user with name "{name}" and id {user_id:d}')
 def step_impl(context, name, user_id):
+    # A single body parameter travels as the bare value, not under its name.
     resp = requests.post(
         f"http://127.0.0.1:{context.port}/",
-        json={"user": {"id": user_id, "name": name, "roles": ["admin"]}},
+        json={"id": user_id, "name": name, "roles": ["admin"]},
         timeout=10,
     )
     assert resp.status_code == 200, f"Got {resp.status_code}: {resp.text}"

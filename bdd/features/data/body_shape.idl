@@ -1,0 +1,19 @@
+#pragma xidlc package body_shape
+
+// A single @body parameter is the request body as-is; the enum exercises
+// @rename_all member naming on rust and ts.
+@rename_all("camelCase")
+enum Kind {
+    kind_plain,
+    @rename("wrapped") kind_wrapped,
+};
+
+struct Item {
+    string sku;
+    Kind kind;
+};
+
+interface Store {
+    @post(path = "/body-item")
+    Item create(@body Item item);
+};

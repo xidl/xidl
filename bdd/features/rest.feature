@@ -144,6 +144,11 @@ Feature: REST API Generation and Communication
       | e2e_test         | rust |
       | e2e_test         | go   |
       | e2e_test         | ts   |
+      | wire_contract    | rust |
+      | wire_contract    | go   |
+      | wire_contract    | ts   |
+      | body_shape       | rust |
+      | body_shape       | ts   |
 
   @bdd_rest-errors
   Scenario Outline: REST Bad Path - Not Found
