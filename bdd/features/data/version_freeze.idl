@@ -1,0 +1,18 @@
+#pragma xidlc package store
+
+@version
+enum ApiVersions {
+    @rename("2025-01") v1,
+    @rename("2025-06") v2,
+};
+
+struct Item {
+    string id;
+    @added(ApiVersions::v2)
+    @optional string note;
+};
+
+interface Store {
+    @get(path = "/items/{id}")
+    Item get(@path string id);
+};

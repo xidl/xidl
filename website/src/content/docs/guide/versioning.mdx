@@ -61,6 +61,20 @@ and selection flags; the value (`2025-06`) is what versioned documents carry.
 Per-version documents ignore `#pragma xidlc version` and use the projected
 version value as `info.version`.
 
+## Freezing released versions
+
+`xidlc version verify` checks every released version's OpenAPI document
+against a normalized copy checked in under `<contract>.versions/<value>.json`.
+Normalization strips documentation keywords at their OpenAPI keyword
+positions, prunes unreferenced components and sorts set-like arrays, so prose
+churn never reads as a wire change. The first run needs
+`xidlc version verify --update` to create the copies; after that a plain
+`verify` fails CI when a released version drifts, when it disappears, or when
+its wire value changes. The `--update` door rewrites the copies for
+intentional changes and refuses to rewrite history: new versions may only
+join at the end of the timeline. `xidlc version diff --from v1 --to v2`
+prints the structural difference between two versions.
+
 ## Lifecycle annotations
 
 | Annotation | Meaning |
