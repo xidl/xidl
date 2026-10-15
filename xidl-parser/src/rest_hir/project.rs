@@ -19,8 +19,9 @@ use super::semantics::{
 };
 use super::validate::{
     effective_basic_auth_realm, effective_deprecated, validate_head_constraints,
-    validate_request_shape, validate_route_bindings, validate_stream_method, validate_stream_shape,
-    validate_unique_route_bindings, validate_upgrade_constraints, validate_websocket_stream_items,
+    validate_request_shape, validate_route_bindings, validate_selector_param_collisions,
+    validate_stream_method, validate_stream_shape, validate_unique_route_bindings,
+    validate_upgrade_constraints, validate_websocket_stream_items,
 };
 use super::{
     HttpDocumentMetadata, HttpDocumentServer, HttpInterface, HttpOperation, HttpOperationMeta,
@@ -34,6 +35,9 @@ pub fn project(spec: &hir::Specification) -> ParserResult<RestHirDocument> {
     ctx.document.http_unions = HttpUnion::collect(&spec.0)?;
     ctx.collect_spec(spec, &[])?;
     ctx.document.exceptions = ctx.exceptions;
+    if let Some(selector) = &ctx.document.version_selector {
+        validate_selector_param_collisions(selector, &ctx.interfaces).map_err(parse_err)?;
+    }
     Ok(RestHirDocument {
         spec: spec.clone(),
         document: ctx.document,

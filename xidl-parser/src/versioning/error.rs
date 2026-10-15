@@ -89,8 +89,8 @@ pub enum VersioningError {
     MalformedVersionSelector { decl: String },
     /// `@version_selector` appears on a declaration other than the `@version` enum.
     SelectorOutsideVersionEnum { decl: String },
-    /// Two `@version_selector` declarations exist in one specification.
-    DuplicateVersionSelector { first: String, second: String },
+    /// More than one `@version_selector` declaration sits on the `@version` enum.
+    DuplicateVersionSelector { decl: String },
 }
 
 impl fmt::Display for VersioningError {
@@ -226,15 +226,15 @@ impl fmt::Display for VersioningError {
             ),
             Self::MalformedVersionSelector { decl } => write!(
                 f,
-                "xidl versioning: @version_selector on {decl} requires exactly one of header = \"...\" or query = \"...\" with a non-empty name"
+                "xidl versioning: @version_selector on {decl} requires exactly one of header = \"...\" or query = \"...\" naming a valid header token or query parameter"
             ),
             Self::SelectorOutsideVersionEnum { decl } => write!(
                 f,
                 "xidl versioning: @version_selector on {decl} must sit on the @version enum"
             ),
-            Self::DuplicateVersionSelector { first, second } => write!(
+            Self::DuplicateVersionSelector { decl } => write!(
                 f,
-                "xidl versioning: multiple @version_selector declarations: {first} and {second}"
+                "xidl versioning: multiple @version_selector declarations on {decl}"
             ),
         }
     }

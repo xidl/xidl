@@ -60,6 +60,43 @@ fn empty_selector_name_is_malformed() {
 }
 
 #[test]
+fn header_name_must_be_an_rfc_7230_token() {
+    let error = super::lower_error(&selector_text(
+        "@version_selector(header = \"Api Version\")",
+    ));
+    assert!(
+        error
+            .to_string()
+            .contains("requires exactly one of header = \"...\" or query = \"...\""),
+        "{error}"
+    );
+}
+
+#[test]
+fn query_name_must_not_break_the_query_string() {
+    let error = super::lower_error(&selector_text("@version_selector(query = \"api&version\")"));
+    assert!(
+        error
+            .to_string()
+            .contains("requires exactly one of header = \"...\" or query = \"...\""),
+        "{error}"
+    );
+}
+
+#[test]
+fn selector_name_whitespace_is_rejected_not_trimmed() {
+    let error = super::lower_error(&selector_text(
+        "@version_selector(header = \" Api-Version \")",
+    ));
+    assert!(
+        error
+            .to_string()
+            .contains("requires exactly one of header = \"...\" or query = \"...\""),
+        "{error}"
+    );
+}
+
+#[test]
 fn positional_argument_is_malformed() {
     let error = super::lower_error(&selector_text("@version_selector(\"Api-Version\")"));
     assert!(

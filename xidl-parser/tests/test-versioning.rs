@@ -232,3 +232,45 @@ fn unversioned_contracts_keep_their_single_projection() {
             .all(|definition| !matches!(definition, xidl_parser::hir::Definition::ModuleDcl(_)))
     );
 }
+
+#[test]
+fn selector_param_collision_fails_http_projection() {
+    let source = r#"
+#pragma xidlc package collision
+
+@version
+@version_selector(header = "Api-Version")
+enum ApiVersions {
+    @rename("1.0") v1,
+    @rename("2.0") v2,
+};
+
+interface Pets {
+    @get(path = "/pets/{id}")
+    Pet get(
+        @path string id,
+        @header @rename("Api-Version") string client_name
+    );
+};
+"#;
+    let typed = parse(source);
+    let error = xidl_parser::hir::Specification::project_typed_ast_versions(
+        typed,
+        http_properties(&[(VERSION_LAYOUT_PROPERTY, json!(LAYOUT_PER_VERSION))]),
+        "collision.idl",
+    )
+    .expect_err("a parameter bound under the selector name should fail projection");
+    let message = error.to_string();
+    assert!(
+        message.contains("under the name of the @version_selector"),
+        "{message}"
+    );
+    assert!(
+        message.contains("header parameter 'Api-Version'"),
+        "{message}"
+    );
+    assert!(
+        message.contains("'Pets::get'") || message.contains("operation 'get'"),
+        "{message}"
+    );
+}

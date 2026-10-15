@@ -35,8 +35,13 @@ impl VersionVisitor for DiscoverVisitor {
                 Annotation::VersionSelector { location, name } => {
                     if selector.is_some() {
                         return Err(VersioningError::DuplicateVersionSelector {
-                            first: site.path.clone(),
-                            second: site.path.clone(),
+                            decl: site.path.clone(),
+                        }
+                        .into());
+                    }
+                    if !is_valid_selector_name(*location, name) {
+                        return Err(VersioningError::MalformedVersionSelector {
+                            decl: site.path.clone(),
                         }
                         .into());
                     }
@@ -134,6 +139,25 @@ pub(crate) fn discover(definitions: &[Definition]) -> ParserResult<Discovery> {
     };
     visitor.walk(definitions, "", Availability::full())?;
     Ok(visitor.discovery)
+}
+
+/// Whether a selector name can travel on the wire unambiguously.
+///
+/// Header names must be RFC 7230 tokens; query names must stay free of the
+/// characters that break query-string structure (`&`, `=`, `#`, `%`) and of
+/// whitespace, so the generated client and server always agree on matching.
+fn is_valid_selector_name(location: crate::hir::VersionSelectorLocation, name: &str) -> bool {
+    if name != name.trim() || name.is_empty() {
+        return false;
+    }
+    match location {
+        crate::hir::VersionSelectorLocation::Header => name
+            .chars()
+            .all(|ch| ch.is_ascii_alphanumeric() || "!#$%&'*+-.^_`|~".contains(ch)),
+        crate::hir::VersionSelectorLocation::Query => name
+            .chars()
+            .all(|ch| ch.is_ascii() && !ch.is_whitespace() && !"&=#%".contains(ch)),
+    }
 }
 
 /// Validates every lifecycle annotation of a versioned specification.
