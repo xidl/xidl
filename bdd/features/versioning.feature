@@ -50,3 +50,10 @@ Feature: API versioning
   Scenario: version adapters refuse contracts the head can no longer serve
     Given a versioned REST IDL file "bdd/features/data/versioned_rest.idl"
     When I generate ts code for the IDL with version adapters enabled and expect failure containing "cannot serve removed operations"
+
+  Scenario: one head implementation serves older versions through rust adapters
+    Given a versioned REST IDL file "bdd/features/data/versioned_adapters.idl"
+    When I generate rust code for the IDL with version adapters enabled
+    Then I can run the generated rust servers for every API version using boilerplate
+    And I can run hurl tests for API version "v1" against the server
+    And I can run hurl tests for API version "v2" against the server
