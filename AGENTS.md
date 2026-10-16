@@ -82,3 +82,8 @@
   access statements.
 - Manually assembled Rust string fragments inside generator implementation code
   MUST stay below 20 characters per fragment.
+
+## Issues
+
+- Authors MUST consult `agents/issue.md` before filing or editing an issue.
+- Issues MUST follow the specifications defined in `agents/issue.md`.
