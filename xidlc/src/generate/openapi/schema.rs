@@ -102,8 +102,13 @@ fn integer_schema(value: &hir::IntegerType) -> RefOr<Schema> {
                 .format(Some(SchemaFormat::KnownFormat(KnownFormat::Int64)))
                 .minimum(Some(0));
         }
-        hir::IntegerType::U32
-        | hir::IntegerType::U16
+        hir::IntegerType::U32 => {
+            object = object
+                .format(Some(SchemaFormat::KnownFormat(KnownFormat::Int64)))
+                .minimum(Some(0))
+                .maximum(Some(u32::MAX));
+        }
+        hir::IntegerType::U16
         | hir::IntegerType::U8
         | hir::IntegerType::Octet
         | hir::IntegerType::UChar => {

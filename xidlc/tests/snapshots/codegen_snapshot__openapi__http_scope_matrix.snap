@@ -1,5 +1,6 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
+assertion_line: 145
 expression: output
 ---
 ===============
@@ -362,7 +363,8 @@ openapi_http_scope_matrix.json
               "schema": {
                 "properties": {
                   "age": {
-                    "format": "int32",
+                    "format": "int64",
+                    "maximum": 4294967295,
                     "minimum": 0,
                     "type": "integer"
                   },
@@ -438,7 +440,8 @@ openapi_http_scope_matrix.json
               "schema": {
                 "properties": {
                   "age": {
-                    "format": "int32",
+                    "format": "int64",
+                    "maximum": 4294967295,
                     "minimum": 0,
                     "type": "integer"
                   },
@@ -528,7 +531,8 @@ openapi_http_scope_matrix.json
                       "$ref": "#/components/schemas/MatrixBody"
                     },
                     "revision": {
-                      "format": "int32",
+                      "format": "int64",
+                      "maximum": 4294967295,
                       "minimum": 0,
                       "type": "integer"
                     }
@@ -811,7 +815,8 @@ openapi_http_scope_matrix.json
                     "type": "string"
                   },
                   "page": {
-                    "format": "int32",
+                    "format": "int64",
+                    "maximum": 4294967295,
                     "minimum": 0,
                     "type": "integer"
                   }

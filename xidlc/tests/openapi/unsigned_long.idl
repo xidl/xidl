@@ -1,0 +1,16 @@
+struct Counters {
+    unsigned long legacy;
+    uint32 modern;
+    unsigned short small;
+    long signed_count;
+    unsigned long long wide;
+    sequence<uint32> samples;
+};
+
+interface CounterService {
+    @get(path = "/counters/{id}")
+    Counters get(@path uint32 id);
+
+    @post(path = "/counters")
+    Counters create(in Counters value);
+};

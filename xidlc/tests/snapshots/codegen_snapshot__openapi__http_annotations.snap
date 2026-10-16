@@ -1,5 +1,6 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
+assertion_line: 145
 expression: output
 ---
 ===============
@@ -184,7 +185,8 @@ openapi_http_annotations.json
               "schema": {
                 "properties": {
                   "age": {
-                    "format": "int32",
+                    "format": "int64",
+                    "maximum": 4294967295,
                     "minimum": 0,
                     "type": "integer"
                   },
@@ -328,7 +330,8 @@ openapi_http_annotations.json
             "name": "id",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }
@@ -419,7 +422,8 @@ openapi_http_annotations.json
             "name": "page",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }
@@ -471,7 +475,8 @@ openapi_http_annotations.json
             "name": "id",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }
@@ -531,7 +536,8 @@ openapi_http_annotations.json
             "name": "id",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }
@@ -591,7 +597,8 @@ openapi_http_annotations.json
             "name": "id",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }

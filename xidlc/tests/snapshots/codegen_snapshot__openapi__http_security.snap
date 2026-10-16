@@ -1,5 +1,6 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
+assertion_line: 145
 expression: output
 ---
 ===============
@@ -90,7 +91,8 @@ openapi_http_security.json
                     "type": "string"
                   },
                   "page": {
-                    "format": "int32",
+                    "format": "int64",
+                    "maximum": 4294967295,
                     "minimum": 0,
                     "type": "integer"
                   }
@@ -151,7 +153,8 @@ openapi_http_security.json
             "name": "id",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }

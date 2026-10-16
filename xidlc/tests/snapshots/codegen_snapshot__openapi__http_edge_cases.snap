@@ -1,5 +1,6 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
+assertion_line: 145
 expression: output
 ---
 ===============
@@ -51,7 +52,8 @@ openapi_http_edge_cases.json
             "name": "limit",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }
@@ -103,7 +105,8 @@ openapi_http_edge_cases.json
             "name": "order_id",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }
@@ -113,7 +116,8 @@ openapi_http_edge_cases.json
             "name": "item_id",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }
@@ -165,7 +169,8 @@ openapi_http_edge_cases.json
             "name": "id",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }
@@ -260,7 +265,8 @@ openapi_http_edge_cases.json
             "name": "id",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }
@@ -320,7 +326,8 @@ openapi_http_edge_cases.json
             "name": "id",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }
