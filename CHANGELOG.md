@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.102.0](https://github.com/xidl/xidl/compare/v0.101.0...v0.102.0) (2026-10-16)
+
+
+### Features
+
+* **manifest:** add xidl.toml library manifests ([d21dc11](https://github.com/xidl/xidl/commit/d21dc1136144418579df6346bfadecd6a063fd4c))
+
+
+### Bug Fixes
+
+* **openapi:** describe unsigned long as bounded int64 ([90e876c](https://github.com/xidl/xidl/commit/90e876c146273ba621fdf414f2220381db41ad14))
+
 ## [0.101.0](https://github.com/xidl/xidl/compare/v0.100.1...v0.101.0) (2026-10-16)
 
 
