@@ -24,7 +24,8 @@ fn an_in_place_type_change_pairs_as_a_replacement() {
     );
     let intervals = vec![interval_of("Parcel::quantity", 0, 2)];
     let upcast = convert_direction(Direction::Upcast, &source, &target, &intervals, 0, 1)
-        .expect("replacement upcast");
+        .expect("replacement upcast classifies")
+        .expect("replacement upcast exists");
     assert_eq!(
         hook_fields(&upcast),
         vec![
@@ -33,7 +34,8 @@ fn an_in_place_type_change_pairs_as_a_replacement() {
         ]
     );
     let downcast = convert_direction(Direction::Downcast, &target, &source, &intervals, 1, 0)
-        .expect("replacement downcast");
+        .expect("replacement downcast classifies")
+        .expect("replacement downcast exists");
     assert_eq!(
         hook_fields(&downcast),
         vec![("quantity".to_string(), false)]

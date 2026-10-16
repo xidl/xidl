@@ -1,0 +1,153 @@
+{% filter rustfmt %}/// Version adapters: pure projections between the declared API versions.
+///
+/// The conversion functions below are mechanical. The decisions the
+/// compiler cannot make live on [`VersionAdapters`], which the application
+/// implements; every hook body must be pure — no I/O, no clock, no
+/// database — so the same input always projects the same way. A hook that
+/// cannot decide returns [`UnsupportedProjection`] instead of inventing
+/// data, and the application renders that refusal as a wire error.
+///
+/// Rust deserializes into the served version's own types, so wire members
+/// the served version does not declare are dropped by serde's default
+/// rules; rejecting foreign members on the wire stays the transport
+/// layer's job.
+pub mod version_adapters {
+    use super::{ {{ versions | join(", ") }} };
+
+    /// Data carried when a projection would have to invent information.
+    #[derive(Debug, Clone)]
+    pub struct UnsupportedProjection {
+        pub version: String,
+        pub direction: Direction,
+        pub type_path: String,
+        pub reason: String,
+    }
+
+    /// Which way a refused projection was heading.
+    #[derive(Debug, Clone, Copy)]
+    pub enum Direction {
+        Upcast,
+        Downcast,
+    }
+
+    /// The projected value, or why the projection refused.
+    pub type VersionedResult<T> = ::std::result::Result<T, UnsupportedProjection>;
+
+    /// Marker a hook sets to prove a retired member was consciously dropped.
+    #[derive(Debug, Clone, Copy)]
+    pub struct Ignored;
+
+    /// The only legal value for a retired decision field.
+    pub const IGNORED: Ignored = Ignored;
+
+    /// Hooks the application implements. Methods stay synchronous so the
+    /// generated conversions can take the trait by reference.
+    pub trait VersionAdapters {
+        {%- for hook in hooks %}
+            fn {{ hook.name }}(&self, {%- for param in hook.params %} {{ param.name }}: &{{ param.ty }} {%- if not loop.last %},{% endif %}{%- endfor %} ) -> VersionedResult<{{ hook.ret_ty }}>;
+        {%- endfor %}
+    }
+    {%- for decision in decisions %}
+
+        /// Decision fields a hook supplies; [`IGNORED`] proves a retired member
+        /// was consciously dropped.
+        pub struct {{ decision.name }} {
+            {%- for field in decision.fields %}
+                pub {{ field.name }}: {{ field.ty }},
+            {%- endfor %}
+        }
+    {%- endfor %}
+    {%- for request in requests %}
+
+        /// The head-shaped parameters of one request, projected from an older
+        /// version. The fields are the head handler's parameters in declaration
+        /// order.
+        pub struct {{ request.name }} {
+            {%- for field in request.fields %}
+                pub {{ field.name }}: {{ field.ty }},
+            {%- endfor %}
+        }
+    {%- endfor %}
+    {%- for conversion in conversions %}
+
+        /// Projects this declaration between two adjacent API versions.
+        pub fn {{ conversion.fn_name }}(
+        {%- for param in conversion.params %} {{ param.name }}: {{ param.ty }},{% endfor %}
+            {%- if conversion.source_ty %} source: {{ conversion.source_ty }},{% endif %}
+                adapters: &dyn VersionAdapters,
+                ) -> VersionedResult<{{ conversion.target_ty }}> {
+                    {%- if conversion.kind == "enum" %}
+                        match source {
+                            {%- for shared in conversion.enum_shared %}
+                                {{ conversion.source_ty }}::{{ shared }} => Ok({{ conversion.target_ty }}::{{ shared }}),
+                            {%- endfor %}
+                            {%- if conversion.hook_member %}
+                                other => adapters.{{ conversion.hook_member }}(&other),
+                            {%- endif %}
+                        }
+                    {%- else %}
+                        {%- if conversion.hook_member %}
+                            let decision = adapters.{{ conversion.hook_member }}(
+                            {%- for param in conversion.params %}&{{ param.name }},{% endfor %}
+                                {%- if conversion.source_ty %}&source{% endif %}
+                                    )?;
+                                {%- endif %}
+                                {%- set receiver = "source" if conversion.source_ty else "" %}
+                                {%- for copy in conversion.copies if copy.call %}
+                                    {%- if copy.optional %}
+                                        let {{ copy.tmp }} = match {{ receiver }}{{ "." if conversion.source_ty }}{{ copy.field }} {
+                                            ::std::option::Option::Some(value) => ::std::option::Option::Some({{ copy.call }}(value, adapters)?),
+                                            ::std::option::Option::None => ::std::option::Option::None,
+                                        };
+                                    {%- else %}
+                                        let {{ copy.tmp }} = {{ copy.call }}({{ receiver }}{{ "." if conversion.source_ty }}{{ copy.field }}, adapters)?;
+                                    {%- endif %}
+                                {%- endfor %}
+                                Ok({{ conversion.target_ty }} {
+                                    {%- for copy in conversion.copies %}
+                                        {{ copy.target }}: {%- if copy.call %} {{ copy.tmp }},{%- else %} {{ receiver }}{{ "." if conversion.source_ty }}{{ copy.field }},{%- endif %}
+                                    {%- endfor %}
+                                    {%- for field in conversion.assign %}
+                                        {{ field.name }}: decision.{{ field.name }},
+                                    {%- endfor %}
+                                    {%- for absent in conversion.absences %}
+                                        {{ absent }}: ::std::option::Option::None,
+                                    {%- endfor %}
+                                })
+                            {%- endif %}
+                        }
+                    {%- endfor %}
+                    {%- for error in errors %}
+
+                        /// Projects a head error onto the older version's vocabulary.
+                        pub fn {{ error.fn_name }}(
+                        source: {{ error.source_ty }},
+                        adapters: &dyn VersionAdapters,
+                        ) -> VersionedResult<{{ error.target_ty }}> {
+                            match source {
+                                {%- for arm in error.arms %}
+                                    {{ error.source_ty }}::{{ arm.variant }}(value) => {
+                                        {%- if arm.hook_member %}
+                                            adapters.{{ arm.hook_member }}(&value)
+                                        {%- elif arm.payload_conversion %}
+                                            Ok({{ error.target_ty }}::{{ arm.variant }}({{ arm.payload_conversion }}(value, adapters)?))
+                                        {%- else %}
+                                            Ok({{ error.target_ty }}::{{ arm.variant }}(value))
+                                        {%- endif %}
+                                    }
+                                {%- endfor %}
+                            }
+                        }
+                    {%- endfor %}
+                    {%- for wrapper in results %}
+
+                        /// Projects a head result onto the older version.
+                        pub fn {{ wrapper.fn_name }}(
+                        value: {{ wrapper.head_ty }},
+                        adapters: &dyn VersionAdapters,
+                        ) -> VersionedResult<{{ wrapper.old_ty }}> {
+                            {{ wrapper.inner }}(value, adapters)
+                        }
+                    {%- endfor %}
+                }
+            {% endfilter %}

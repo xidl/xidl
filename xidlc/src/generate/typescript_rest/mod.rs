@@ -65,7 +65,7 @@ pub fn generate(
             content: output.errors,
         }));
     }
-    if let Some(adapters) = crate::generate::adapter::entry::adapters_artifact(
+    if let Some(adapters) = crate::generate::adapter::render::adapters_artifact(
         &spec, &rest_hir, &props, file_name, &renderer,
     )? {
         artifacts.push(Artifact::new_file(ArtifactFile {

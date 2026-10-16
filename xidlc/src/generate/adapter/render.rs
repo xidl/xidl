@@ -21,7 +21,26 @@ use crate::error::{IdlcError, IdlcResult};
 use crate::generate::typescript::TypescriptRenderer;
 use crate::generate::typescript::definition::contexts::TsType;
 use crate::generate::typescript::definition::names::{method_struct_prefix, ts_prop_name};
+use std::collections::HashMap;
 use xidl_parser::hir;
+use xidl_parser::rest_hir::RestHirDocument;
+
+/// Renders the version-adapter artifact for an opted-in versioned contract.
+///
+/// Returns `None` when the contract is unversioned or the property is off,
+/// so existing output stays byte-identical.
+pub(crate) fn adapters_artifact(
+    spec: &hir::Specification,
+    rest_hir: &RestHirDocument,
+    props: &HashMap<String, serde_json::Value>,
+    file_stem: &str,
+    renderer: &TypescriptRenderer,
+) -> IdlcResult<Option<String>> {
+    let Some(plan) = super::entry::adapter_plan(spec, rest_hir, props)? else {
+        return Ok(None);
+    };
+    render_adapters(&plan, file_stem, renderer).map(Some)
+}
 
 /// Decision and hook names accumulated across the whole plan.
 #[derive(Default)]
