@@ -1,8 +1,12 @@
 use xidl_parser::hir::ParserProperties;
+use xidl_parser::parser::IncludeResolver;
 use xidl_parser::rest_hir::ProjectedHir;
 use xidl_parser::versioning::{self, VersionedProjection};
 
 use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir, ArtifactJsonRpcHir};
+use crate::library::MOUNT_PROPERTY;
+use std::collections::BTreeMap;
+use std::path::PathBuf;
 
 pub struct HirGen;
 
@@ -27,12 +31,10 @@ impl crate::jsonrpc::Codegen for HirGen {
         let target_lang: String =
             serde_json::from_value(props.get("target_lang").unwrap().clone()).unwrap();
 
-        let typed = xidl_parser::parser::parser_text_with_resolver(
-            &source,
-            Some(&input),
-            &mut xidl_parser::hir::FsIncludeResolver,
-        )
-        .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
+        let mut resolver = include_resolver(&props);
+        let typed =
+            xidl_parser::parser::parser_text_with_resolver(&source, Some(&input), &mut *resolver)
+                .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
         let projections = xidl_parser::hir::Specification::project_typed_ast_versions(
             typed,
             props.clone(),
@@ -51,6 +53,20 @@ impl crate::jsonrpc::Codegen for HirGen {
             )?);
         }
         Ok(artifacts)
+    }
+}
+
+/// Picks the include resolver: dependency mounts when the driver supplied any,
+/// and plain filesystem resolution otherwise.
+fn include_resolver(props: &ParserProperties) -> Box<dyn IncludeResolver> {
+    let mounts = props
+        .get(MOUNT_PROPERTY)
+        .and_then(|value| serde_json::from_value::<BTreeMap<String, PathBuf>>(value.clone()).ok())
+        .unwrap_or_default();
+    if mounts.is_empty() {
+        Box::new(xidl_parser::hir::FsIncludeResolver)
+    } else {
+        Box::new(xidl_parser::hir::MountIncludeResolver::new(mounts))
     }
 }
 

@@ -7,6 +7,7 @@ pub mod fmt;
 pub mod generate;
 pub mod import;
 pub mod jsonrpc;
+pub mod library;
 pub mod macros;
 pub mod openapi;
 

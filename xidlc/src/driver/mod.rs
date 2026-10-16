@@ -7,6 +7,7 @@ mod out_file;
 
 use crate::driver::out_file::OutputTargetTrait;
 use crate::error::IdlcResult;
+use crate::library::{LibraryLoader, MOUNT_PROPERTY};
 use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
@@ -87,13 +88,21 @@ impl Driver {
             false => out_file::OutputTarget::new_real(&self.args.out_dir)?,
         };
 
+        // Library arguments are expanded before generation, so a directory
+        // holding `xidl.toml` behaves like the list of files it declares.
+        let resolved = LibraryLoader::new().resolve(&self.args.files)?;
+        resolved.check_compiler()?;
+
         let mut generator = generate::Generator::new(self.args.lang.clone());
         let mut props = self.args.generator_props();
+        if !resolved.mounts().is_empty() {
+            props.insert(MOUNT_PROPERTY.to_string(), resolved.mount_property());
+        }
         props.extend(self.extra_props);
 
-        for input in self.args.files {
-            let source = fs::read_to_string(&input)?;
-            let files = generator.generate_from_idl(&source, &input, props.clone())?;
+        for input in resolved.files() {
+            let source = fs::read_to_string(input)?;
+            let files = generator.generate_from_idl(&source, input, props.clone())?;
             output.write_files(files)?;
         }
 

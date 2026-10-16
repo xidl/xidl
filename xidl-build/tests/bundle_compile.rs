@@ -34,6 +34,34 @@ fn bundle_backend_generates_openapi_artifact() {
 }
 
 #[test]
+fn bundle_backend_accepts_a_library_directory() {
+    let scratch = scratch_dir("library");
+    let out_dir = scratch.join("out");
+    let library = scratch.join("library");
+    fs::create_dir_all(&library).expect("failed to create library dir");
+    fs::write(
+        library.join("xidl.toml"),
+        "name = \"greeter\"\nversion = \"1.0.0\"\n",
+    )
+    .expect("failed to write manifest");
+    fs::write(library.join("hello_world.idl"), HELLO_WORLD_IDL).expect("failed to write input idl");
+    fs::write(library.join("notes.txt"), "not an input").expect("failed to write decoy");
+
+    xidl_build::Builder::new()
+        .with_lang("openapi")
+        .with_out_dir(&out_dir)
+        .compile(&[&library])
+        .expect("a bundled library directory should compile");
+
+    assert!(
+        out_dir.join("openapi_hello_world.json").exists(),
+        "the manifest inputs should reach the generator in {}",
+        out_dir.display()
+    );
+    let _ = fs::remove_dir_all(&scratch);
+}
+
+#[test]
 fn bundle_backend_reports_compile_diagnostics() {
     let scratch = scratch_dir("diagnostics");
     let out_dir = scratch.join("out");

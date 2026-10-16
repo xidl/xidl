@@ -63,3 +63,30 @@ mod api {
     include!(concat!(env!("OUT_DIR"), "/api.rs"));
 }
 ```
+
+## 3. Library Manifests (`xidl.toml`)
+
+A directory holding `xidl.toml` is a library: pass the directory to `xidlc`
+instead of the individual files and every declared input is compiled.
+
+```toml
+name = "timestamp"
+version = "1.2.3"
+compiler = ">=0.100"
+
+[dependencies]
+"timestamp" = { src = "github.com/xidl/timestamp", tag = "v1.2.3" }
+```
+
+- Inputs default to the `*.idl` files beside the manifest; `files` and `exclude`
+  glob patterns refine that set.
+- Dependencies are fetched with `git` into `~/.xidl/pkg/<host>/<name>-<version>`
+  and mounted by name, so contracts consume them with
+  `#include "timestamp/lib.idl"`.
+- `compiler` is a version range; when the running `xidlc` is outside it, the
+  newest matching release is installed into `~/.xidl/toolchain/<version>/` and
+  used instead.
+- `xidl-build` accepts a library directory in `compile(&[...])` too; the
+  `bundle` backend resolves it in-process.
+
+Full reference: `website/src/content/docs/docs/xidl-toml.mdx`.
