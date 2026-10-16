@@ -100,6 +100,7 @@ impl CodegenSession {
             Plugin::TypescriptRest => {
                 Box::new(crate::generate::typescript_rest::TypescriptRestCodegen)
             }
+            Plugin::VersionMap => Box::new(crate::generate::hir_gen::HirGen),
             Plugin::Custom(_) => unreachable!("custom plugins use spawn_custom_session"),
             var => panic!("does not support {var:?}"),
         };

@@ -1,0 +1,207 @@
+---
+source: xidl-parser/src/versioning/tests/map.rs
+expression: json
+---
+{
+  "format": 1,
+  "contract": "edge.idl",
+  "versions": [
+    {
+      "id": "v1",
+      "value": "v1"
+    },
+    {
+      "id": "v2",
+      "value": "v2"
+    }
+  ],
+  "steps": [
+    {
+      "from": "v1",
+      "to": "v2",
+      "types": {
+        "Count": {
+          "change": "removed",
+          "kind": "typedef",
+          "details": {
+            "declarators": [
+              {
+                "array": false,
+                "name": "Count"
+              }
+            ],
+            "type": "long"
+          }
+        },
+        "Opaque": {
+          "change": "added",
+          "kind": "native",
+          "details": {
+            "name": "Opaque"
+          }
+        },
+        "Total": {
+          "change": "added",
+          "kind": "typedef",
+          "details": {
+            "declarators": [
+              {
+                "array": false,
+                "name": "Total"
+              }
+            ],
+            "type": "string"
+          }
+        }
+      },
+      "operations": {
+        "Items::save": {
+          "change": "changed",
+          "from": {
+            "method": "post",
+            "parameters": {
+              "body:payload": {
+                "location": "body",
+                "name": "payload",
+                "optional": false,
+                "type": "string",
+                "wire_name": "payload"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": "Text",
+                "content_type": "text/plain",
+                "content_type_explicit": false,
+                "shape": {
+                  "SingleValue": {
+                    "flatten": false,
+                    "source_param": "payload",
+                    "ty": {
+                      "StringType": {
+                        "bound": null
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "path": [],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Text",
+                "content_type": "text/plain",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "StringType": {
+                        "bound": null
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "string",
+            "route": "/items",
+            "routes": [
+              {
+                "path": "/items",
+                "path_params": [],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          },
+          "to": {
+            "method": "post",
+            "parameters": {
+              "query:query": {
+                "location": "query",
+                "name": "query",
+                "optional": false,
+                "type": "string",
+                "wire_name": "query"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [],
+              "query": [
+                {
+                  "optional": false,
+                  "source_param": "query",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "query"
+                }
+              ]
+            },
+            "response": {
+              "body": {
+                "codec": "Text",
+                "content_type": "text/plain",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "StringType": {
+                        "bound": null
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "string",
+            "route": "/items",
+            "routes": [
+              {
+                "path": "/items",
+                "path_params": [],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        }
+      }
+    }
+  ]
+}
