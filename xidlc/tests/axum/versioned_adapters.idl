@@ -1,0 +1,63 @@
+#pragma xidlc package versioned_adapters
+
+@version
+enum ApiVersions {
+    @rename("2025-01") v1,
+    @rename("2025-06") v2,
+    @rename("2026-01") v3,
+};
+
+/** Referenced by shared operations in every version. */
+struct Sku {
+    string value;
+};
+
+@http(404)
+exception ParcelNotFound {
+    string sku;
+};
+
+/** Raised by the shared read since v2: the error downcast hook's subject. */
+@http(422)
+@added(ApiVersions::v2)
+exception CarrierRejected {
+    string carrier;
+};
+
+/** Outcome vocabulary with one removal and one addition. */
+enum Status {
+    processing,
+    @removed(ApiVersions::v2) lost,
+    @added(ApiVersions::v2) delayed,
+};
+
+/** Every struct-level movement of the rules table in one parcel. */
+struct Parcel {
+    /** Unchanged since v1: a mechanical copy in both directions. */
+    Sku sku;
+    /** Required until v2: the downcast hook must supply it again. */
+    @removed(ApiVersions::v2) Sku return_label;
+    /** Optional until v2: omitted on the way down without a decision. */
+    @removed(ApiVersions::v2) @optional string color;
+    /** Retired wire name of the tracking code. */
+    @removed(ApiVersions::v2) @rename("code") string code_v1;
+    /** Replacement wire name since v2: pairs with the retired code. */
+    @added(ApiVersions::v2) @rename("code") string code_v2;
+    /** Required since v2: the upcast hook must supply it. */
+    @added(ApiVersions::v2) string carrier;
+    /** Optional since v2: stays absent on the way up. */
+    @added(ApiVersions::v2) @optional string note;
+    /** Optional since v3: only the second step carries it. */
+    @added(ApiVersions::v3) @optional string inspect_note;
+};
+
+interface Depot {
+    /** Shared read: pairs across every step and filters by status. */
+    @get(path = "/parcels/{sku}")
+    Parcel get(@path string sku, @query @optional Status status)
+        raises(ParcelNotFound, CarrierRejected);
+
+    /** Shared write: the request body carries every Parcel movement. */
+    @post(path = "/parcels")
+    Status ship(@body Parcel parcel, @added(ApiVersions::v2) @query string lane);
+};

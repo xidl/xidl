@@ -88,6 +88,11 @@ def step_impl(context):
     _generate_code(context, "ts", extra_args=["--version-adapters"])
 
 
+@when("I generate rust code for the IDL with version adapters enabled")
+def step_impl(context):
+    _generate_code(context, "rust", extra_args=["--version-adapters"])
+
+
 def _generate_code(context, lang, invocations="one", extra_args=()):
     context.lang = lang
     cmd_lang = lang

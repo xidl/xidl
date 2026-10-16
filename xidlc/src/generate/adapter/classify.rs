@@ -4,6 +4,7 @@
 //! one-sided member is a removal, reading the newer shape it is an
 //! addition, and each case pairs differently.
 
+use crate::error::IdlcError;
 use xidl_parser::hir;
 use xidl_parser::versioning::MemberInterval;
 
@@ -29,11 +30,12 @@ pub(crate) fn convert_direction(
     intervals: &[MemberInterval],
     source_index: usize,
     target_index: usize,
-) -> Option<ConversionPlan> {
+) -> crate::error::IdlcResult<Option<ConversionPlan>> {
     let upward = direction == Direction::Upcast;
     let mut copies = Vec::new();
     let mut produce: Vec<HookField> = Vec::new();
     let mut consumed: Vec<MemberSurface> = Vec::new();
+    let mut covered: Vec<String> = Vec::new();
     let mut needs_hook = false;
 
     for source_member in &source.members {
@@ -45,6 +47,7 @@ pub(crate) fn convert_direction(
                     && target_member.location == source_member.location
                     && written_matches(&source_member.ty, &target_member.ty)
                 {
+                    covered.push(target_member.decl_path.clone());
                     copies.push(FieldCopy {
                         from: source_member.clone(),
                         to: target_member,
@@ -59,6 +62,7 @@ pub(crate) fn convert_direction(
                         consumed.push(source_member.clone());
                         consumed.push(target_member);
                     } else if upward {
+                        covered.push(target_member.decl_path.clone());
                         produce.push(HookField {
                             member: target_member,
                             ignored: false,
@@ -68,6 +72,7 @@ pub(crate) fn convert_direction(
                             ignored: true,
                         });
                     } else {
+                        covered.push(target_member.decl_path.clone());
                         produce.push(HookField {
                             member: target_member,
                             ignored: false,
@@ -118,6 +123,7 @@ pub(crate) fn convert_direction(
             (true, TypeKind::Enum) => {}
             (true, TypeKind::Members) if required => {
                 needs_hook = true;
+                covered.push(target_member.decl_path.clone());
                 produce.push(HookField {
                     member: target_member.clone(),
                     ignored: false,
@@ -127,6 +133,7 @@ pub(crate) fn convert_direction(
             (false, TypeKind::Enum) => {}
             (false, TypeKind::Members) if required => {
                 needs_hook = true;
+                covered.push(target_member.decl_path.clone());
                 produce.push(HookField {
                     member: target_member.clone(),
                     ignored: false,
@@ -135,11 +142,30 @@ pub(crate) fn convert_direction(
             (false, TypeKind::Members) => {}
         }
     }
-    if copies.is_empty() && !needs_hook {
-        return None;
+    let mut absences = Vec::new();
+    if source.kind == TypeKind::Members {
+        for target_member in &target.members {
+            if covered.contains(&target_member.decl_path) {
+                continue;
+            }
+            if !target_member.optional {
+                return Err(IdlcError::fmt(format!(
+                    "conversion of {} would leave the required member {} unassigned",
+                    target_member.decl_path, target_member.ident
+                )));
+            }
+            absences.push(target_member.clone());
+        }
+    }
+    if copies.is_empty() && !needs_hook && absences.is_empty() {
+        return Ok(None);
     }
     let hook = needs_hook.then_some(HookPlan { produce, consumed });
-    Some(ConversionPlan { copies, hook })
+    Ok(Some(ConversionPlan {
+        copies,
+        hook,
+        absences,
+    }))
 }
 
 /// Structural identity of a written type: shallow by design, because a

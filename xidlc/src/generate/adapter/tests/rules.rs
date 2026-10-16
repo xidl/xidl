@@ -45,6 +45,16 @@ fn removed_members_pair_per_optionality_and_direction() {
             ("code_v1".to_string(), false),
         ]
     );
+    let absent: Vec<String> = downcast
+        .absences
+        .iter()
+        .map(|member| member.ident.clone())
+        .collect();
+    assert_eq!(
+        absent,
+        vec!["color".to_string()],
+        "optional members the head no longer carries are explicitly absent"
+    );
 }
 
 #[test]
@@ -153,6 +163,11 @@ fn retired_raised_exception_reaches_the_operation_plan() {
         .find(|operation| operation.name == "get")
         .expect("shared operation get");
     assert_eq!(get.raises_added, vec!["CarrierRejected".to_string()]);
+    assert_eq!(get.raises_from, vec!["ParcelNotFound".to_string()]);
+    assert_eq!(
+        get.raises_to,
+        vec!["ParcelNotFound".to_string(), "CarrierRejected".to_string()]
+    );
     let ship = operations
         .iter()
         .find(|operation| operation.name == "ship")

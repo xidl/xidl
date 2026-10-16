@@ -2,33 +2,31 @@
 //!
 //! Versioned contracts keep rendering plain per-version output unless the
 //! build turns adapters on; the timeline and the unprojected intervals
-//! arrive through the generation properties.
+//! arrive through the generation properties. Language renderers consume
+//! the plan this module derives.
 
 use std::collections::HashMap;
 
 use xidl_parser::rest_hir::RestHirDocument;
 use xidl_parser::versioning::{self, MemberInterval, VersionDef};
 
-use super::{AdapterPlan, derive, render_adapters, surface};
+use super::{AdapterPlan, derive, surface};
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::typescript::TypescriptRenderer;
 use xidl_parser::hir;
 
 /// Generation property that turns adapter generation on; versioned
 /// contracts keep rendering plain per-version output unless it is set.
 pub(crate) const ENABLE_VERSION_ADAPTERS_PROPERTY: &str = "enable_version_adapters";
 
-/// Renders the version-adapter artifact for an opted-in versioned contract.
+/// Derives the version-adapter plan for an opted-in versioned contract.
 ///
 /// Returns `None` when the contract is unversioned or the property is off,
 /// so existing output stays byte-identical.
-pub(crate) fn adapters_artifact(
+pub(crate) fn adapter_plan(
     spec: &hir::Specification,
     rest_hir: &RestHirDocument,
     props: &HashMap<String, serde_json::Value>,
-    file_stem: &str,
-    renderer: &TypescriptRenderer,
-) -> IdlcResult<Option<String>> {
+) -> IdlcResult<Option<AdapterPlan>> {
     let enabled = props
         .get(ENABLE_VERSION_ADAPTERS_PROPERTY)
         .and_then(serde_json::Value::as_bool)
@@ -57,6 +55,5 @@ pub(crate) fn adapters_artifact(
         ))
     })?;
     let surfaces = surface::collect(spec, rest_hir);
-    let plan: AdapterPlan = derive(&surfaces, &versions, &intervals)?;
-    render_adapters(&plan, file_stem, renderer).map(Some)
+    derive(&surfaces, &versions, &intervals).map(Some)
 }

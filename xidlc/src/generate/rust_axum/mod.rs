@@ -1,8 +1,9 @@
-mod interface;
+pub(crate) mod interface;
 mod merged;
 mod render;
 mod scope;
 mod transport;
+mod version_adapters;
 
 use crate::error::IdlcResult;
 use crate::jsonrpc::{Artifact, ArtifactFile};
@@ -48,6 +49,13 @@ pub fn generate(
             "definitions": definitions,
         }),
     )?;
+    let content = match crate::generate::adapter::entry::adapter_plan(&spec, &rest_hir, &props)? {
+        Some(plan) => {
+            let adapters = version_adapters::render_module(&plan, &renderer)?;
+            format!("{content}\n{adapters}\n")
+        }
+        None => content,
+    };
 
     Ok(vec![Artifact::new_file(ArtifactFile {
         path: filename,

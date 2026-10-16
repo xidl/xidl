@@ -4,7 +4,7 @@ mod interface_exceptions;
 mod interface_http;
 mod interface_method;
 mod interface_method_params;
-mod interface_method_support;
+pub(crate) mod interface_method_support;
 mod interface_model;
 mod interface_render;
 mod interface_types;

@@ -11,6 +11,7 @@ pub(crate) mod classify;
 pub(crate) mod context;
 pub(crate) mod entry;
 pub(crate) mod naming;
+pub(crate) mod operations;
 pub(crate) mod render;
 pub(crate) mod surface;
 
@@ -24,9 +25,7 @@ use classify::{Direction, convert_direction};
 use xidl_parser::hir;
 use xidl_parser::versioning::{MemberInterval, VersionDef};
 
-pub(crate) use surface::{MemberSurface, ParameterSurface, TypeKind, TypeSurface, VersionSurface};
-
-pub(crate) use render::render_adapters;
+pub(crate) use surface::{MemberSurface, TypeKind, TypeSurface, VersionSurface};
 
 /// The adapter plan over the declared timeline.
 #[derive(Debug, Clone)]
@@ -64,6 +63,10 @@ pub(crate) struct ConversionPlan {
     /// Set when the direction needs decisions; the renderer emits the hook
     /// signature and the application writes the body.
     pub(crate) hook: Option<HookPlan>,
+    /// Optional target members the conversion leaves absent. Structs must
+    /// initialize every field, so renderers emit an explicit absent value
+    /// for each; a required member here would be a derivation bug.
+    pub(crate) absences: Vec<MemberSurface>,
 }
 
 /// One mechanical member copy.
@@ -108,6 +111,10 @@ pub(crate) struct OperationPlan {
     pub(crate) upcast: Option<ConversionPlan>,
     /// The head version's return type; the downcast entry points project it.
     pub(crate) return_type: Option<hir::TypeSpec>,
+    /// Exceptions the older version raises, in declaration order.
+    pub(crate) raises_from: Vec<String>,
+    /// Exceptions the newer version raises, in declaration order.
+    pub(crate) raises_to: Vec<String>,
     /// Exceptions the newer version raises that the older one cannot,
     /// driving the per-operation error downcast hook.
     pub(crate) raises_added: Vec<String>,
@@ -153,8 +160,8 @@ pub(crate) fn derive(
         let (from_def, to_def) = (&pair[0], &pair[1]);
         let from = surface_for(surfaces, &from_def.ident)?;
         let to = surface_for(surfaces, &to_def.ident)?;
-        let types = pair_types(from, to, intervals, index, index + 1);
-        let operations = pair_operations(from, to, intervals, index, index + 1);
+        let types = pair_types(from, to, intervals, index, index + 1)?;
+        let operations = operations::pair_operations(from, to, intervals, index, index + 1)?;
         steps.push(StepPlan {
             from: from_def.clone(),
             to: to_def.clone(),
@@ -173,35 +180,35 @@ fn pair_types(
     intervals: &[MemberInterval],
     from_index: usize,
     to_index: usize,
-) -> Vec<TypePlan> {
-    let conversions: BTreeMap<String, (Option<ConversionPlan>, Option<ConversionPlan>)> = from
-        .types
-        .iter()
-        .filter_map(|(name, from_type)| {
-            let to_type = to.types.get(name)?;
-            Some((
-                name.clone(),
-                (
-                    convert_direction(
-                        Direction::Upcast,
-                        from_type,
-                        to_type,
-                        intervals,
-                        from_index,
-                        to_index,
-                    ),
-                    convert_direction(
-                        Direction::Downcast,
-                        to_type,
-                        from_type,
-                        intervals,
-                        to_index,
-                        from_index,
-                    ),
-                ),
-            ))
-        })
-        .collect();
+) -> IdlcResult<Vec<TypePlan>> {
+    let mut conversions: BTreeMap<String, (Option<ConversionPlan>, Option<ConversionPlan>)> =
+        BTreeMap::new();
+    for (name, from_type) in &from.types {
+        let Some(to_type) = to.types.get(name) else {
+            continue;
+        };
+        conversions.insert(
+            name.clone(),
+            (
+                convert_direction(
+                    Direction::Upcast,
+                    from_type,
+                    to_type,
+                    intervals,
+                    from_index,
+                    to_index,
+                )?,
+                convert_direction(
+                    Direction::Downcast,
+                    to_type,
+                    from_type,
+                    intervals,
+                    to_index,
+                    from_index,
+                )?,
+            ),
+        );
+    }
     let plans: Vec<TypePlan> = conversions
         .iter()
         .map(|(name, (upcast, downcast))| TypePlan {
@@ -214,7 +221,7 @@ fn pair_types(
 
     let up_reachable = reachable(&conversions, &upcast_roots(from, to));
     let down_reachable = reachable(&conversions, &downcast_roots(from, to));
-    plans
+    Ok(plans
         .into_iter()
         .filter_map(|mut plan| {
             if !up_reachable.contains(&plan.name) {
@@ -225,7 +232,7 @@ fn pair_types(
             }
             (plan.upcast.is_some() || plan.downcast.is_some()).then_some(plan)
         })
-        .collect()
+        .collect())
 }
 
 /// Types the upcast conversions start from: input types of the operations
@@ -327,70 +334,4 @@ fn surface_for<'a>(
             "version module {ident} is missing from the projected specification"
         ))
     })
-}
-
-/// Pairs the operations both versions declare.
-fn pair_operations(
-    from: &VersionSurface,
-    to: &VersionSurface,
-    intervals: &[MemberInterval],
-    from_index: usize,
-    to_index: usize,
-) -> Vec<OperationPlan> {
-    let mut plans = Vec::new();
-    for (interface_name, from_interface) in &from.interfaces {
-        let Some(to_interface) = to.interfaces.get(interface_name) else {
-            continue;
-        };
-        for (name, from_operation) in &from_interface.operations {
-            let Some(to_operation) = to_interface.operations.get(name) else {
-                continue;
-            };
-            let from_raises: BTreeSet<&str> =
-                from_operation.raises.iter().map(String::as_str).collect();
-            let raises_added = to_operation
-                .raises
-                .iter()
-                .filter(|exception| !from_raises.contains(exception.as_str()))
-                .cloned()
-                .collect();
-            let from_params = synthetic_struct(&from_operation.params);
-            let to_params = synthetic_struct(&to_operation.params);
-            let upcast = convert_direction(
-                Direction::Upcast,
-                &from_params,
-                &to_params,
-                intervals,
-                from_index,
-                to_index,
-            );
-            plans.push(OperationPlan {
-                interface: interface_name.clone(),
-                name: name.clone(),
-                upcast,
-                return_type: to_operation.return_type.clone(),
-                raises_added,
-            });
-        }
-    }
-    plans
-}
-
-/// The rules table treats an operation's request parameters as one synthetic
-/// struct, so they classify exactly like members do.
-fn synthetic_struct(params: &[ParameterSurface]) -> TypeSurface {
-    TypeSurface {
-        kind: TypeKind::Members,
-        members: params
-            .iter()
-            .map(|parameter| MemberSurface {
-                decl_path: parameter.decl_path.clone(),
-                ident: parameter.ident.clone(),
-                wire_name: parameter.wire_name.clone(),
-                ty: Some(parameter.ty.clone()),
-                optional: parameter.optional,
-                location: Some(parameter.location),
-            })
-            .collect(),
-    }
 }
