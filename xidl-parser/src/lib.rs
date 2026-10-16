@@ -9,3 +9,6 @@ pub mod rest_hir;
 pub mod versioning;
 
 pub use xidl_parser_derive::Parser;
+
+#[cfg(test)]
+mod tests;
