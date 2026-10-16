@@ -20,6 +20,7 @@ pub(crate) struct GenerateSpec {
     pub(crate) mock: bool,
     pub(crate) api_version: Option<String>,
     pub(crate) api_versions: Option<String>,
+    pub(crate) version_adapters: bool,
     pub(crate) inputs: Vec<PathBuf>,
 }
 
@@ -51,6 +52,7 @@ pub struct Builder {
     mock: bool,
     api_version: Option<String>,
     api_versions: Option<String>,
+    version_adapters: bool,
 }
 
 impl Default for Builder {
@@ -64,6 +66,7 @@ impl Default for Builder {
             mock: false,
             api_version: None,
             api_versions: None,
+            version_adapters: false,
         }
     }
 }
@@ -140,6 +143,13 @@ impl Builder {
         self
     }
 
+    /// Serves older API versions from the head one by generating version
+    /// adapters alongside the per-version artifacts.
+    pub fn with_version_adapters(mut self, value: bool) -> Self {
+        self.version_adapters = value;
+        self
+    }
+
     /// Enables or disables client-side artifact generation.
     pub fn with_client(mut self, value: bool) -> Self {
         self.client = value;
@@ -189,6 +199,7 @@ impl Builder {
             mock: self.mock,
             api_version: self.api_version.clone(),
             api_versions: self.api_versions.clone(),
+            version_adapters: self.version_adapters,
             inputs: inputs.iter().map(|p| p.as_ref().to_path_buf()).collect(),
         };
         #[cfg(feature = "bundle")]

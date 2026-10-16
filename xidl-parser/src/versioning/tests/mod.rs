@@ -8,6 +8,7 @@ mod analyze;
 mod carriers;
 mod claims;
 mod error;
+mod intervals;
 mod lifecycle;
 mod project;
 mod references;

@@ -34,3 +34,19 @@ Feature: API versioning
   Scenario: unimplemented versioning annotations are rejected
     Given a versioned REST IDL file "bdd/features/data/versioning_unsupported.idl"
     When I generate rust code for the IDL and expect failure containing "is not supported yet"
+
+  Scenario: typescript version adapters serve old clients from one head implementation
+    Given a REST IDL file "bdd/features/data/versioned_adapters.idl"
+    When I generate ts code for the IDL with version adapters enabled
+    Then the generated ts code should be valid
+    And the generated ts adapters should require head decisions
+    And the generated ts adapters should expose the version entry points
+
+  Scenario: typescript version adapters stay off unless enabled
+    Given a REST IDL file "bdd/features/data/versioned_adapters.idl"
+    When I generate ts code for the IDL
+    Then the generated ts code should not contain version adapters
+
+  Scenario: version adapters refuse contracts the head can no longer serve
+    Given a versioned REST IDL file "bdd/features/data/versioned_rest.idl"
+    When I generate ts code for the IDL with version adapters enabled and expect failure containing "cannot serve removed operations"

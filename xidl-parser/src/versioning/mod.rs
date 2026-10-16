@@ -50,6 +50,47 @@ pub const API_VERSION_MODULES_PROPERTY: &str = "api_version_modules";
 pub const LAYOUT_MERGED: &str = "merged";
 /// Layout value: one projection per version.
 pub const LAYOUT_PER_VERSION: &str = "per_version";
+/// Generation property carrying the declared timeline as
+/// `[{"ident": .., "value": ..}]`; the adapter stage pairs versions from it.
+pub const API_VERSION_TIMELINE_PROPERTY: &str = "api_version_timeline";
+/// Generation property carrying [`MemberInterval`]s of the unprojected
+/// specification; the adapter stage classifies movements from it.
+pub const API_VERSION_INTERVALS_PROPERTY: &str = "api_version_intervals";
+
+/// What kind of declaration a [`MemberInterval`] describes.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum IntervalKind {
+    /// A struct, exception, union, enum or typedef declaration.
+    Type,
+    /// A member of a struct, exception or union.
+    Member,
+    /// A member of the version enum's own timeline is not reported; this
+    /// covers enumerators of ordinary enums.
+    Enumerator,
+    /// A value of a bitmask.
+    BitmaskValue,
+    /// An interface operation.
+    Operation,
+    /// One parameter of an operation.
+    Parameter,
+    /// An interface attribute (expanded into operations for HTTP).
+    Attribute,
+}
+
+/// The existence interval of one declaration, as half-open timeline indices.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct MemberInterval {
+    /// Declaration path from the specification root, `::`-joined, without
+    /// any version module prefix.
+    pub path: String,
+    /// What the declaration is.
+    pub kind: IntervalKind,
+    /// First timeline index where the declaration exists (inclusive).
+    pub from: usize,
+    /// First timeline index where it no longer exists (exclusive).
+    pub until: usize,
+}
 
 /// One HIR projection produced from a specification.
 #[derive(Debug)]
@@ -59,6 +100,11 @@ pub struct VersionedProjection {
     /// Target version of a single-version projection; `None` for merged and
     /// unversioned projections.
     pub version: Option<VersionDef>,
+    /// Existence intervals of every versioned declaration, read from the
+    /// unprojected specification; empty for unversioned contracts. The
+    /// adapter stage pairs versions from these because the projection strips
+    /// lifecycle annotations.
+    pub intervals: Vec<MemberInterval>,
     /// The projected HIR.
     pub hir: ProjectedHir,
 }
@@ -96,6 +142,14 @@ impl VersioningRecord {
     /// The version history declared by the `@version` enum.
     pub fn timeline(&self) -> &VersionTimeline {
         &self.timeline
+    }
+
+    /// The existence interval of every versioned declaration, read from the
+    /// unprojected specification. Version modules carry no lifecycle
+    /// annotations after projection, so this is the only view the adapter
+    /// stage can pair versions from.
+    pub fn member_intervals(&self, spec: &Specification) -> ParserResult<Vec<MemberInterval>> {
+        lifecycle::collect_intervals(&spec.0, &self.timeline)
     }
 
     /// Projects `version` into an ordinary specification.

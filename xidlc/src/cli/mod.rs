@@ -55,6 +55,10 @@ struct ArgsGen {
     /// Generate these API versions, comma separated, or `*` for every version.
     #[arg(long = "api-versions", value_name = "VERSIONS", global = true)]
     api_versions: Option<String>,
+    /// Serve older API versions from the head one by generating version
+    /// adapters.
+    #[arg(long = "version-adapters", default_value_t = false, global = true)]
+    version_adapters: bool,
     #[command(subcommand)]
     lang: GenLang,
 }
@@ -129,6 +133,7 @@ struct SharedGenArgs {
     dry_run: bool,
     api_version: Option<String>,
     api_versions: Option<String>,
+    version_adapters: bool,
 }
 
 impl ArgsGen {
@@ -138,6 +143,7 @@ impl ArgsGen {
             dry_run: self.dry_run,
             api_version: self.api_version,
             api_versions: self.api_versions,
+            version_adapters: self.version_adapters,
         };
         self.lang.into_driver_args(shared)
     }
@@ -223,6 +229,7 @@ impl SharedGenArgs {
             mock: false,
             api_version: self.api_version,
             api_versions: self.api_versions,
+            version_adapters: self.version_adapters,
             files,
         }
     }
@@ -247,6 +254,7 @@ impl SharedGenArgs {
             dry_run: self.dry_run,
             api_version: self.api_version,
             api_versions: self.api_versions,
+            version_adapters: self.version_adapters,
             files: args.files,
         }
     }

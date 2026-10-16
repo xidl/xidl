@@ -24,6 +24,8 @@ pub struct ArgsGenerate {
     pub api_version: Option<String>,
     /// Several API versions, comma separated, or `*` for every version.
     pub api_versions: Option<String>,
+    /// Serve older versions from the head one by generating version adapters.
+    pub version_adapters: bool,
     pub files: Vec<PathBuf>,
 }
 
@@ -44,6 +46,12 @@ impl ArgsGenerate {
             props.insert(
                 xidl_parser::versioning::API_VERSIONS_PROPERTY.to_string(),
                 serde_json::Value::String(versions.clone()),
+            );
+        }
+        if self.version_adapters {
+            props.insert(
+                crate::generate::adapter::entry::ENABLE_VERSION_ADAPTERS_PROPERTY.to_string(),
+                true.into(),
             );
         }
         props

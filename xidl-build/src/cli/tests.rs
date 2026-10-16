@@ -15,6 +15,7 @@ fn spec(lang: &str, client: bool, server: bool, mock: bool) -> GenerateSpec {
         mock,
         api_version: None,
         api_versions: None,
+        version_adapters: false,
         inputs: vec![PathBuf::from("api/city.idl")],
     }
 }

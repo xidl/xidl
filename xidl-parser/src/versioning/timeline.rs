@@ -18,7 +18,7 @@ impl VersionId {
 }
 
 /// One member of the API version enum.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct VersionDef {
     /// Stable machine name of the version: the enum member ident.
     pub ident: String,

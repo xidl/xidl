@@ -19,6 +19,7 @@ impl BundleBackend {
             dry_run: false,
             api_version: spec.api_version.clone(),
             api_versions: spec.api_versions.clone(),
+            version_adapters: spec.version_adapters,
             files: spec.inputs.clone(),
         };
         xidlc::driver::Driver::run(args).map_err(Self::map_error)
