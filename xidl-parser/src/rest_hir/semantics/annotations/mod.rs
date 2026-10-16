@@ -6,13 +6,7 @@ use super::annotation_parse::{parse_raw_params, render_const_expr, trim_quotes};
 #[cfg(test)]
 mod tests;
 
-pub fn annotation_name(annotation: &hir::Annotation) -> Option<&str> {
-    match annotation {
-        hir::Annotation::Builtin { name, .. } => Some(name.as_str()),
-        hir::Annotation::ScopedName { name, .. } => name.name.last().map(|value| value.as_str()),
-        _ => None,
-    }
-}
+pub use crate::hir::annotation_name;
 
 pub fn annotation_params(annotation: &hir::Annotation) -> Option<&hir::AnnotationParams> {
     match annotation {

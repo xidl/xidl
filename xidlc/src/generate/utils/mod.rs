@@ -9,12 +9,8 @@ use xidl_parser::hir;
 
 /// Whether any annotation carries the given name (e.g. `http`, `header`).
 pub fn has_annotation(annotations: &[hir::Annotation], target: &str) -> bool {
-    annotations.iter().any(|annotation| match annotation {
-        hir::Annotation::Builtin { name, .. } => name == target,
-        hir::Annotation::ScopedName { name, .. } => {
-            name.name.last().map(String::as_str) == Some(target)
-        }
-        _ => false,
+    annotations.iter().any(|annotation| {
+        hir::annotation_name(annotation).is_some_and(|name| name.eq_ignore_ascii_case(target))
     })
 }
 

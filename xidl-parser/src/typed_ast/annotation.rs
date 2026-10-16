@@ -1,8 +1,12 @@
 use super::*;
 use serde::Serialize;
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Clone, Serialize)]
+/// One annotation application, preserving its original source location.
 pub struct AnnotationAppl {
+    /// Original byte range; synthetic documentation annotations have no range.
+    #[serde(skip)]
+    pub span: Option<std::ops::Range<usize>>,
     pub name: AnnotationName,
     pub params: Option<AnnotationParams>,
     pub builtin: Option<BuiltinAnnotation>,
@@ -39,6 +43,15 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationAppl {
             assert_eq!(kind_id, xidl_parser_derive::node_id!("annotation_appl"));
         }
         let raw = ctx.node_text(&node)?.to_string();
+        let span = node
+            .children(&mut node.walk())
+            .find(|child| {
+                matches!(
+                    child.kind(),
+                    "annotation_appl_custom_body" | "annotation_appl_builtin_body"
+                )
+            })
+            .map(|body| node.start_byte()..body.end_byte());
 
         let mut custom_body = None;
         let mut builtin_body = None;
@@ -59,8 +72,14 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationAppl {
             }
         }
 
-        if requires_raw_annotation_parse(&raw) {
-            return parse_annotation_from_raw(&raw, is_extend, extra);
+        let body_source = custom_body
+            .or(builtin_body)
+            .map(|body| ctx.node_text(&body))
+            .transpose()?;
+        if let Some(source) = body_source.filter(|source| requires_raw_annotation_parse(source)) {
+            let mut annotation = parse_annotation_from_raw(source, is_extend, extra)?;
+            annotation.span = span;
+            return Ok(annotation);
         }
 
         if let Some(custom_body) = custom_body {
@@ -83,6 +102,7 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationAppl {
                 )
             })?;
             return Ok(Self {
+                span,
                 name: AnnotationName::ScopedName(scoped_name),
                 params,
                 builtin: None,
@@ -109,6 +129,7 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationAppl {
         };
 
         Ok(Self {
+            span,
             name: AnnotationName::Builtin(name.to_string()),
             params: args.map(|value| AnnotationParams::Raw(value.to_string())),
             builtin,
@@ -119,6 +140,7 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationAppl {
 }
 
 fn requires_raw_annotation_parse(raw: &str) -> bool {
+    let raw = crate::parser::raw::RawArguments::without_comments(raw);
     let source = raw.trim();
     let source = source.strip_prefix("//@").unwrap_or(source);
     let source = source.strip_prefix('@').unwrap_or(source);
@@ -145,6 +167,7 @@ fn parse_annotation_from_raw(
         None => (source, None),
     };
     Ok(AnnotationAppl {
+        span: None,
         name: AnnotationName::Builtin(name.to_string()),
         params: args.map(|value| AnnotationParams::Raw(value.to_string())),
         builtin: None,
@@ -157,6 +180,7 @@ impl AnnotationAppl {
     pub fn doc(text: String) -> Self {
         let escaped = escape_doc_text(&text);
         Self {
+            span: None,
             name: AnnotationName::Builtin("doc".to_string()),
             params: Some(AnnotationParams::Raw(format!("\"{}\"", escaped))),
             builtin: None,
@@ -246,5 +270,17 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationApplParam {
                 "annotation_appl_param missing const_expr".to_string(),
             )),
         }
+    }
+}
+
+impl std::fmt::Debug for AnnotationAppl {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("AnnotationAppl")
+            .field("name", &self.name)
+            .field("params", &self.params)
+            .field("builtin", &self.builtin)
+            .field("is_extend", &self.is_extend)
+            .field("extra", &self.extra)
+            .finish()
     }
 }

@@ -1,5 +1,6 @@
 mod doc_comments;
 mod normalize;
+pub(crate) mod raw;
 
 use crate::error::ParserResult;
 use std::collections::{HashMap, HashSet};

@@ -26,6 +26,7 @@ repository = "https://github.com/xidl/xidl"
 strip = true
 
 [workspace.dependencies]
+strsim = "0.11"
 xidl-http = { version = "0.102.0", path = "crates/xidl-http" }
 xidl-parser = { version = "0.102.0", path = "xidl-parser" }
 xidl-parser-derive = { version = "0.102.0", path = "xidl-parser-derive" }

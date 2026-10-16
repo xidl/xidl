@@ -1,4 +1,5 @@
 mod fmt;
+mod lint;
 
 use crate::driver;
 use crate::driver::ArgsGenerate;
@@ -17,6 +18,8 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Command {
+    /// Check annotation names, placement and arguments without generating files.
+    Lint(lint::ArgsLint),
     Gen(ArgsGen),
     #[command(alias = "format")]
     Fmt(fmt::ArgsFormat),
@@ -293,6 +296,7 @@ fn exec_toolchain(binary: &std::path::Path) -> IdlcResult<()> {
 impl Cli {
     pub fn run(self) -> IdlcResult<()> {
         match self.command {
+            Command::Lint(args) => args.execute(),
             Command::Gen(args) => {
                 let help_command = args.lang.help_command();
                 let args = args.into_driver_args()?;

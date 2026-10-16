@@ -3563,6 +3563,7 @@ dependencies = [
  "semver",
  "serde",
  "serde_json",
+ "strsim",
  "toml",
  "tree-sitter",
  "tree-sitter-idl",

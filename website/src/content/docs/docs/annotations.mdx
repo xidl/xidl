@@ -9,6 +9,40 @@ This page is the single reference for annotations that are built into the XIDL
 language. Protocol-specific annotations (HTTP verbs, streams, security, ...)
 are documented in their own sections.
 
+## Checking annotations
+
+Run annotation checks explicitly before generating a contract:
+
+```sh
+xidlc lint api.idl shared.idl
+xidlc lint --deny warnings api.idl
+```
+
+`lint` checks built-in names, declaration positions, and argument shapes. It
+reports source locations and stable diagnostic codes:
+
+| Code | Level | Example |
+| --- | --- | --- |
+| `misspelled-annotation` | error | `@remvoed` suggests `@removed` |
+| `misplaced-annotation` | error | `@optional` on an interface |
+| `bad-annotation-args` | error | `@api_key` without `name` |
+| `unknown-annotation` | warning | An external plugin's `@photon_audit` |
+
+Built-in annotation names ignore ASCII case. Target-specific `rust-`, `rust_`,
+`ts-`, and `ts_` attributes pass through without validation. Unknown annotations
+remain available to plugins; `--deny warnings` only changes the CLI exit policy.
+
+The command checks every supplied file and exits with status 1 for errors,
+including unreadable or unparseable files. Warnings alone exit with status 0
+unless `--deny warnings` is set. It does not rewrite sources or generate files.
+`xidlc gen` does not run lint, so CI should invoke both commands explicitly.
+
+Editor integrations can use `xidl_parser::lint::BUILTIN_ANNOTATIONS` for completion
+and `xidl_parser::lint::lint(&typed_ast::Specification)` for the same diagnostics.
+The library is a pure function; diagnostic spans are half-open UTF-8 byte ranges
+in the parsed source. Type resolution and generator-specific semantic validation
+remain separate checks.
+
 ## `@rename`
 
 `@rename("...")` is used to rename the serialized name of a field or

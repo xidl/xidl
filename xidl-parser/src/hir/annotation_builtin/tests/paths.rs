@@ -4,6 +4,7 @@ use crate::typed_ast::{AnnotationAppl, AnnotationName};
 #[test]
 fn annotation_from_builtin_path_uses_conversion_function() {
     let appl = AnnotationAppl {
+        span: None,
         name: AnnotationName::Builtin("id".to_string()),
         params: None,
         builtin: Some(BuiltinAnnotation::Id {

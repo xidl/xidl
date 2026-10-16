@@ -1,113 +1,158 @@
 use std::borrow::Cow;
+use std::ops::Range;
+
+use crate::lint::AnnotationDefinition;
 
 pub fn source(text: &str) -> Cow<'_, str> {
-    let bytes = text.as_bytes();
-    let mut out = String::with_capacity(text.len());
-    let mut changed = false;
-    let mut index = 0usize;
-    let mut quote = None;
-
-    while index < bytes.len() {
-        let ch = bytes[index] as char;
-
-        if let Some(current_quote) = quote {
-            out.push(ch);
-            if ch == '\\' && index + 1 < bytes.len() {
-                index += 1;
-                out.push(bytes[index] as char);
-            } else if ch == current_quote {
-                quote = None;
-            }
-            index += 1;
-            continue;
-        }
-
-        if matches!(ch, '"' | '\'') {
-            quote = Some(ch);
-            out.push(ch);
-            index += 1;
-            continue;
-        }
-
-        if ch == '@' {
-            let (next_index, annotation_changed) = normalize_annotation(bytes, index, &mut out);
-            changed |= annotation_changed;
-            index = next_index;
-            continue;
-        }
-
-        out.push(ch);
-        index += 1;
+    SourceNormalization {
+        text,
+        edits: Vec::new(),
     }
-
-    if changed {
-        Cow::Owned(out)
-    } else {
-        Cow::Borrowed(text)
-    }
+    .apply()
 }
 
-fn normalize_annotation(bytes: &[u8], start: usize, out: &mut String) -> (usize, bool) {
-    out.push('@');
-    let mut index = start + 1;
-    while index < bytes.len() {
-        let ch = bytes[index] as char;
-        if ch.is_ascii_alphanumeric() || matches!(ch, '_' | '-' | ':') {
-            out.push(ch);
-            index += 1;
-        } else {
-            break;
-        }
-    }
-
-    if index < bytes.len() && bytes[index] as char == '(' {
-        if let Some(end) = masked_annotation_end(bytes, index) {
-            out.push('(');
-            for _ in index + 1..end {
-                out.push(' ');
-            }
-            out.push(')');
-            return (end + 1, true);
-        }
-    }
-
-    (index, false)
+struct SourceNormalization<'a> {
+    text: &'a str,
+    edits: Vec<(Range<usize>, String)>,
 }
 
-fn masked_annotation_end(bytes: &[u8], start: usize) -> Option<usize> {
-    let mut index = start + 1;
-    let mut quote = None;
-    let mut depth = 1usize;
-    let mut has_bracket = false;
-
-    while index < bytes.len() {
-        let ch = bytes[index] as char;
-        if let Some(current_quote) = quote {
-            if ch == '\\' && index + 1 < bytes.len() {
-                index += 2;
-                continue;
-            }
-            if ch == current_quote {
-                quote = None;
-            }
-            index += 1;
-            continue;
-        }
-
-        match ch {
-            '"' | '\'' => quote = Some(ch),
-            '[' | ']' => has_bracket = true,
-            '(' => depth += 1,
-            ')' => {
-                depth -= 1;
-                if depth == 0 {
-                    return has_bracket.then_some(index);
+impl<'a> SourceNormalization<'a> {
+    fn apply(mut self) -> Cow<'a, str> {
+        let bytes = self.text.as_bytes();
+        let mut index = 0;
+        while index < bytes.len() {
+            match bytes[index] {
+                b'"' | b'\'' => index = self.quoted_end(index),
+                b'/' if bytes.get(index + 1) == Some(&b'*') => {
+                    index = self.text[index + 2..]
+                        .find("*/")
+                        .map_or(bytes.len(), |end| index + 4 + end);
                 }
+                b'/' if bytes.get(index + 1) == Some(&b'/') => {
+                    if bytes.get(index + 2) == Some(&b'@') {
+                        index += 2;
+                    } else {
+                        index = self.text[index..]
+                            .find('\n')
+                            .map_or(bytes.len(), |end| index + end);
+                    }
+                }
+                b'@' => index = self.annotation(index),
+                _ => index += 1,
             }
-            _ => {}
         }
-        index += 1;
+        if self.edits.is_empty() {
+            return Cow::Borrowed(self.text);
+        }
+        let mut out = self.text.to_owned();
+        for (range, replacement) in self.edits.into_iter().rev() {
+            out.replace_range(range, &replacement);
+        }
+        Cow::Owned(out)
     }
 
-    None
+    fn quoted_end(&self, start: usize) -> usize {
+        let bytes = self.text.as_bytes();
+        let mut index = start + 1;
+        while index < bytes.len() {
+            if bytes[index] == b'\\' {
+                index = (index + 2).min(bytes.len());
+            } else if bytes[index] == bytes[start] {
+                return index + 1;
+            } else {
+                index += 1;
+            }
+        }
+        index
+    }
+
+    fn annotation(&mut self, start: usize) -> usize {
+        let bytes = self.text.as_bytes();
+        let name_start = self.skip_trivia(start + 1);
+        let mut end = name_start;
+        while end < bytes.len()
+            && (bytes[end].is_ascii_alphanumeric() || matches!(bytes[end], b'_' | b'-' | b':'))
+        {
+            end += 1;
+        }
+        let name = &self.text[name_start..end];
+        if let Some(definition) = AnnotationDefinition::lookup(name) {
+            if definition.name != name {
+                self.edits
+                    .push((name_start..end, definition.name.to_string()));
+            }
+        } else if AnnotationDefinition::is_passthrough(name) && name.contains('-') {
+            self.edits.push((name_start..end, name.replace('-', "_")));
+        }
+        let arguments = self.skip_trivia(end);
+        if bytes.get(arguments) == Some(&b'(') {
+            if let Some(close) = self.masked_end(arguments) {
+                let replacement = bytes[arguments + 1..close]
+                    .iter()
+                    .map(|byte| {
+                        if matches!(byte, b'\n' | b'\r') {
+                            *byte as char
+                        } else {
+                            ' '
+                        }
+                    })
+                    .collect();
+                self.edits.push((arguments + 1..close, replacement));
+                return close + 1;
+            }
+        }
+        end
+    }
+
+    fn skip_trivia(&self, mut index: usize) -> usize {
+        let bytes = self.text.as_bytes();
+        loop {
+            while bytes.get(index).is_some_and(u8::is_ascii_whitespace) {
+                index += 1;
+            }
+            if bytes.get(index..index + 2) == Some(b"/*") {
+                index = self.text[index + 2..]
+                    .find("*/")
+                    .map_or(bytes.len(), |end| index + 4 + end);
+            } else {
+                return index;
+            }
+        }
+    }
+
+    fn masked_end(&self, start: usize) -> Option<usize> {
+        let bytes = self.text.as_bytes();
+        let mut index = start + 1;
+        let mut depth = 1;
+        let mut bracket = false;
+        while index < bytes.len() {
+            match bytes[index] {
+                b'"' | b'\'' => {
+                    index = self.quoted_end(index);
+                    continue;
+                }
+                b'/' if bytes.get(index + 1) == Some(&b'*') => {
+                    index = self.skip_trivia(index);
+                    continue;
+                }
+                b'/' if bytes.get(index + 1) == Some(&b'/') => {
+                    index = self.text[index..]
+                        .find('\n')
+                        .map_or(bytes.len(), |end| index + end);
+                    continue;
+                }
+                b'[' | b']' => bracket = true,
+                b'(' => depth += 1,
+                b')' => {
+                    depth -= 1;
+                    if depth == 0 {
+                        return bracket.then_some(index);
+                    }
+                }
+                _ => {}
+            }
+            index += 1;
+        }
+        None
+    }
 }

@@ -66,18 +66,15 @@ impl HttpException {
     }
 
     fn http_params(annotations: &[hir::Annotation]) -> Option<&hir::AnnotationParams> {
-        annotations.iter().find_map(|annotation| match annotation {
-            hir::Annotation::Builtin { name, params } if name == "http" => params.as_ref(),
-            hir::Annotation::ScopedName { name, params }
-                if name.name.last().map(String::as_str) == Some("http") =>
-            {
-                params.as_ref()
-            }
-            _ => None,
+        annotations.iter().find_map(|annotation| {
+            (hir::annotation_name(annotation).and_then(crate::lint::AnnotationKind::from_name)
+                == Some(crate::lint::AnnotationKind::Http))
+            .then(|| hir::annotation_params(annotation))
+            .flatten()
         })
     }
 
-    fn status(annotations: &[hir::Annotation], ident: &str) -> ParserResult<u16> {
+    pub(crate) fn status(annotations: &[hir::Annotation], ident: &str) -> ParserResult<u16> {
         const HINT: &str = "(e.g. @http(412) or @http(status = 412))";
         let params = Self::http_params(annotations).ok_or_else(|| {
             ParseError::Message(format!(

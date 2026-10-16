@@ -257,14 +257,15 @@ pub(super) fn normalize_path(path: &str) -> String {
 
 fn method_from_annotation(annotation: &hir::Annotation) -> Option<HttpMethod> {
     let name = annotation_name(annotation)?;
-    match name.to_ascii_lowercase().as_str() {
-        "get" => Some(HttpMethod::Get),
-        "post" => Some(HttpMethod::Post),
-        "put" => Some(HttpMethod::Put),
-        "patch" => Some(HttpMethod::Patch),
-        "delete" => Some(HttpMethod::Delete),
-        "head" => Some(HttpMethod::Head),
-        "options" => Some(HttpMethod::Options),
+    use crate::lint::AnnotationKind;
+    match AnnotationKind::from_name(name)? {
+        AnnotationKind::Get => Some(HttpMethod::Get),
+        AnnotationKind::Post => Some(HttpMethod::Post),
+        AnnotationKind::Put => Some(HttpMethod::Put),
+        AnnotationKind::Patch => Some(HttpMethod::Patch),
+        AnnotationKind::Delete => Some(HttpMethod::Delete),
+        AnnotationKind::Head => Some(HttpMethod::Head),
+        AnnotationKind::Options => Some(HttpMethod::Options),
         _ => None,
     }
 }

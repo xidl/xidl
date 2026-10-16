@@ -191,6 +191,7 @@ fn render_annotation_const_expr_covers_literals_and_operators() {
 fn annotation_from_typed_ast_recognizes_builtin_aliases_and_extras() {
     fn raw_builtin(name: &str, raw: &str) -> crate::typed_ast::AnnotationAppl {
         crate::typed_ast::AnnotationAppl {
+            span: None,
             name: crate::typed_ast::AnnotationName::Builtin(name.to_string()),
             params: Some(crate::typed_ast::AnnotationParams::Raw(raw.to_string())),
             builtin: None,
@@ -219,6 +220,7 @@ fn annotation_from_typed_ast_recognizes_builtin_aliases_and_extras() {
     ));
 
     let expanded = expand_annotations(vec![crate::typed_ast::AnnotationAppl {
+        span: None,
         name: crate::typed_ast::AnnotationName::Builtin("outer".to_string()),
         params: None,
         builtin: None,

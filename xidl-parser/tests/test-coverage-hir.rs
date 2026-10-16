@@ -121,6 +121,7 @@ fn hir_type_conversions_cover_simple_and_template_variants() {
     ));
 
     let nested = AnnotationAppl {
+        span: None,
         name: AnnotationName::Builtin("outer".to_string()),
         params: None,
         builtin: None,
