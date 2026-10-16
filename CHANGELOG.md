@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.101.0](https://github.com/xidl/xidl/compare/v0.100.1...v0.101.0) (2026-10-16)
+
+
+### Features
+
+* **go-rest:** decode single body parameters as bare values ([36f22e5](https://github.com/xidl/xidl/commit/36f22e5d870c4192bbe5c5b7ca5ef80a111e3250))
+* **go:** omit absent optional members from the wire ([f1501aa](https://github.com/xidl/xidl/commit/f1501aa6ff16e1b92c0e9810f78f0019cd51c33a))
+* **rust-axum:** bind single body parameters as bare values ([d51903f](https://github.com/xidl/xidl/commit/d51903ffcaf86fbcae59af999c536796d193e84d))
+* **rust:** rename model fields per canonical wire name ([1e90d2f](https://github.com/xidl/xidl/commit/1e90d2f8a658b0d11cf91342c30e590c7299c692))
+* **typescript:** decode responses through canonical wire schemas ([4f0f10c](https://github.com/xidl/xidl/commit/4f0f10cbeae7c5282b8f355342fc58528d476bd3))
+
+
+### Bug Fixes
+
+* **rust-axum:** follow the canonical wire-name rule in transport projections ([fca3731](https://github.com/xidl/xidl/commit/fca3731e36a630555d9b931719179041f4310ac7))
+* **versioning:** reject duplicate canonical wire names ([4afa545](https://github.com/xidl/xidl/commit/4afa5455a33c2f3e95b9b280968dbc308d506150))
+
 ## [0.100.1](https://github.com/xidl/xidl/compare/v0.100.0...v0.100.1) (2026-10-15)
 
 
