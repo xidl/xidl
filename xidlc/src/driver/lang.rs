@@ -42,6 +42,8 @@ pub enum Plugin {
     Openapi,
     #[serde(alias = "openrpc", alias = "open-rpc")]
     Openrpc,
+    #[serde(alias = "version_map", alias = "version-map")]
+    VersionMap,
     Custom(String),
 }
 
@@ -86,6 +88,7 @@ mod tests {
             ("openapi", Plugin::Openapi),
             ("openrpc", Plugin::Openrpc),
             ("open-rpc", Plugin::Openrpc),
+            ("version-map", Plugin::VersionMap),
             ("custom_plugin", Plugin::Custom("custom_plugin".into())),
         ];
 

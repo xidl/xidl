@@ -35,6 +35,59 @@ impl crate::jsonrpc::Codegen for HirGen {
         let typed =
             xidl_parser::parser::parser_text_with_resolver(&source, Some(&input), &mut *resolver)
                 .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
+        let mut map_resolver = include_resolver(&props);
+        let map_spec = xidl_parser::hir::Specification::from_typed_ast_with_properties_and_path(
+            xidl_parser::parser::parser_text_with_resolver(
+                &source,
+                Some(&input),
+                &mut *map_resolver,
+            )
+            .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?,
+            [("expand_interface".to_string(), false.into())].into(),
+            std::path::Path::new(&input),
+        )
+        .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
+        let version_map = match xidl_parser::versioning::VersioningRecord::analyze(&map_spec)
+            .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?
+        {
+            Some(record) => Some(
+                xidl_parser::versioning::map::from_spec(
+                    &map_spec,
+                    &record,
+                    std::path::Path::new(&input)
+                        .file_name()
+                        .and_then(|name| name.to_str())
+                        .unwrap_or(&input),
+                )
+                .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?,
+            ),
+            None => None,
+        };
+        if target_lang == "version-map" {
+            let Some(version_map) = version_map.as_ref() else {
+                return Err(crate::jsonrpc::RpcError::new(
+                    "xidlc version-map requires a @version enum",
+                ));
+            };
+            let file_name = std::path::Path::new(&input)
+                .file_stem()
+                .and_then(|name| name.to_str())
+                .unwrap_or("api");
+            let content = xidl_parser::versioning::map::to_json(version_map)
+                .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
+            return Ok(vec![Artifact::new_file(ArtifactFile {
+                path: format!("{file_name}.version-map.json"),
+                content,
+            })]);
+        }
+        let mut props = props;
+        if let Some(version_map) = version_map {
+            props.insert(
+                "version_map".to_string(),
+                serde_json::to_value(version_map)
+                    .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?,
+            );
+        }
         // The same resolver reads the units a versioned include names.
         let projections =
             xidl_parser::hir::Specification::project_typed_ast_versions_with_resolver(
@@ -43,7 +96,7 @@ impl crate::jsonrpc::Codegen for HirGen {
                 std::path::Path::new(&input),
                 &mut *resolver,
             )
-            .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
+        .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
 
         let mut artifacts = Vec::new();
         for projection in projections {
@@ -69,7 +122,7 @@ fn include_resolver(props: &ParserProperties) -> Box<dyn IncludeResolver> {
     crate::library::include_resolver(&mounts)
 }
 
-/// Adds the projected API versions to the properties seen by the target.
+/// Adds the selected API version to the properties seen by the target.
 fn projection_properties(
     mut props: ParserProperties,
     projection: &VersionedProjection,

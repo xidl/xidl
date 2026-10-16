@@ -15,10 +15,15 @@ impl VersionId {
     pub fn index(self) -> usize {
         self.0
     }
+
+    /// Creates a version position for core version-map traversal.
+    pub(crate) fn from_index(index: usize) -> Self {
+        Self(index)
+    }
 }
 
 /// One member of the API version enum.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct VersionDef {
     /// Stable machine name of the version: the enum member ident.
     pub ident: String,
