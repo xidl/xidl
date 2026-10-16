@@ -32,6 +32,20 @@ fn parse_hir(path: &Path) -> xidl_parser::error::ParserResult<xidl_parser::hir::
     xidl_parser::hir::Specification::from_typed_ast_with_path(typed, path)
 }
 
+/// Parses `path` with `mounts` available to dependency `#include` paths.
+fn parse_hir_with_mounts(
+    path: &Path,
+    mounts: std::collections::BTreeMap<String, PathBuf>,
+) -> xidl_parser::error::ParserResult<xidl_parser::hir::Specification> {
+    let source = fs::read_to_string(path).expect("read fixture");
+    let typed = xidl_parser::parser::parser_text_with_resolver(
+        &source,
+        Some(path.to_str().unwrap()),
+        &mut xidl_parser::hir::MountIncludeResolver::new(mounts),
+    )?;
+    xidl_parser::hir::Specification::from_typed_ast_with_path(typed, path)
+}
+
 #[test]
 fn test_hir_include_inserts_definitions_in_order() {
     let root = unique_temp_dir("ordered");
@@ -175,4 +189,91 @@ fn http_includes_share_compiler_builtins_without_adding_runtime_models() {
         .collect::<Vec<_>>();
     assert_eq!(media_types, ["application/json", "text/plain"]);
     fs::remove_dir_all(root).expect("remove include fixtures");
+}
+
+#[test]
+fn dependency_mount_resolves_nested_include() {
+    let root = unique_temp_dir("mount");
+    let main = root.join("main.idl");
+    let package = root.join("pkgs/timestamp-1.2.3");
+
+    write_file(
+        &main,
+        r#"
+        #include "timestamp/lib.idl"
+        "#,
+    );
+    write_file(
+        &package.join("lib.idl"),
+        r#"
+        struct Stamp {
+            int32 value;
+        };
+        "#,
+    );
+
+    let mounts = std::collections::BTreeMap::from([("timestamp".to_string(), package.clone())]);
+    let spec = parse_hir_with_mounts(&main, mounts).expect("mounted include resolves");
+    assert_eq!(spec.0.len(), 1, "the included declaration is available");
+    fs::remove_dir_all(root).expect("remove mount fixtures");
+}
+
+#[test]
+fn dependency_mount_prefers_the_longest_matching_name() {
+    let root = unique_temp_dir("mount-longest");
+    let main = root.join("main.idl");
+    let outer = root.join("pkgs/xidl");
+    let inner = root.join("pkgs/xidl-std");
+
+    write_file(&main, "#include \"xidl/std/lib.idl\"\n");
+    write_file(&outer.join("std.idl"), "struct Wrong { int32 value; };\n");
+    write_file(
+        &outer.join("std/lib.idl"),
+        "struct AlsoWrong { int32 value; };\n",
+    );
+    write_file(&inner.join("lib.idl"), "struct Right { int32 value; };\n");
+
+    let mounts = std::collections::BTreeMap::from([
+        ("xidl".to_string(), outer),
+        ("xidl/std".to_string(), inner),
+    ]);
+    let spec = parse_hir_with_mounts(&main, mounts).expect("mounted include resolves");
+    let ident = format!("{:?}", spec.0.first());
+    assert!(ident.contains("Right"), "expected {ident} to name Right");
+    fs::remove_dir_all(root).expect("remove mount fixtures");
+}
+
+#[test]
+fn dependency_mount_falls_back_to_the_filesystem() {
+    let root = unique_temp_dir("mount-fallback");
+    let main = root.join("main.idl");
+
+    write_file(&main, "#include \"sibling.idl\"\n");
+    write_file(
+        &root.join("sibling.idl"),
+        "struct Sibling { int32 value; };\n",
+    );
+
+    let mounts =
+        std::collections::BTreeMap::from([("timestamp".to_string(), root.join("missing-package"))]);
+    let spec = parse_hir_with_mounts(&main, mounts).expect("sibling include still resolves");
+    assert_eq!(spec.0.len(), 1);
+    fs::remove_dir_all(root).expect("remove mount fixtures");
+}
+
+#[test]
+fn dependency_mount_names_the_mount_when_the_file_is_missing() {
+    let root = unique_temp_dir("mount-missing");
+    let main = root.join("main.idl");
+
+    write_file(&main, "#include \"timestamp/lib.idl\"\n");
+
+    let mounts = std::collections::BTreeMap::from([(
+        "timestamp".to_string(),
+        root.join("pkgs/timestamp-1.2.3"),
+    )]);
+    let err = parse_hir_with_mounts(&main, mounts).expect_err("missing mount target should fail");
+    assert!(err.to_string().contains("timestamp/lib.idl"), "{err}");
+    assert!(err.to_string().contains("the 'timestamp' mount"), "{err}");
+    fs::remove_dir_all(root).expect("remove mount fixtures");
 }

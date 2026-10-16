@@ -1,0 +1,133 @@
+---
+title: "Library Manifests"
+description: "`xidl.toml`: library identity, input patterns, compiler range, and external dependencies."
+sidebar:
+  order: 5
+---
+
+# Library Manifests
+
+A library is a directory holding a `xidl.toml` manifest next to its IDL files.
+The manifest gives the directory an identity, lists the inputs that belong to
+it, pins the compiler it needs, and declares the other libraries it depends on.
+
+Passing the directory (or the manifest) to `xidlc` is the same as passing every
+input file it resolves to:
+
+```bash
+xidlc gen --out-dir out rust path/to/library
+```
+
+## Manifest Reference
+
+```toml
+name = "timestamp"
+version = "1.2.3"
+files = ["*.idl", "lib/*.idl"]
+exclude = ["draft.idl"]
+compiler = ">=0.100"
+
+[dependencies]
+"timestamp" = { src = "github.com/xidl/timestamp", tag = "v1.2.3" }
+"other" = { src = "github.com/xidl/xidl/xidl-std", rev = "9f0dabc" }
+```
+
+| Key | Meaning |
+| --- | --- |
+| `name` | Package identity, required. Used as the dependency key and by `#include` mounts. |
+| `version` | The library's own release version, required, semantic version. |
+| `files` | Input patterns relative to the manifest, optional. Defaults to `*.idl`. |
+| `exclude` | Patterns removed from the resolved inputs, optional. |
+| `compiler` | Compiler version range, optional. |
+| `[dependencies]` | Other libraries this one uses, optional. |
+
+Unknown keys are rejected, so a typo fails with the file name, the key, and the
+offending value instead of being ignored.
+
+## Inputs
+
+Without `files`, a library is exactly the `.idl` files that sit beside its
+manifest. The scan is not recursive: a subdirectory is only read when a pattern
+names it, as in `lib/*.idl`.
+
+`exclude` is applied after `files`, so a pattern can add a whole directory and
+an exclusion can remove a single file from it. A library that resolves to no
+files at all is an error rather than an empty compiler run.
+
+## Dependencies
+
+Every `[dependencies]` entry needs a `src` plus exactly one revision key:
+
+| Key | Meaning |
+| --- | --- |
+| `src` | Source of the library, such as `github.com/xidl/xidl/xidl-std`, its `https://` form, or a local path. |
+| `tag` | Release tag to fetch, such as `v1.2.3`. |
+| `rev` | Immutable commit hash to fetch. |
+
+Packages are fetched with `git`, preferring a sparse checkout so a `src` that
+points inside a repository only materializes the package subtree. A fetched
+package lands in the shared cache:
+
+```
+~/.xidl/pkg/<host>/<name>-<version>
+```
+
+`<version>` is the declared `tag`, or the `rev` when a commit is pinned, and
+`<host>` is derived from `src` (`local` for filesystem paths).
+
+### Consuming a Dependency
+
+Dependencies are mounted by name, so a contract includes them with the usual
+`#include` and the mount name as its first path segment:
+
+```idl
+#include "timestamp/lib.idl"
+
+struct Contract {
+    Stamp stamp;
+};
+```
+
+An include that does not start with a dependency name keeps resolving relative
+to the including file, so existing `#include "shared.idl"` usage is unchanged.
+When a dependency key contains a slash, the longest matching key wins.
+
+## Compiler Range
+
+`compiler` is a semantic version requirement. When the running `xidlc` already
+satisfies it, that binary is used and nothing is downloaded:
+
+```toml
+compiler = ">=0.100"
+```
+
+Otherwise `xidlc` installs the newest matching release from GitHub into
+`~/.xidl/toolchain/<version>/xidlc` and re-runs itself with that binary, passing
+through the same arguments and exit status. Generation fails with a message
+naming the required range when no release satisfies it.
+
+The cache home is `~/.xidl`, which `XIDL_HOME` overrides. Fetching needs `git`,
+plus `curl` and `tar` when a toolchain has to be installed.
+
+## Rust Build Scripts
+
+`xidl-build` accepts a library directory wherever it accepts input files.
+Without the `bundle` feature, the directory is handed to the `xidlc`
+executable, which resolves it exactly as above. With `bundle`, resolution runs
+in-process:
+
+```rust
+fn main() -> Result<(), xidl_build::Error> {
+    println!("cargo:rerun-if-changed=idl/xidl.toml");
+    println!("cargo:rerun-if-changed=idl/contract.idl");
+
+    xidl_build::Builder::new()
+        .with_lang("rust")
+        .compile(&["idl"])?;
+
+    Ok(())
+}
+```
+
+A bundled build cannot switch compilers, so a manifest whose `compiler` range
+the linked compiler does not satisfy fails with the range it needs.

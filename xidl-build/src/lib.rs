@@ -5,6 +5,9 @@
 //! feature links the `xidlc` compiler in-process with the default
 //! generator set; `gen-*` features add more generators to bundled builds.
 //!
+//! Inputs may also be library directories holding a `xidl.toml` manifest;
+//! every input the manifest declares is compiled instead.
+//!
 //! # Example
 //!
 //! ```no_run

@@ -22,6 +22,8 @@ pub enum IdlcError {
     Rpc(String),
     /// Formatting error.
     Fmt(String),
+    /// Library (`xidl.toml`) resolution error.
+    Library(crate::library::LibraryError),
     /// Collection of diagnostics.
     Diagnostics(DiagnosticListError),
 }
@@ -35,6 +37,7 @@ impl fmt::Display for IdlcError {
             Self::Template(message) | Self::Rpc(message) | Self::Fmt(message) => {
                 f.write_str(message)
             }
+            Self::Library(err) => write!(f, "{err}"),
             Self::Diagnostics(err) => write!(f, "{err}"),
         }
     }
@@ -49,6 +52,7 @@ impl Error for IdlcError {
             Self::Parse(err) => err.source(),
             Self::Json(err) => err.source(),
             Self::Diagnostics(err) => Some(err),
+            Self::Library(err) => Some(err),
             Self::Template(_) | Self::Rpc(_) | Self::Fmt(_) => None,
         }
     }
@@ -69,6 +73,12 @@ impl From<xidl_parser::error::ParseError> for IdlcError {
 impl From<serde_json::Error> for IdlcError {
     fn from(err: serde_json::Error) -> Self {
         Self::Json(err)
+    }
+}
+
+impl From<crate::library::LibraryError> for IdlcError {
+    fn from(err: crate::library::LibraryError) -> Self {
+        Self::Library(err)
     }
 }
 
