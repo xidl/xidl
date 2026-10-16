@@ -5,3 +5,4 @@ uvicorn
 msgpack
 websocket-client
 PyYAML
+jsonschema

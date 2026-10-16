@@ -1,5 +1,6 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
+assertion_line: 145
 expression: output
 ---
 ===============
@@ -49,7 +50,8 @@ openapi_http_client_stream_report.json
       "UploadSummary": {
         "properties": {
           "accepted": {
-            "format": "int32",
+            "format": "int64",
+            "maximum": 4294967295,
             "minimum": 0,
             "type": "integer"
           },

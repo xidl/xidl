@@ -1,5 +1,6 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
+assertion_line: 145
 expression: output
 ---
 ===============
@@ -11,7 +12,8 @@ openapi_http_defaults.json
       "CreateUserRequest": {
         "properties": {
           "age": {
-            "format": "int32",
+            "format": "int64",
+            "maximum": 4294967295,
             "minimum": 0,
             "type": "integer"
           },
@@ -110,7 +112,8 @@ openapi_http_defaults.json
             "name": "id",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }
@@ -170,7 +173,8 @@ openapi_http_defaults.json
             "name": "uid",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }
@@ -180,7 +184,8 @@ openapi_http_defaults.json
             "name": "page",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }
@@ -190,7 +195,8 @@ openapi_http_defaults.json
             "name": "size",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }
@@ -242,7 +248,8 @@ openapi_http_defaults.json
             "name": "id",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }
@@ -252,7 +259,8 @@ openapi_http_defaults.json
             "name": "revision",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }
@@ -400,7 +408,8 @@ openapi_http_defaults.json
             "name": "id",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }
@@ -410,7 +419,8 @@ openapi_http_defaults.json
             "name": "revision",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }
@@ -455,7 +465,8 @@ openapi_http_defaults.json
             "name": "id",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }
@@ -465,7 +476,8 @@ openapi_http_defaults.json
             "name": "revision",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }
@@ -559,7 +571,8 @@ openapi_http_defaults.json
               "schema": {
                 "properties": {
                   "age": {
-                    "format": "int32",
+                    "format": "int64",
+                    "maximum": 4294967295,
                     "minimum": 0,
                     "type": "integer"
                   },
@@ -622,7 +635,8 @@ openapi_http_defaults.json
             "name": "id",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }
@@ -634,7 +648,8 @@ openapi_http_defaults.json
               "schema": {
                 "properties": {
                   "age": {
-                    "format": "int32",
+                    "format": "int64",
+                    "maximum": 4294967295,
                     "minimum": 0,
                     "type": "integer"
                   },
@@ -695,7 +710,8 @@ openapi_http_defaults.json
             "name": "id",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }
@@ -707,7 +723,8 @@ openapi_http_defaults.json
               "schema": {
                 "properties": {
                   "age": {
-                    "format": "int32",
+                    "format": "int64",
+                    "maximum": 4294967295,
                     "minimum": 0,
                     "type": "integer"
                   },
@@ -770,7 +787,8 @@ openapi_http_defaults.json
             "name": "id",
             "required": true,
             "schema": {
-              "format": "int32",
+              "format": "int64",
+              "maximum": 4294967295,
               "minimum": 0,
               "type": "integer"
             }

@@ -1,5 +1,6 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
+assertion_line: 145
 expression: output
 ---
 ===============
@@ -43,7 +44,8 @@ openapi_http_envelope.json
       "NotFound": {
         "properties": {
           "code": {
-            "format": "int32",
+            "format": "int64",
+            "maximum": 4294967295,
             "minimum": 0,
             "type": "integer"
           },
@@ -63,7 +65,8 @@ openapi_http_envelope.json
       "PreconditionFailed": {
         "properties": {
           "code": {
-            "format": "int32",
+            "format": "int64",
+            "maximum": 4294967295,
             "minimum": 0,
             "type": "integer"
           },
