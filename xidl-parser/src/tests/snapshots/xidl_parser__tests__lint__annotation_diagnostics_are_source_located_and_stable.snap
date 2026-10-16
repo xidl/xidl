@@ -1,0 +1,57 @@
+---
+source: xidl-parser/src/tests/lint.rs
+assertion_line: 27
+expression: "serde_json::to_string_pretty(&diagnostics).unwrap()"
+---
+[
+  {
+    "code": "misspelled-annotation",
+    "severity": "error",
+    "span": {
+      "start": 61,
+      "end": 76
+    },
+    "message": "unknown annotation `@remvoed`",
+    "suggestion": "removed"
+  },
+  {
+    "code": "unknown-annotation",
+    "severity": "warning",
+    "span": {
+      "start": 96,
+      "end": 109
+    },
+    "message": "unknown annotation `@photon_audit`",
+    "suggestion": null
+  },
+  {
+    "code": "misplaced-annotation",
+    "severity": "error",
+    "span": {
+      "start": 124,
+      "end": 133
+    },
+    "message": "@optional is not allowed on Interface",
+    "suggestion": null
+  },
+  {
+    "code": "misspelled-annotation",
+    "severity": "error",
+    "span": {
+      "start": 156,
+      "end": 178
+    },
+    "message": "unknown annotation `@gett`",
+    "suggestion": "get"
+  },
+  {
+    "code": "bad-annotation-args",
+    "severity": "error",
+    "span": {
+      "start": 200,
+      "end": 235
+    },
+    "message": "@api_key: `in` must be header, query or cookie",
+    "suggestion": null
+  }
+]

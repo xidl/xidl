@@ -10,6 +10,8 @@ pub type IdlcResult<T> = std::result::Result<T, IdlcError>;
 /// Errors produced by the IDL compiler driver.
 #[derive(Debug)]
 pub enum IdlcError {
+    /// Annotation lint found errors; the command has already printed diagnostics.
+    LintFailed,
     /// IO error.
     Io(std::io::Error),
     /// Parse error from the IDL parser.
@@ -31,6 +33,7 @@ pub enum IdlcError {
 impl fmt::Display for IdlcError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::LintFailed => f.write_str("annotation lint failed"),
             Self::Io(err) => write!(f, "{err}"),
             Self::Parse(err) => write!(f, "{err}"),
             Self::Json(err) => write!(f, "{err}"),
@@ -53,7 +56,7 @@ impl Error for IdlcError {
             Self::Json(err) => err.source(),
             Self::Diagnostics(err) => Some(err),
             Self::Library(err) => Some(err),
-            Self::Template(_) | Self::Rpc(_) | Self::Fmt(_) => None,
+            Self::LintFailed | Self::Template(_) | Self::Rpc(_) | Self::Fmt(_) => None,
         }
     }
 }

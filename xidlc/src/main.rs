@@ -19,6 +19,7 @@ fn main() {
 
     if let Err(err) = Cli::parse().run() {
         match err {
+            IdlcError::LintFailed => {}
             IdlcError::Diagnostics(DiagnosticListError { diagnostics }) => {
                 for (index, diagnostic) in diagnostics.into_iter().enumerate() {
                     if index > 0 {

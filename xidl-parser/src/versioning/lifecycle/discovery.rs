@@ -30,9 +30,10 @@ impl VersionVisitor for DiscoverVisitor {
                 other => {
                     // A malformed `@version(...)` stays a raw application; treat
                     // it as the marker so its arguments are reported.
-                    if raw_versioning_name(other)
-                        .is_some_and(|name| name.eq_ignore_ascii_case("version"))
-                    {
+                    if raw_versioning_name(other).is_some_and(|name| {
+                        crate::lint::AnnotationKind::from_name(&name)
+                            == Some(crate::lint::AnnotationKind::Version)
+                    }) {
                         marker = true;
                     }
                 }

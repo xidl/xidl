@@ -4,6 +4,7 @@ use super::super::VersioningError;
 use super::super::timeline::{VersionId, VersionTimeline};
 use crate::error::ParserResult;
 use crate::hir::{Annotation, Enumerator, ScopedName};
+use crate::lint::AnnotationKind;
 
 /// Annotations reserved for later versioning phases.
 pub(super) const UNSUPPORTED_ANNOTATIONS: [&str; 7] = [
@@ -175,14 +176,17 @@ pub(crate) fn availability(
                     continue;
                 };
                 let lowered = name.to_ascii_lowercase();
-                if lowered == "added" || lowered == "removed" {
+                if matches!(
+                    AnnotationKind::from_name(name.as_str()),
+                    Some(AnnotationKind::Added | AnnotationKind::Removed)
+                ) {
                     return Err(VersioningError::MalformedVersionReference {
                         annotation: format!("@{name}"),
                         decl: site.path.clone(),
                     }
                     .into());
                 }
-                if lowered == "version" {
+                if AnnotationKind::from_name(name.as_str()) == Some(AnnotationKind::Version) {
                     return Err(VersioningError::MalformedVersionMarker {
                         decl: site.path.clone(),
                     }
@@ -288,9 +292,7 @@ pub(crate) fn is_versioning_annotation(annotation: &Annotation) -> bool {
     match annotation {
         Annotation::Version | Annotation::Added { .. } | Annotation::Removed { .. } => true,
         other => raw_versioning_name(other).is_some_and(|name| {
-            name.eq_ignore_ascii_case("version")
-                || name.eq_ignore_ascii_case("added")
-                || name.eq_ignore_ascii_case("removed")
+            AnnotationKind::from_name(&name).is_some_and(AnnotationKind::is_lifecycle)
         }),
     }
 }

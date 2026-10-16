@@ -1,14 +1,16 @@
 use super::super::*;
 use super::{Annotation, AnnotationParam, AnnotationParams, RenameRule};
+use crate::lint::{AnnotationDefinition, AnnotationKind};
 use convert_case::{Case, Casing};
 use std::collections::HashMap;
 
 pub fn annotation_name(annotation: &Annotation) -> Option<&str> {
-    match annotation {
+    let name = match annotation {
         Annotation::Builtin { name, .. } => Some(name.as_str()),
         Annotation::ScopedName { name, .. } => name.name.last().map(|value| value.as_str()),
         _ => None,
-    }
+    }?;
+    Some(AnnotationDefinition::lookup(name).map_or(name, |entry| entry.name))
 }
 
 pub fn annotation_params(annotation: &Annotation) -> Option<&AnnotationParams> {
@@ -135,7 +137,22 @@ fn push_annotation(out: &mut Vec<Annotation>, mut value: crate::typed_ast::Annot
 }
 
 impl From<crate::typed_ast::AnnotationAppl> for Annotation {
-    fn from(value: crate::typed_ast::AnnotationAppl) -> Self {
+    fn from(mut value: crate::typed_ast::AnnotationAppl) -> Self {
+        match &mut value.name {
+            crate::typed_ast::AnnotationName::Builtin(name) => {
+                if let Some(definition) = AnnotationDefinition::lookup(name) {
+                    *name = definition.name.to_string();
+                }
+            }
+            crate::typed_ast::AnnotationName::ScopedName(name)
+                if name.scoped_name.is_none() && !name.node_text.starts_with("::") =>
+            {
+                if let Some(definition) = AnnotationDefinition::lookup(&name.identifier.0) {
+                    name.identifier.0 = definition.name.to_string();
+                }
+            }
+            _ => {}
+        }
         let params = value.params.map(Into::into);
 
         let name_ref = match &value.name {
@@ -144,8 +161,8 @@ impl From<crate::typed_ast::AnnotationAppl> for Annotation {
         };
 
         if let Some(name) = name_ref {
-            match name.to_ascii_lowercase().as_str() {
-                "rename" | "name" => {
+            match AnnotationKind::from_name(name) {
+                Some(AnnotationKind::Rename | AnnotationKind::Name) => {
                     if let Some(p) = &params {
                         let normalized = normalize_annotation_params(p);
                         if let Some(val) =
@@ -155,7 +172,7 @@ impl From<crate::typed_ast::AnnotationAppl> for Annotation {
                         }
                     }
                 }
-                "rename_all" => {
+                Some(AnnotationKind::RenameAll) => {
                     if let Some(p) = &params {
                         let normalized = normalize_annotation_params(p);
                         if let Some(val) =
@@ -167,19 +184,19 @@ impl From<crate::typed_ast::AnnotationAppl> for Annotation {
                         }
                     }
                 }
-                "skip" => return Self::Skip,
-                "version" => {
+                Some(AnnotationKind::Skip) => return Self::Skip,
+                Some(AnnotationKind::Version) => {
                     if params.is_none() {
                         return Self::Version;
                     }
                 }
-                "added" | "removed" => {
+                Some(AnnotationKind::Added | AnnotationKind::Removed) => {
                     if let Some(AnnotationParams::ConstExpr(ConstExpr::ScopedName(version))) =
                         params.as_ref()
                     {
                         let version = version.clone();
-                        return match name.to_ascii_lowercase().as_str() {
-                            "added" => Self::Added { version },
+                        return match AnnotationKind::from_name(name) {
+                            Some(AnnotationKind::Added) => Self::Added { version },
                             _ => Self::Removed { version },
                         };
                     }
@@ -251,48 +268,7 @@ pub(super) fn apply_rename_rule(raw_name: &str, rule: RenameRule) -> String {
 }
 
 fn parse_raw_annotation_params(raw: &str) -> Vec<(String, String)> {
-    let mut parts = Vec::new();
-    let mut buf = String::new();
-    let mut quote = None;
-    let mut escaped = false;
-
-    for ch in raw.chars() {
-        if escaped {
-            buf.push(ch);
-            escaped = false;
-            continue;
-        }
-        if ch == '\\' && quote.is_some() {
-            escaped = true;
-            buf.push(ch);
-            continue;
-        }
-        match ch {
-            '\'' | '"' => {
-                if quote == Some(ch) {
-                    quote = None;
-                } else if quote.is_none() {
-                    quote = Some(ch);
-                }
-                buf.push(ch);
-            }
-            ',' if quote.is_none() => {
-                let item = buf.trim();
-                if !item.is_empty() {
-                    parts.push(item.to_string());
-                }
-                buf.clear();
-            }
-            _ => buf.push(ch),
-        }
-    }
-
-    let item = buf.trim();
-    if !item.is_empty() {
-        parts.push(item.to_string());
-    }
-
-    parts
+    crate::parser::raw::RawArguments::split(raw, ',')
         .into_iter()
         .map(|part| {
             if let Some((key, value)) = part.split_once('=') {

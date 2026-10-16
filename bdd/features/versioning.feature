@@ -34,3 +34,25 @@ Feature: API versioning
   Scenario: unimplemented versioning annotations are rejected
     Given a versioned REST IDL file "bdd/features/data/versioning_unsupported.idl"
     When I generate rust code for the IDL and expect failure containing "is not supported yet"
+
+  Scenario: lint protects lifecycle spelling independently of generation
+    Given a versioned contract with annotation mistakes
+      """
+      @version enum Versions { v1, v2 };
+      struct Item { string id; @remvoed(Versions::v2) string legacy; };
+      @optional interface Items { @gett(path="/items") Item read(); };
+      """
+    When I check the contract with xidlc lint
+    Then lint reports the annotation mistakes without rewriting the contract
+    And generation remains independent and correcting the typo changes the intended version
+
+  Scenario: plugin diagnostics and IO failures obey explicit CI warning policy
+    Given a versioned contract with annotation mistakes
+      """
+      @version enum Versions { v1, v2 };
+      struct Item { @remvoed(Versions::v2) string legacy; };
+      @optional interface Items { @gett(path="/items") Item read(); };
+      """
+    When I check the contract with xidlc lint
+    Then lint reports the annotation mistakes without rewriting the contract
+    And plugin warnings obey the CI policy across multiple files

@@ -12,7 +12,7 @@ fn parses_gen_subcommand_with_lang_enum_and_files() {
             }
             _ => panic!("expected rust lang"),
         },
-        Command::Fmt(_) => panic!("expected gen command"),
+        Command::Fmt(_) | Command::Lint(_) => panic!("expected gen command"),
         Command::Import(_) => panic!("expected gen command"),
     }
 }
