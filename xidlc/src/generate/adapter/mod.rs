@@ -9,3 +9,5 @@ mod references;
 
 pub(crate) use model::*;
 pub(crate) use planner::AdapterPlanner;
+
+pub(crate) mod wire_layout;

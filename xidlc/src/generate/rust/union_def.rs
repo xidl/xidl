@@ -1,3 +1,4 @@
+use super::util::{http_union_case_ident, union_serde_tag_string};
 use crate::error::IdlcResult;
 use crate::generate::rust::util::{
     constr_type_scoped_name, declarator_name, render_const, rust_derive_info_with_extra,
@@ -48,7 +49,7 @@ fn render_http_union(def: &hir::UnionDef, renderer: &RustRenderer) -> IdlcResult
                 }
             };
             Ok(json!({
-                "case": convert_case(case_ident),
+                "case": http_union_case_ident(case_ident),
                 "ty": ty,
                 "doc": doc_lines_from_annotations(&case.element.annotations),
             }))
@@ -65,13 +66,6 @@ fn render_http_union(def: &hir::UnionDef, renderer: &RustRenderer) -> IdlcResult
         &doc_lines_from_annotations(&def.annotations),
     );
     renderer.render_source_template("http_union.rs.j2", &ctx)
-}
-
-fn convert_case(ident: &str) -> String {
-    ident
-        .strip_prefix("r#")
-        .unwrap_or(ident)
-        .to_case(ConvertCase::Pascal)
 }
 
 pub(crate) fn render_union_with_config(
@@ -163,7 +157,7 @@ pub(crate) fn render_union_with_config(
                     .map(|label| {
                         json!({
                             "match_expr": label,
-                            "tag": serde_tag_string(label),
+                            "tag": union_serde_tag_string(label),
                             "tag_expr": label,
                         })
                     })
@@ -251,8 +245,4 @@ pub(crate) fn render_union_with_config(
         module_path,
     );
     renderer.render_source_template("union.rs.j2", &ctx)
-}
-
-fn serde_tag_string(label: &str) -> String {
-    label.rsplit("::").next().unwrap_or(label).to_string()
 }

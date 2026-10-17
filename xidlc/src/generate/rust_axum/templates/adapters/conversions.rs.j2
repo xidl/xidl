@@ -1,0 +1,70 @@
+{% macro value(plan, source) -%}
+    {%- if plan.kind == "Identity" -%}Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone({{ source }}))
+    {%- elif plan.kind == "Named" -%}{{ plan.data }}({{ source }}, adapters)
+    {%- elif plan.kind == "Sequence" -%}map_sequence({{ source }}, |item| {{ value(plan.data, "item") }})
+    {%- elif plan.kind == "Array" -%}map_array({{ source }}, |item| {{ value(plan.data, "item") }}, refusal)
+    {%- elif plan.kind == "Map" -%}map_record({{ source }}, |key| {{ value(plan.data.key, "key") }}, |item| {{ value(plan.data.value, "item") }}, refusal)
+    {%- elif plan.kind == "Optional" -%}({{ source }}).as_ref().map(|item| {{ value(plan.data, "item") }}).transpose()
+{%- elif plan.kind == "Boxed" -%}{{ value(plan.data.value, "(" ~ source ~ ").as_ref()" if plan.data.source else source) }}{% if plan.data.target %}.map(Box::new){% endif %}
+{%- endif -%}
+{%- endmacro %}
+{% for conversion in conversions %}
+    {% if conversion.changed %}
+        /// Only source alternatives requiring an application decision.
+        pub enum {{ conversion.changed_type }}{% if conversion.kind != "enum" %}<'a>{% endif %} {
+        {% for changed in conversion.changed %}{{ changed.name }}{% if changed.ty %}(&'a {{ changed.ty }}){% endif %},{% endfor %}
+            }
+        {% endif %}
+        /// Projects one adjacent declaration by borrowing its source value.
+        pub fn {{ conversion.name }}(source: &{{ conversion.source }}, adapters: &dyn VersionAdapters) -> VersionedResult<{{ conversion.target }}> {
+            let refusal = |reason: &str| UnsupportedProjection {
+                version: {{ conversion.version | tojson }}.into(), direction: Direction::{% if conversion.upward %}Upcast{% else %}Downcast{% endif %},
+                type_path: {{ conversion.type_path | tojson }}.into(), reason: reason.into(),
+            };
+            {% if conversion.kind == "hook" %}
+                adapters.{{ conversion.hook }}(source)
+            {% elif conversion.kind == "alias" %}
+                {{ value(conversion.value, "source") }}
+            {% elif conversion.kind == "enum" %}
+                match source {
+                    {% for variant in conversion.variants %}{{ conversion.source }}::{{ variant }} => Ok({{ conversion.target }}::{{ variant }}),{% endfor %}
+                        {% for changed in conversion.changed %}{{ conversion.source }}::{{ changed.name }} => adapters.{{ conversion.hook }}(&{{ conversion.changed_type }}::{{ changed.name }}),{% endfor %}
+                        }
+                    {% elif conversion.kind == "union" or conversion.kind == "http_union" %}
+                        {% if conversion.kind == "http_union" %}
+                            match source {
+                                {% for copy in conversion.copies %}
+                                    {{ conversion.source }}::{{ copy.source }}(item) => {{ value(copy.value, "item") }}.map({{ conversion.target }}::{{ copy.target }}),
+                                {% endfor %}
+                                {% for changed in conversion.changed %}
+                                    {{ conversion.source }}::{{ changed.name }}(item) => adapters.{{ conversion.hook }}(&{{ conversion.changed_type }}::{{ changed.name }}(item)),
+                                {% endfor %}
+                            }
+                        {% else %}
+                            {% for copy in conversion.copies %}
+                                if source.is_{{ copy.source }}() { return {{ value(copy.value, "source.as_" ~ copy.source ~ "()") }}.map({{ conversion.target }}::new_{{ copy.target }}); }
+                            {% endfor %}
+                            {% for changed in conversion.changed %}
+                                if source.is_{{ changed.name }}() { return adapters.{{ conversion.hook }}(&{{ conversion.changed_type }}::{{ changed.name }}(source.as_{{ changed.name }}())); }
+                            {% endfor %}
+                            Err(refusal("union tag is not declared in source version"))
+                        {% endif %}
+                    {% else %}
+                        {% if conversion.hook %}let decision = adapters.{{ conversion.hook }}(source)?;{% endif %}
+                            {% for copy in conversion.copies %}
+                                let projected_{{ loop.index0 }} = {{ value(copy.value, "source" if conversion.source_shape == "direct" else "&source." ~ copy.source) }}?;
+                            {% endfor %}
+                            {% if conversion.target_shape == "unit" %}
+                                Ok(())
+                            {% elif conversion.target_shape == "direct" %}
+                                {% if conversion.copies %}Ok(projected_0){% elif conversion.assignments %}Ok(decision.{{ conversion.assignments[0] }}){% else %}Ok(None){% endif %}
+                                {% else %}
+                                    Ok({{ conversion.target }} {
+                                        {% for copy in conversion.copies %}{{ copy.target }}: projected_{{ loop.index0 }},{% endfor %}
+                                            {% for assignment in conversion.assignments %}{{ assignment }}: decision.{{ assignment }},{% endfor %}
+                                                {% for absent in conversion.absences %}{{ absent }}: None,{% endfor %}
+                                                })
+                                            {% endif %}
+                                        {% endif %}
+                                    }
+                                {% endfor %}

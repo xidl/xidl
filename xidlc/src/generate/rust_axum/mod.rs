@@ -1,3 +1,5 @@
+#[cfg(feature = "gen-rust-axum-adapters")]
+pub(crate) mod adapters;
 mod interface;
 mod merged;
 mod render;

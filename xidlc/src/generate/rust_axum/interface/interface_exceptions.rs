@@ -17,20 +17,9 @@ impl RaisesContext {
             return Ok(Vec::new());
         }
         let document = env.renderer.rest_hir()?;
-        let variants = http_op
-            .meta
-            .raises
-            .iter()
-            .map(|refer| rust_ident(&refer.ident).to_case(convert_case::Case::Pascal))
-            .collect::<Vec<_>>();
-        let qualify_variants = variants.iter().any(|name| name == "Framework")
-            || variants
-                .iter()
-                .collect::<std::collections::HashSet<_>>()
-                .len()
-                != variants.len();
+        let names = Self::variant_names(http_op, &document)?;
         let mut out = Vec::new();
-        for refer in &http_op.meta.raises {
+        for (refer, variant) in http_op.meta.raises.iter().zip(names) {
             let exception = document
                 .document
                 .exceptions
@@ -65,14 +54,7 @@ impl RaisesContext {
                     .collect()
             };
             out.push(RaisesContext {
-                variant: {
-                    let name = rust_ident(&exception.ident).to_case(convert_case::Case::Pascal);
-                    if qualify_variants {
-                        format!("Http{}{name}", exception.status)
-                    } else {
-                        name
-                    }
-                },
+                variant,
                 ty: env.relative_type_path(&refer.module_path, &refer.ident),
                 status: exception.status,
                 headers: members(&exception.headers),
@@ -81,5 +63,50 @@ impl RaisesContext {
             });
         }
         Ok(out)
+    }
+
+    /// Names shared by ordinary errors and independent adapter match arms.
+    pub(crate) fn variant_names(
+        http_op: &HttpOperation,
+        document: &xidl_parser::rest_hir::RestHirDocument,
+    ) -> IdlcResult<Vec<String>> {
+        let variants = http_op
+            .meta
+            .raises
+            .iter()
+            .map(|refer| rust_ident(&refer.ident).to_case(convert_case::Case::Pascal))
+            .collect::<Vec<_>>();
+        let qualify_variants = variants.iter().any(|name| name == "Framework")
+            || variants
+                .iter()
+                .collect::<std::collections::HashSet<_>>()
+                .len()
+                != variants.len();
+        http_op
+            .meta
+            .raises
+            .iter()
+            .map(|refer| {
+                let exception = document
+                    .document
+                    .exceptions
+                    .iter()
+                    .find(|value| {
+                        value.ident == refer.ident && value.module_path == refer.module_path
+                    })
+                    .ok_or_else(|| {
+                        IdlcError::rpc(format!(
+                            "raises('{}') does not resolve to a declared exception",
+                            refer.ident
+                        ))
+                    })?;
+                let name = rust_ident(&exception.ident).to_case(convert_case::Case::Pascal);
+                Ok(if qualify_variants {
+                    format!("Http{}{name}", exception.status)
+                } else {
+                    name
+                })
+            })
+            .collect()
     }
 }

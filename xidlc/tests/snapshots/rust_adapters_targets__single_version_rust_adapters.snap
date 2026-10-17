@@ -1,0 +1,268 @@
+---
+source: xidlc/tests/rust_adapters_targets.rs
+expression: "&files[0].1"
+---
+/// Pure version projections. The application owns routing and side effects.
+#[allow(unused_imports, unused_variables, non_snake_case, non_camel_case_types)]
+pub mod version_adapters {
+    use super::only;
+    /// Direction of an unsupported projection.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum Direction {
+        Upcast,
+        Downcast,
+    }
+    /// The application renders a refusal using its own frozen error vocabulary.
+    #[derive(Debug, Clone)]
+    pub struct UnsupportedProjection {
+        pub version: String,
+        pub direction: Direction,
+        pub type_path: String,
+        pub reason: String,
+    }
+    /// A projection either succeeds or requires an unsupported business choice.
+    pub type VersionedResult<T> = Result<T, UnsupportedProjection>;
+    /// Explicit acknowledgement that a source value is intentionally discarded.
+    #[derive(Debug, Clone, Copy)]
+    pub struct Ignored {
+        _private: (),
+    }
+    /// The acknowledgement hooks return for an intentionally retired member.
+    pub const IGNORED: Ignored = Ignored { _private: () };
+    /// A version resolved by the application before calling an adapter.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum Version {
+        Only,
+    }
+    impl Version {
+        /// Original contract identifier.
+        pub fn id(self) -> &'static str {
+            match self {
+                Self::Only => "only",
+            }
+        }
+        /// Original contract version value.
+        pub fn value(self) -> &'static str {
+            match self {
+                Self::Only => "only",
+            }
+        }
+    }
+    /// Context for application business policy; adapters do not select versions.
+    #[derive(Debug, Clone, Copy)]
+    pub struct VersionContext {
+        pub original_version: Version,
+    }
+    /// A failed response projection retains the original committed Head outcome.
+    pub enum ProjectionOutcome<T, H> {
+        Projected(T),
+        Unsupported { head: H, error: UnsupportedProjection },
+    }
+    /// Invalid served-version wire data is distinct from a business refusal.
+    #[derive(Debug)]
+    pub enum AdaptationError {
+        Validation(String),
+        Unsupported(UnsupportedProjection),
+    }
+    impl From<UnsupportedProjection> for AdaptationError {
+        fn from(value: UnsupportedProjection) -> Self {
+            Self::Unsupported(value)
+        }
+    }
+    /// Hooks remain synchronous, pure, deterministic, and mandatory.
+    pub trait VersionAdapters {}
+    /// Public model parameters for one served version's operation.
+    pub struct StoreSaveRequestOnly {
+        pub item: only::Item,
+    }
+    fn decode_wire_only_item(wire: &::serde_json::Value) -> Result<only::Item, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &["id", "note"];
+        let forbidden: &[&str] = &[];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object
+            .get("id")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "id").to_string()
+            })?;
+        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_1 = object.get("note").unwrap_or(&::serde_json::Value::Null);
+        let value_1: Option<String> = if (raw_1).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_1).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        Ok(only::Item {
+            id: value_0,
+            note: value_1,
+        })
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_store_save_from_only(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<StoreSaveRequestOnly, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["item"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("item")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "item").into(),
+            ))?;
+        let value_0: only::Item = decode_wire_only_item(&raw_0)
+            .map_err(AdaptationError::Validation)?;
+        let source = StoreSaveRequestOnly {
+            item: value_0,
+        };
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_store_save_from_only_outcome(
+        head: Result<only::Item, only::StoreSaveError>,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<only::Item, only::StoreSaveError>,
+        Result<only::Item, only::StoreSaveError>,
+    > {
+        ProjectionOutcome::Projected(head)
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_store_save_from_only<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<only::Item, only::StoreSaveError>,
+            Result<only::Item, only::StoreSaveError>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(StoreSaveRequestOnly, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = Result<only::Item, only::StoreSaveError>>,
+    {
+        let input = decode_and_upcast_store_save_from_only(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::Only,
+                },
+            )
+            .await;
+        Ok(downcast_store_save_from_only_outcome(head, adapters))
+    }
+    /// The caller-selected version's projected model type.
+    pub enum InvalidProjection {
+        Only(only::Invalid),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_invalid(
+        version: Version,
+        head: only::Invalid,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<InvalidProjection> {
+        match version {
+            Version::Only => {
+                let source = head;
+                Ok(InvalidProjection::Only(source))
+            }
+        }
+    }
+    /// The caller-selected version's projected model type.
+    pub enum ItemProjection {
+        Only(only::Item),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_item(
+        version: Version,
+        head: only::Item,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<ItemProjection> {
+        match version {
+            Version::Only => {
+                let source = head;
+                Ok(ItemProjection::Only(source))
+            }
+        }
+    }
+    /// Outcome in the caller's explicitly selected contract version.
+    pub enum StoreSaveOutcome {
+        Only(Result<only::Item, only::StoreSaveError>),
+    }
+    /// Decode a request using an application-resolved version before any hook.
+    pub fn decode_and_upcast_store_save(
+        version: Version,
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<StoreSaveRequestOnly, AdaptationError> {
+        match version {
+            Version::Only => decode_and_upcast_store_save_from_only(wire, adapters),
+        }
+    }
+    /// Retain the original owned Head outcome when any projection refuses.
+    pub fn downcast_store_save_outcome(
+        version: Version,
+        head: Result<only::Item, only::StoreSaveError>,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<StoreSaveOutcome, Result<only::Item, only::StoreSaveError>> {
+        match version {
+            Version::Only => {
+                match downcast_store_save_from_only_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(StoreSaveOutcome::Only(value))
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /// Execute a Head handler once; the application supplies version resolution.
+    pub async fn dispatch_store_save<F, Fut>(
+        version: Version,
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<StoreSaveOutcome, Result<only::Item, only::StoreSaveError>>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(StoreSaveRequestOnly, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = Result<only::Item, only::StoreSaveError>>,
+    {
+        let input = decode_and_upcast_store_save(version, wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: version,
+                },
+            )
+            .await;
+        Ok(downcast_store_save_outcome(version, head, adapters))
+    }
+}
