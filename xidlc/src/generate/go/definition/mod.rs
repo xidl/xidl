@@ -10,7 +10,9 @@ use crate::error::IdlcResult;
 use xidl_parser::hir;
 
 #[allow(unused_imports)]
-pub(crate) use self::definition_names::{go_export_name, go_field_name, pointer_type};
+pub(crate) use self::definition_names::{
+    go_capitalize, go_export_name, go_field_name, pointer_type,
+};
 #[allow(unused_imports)]
 pub(crate) use self::definition_support::{
     declarator_name, is_out_param, operation_params, param_direction,

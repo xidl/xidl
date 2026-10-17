@@ -8,7 +8,7 @@ mod out_file;
 use crate::driver::out_file::OutputTargetTrait;
 use crate::error::IdlcResult;
 use crate::library::{LibraryLoader, MOUNT_PROPERTY};
-use crate::units::{IMPORT_PROPERTY, UnitGraph};
+use crate::units::{IMPORT_PROPERTY, UNIT_PATH_PROPERTY, UnitGraph};
 use std::collections::HashMap;
 use std::path::PathBuf;
 
@@ -107,6 +107,10 @@ impl Driver {
         for unit in graph.units() {
             let mut unit_props = props.clone();
             unit_props.insert(IMPORT_PROPERTY.to_string(), unit.import_property());
+            unit_props.insert(
+                UNIT_PATH_PROPERTY.to_string(),
+                serde_json::Value::String(unit.path().to_string()),
+            );
             let files =
                 generator.generate_from_idl(unit.source(), &unit.generation_input(), unit_props)?;
             output.write_files(files)?;

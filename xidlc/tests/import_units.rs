@@ -193,6 +193,30 @@ fn typescript_reexports_the_units_a_file_references() {
 }
 
 #[test]
+fn go_mirrors_the_unit_path_and_qualifies_the_reference() {
+    let root = temp_dir("go");
+    let out = root.join("out");
+    let app = root.join("main.idl");
+    write(
+        &root.join("pkg/timestamp.idl"),
+        "struct Instant { string at; };\n",
+    );
+    write(
+        &app,
+        "#pragma xidlc package app\n\nimport \"pkg/timestamp.idl\";\n\n\
+         struct Event {\n    timestamp::Instant at;\n};\n",
+    );
+
+    generate("go", &out, vec![app]).expect("generation succeeds");
+
+    let unit = fs::read_to_string(out.join("pkg/timestamp.go")).expect("pkg/timestamp.go");
+    assert!(unit.contains("package pkg"), "pkg/timestamp.go: {unit}");
+    let importer = fs::read_to_string(out.join("main.go")).expect("main.go");
+    assert!(importer.contains("import \"pkg\""), "main.go: {importer}");
+    assert!(importer.contains("pkg.Instant"), "main.go: {importer}");
+}
+
+#[test]
 fn a_target_that_cannot_reach_another_unit_fails_the_run() {
     let root = temp_dir("unsupported-target");
     let out = root.join("out");
@@ -200,8 +224,8 @@ fn a_target_that_cannot_reach_another_unit_fails_the_run() {
     write(&root.join("timestamp/index.idl"), TIMESTAMP_ENTRY);
     write(&app, BOUND_APP_SOURCE);
 
-    let err = generate("go", &out, vec![app]).expect_err("go cannot import units yet");
-    assert!(err.contains("`go` target"), "error: {err}");
+    let err = generate("openapi", &out, vec![app]).expect_err("openapi cannot import units yet");
+    assert!(err.contains("`openapi` target"), "error: {err}");
     assert!(err.contains("timestamp::v1::Instant"), "error: {err}");
 }
 

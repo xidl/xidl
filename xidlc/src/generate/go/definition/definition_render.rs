@@ -10,7 +10,6 @@ use super::definition_templates::{
     StructTemplate, render_field_block, render_method_block,
 };
 use super::definition_type_render::{render_exception, render_type_dcl};
-use super::definition_types::{go_const_type, go_type, render_const_expr};
 
 pub(super) fn render_const(
     ctx: &mut GoRenderContext,
@@ -18,8 +17,8 @@ pub(super) fn render_const(
     prefix: &[String],
 ) -> IdlcResult<()> {
     let name = go_export_name(prefix, &def.ident);
-    let ty = go_const_type(&def.ty);
-    let value = render_const_expr(&def.value)?;
+    let ty = ctx.const_type(&def.ty);
+    let value = ctx.const_expr(&def.value)?;
     ctx.push_template("const.go.j2", &ConstTemplate { name, ty, value })
 }
 
@@ -95,7 +94,7 @@ fn render_operation_types(
 
         request_fields.push(FieldTemplate {
             name: field,
-            ty: go_type(&param.ty),
+            ty: ctx.type_ref(&param.ty),
             tag: wire_name,
         });
     }
@@ -128,7 +127,7 @@ fn render_operation_types(
 
         response_fields.push(FieldTemplate {
             name: field,
-            ty: go_type(ty),
+            ty: ctx.type_ref(ty),
             tag: wire_name,
         });
     }
@@ -148,7 +147,7 @@ fn render_operation_types(
 
         response_fields.push(FieldTemplate {
             name: field,
-            ty: go_type(&param.ty),
+            ty: ctx.type_ref(&param.ty),
             tag: wire_name,
         });
     }

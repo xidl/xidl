@@ -8,6 +8,7 @@ pub struct ImportSpec {
     version: Option<String>,
     path: String,
     file: PathBuf,
+    unit_path: String,
 }
 
 impl ImportSpec {
@@ -17,12 +18,14 @@ impl ImportSpec {
         version: Option<String>,
         path: String,
         file: PathBuf,
+        unit_path: String,
     ) -> Self {
         Self {
             prefix,
             version,
             path,
             file,
+            unit_path,
         }
     }
 
@@ -46,11 +49,21 @@ impl ImportSpec {
         &self.file
     }
 
+    /// Path the imported unit has inside the mount or directory tree.
+    ///
+    /// A dependency resolved through the `timestamp` mount of
+    /// `#include "timestamp/lib.idl"` reports `timestamp/lib.idl`, and a
+    /// relative import reports the path as written.
+    pub fn unit_path(&self) -> &str {
+        &self.unit_path
+    }
+
     /// Serializes the import for the generator property.
     fn to_json(&self) -> serde_json::Value {
         let mut value = serde_json::Map::new();
         value.insert("prefix".into(), self.prefix.clone().into());
         value.insert("path".into(), self.path.clone().into());
+        value.insert("unit".into(), self.unit_path.clone().into());
         value.insert(
             "file".into(),
             self.file.to_string_lossy().into_owned().into(),
@@ -69,6 +82,7 @@ pub struct Unit {
     prefix: String,
     imports: Vec<ImportSpec>,
     prepared: PreparedSource,
+    path: String,
 }
 
 impl Unit {
@@ -78,12 +92,14 @@ impl Unit {
         prefix: String,
         imports: Vec<ImportSpec>,
         prepared: PreparedSource,
+        path: String,
     ) -> Self {
         Self {
             file,
             prefix,
             imports,
             prepared,
+            path,
         }
     }
 
@@ -95,6 +111,15 @@ impl Unit {
     /// Reference prefix of the unit, such as `timestamp`.
     pub fn prefix(&self) -> &str {
         &self.prefix
+    }
+
+    /// Path the unit has inside the mount or directory tree.
+    ///
+    /// A unit imported as `timestamp` reports `timestamp/index.idl`, and a root
+    /// input reports the path it was given, so a target that mirrors the tree
+    /// can lay its output out the same way.
+    pub fn path(&self) -> &str {
+        &self.path
     }
 
     /// Imports this unit declares, resolved and deduplicated.

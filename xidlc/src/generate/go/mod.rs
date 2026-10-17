@@ -1,4 +1,5 @@
 mod definition;
+mod packages;
 mod render;
 mod spec;
 
@@ -11,6 +12,8 @@ use std::path::Path;
 use xidl_parser::hir;
 use xidl_parser::hir::ParserProperties;
 
+pub(crate) use packages::{GoImport, GoPackages};
+
 pub fn generate_with_properties(
     spec: &hir::Specification,
     input_path: &Path,
@@ -21,17 +24,41 @@ pub fn generate_with_properties(
         .file_stem()
         .and_then(|value| value.to_str())
         .unwrap_or("output");
+    // A unit keeps the directory its IDL path names, so a package generated
+    // from `pkg/a.idl` is `pkg/a.go` with package name `pkg`.
+    let unit_path = properties
+        .get(crate::units::UNIT_PATH_PROPERTY)
+        .and_then(serde_json::Value::as_str);
     let package = properties
         .get("package")
         .and_then(|v| v.as_str())
         .map(go_package_name)
-        .unwrap_or_else(|| go_package_name(stem));
-    let filename = format!("{}.go", package);
+        .unwrap_or_else(|| match unit_path {
+            Some(path) => go_package_name(&package_name_of(path, stem)),
+            None => go_package_name(stem),
+        });
+    let filename = match unit_path {
+        Some(path) => format!("{}.go", path.trim_end_matches(".idl")),
+        None => format!("{package}.go"),
+    };
     let source = spec::render_spec(spec, &package, properties)?;
     Ok(vec![Artifact::new_file(ArtifactFile {
         path: filename,
         content: source,
     })])
+}
+
+/// Package name a unit path implies: its directory, or its file stem.
+fn package_name_of(path: &str, stem: &str) -> String {
+    match path.rsplit_once('/') {
+        Some((dir, _)) => dir
+            .rsplit('/')
+            .next()
+            .filter(|name| !name.is_empty())
+            .unwrap_or(stem)
+            .to_string(),
+        None => stem.to_string(),
+    }
 }
 
 pub(crate) struct GoCodegen;
@@ -71,20 +98,38 @@ pub(crate) struct GoRenderContext {
     pub(crate) package_name: String,
     pub(crate) properties: ParserProperties,
     pub(crate) state: GoRenderState,
+    pub(crate) packages: GoPackages,
     renderer: GoRenderer,
     pub(crate) body: String,
 }
 
 impl GoRenderContext {
     pub(crate) fn new(package_name: String, properties: ParserProperties) -> IdlcResult<Self> {
+        let packages = GoPackages::of(&properties);
         let renderer = GoRenderer::new(&properties)?;
         Ok(Self {
             package_name,
             properties,
             state: GoRenderState::default(),
+            packages,
             renderer,
             body: String::new(),
         })
+    }
+
+    /// Go type of `ty`, with imported units qualified by their package.
+    pub(crate) fn type_ref(&self, ty: &hir::TypeSpec) -> String {
+        definition::go_type(ty, &self.packages)
+    }
+
+    /// Go type of a constant declaration.
+    pub(crate) fn const_type(&self, ty: &hir::ConstType) -> String {
+        definition::go_const_type(ty, &self.packages)
+    }
+
+    /// Go source of a constant value.
+    pub(crate) fn const_expr(&self, expr: &hir::ConstExpr) -> IdlcResult<String> {
+        definition::render_const_expr(expr, &self.packages)
     }
 
     pub(crate) fn push_template<S: Serialize>(&mut self, name: &str, ctx: &S) -> IdlcResult<()> {
@@ -102,6 +147,7 @@ impl GoRenderContext {
         let output = GoRenderOutput {
             package_name: self.package_name,
             uses_context: self.state.uses_context,
+            imports: self.packages.imports(),
             body,
         };
         self.renderer.render_spec(&output)
@@ -112,6 +158,7 @@ impl GoRenderContext {
 pub struct GoRenderOutput {
     package_name: String,
     uses_context: bool,
+    imports: Vec<GoImport>,
     body: String,
 }
 pub(crate) enum ParamDirection {

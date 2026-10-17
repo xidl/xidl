@@ -6,4 +6,7 @@ package {{ package_name }}
 {%- if uses_context %}
     import "context"
 {%- endif %}
+{%- for import in imports %}
+    import "{{ import.path }}"
+{%- endfor %}
 {{ body -}}
