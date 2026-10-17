@@ -155,7 +155,7 @@ def version_typescript(context):
         )
     manifest.write_text(text)
     run(
-        ["pnpm", "install", "--ignore-workspace", "--no-frozen-lockfile"],
+        ["pnpm", "install", "--no-frozen-lockfile"],
         destination,
         env,
     )
