@@ -18,6 +18,16 @@ def generate_independent_target(context):
         [str(Path.cwd() / "target/debug/xidlc"), "gen", "--help"], cwd=Path.cwd()
     )
     assert "typescript-rest-adapters" in help_result.stdout
+    generate_adapter_artifact(context, "typescript-rest-adapters")
+
+
+@when("I generate Rust with the independent adapter target")
+def generate_rust_target(context):
+    context.execute_steps("When I generate rust code for the IDL")
+    generate_adapter_artifact(context, "rust-axum-adapters")
+
+
+def generate_adapter_artifact(context, target):
     output = Path(context.lang_dir)
     context.ordinary_adapter_baseline = {
         path.name: path.read_bytes() for path in output.iterdir() if path.is_file()
@@ -27,7 +37,7 @@ def generate_independent_target(context):
         "gen",
         "--out-dir",
         str(output),
-        "typescript-rest-adapters",
+        target,
         context.idl_file,
     ]
     run(command, cwd=Path.cwd())
@@ -104,3 +114,70 @@ def single_version_journey(context):
     output = prepare_application(context, "single.ts")
     result = run(["pnpm", "exec", "tsx", "single.ts"], cwd=output)
     assert "PASS: single-version" in result.stdout
+
+
+def prepare_rust_application(context, script):
+    root = Path.cwd()
+    output = Path(context.lang_dir)
+    boilerplate = root / "bdd/boilerplate/versioned_adapters/rust"
+    (output / "src").mkdir(exist_ok=True)
+    package = (
+        (boilerplate / "Cargo.toml")
+        .read_text()
+        .replace("{{RUST_XIDL_RUST_AXUM_PATH}}", str(root / "crates/xidl-rust-axum"))
+    )
+    (output / "Cargo.toml").write_text(package)
+    shutil.copy(boilerplate / script, output / "src/main.rs")
+    if script == "main.rs":
+        for name in ["hooks.rs", "journey.rs", "wire.rs"]:
+            shutil.copy(boilerplate / name, output / "src" / name)
+    return output
+
+
+@then("one Rust Head implementation passes the unchanged adapter Hurl contracts")
+def rust_frozen_http_contracts(context):
+    output = prepare_rust_application(context, "legacy.rs")
+    result = run(
+        ["cargo", "run", "--quiet", "--", str(Path(context.idl_file).parent.resolve())],
+        cwd=output,
+    )
+    assert "PASS: unchanged Hurl" in result.stdout
+
+
+@then("the three-version Rust application enforces wire and business boundaries")
+def rust_business_journey(context):
+    output = prepare_rust_application(context, "main.rs")
+    result = run(["cargo", "run", "--quiet"], cwd=output)
+    assert "PASS: Rust three-version" in result.stdout
+    main = output / "src/main.rs"
+    original = main.read_text()
+    main.write_text(
+        original
+        + "\nstruct Missing;\nimpl gen::version_adapters::VersionAdapters for Missing {}\n"
+    )
+    try:
+        result = subprocess.run(
+            ["cargo", "check", "--quiet"], cwd=output, capture_output=True, text=True
+        )
+        assert result.returncode != 0, "missing business hooks must fail cargo check"
+        assert "parcel_upcast_from_v_1" in result.stderr
+    finally:
+        main.write_text(original)
+    hooks = output / "src/hooks.rs"
+    original = hooks.read_text()
+    hooks.write_text(original.replace("legacy: IGNORED,", ""))
+    try:
+        result = subprocess.run(
+            ["cargo", "check", "--quiet"], cwd=output, capture_output=True, text=True
+        )
+        assert result.returncode != 0, "discarded request members require IGNORED"
+        assert "missing field `legacy`" in result.stderr
+    finally:
+        hooks.write_text(original)
+
+
+@then("the single-version Rust application validates before dispatch")
+def rust_single_version_journey(context):
+    output = prepare_rust_application(context, "single.rs")
+    result = run(["cargo", "run", "--quiet"], cwd=output)
+    assert "PASS: Rust single-version" in result.stdout

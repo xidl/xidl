@@ -20,6 +20,7 @@ default = [
   "gen-rust",
   "gen-rust-jsonrpc",
   "gen-rust-axum",
+  "gen-rust-axum-adapters",
   "gen-typescript",
   "gen-typescript-rest",
   "gen-typescript-rest-adapters",
@@ -31,6 +32,7 @@ default = [
 gen-rust = []
 gen-rust-jsonrpc = ["gen-rust"]
 gen-rust-axum = ["gen-rust", "dep:percent-encoding"]
+gen-rust-axum-adapters = ["gen-rust-axum"]
 gen-typescript = []
 gen-typescript-rest = ["gen-typescript"]
 gen-typescript-rest-adapters = ["gen-typescript-rest"]

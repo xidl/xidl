@@ -23,7 +23,7 @@ impl WireDecoderBuilder<'_> {
     ) -> IdlcResult<()> {
         match ty {
             hir::TypeSpec::ScopedName(name) => {
-                let key = self.resolve(version, scope, name)?;
+                let key = self.layouts(version)?.resolve(scope, name)?;
                 name.name = vec![self.ensure(version, &key)?];
                 name.is_root = true;
             }

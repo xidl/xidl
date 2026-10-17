@@ -1,20 +1,25 @@
 //! Assign promoted wire keys to flattened fields.
 
-use super::*;
-use crate::generate::adapter::TypeUse;
+use super::model::{TypeShape, TypeUse};
+use crate::error::{IdlcError, IdlcResult};
 use crate::generate::utils::scope::resolve_canonical;
+use std::collections::{BTreeMap, BTreeSet};
 use xidl_parser::hir;
 
 #[derive(Default)]
-pub(super) struct WireLayout {
+pub(crate) struct WireLayout {
     pub keys: BTreeSet<String>,
     pub catch_all: bool,
 }
 
-impl WireDecoderBuilder<'_> {
-    pub(super) fn layout(
+pub(crate) struct WireLayouts<'a> {
+    pub version: &'a str,
+    pub types: &'a BTreeMap<String, TypeShape>,
+}
+
+impl WireLayouts<'_> {
+    pub(crate) fn layout(
         &self,
-        version: &str,
         key: &str,
         visiting: &mut BTreeSet<String>,
     ) -> IdlcResult<WireLayout> {
@@ -22,9 +27,8 @@ impl WireDecoderBuilder<'_> {
             return Err(Self::error(key, "flattened reference cycle"));
         }
         let shape = self
-            .versions
-            .get(version)
-            .and_then(|types| types.get(key))
+            .types
+            .get(key)
             .ok_or_else(|| Self::error(key, "flattened type is missing"))?;
         let layout = match shape {
             TypeShape::Struct(members) => {
@@ -32,7 +36,6 @@ impl WireDecoderBuilder<'_> {
                 for member in members {
                     let next = if member.flatten {
                         self.value_layout(
-                            version,
                             member.value.as_ref().ok_or_else(|| {
                                 Self::error(&member.name, "flattened member has no type")
                             })?,
@@ -56,21 +59,20 @@ impl WireDecoderBuilder<'_> {
                 }
                 layout
             }
-            TypeShape::Alias(value) => self.value_layout(version, value, visiting)?,
+            TypeShape::Alias(value) => self.value_layout(value, visiting)?,
             _ => return Err(Self::error(key, "flatten requires a struct or map")),
         };
         visiting.remove(key);
         Ok(layout)
     }
 
-    pub(super) fn value_layout(
+    pub(crate) fn value_layout(
         &self,
-        version: &str,
         value: &TypeUse,
         visiting: &mut BTreeSet<String>,
     ) -> IdlcResult<WireLayout> {
         if matches!(value.declarator, hir::Declarator::ArrayDeclarator(_)) {
-            return Err(Self::error(version, "flatten does not support arrays"));
+            return Err(Self::error(self.version, "flatten does not support arrays"));
         }
         match &value.ty {
             hir::TypeSpec::MapType(_)
@@ -80,31 +82,26 @@ impl WireDecoderBuilder<'_> {
                 keys: BTreeSet::new(),
                 catch_all: true,
             }),
-            hir::TypeSpec::ScopedName(name) => self.layout(
-                version,
-                &self.resolve(version, &value.scope, name)?,
-                visiting,
-            ),
-            _ => Err(Self::error(version, "flatten requires a struct or map")),
+            hir::TypeSpec::ScopedName(name) => {
+                self.layout(&self.resolve(&value.scope, name)?, visiting)
+            }
+            _ => Err(Self::error(
+                self.version,
+                "flatten requires a struct or map",
+            )),
         }
     }
 
-    pub(super) fn resolve(
-        &self,
-        version: &str,
-        scope: &[String],
-        name: &hir::ScopedName,
-    ) -> IdlcResult<String> {
+    pub(crate) fn resolve(&self, scope: &[String], name: &hir::ScopedName) -> IdlcResult<String> {
         let mut name = name.clone();
-        if name.name.first().is_some_and(|first| first == version) {
+        if name.name.first().is_some_and(|first| first == self.version) {
             name.name.remove(0);
             name.is_root = true;
         }
-        resolve_canonical(scope, &name, |key| {
-            self.versions
-                .get(version)
-                .is_some_and(|types| types.contains_key(key))
-        })
-        .ok_or_else(|| Self::error(&name.name.join("::"), "cannot resolve wire reference"))
+        resolve_canonical(scope, &name, |key| self.types.contains_key(key))
+            .ok_or_else(|| Self::error(&name.name.join("::"), "cannot resolve wire reference"))
+    }
+    fn error(key: &str, reason: &str) -> IdlcError {
+        IdlcError::rpc(format!("version adapter wire layout {key}: {reason}"))
     }
 }

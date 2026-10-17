@@ -1,0 +1,102 @@
+{% filter rustfmt %}
+    /// Pure version projections. The application owns routing and side effects.
+    #[allow(unused_imports, unused_variables, non_snake_case, non_camel_case_types)]
+    pub mod version_adapters {
+        use super::{ {% for version in versions %}{{ version.module }}{% if not loop.last %}, {% endif %}{% endfor %} };
+
+        /// Direction of an unsupported projection.
+        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        pub enum Direction { Upcast, Downcast }
+
+        /// The application renders a refusal using its own frozen error vocabulary.
+        #[derive(Debug, Clone)]
+        pub struct UnsupportedProjection {
+            pub version: String,
+            pub direction: Direction,
+            pub type_path: String,
+            pub reason: String,
+        }
+        /// A projection either succeeds or requires an unsupported business choice.
+        pub type VersionedResult<T> = Result<T, UnsupportedProjection>;
+        /// Explicit acknowledgement that a source value is intentionally discarded.
+        #[derive(Debug, Clone, Copy)]
+        pub struct Ignored { _private: () }
+        /// The acknowledgement hooks return for an intentionally retired member.
+        pub const IGNORED: Ignored = Ignored { _private: () };
+
+        /// A version resolved by the application before calling an adapter.
+        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        pub enum Version { {% for version in versions %}{{ version.id }},{% endfor %} }
+        impl Version {
+            /// Original contract identifier.
+            pub fn id(self) -> &'static str { match self { {% for version in versions %}Self::{{ version.id }} => {{ version.raw_id | tojson }},{% endfor %} } }
+            /// Original contract version value.
+            pub fn value(self) -> &'static str { match self { {% for version in versions %}Self::{{ version.id }} => {{ version.value | tojson }},{% endfor %} } }
+        }
+        /// Context for application business policy; adapters do not select versions.
+        #[derive(Debug, Clone, Copy)]
+        pub struct VersionContext { pub original_version: Version }
+        /// A failed response projection retains the original committed Head outcome.
+        pub enum ProjectionOutcome<T, H> {
+            Projected(T),
+            Unsupported { head: H, error: UnsupportedProjection },
+        }
+        /// Invalid served-version wire data is distinct from a business refusal.
+        #[derive(Debug)]
+        pub enum AdaptationError { Validation(String), Unsupported(UnsupportedProjection) }
+        impl From<UnsupportedProjection> for AdaptationError {
+            fn from(value: UnsupportedProjection) -> Self { Self::Unsupported(value) }
+        }
+        /// Hooks remain synchronous, pure, deterministic, and mandatory.
+        pub trait VersionAdapters {
+            {% for hook in hooks %}
+                fn {{ hook.name }}(&self, source: &{{ hook.source }}) -> VersionedResult<{{ hook.target }}>;
+            {% endfor %}
+        }
+        {% for decision in decisions %}
+            /// Explicit business assignments and discarded-value acknowledgements.
+            pub struct {{ decision.name }} {
+                {% for field in decision.fields %}pub {{ field.name }}: {{ field.ty }},{% endfor %}
+                }
+            {% endfor %}
+            {% for request in requests %}
+                /// Public model parameters for one served version's operation.
+                pub struct {{ request.name }} {
+                    {% for field in request.fields %}pub {{ field.name }}: {{ field.ty }},{% endfor %}
+                    }
+                {% endfor %}
+
+                {% if "sequence" in helpers %}
+                    fn map_sequence<S, T>(source: &[S], convert: impl Fn(&S) -> VersionedResult<T>) -> VersionedResult<Vec<T>> {
+                        source.iter().map(convert).collect()
+                    }
+                {% endif %}
+                {% if "array" in helpers %}
+                    fn map_array<S, T, const N: usize>(source: &[S; N], convert: impl Fn(&S) -> VersionedResult<T>, refusal: impl Fn(&str) -> UnsupportedProjection) -> VersionedResult<[T; N]> {
+                        let values = source.iter().map(convert).collect::<VersionedResult<Vec<_>>>()?;
+                        // The iteration preserves the input array length exactly.
+                        values.try_into().map_err(|_: Vec<T>| refusal("array projection changed its length"))
+                    }
+                {% endif %}
+                {% if "record" in helpers %}
+                    fn map_record<K: Ord, V, L: Ord, W>(
+                    source: &::std::collections::BTreeMap<K, V>,
+                    key: impl Fn(&K) -> VersionedResult<L>,
+                    value: impl Fn(&V) -> VersionedResult<W>,
+                    refusal: impl Fn(&str) -> UnsupportedProjection,
+                    ) -> VersionedResult<::std::collections::BTreeMap<L, W>> {
+                        let mut target = ::std::collections::BTreeMap::new();
+                        for (old_key, old_value) in source {
+                            let next_key = key(old_key)?;
+                            let next_value = value(old_value)?;
+                            if target.insert(next_key, next_value).is_some() { return Err(refusal("map key projection is not injective")); }
+                        }
+                        Ok(target)
+                    }
+                {% endif %}
+                {% include "adapters/conversions.rs.j2" %}
+                {% include "adapters/errors.rs.j2" %}
+                {% include "adapters/wire.rs.j2" %}
+                {% include "adapters/endpoints.rs.j2" %}
+            }
+        {% endfilter %}
