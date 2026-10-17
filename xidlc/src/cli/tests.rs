@@ -130,3 +130,37 @@ fn rejects_conflicting_api_version_selection() {
 
     assert!(result.is_err(), "conflicting flags should not parse");
 }
+
+#[test]
+fn parses_openapi_version_selection() {
+    let cli = Cli::try_parse_from(["xidlc", "gen", "openapi", "--version", "3.1", "demo.idl"])
+        .expect("openapi version flag should parse");
+    let Command::Gen(args) = cli.command else {
+        panic!("expected gen command");
+    };
+    let args = args.into_driver_args().expect("args should convert");
+
+    assert_eq!(args.lang, "openapi");
+    assert_eq!(args.openapi_version.as_deref(), Some("3.1"));
+}
+
+#[test]
+fn openapi_defaults_to_auto_version() {
+    let cli = Cli::try_parse_from(["xidlc", "gen", "openapi", "demo.idl"])
+        .expect("openapi command should parse");
+    let Command::Gen(args) = cli.command else {
+        panic!("expected gen command");
+    };
+    let args = args.into_driver_args().expect("args should convert");
+
+    assert!(args.openapi_version.is_none());
+}
+
+#[test]
+fn openapi_version_only_parses_for_the_openapi_target() {
+    let result = Cli::try_parse_from(["xidlc", "gen", "rust", "--version", "3.1", "demo.idl"]);
+    assert!(result.is_err(), "`rust` must reject --version");
+
+    let result = Cli::try_parse_from(["xidlc", "gen", "openapi", "--version", "3.2", "demo.idl"]);
+    assert!(result.is_err(), "only auto and 3.1 are accepted");
+}

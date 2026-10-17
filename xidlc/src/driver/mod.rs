@@ -12,6 +12,12 @@ use crate::units::{IMPORT_PROPERTY, UNIT_PATH_PROPERTY, UnitGraph};
 use std::collections::HashMap;
 use std::path::PathBuf;
 
+/// Generator property selecting the OpenAPI document version.
+///
+/// `auto` (the default) keeps the projection's own choice, `3.1` forces an
+/// OpenAPI 3.1 document. Set by the `openapi` target's `--version` option.
+pub const OPENAPI_VERSION_PROPERTY: &str = "openapi_version";
+
 #[derive(Debug, Clone)]
 pub struct ArgsGenerate {
     pub lang: String,
@@ -24,6 +30,8 @@ pub struct ArgsGenerate {
     pub api_version: Option<String>,
     /// Several API versions, comma separated, or `*` for every version.
     pub api_versions: Option<String>,
+    /// OpenAPI document version: `auto` (default) or `3.1`.
+    pub openapi_version: Option<String>,
     pub files: Vec<PathBuf>,
 }
 
@@ -34,6 +42,12 @@ impl ArgsGenerate {
             ("enable_server".into(), self.server.into()),
             ("mock".into(), self.mock.into()),
         ]);
+        if let Some(version) = &self.openapi_version {
+            props.insert(
+                OPENAPI_VERSION_PROPERTY.to_string(),
+                serde_json::Value::String(version.clone()),
+            );
+        }
         if let Some(version) = &self.api_version {
             props.insert(
                 xidl_parser::versioning::API_VERSION_PROPERTY.to_string(),

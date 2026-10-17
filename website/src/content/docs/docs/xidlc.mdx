@@ -91,6 +91,10 @@ Next.js integration.
 xidlc gen -o generated openapi api.idl
 ```
 
+Pass `--version 3.1` to keep the document on OpenAPI 3.1 even when the contract
+has streaming operations; the default `auto` upgrades the document to 3.2 in
+that case. See [OpenAPI Metadata](../../rest/openapi/) for details.
+
 ### Generate OpenRPC
 
 ```bash

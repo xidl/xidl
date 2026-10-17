@@ -58,6 +58,13 @@ impl CliBackend {
                 spec.lang
             )));
         }
+        if spec.openapi_version.is_some() && spec.lang != "openapi" {
+            return Err(Error::Config(format!(
+                "xidlc CLI only accepts --version for the 'openapi' generator, not \
+                 the '{}' generator",
+                spec.lang
+            )));
+        }
 
         let mut command = Command::new("xidlc");
         command.arg("gen");
@@ -69,6 +76,9 @@ impl CliBackend {
             command.arg("--api-versions").arg(versions);
         }
         command.arg(&spec.lang);
+        if let Some(version) = &spec.openapi_version {
+            command.arg("--version").arg(version);
+        }
         if client_server_lang {
             if spec.client {
                 command.arg("--client");

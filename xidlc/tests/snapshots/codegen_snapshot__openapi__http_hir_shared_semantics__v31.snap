@@ -1,0 +1,201 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+openapi_http_hir_shared_semantics.json
+===============
+{
+  "components": {
+    "schemas": {
+      "Error": {
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "msg"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "http_bearer": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "reporting",
+    "version": "2026.04"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/reports/{id}": {
+      "get": {
+        "operationId": "ReportApi.get_report",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lang",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Trace-Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "http_bearer": []
+          }
+        ],
+        "tags": [
+          "ReportApi"
+        ]
+      }
+    },
+    "/reports/{id}/events": {
+      "get": {
+        "operationId": "ReportApi.watch_report",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "http_bearer": []
+          }
+        ],
+        "tags": [
+          "ReportApi"
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "description": "production",
+      "url": "https://api.example.com"
+    }
+  ],
+  "tags": [
+    {
+      "name": "ReportApi"
+    }
+  ]
+}

@@ -11,7 +11,7 @@ mod units;
 #[cfg(test)]
 mod tests;
 
-use crate::error::IdlcResult;
+use crate::error::{IdlcError, IdlcResult};
 use crate::jsonrpc::{Artifact, ArtifactFile};
 use crate::openapi::{InfoBuilder, OpenApi, OpenApiBuilder, Tag};
 use serde_json::Value;
@@ -50,7 +50,8 @@ impl crate::jsonrpc::Codegen for OpenApiCodegen {
     ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
         let rest_hir = input_hir.into_rest_hir();
         let units = DocumentUnits::of(&props);
-        let openapi = render_openapi_json(&rest_hir.spec, &rest_hir, &units)?;
+        let version = OpenApiVersion::from_props(&props)?;
+        let openapi = render_openapi_json(&rest_hir.spec, &rest_hir, &units, version)?;
         let content = serde_json::to_string_pretty(&openapi)?;
 
         let stem = std::path::Path::new(&input)
@@ -73,29 +74,59 @@ fn api_version(props: &ParserProperties) -> Option<&str> {
         .and_then(serde_json::Value::as_str)
 }
 
+/// OpenAPI document version requested through the `--version` generator option.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum OpenApiVersion {
+    /// Keep the projection's own choice, upgrading streams to OpenAPI 3.2.
+    Auto,
+    /// Force an OpenAPI 3.1 document, rendering streams best-effort.
+    V31,
+}
+
+impl OpenApiVersion {
+    /// Reads the requested version from the generator properties.
+    fn from_props(props: &ParserProperties) -> IdlcResult<Self> {
+        match props
+            .get(crate::driver::OPENAPI_VERSION_PROPERTY)
+            .and_then(serde_json::Value::as_str)
+        {
+            None | Some("auto") => Ok(Self::Auto),
+            Some("3.1") => Ok(Self::V31),
+            Some(other) => Err(IdlcError::fmt(format!(
+                "xidl openapi: unknown --version value '{other}'; expected 'auto' or '3.1'"
+            ))),
+        }
+    }
+
+    /// Document version for a projection, given whether it has stream patches.
+    fn document_version(self, has_streams: bool) -> &'static str {
+        match (self, has_streams) {
+            (Self::V31, _) | (Self::Auto, false) => "3.1.0",
+            (Self::Auto, true) => "3.2.0",
+        }
+    }
+}
+
 fn render_openapi_json(
     spec: &hir::Specification,
     rest_hir: &RestHirDocument,
     units: &DocumentUnits,
+    version: OpenApiVersion,
 ) -> IdlcResult<Value> {
     let ctx = render_openapi(spec, rest_hir, units)?;
-    let version = select_openapi_version(&ctx);
+    let document_version = version.document_version(!ctx.stream_patches.is_empty());
     let mut value = serde_json::to_value(ctx.document)?;
     if let Some(openapi) = value.get_mut("openapi") {
-        *openapi = Value::String(version.to_string());
+        *openapi = Value::String(document_version.to_string());
     }
-    for patch in ctx.stream_patches {
-        stream::patch_openapi_stream_content(&mut value, &patch);
+    // Forced 3.1 keeps the media type's best-effort `schema`; the 3.2-only
+    // `itemSchema` rewrite is skipped instead of being approximated.
+    if version == OpenApiVersion::Auto {
+        for patch in ctx.stream_patches {
+            stream::patch_openapi_stream_content(&mut value, &patch);
+        }
     }
     Ok(value)
-}
-
-fn select_openapi_version(ctx: &RenderedOpenApi) -> &'static str {
-    if ctx.stream_patches.is_empty() {
-        "3.1.0"
-    } else {
-        "3.2.0"
-    }
 }
 
 /// Renders an OpenAPI document from an XIDL specification and projected REST HIR.

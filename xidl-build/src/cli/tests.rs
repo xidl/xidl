@@ -15,6 +15,7 @@ fn spec(lang: &str, client: bool, server: bool, mock: bool) -> GenerateSpec {
         mock,
         api_version: None,
         api_versions: None,
+        openapi_version: None,
         inputs: vec![PathBuf::from("api/city.idl")],
     }
 }
@@ -106,6 +107,36 @@ fn rejects_mock_for_plain_generator() {
         CliBackend::build_command(&spec("openapi", true, true, true)),
         "--mock",
     );
+}
+
+#[test]
+fn openapi_version_is_passed_after_the_language() {
+    let spec = GenerateSpec {
+        openapi_version: Some("3.1".to_string()),
+        ..spec("openapi", true, true, false)
+    };
+    let command = CliBackend::build_command(&spec).expect("openapi request must build");
+    assert_eq!(
+        argv_of(&command),
+        vec![
+            "gen",
+            "--out-dir",
+            "/tmp/xidl-build-test-out",
+            "openapi",
+            "--version",
+            "3.1",
+            "api/city.idl"
+        ]
+    );
+}
+
+#[test]
+fn rejects_openapi_version_for_other_generators() {
+    let spec = GenerateSpec {
+        openapi_version: Some("3.1".to_string()),
+        ..spec("rust", true, true, false)
+    };
+    assert_config_error(CliBackend::build_command(&spec), "--version");
 }
 
 #[test]

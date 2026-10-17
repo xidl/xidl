@@ -54,6 +54,7 @@ fn generate_with_http(
         mock: false,
         api_version: None,
         api_versions: None,
+        openapi_version: None,
         files,
     })
     .map_err(|err| err.to_string())
