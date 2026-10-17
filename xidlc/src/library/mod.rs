@@ -31,6 +31,20 @@ pub use toolchain::{Toolchain, ToolchainSource};
 /// Generator property that carries dependency mounts into the parser.
 pub const MOUNT_PROPERTY: &str = "xidl_mounts";
 
+/// Builds the include resolver for `mounts`.
+///
+/// Include and import paths resolve inside a dependency package when their
+/// first segment names a mount, and relative to the including file otherwise.
+pub fn include_resolver(
+    mounts: &BTreeMap<String, PathBuf>,
+) -> Box<dyn xidl_parser::parser::IncludeResolver> {
+    if mounts.is_empty() {
+        Box::new(xidl_parser::hir::FsIncludeResolver)
+    } else {
+        Box::new(xidl_parser::hir::MountIncludeResolver::new(mounts.clone()))
+    }
+}
+
 /// Inputs resolved from the command line once every manifest is expanded.
 #[derive(Debug, Clone, Default)]
 pub struct ResolvedInputs {

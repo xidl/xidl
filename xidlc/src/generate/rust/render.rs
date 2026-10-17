@@ -23,6 +23,7 @@ struct RustModuleTemplate<'a> {
 #[derive(Serialize)]
 struct RustSpecTemplate<'a> {
     definitions: &'a [String],
+    imports: &'a [String],
 }
 
 impl RustRenderOutput {
@@ -46,6 +47,7 @@ pub trait RustRender {
 
 pub struct RustRenderer {
     env: Environment<'static>,
+    imports: Vec<String>,
 }
 
 impl RustRenderer {
@@ -58,7 +60,42 @@ impl RustRenderer {
         env.add_function("is_upper", is_upper_case);
         env.add_filter("rustfmt", rust_format_filter);
         env.add_global("opt", minijinja::Value::from_serialize(&attribute));
-        Ok(Self { env })
+        let imports = Self::import_prefixes_of(&attribute);
+        Ok(Self { env, imports })
+    }
+
+    /// Reference prefixes of the units this file imports, when it imports any.
+    fn import_prefixes_of(attribute: &HashMap<String, serde_json::Value>) -> Vec<String> {
+        attribute
+            .get(crate::units::IMPORT_PROPERTY)
+            .and_then(serde_json::Value::as_array)
+            .map(|entries| {
+                entries
+                    .iter()
+                    .filter_map(|entry| entry.get("prefix"))
+                    .filter_map(serde_json::Value::as_str)
+                    .map(str::to_string)
+                    .collect()
+            })
+            .unwrap_or_default()
+    }
+
+    /// The imported prefixes `definitions` actually reference.
+    ///
+    /// The rendered definitions already spell every reference, so a prefix
+    /// appearing as `<prefix>::` is exactly a type this file reaches into
+    /// another unit for.
+    pub fn referenced_imports(&self, definitions: &[String]) -> Vec<String> {
+        self.imports
+            .iter()
+            .filter(|prefix| {
+                let marker = format!("{prefix}::");
+                definitions
+                    .iter()
+                    .any(|definition| definition.contains(&marker))
+            })
+            .cloned()
+            .collect()
     }
 
     pub fn render_template<T: Serialize>(&self, template: &str, ctx: &T) -> IdlcResult<String> {
@@ -88,8 +125,14 @@ impl RustRenderer {
         )
     }
 
-    pub fn render_spec(&self, definitions: &[String]) -> IdlcResult<String> {
-        self.render_template("spec.rs.j2", &RustSpecTemplate { definitions })
+    pub fn render_spec(&self, definitions: &[String], imports: &[String]) -> IdlcResult<String> {
+        self.render_template(
+            "spec.rs.j2",
+            &RustSpecTemplate {
+                definitions,
+                imports,
+            },
+        )
     }
 
     pub fn enrich_ctx(&self, mut ctx: serde_json::Value, doc: &[String]) -> serde_json::Value {

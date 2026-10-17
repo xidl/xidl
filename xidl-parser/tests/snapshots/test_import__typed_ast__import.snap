@@ -1,0 +1,76 @@
+---
+source: xidl-parser/tests/test-import.rs
+expression: ast
+---
+Specification(
+    [
+        ImportDcl(
+            ImportDcl {
+                scope: StringLiteral(
+                    "\"timestamp\"",
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDef(
+                            StructDef {
+                                ident: Identifier(
+                                    "Event",
+                                ),
+                                parent: [],
+                                member: [
+                                    Member {
+                                        annotations: [],
+                                        ty: SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    scoped_name: Some(
+                                                        ScopedName {
+                                                            scoped_name: Some(
+                                                                ScopedName {
+                                                                    scoped_name: None,
+                                                                    identifier: Identifier(
+                                                                        "timestamp",
+                                                                    ),
+                                                                    node_text: "timestamp",
+                                                                },
+                                                            ),
+                                                            identifier: Identifier(
+                                                                "v1",
+                                                            ),
+                                                            node_text: "timestamp::v1",
+                                                        },
+                                                    ),
+                                                    identifier: Identifier(
+                                                        "Instant",
+                                                    ),
+                                                    node_text: "timestamp::v1::Instant",
+                                                },
+                                            ),
+                                        ),
+                                        ident: Declarators(
+                                            [
+                                                SimpleDeclarator(
+                                                    SimpleDeclarator(
+                                                        Identifier(
+                                                            "at",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ],
+                                        ),
+                                        default: None,
+                                    },
+                                ],
+                            },
+                        ),
+                    ),
+                ),
+            },
+        ),
+    ],
+)

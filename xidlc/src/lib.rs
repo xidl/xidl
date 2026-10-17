@@ -10,6 +10,7 @@ pub mod jsonrpc;
 pub mod library;
 pub mod macros;
 pub mod openapi;
+pub mod units;
 
 use std::collections::HashMap;
 use std::path::Path as FsPath;

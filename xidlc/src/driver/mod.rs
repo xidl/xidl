@@ -8,6 +8,7 @@ mod out_file;
 use crate::driver::out_file::OutputTargetTrait;
 use crate::error::IdlcResult;
 use crate::library::{LibraryLoader, MOUNT_PROPERTY};
+use crate::units::{IMPORT_PROPERTY, UnitGraph};
 use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
@@ -100,9 +101,15 @@ impl Driver {
         }
         props.extend(self.extra_props);
 
-        for input in resolved.files() {
-            let source = fs::read_to_string(input)?;
-            let files = generator.generate_from_idl(&source, input, props.clone())?;
+        // Imports name other units, so the inputs are walked into a graph first
+        // and every unit it reaches is generated exactly once.
+        let graph = UnitGraph::build(resolved.files(), resolved.mounts())?;
+        for unit in graph.units() {
+            let source = fs::read_to_string(unit.file())?;
+            let mut unit_props = props.clone();
+            unit_props.insert(IMPORT_PROPERTY.to_string(), unit.import_property());
+            let files =
+                generator.generate_from_idl(&source, &unit.generation_input(), unit_props)?;
             output.write_files(files)?;
         }
 

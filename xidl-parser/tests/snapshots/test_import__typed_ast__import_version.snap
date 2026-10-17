@@ -1,0 +1,68 @@
+---
+source: xidl-parser/tests/test-import.rs
+expression: ast
+---
+Specification(
+    [
+        ImportDcl(
+            ImportDcl {
+                scope: StringLiteral(
+                    "\"timestamp/util.idl@v1\"",
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDef(
+                            StructDef {
+                                ident: Identifier(
+                                    "Event",
+                                ),
+                                parent: [],
+                                member: [
+                                    Member {
+                                        annotations: [],
+                                        ty: SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    scoped_name: Some(
+                                                        ScopedName {
+                                                            scoped_name: None,
+                                                            identifier: Identifier(
+                                                                "util",
+                                                            ),
+                                                            node_text: "util",
+                                                        },
+                                                    ),
+                                                    identifier: Identifier(
+                                                        "Id",
+                                                    ),
+                                                    node_text: "util::Id",
+                                                },
+                                            ),
+                                        ),
+                                        ident: Declarators(
+                                            [
+                                                SimpleDeclarator(
+                                                    SimpleDeclarator(
+                                                        Identifier(
+                                                            "id",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ],
+                                        ),
+                                        default: None,
+                                    },
+                                ],
+                            },
+                        ),
+                    ),
+                ),
+            },
+        ),
+    ],
+)

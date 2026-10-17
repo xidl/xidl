@@ -34,7 +34,8 @@ pub fn generate_with_properties(
 
     let renderer = RustRenderer::new(properties.clone())?;
     let output = spec.render(&renderer)?;
-    let source = renderer.render_spec(&output.source)?;
+    let imports = renderer.referenced_imports(&output.source);
+    let source = renderer.render_spec(&output.source, &imports)?;
 
     Ok(vec![Artifact::new_file(ArtifactFile {
         path: filename,
