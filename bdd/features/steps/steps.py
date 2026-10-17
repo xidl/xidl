@@ -1478,6 +1478,50 @@ def step_impl(context):
     assert result.returncode == 0
 
 
+@when("I generate a version map for the IDL")
+def step_impl(context):
+    cmd = [
+        "cargo",
+        "run",
+        "-p",
+        "xidlc",
+        "--features",
+        "cli,fmt",
+        "--",
+        "gen",
+        "-o",
+        context.lang_dir,
+        "version-map",
+        context.idl_file,
+    ]
+    first = subprocess.run(cmd, capture_output=True, text=True, cwd=os.getcwd())
+    if first.returncode != 0:
+        print(f"Version map stdout: {first.stdout}")
+        print(f"Version map stderr: {first.stderr}")
+    assert first.returncode == 0
+    artifact = os.path.join(
+        context.lang_dir, f"{get_idl_name(context)}.version-map.json"
+    )
+    assert os.path.exists(artifact), f"missing version map: {artifact}"
+    with open(artifact, "rb") as handle:
+        context.version_map_bytes = handle.read()
+    second = subprocess.run(cmd, capture_output=True, text=True, cwd=os.getcwd())
+    assert second.returncode == 0
+    with open(artifact, "rb") as handle:
+        context.version_map_second_bytes = handle.read()
+
+
+@then("the version map should describe both versions and remain byte-stable")
+def step_impl(context):
+    assert context.version_map_bytes == context.version_map_second_bytes
+    document = json.loads(context.version_map_bytes)
+    assert [version["id"] for version in document["versions"]] == ["v1", "v2"]
+    assert len(document["steps"]) == 1
+    step = document["steps"][0]
+    assert step["from"] == "v1" and step["to"] == "v2"
+    assert "Items.adopt" in step["operations"]
+
+
 @then("each API version has its own openapi document")
 def step_impl(context):
     idl_name = get_idl_name(context)

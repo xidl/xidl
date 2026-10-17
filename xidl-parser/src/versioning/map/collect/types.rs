@@ -3,10 +3,10 @@
 use super::super::helpers::descriptor;
 use super::super::model::{TypeParts, TypeSurface};
 use super::render::{
-    join, render_bitfield_type, render_declarator, render_element_type, render_scoped_name,
-    render_switch_type, render_type,
+    declarator_facts, declarator_ident, join, render_bitfield_type, render_element_type,
+    render_scoped_name, render_switch_type, render_type,
 };
-use crate::hir::{self, Definition, Specification, TypeDcl, effective_wire_name};
+use crate::hir::{self, Definition, Specification, TypeDcl, effective_wire_name, is_skipped};
 use serde_json::Value;
 use std::collections::BTreeMap;
 
@@ -51,22 +51,16 @@ fn collect_definitions(
                 collect_constr(constr, parent, types)
             }
             Definition::TypeDcl(TypeDcl::TypedefDcl(value)) => {
-                let name = join(
-                    parent,
-                    &value
-                        .decl
-                        .first()
-                        .map(render_declarator)
-                        .unwrap_or_default(),
-                );
-                types.insert(
-                    name,
-                    TypeSurface {
-                        kind: "typedef".to_string(),
-                        details: typedef_details(value),
-                        members: BTreeMap::new(),
-                    },
-                );
+                for declarator in &value.decl {
+                    types.insert(
+                        join(parent, declarator_ident(declarator)),
+                        TypeSurface {
+                            kind: "typedef".to_string(),
+                            details: typedef_details(value, declarator),
+                            members: BTreeMap::new(),
+                        },
+                    );
+                }
             }
             Definition::TypeDcl(TypeDcl::NativeDcl(value)) => {
                 types.insert(
@@ -108,9 +102,36 @@ fn collect_interface_types(
     if let Some(body) = &definition.interface_body {
         for export in &body.0 {
             match export {
-                hir::Export::TypeDcl(TypeDcl::ConstrTypeDcl(constr)) => {
-                    collect_constr(constr, &interface_path, types)
-                }
+                hir::Export::TypeDcl(type_dcl) => match type_dcl {
+                    TypeDcl::ConstrTypeDcl(constr) => {
+                        collect_constr(constr, &interface_path, types)
+                    }
+                    TypeDcl::TypedefDcl(value) => {
+                        for declarator in &value.decl {
+                            types.insert(
+                                join(&interface_path, declarator_ident(declarator)),
+                                TypeSurface {
+                                    kind: "typedef".to_string(),
+                                    details: typedef_details(value, declarator),
+                                    members: BTreeMap::new(),
+                                },
+                            );
+                        }
+                    }
+                    TypeDcl::NativeDcl(value) => {
+                        types.insert(
+                            join(&interface_path, &value.decl.0),
+                            TypeSurface {
+                                kind: "native".to_string(),
+                                details: descriptor([(
+                                    "name",
+                                    Value::String(value.decl.0.clone()),
+                                )]),
+                                members: BTreeMap::new(),
+                            },
+                        );
+                    }
+                },
                 hir::Export::ExceptDcl(value) => {
                     types.insert(
                         join(&interface_path, &value.ident),
@@ -147,14 +168,17 @@ fn collect_constr(
                 .member
                 .iter()
                 .enumerate()
-                .map(|(index, member)| {
-                    (
+                .filter_map(|(index, member)| {
+                    if is_skipped(&member.annotations) {
+                        return None;
+                    }
+                    Some((
                         effective_wire_name(&member.ident, &member.annotations, &value.annotations),
                         descriptor([
                             ("name", Value::String(member.ident.clone())),
                             ("index", Value::from(index)),
                         ]),
-                    )
+                    ))
                 })
                 .collect(),
         ),
@@ -168,19 +192,23 @@ fn collect_constr(
             value
                 .case
                 .iter()
-                .map(|case| {
-                    let ident = render_declarator(&case.element.value);
-                    (
-                        ident.clone(),
-                        descriptor([
-                            ("name", Value::String(ident)),
-                            ("type", Value::String(render_element_type(&case.element.ty))),
-                            (
-                                "labels",
-                                serde_json::to_value(&case.label).unwrap_or(Value::Null),
-                            ),
-                        ]),
-                    )
+                .filter_map(|case| {
+                    let ident = declarator_ident(&case.element.value).to_string();
+                    if is_skipped(&case.element.annotations) {
+                        return None;
+                    }
+                    let wire =
+                        effective_wire_name(&ident, &case.element.annotations, &value.annotations);
+                    let mut facts = declarator_facts(&case.element.value);
+                    facts.insert(
+                        "type".to_string(),
+                        Value::String(render_element_type(&case.element.ty)),
+                    );
+                    facts.insert(
+                        "labels".to_string(),
+                        serde_json::to_value(&case.label).unwrap_or(Value::Null),
+                    );
+                    Some((wire, facts))
                 })
                 .collect(),
         ),
@@ -229,9 +257,10 @@ fn collect_constr(
             value
                 .value
                 .iter()
+                .filter(|field| !is_skipped(&field.annotations))
                 .map(|field| {
                     (
-                        field.ident.clone(),
+                        effective_wire_name(&field.ident, &field.annotations, &value.annotations),
                         descriptor([
                             ("name", Value::String(field.ident.clone())),
                             ("position", Value::String(field.position.to_string())),
@@ -263,26 +292,14 @@ fn collect_constr(
     );
 }
 
-fn typedef_details(value: &hir::TypedefDcl) -> BTreeMap<String, Value> {
-    let declarators = value
-        .decl
-        .iter()
-        .map(|declarator| match declarator {
-            hir::Declarator::SimpleDeclarator(name) => descriptor([
-                ("name", Value::String(name.0.clone())),
-                ("array", Value::Bool(false)),
-            ]),
-            hir::Declarator::ArrayDeclarator(array) => descriptor([
-                ("name", Value::String(array.ident.clone())),
-                ("array", Value::Bool(true)),
-                (
-                    "lengths",
-                    serde_json::to_value(&array.len).unwrap_or(Value::Null),
-                ),
-            ]),
-        })
-        .map(|value| Value::Object(value.into_iter().collect()))
-        .collect::<Vec<_>>();
+fn typedef_details(
+    value: &hir::TypedefDcl,
+    declarator: &hir::Declarator,
+) -> BTreeMap<String, Value> {
+    let mut facts = declarator_facts(declarator);
+    if matches!(declarator, hir::Declarator::SimpleDeclarator(_)) {
+        facts.insert("array".to_string(), Value::Bool(false));
+    }
     descriptor([
         (
             "type",
@@ -291,7 +308,10 @@ fn typedef_details(value: &hir::TypedefDcl) -> BTreeMap<String, Value> {
                 hir::TypedefType::ConstrTypeDcl(value) => value.ident().to_string(),
             }),
         ),
-        ("declarators", Value::Array(declarators)),
+        (
+            "declarators",
+            Value::Array(vec![Value::Object(facts.into_iter().collect())]),
+        ),
     ])
 }
 
@@ -305,19 +325,16 @@ fn collect_members(
             member
                 .ident
                 .iter()
+                .filter(|_| !is_skipped(&member.annotations))
                 .map(move |declarator| (member, declarator))
         })
         .map(|(member, declarator)| {
-            let ident = render_declarator(declarator);
+            let ident = declarator_ident(declarator).to_string();
             let wire = effective_wire_name(&ident, &member.annotations, container_annotations);
-            (
-                wire,
-                descriptor([
-                    ("name", Value::String(ident)),
-                    ("type", Value::String(render_type(&member.ty))),
-                    ("optional", Value::Bool(member.is_optional())),
-                ]),
-            )
+            let mut facts = declarator_facts(declarator);
+            facts.insert("type".to_string(), Value::String(render_type(&member.ty)));
+            facts.insert("optional".to_string(), Value::Bool(member.is_optional()));
+            (wire, facts)
         })
         .collect::<BTreeMap<_, _>>()
 }

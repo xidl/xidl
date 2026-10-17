@@ -149,6 +149,7 @@ fn build_request_mapping(
             };
             HttpRequestBodyShape::Stream {
                 source_param: param.name.clone(),
+                wire_name: param.wire_name.clone(),
                 item_ty: param.ty.clone(),
                 codec,
             }
@@ -160,6 +161,7 @@ fn build_request_mapping(
     } else if body_params.len() == 1 {
         HttpRequestBodyShape::SingleValue {
             source_param: body_params[0].name.clone(),
+            wire_name: body_params[0].wire_name.clone(),
             flatten: body_params[0].flatten,
             ty: body_params[0].ty.clone(),
         }

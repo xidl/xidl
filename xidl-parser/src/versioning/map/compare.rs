@@ -1,7 +1,7 @@
 //! Compares adjacent collected surfaces without following references.
 
 use super::helpers::object;
-use super::model::{Change, ChangeKind, OperationSurface, TypeChange, TypeSurface};
+use super::model::{Change, ChangeKind, OperationSurface, TypeChange, TypeSurface, type_shape};
 use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -22,6 +22,8 @@ pub(crate) fn compare_types(
                     change: ChangeKind::Added,
                     kind: Some(value.kind.clone()),
                     details: (!value.details.is_empty()).then(|| value.details.clone()),
+                    from: None,
+                    to: None,
                     members: BTreeMap::new(),
                 },
             )),
@@ -31,6 +33,8 @@ pub(crate) fn compare_types(
                     change: ChangeKind::Removed,
                     kind: Some(value.kind.clone()),
                     details: (!value.details.is_empty()).then(|| value.details.clone()),
+                    from: None,
+                    to: None,
                     members: BTreeMap::new(),
                 },
             )),
@@ -43,6 +47,8 @@ pub(crate) fn compare_types(
                             change: ChangeKind::Changed,
                             kind: Some(right.kind.clone()),
                             details: (!right.details.is_empty()).then(|| right.details.clone()),
+                            from: Some(type_shape(left)),
+                            to: Some(type_shape(right)),
                             members,
                         },
                     ))
