@@ -4,7 +4,7 @@ use super::definition_templates::{
     EncodeTemplate, RequestBindTemplate, ResponseCookieDecodeTemplate, ResponseEncodeTemplate,
     ResponseHeaderDecodeTemplate,
 };
-use crate::generate::go_rest::{GoRestRenderer, ParamMeta};
+use crate::generate::go_rest::{GoRestRenderer, ParamMeta, ParamSource};
 
 pub(crate) fn emit_request_bind(
     out: &mut String,
@@ -24,6 +24,38 @@ pub(crate) fn emit_request_bind(
     if param.ty != "string" && param.ty != "uint32" && param.ty != "int32" && param.ty != "bool" {
         return Ok(());
     }
+    let renderer = GoRestRenderer::new()?;
+    out.push_str(&renderer.render_template(
+        "request_bind.go.j2",
+        &RequestBindTemplate {
+            field: &field,
+            call: &call,
+            ty: &param.ty,
+            optional: param.optional,
+            wire_name: &param.wire_name,
+            source_kind,
+        },
+    )?);
+    out.push('\n');
+    Ok(())
+}
+
+pub(crate) fn emit_bidi_request_bind(out: &mut String, param: &ParamMeta) -> IdlcResult<()> {
+    let field = format!("req.{}", param.field_name);
+    let wire = &param.wire_name;
+    let (call, source_kind) = match param.source {
+        ParamSource::Path => (format!("xidlgohttp.GinPathString(c, {wire:?})"), "Path"),
+        ParamSource::Query => (
+            format!("xidlgohttp.QueryString(c.Request.URL.Query(), {wire:?})"),
+            "Query",
+        ),
+        ParamSource::Header => (
+            format!("xidlgohttp.HeaderString(c.Request.Header, {wire:?})"),
+            "Header",
+        ),
+        ParamSource::Cookie => (format!("xidlgohttp.GinCookieString(c, {wire:?})"), "Cookie"),
+        ParamSource::Body => return Ok(()),
+    };
     let renderer = GoRestRenderer::new()?;
     out.push_str(&renderer.render_template(
         "request_bind.go.j2",

@@ -108,11 +108,19 @@ func UpgradeWebSocket(c *gin.Context, subprotocols []string) (*websocket.Conn, e
 
 // DialWebSocket opens a client WebSocket connection to endpoint.
 func DialWebSocket(ctx context.Context, endpoint string, subprotocols []string) (*websocket.Conn, error) {
+	return DialWebSocketWithHeaders(ctx, endpoint, subprotocols, nil)
+}
+
+// DialWebSocketWithHeaders opens a client WebSocket connection with headers
+// supplied for the HTTP upgrade request.
+func DialWebSocketWithHeaders(ctx context.Context, endpoint string, subprotocols []string, header http.Header) (*websocket.Conn, error) {
 	dialer := websocket.Dialer{
 		Subprotocols: subprotocols,
 		Proxy:        http.ProxyFromEnvironment,
 	}
-	header := http.Header{}
+	if header == nil {
+		header = http.Header{}
+	}
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}

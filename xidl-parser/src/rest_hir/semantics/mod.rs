@@ -18,8 +18,8 @@ pub use self::annotations::{
 };
 pub use self::cors::{HttpCorsProfile, effective_cors};
 pub use self::security::{
-    HttpApiKeyLocation, HttpSecurityOrigin, HttpSecurityProfile, HttpSecurityRequirement,
-    effective_security, effective_security_with_origin,
+    HttpSecurityOrigin, HttpSecurityProfile, HttpSecurityRequirement, effective_security,
+    effective_security_with_origin,
 };
 pub use self::stream::{
     HttpStreamCodec, HttpStreamConfig, HttpStreamKind, HttpStreamTargetSupport, http_stream_config,

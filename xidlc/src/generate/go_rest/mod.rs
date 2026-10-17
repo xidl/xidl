@@ -18,7 +18,6 @@ pub fn generate(
     input_path: &Path,
     props: HashMap<String, serde_json::Value>,
 ) -> IdlcResult<Vec<Artifact>> {
-    crate::generate::versioning::reject_versioned_modules("go-rest", &props)?;
     GoRestRenderMode::from_properties(&props)?;
     let spec = rest_hir.spec.clone();
     let stem = input_path
@@ -50,6 +49,7 @@ pub fn generate(
             "enable_interfaces" => false,
             "enable_render_header" => false,
             "enable_metadata" => enable_metadata,
+            "allow_versioned_modules" => serde_json::Value::Bool(true),
             "package" => serde_json::Value::from(package)
         };
         artifacts.push(Artifact::new_hir(ArtifactHir {
@@ -124,6 +124,30 @@ pub(crate) struct GoRestRenderContext<'a> {
     pub(crate) renderer: &'a GoRestRenderer,
     pub(crate) rest_hir: &'a xidl_parser::rest_hir::RestHirDocument,
     pub(crate) mode: GoRestRenderMode,
+    pub(crate) versioned_modules: bool,
+}
+
+impl GoRestRenderContext<'_> {
+    pub(crate) fn version_parameter(&self, module_path: &[String]) -> Option<VersionParameterMeta> {
+        let parameter = self.rest_hir.document.version_parameter.as_ref()?;
+        let value = self.rest_hir.document.api_version(module_path)?.to_string();
+        Some(VersionParameterMeta {
+            location: parameter.location,
+            name: parameter.name.clone(),
+            value,
+        })
+    }
+
+    pub(crate) fn versioned_modules(&self) -> bool {
+        self.versioned_modules
+    }
+}
+
+#[derive(Clone)]
+pub(crate) struct VersionParameterMeta {
+    pub(crate) location: xidl_parser::hir::HttpParameterLocation,
+    pub(crate) name: String,
+    pub(crate) value: String,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -190,6 +214,7 @@ pub(crate) struct MethodMeta {
     pub(crate) stream_in_ty: String,
     pub(crate) stream_out_ty: String,
     pub(crate) handshake_params: Vec<ParamMeta>,
+    pub(crate) version_parameter: Option<VersionParameterMeta>,
     pub(crate) cors: Option<xidl_parser::rest_hir::semantics::HttpCorsProfile>,
     pub(crate) security: Vec<xidl_parser::rest_hir::semantics::HttpSecurityRequirement>,
     pub(crate) basic_realm: Option<String>,

@@ -6,7 +6,7 @@ use super::GoRestRenderer;
 use super::interface_templates::{
     ClientBuildRequestMethod, ClientBuildRequestTemplate, DecodeResponseMethod,
     DecodeResponseTemplate, MethodTemplateParam, RequestBindingMethod, RequestBindingTemplate,
-    ResponseWriteMethod, ResponseWriteTemplate,
+    ResponseWriteMethod, ResponseWriteTemplate, VersionParameterTemplate,
 };
 
 pub(super) fn render_client_build_request(
@@ -42,6 +42,13 @@ pub(super) fn render_client_build_request(
             query_encode,
             header_encode,
             cookie_encode,
+            version_parameter: method.version_parameter.as_ref().map(|parameter| {
+                VersionParameterTemplate {
+                    location: parameter.location.as_str(),
+                    name: parameter.name.clone(),
+                    value: parameter.value.clone(),
+                }
+            }),
         },
     };
     out.push_str(&renderer.render_template("client_build_request.go.j2", &ctx)?);

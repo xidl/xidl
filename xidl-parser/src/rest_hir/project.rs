@@ -17,8 +17,7 @@ use super::semantics::{
 use super::validate::{
     effective_basic_auth_realm, effective_deprecated, validate_head_constraints,
     validate_request_shape, validate_route_bindings, validate_stream_method, validate_stream_shape,
-    validate_unique_header_params, validate_unique_route_bindings, validate_upgrade_constraints,
-    validate_version_header, validate_websocket_stream_items,
+    validate_unique_route_bindings, validate_upgrade_constraints, validate_websocket_stream_items,
 };
 use super::{
     HttpDocumentMetadata, HttpDocumentServer, HttpInterface, HttpOperation, HttpOperationMeta,
@@ -40,12 +39,18 @@ pub fn project_with_options(
     ctx.document.http_unions = HttpUnion::collect(&spec.0)?;
     ctx.collect_spec(spec, &[])?;
     ctx.document.exceptions = ctx.exceptions;
-    ctx.document.version_header = options.version_header.clone();
+    ctx.document.version_parameter = options.version_parameter.clone();
     ctx.document.version_values = options.version_values.iter().cloned().collect();
-    validate_version_header(ctx.document.version_header.as_deref(), &ctx.interfaces)
-        .map_err(parse_err)?;
+    if let Some(parameter) = &ctx.document.version_parameter {
+        parameter.validate().map_err(parse_err)?;
+        parameter
+            .validate_interfaces(&ctx.interfaces, &ctx.document.exceptions)
+            .map_err(parse_err)?;
+    }
     for interface in &ctx.interfaces {
-        validate_unique_header_params(interface).map_err(parse_err)?;
+        interface
+            .validate_unique_header_params()
+            .map_err(parse_err)?;
     }
     Ok(RestHirDocument {
         spec: spec.clone(),

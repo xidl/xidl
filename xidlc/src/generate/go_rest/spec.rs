@@ -17,6 +17,10 @@ pub(crate) fn render_spec(
         renderer: &renderer,
         rest_hir,
         mode: GoRestRenderMode::from_properties(properties)?,
+        versioned_modules: properties
+            .get(xidl_parser::versioning::API_VERSION_MODULES_PROPERTY)
+            .and_then(serde_json::Value::as_array)
+            .is_some_and(|modules| !modules.is_empty()),
     };
     let mut template_properties = properties.clone();
     template_properties.insert(

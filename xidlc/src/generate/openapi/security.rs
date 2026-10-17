@@ -2,7 +2,8 @@ use crate::openapi::security::{
     ApiKey, ApiKeyValue, Http, HttpAuthScheme, SecurityRequirement, SecurityScheme,
 };
 use std::collections::BTreeMap;
-use xidl_parser::rest_hir::semantics::{HttpApiKeyLocation, HttpSecurityRequirement};
+use xidl_parser::hir::HttpParameterLocation;
+use xidl_parser::rest_hir::semantics::HttpSecurityRequirement;
 
 pub(crate) fn openapi_security_requirement(
     requirement: HttpSecurityRequirement,
@@ -39,13 +40,13 @@ pub(crate) fn register_security_schemes(
             HttpSecurityRequirement::ApiKey { location, name } => {
                 let key = api_key_scheme_name(location, name);
                 store.entry(key).or_insert_with(|| match location {
-                    HttpApiKeyLocation::Header => {
+                    HttpParameterLocation::Header => {
                         SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::new(name.clone())))
                     }
-                    HttpApiKeyLocation::Query => {
+                    HttpParameterLocation::Query => {
                         SecurityScheme::ApiKey(ApiKey::Query(ApiKeyValue::new(name.clone())))
                     }
-                    HttpApiKeyLocation::Cookie => {
+                    HttpParameterLocation::Cookie => {
                         SecurityScheme::ApiKey(ApiKey::Cookie(ApiKeyValue::new(name.clone())))
                     }
                 });
@@ -54,11 +55,11 @@ pub(crate) fn register_security_schemes(
     }
 }
 
-fn api_key_scheme_name(location: &HttpApiKeyLocation, name: &str) -> String {
+fn api_key_scheme_name(location: &HttpParameterLocation, name: &str) -> String {
     let location = match location {
-        HttpApiKeyLocation::Header => "header",
-        HttpApiKeyLocation::Query => "query",
-        HttpApiKeyLocation::Cookie => "cookie",
+        HttpParameterLocation::Header => "header",
+        HttpParameterLocation::Query => "query",
+        HttpParameterLocation::Cookie => "cookie",
     };
     format!("api_key-{location}-{}", name.to_ascii_lowercase())
 }

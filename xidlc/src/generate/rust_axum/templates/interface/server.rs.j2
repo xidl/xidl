@@ -26,7 +26,20 @@ T: {{ ident }} + Send + Sync + 'static,
             {% endfor %}
         {% endfor %}
         .with_state(_svc)
+        {% if version_parameter and version_parameter.location == "Header" %}
+            .layer(xidl_rust_axum::axum::middleware::map_response(Self::with_api_version))
+        {% endif %}
     }
+
+    {% if version_parameter and version_parameter.location == "Header" %}
+        async fn with_api_version(mut response: ::xidl_rust_axum::axum::response::Response) -> ::xidl_rust_axum::axum::response::Response {
+            response.headers_mut().insert(
+            ::xidl_rust_axum::axum::http::HeaderName::from_static({{ version_parameter.header_name }}),
+            ::xidl_rust_axum::axum::http::HeaderValue::from_static({{ version_parameter.value }}),
+            );
+            response
+        }
+    {% endif %}
 
     {% for method in methods %}
         #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion, unused_mut, unreachable_code, clippy::let_unit_value, unused_variables)]
@@ -528,16 +541,6 @@ T: {{ ident }} + Send + Sync + 'static,
                                     value,
                                     );
                                 {% endif %}
-                            {% endif %}
-                            {% if metadata.version_header %}
-                                {# The server never resolves the version; it echoes the received value back. #}
-                                if let Some(version_value) = headers.get("{{ metadata.version_header }}") {
-                                    let version_header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
-                                    "{{ metadata.version_header }}".as_bytes(),
-                                    )
-                                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-                                    resp.headers_mut().insert(version_header_name, version_value.clone());
-                                }
                             {% endif %}
                             Ok(resp)
                         {% endif %}

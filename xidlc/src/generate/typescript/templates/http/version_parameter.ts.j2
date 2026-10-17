@@ -1,0 +1,8 @@
+{% macro pin_headers(headers, parameter, value) %}{% if parameter.location == "Header" %}{{ headers }}.set({{ parameter.name | tojson }}, {{ value }});
+{% elif parameter.location == "Cookie" %}if (typeof window === "undefined") {
+    const versionCookies = ({{ headers }}.get("Cookie") ?? "").split(";")
+    .map(cookie => cookie.trim()).filter(cookie => cookie && cookie.split("=", 1)[0].trim() !== {{ parameter.name | tojson }});
+    versionCookies.push({{ parameter.name | tojson }} + "=" + encodeURIComponent({{ value }}));
+    {{ headers }}.set("Cookie", versionCookies.join("; "));
+}
+{% endif %}{% endmacro %}

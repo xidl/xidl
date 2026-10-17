@@ -8,7 +8,17 @@ export interface WsBidiSession<TIn, TOut> {
   readonly subprotocol: string | null;
 }
 
+/** Handshake transport for environments that can send custom HTTP headers. */
+export interface WebSocketConnectRequest {
+  url: string;
+  protocols?: string[];
+  headers: Record<string, string>;
+}
+
+/** Options shared by browser constructors and header-capable transports. */
 export interface OpenWsOptions {
+  headers?: Record<string, string>;
+  connect?: (request: WebSocketConnectRequest) => WebSocketLike;
   subprotocol?: string;
   protocols?: string[];
   WebSocketImpl?: typeof WebSocket;
@@ -16,13 +26,14 @@ export interface OpenWsOptions {
   outSchema?: XidlSchema;
 }
 
-type WsLike = {
+/** The event and message operations used by a generated WebSocket client. */
+export interface WebSocketLike {
   send(data: string): void;
   close(code?: number, reason?: string): void;
   addEventListener(type: string, listener: (event: unknown) => void): void;
   readyState: number;
   protocol: string;
-};
+}
 
 function resolveWebSocketCtor(options?: OpenWsOptions): typeof WebSocket {
   if (options?.WebSocketImpl) {
@@ -40,12 +51,17 @@ export async function openWsBidiClient<TIn, TOut>(
   url: string,
   options?: OpenWsOptions,
 ): Promise<WsBidiSession<TIn, TOut>> {
-  const Ctor = resolveWebSocketCtor(options);
   const protocols =
     options?.protocols ??
     (options?.subprotocol ? [options.subprotocol] : undefined);
-  const socket = protocols?.length ? new Ctor(url, protocols) : new Ctor(url);
-  const ws = socket as unknown as WsLike;
+  let ws: WebSocketLike;
+  if (options?.connect) {
+    ws = options.connect({ headers: options.headers ?? {}, protocols, url });
+  } else {
+    // Browser WebSocket constructors cannot send custom headers or cookies.
+    const Ctor = resolveWebSocketCtor(options);
+    ws = protocols?.length ? new Ctor(url, protocols) : new Ctor(url);
+  }
   await new Promise<void>((resolve, reject) => {
     const timer = setTimeout(
       () => reject(new Error('websocket connect timeout')),

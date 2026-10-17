@@ -146,10 +146,12 @@ pub(super) struct TsExceptionFieldContext {
 pub(super) struct ClientClassContext {
     pub(super) client_name: String,
     pub(super) methods: Vec<ClientMethodContext>,
-    /// Request header carrying the API version, when declared.
-    pub(super) version_header: Option<String>,
+    /// The location and name used to send the module's API version.
+    pub(super) version_parameter: Option<xidl_parser::hir::VersionParameter>,
     /// The version value this client pins on every request.
     pub(super) api_version: Option<String>,
+    /// Whether browser requests should include application-managed cookies.
+    pub(super) cookie_version: bool,
 }
 
 #[derive(Serialize)]
@@ -198,8 +200,8 @@ pub(super) struct ClientMethodContext {
 pub(super) struct ServerClassContext {
     pub(super) service_name: String,
     pub(super) methods: Vec<ServerMethodContext>,
-    /// Request header the generated server echoes back, when declared.
-    pub(super) version_header: Option<String>,
+    /// Fixed response headers emitted by the version contract, when present.
+    pub(super) fixed_response_headers: std::collections::BTreeMap<String, String>,
 }
 
 #[derive(Serialize)]
@@ -374,8 +376,8 @@ impl MethodModel {
             is_client_stream: self.is_client_stream,
             is_websocket: self.is_websocket,
             websocket_subprotocol: self.websocket_subprotocol.clone(),
-            stream_in_ty: self.stream_in_ty.clone(),
-            stream_out_ty: self.stream_out_ty.clone(),
+            stream_in_ty: self.stream_in_ty,
+            stream_out_ty: self.stream_out_ty,
             stream_item_ty: self.stream_item_ty,
             stream_item_schema_ref: self.stream_item_schema_ref,
             security: self.security,

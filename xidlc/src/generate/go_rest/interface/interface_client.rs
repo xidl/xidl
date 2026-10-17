@@ -12,6 +12,18 @@ pub(super) fn render_client(
     methods: &[MethodMeta],
     renderer: &GoRestRenderer,
 ) -> IdlcResult<()> {
+    if let Some(version) = methods
+        .iter()
+        .find_map(|method| method.version_parameter.as_ref())
+    {
+        writeln!(
+            out,
+            "const {interface_name}APIVersion = {:?}",
+            version.value
+        )
+        .unwrap();
+        writeln!(out).unwrap();
+    }
     writeln!(out, "type {interface_name}Client struct {{").unwrap();
     writeln!(out, "\tbaseURL string").unwrap();
     writeln!(out, "\thttpClient *http.Client").unwrap();
@@ -140,6 +152,19 @@ fn render_client_client_stream(
             .unwrap_or_else(|| "/".to_string())
     )
     .unwrap();
+    if let Some(version) = method
+        .version_parameter
+        .as_ref()
+        .filter(|parameter| parameter.location == xidl_parser::hir::HttpParameterLocation::Query)
+    {
+        writeln!(out, "\tversionQuery := url.Values{{}}").unwrap();
+        writeln!(
+            out,
+            "\tversionQuery.Set({:?}, {:?}); requestURL += \"?\" + versionQuery.Encode()",
+            version.name, version.value
+        )
+        .unwrap();
+    }
     writeln!(
         out,
         "\thttpReq, err := http.NewRequestWithContext(ctx, \"{}\", requestURL, nil)",
@@ -147,6 +172,7 @@ fn render_client_client_stream(
     )
     .unwrap();
     writeln!(out, "\tif err != nil {{ return nil, err }}").unwrap();
+    render_version_http_binding(out, method);
     writeln!(
         out,
         "\thttpReq.Header.Set(\"Accept\", \"{}\")",
@@ -190,6 +216,10 @@ fn render_client_bidi_stream(
     interface_name: &str,
     method: &MethodMeta,
 ) -> IdlcResult<()> {
+    let mut query_encode = String::new();
+    for param in &method.query_params {
+        definition::emit_query_encode(&mut query_encode, param)?;
+    }
     let mut params = vec!["ctx context.Context".to_string()];
     let mut req_fields = Vec::new();
     for param in &method.handshake_params {
@@ -231,6 +261,25 @@ fn render_client_bidi_stream(
     )
     .unwrap();
     writeln!(out, "\tendpoint := base + path").unwrap();
+    let has_version_query = method.version_parameter.as_ref().is_some_and(|parameter| {
+        parameter.location == xidl_parser::hir::HttpParameterLocation::Query
+    });
+    if !query_encode.is_empty() || has_version_query {
+        writeln!(out, "\tquery := url.Values{{}}").unwrap();
+        for line in query_encode.lines() {
+            writeln!(out, "\t{line}").unwrap();
+        }
+        if let Some(version) = method.version_parameter.as_ref().filter(|parameter| {
+            parameter.location == xidl_parser::hir::HttpParameterLocation::Query
+        }) {
+            writeln!(out, "\tquery.Set({:?}, {:?})", version.name, version.value).unwrap();
+        }
+        writeln!(
+            out,
+            "\tif encoded := query.Encode(); encoded != \"\" {{ endpoint += \"?\" + encoded }}"
+        )
+        .unwrap();
+    }
     let subproto = method
         .websocket_subprotocol
         .as_deref()
@@ -242,11 +291,46 @@ fn render_client_bidi_stream(
         "\tif {subproto} != \"\" {{ subprotocols = []string{{{subproto}}} }}"
     )
     .unwrap();
-    writeln!(
-        out,
-        "\tconn, err := xidlgohttp.DialWebSocket(ctx, endpoint, subprotocols)"
-    )
-    .unwrap();
+    let ws_version_header = method.version_parameter.as_ref().filter(|parameter| {
+        matches!(
+            parameter.location,
+            xidl_parser::hir::HttpParameterLocation::Header
+                | xidl_parser::hir::HttpParameterLocation::Cookie
+        )
+    });
+    if let Some(version) = ws_version_header {
+        writeln!(out, "\twsHeaders := http.Header{{}}").unwrap();
+        match version.location {
+            xidl_parser::hir::HttpParameterLocation::Header => {
+                writeln!(
+                    out,
+                    "\twsHeaders.Set({:?}, {:?})",
+                    version.name, version.value
+                )
+                .unwrap();
+            }
+            xidl_parser::hir::HttpParameterLocation::Cookie => {
+                writeln!(
+                    out,
+                    "\twsHeaders.Add(\"Cookie\", {:?} + \"=\" + xidlgohttp.EncodeCookieValue({:?}))",
+                    version.name, version.value
+                )
+                .unwrap();
+            }
+            xidl_parser::hir::HttpParameterLocation::Query => unreachable!(),
+        }
+        writeln!(
+            out,
+            "\tconn, err := xidlgohttp.DialWebSocketWithHeaders(ctx, endpoint, subprotocols, wsHeaders)"
+        )
+        .unwrap();
+    } else {
+        writeln!(
+            out,
+            "\tconn, err := xidlgohttp.DialWebSocket(ctx, endpoint, subprotocols)"
+        )
+        .unwrap();
+    }
     writeln!(out, "\tif err != nil {{ return nil, err }}").unwrap();
     writeln!(
         out,
@@ -257,4 +341,29 @@ fn render_client_bidi_stream(
     writeln!(out, "}}").unwrap();
     writeln!(out).unwrap();
     Ok(())
+}
+
+fn render_version_http_binding(out: &mut String, method: &MethodMeta) {
+    let Some(version) = method.version_parameter.as_ref() else {
+        return;
+    };
+    match version.location {
+        xidl_parser::hir::HttpParameterLocation::Header => {
+            writeln!(
+                out,
+                "\thttpReq.Header.Set({:?}, {:?})",
+                version.name, version.value
+            )
+            .unwrap();
+        }
+        xidl_parser::hir::HttpParameterLocation::Cookie => {
+            writeln!(
+                out,
+                "\thttpReq.AddCookie(&http.Cookie{{Name: {:?}, Value: xidlgohttp.EncodeCookieValue({:?})}})",
+                version.name, version.value
+            )
+            .unwrap();
+        }
+        xidl_parser::hir::HttpParameterLocation::Query => {}
+    }
 }

@@ -61,8 +61,8 @@ pub struct HttpDocumentServer {
 /// Inputs the HIR stage passes down that the specification itself does not carry.
 #[derive(Debug, Default)]
 pub struct ProjectOptions {
-    /// The request header declared via `@version(header = "...")`.
-    pub version_header: Option<String>,
+    /// The API version parameter declared by the source timeline.
+    pub version_parameter: Option<hir::VersionParameter>,
     /// Version module idents and their wire values for this projection.
     pub version_values: Vec<(String, String)>,
 }
@@ -72,10 +72,9 @@ pub struct HttpDocumentMetadata {
     pub package: Option<String>,
     pub version: Option<String>,
     pub servers: Vec<HttpDocumentServer>,
-    /// Request header carrying the API version, declared via
-    /// `@version(header = "...")`. Typed stage metadata, not a pragma.
+    /// API version parameter declaration. Typed stage metadata, not a pragma.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub version_header: Option<String>,
+    pub version_parameter: Option<hir::VersionParameter>,
     /// Version module ident to wire value, so merged-layout output can
     /// resolve the version of its enclosing module.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
@@ -375,5 +374,17 @@ impl RestHirDocument {
         self.interfaces
             .iter()
             .find(|interface| interface.name == name && interface.module_path == module_path)
+    }
+}
+
+impl HttpDocumentMetadata {
+    /// Finds the version of an interface, including nested business modules.
+    pub fn api_version(&self, module_path: &[String]) -> Option<&str> {
+        self.version.as_deref().or_else(|| {
+            module_path
+                .first()
+                .and_then(|module| self.version_values.get(module))
+                .map(String::as_str)
+        })
     }
 }
