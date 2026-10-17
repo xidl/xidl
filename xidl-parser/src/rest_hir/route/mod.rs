@@ -271,10 +271,11 @@ fn method_from_annotation(annotation: &hir::Annotation) -> Option<HttpMethod> {
 }
 
 pub(super) fn readonly_attr_names(spec: &hir::ReadonlyAttrSpec) -> Vec<String> {
-    match &spec.declarator {
-        hir::ReadonlyAttrDeclarator::SimpleDeclarator(decl) => vec![decl.0.clone()],
-        hir::ReadonlyAttrDeclarator::RaisesExpr(_) => Vec::new(),
-    }
+    spec.declarator
+        .declarators()
+        .iter()
+        .map(|decl| decl.0.clone())
+        .collect()
 }
 
 pub(super) fn attribute_path(name: &str) -> String {

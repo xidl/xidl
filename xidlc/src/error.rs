@@ -30,6 +30,8 @@ pub enum IdlcError {
     Import(crate::units::ImportError),
     /// Collection of diagnostics.
     Diagnostics(DiagnosticListError),
+    /// A CLI subcommand requested a process exit with a specific status.
+    CliExit { code: u8, message: Option<String> },
 }
 
 impl fmt::Display for IdlcError {
@@ -45,6 +47,13 @@ impl fmt::Display for IdlcError {
             Self::Library(err) => write!(f, "{err}"),
             Self::Import(err) => write!(f, "{err}"),
             Self::Diagnostics(err) => write!(f, "{err}"),
+            Self::CliExit { message, .. } => {
+                if let Some(message) = message {
+                    f.write_str(message)
+                } else {
+                    Ok(())
+                }
+            }
         }
     }
 }
@@ -60,7 +69,11 @@ impl Error for IdlcError {
             Self::Diagnostics(err) => Some(err),
             Self::Library(err) => Some(err),
             Self::Import(err) => Some(err),
-            Self::LintFailed | Self::Template(_) | Self::Rpc(_) | Self::Fmt(_) => None,
+            Self::LintFailed
+            | Self::Template(_)
+            | Self::Rpc(_)
+            | Self::Fmt(_)
+            | Self::CliExit { .. } => None,
         }
     }
 }

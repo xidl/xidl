@@ -134,7 +134,9 @@ fn route_helpers_normalize_and_format_paths() {
 
     let spec = ReadonlyAttrSpec {
         ty: TypeSpec::StringType(StringType { bound: None }),
-        declarator: ReadonlyAttrDeclarator::SimpleDeclarator(SimpleDeclarator("status".into())),
+        declarator: ReadonlyAttrDeclarator::SimpleDeclarator(vec![SimpleDeclarator(
+            "status".into(),
+        )]),
     };
     assert_eq!(readonly_attr_names(&spec), vec!["status".to_string()]);
 }

@@ -148,7 +148,7 @@ fn requires_raw_annotation_parse(raw: &str) -> bool {
         .split_once('(')
         .map(|(name, _)| name)
         .unwrap_or(source);
-    name.contains('-') || source.contains('[') || source.contains(']')
+    name.contains('-') || crate::parser::raw::RawArguments::contains_array(source)
 }
 
 fn parse_annotation_from_raw(

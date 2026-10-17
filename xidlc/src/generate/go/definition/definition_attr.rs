@@ -15,7 +15,7 @@ pub(super) fn render_attr_types(
     let mut out = Vec::new();
     match &attr.decl {
         hir::AttrDclInner::ReadonlyAttrSpec(spec) => {
-            if let hir::ReadonlyAttrDeclarator::SimpleDeclarator(decl) = &spec.declarator {
+            for decl in spec.declarator.declarators() {
                 push_get_attr(ctx, &mut out, interface_name, &decl.0, &spec.ty)?;
             }
         }

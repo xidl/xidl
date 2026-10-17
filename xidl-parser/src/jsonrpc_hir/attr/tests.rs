@@ -17,9 +17,9 @@ fn project_attr_covers_readonly_readwrite_and_stream_watch_paths() {
         }],
         decl: AttrDclInner::ReadonlyAttrSpec(ReadonlyAttrSpec {
             ty: string_ty(),
-            declarator: ReadonlyAttrDeclarator::SimpleDeclarator(SimpleDeclarator(
+            declarator: ReadonlyAttrDeclarator::SimpleDeclarator(vec![SimpleDeclarator(
                 "status".to_string(),
-            )),
+            )]),
         }),
     };
     let (methods, watches) = project_attr(
@@ -90,7 +90,10 @@ fn project_attr_covers_readonly_readwrite_and_stream_watch_paths() {
         annotations: Vec::new(),
         decl: AttrDclInner::ReadonlyAttrSpec(ReadonlyAttrSpec {
             ty: string_ty(),
-            declarator: ReadonlyAttrDeclarator::RaisesExpr(crate::hir::RaisesExpr(Vec::new())),
+            declarator: ReadonlyAttrDeclarator::WithRaises {
+                declarator: SimpleDeclarator("status".to_string()),
+                raises: crate::hir::RaisesExpr(Vec::new()),
+            },
         }),
     };
     let (methods, watches) = project_attr(
@@ -100,6 +103,6 @@ fn project_attr_covers_readonly_readwrite_and_stream_watch_paths() {
         &std::collections::HashSet::new(),
     )
     .expect("readonly raises");
-    assert!(methods.is_empty());
+    assert_eq!(methods.len(), 1);
     assert!(watches.is_empty());
 }

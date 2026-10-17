@@ -329,10 +329,14 @@ pub struct ReadonlyAttrSpec {
     pub declarator: ReadonlyAttrDeclarator,
 }
 
-#[derive(Debug, Parser, Serialize)]
+/// Readonly attribute names, with an optional raises clause on one name.
+#[derive(Debug, Serialize)]
 pub enum ReadonlyAttrDeclarator {
-    SimpleDeclarator(SimpleDeclarator),
-    RaisesExpr(RaisesExpr),
+    SimpleDeclarator(Vec<SimpleDeclarator>),
+    WithRaises {
+        declarator: SimpleDeclarator,
+        raises: RaisesExpr,
+    },
 }
 
 #[derive(Debug, Parser, Serialize)]

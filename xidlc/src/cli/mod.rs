@@ -21,10 +21,32 @@ enum Command {
     /// Check annotation names, placement and arguments without generating files.
     Lint(lint::ArgsLint),
     Gen(ArgsGen),
+    Version(ArgsVersion),
     #[command(alias = "format")]
     Fmt(fmt::ArgsFormat),
     #[command(name = "import")]
     Import(ArgsImport),
+}
+
+#[derive(Debug, Args)]
+struct ArgsVersion {
+    #[command(subcommand)]
+    command: VersionCommand,
+}
+
+#[derive(Debug, Subcommand)]
+enum VersionCommand {
+    Diff(ArgsVersionDiff),
+}
+
+#[derive(Debug, Args)]
+struct ArgsVersionDiff {
+    /// Earlier version member name or display value.
+    from: String,
+    /// Later version member name or display value.
+    to: String,
+    /// Versioned IDL contract.
+    idl: PathBuf,
 }
 
 #[derive(Debug, Args)]
@@ -330,39 +352,7 @@ fn exec_toolchain(binary: &std::path::Path) -> IdlcResult<()> {
     std::process::exit(status.code().unwrap_or(1));
 }
 
-impl Cli {
-    pub fn run(self) -> IdlcResult<()> {
-        match self.command {
-            Command::Lint(args) => args.execute(),
-            Command::Gen(args) => {
-                let help_command = args.lang.help_command();
-                let args = args.into_driver_args()?;
-                if args.files.is_empty() {
-                    help_command.clone().print_help()?;
-                    println!();
-                    return Ok(());
-                }
-                switch_toolchain(&args.files)?;
-                driver::Driver::run(args)
-            }
-            Command::Fmt(args) => args.execute(),
-            Command::Import(args) => {
-                let out_dir = PathBuf::from(&args.out_dir);
-                if !out_dir.exists() {
-                    std::fs::create_dir_all(&out_dir)?;
-                }
-                match args.lang {
-                    ImportLang::Openapi(files_args) => {
-                        for file in files_args.files {
-                            crate::import::openapi::import_openapi(&file, &out_dir)?;
-                        }
-                    }
-                }
-                Ok(())
-            }
-        }
-    }
-}
+mod run;
 
 #[cfg(test)]
 mod tests;

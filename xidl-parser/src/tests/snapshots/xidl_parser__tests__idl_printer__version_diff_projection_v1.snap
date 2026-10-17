@@ -1,0 +1,23 @@
+---
+source: xidl-parser/src/tests/idl_printer.rs
+expression: "&printed"
+---
+#pragma xidlc package "versioned_rest"
+#pragma xidlc version "1.0"
+module v1 {
+    struct Item {
+        string name;
+    };
+    @http(404)
+    exception NotFound {
+        string id;
+    };
+    interface Items {
+        @get(path = "/items/{id}")
+        Item get(@path  string id);
+        @get(path = "/legacy")
+        string legacy();
+        @post(path = "/items/{id}/adopt")
+        Item adopt(@path  string id) raises(NotFound);
+    };
+};

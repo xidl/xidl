@@ -31,6 +31,10 @@ pub const A_func6_Hash: i32 = 2431207424;
 #[allow(non_upper_case_globals)]
 pub const A_get_attribute_attr1_Hash: i32 = 608996360;
 #[allow(non_upper_case_globals)]
+pub const A_get_attribute_attr2_Hash: i32 = 2525005575;
+#[allow(non_upper_case_globals)]
+pub const A_get_attribute_attr3_Hash: i32 = 3118622849;
+#[allow(non_upper_case_globals)]
 pub const A_get_attribute_attr4_Hash: i32 = 3573244217;
 #[allow(non_upper_case_globals)]
 pub const A_get_attribute_attr5_Hash: i32 = 3938161725;
@@ -1814,6 +1818,378 @@ impl<'de> serde::Deserialize<'de> for A_get_attribute_attr1_Result {
 }
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
+pub struct A_get_attribute_attr2_In {
+    pub dummy: dds::rpc::UnusedMember,
+}
+impl A_get_attribute_attr2_In {}
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
+pub struct A_get_attribute_attr2_Out {
+    pub return_: u8,
+}
+impl A_get_attribute_attr2_Out {}
+pub struct A_get_attribute_attr2_Result {
+    tag: i32,
+    data: A_get_attribute_attr2_ResultData,
+}
+union A_get_attribute_attr2_ResultData {
+    result: core::mem::ManuallyDrop<A_get_attribute_attr2_Out>,
+}
+impl Drop for A_get_attribute_attr2_Result {
+    #[allow(unreachable_patterns)]
+    fn drop(&mut self) {
+        match self.tag {
+            dds::RETCODE_OK => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.result);
+                }
+            }
+            _ => {}
+        }
+    }
+}
+impl Clone for A_get_attribute_attr2_Result {
+    #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
+    fn clone(&self) -> Self {
+        match self.tag {
+            dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+            _ => unreachable!(),
+        }
+    }
+}
+impl core::fmt::Debug for A_get_attribute_attr2_Result {
+    #[allow(unreachable_patterns)]
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("A_get_attribute_attr2_Result");
+        d.field("tag", &self.tag);
+        match self.tag {
+            dds::RETCODE_OK => {
+                d.field("result", self.as_result());
+            }
+            _ => {}
+        }
+        d.finish()
+    }
+}
+impl PartialEq for A_get_attribute_attr2_Result {
+    #[allow(unreachable_patterns)]
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            dds::RETCODE_OK => self.as_result() == other.as_result(),
+            _ => false,
+        }
+    }
+}
+impl A_get_attribute_attr2_Result {
+    pub fn new_result(value: A_get_attribute_attr2_Out) -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_get_attribute_attr2_ResultData {
+                result: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_result(&self) -> bool {
+        matches!(self.tag, dds::RETCODE_OK)
+    }
+    #[allow(clippy::borrowed_box)]
+    pub fn as_result(&self) -> &A_get_attribute_attr2_Out {
+        debug_assert!(self.is_result());
+        unsafe { &self.data.result }
+    }
+    #[allow(clippy::borrowed_box)]
+    pub fn as_result_mut(&mut self) -> &mut A_get_attribute_attr2_Out {
+        debug_assert!(self.is_result());
+        unsafe { &mut self.data.result }
+    }
+    pub fn into_result(self) -> A_get_attribute_attr2_Out {
+        debug_assert!(self.is_result());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.result)
+        }
+    }
+    pub fn tag(&self) -> &i32 {
+        &self.tag
+    }
+}
+impl Default for A_get_attribute_attr2_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_get_attribute_attr2_ResultData {
+                result: core::mem::ManuallyDrop::new(
+                    A_get_attribute_attr2_Out::default(),
+                ),
+            },
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct A_get_attribute_attr2_ResultSerdeRef<'__a> {
+    tag: &'__a str,
+    data: A_get_attribute_attr2_ResultSerdeRefData<'__a>,
+}
+#[allow(clippy::borrowed_box)]
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum A_get_attribute_attr2_ResultSerdeRefData<'__a> {
+    Case0(&'__a A_get_attribute_attr2_Out),
+}
+impl serde::Serialize for A_get_attribute_attr2_Result {
+    #[allow(unreachable_patterns)]
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            dds::RETCODE_OK => {
+                let tag = "RETCODE_OK";
+                A_get_attribute_attr2_ResultSerdeRef {
+                    tag,
+                    data: A_get_attribute_attr2_ResultSerdeRefData::Case0(
+                        self.as_result(),
+                    ),
+                }
+            }
+            _ => unreachable!(),
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct A_get_attribute_attr2_ResultSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for A_get_attribute_attr2_Result {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = A_get_attribute_attr2_ResultSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "RETCODE_OK" => {
+                let value = ::serde_json::from_value::<
+                    A_get_attribute_attr2_Out,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_get_attribute_attr2_Result payload decode failed for tag `RETCODE_OK`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: dds::RETCODE_OK,
+                    data: A_get_attribute_attr2_ResultData {
+                        result: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union A_get_attribute_attr2_Result tag/data mismatch for tag `{}`",
+                            helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
+pub struct A_get_attribute_attr3_In {
+    pub dummy: dds::rpc::UnusedMember,
+}
+impl A_get_attribute_attr3_In {}
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
+pub struct A_get_attribute_attr3_Out {
+    pub return_: u8,
+}
+impl A_get_attribute_attr3_Out {}
+pub struct A_get_attribute_attr3_Result {
+    tag: i32,
+    data: A_get_attribute_attr3_ResultData,
+}
+union A_get_attribute_attr3_ResultData {
+    result: core::mem::ManuallyDrop<A_get_attribute_attr3_Out>,
+}
+impl Drop for A_get_attribute_attr3_Result {
+    #[allow(unreachable_patterns)]
+    fn drop(&mut self) {
+        match self.tag {
+            dds::RETCODE_OK => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.result);
+                }
+            }
+            _ => {}
+        }
+    }
+}
+impl Clone for A_get_attribute_attr3_Result {
+    #[allow(clippy::clone_on_copy)]
+    #[allow(unreachable_patterns)]
+    fn clone(&self) -> Self {
+        match self.tag {
+            dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+            _ => unreachable!(),
+        }
+    }
+}
+impl core::fmt::Debug for A_get_attribute_attr3_Result {
+    #[allow(unreachable_patterns)]
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("A_get_attribute_attr3_Result");
+        d.field("tag", &self.tag);
+        match self.tag {
+            dds::RETCODE_OK => {
+                d.field("result", self.as_result());
+            }
+            _ => {}
+        }
+        d.finish()
+    }
+}
+impl PartialEq for A_get_attribute_attr3_Result {
+    #[allow(unreachable_patterns)]
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            dds::RETCODE_OK => self.as_result() == other.as_result(),
+            _ => false,
+        }
+    }
+}
+impl A_get_attribute_attr3_Result {
+    pub fn new_result(value: A_get_attribute_attr3_Out) -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_get_attribute_attr3_ResultData {
+                result: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_result(&self) -> bool {
+        matches!(self.tag, dds::RETCODE_OK)
+    }
+    #[allow(clippy::borrowed_box)]
+    pub fn as_result(&self) -> &A_get_attribute_attr3_Out {
+        debug_assert!(self.is_result());
+        unsafe { &self.data.result }
+    }
+    #[allow(clippy::borrowed_box)]
+    pub fn as_result_mut(&mut self) -> &mut A_get_attribute_attr3_Out {
+        debug_assert!(self.is_result());
+        unsafe { &mut self.data.result }
+    }
+    pub fn into_result(self) -> A_get_attribute_attr3_Out {
+        debug_assert!(self.is_result());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.result)
+        }
+    }
+    pub fn tag(&self) -> &i32 {
+        &self.tag
+    }
+}
+impl Default for A_get_attribute_attr3_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_get_attribute_attr3_ResultData {
+                result: core::mem::ManuallyDrop::new(
+                    A_get_attribute_attr3_Out::default(),
+                ),
+            },
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct A_get_attribute_attr3_ResultSerdeRef<'__a> {
+    tag: &'__a str,
+    data: A_get_attribute_attr3_ResultSerdeRefData<'__a>,
+}
+#[allow(clippy::borrowed_box)]
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum A_get_attribute_attr3_ResultSerdeRefData<'__a> {
+    Case0(&'__a A_get_attribute_attr3_Out),
+}
+impl serde::Serialize for A_get_attribute_attr3_Result {
+    #[allow(unreachable_patterns)]
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            dds::RETCODE_OK => {
+                let tag = "RETCODE_OK";
+                A_get_attribute_attr3_ResultSerdeRef {
+                    tag,
+                    data: A_get_attribute_attr3_ResultSerdeRefData::Case0(
+                        self.as_result(),
+                    ),
+                }
+            }
+            _ => unreachable!(),
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct A_get_attribute_attr3_ResultSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for A_get_attribute_attr3_Result {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = A_get_attribute_attr3_ResultSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "RETCODE_OK" => {
+                let value = ::serde_json::from_value::<
+                    A_get_attribute_attr3_Out,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_get_attribute_attr3_Result payload decode failed for tag `RETCODE_OK`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: dds::RETCODE_OK,
+                    data: A_get_attribute_attr3_ResultData {
+                        result: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union A_get_attribute_attr3_Result tag/data mismatch for tag `{}`",
+                            helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
 pub struct A_get_attribute_attr4_In {
     pub dummy: dds::rpc::UnusedMember,
 }
@@ -1830,6 +2206,7 @@ pub struct A_get_attribute_attr4_Result {
 }
 union A_get_attribute_attr4_ResultData {
     result: core::mem::ManuallyDrop<A_get_attribute_attr4_Out>,
+    a_ex: core::mem::ManuallyDrop<A>,
 }
 impl Drop for A_get_attribute_attr4_Result {
     #[allow(unreachable_patterns)]
@@ -1838,6 +2215,11 @@ impl Drop for A_get_attribute_attr4_Result {
             dds::RETCODE_OK => {
                 unsafe {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
+                }
+            }
+            A_Ex_Hash => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.a_ex);
                 }
             }
             _ => {}
@@ -1850,6 +2232,7 @@ impl Clone for A_get_attribute_attr4_Result {
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+            A_Ex_Hash => Self::new_a_ex(self.as_a_ex().clone()),
             _ => unreachable!(),
         }
     }
@@ -1862,6 +2245,9 @@ impl core::fmt::Debug for A_get_attribute_attr4_Result {
         match self.tag {
             dds::RETCODE_OK => {
                 d.field("result", self.as_result());
+            }
+            A_Ex_Hash => {
+                d.field("a_ex", self.as_a_ex());
             }
             _ => {}
         }
@@ -1876,6 +2262,7 @@ impl PartialEq for A_get_attribute_attr4_Result {
         }
         match self.tag {
             dds::RETCODE_OK => self.as_result() == other.as_result(),
+            A_Ex_Hash => self.as_a_ex() == other.as_a_ex(),
             _ => false,
         }
     }
@@ -1909,6 +2296,34 @@ impl A_get_attribute_attr4_Result {
             core::mem::ManuallyDrop::take(&mut forget.data.result)
         }
     }
+    pub fn new_a_ex(value: A) -> Self {
+        Self {
+            tag: A_Ex_Hash,
+            data: A_get_attribute_attr4_ResultData {
+                a_ex: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_a_ex(&self) -> bool {
+        matches!(self.tag, A_Ex_Hash)
+    }
+    #[allow(clippy::borrowed_box)]
+    pub fn as_a_ex(&self) -> &A {
+        debug_assert!(self.is_a_ex());
+        unsafe { &self.data.a_ex }
+    }
+    #[allow(clippy::borrowed_box)]
+    pub fn as_a_ex_mut(&mut self) -> &mut A {
+        debug_assert!(self.is_a_ex());
+        unsafe { &mut self.data.a_ex }
+    }
+    pub fn into_a_ex(self) -> A {
+        debug_assert!(self.is_a_ex());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.a_ex)
+        }
+    }
     pub fn tag(&self) -> &i32 {
         &self.tag
     }
@@ -1935,6 +2350,7 @@ struct A_get_attribute_attr4_ResultSerdeRef<'__a> {
 #[serde(untagged)]
 enum A_get_attribute_attr4_ResultSerdeRefData<'__a> {
     Case0(&'__a A_get_attribute_attr4_Out),
+    Case1(&'__a A),
 }
 impl serde::Serialize for A_get_attribute_attr4_Result {
     #[allow(unreachable_patterns)]
@@ -1950,6 +2366,13 @@ impl serde::Serialize for A_get_attribute_attr4_Result {
                     data: A_get_attribute_attr4_ResultSerdeRefData::Case0(
                         self.as_result(),
                     ),
+                }
+            }
+            A_Ex_Hash => {
+                let tag = "A_Ex_Hash";
+                A_get_attribute_attr4_ResultSerdeRef {
+                    tag,
+                    data: A_get_attribute_attr4_ResultSerdeRefData::Case1(self.as_a_ex()),
                 }
             }
             _ => unreachable!(),
@@ -1985,6 +2408,20 @@ impl<'de> serde::Deserialize<'de> for A_get_attribute_attr4_Result {
                     },
                 })
             }
+            "A_Ex_Hash" => {
+                let value = ::serde_json::from_value::<A>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_get_attribute_attr4_Result payload decode failed for tag `A_Ex_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: A_Ex_Hash,
+                    data: A_get_attribute_attr4_ResultData {
+                        a_ex: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
             _ => {
                 Err(
                     serde::de::Error::custom(
@@ -2016,6 +2453,9 @@ pub struct A_get_attribute_attr5_Result {
 }
 union A_get_attribute_attr5_ResultData {
     result: core::mem::ManuallyDrop<A_get_attribute_attr5_Out>,
+    a_ex: core::mem::ManuallyDrop<A>,
+    b_ex: core::mem::ManuallyDrop<B>,
+    c_ex: core::mem::ManuallyDrop<C>,
 }
 impl Drop for A_get_attribute_attr5_Result {
     #[allow(unreachable_patterns)]
@@ -2024,6 +2464,21 @@ impl Drop for A_get_attribute_attr5_Result {
             dds::RETCODE_OK => {
                 unsafe {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
+                }
+            }
+            A_Ex_Hash => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.a_ex);
+                }
+            }
+            B_Ex_Hash => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.b_ex);
+                }
+            }
+            C_Ex_Hash => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.c_ex);
                 }
             }
             _ => {}
@@ -2036,6 +2491,9 @@ impl Clone for A_get_attribute_attr5_Result {
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+            A_Ex_Hash => Self::new_a_ex(self.as_a_ex().clone()),
+            B_Ex_Hash => Self::new_b_ex(self.as_b_ex().clone()),
+            C_Ex_Hash => Self::new_c_ex(self.as_c_ex().clone()),
             _ => unreachable!(),
         }
     }
@@ -2048,6 +2506,15 @@ impl core::fmt::Debug for A_get_attribute_attr5_Result {
         match self.tag {
             dds::RETCODE_OK => {
                 d.field("result", self.as_result());
+            }
+            A_Ex_Hash => {
+                d.field("a_ex", self.as_a_ex());
+            }
+            B_Ex_Hash => {
+                d.field("b_ex", self.as_b_ex());
+            }
+            C_Ex_Hash => {
+                d.field("c_ex", self.as_c_ex());
             }
             _ => {}
         }
@@ -2062,6 +2529,9 @@ impl PartialEq for A_get_attribute_attr5_Result {
         }
         match self.tag {
             dds::RETCODE_OK => self.as_result() == other.as_result(),
+            A_Ex_Hash => self.as_a_ex() == other.as_a_ex(),
+            B_Ex_Hash => self.as_b_ex() == other.as_b_ex(),
+            C_Ex_Hash => self.as_c_ex() == other.as_c_ex(),
             _ => false,
         }
     }
@@ -2095,6 +2565,90 @@ impl A_get_attribute_attr5_Result {
             core::mem::ManuallyDrop::take(&mut forget.data.result)
         }
     }
+    pub fn new_a_ex(value: A) -> Self {
+        Self {
+            tag: A_Ex_Hash,
+            data: A_get_attribute_attr5_ResultData {
+                a_ex: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_a_ex(&self) -> bool {
+        matches!(self.tag, A_Ex_Hash)
+    }
+    #[allow(clippy::borrowed_box)]
+    pub fn as_a_ex(&self) -> &A {
+        debug_assert!(self.is_a_ex());
+        unsafe { &self.data.a_ex }
+    }
+    #[allow(clippy::borrowed_box)]
+    pub fn as_a_ex_mut(&mut self) -> &mut A {
+        debug_assert!(self.is_a_ex());
+        unsafe { &mut self.data.a_ex }
+    }
+    pub fn into_a_ex(self) -> A {
+        debug_assert!(self.is_a_ex());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.a_ex)
+        }
+    }
+    pub fn new_b_ex(value: B) -> Self {
+        Self {
+            tag: B_Ex_Hash,
+            data: A_get_attribute_attr5_ResultData {
+                b_ex: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_b_ex(&self) -> bool {
+        matches!(self.tag, B_Ex_Hash)
+    }
+    #[allow(clippy::borrowed_box)]
+    pub fn as_b_ex(&self) -> &B {
+        debug_assert!(self.is_b_ex());
+        unsafe { &self.data.b_ex }
+    }
+    #[allow(clippy::borrowed_box)]
+    pub fn as_b_ex_mut(&mut self) -> &mut B {
+        debug_assert!(self.is_b_ex());
+        unsafe { &mut self.data.b_ex }
+    }
+    pub fn into_b_ex(self) -> B {
+        debug_assert!(self.is_b_ex());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.b_ex)
+        }
+    }
+    pub fn new_c_ex(value: C) -> Self {
+        Self {
+            tag: C_Ex_Hash,
+            data: A_get_attribute_attr5_ResultData {
+                c_ex: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_c_ex(&self) -> bool {
+        matches!(self.tag, C_Ex_Hash)
+    }
+    #[allow(clippy::borrowed_box)]
+    pub fn as_c_ex(&self) -> &C {
+        debug_assert!(self.is_c_ex());
+        unsafe { &self.data.c_ex }
+    }
+    #[allow(clippy::borrowed_box)]
+    pub fn as_c_ex_mut(&mut self) -> &mut C {
+        debug_assert!(self.is_c_ex());
+        unsafe { &mut self.data.c_ex }
+    }
+    pub fn into_c_ex(self) -> C {
+        debug_assert!(self.is_c_ex());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.c_ex)
+        }
+    }
     pub fn tag(&self) -> &i32 {
         &self.tag
     }
@@ -2121,6 +2675,9 @@ struct A_get_attribute_attr5_ResultSerdeRef<'__a> {
 #[serde(untagged)]
 enum A_get_attribute_attr5_ResultSerdeRefData<'__a> {
     Case0(&'__a A_get_attribute_attr5_Out),
+    Case1(&'__a A),
+    Case2(&'__a B),
+    Case3(&'__a C),
 }
 impl serde::Serialize for A_get_attribute_attr5_Result {
     #[allow(unreachable_patterns)]
@@ -2136,6 +2693,27 @@ impl serde::Serialize for A_get_attribute_attr5_Result {
                     data: A_get_attribute_attr5_ResultSerdeRefData::Case0(
                         self.as_result(),
                     ),
+                }
+            }
+            A_Ex_Hash => {
+                let tag = "A_Ex_Hash";
+                A_get_attribute_attr5_ResultSerdeRef {
+                    tag,
+                    data: A_get_attribute_attr5_ResultSerdeRefData::Case1(self.as_a_ex()),
+                }
+            }
+            B_Ex_Hash => {
+                let tag = "B_Ex_Hash";
+                A_get_attribute_attr5_ResultSerdeRef {
+                    tag,
+                    data: A_get_attribute_attr5_ResultSerdeRefData::Case2(self.as_b_ex()),
+                }
+            }
+            C_Ex_Hash => {
+                let tag = "C_Ex_Hash";
+                A_get_attribute_attr5_ResultSerdeRef {
+                    tag,
+                    data: A_get_attribute_attr5_ResultSerdeRefData::Case3(self.as_c_ex()),
                 }
             }
             _ => unreachable!(),
@@ -2168,6 +2746,48 @@ impl<'de> serde::Deserialize<'de> for A_get_attribute_attr5_Result {
                     tag: dds::RETCODE_OK,
                     data: A_get_attribute_attr5_ResultData {
                         result: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "A_Ex_Hash" => {
+                let value = ::serde_json::from_value::<A>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_get_attribute_attr5_Result payload decode failed for tag `A_Ex_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: A_Ex_Hash,
+                    data: A_get_attribute_attr5_ResultData {
+                        a_ex: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "B_Ex_Hash" => {
+                let value = ::serde_json::from_value::<B>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_get_attribute_attr5_Result payload decode failed for tag `B_Ex_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: B_Ex_Hash,
+                    data: A_get_attribute_attr5_ResultData {
+                        b_ex: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "C_Ex_Hash" => {
+                let value = ::serde_json::from_value::<C>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_get_attribute_attr5_Result payload decode failed for tag `C_Ex_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: C_Ex_Hash,
+                    data: A_get_attribute_attr5_ResultData {
+                        c_ex: core::mem::ManuallyDrop::new(value),
                     },
                 })
             }
@@ -4805,6 +5425,8 @@ union A_CallData {
     func5: core::mem::ManuallyDrop<A_func5_In>,
     func6: core::mem::ManuallyDrop<A_func6_In>,
     get_attribute_attr1: core::mem::ManuallyDrop<A_get_attribute_attr1_In>,
+    get_attribute_attr2: core::mem::ManuallyDrop<A_get_attribute_attr2_In>,
+    get_attribute_attr3: core::mem::ManuallyDrop<A_get_attribute_attr3_In>,
     get_attribute_attr4: core::mem::ManuallyDrop<A_get_attribute_attr4_In>,
     get_attribute_attr5: core::mem::ManuallyDrop<A_get_attribute_attr5_In>,
     get_attribute_attr6: core::mem::ManuallyDrop<A_get_attribute_attr6_In>,
@@ -4850,6 +5472,14 @@ impl Drop for A_Call {
         } else if matches!(self.tag, A_get_attribute_attr1_Hash) {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
+            }
+        } else if matches!(self.tag, A_get_attribute_attr2_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr2);
+            }
+        } else if matches!(self.tag, A_get_attribute_attr3_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr3);
             }
         } else if matches!(self.tag, A_get_attribute_attr4_Hash) {
             unsafe {
@@ -4932,6 +5562,10 @@ impl Clone for A_Call {
             Self::new_func6(self.as_func6().clone())
         } else if matches!(self.tag, A_get_attribute_attr1_Hash) {
             Self::new_get_attribute_attr1(self.as_get_attribute_attr1().clone())
+        } else if matches!(self.tag, A_get_attribute_attr2_Hash) {
+            Self::new_get_attribute_attr2(self.as_get_attribute_attr2().clone())
+        } else if matches!(self.tag, A_get_attribute_attr3_Hash) {
+            Self::new_get_attribute_attr3(self.as_get_attribute_attr3().clone())
         } else if matches!(self.tag, A_get_attribute_attr4_Hash) {
             Self::new_get_attribute_attr4(self.as_get_attribute_attr4().clone())
         } else if matches!(self.tag, A_get_attribute_attr5_Hash) {
@@ -4984,6 +5618,10 @@ impl core::fmt::Debug for A_Call {
             d.field("func6", self.as_func6());
         } else if matches!(self.tag, A_get_attribute_attr1_Hash) {
             d.field("get_attribute_attr1", self.as_get_attribute_attr1());
+        } else if matches!(self.tag, A_get_attribute_attr2_Hash) {
+            d.field("get_attribute_attr2", self.as_get_attribute_attr2());
+        } else if matches!(self.tag, A_get_attribute_attr3_Hash) {
+            d.field("get_attribute_attr3", self.as_get_attribute_attr3());
         } else if matches!(self.tag, A_get_attribute_attr4_Hash) {
             d.field("get_attribute_attr4", self.as_get_attribute_attr4());
         } else if matches!(self.tag, A_get_attribute_attr5_Hash) {
@@ -5038,6 +5676,10 @@ impl PartialEq for A_Call {
             self.as_func6() == other.as_func6()
         } else if matches!(self.tag, A_get_attribute_attr1_Hash) {
             self.as_get_attribute_attr1() == other.as_get_attribute_attr1()
+        } else if matches!(self.tag, A_get_attribute_attr2_Hash) {
+            self.as_get_attribute_attr2() == other.as_get_attribute_attr2()
+        } else if matches!(self.tag, A_get_attribute_attr3_Hash) {
+            self.as_get_attribute_attr3() == other.as_get_attribute_attr3()
         } else if matches!(self.tag, A_get_attribute_attr4_Hash) {
             self.as_get_attribute_attr4() == other.as_get_attribute_attr4()
         } else if matches!(self.tag, A_get_attribute_attr5_Hash) {
@@ -5270,14 +5912,14 @@ impl A_Call {
     }
     pub fn new_get_attribute_attr1(value: A_get_attribute_attr1_In) -> Self {
         Self {
-            tag: A_get_attribute_attr4_Hash,
+            tag: A_get_attribute_attr2_Hash,
             data: A_CallData {
                 get_attribute_attr1: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_get_attribute_attr1(&self) -> bool {
-        matches!(self.tag, A_get_attribute_attr4_Hash)
+        matches!(self.tag, A_get_attribute_attr2_Hash)
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_get_attribute_attr1(&self) -> &A_get_attribute_attr1_In {
@@ -5294,6 +5936,62 @@ impl A_Call {
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_attr1)
+        }
+    }
+    pub fn new_get_attribute_attr2(value: A_get_attribute_attr2_In) -> Self {
+        Self {
+            tag: A_get_attribute_attr3_Hash,
+            data: A_CallData {
+                get_attribute_attr2: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_get_attribute_attr2(&self) -> bool {
+        matches!(self.tag, A_get_attribute_attr3_Hash)
+    }
+    #[allow(clippy::borrowed_box)]
+    pub fn as_get_attribute_attr2(&self) -> &A_get_attribute_attr2_In {
+        debug_assert!(self.is_get_attribute_attr2());
+        unsafe { &self.data.get_attribute_attr2 }
+    }
+    #[allow(clippy::borrowed_box)]
+    pub fn as_get_attribute_attr2_mut(&mut self) -> &mut A_get_attribute_attr2_In {
+        debug_assert!(self.is_get_attribute_attr2());
+        unsafe { &mut self.data.get_attribute_attr2 }
+    }
+    pub fn into_get_attribute_attr2(self) -> A_get_attribute_attr2_In {
+        debug_assert!(self.is_get_attribute_attr2());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_attr2)
+        }
+    }
+    pub fn new_get_attribute_attr3(value: A_get_attribute_attr3_In) -> Self {
+        Self {
+            tag: A_get_attribute_attr4_Hash,
+            data: A_CallData {
+                get_attribute_attr3: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_get_attribute_attr3(&self) -> bool {
+        matches!(self.tag, A_get_attribute_attr4_Hash)
+    }
+    #[allow(clippy::borrowed_box)]
+    pub fn as_get_attribute_attr3(&self) -> &A_get_attribute_attr3_In {
+        debug_assert!(self.is_get_attribute_attr3());
+        unsafe { &self.data.get_attribute_attr3 }
+    }
+    #[allow(clippy::borrowed_box)]
+    pub fn as_get_attribute_attr3_mut(&mut self) -> &mut A_get_attribute_attr3_In {
+        debug_assert!(self.is_get_attribute_attr3());
+        unsafe { &mut self.data.get_attribute_attr3 }
+    }
+    pub fn into_get_attribute_attr3(self) -> A_get_attribute_attr3_In {
+        debug_assert!(self.is_get_attribute_attr3());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_attr3)
         }
     }
     pub fn new_get_attribute_attr4(value: A_get_attribute_attr4_In) -> Self {
@@ -5720,20 +6418,22 @@ enum A_CallSerdeRefData<'__a> {
     Case5(&'__a A_func5_In),
     Case6(&'__a A_func6_In),
     Case7(&'__a A_get_attribute_attr1_In),
-    Case8(&'__a A_get_attribute_attr4_In),
-    Case9(&'__a A_get_attribute_attr5_In),
-    Case10(&'__a A_get_attribute_attr6_In),
-    Case11(&'__a A_set_attribute_attr6_In),
-    Case12(&'__a A_get_attribute_attr7_In),
-    Case13(&'__a A_set_attribute_attr7_In),
-    Case14(&'__a A_get_attribute_attr8_In),
-    Case15(&'__a A_set_attribute_attr8_In),
-    Case16(&'__a A_get_attribute_attr9_In),
-    Case17(&'__a A_set_attribute_attr9_In),
-    Case18(&'__a A_get_attribute_attr10_In),
-    Case19(&'__a A_set_attribute_attr10_In),
-    Case20(&'__a A_get_attribute_attr11_In),
-    Case21(&'__a A_set_attribute_attr11_In),
+    Case8(&'__a A_get_attribute_attr2_In),
+    Case9(&'__a A_get_attribute_attr3_In),
+    Case10(&'__a A_get_attribute_attr4_In),
+    Case11(&'__a A_get_attribute_attr5_In),
+    Case12(&'__a A_get_attribute_attr6_In),
+    Case13(&'__a A_set_attribute_attr6_In),
+    Case14(&'__a A_get_attribute_attr7_In),
+    Case15(&'__a A_set_attribute_attr7_In),
+    Case16(&'__a A_get_attribute_attr8_In),
+    Case17(&'__a A_set_attribute_attr8_In),
+    Case18(&'__a A_get_attribute_attr9_In),
+    Case19(&'__a A_set_attribute_attr9_In),
+    Case20(&'__a A_get_attribute_attr10_In),
+    Case21(&'__a A_set_attribute_attr10_In),
+    Case22(&'__a A_get_attribute_attr11_In),
+    Case23(&'__a A_set_attribute_attr11_In),
     Case0(&'__a dds::rpc::UnknownOperation),
 }
 impl serde::Serialize for A_Call {
@@ -5784,89 +6484,101 @@ impl serde::Serialize for A_Call {
                 tag,
                 data: A_CallSerdeRefData::Case7(self.as_get_attribute_attr1()),
             }
+        } else if matches!(self.tag, A_get_attribute_attr2_Hash) {
+            let tag = "A_get_attribute_attr2_Hash";
+            A_CallSerdeRef {
+                tag,
+                data: A_CallSerdeRefData::Case8(self.as_get_attribute_attr2()),
+            }
+        } else if matches!(self.tag, A_get_attribute_attr3_Hash) {
+            let tag = "A_get_attribute_attr3_Hash";
+            A_CallSerdeRef {
+                tag,
+                data: A_CallSerdeRefData::Case9(self.as_get_attribute_attr3()),
+            }
         } else if matches!(self.tag, A_get_attribute_attr4_Hash) {
             let tag = "A_get_attribute_attr4_Hash";
             A_CallSerdeRef {
                 tag,
-                data: A_CallSerdeRefData::Case8(self.as_get_attribute_attr4()),
+                data: A_CallSerdeRefData::Case10(self.as_get_attribute_attr4()),
             }
         } else if matches!(self.tag, A_get_attribute_attr5_Hash) {
             let tag = "A_get_attribute_attr5_Hash";
             A_CallSerdeRef {
                 tag,
-                data: A_CallSerdeRefData::Case9(self.as_get_attribute_attr5()),
+                data: A_CallSerdeRefData::Case11(self.as_get_attribute_attr5()),
             }
         } else if matches!(self.tag, A_get_attribute_attr6_Hash) {
             let tag = "A_get_attribute_attr6_Hash";
             A_CallSerdeRef {
                 tag,
-                data: A_CallSerdeRefData::Case10(self.as_get_attribute_attr6()),
+                data: A_CallSerdeRefData::Case12(self.as_get_attribute_attr6()),
             }
         } else if matches!(self.tag, A_set_attribute_attr6_Hash) {
             let tag = "A_set_attribute_attr6_Hash";
             A_CallSerdeRef {
                 tag,
-                data: A_CallSerdeRefData::Case11(self.as_set_attribute_attr6()),
+                data: A_CallSerdeRefData::Case13(self.as_set_attribute_attr6()),
             }
         } else if matches!(self.tag, A_get_attribute_attr7_Hash) {
             let tag = "A_get_attribute_attr7_Hash";
             A_CallSerdeRef {
                 tag,
-                data: A_CallSerdeRefData::Case12(self.as_get_attribute_attr7()),
+                data: A_CallSerdeRefData::Case14(self.as_get_attribute_attr7()),
             }
         } else if matches!(self.tag, A_set_attribute_attr7_Hash) {
             let tag = "A_set_attribute_attr7_Hash";
             A_CallSerdeRef {
                 tag,
-                data: A_CallSerdeRefData::Case13(self.as_set_attribute_attr7()),
+                data: A_CallSerdeRefData::Case15(self.as_set_attribute_attr7()),
             }
         } else if matches!(self.tag, A_get_attribute_attr8_Hash) {
             let tag = "A_get_attribute_attr8_Hash";
             A_CallSerdeRef {
                 tag,
-                data: A_CallSerdeRefData::Case14(self.as_get_attribute_attr8()),
+                data: A_CallSerdeRefData::Case16(self.as_get_attribute_attr8()),
             }
         } else if matches!(self.tag, A_set_attribute_attr8_Hash) {
             let tag = "A_set_attribute_attr8_Hash";
             A_CallSerdeRef {
                 tag,
-                data: A_CallSerdeRefData::Case15(self.as_set_attribute_attr8()),
+                data: A_CallSerdeRefData::Case17(self.as_set_attribute_attr8()),
             }
         } else if matches!(self.tag, A_get_attribute_attr9_Hash) {
             let tag = "A_get_attribute_attr9_Hash";
             A_CallSerdeRef {
                 tag,
-                data: A_CallSerdeRefData::Case16(self.as_get_attribute_attr9()),
+                data: A_CallSerdeRefData::Case18(self.as_get_attribute_attr9()),
             }
         } else if matches!(self.tag, A_set_attribute_attr9_Hash) {
             let tag = "A_set_attribute_attr9_Hash";
             A_CallSerdeRef {
                 tag,
-                data: A_CallSerdeRefData::Case17(self.as_set_attribute_attr9()),
+                data: A_CallSerdeRefData::Case19(self.as_set_attribute_attr9()),
             }
         } else if matches!(self.tag, A_get_attribute_attr10_Hash) {
             let tag = "A_get_attribute_attr10_Hash";
             A_CallSerdeRef {
                 tag,
-                data: A_CallSerdeRefData::Case18(self.as_get_attribute_attr10()),
+                data: A_CallSerdeRefData::Case20(self.as_get_attribute_attr10()),
             }
         } else if matches!(self.tag, A_set_attribute_attr10_Hash) {
             let tag = "A_set_attribute_attr10_Hash";
             A_CallSerdeRef {
                 tag,
-                data: A_CallSerdeRefData::Case19(self.as_set_attribute_attr10()),
+                data: A_CallSerdeRefData::Case21(self.as_set_attribute_attr10()),
             }
         } else if matches!(self.tag, A_get_attribute_attr11_Hash) {
             let tag = "A_get_attribute_attr11_Hash";
             A_CallSerdeRef {
                 tag,
-                data: A_CallSerdeRefData::Case20(self.as_get_attribute_attr11()),
+                data: A_CallSerdeRefData::Case22(self.as_get_attribute_attr11()),
             }
         } else if matches!(self.tag, A_set_attribute_attr11_Hash) {
             let tag = "A_set_attribute_attr11_Hash";
             A_CallSerdeRef {
                 tag,
-                data: A_CallSerdeRefData::Case21(self.as_set_attribute_attr11()),
+                data: A_CallSerdeRefData::Case23(self.as_set_attribute_attr11()),
             }
         } else {
             let tag = "default";
@@ -5987,6 +6699,38 @@ impl<'de> serde::Deserialize<'de> for A_Call {
                     tag: A_get_attribute_attr1_Hash,
                     data: A_CallData {
                         get_attribute_attr1: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "A_get_attribute_attr2_Hash" => {
+                let value = ::serde_json::from_value::<
+                    A_get_attribute_attr2_In,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_Call payload decode failed for tag `A_get_attribute_attr2_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: A_get_attribute_attr2_Hash,
+                    data: A_CallData {
+                        get_attribute_attr2: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "A_get_attribute_attr3_Hash" => {
+                let value = ::serde_json::from_value::<
+                    A_get_attribute_attr3_In,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_Call payload decode failed for tag `A_get_attribute_attr3_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: A_get_attribute_attr3_Hash,
+                    data: A_CallData {
+                        get_attribute_attr3: core::mem::ManuallyDrop::new(value),
                     },
                 })
             }
@@ -6262,6 +7006,8 @@ union A_ReturnData {
     func5: core::mem::ManuallyDrop<A_func5_Result>,
     func6: core::mem::ManuallyDrop<A_func6_Result>,
     get_attribute_attr1: core::mem::ManuallyDrop<A_get_attribute_attr1_Result>,
+    get_attribute_attr2: core::mem::ManuallyDrop<A_get_attribute_attr2_Result>,
+    get_attribute_attr3: core::mem::ManuallyDrop<A_get_attribute_attr3_Result>,
     get_attribute_attr4: core::mem::ManuallyDrop<A_get_attribute_attr4_Result>,
     get_attribute_attr5: core::mem::ManuallyDrop<A_get_attribute_attr5_Result>,
     get_attribute_attr6: core::mem::ManuallyDrop<A_get_attribute_attr6_Result>,
@@ -6307,6 +7053,14 @@ impl Drop for A_Return {
         } else if matches!(self.tag, A_get_attribute_attr1_Hash) {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
+            }
+        } else if matches!(self.tag, A_get_attribute_attr2_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr2);
+            }
+        } else if matches!(self.tag, A_get_attribute_attr3_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr3);
             }
         } else if matches!(self.tag, A_get_attribute_attr4_Hash) {
             unsafe {
@@ -6389,6 +7143,10 @@ impl Clone for A_Return {
             Self::new_func6(self.as_func6().clone())
         } else if matches!(self.tag, A_get_attribute_attr1_Hash) {
             Self::new_get_attribute_attr1(self.as_get_attribute_attr1().clone())
+        } else if matches!(self.tag, A_get_attribute_attr2_Hash) {
+            Self::new_get_attribute_attr2(self.as_get_attribute_attr2().clone())
+        } else if matches!(self.tag, A_get_attribute_attr3_Hash) {
+            Self::new_get_attribute_attr3(self.as_get_attribute_attr3().clone())
         } else if matches!(self.tag, A_get_attribute_attr4_Hash) {
             Self::new_get_attribute_attr4(self.as_get_attribute_attr4().clone())
         } else if matches!(self.tag, A_get_attribute_attr5_Hash) {
@@ -6441,6 +7199,10 @@ impl core::fmt::Debug for A_Return {
             d.field("func6", self.as_func6());
         } else if matches!(self.tag, A_get_attribute_attr1_Hash) {
             d.field("get_attribute_attr1", self.as_get_attribute_attr1());
+        } else if matches!(self.tag, A_get_attribute_attr2_Hash) {
+            d.field("get_attribute_attr2", self.as_get_attribute_attr2());
+        } else if matches!(self.tag, A_get_attribute_attr3_Hash) {
+            d.field("get_attribute_attr3", self.as_get_attribute_attr3());
         } else if matches!(self.tag, A_get_attribute_attr4_Hash) {
             d.field("get_attribute_attr4", self.as_get_attribute_attr4());
         } else if matches!(self.tag, A_get_attribute_attr5_Hash) {
@@ -6495,6 +7257,10 @@ impl PartialEq for A_Return {
             self.as_func6() == other.as_func6()
         } else if matches!(self.tag, A_get_attribute_attr1_Hash) {
             self.as_get_attribute_attr1() == other.as_get_attribute_attr1()
+        } else if matches!(self.tag, A_get_attribute_attr2_Hash) {
+            self.as_get_attribute_attr2() == other.as_get_attribute_attr2()
+        } else if matches!(self.tag, A_get_attribute_attr3_Hash) {
+            self.as_get_attribute_attr3() == other.as_get_attribute_attr3()
         } else if matches!(self.tag, A_get_attribute_attr4_Hash) {
             self.as_get_attribute_attr4() == other.as_get_attribute_attr4()
         } else if matches!(self.tag, A_get_attribute_attr5_Hash) {
@@ -6727,14 +7493,14 @@ impl A_Return {
     }
     pub fn new_get_attribute_attr1(value: A_get_attribute_attr1_Result) -> Self {
         Self {
-            tag: A_get_attribute_attr4_Hash,
+            tag: A_get_attribute_attr2_Hash,
             data: A_ReturnData {
                 get_attribute_attr1: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_get_attribute_attr1(&self) -> bool {
-        matches!(self.tag, A_get_attribute_attr4_Hash)
+        matches!(self.tag, A_get_attribute_attr2_Hash)
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_get_attribute_attr1(&self) -> &A_get_attribute_attr1_Result {
@@ -6751,6 +7517,62 @@ impl A_Return {
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_attr1)
+        }
+    }
+    pub fn new_get_attribute_attr2(value: A_get_attribute_attr2_Result) -> Self {
+        Self {
+            tag: A_get_attribute_attr3_Hash,
+            data: A_ReturnData {
+                get_attribute_attr2: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_get_attribute_attr2(&self) -> bool {
+        matches!(self.tag, A_get_attribute_attr3_Hash)
+    }
+    #[allow(clippy::borrowed_box)]
+    pub fn as_get_attribute_attr2(&self) -> &A_get_attribute_attr2_Result {
+        debug_assert!(self.is_get_attribute_attr2());
+        unsafe { &self.data.get_attribute_attr2 }
+    }
+    #[allow(clippy::borrowed_box)]
+    pub fn as_get_attribute_attr2_mut(&mut self) -> &mut A_get_attribute_attr2_Result {
+        debug_assert!(self.is_get_attribute_attr2());
+        unsafe { &mut self.data.get_attribute_attr2 }
+    }
+    pub fn into_get_attribute_attr2(self) -> A_get_attribute_attr2_Result {
+        debug_assert!(self.is_get_attribute_attr2());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_attr2)
+        }
+    }
+    pub fn new_get_attribute_attr3(value: A_get_attribute_attr3_Result) -> Self {
+        Self {
+            tag: A_get_attribute_attr4_Hash,
+            data: A_ReturnData {
+                get_attribute_attr3: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_get_attribute_attr3(&self) -> bool {
+        matches!(self.tag, A_get_attribute_attr4_Hash)
+    }
+    #[allow(clippy::borrowed_box)]
+    pub fn as_get_attribute_attr3(&self) -> &A_get_attribute_attr3_Result {
+        debug_assert!(self.is_get_attribute_attr3());
+        unsafe { &self.data.get_attribute_attr3 }
+    }
+    #[allow(clippy::borrowed_box)]
+    pub fn as_get_attribute_attr3_mut(&mut self) -> &mut A_get_attribute_attr3_Result {
+        debug_assert!(self.is_get_attribute_attr3());
+        unsafe { &mut self.data.get_attribute_attr3 }
+    }
+    pub fn into_get_attribute_attr3(self) -> A_get_attribute_attr3_Result {
+        debug_assert!(self.is_get_attribute_attr3());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_attr3)
         }
     }
     pub fn new_get_attribute_attr4(value: A_get_attribute_attr4_Result) -> Self {
@@ -7177,20 +7999,22 @@ enum A_ReturnSerdeRefData<'__a> {
     Case5(&'__a A_func5_Result),
     Case6(&'__a A_func6_Result),
     Case7(&'__a A_get_attribute_attr1_Result),
-    Case8(&'__a A_get_attribute_attr4_Result),
-    Case9(&'__a A_get_attribute_attr5_Result),
-    Case10(&'__a A_get_attribute_attr6_Result),
-    Case11(&'__a A_set_attribute_attr6_Result),
-    Case12(&'__a A_get_attribute_attr7_Result),
-    Case13(&'__a A_set_attribute_attr7_Result),
-    Case14(&'__a A_get_attribute_attr8_Result),
-    Case15(&'__a A_set_attribute_attr8_Result),
-    Case16(&'__a A_get_attribute_attr9_Result),
-    Case17(&'__a A_set_attribute_attr9_Result),
-    Case18(&'__a A_get_attribute_attr10_Result),
-    Case19(&'__a A_set_attribute_attr10_Result),
-    Case20(&'__a A_get_attribute_attr11_Result),
-    Case21(&'__a A_set_attribute_attr11_Result),
+    Case8(&'__a A_get_attribute_attr2_Result),
+    Case9(&'__a A_get_attribute_attr3_Result),
+    Case10(&'__a A_get_attribute_attr4_Result),
+    Case11(&'__a A_get_attribute_attr5_Result),
+    Case12(&'__a A_get_attribute_attr6_Result),
+    Case13(&'__a A_set_attribute_attr6_Result),
+    Case14(&'__a A_get_attribute_attr7_Result),
+    Case15(&'__a A_set_attribute_attr7_Result),
+    Case16(&'__a A_get_attribute_attr8_Result),
+    Case17(&'__a A_set_attribute_attr8_Result),
+    Case18(&'__a A_get_attribute_attr9_Result),
+    Case19(&'__a A_set_attribute_attr9_Result),
+    Case20(&'__a A_get_attribute_attr10_Result),
+    Case21(&'__a A_set_attribute_attr10_Result),
+    Case22(&'__a A_get_attribute_attr11_Result),
+    Case23(&'__a A_set_attribute_attr11_Result),
     Case0(&'__a dds::rpc::UnknownOperation),
 }
 impl serde::Serialize for A_Return {
@@ -7241,89 +8065,101 @@ impl serde::Serialize for A_Return {
                 tag,
                 data: A_ReturnSerdeRefData::Case7(self.as_get_attribute_attr1()),
             }
+        } else if matches!(self.tag, A_get_attribute_attr2_Hash) {
+            let tag = "A_get_attribute_attr2_Hash";
+            A_ReturnSerdeRef {
+                tag,
+                data: A_ReturnSerdeRefData::Case8(self.as_get_attribute_attr2()),
+            }
+        } else if matches!(self.tag, A_get_attribute_attr3_Hash) {
+            let tag = "A_get_attribute_attr3_Hash";
+            A_ReturnSerdeRef {
+                tag,
+                data: A_ReturnSerdeRefData::Case9(self.as_get_attribute_attr3()),
+            }
         } else if matches!(self.tag, A_get_attribute_attr4_Hash) {
             let tag = "A_get_attribute_attr4_Hash";
             A_ReturnSerdeRef {
                 tag,
-                data: A_ReturnSerdeRefData::Case8(self.as_get_attribute_attr4()),
+                data: A_ReturnSerdeRefData::Case10(self.as_get_attribute_attr4()),
             }
         } else if matches!(self.tag, A_get_attribute_attr5_Hash) {
             let tag = "A_get_attribute_attr5_Hash";
             A_ReturnSerdeRef {
                 tag,
-                data: A_ReturnSerdeRefData::Case9(self.as_get_attribute_attr5()),
+                data: A_ReturnSerdeRefData::Case11(self.as_get_attribute_attr5()),
             }
         } else if matches!(self.tag, A_get_attribute_attr6_Hash) {
             let tag = "A_get_attribute_attr6_Hash";
             A_ReturnSerdeRef {
                 tag,
-                data: A_ReturnSerdeRefData::Case10(self.as_get_attribute_attr6()),
+                data: A_ReturnSerdeRefData::Case12(self.as_get_attribute_attr6()),
             }
         } else if matches!(self.tag, A_set_attribute_attr6_Hash) {
             let tag = "A_set_attribute_attr6_Hash";
             A_ReturnSerdeRef {
                 tag,
-                data: A_ReturnSerdeRefData::Case11(self.as_set_attribute_attr6()),
+                data: A_ReturnSerdeRefData::Case13(self.as_set_attribute_attr6()),
             }
         } else if matches!(self.tag, A_get_attribute_attr7_Hash) {
             let tag = "A_get_attribute_attr7_Hash";
             A_ReturnSerdeRef {
                 tag,
-                data: A_ReturnSerdeRefData::Case12(self.as_get_attribute_attr7()),
+                data: A_ReturnSerdeRefData::Case14(self.as_get_attribute_attr7()),
             }
         } else if matches!(self.tag, A_set_attribute_attr7_Hash) {
             let tag = "A_set_attribute_attr7_Hash";
             A_ReturnSerdeRef {
                 tag,
-                data: A_ReturnSerdeRefData::Case13(self.as_set_attribute_attr7()),
+                data: A_ReturnSerdeRefData::Case15(self.as_set_attribute_attr7()),
             }
         } else if matches!(self.tag, A_get_attribute_attr8_Hash) {
             let tag = "A_get_attribute_attr8_Hash";
             A_ReturnSerdeRef {
                 tag,
-                data: A_ReturnSerdeRefData::Case14(self.as_get_attribute_attr8()),
+                data: A_ReturnSerdeRefData::Case16(self.as_get_attribute_attr8()),
             }
         } else if matches!(self.tag, A_set_attribute_attr8_Hash) {
             let tag = "A_set_attribute_attr8_Hash";
             A_ReturnSerdeRef {
                 tag,
-                data: A_ReturnSerdeRefData::Case15(self.as_set_attribute_attr8()),
+                data: A_ReturnSerdeRefData::Case17(self.as_set_attribute_attr8()),
             }
         } else if matches!(self.tag, A_get_attribute_attr9_Hash) {
             let tag = "A_get_attribute_attr9_Hash";
             A_ReturnSerdeRef {
                 tag,
-                data: A_ReturnSerdeRefData::Case16(self.as_get_attribute_attr9()),
+                data: A_ReturnSerdeRefData::Case18(self.as_get_attribute_attr9()),
             }
         } else if matches!(self.tag, A_set_attribute_attr9_Hash) {
             let tag = "A_set_attribute_attr9_Hash";
             A_ReturnSerdeRef {
                 tag,
-                data: A_ReturnSerdeRefData::Case17(self.as_set_attribute_attr9()),
+                data: A_ReturnSerdeRefData::Case19(self.as_set_attribute_attr9()),
             }
         } else if matches!(self.tag, A_get_attribute_attr10_Hash) {
             let tag = "A_get_attribute_attr10_Hash";
             A_ReturnSerdeRef {
                 tag,
-                data: A_ReturnSerdeRefData::Case18(self.as_get_attribute_attr10()),
+                data: A_ReturnSerdeRefData::Case20(self.as_get_attribute_attr10()),
             }
         } else if matches!(self.tag, A_set_attribute_attr10_Hash) {
             let tag = "A_set_attribute_attr10_Hash";
             A_ReturnSerdeRef {
                 tag,
-                data: A_ReturnSerdeRefData::Case19(self.as_set_attribute_attr10()),
+                data: A_ReturnSerdeRefData::Case21(self.as_set_attribute_attr10()),
             }
         } else if matches!(self.tag, A_get_attribute_attr11_Hash) {
             let tag = "A_get_attribute_attr11_Hash";
             A_ReturnSerdeRef {
                 tag,
-                data: A_ReturnSerdeRefData::Case20(self.as_get_attribute_attr11()),
+                data: A_ReturnSerdeRefData::Case22(self.as_get_attribute_attr11()),
             }
         } else if matches!(self.tag, A_set_attribute_attr11_Hash) {
             let tag = "A_set_attribute_attr11_Hash";
             A_ReturnSerdeRef {
                 tag,
-                data: A_ReturnSerdeRefData::Case21(self.as_set_attribute_attr11()),
+                data: A_ReturnSerdeRefData::Case23(self.as_set_attribute_attr11()),
             }
         } else {
             let tag = "default";
@@ -7444,6 +8280,38 @@ impl<'de> serde::Deserialize<'de> for A_Return {
                     tag: A_get_attribute_attr1_Hash,
                     data: A_ReturnData {
                         get_attribute_attr1: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "A_get_attribute_attr2_Hash" => {
+                let value = ::serde_json::from_value::<
+                    A_get_attribute_attr2_Result,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_Return payload decode failed for tag `A_get_attribute_attr2_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: A_get_attribute_attr2_Hash,
+                    data: A_ReturnData {
+                        get_attribute_attr2: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "A_get_attribute_attr3_Hash" => {
+                let value = ::serde_json::from_value::<
+                    A_get_attribute_attr3_Result,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_Return payload decode failed for tag `A_get_attribute_attr3_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: A_get_attribute_attr3_Hash,
+                    data: A_ReturnData {
+                        get_attribute_attr3: core::mem::ManuallyDrop::new(value),
                     },
                 })
             }
@@ -7714,6 +8582,8 @@ pub trait A {
     fn func5(&self, attr: &u8, attr: &mut u16) -> ();
     fn func6(&self, attr: &u8, attr: &mut u16) -> ();
     fn attr1(&self) -> &u8;
+    fn attr2(&self) -> &u8;
+    fn attr3(&self) -> &u8;
     fn attr4(&self) -> &u8;
     fn attr5(&self) -> &u8;
     fn attr6(&self) -> &u8;

@@ -2,6 +2,64 @@
 pub(crate) struct RawArguments;
 
 impl RawArguments {
+    /// Canonicalizes argument trivia without changing quoted text or tokens.
+    pub(crate) fn canonical(raw: &str) -> String {
+        let raw = Self::without_comments(raw);
+        let mut out = String::new();
+        let mut chars = raw.chars();
+        let mut quote = None;
+        let mut previous = None;
+        let mut whitespace = false;
+        while let Some(ch) = chars.next() {
+            if let Some(current) = quote {
+                out.push(ch);
+                if ch == '\\' {
+                    if let Some(escaped) = chars.next() {
+                        out.push(escaped);
+                    }
+                } else if ch == current {
+                    quote = None;
+                }
+            } else if ch.is_whitespace() {
+                whitespace = true;
+                continue;
+            } else {
+                let delimiter =
+                    |value| matches!(value, '(' | ')' | '[' | ']' | '{' | '}' | ',' | '=');
+                if whitespace && previous.is_some_and(|last| !delimiter(last) && !delimiter(ch)) {
+                    out.push(' ');
+                }
+                out.push(ch);
+                if matches!(ch, '"' | '\'') {
+                    quote = Some(ch);
+                }
+            }
+            previous = Some(ch);
+            whitespace = false;
+        }
+        out
+    }
+
+    /// Detects array syntax while ignoring bracket characters inside strings.
+    pub(crate) fn contains_array(raw: &str) -> bool {
+        let mut chars = raw.chars();
+        let mut quote = None;
+        while let Some(ch) = chars.next() {
+            if let Some(current) = quote {
+                if ch == '\\' {
+                    chars.next();
+                } else if ch == current {
+                    quote = None;
+                }
+            } else if matches!(ch, '"' | '\'') {
+                quote = Some(ch);
+            } else if matches!(ch, '[' | ']') {
+                return true;
+            }
+        }
+        false
+    }
+
     /// Removes comment trivia while retaining quoted values verbatim.
     pub(crate) fn without_comments(raw: &str) -> String {
         let mut result = String::new();

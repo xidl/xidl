@@ -1,3 +1,5 @@
+mod parse;
+
 use serde::Serialize;
 use xidl_parser_derive::Parser;
 
@@ -6,80 +8,39 @@ use crate::typed_ast::Identifier;
 #[derive(Debug, Clone, Serialize)]
 pub struct ConstExpr(pub OrExpr);
 
-impl<'a> crate::parser::FromTreeSitter<'a> for ConstExpr {
-    fn from_node(
-        node: tree_sitter::Node<'a>,
-        ctx: &mut crate::parser::ParseContext<'a>,
-    ) -> crate::error::ParserResult<Self> {
-        assert_eq!(node.kind_id(), xidl_parser_derive::node_id!("const_expr"));
-        let value = node
-            .named_children(&mut node.walk())
-            .find(|child| child.kind_id() == xidl_parser_derive::node_id!("or_expr"))
-            .ok_or_else(|| {
-                crate::error::ParseError::UnexpectedNode("const_expr missing or_expr".to_string())
-            })?;
-        Ok(Self(OrExpr::from_node(value, ctx)?))
-    }
-}
-
 #[derive(Debug, Clone, Serialize)]
 pub enum OrExpr {
     XorExpr(XorExpr),
     OrExpr(Box<OrExpr>, XorExpr),
 }
 
-impl<'a> crate::parser::FromTreeSitter<'a> for OrExpr {
-    fn from_node(
-        node: tree_sitter::Node<'a>,
-        ctx: &mut crate::parser::ParseContext<'a>,
-    ) -> crate::error::ParserResult<Self> {
-        assert_eq!(node.kind_id(), xidl_parser_derive::node_id!("or_expr"));
-        let mut values = node
-            .named_children(&mut node.walk())
-            .filter(|child| child.is_named())
-            .collect::<Vec<_>>();
-        match values.len() {
-            1 => Ok(Self::XorExpr(XorExpr::from_node(values.remove(0), ctx)?)),
-            2 => Ok(Self::OrExpr(
-                Box::new(OrExpr::from_node(values.remove(0), ctx)?),
-                XorExpr::from_node(values.remove(0), ctx)?,
-            )),
-            _ => Err(crate::error::ParseError::UnexpectedNode(format!(
-                "parent: {}, got: {}",
-                node.kind(),
-                ctx.node_text(&node)?
-            ))),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Parser, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub enum XorExpr {
     AndExpr(AndExpr),
     XorExpr(Box<XorExpr>, AndExpr),
 }
 
-#[derive(Debug, Clone, Parser, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub enum AndExpr {
     ShiftExpr(ShiftExpr),
     AndExpr(Box<AndExpr>, ShiftExpr),
 }
 
-#[derive(Debug, Clone, Parser, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub enum ShiftExpr {
     AddExpr(AddExpr),
     LeftShiftExpr(Box<ShiftExpr>, AddExpr),
     RightShiftExpr(Box<ShiftExpr>, AddExpr),
 }
 
-#[derive(Debug, Clone, Parser, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub enum AddExpr {
     MultExpr(MultExpr),
     AddExpr(Box<AddExpr>, MultExpr),
     SubExpr(Box<AddExpr>, MultExpr),
 }
 
-#[derive(Debug, Clone, Parser, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub enum MultExpr {
     UnaryExpr(UnaryExpr),
     MultExpr(Box<MultExpr>, UnaryExpr),
@@ -87,13 +48,13 @@ pub enum MultExpr {
     ModExpr(Box<MultExpr>, UnaryExpr),
 }
 
-#[derive(Debug, Clone, Parser, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub enum UnaryExpr {
     UnaryExpr(UnaryOperator, PrimaryExpr),
     PrimaryExpr(PrimaryExpr),
 }
 
-#[derive(Debug, Clone, Parser, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub enum PrimaryExpr {
     ScopedName(ScopedName),
     Literal(Literal),
@@ -105,28 +66,6 @@ pub enum UnaryOperator {
     Add,
     Sub,
     Not,
-}
-
-impl<'a> crate::parser::FromTreeSitter<'a> for UnaryOperator {
-    fn from_node(
-        node: tree_sitter::Node<'a>,
-        ctx: &mut crate::parser::ParseContext<'a>,
-    ) -> crate::error::ParserResult<Self> {
-        #[allow(clippy::never_loop)]
-        for ch in node.children(&mut node.walk()) {
-            return match ctx.node_text(&ch)? {
-                "+" => Ok(Self::Add),
-                "-" => Ok(Self::Sub),
-                "~" => Ok(Self::Not),
-                _ => Err(crate::error::ParseError::UnexpectedNode(format!(
-                    "parent: {}, got: {}",
-                    node.kind(),
-                    ch.kind()
-                ))),
-            };
-        }
-        unreachable!()
-    }
 }
 
 #[derive(Debug, Clone, Parser, Serialize)]
