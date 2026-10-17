@@ -34,6 +34,9 @@ pub enum Plugin {
         alias = "typescript-rest"
     )]
     TypescriptRest,
+    /// Separate opt-in generation of TypeScript REST version adapters.
+    #[serde(alias = "typescript-rest-adapters")]
+    TypescriptRestAdapters,
     #[serde(alias = "go", alias = "golang")]
     Go,
     #[serde(alias = "go_rest", alias = "go-rest")]

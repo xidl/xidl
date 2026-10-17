@@ -1,5 +1,6 @@
 //! Guards for targets that cannot render versioned projections yet.
 
+#[cfg(any(feature = "gen-go", feature = "gen-rust-jsonrpc"))]
 use crate::error::{IdlcError, IdlcResult};
 use xidl_parser::hir::ParserProperties;
 use xidl_parser::versioning;
@@ -9,6 +10,7 @@ use xidl_parser::versioning;
 ///
 /// Those targets would emit one `module <version>` block per body instead of
 /// one module per API version, which does not compile.
+#[cfg(any(feature = "gen-go", feature = "gen-rust-jsonrpc"))]
 pub(crate) fn reject_versioned_modules(target: &str, props: &ParserProperties) -> IdlcResult<()> {
     let versioned = props
         .get(versioning::API_VERSION_MODULES_PROPERTY)

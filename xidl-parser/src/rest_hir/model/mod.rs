@@ -248,6 +248,18 @@ pub enum HttpRequestBodyShape {
     },
 }
 
+impl HttpRequestBodyShape {
+    /// Returns the source parameter carried as a single raw byte body.
+    pub fn byte_parameter(&self) -> Option<&str> {
+        match self {
+            Self::SingleValue {
+                source_param, ty, ..
+            } if super::is_byte_sequence(ty) => Some(source_param),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HttpRequestBodyField {
     pub source_param: String,

@@ -11,6 +11,40 @@ fn project_contract(source: &str) -> Result<RestHirDocument, String> {
 }
 
 #[test]
+fn binary_upload_binding_distinguishes_the_entire_body_from_object_fields() {
+    let document = project_contract(
+        r#"
+interface Uploads {
+    @post(path="/raw") void raw(@body sequence<octet> data);
+    @post(path="/text") void text(@body string data);
+    @post(path="/record") void record(sequence<octet> data, string checksum);
+    @get(path="/status") string status();
+};
+"#,
+    )
+    .expect("upload HTTP contract");
+    let actual = document.interfaces[0]
+        .operations
+        .iter()
+        .map(|operation| {
+            (
+                operation.meta.name.as_str(),
+                operation.http.request.body.shape.byte_parameter(),
+            )
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(
+        actual,
+        [
+            ("raw", Some("data")),
+            ("text", None),
+            ("record", None),
+            ("status", None),
+        ]
+    );
+}
+
+#[test]
 fn conditional_file_update_preserves_each_wire_binding_and_typed_failure() {
     let document = project_contract(
         r#"

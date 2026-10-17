@@ -41,20 +41,24 @@ export function getMeta(schema: XidlSchema): XidlJsonMeta | undefined {
   return undefined;
 }
 
-/** Attach JSON metadata to a schema without changing its type. */
-export function setMeta<T extends XidlSchema>(
+/** Attach field metadata to a cloned Zod schema, preserving shared definitions. */
+export function setMeta<T extends XidlSchema & { clone(): T }>(
   schema: T,
   meta: XidlJsonMeta,
 ): T {
-  Object.defineProperty(schema, metadataKey, {
+  const annotated = schema.clone();
+  Object.defineProperty(annotated, metadataKey, {
     configurable: true,
     value: meta,
   });
-  return schema;
+  return annotated;
 }
 
 /** Convenient alias for {@link setMeta}. */
-export function xjson<T extends XidlSchema>(schema: T, meta: XidlJsonMeta): T {
+export function xjson<T extends XidlSchema & { clone(): T }>(
+  schema: T,
+  meta: XidlJsonMeta,
+): T {
   return setMeta(schema, meta);
 }
 
@@ -99,6 +103,34 @@ function unwrapSchema(schema: XidlSchema): any {
   return current;
 }
 
+function setJsonProperty(
+  target: Record<string, any>,
+  key: string,
+  value: any,
+): void {
+  Object.defineProperty(target, key, {
+    configurable: true,
+    enumerable: true,
+    value,
+    writable: true,
+  });
+}
+
+function transformRecordValues(
+  value: any,
+  schema: any,
+  convert: (value: any, schema: XidlSchema) => any,
+): any {
+  if (typeof value !== 'object' || Array.isArray(value)) return value;
+  const valueSchema = schema.valueType ?? defOf(schema)?.valueType;
+  return Object.fromEntries(
+    Object.entries(value).map(([key, item]) => [
+      key,
+      convert(item, valueSchema),
+    ]),
+  );
+}
+
 function isZeroValue(val: any, schema: XidlSchema): boolean {
   if (val === null || val === undefined) return true;
   const unwrapped = unwrapSchema(schema);
@@ -139,7 +171,7 @@ export function serializeZodObject(obj: any, schema: XidlSchema): any {
     const meta = getMeta(fieldSchema) || {};
     if (meta.ignore) continue;
 
-    const value = obj[key];
+    const value = Object.hasOwn(obj, key) ? obj[key] : undefined;
 
     // omitempty check
     if (meta.omitempty && isZeroValue(value, fieldSchema)) {
@@ -158,7 +190,7 @@ export function serializeZodObject(obj: any, schema: XidlSchema): any {
             if (usedKeys.has(innerKey)) {
               delete result[innerKey];
             } else {
-              result[innerKey] = innerSerialized[innerKey];
+              setJsonProperty(result, innerKey, innerSerialized[innerKey]);
               usedKeys.add(innerKey);
             }
           }
@@ -171,7 +203,7 @@ export function serializeZodObject(obj: any, schema: XidlSchema): any {
       const outKey = meta.name || key;
       // Normal field serialization
       if (value !== undefined) {
-        result[outKey] = serialize(value, fieldSchema);
+        setJsonProperty(result, outKey, serialize(value, fieldSchema));
         usedKeys.add(outKey);
       }
     }
@@ -185,17 +217,15 @@ export function serializeZodObject(obj: any, schema: XidlSchema): any {
   }
 
   if (catchAllFields.length === 1) {
-    const { key } = catchAllFields[0];
-    const value = obj[key];
+    const { key, fieldSchema } = catchAllFields[0];
+    const value = Object.hasOwn(obj, key) ? obj[key] : undefined;
     if (value !== undefined && value !== null) {
       if (typeof value !== 'object') {
         throw new Error('Catch-all flatten field value must be an object/map.');
       }
-      for (const k in value) {
-        // Named fields (in usedKeys) take priority and are skipped
-        if (!usedKeys.has(k)) {
-          result[k] = value[k];
-        }
+      for (const [key, item] of Object.entries(serialize(value, fieldSchema))) {
+        // Named fields (in usedKeys) take priority and are skipped.
+        if (!usedKeys.has(key)) setJsonProperty(result, key, item);
       }
     }
   }
@@ -215,6 +245,9 @@ export function serialize(value: any, schema: XidlSchema): any {
     if (!Array.isArray(value)) return value;
     const elementSchema = elementOf(unwrapped) as XidlSchema;
     return value.map(item => serialize(item, elementSchema));
+  }
+  if (defTypeOf(unwrapped) === 'record') {
+    return transformRecordValues(value, unwrapped, serialize);
   }
 
   return value;
@@ -244,7 +277,7 @@ export function deserializeZodObject(jsonObj: any, schema: XidlSchema): any {
       if (isObjectSchema(unwrapped)) {
         // Struct flatten
         const subResult = deserializeZodObject(jsonObj, unwrapped);
-        result[key] = subResult;
+        setJsonProperty(result, key, subResult);
 
         // Track which keys in jsonObj were matched by this sub-object
         const subExpectedKeys = getExpectedJsonKeys(unwrapped);
@@ -257,9 +290,9 @@ export function deserializeZodObject(jsonObj: any, schema: XidlSchema): any {
       }
     } else {
       const inKey = meta.name || key;
-      const value = jsonObj[inKey];
+      const value = Object.hasOwn(jsonObj, inKey) ? jsonObj[inKey] : undefined;
       if (value !== undefined) {
-        result[key] = deserialize(value, fieldSchema);
+        setJsonProperty(result, key, deserialize(value, fieldSchema));
         matchedKeys.add(inKey);
       }
     }
@@ -273,14 +306,13 @@ export function deserializeZodObject(jsonObj: any, schema: XidlSchema): any {
   }
 
   if (catchAllFields.length === 1) {
-    const { key } = catchAllFields[0];
+    const { key, fieldSchema } = catchAllFields[0];
     const catchAllObj: Record<string, any> = {};
-    for (const k in jsonObj) {
-      if (!matchedKeys.has(k)) {
-        catchAllObj[k] = jsonObj[k];
-      }
+    for (const [wireKey, value] of Object.entries(jsonObj)) {
+      if (!matchedKeys.has(wireKey))
+        setJsonProperty(catchAllObj, wireKey, value);
     }
-    result[key] = catchAllObj;
+    setJsonProperty(result, key, deserialize(catchAllObj, fieldSchema));
   }
 
   return result;
@@ -298,6 +330,9 @@ export function deserialize(value: any, schema: XidlSchema): any {
     if (!Array.isArray(value)) return value;
     const elementSchema = elementOf(unwrapped) as XidlSchema;
     return value.map(item => deserialize(item, elementSchema));
+  }
+  if (defTypeOf(unwrapped) === 'record') {
+    return transformRecordValues(value, unwrapped, deserialize);
   }
 
   return value;

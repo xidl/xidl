@@ -100,9 +100,17 @@ impl CodegenSession {
             Plugin::TypescriptRest => {
                 Box::new(crate::generate::typescript_rest::TypescriptRestCodegen)
             }
+            #[cfg(feature = "gen-typescript-rest-adapters")]
+            Plugin::TypescriptRestAdapters => {
+                Box::new(crate::generate::typescript_rest::adapters::TypescriptRestAdaptersCodegen)
+            }
             Plugin::VersionMap => Box::new(crate::generate::hir_gen::HirGen),
             Plugin::Custom(_) => unreachable!("custom plugins use spawn_custom_session"),
-            var => panic!("does not support {var:?}"),
+            var => {
+                return Err(crate::error::IdlcError::rpc(format!(
+                    "generator {var:?} is unavailable in this build; enable its Cargo feature"
+                )));
+            }
         };
         Ok(Self {
             inner: Inner::Builtin(generator),

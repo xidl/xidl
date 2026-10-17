@@ -1,0 +1,65 @@
+{% macro wire_schema(schema) -%}
+    {%- if schema.kind == "Array" -%}z.array({{ wire_schema(schema.data.element) }}){% if schema.data.length is not none %}.length({{ schema.data.length }}){% endif %}
+        {%- elif schema.kind == "Record" -%}z.unknown().superRefine(rejectPrototypeKey).pipe(z.record(z.string(), {{ wire_schema(schema.data) }}))
+        {%- else -%}{{ m.render_zod(schema) }}
+    {%- endif -%}
+{%- endmacro %}
+
+{% macro wire_object(object) -%}
+    z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
+        {% for key in object.keys %}
+            [{{ key | tojson }}]: z.unknown().optional(),
+        {% endfor %}
+    }){% if object.catch_all %}.catchall(z.unknown()){% else %}.strict(){% endif %}
+    {% if object.forbidden %}
+        .superRefine((wire, context) => {
+            for (const key of {{ object.forbidden | tojson }}) {
+                if (Object.hasOwn(wire, key)) context.addIssue({ code: "custom", path: [key], message: "field is not available in served version" });
+            }
+        })
+    {% endif %}
+    .transform((wire): Record<string, unknown> => ({
+        {% for field in object.fields %}
+            [{{ field.prop | tojson }}]: {% if field.input.kind == "Named" %}wire[{{ field.input.data | tojson }}]{% else %}flattenWire(wire, {{ field.input.data.keys | tojson }}, {{ object.keys | tojson }}, {{ field.input.data.receives_rest | tojson }}, {{ field.optional | tojson }}){% endif %},
+        {% endfor %}
+    }))
+    .pipe(z.object({
+        {% for field in object.fields %}
+            [{{ field.prop | tojson }}]: {% if not field.optional %}z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe({{ wire_schema(field.schema) }}){% else %}{{ wire_schema(field.schema) }}.nullish().transform((value) => value ?? undefined){% endif %},
+        {% endfor %}
+    })).transform((value) => ({
+        {% for field in object.fields %}
+            {% if field.optional %}
+                ...(value[{{ field.prop | tojson }}] === undefined ? {} : { [{{ field.prop | tojson }}]: value[{{ field.prop | tojson }}] }),
+            {% else %}
+                [{{ field.prop | tojson }}]: value[{{ field.prop | tojson }}],
+            {% endif %}
+        {% endfor %}
+    })))
+{%- endmacro %}
+
+function rejectPrototypeKey(value: unknown, context: z.RefinementCtx): void {
+    if (typeof value === "object" && value !== null && Object.hasOwn(value, "__proto__")) {
+        context.addIssue({ code: "custom", path: ["__proto__"], message: "wire object contains a reserved prototype key" });
+    }
+}
+
+function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: string[], rest: boolean, optional: boolean): Record<string, unknown> | undefined {
+    const entries = Object.entries(wire).filter(([key]) => keys.includes(key) || (rest && !occupied.includes(key)));
+    return optional && entries.length === 0 ? undefined : Object.fromEntries(entries);
+}
+{% for definition in wire_definitions %}
+    const {{ definition.name }}: z.ZodType<{{ m.render_type(definition.output) }}> = z.lazy(() =>
+    {% if definition.body.kind == "Object" %}
+        {{ wire_object(definition.body.data) }}
+    {% elif definition.body.kind == "Value" %}
+        {{ wire_schema(definition.body.data) }}
+    {% elif definition.body.kind == "Union" %}
+        {% if definition.body.data | length == 0 %}z.never(){% elif definition.body.data | length == 1 %}{{ wire_object(definition.body.data[0]) }}{% else %}z.union([
+        {% for variant in definition.body.data %}
+            {{ wire_object(variant) }}{% if not loop.last %},{% endif %}
+        {% endfor %}
+        ]){% endif %}
+    {% endif %}
+    );
+{% endfor %}
