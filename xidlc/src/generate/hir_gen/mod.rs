@@ -53,15 +53,6 @@ impl crate::jsonrpc::Codegen for HirGen {
                 content,
             })]);
         }
-        let version_map = Self::build_version_map(&source, &input, &props)?;
-        let mut props = props;
-        if let Some(version_map) = version_map {
-            props.insert(
-                "version_map".to_string(),
-                serde_json::to_value(version_map)
-                    .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?,
-            );
-        }
         // The same resolver reads the units a versioned include names.
         let projections =
             xidl_parser::hir::Specification::project_typed_ast_versions_with_resolver(
@@ -71,6 +62,15 @@ impl crate::jsonrpc::Codegen for HirGen {
                 &mut *resolver,
             )
             .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
+        let version_map = Self::build_version_map(&source, &input, &props)?;
+        let mut props = props;
+        if let Some(version_map) = version_map {
+            props.insert(
+                "version_map".to_string(),
+                serde_json::to_value(version_map)
+                    .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?,
+            );
+        }
         let mut artifacts = Vec::new();
         for projection in projections {
             let props = projection_properties(props.clone(), &projection);
