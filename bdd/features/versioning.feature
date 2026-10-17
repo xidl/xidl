@@ -15,6 +15,11 @@ Feature: API versioning
     When I generate openapi documents for every API version
     Then each API version has its own openapi document
 
+  Scenario: version-map emits deterministic adjacent contract facts
+    Given a versioned REST IDL file "bdd/features/data/versioned_rest.idl"
+    When I generate a version map for the IDL
+    Then the version map should describe both versions and remain byte-stable
+
   Scenario: one binary serves every API version
     Given a versioned REST IDL file "bdd/features/data/versioned_rest.idl"
     When I generate rust code for the IDL

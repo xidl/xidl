@@ -53,6 +53,12 @@ pub struct TypeChange {
     /// members alone (for example typedefs, natives and union switches).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub details: Option<BTreeMap<String, Value>>,
+    /// Earlier declaration facts for a changed type.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub from: Option<BTreeMap<String, Value>>,
+    /// Later declaration facts for a changed type.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub to: Option<BTreeMap<String, Value>>,
     /// Direct member facts; references are intentionally not followed here.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub members: BTreeMap<String, Change>,
@@ -88,6 +94,17 @@ pub(super) struct TypeSurface {
     pub(super) kind: String,
     pub(super) details: BTreeMap<String, Value>,
     pub(super) members: BTreeMap<String, BTreeMap<String, Value>>,
+}
+
+pub(super) fn type_shape(surface: &TypeSurface) -> BTreeMap<String, Value> {
+    let mut shape = BTreeMap::from([("kind".to_string(), Value::String(surface.kind.clone()))]);
+    shape.extend(
+        surface
+            .details
+            .iter()
+            .map(|(key, value)| (key.clone(), value.clone())),
+    );
+    shape
 }
 
 pub(super) type TypeParts<'a> = (

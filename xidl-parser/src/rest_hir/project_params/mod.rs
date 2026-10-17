@@ -1,4 +1,4 @@
-use crate::hir;
+use crate::hir::{self, is_skipped};
 use std::collections::{HashMap, HashSet};
 
 use super::route::{SourceBinding, explicit_param_binding};
@@ -36,6 +36,9 @@ pub(super) fn project_params(
     let mut query_binding_count = HashMap::<String, usize>::new();
 
     for param in params {
+        if is_skipped(&param.annotations) {
+            continue;
+        }
         let direction = param_direction(param.attr.as_ref());
         let binding = explicit_param_binding(param)?;
         let default_source = if matches!(stream_kind, Some(HttpStreamKind::Bidi)) {

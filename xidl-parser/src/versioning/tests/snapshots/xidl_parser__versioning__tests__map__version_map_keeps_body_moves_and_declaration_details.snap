@@ -55,7 +55,7 @@ expression: json
         }
       },
       "operations": {
-        "Items::save": {
+        "Items.save": {
           "change": "changed",
           "from": {
             "method": "post",

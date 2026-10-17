@@ -213,6 +213,8 @@ pub enum HttpRequestBodyShape {
     Empty,
     SingleValue {
         source_param: String,
+        #[serde(skip)]
+        wire_name: String,
         flatten: bool,
         ty: hir::TypeSpec,
     },
@@ -221,6 +223,8 @@ pub enum HttpRequestBodyShape {
     },
     Stream {
         source_param: String,
+        #[serde(skip)]
+        wire_name: String,
         item_ty: hir::TypeSpec,
         codec: HttpStreamPayloadCodec,
     },

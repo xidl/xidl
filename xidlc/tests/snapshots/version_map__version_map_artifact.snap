@@ -1,0 +1,332 @@
+---
+source: xidlc/tests/version_map.rs
+expression: "&first[0].1"
+---
+{
+  "format": 1,
+  "contract": "api.idl",
+  "versions": [
+    {
+      "id": "v1",
+      "value": "1.0"
+    },
+    {
+      "id": "v2",
+      "value": "2.0"
+    }
+  ],
+  "steps": [
+    {
+      "from": "v1",
+      "to": "v2",
+      "types": {
+        "Conflict": {
+          "change": "added",
+          "kind": "exception"
+        },
+        "Item": {
+          "change": "changed",
+          "kind": "struct",
+          "from": {
+            "kind": "struct"
+          },
+          "to": {
+            "kind": "struct"
+          },
+          "members": {
+            "note": {
+              "change": "added",
+              "to": {
+                "name": "note",
+                "optional": true,
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "operations": {
+        "Items.adopt": {
+          "change": "changed",
+          "from": {
+            "method": "post",
+            "parameters": {
+              "path:id": {
+                "location": "path",
+                "name": "id",
+                "optional": false,
+                "type": "string",
+                "wire_name": "id"
+              }
+            },
+            "raises": [
+              "NotFound"
+            ],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "id",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "Item"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "Item",
+            "route": "/items/{id}/adopt",
+            "routes": [
+              {
+                "path": "/items/{id}/adopt",
+                "path_params": [
+                  "id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          },
+          "to": {
+            "method": "post",
+            "parameters": {
+              "path:id": {
+                "location": "path",
+                "name": "id",
+                "optional": false,
+                "type": "string",
+                "wire_name": "id"
+              }
+            },
+            "raises": [
+              "NotFound",
+              "Conflict"
+            ],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "id",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "Item"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "Item",
+            "route": "/items/{id}/adopt",
+            "routes": [
+              {
+                "path": "/items/{id}/adopt",
+                "path_params": [
+                  "id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Items.legacy": {
+          "change": "removed",
+          "from": {
+            "method": "get",
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Text",
+                "content_type": "text/plain",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "StringType": {
+                        "bound": null
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "string",
+            "route": "/legacy",
+            "routes": [
+              {
+                "path": "/legacy",
+                "path_params": [],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Items.list": {
+          "change": "added",
+          "to": {
+            "method": "get",
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "SequenceType": {
+                        "len": null,
+                        "ty": {
+                          "ScopedName": {
+                            "is_root": false,
+                            "name": [
+                              "Item"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "sequence<Item>",
+            "route": "/items",
+            "routes": [
+              {
+                "path": "/items",
+                "path_params": [],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        }
+      }
+    }
+  ]
+}

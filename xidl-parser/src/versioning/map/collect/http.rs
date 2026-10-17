@@ -100,7 +100,18 @@ pub(crate) fn collect_operations(
                             .meta
                             .raises
                             .iter()
-                            .map(|value| Value::String(value.ident.clone()))
+                            .map(|value| {
+                                Value::String(join(
+                                    &value
+                                        .module_path
+                                        .iter()
+                                        .skip(1)
+                                        .cloned()
+                                        .collect::<Vec<_>>()
+                                        .join("::"),
+                                    &value.ident,
+                                ))
+                            })
                             .collect(),
                     ),
                 ),
@@ -135,7 +146,7 @@ pub(crate) fn collect_operations(
                 ),
             ]);
             operations.insert(
-                join(&interface_path, &operation.meta.name),
+                format!("{interface_path}.{}", operation.meta.name),
                 OperationSurface { descriptor, params },
             );
         }
@@ -156,13 +167,16 @@ fn body_params(operation: &rest_hir::HttpOperation) -> Vec<(String, BTreeMap<Str
     match &operation.http.request.body.shape {
         rest_hir::HttpRequestBodyShape::Empty => Vec::new(),
         rest_hir::HttpRequestBodyShape::SingleValue {
-            source_param, ty, ..
+            source_param,
+            wire_name,
+            ty,
+            ..
         } => vec![(
-            param_key(HttpParamKind::Body, source_param),
+            param_key(HttpParamKind::Body, wire_name),
             descriptor([
                 ("name", Value::String(source_param.clone())),
                 ("location", Value::String("body".to_string())),
-                ("wire_name", Value::String(source_param.clone())),
+                ("wire_name", Value::String(wire_name.clone())),
                 ("type", Value::String(render_type(ty))),
                 ("optional", Value::Bool(optional(source_param))),
             ]),
@@ -184,14 +198,15 @@ fn body_params(operation: &rest_hir::HttpOperation) -> Vec<(String, BTreeMap<Str
             .collect(),
         rest_hir::HttpRequestBodyShape::Stream {
             source_param,
+            wire_name,
             item_ty,
             ..
         } => vec![(
-            param_key(HttpParamKind::Body, source_param),
+            param_key(HttpParamKind::Body, wire_name),
             descriptor([
                 ("name", Value::String(source_param.clone())),
                 ("location", Value::String("body".to_string())),
-                ("wire_name", Value::String(source_param.clone())),
+                ("wire_name", Value::String(wire_name.clone())),
                 (
                     "type",
                     Value::String(format!("stream<{}>", render_type(item_ty))),

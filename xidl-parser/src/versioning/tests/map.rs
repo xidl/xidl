@@ -67,9 +67,16 @@ fn version_map_walks_all_type_and_http_shapes() {
         @version
         enum Versions { v1, v2 };
 
-        typedef long Count, Counts[3];
+        @added(Versions::v2) typedef long Count, Counts[3];
+        @added(Versions::v2) typedef sequence<string<16>, 4> Names;
+        @added(Versions::v2) typedef fixed<8, 2> Amount;
         native Opaque;
-        struct Item { string id; };
+        struct Item {
+            string id;
+            @added(Versions::v2) string<12> label;
+            @added(Versions::v2) Names names;
+            @added(Versions::v2) Amount amount;
+        };
         @http(400) exception Failure { string message; };
         enum Color { red, blue };
         union Choice switch (long) {
@@ -115,7 +122,7 @@ fn version_map_walks_all_type_and_http_shapes() {
     let step = &map.steps[0];
     let changed = step
         .operations
-        .get("Items::changed")
+        .get("Items.changed")
         .expect("changed operation");
     let from = changed.from.as_ref().expect("from descriptor");
     let to = changed.to.as_ref().expect("to descriptor");
@@ -123,4 +130,13 @@ fn version_map_walks_all_type_and_http_shapes() {
     let to_params = to.get("parameters").expect("query parameter");
     assert!(from_params.get("body:old").is_some());
     assert!(to_params.get("query:next").is_some());
+
+    let json = crate::versioning::map::to_json(&map).expect("map should serialize");
+    assert!(json.contains("sequence<string<16>, 4>"));
+    assert!(json.contains("fixed<8, 2>"));
+    assert!(json.contains("string<12>"));
+    assert!(json.contains("\"Counts\""));
+    assert!(!json.contains("Counts[3]"));
+    assert!(json.contains("\"lengths\""));
+    assert!(json.contains("\"3\""));
 }

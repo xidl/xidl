@@ -27,6 +27,12 @@ expression: "crate::versioning::map::to_json(&map).expect(\"serialize map\")"
         "Item": {
           "change": "changed",
           "kind": "struct",
+          "from": {
+            "kind": "struct"
+          },
+          "to": {
+            "kind": "struct"
+          },
           "members": {
             "note": {
               "change": "added",
@@ -40,7 +46,7 @@ expression: "crate::versioning::map::to_json(&map).expect(\"serialize map\")"
         }
       },
       "operations": {
-        "Items::adopt": {
+        "Items.adopt": {
           "change": "changed",
           "from": {
             "method": "post",
@@ -202,7 +208,7 @@ expression: "crate::versioning::map::to_json(&map).expect(\"serialize map\")"
             "websocket": null
           }
         },
-        "Items::legacy": {
+        "Items.legacy": {
           "change": "removed",
           "from": {
             "method": "get",
@@ -257,7 +263,7 @@ expression: "crate::versioning::map::to_json(&map).expect(\"serialize map\")"
             "websocket": null
           }
         },
-        "Items::list": {
+        "Items.list": {
           "change": "added",
           "to": {
             "method": "get",

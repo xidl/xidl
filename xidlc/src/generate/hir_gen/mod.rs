@@ -35,35 +35,8 @@ impl crate::jsonrpc::Codegen for HirGen {
         let typed =
             xidl_parser::parser::parser_text_with_resolver(&source, Some(&input), &mut *resolver)
                 .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
-        let mut map_resolver = include_resolver(&props);
-        let map_spec = xidl_parser::hir::Specification::from_typed_ast_with_properties_and_path(
-            xidl_parser::parser::parser_text_with_resolver(
-                &source,
-                Some(&input),
-                &mut *map_resolver,
-            )
-            .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?,
-            [("expand_interface".to_string(), false.into())].into(),
-            std::path::Path::new(&input),
-        )
-        .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
-        let version_map = match xidl_parser::versioning::VersioningRecord::analyze(&map_spec)
-            .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?
-        {
-            Some(record) => Some(
-                xidl_parser::versioning::map::from_spec(
-                    &map_spec,
-                    &record,
-                    std::path::Path::new(&input)
-                        .file_name()
-                        .and_then(|name| name.to_str())
-                        .unwrap_or(&input),
-                )
-                .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?,
-            ),
-            None => None,
-        };
-        if target_lang == "version-map" {
+        if Self::is_version_map_target(&target_lang) {
+            let version_map = Self::build_version_map(&source, &input, &props)?;
             let Some(version_map) = version_map.as_ref() else {
                 return Err(crate::jsonrpc::RpcError::new(
                     "xidlc version-map requires a @version enum",
@@ -80,6 +53,7 @@ impl crate::jsonrpc::Codegen for HirGen {
                 content,
             })]);
         }
+        let version_map = Self::build_version_map(&source, &input, &props)?;
         let mut props = props;
         if let Some(version_map) = version_map {
             props.insert(
@@ -96,8 +70,7 @@ impl crate::jsonrpc::Codegen for HirGen {
                 std::path::Path::new(&input),
                 &mut *resolver,
             )
-        .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
-
+            .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
         let mut artifacts = Vec::new();
         for projection in projections {
             let props = projection_properties(props.clone(), &projection);
@@ -109,6 +82,50 @@ impl crate::jsonrpc::Codegen for HirGen {
             )?);
         }
         Ok(artifacts)
+    }
+}
+
+impl HirGen {
+    fn is_version_map_target(target_lang: &str) -> bool {
+        matches!(target_lang, "version-map" | "version_map")
+    }
+
+    fn build_version_map(
+        source: &str,
+        input: &str,
+        props: &ParserProperties,
+    ) -> Result<Option<xidl_parser::versioning::map::VersionMap>, crate::jsonrpc::RpcError> {
+        let mut map_resolver = include_resolver(props);
+        let map_spec = xidl_parser::hir::Specification::from_typed_ast_with_properties_and_path(
+            xidl_parser::parser::parser_text_with_resolver(source, Some(input), &mut *map_resolver)
+                .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?,
+            [("expand_interface".to_string(), false.into())].into(),
+            std::path::Path::new(input),
+        )
+        .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
+        let Some(record) = xidl_parser::versioning::VersioningRecord::analyze(&map_spec)
+            .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?
+        else {
+            return Ok(None);
+        };
+        let contract = std::path::Path::new(input)
+            .file_name()
+            .and_then(|name| name.to_str())
+            .unwrap_or(input);
+        xidl_parser::versioning::map::from_spec_with_http(
+            &map_spec,
+            &record,
+            contract,
+            matches!(
+                props.get("hir_kind").and_then(serde_json::Value::as_str),
+                Some(value) if value.eq_ignore_ascii_case("http")
+            ) || matches!(
+                props.get("target_lang").and_then(serde_json::Value::as_str),
+                Some("version-map" | "version_map")
+            ),
+        )
+        .map(Some)
+        .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))
     }
 }
 
