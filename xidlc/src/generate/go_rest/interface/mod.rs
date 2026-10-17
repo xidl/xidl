@@ -46,6 +46,7 @@ pub(crate) fn render_interface(
             build_method_meta(
                 &interface_name,
                 operation,
+                &context.packages,
                 prefix,
                 context.version_parameter(prefix),
                 context.versioned_modules(),

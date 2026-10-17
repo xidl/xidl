@@ -1,4 +1,5 @@
 use crate::error::IdlcResult;
+use crate::generate::go::GoPackages;
 use crate::generate::go_rest::{
     MethodMeta, ParamMeta, ParamSource, VersionParameterMeta, definition,
 };
@@ -12,6 +13,7 @@ use super::interface_meta_support::{deprecated_context, http_method, validate_st
 pub(crate) fn build_method_meta(
     interface_name: &str,
     op: &HttpOperation,
+    packages: &GoPackages,
     prefix: &[String],
     version_parameter: Option<VersionParameterMeta>,
     versioned_modules: bool,
@@ -40,7 +42,7 @@ pub(crate) fn build_method_meta(
             xidl_parser::rest_hir::HttpSignatureParamDirection::In
                 | xidl_parser::rest_hir::HttpSignatureParamDirection::InOut
         ) {
-            let meta = build_param_meta(op, &p.name, prefix, versioned_modules);
+            let meta = build_param_meta(op, &p.name, packages, prefix, versioned_modules);
             request_params.push(meta.clone());
             match meta.source {
                 ParamSource::Path => path_params.push(meta),
@@ -62,7 +64,7 @@ pub(crate) fn build_method_meta(
             xidl_parser::rest_hir::HttpSignatureParamDirection::Out
                 | xidl_parser::rest_hir::HttpSignatureParamDirection::InOut
         ) {
-            let meta = build_response_param_meta(op, &p.name, prefix, versioned_modules);
+            let meta = build_response_param_meta(op, &p.name, packages, prefix, versioned_modules);
             match meta.source {
                 ParamSource::Header => response_header_params.push(meta),
                 ParamSource::Cookie => response_cookie_params.push(meta),
@@ -86,7 +88,7 @@ pub(crate) fn build_method_meta(
             } => (
                 None,
                 Some(source_param.to_case(Case::Pascal)),
-                Some(definition::go_type(ty, prefix, versioned_modules)),
+                Some(definition::go_type(ty, packages, prefix, versioned_modules)),
             ),
             _ => (None, None, None),
         };
@@ -95,7 +97,7 @@ pub(crate) fn build_method_meta(
         .signature
         .return_type
         .as_ref()
-        .map(|ty| definition::go_type(ty, prefix, versioned_modules));
+        .map(|ty| definition::go_type(ty, packages, prefix, versioned_modules));
 
     let (response_body_struct, response_body_direct_field, response_body_direct_ty) =
         match &op.http.response.body.shape {
@@ -105,7 +107,7 @@ pub(crate) fn build_method_meta(
             HttpResponseBodyShape::ReturnOnly { ty } => (
                 None,
                 Some("Return".to_string()),
-                Some(definition::go_type(ty, prefix, versioned_modules)),
+                Some(definition::go_type(ty, packages, prefix, versioned_modules)),
             ),
             HttpResponseBodyShape::SingleValue { source, ty } => {
                 let name = match source {
@@ -115,7 +117,7 @@ pub(crate) fn build_method_meta(
                 (
                     None,
                     Some(name),
-                    Some(definition::go_type(ty, prefix, versioned_modules)),
+                    Some(definition::go_type(ty, packages, prefix, versioned_modules)),
                 )
             }
             _ => (None, None, None),
@@ -212,6 +214,7 @@ pub(crate) fn build_method_meta(
 fn build_param_meta(
     op: &HttpOperation,
     name: &str,
+    packages: &GoPackages,
     prefix: &[String],
     versioned_modules: bool,
 ) -> ParamMeta {
@@ -276,7 +279,7 @@ fn build_param_meta(
         field_name: name.to_case(Case::Pascal),
         raw_name: name.to_string(),
         wire_name,
-        ty: definition::go_type(&p.ty, prefix, versioned_modules),
+        ty: definition::go_type(&p.ty, packages, prefix, versioned_modules),
         optional,
         source,
     }
@@ -285,6 +288,7 @@ fn build_param_meta(
 fn build_response_param_meta(
     op: &HttpOperation,
     name: &str,
+    packages: &GoPackages,
     prefix: &[String],
     versioned_modules: bool,
 ) -> ParamMeta {
@@ -308,7 +312,7 @@ fn build_response_param_meta(
         field_name: name.to_case(Case::Pascal),
         raw_name: name.to_string(),
         wire_name,
-        ty: definition::go_type(&p.ty, prefix, versioned_modules),
+        ty: definition::go_type(&p.ty, packages, prefix, versioned_modules),
         optional: false,
         source,
     }
