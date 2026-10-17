@@ -171,6 +171,38 @@ xidlc gen rust --api-versions v1,v3 -o dist petstore.idl
 `xidl-build` exposes the same selection through `Builder::with_api_version` and
 `Builder::with_api_versions`.
 
+## Version change facts
+
+Generate a language-neutral table for the complete timeline:
+
+```bash
+xidlc gen --out-dir out version-map petstore.idl
+```
+
+`out/petstore.version-map.json` contains direct changes between adjacent versions.
+The same JSON value is available to generators and plugins as `props.version_map`.
+Version selection does not narrow this table. Keys are sorted, indentation uses
+two spaces, and the file ends with a newline.
+
+Format 2 includes `declaration_id` in member, enumerator, union-case, operation,
+and parameter descriptors. Request parameters are in `parameters`; output and
+`inout` parameters also appear in `response_parameters`, keyed by location and
+wire name. Each response binding contains an array of descriptors in source
+order, including single-item bindings; this preserves repeated response headers.
+An `inout` declaration has the same token on both sides. The synthetic
+return value has no parameter identity. It distinguishes two declarations that happen to
+have the same name, wire name, and type. The same source declaration keeps its
+token across projections; two distinct declarations receive different tokens.
+Tokens are opaque and local to the current source, so consumers must compare
+them within one table and must not use them as persistent identifiers across
+source revisions. Whitespace and comment changes preserve the tokens.
+
+This changes the meaning of an omitted change: equal endpoint shapes alone no
+longer hide a declaration replacement. Format 2 readers can distinguish that
+replacement without recovering lifecycle annotations from projected HIR.
+The table records facts; applications and optional adapter targets decide how
+to convert values, resolve API versions, and route requests.
+
 ## Target support
 
 Versioned contracts project into one module per version, so they need targets

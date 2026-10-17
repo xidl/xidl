@@ -1,9 +1,9 @@
 ---
-source: xidl-parser/src/versioning/tests/map.rs
+source: xidl-parser/src/versioning/tests/map/mod.rs
 expression: "crate::versioning::map::to_json(&map).expect(\"serialize map\")"
 ---
 {
-  "format": 1,
+  "format": 2,
   "contract": "versioned_rest.idl",
   "versions": [
     {
@@ -37,6 +37,7 @@ expression: "crate::versioning::map::to_json(&map).expect(\"serialize map\")"
             "note": {
               "change": "added",
               "to": {
+                "declaration_id": "d3",
                 "name": "note",
                 "optional": true,
                 "type": "string"
@@ -49,9 +50,11 @@ expression: "crate::versioning::map::to_json(&map).expect(\"serialize map\")"
         "Items.adopt": {
           "change": "changed",
           "from": {
+            "declaration_id": "d10",
             "method": "post",
             "parameters": {
               "path:id": {
+                "declaration_id": "d11",
                 "location": "path",
                 "name": "id",
                 "optional": false,
@@ -128,9 +131,11 @@ expression: "crate::versioning::map::to_json(&map).expect(\"serialize map\")"
             "websocket": null
           },
           "to": {
+            "declaration_id": "d10",
             "method": "post",
             "parameters": {
               "path:id": {
+                "declaration_id": "d11",
                 "location": "path",
                 "name": "id",
                 "optional": false,
@@ -211,6 +216,7 @@ expression: "crate::versioning::map::to_json(&map).expect(\"serialize map\")"
         "Items.legacy": {
           "change": "removed",
           "from": {
+            "declaration_id": "d9",
             "method": "get",
             "raises": [],
             "request": {
@@ -266,6 +272,7 @@ expression: "crate::versioning::map::to_json(&map).expect(\"serialize map\")"
         "Items.list": {
           "change": "added",
           "to": {
+            "declaration_id": "d8",
             "method": "get",
             "raises": [],
             "request": {

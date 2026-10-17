@@ -2,6 +2,7 @@
 
 mod collect;
 mod compare;
+mod declarations;
 mod helpers;
 mod model;
 
@@ -42,31 +43,34 @@ pub fn from_spec_with_http(
         })
         .collect::<Vec<_>>();
     let mut steps = Vec::new();
+    let declarations = declarations::SourceDeclarations::collect(spec, record.timeline())?;
     for index in 0..versions.len().saturating_sub(1) {
         let from_id = VersionId::from_index(index);
         let to_id = VersionId::from_index(index + 1);
         let from = record.project(spec, from_id)?;
         let to = record.project(spec, to_id)?;
+        let mut from_types = collect::collect_types(&from);
+        let mut to_types = collect::collect_types(&to);
+        declarations.stamp_types(&mut from_types, from_id)?;
+        declarations.stamp_types(&mut to_types, to_id)?;
         let operations = if include_http_operations {
-            compare::compare_operations(
-                &collect::collect_operations(&from)?,
-                &collect::collect_operations(&to)?,
-            )
+            let mut from_operations = collect::collect_operations(&from)?;
+            let mut to_operations = collect::collect_operations(&to)?;
+            declarations.stamp_operations(&mut from_operations, from_id)?;
+            declarations.stamp_operations(&mut to_operations, to_id)?;
+            compare::compare_operations(&from_operations, &to_operations)
         } else {
             BTreeMap::new()
         };
         steps.push(MapStep {
             from: versions[index].id.clone(),
             to: versions[index + 1].id.clone(),
-            types: compare::compare_types(
-                &collect::collect_types(&from),
-                &collect::collect_types(&to),
-            ),
+            types: compare::compare_types(&from_types, &to_types),
             operations,
         });
     }
     Ok(VersionMap {
-        format: 1,
+        format: 2,
         contract: contract.into(),
         versions,
         steps,

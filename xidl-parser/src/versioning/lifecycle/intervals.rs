@@ -47,7 +47,7 @@ fn interval_kind(kind: SiteKind) -> Option<IntervalKind> {
         SiteKind::Operation => Some(IntervalKind::Operation),
         SiteKind::Parameter => Some(IntervalKind::Parameter),
         SiteKind::Attribute => Some(IntervalKind::Attribute),
-        SiteKind::Module | SiteKind::Interface | SiteKind::Unsupported => None,
+        SiteKind::Module | SiteKind::Interface | SiteKind::Bitfield | SiteKind::Unsupported => None,
     }
 }
 

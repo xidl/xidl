@@ -1,9 +1,9 @@
 ---
-source: xidl-parser/src/versioning/tests/map.rs
+source: xidl-parser/src/versioning/tests/map/mod.rs
 expression: json
 ---
 {
-  "format": 1,
+  "format": 2,
   "contract": "edge.idl",
   "versions": [
     {
@@ -58,9 +58,11 @@ expression: json
         "Items.save": {
           "change": "changed",
           "from": {
+            "declaration_id": "d3",
             "method": "post",
             "parameters": {
               "body:payload": {
+                "declaration_id": "d4",
                 "location": "body",
                 "name": "payload",
                 "optional": false,
@@ -129,9 +131,11 @@ expression: json
             "websocket": null
           },
           "to": {
+            "declaration_id": "d3",
             "method": "post",
             "parameters": {
               "query:query": {
+                "declaration_id": "d5",
                 "location": "query",
                 "name": "query",
                 "optional": false,

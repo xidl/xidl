@@ -3,7 +3,7 @@ source: xidlc/tests/version_map.rs
 expression: "&first[0].1"
 ---
 {
-  "format": 1,
+  "format": 2,
   "contract": "api.idl",
   "versions": [
     {
@@ -37,6 +37,7 @@ expression: "&first[0].1"
             "note": {
               "change": "added",
               "to": {
+                "declaration_id": "d3",
                 "name": "note",
                 "optional": true,
                 "type": "string"
@@ -49,9 +50,11 @@ expression: "&first[0].1"
         "Items.adopt": {
           "change": "changed",
           "from": {
+            "declaration_id": "d10",
             "method": "post",
             "parameters": {
               "path:id": {
+                "declaration_id": "d11",
                 "location": "path",
                 "name": "id",
                 "optional": false,
@@ -128,9 +131,11 @@ expression: "&first[0].1"
             "websocket": null
           },
           "to": {
+            "declaration_id": "d10",
             "method": "post",
             "parameters": {
               "path:id": {
+                "declaration_id": "d11",
                 "location": "path",
                 "name": "id",
                 "optional": false,
@@ -211,6 +216,7 @@ expression: "&first[0].1"
         "Items.legacy": {
           "change": "removed",
           "from": {
+            "declaration_id": "d9",
             "method": "get",
             "raises": [],
             "request": {
@@ -266,6 +272,7 @@ expression: "&first[0].1"
         "Items.list": {
           "change": "added",
           "to": {
+            "declaration_id": "d8",
             "method": "get",
             "raises": [],
             "request": {

@@ -128,7 +128,8 @@ fn walk_export<V: VersionVisitor>(
                             &join(&here, &parameter.declarator.0),
                             &here,
                             &parameter.annotations,
-                        ),
+                        )
+                        .with_parameter(parameter),
                         inner,
                     )?;
                 }
@@ -297,16 +298,19 @@ fn walk_constr<V: VersionVisitor>(
             Ok(())
         }
         ConstrTypeDcl::BitsetDcl(value) => {
-            enter(
+            let here = join(path, &value.ident);
+            let inner = enter(
                 visitor,
-                Site::new(
-                    SiteKind::Type,
-                    &join(path, &value.ident),
-                    path,
-                    &value.annotations,
-                ),
+                Site::new(SiteKind::Type, &here, path, &value.annotations),
                 parent,
             )?;
+            for field in &value.field {
+                enter(
+                    visitor,
+                    Site::new(SiteKind::Bitfield, &join(&here, &field.ident), &here, &[]),
+                    inner,
+                )?;
+            }
             Ok(())
         }
         ConstrTypeDcl::BitmaskDcl(value) => {

@@ -18,6 +18,7 @@ fn site<'a>(path: &str, kind: SiteKind, annotations: &'a [Annotation]) -> Site<'
         kind,
         annotations,
         enum_members: None,
+        parameter: None,
     }
 }
 

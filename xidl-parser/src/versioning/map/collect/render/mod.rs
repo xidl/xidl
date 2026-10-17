@@ -222,7 +222,8 @@ fn render_binary_operator(value: &hir::BinaryOperator) -> &'static str {
     }
 }
 
-pub(super) fn render_param_kind(kind: HttpParamKind) -> &'static str {
+/// Canonical location spelling used by parameter pairing keys.
+pub(in crate::versioning::map) fn render_param_kind(kind: HttpParamKind) -> &'static str {
     match kind {
         HttpParamKind::Path => "path",
         HttpParamKind::Query => "query",

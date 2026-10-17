@@ -50,14 +50,14 @@ fn project_params_infers_kinds_and_tracks_bindings() {
         ])),
         raises: None,
     };
-    let (request, response, path_counts, query_counts) = project_params(
-        &op,
-        HttpMethod::Post,
-        None,
-        &[std::collections::HashSet::from(["cityId".to_string()])],
-        &[std::collections::HashSet::from(["r".to_string()])],
-    )
-    .expect("project params");
+    let routes = [super::super::HttpRoute {
+        path: "/{cityId}".into(),
+        path_params: vec!["cityId".into()],
+        query_params: vec!["r".into()],
+    }];
+    let sources = ParameterSources::new(HttpMethod::Post, None, &routes);
+    let (request, response, path_counts, query_counts) =
+        project_params(&op, &sources).expect("project params");
     assert!(response.is_empty());
     assert_eq!(request[0].kind, HttpParamKind::Path);
     assert_eq!(request[1].kind, HttpParamKind::Query);

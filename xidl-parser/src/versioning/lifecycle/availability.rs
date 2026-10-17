@@ -37,7 +37,7 @@ impl Availability {
     }
 }
 
-/// Kind of annotation-carrying site visited by the walker.
+/// Kind of source declaration visited by the lifecycle walker.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum SiteKind {
     Module,
@@ -45,6 +45,7 @@ pub(crate) enum SiteKind {
     Member,
     Enumerator,
     BitmaskValue,
+    Bitfield,
     Interface,
     Operation,
     Parameter,
@@ -55,7 +56,7 @@ pub(crate) enum SiteKind {
 
 impl SiteKind {
     fn supports_lifecycle(self) -> bool {
-        !matches!(self, Self::Unsupported)
+        !matches!(self, Self::Unsupported | Self::Bitfield)
     }
 
     pub(super) fn describe(self) -> &'static str {
@@ -65,6 +66,7 @@ impl SiteKind {
             Self::Member => "member",
             Self::Enumerator => "enumerator",
             Self::BitmaskValue => "bitmask value",
+            Self::Bitfield => "bitfield",
             Self::Interface => "interface",
             Self::Operation => "operation",
             Self::Parameter => "parameter",
@@ -74,7 +76,7 @@ impl SiteKind {
     }
 }
 
-/// One annotation-carrying site of a specification.
+/// One source declaration and its available annotation slot.
 #[derive(Debug)]
 pub(crate) struct Site<'a> {
     /// Declaration path, e.g. `PetStore::Pet::age`.
@@ -85,6 +87,8 @@ pub(crate) struct Site<'a> {
     pub(crate) annotations: &'a [Annotation],
     /// Members of an enum declaration; `None` for every other site.
     pub(crate) enum_members: Option<&'a [Enumerator]>,
+    /// Original parameter node, used to resolve its canonical HTTP binding.
+    pub(crate) parameter: Option<&'a crate::hir::ParamDcl>,
 }
 
 impl<'a> Site<'a> {
@@ -101,7 +105,14 @@ impl<'a> Site<'a> {
             kind,
             annotations,
             enum_members: None,
+            parameter: None,
         }
+    }
+
+    /// Attaches the original parameter without reconstructing it from annotations.
+    pub(crate) fn with_parameter(mut self, parameter: &'a crate::hir::ParamDcl) -> Self {
+        self.parameter = Some(parameter);
+        self
     }
 
     /// Attaches the members of an enum declaration.
