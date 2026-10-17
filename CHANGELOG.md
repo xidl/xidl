@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.103.0](https://github.com/xidl/xidl/compare/v0.102.0...v0.103.0) (2026-10-17)
+
+
+### Features
+
+* **go:** reach an imported unit through its own package ([54edf41](https://github.com/xidl/xidl/commit/54edf417c4262a2dee90e2c9feaa6c2721edfef1))
+* **import:** compile imported files as independent units ([3ad2490](https://github.com/xidl/xidl/commit/3ad2490c88e718744f5860259f0f03b6923031fa))
+* **import:** reach an imported unit from every target ([f6b7274](https://github.com/xidl/xidl/commit/f6b72749d281ceff26bbe9e93cc32b22b0922def))
+* **import:** validate cross-unit references and reach them from targets ([3ec7eb1](https://github.com/xidl/xidl/commit/3ec7eb1de020a1d2f99a0e1b9f7f5349ea572dee))
+* **xidlc:** lint annotations through a shared registry ([887e0a8](https://github.com/xidl/xidl/commit/887e0a8e2f10d66d7a8eb647d7fddada39bbf3f4))
+
+
+### Bug Fixes
+
+* **parser:** ignore import declarations in the annotation lint walk ([ca426c3](https://github.com/xidl/xidl/commit/ca426c305cfbcf9d46e40da9b00f37d846b1b9fd))
+
 ## [0.102.0](https://github.com/xidl/xidl/compare/v0.101.0...v0.102.0) (2026-10-16)
 
 
