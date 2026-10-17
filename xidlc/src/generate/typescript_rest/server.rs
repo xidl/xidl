@@ -13,18 +13,18 @@ impl ServerClass {
         interface_name: &str,
         module_path: &[String],
         methods: Vec<MethodModel>,
-        version_header: Option<String>,
-    ) -> Self {
-        Self {
+        fixed_response_headers: std::collections::BTreeMap<String, String>,
+    ) -> crate::error::IdlcResult<Self> {
+        Ok(Self {
             context: ServerClassContext {
                 service_name: ts_ident(interface_name),
                 methods: methods
                     .into_iter()
                     .map(|method| method.into_server_context(module_path))
                     .collect(),
-                version_header,
+                fixed_response_headers,
             },
-        }
+        })
     }
 
     pub(super) fn render(&self, renderer: &TypescriptRenderer) -> IdlcResult<String> {

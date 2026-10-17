@@ -1,7 +1,10 @@
 requestURL := c.baseURL + format{{ method.struct_prefix }}Path(req)
-{%- if method.has_query_params %}
+{%- if method.has_query_params or (method.version_parameter and method.version_parameter.location == "query") %}
     query := url.Values{}
     {{ method.query_encode | indent(1, true) }}
+    {%- if method.version_parameter and method.version_parameter.location == "query" %}
+        query.Set({{ method.version_parameter.name | tojson }}, {{ method.version_parameter.value | tojson }})
+    {%- endif %}
     if encoded := query.Encode(); encoded != "" {
         requestURL += "?" + encoded
     }
@@ -34,6 +37,11 @@ httpReq.Header.Set("Accept", "{{ method.response_content_type }}")
 {%- endif %}
 {%- if method.cookie_encode %}
     {{ method.cookie_encode | indent(1, true) }}
+{%- endif %}
+{%- if method.version_parameter and method.version_parameter.location == "header" %}
+    httpReq.Header.Set({{ method.version_parameter.name | tojson }}, {{ method.version_parameter.value | tojson }})
+{%- elif method.version_parameter and method.version_parameter.location == "cookie" %}
+    httpReq.AddCookie(&http.Cookie{Name: {{ method.version_parameter.name | tojson }}, Value: xidlgohttp.EncodeCookieValue({{ method.version_parameter.value | tojson }})})
 {%- endif %}
 {%- if method.has_security %}
     xidlgohttp.ApplyClientAuth(httpReq, c.auth, {{ method.struct_prefix }}SecurityRequirements())

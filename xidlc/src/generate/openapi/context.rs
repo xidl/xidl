@@ -218,7 +218,7 @@ impl OpenApiContext {
             render_http_operation(op, scope, &def.header.ident, &rest_hir.document.exceptions)
         }) {
             let mut method = method?;
-            self.apply_version_header(&mut method, rest_hir);
+            self.apply_version_parameter(&mut method, rest_hir);
             self.collect_method(method)?;
         }
         self.schemas
@@ -227,12 +227,15 @@ impl OpenApiContext {
         Ok(())
     }
 
-    /// Declares the API version header on every operation: a request
-    /// parameter clients may omit, and a response header the generated
-    /// servers echo back.
-    fn apply_version_header(&self, method: &mut MethodInfo, rest_hir: &RestHirDocument) {
-        let Some(header) = rest_hir.document.version_header.as_deref() else {
+    /// Declares the optional request parameter and fixed header response value.
+    fn apply_version_parameter(&self, method: &mut MethodInfo, rest_hir: &RestHirDocument) {
+        let Some(parameter) = &rest_hir.document.version_parameter else {
             return;
+        };
+        let location = match parameter.location {
+            xidl_parser::hir::HttpParameterLocation::Header => ParameterIn::Header,
+            xidl_parser::hir::HttpParameterLocation::Query => ParameterIn::Query,
+            xidl_parser::hir::HttpParameterLocation::Cookie => ParameterIn::Cookie,
         };
         let description = match &rest_hir.document.version {
             Some(version) => format!("API version; this document describes {version}."),
@@ -256,16 +259,16 @@ impl OpenApiContext {
         method.parameters.insert(
             insert_at,
             parameter_schema(
-                ParameterIn::Header,
-                header,
+                location,
+                &parameter.name,
                 schema_ref.clone(),
                 false,
                 Some(description.clone()),
             ),
         );
-        method
-            .response_headers
-            .push((header.to_string(), schema_ref));
+        if parameter.location == xidl_parser::hir::HttpParameterLocation::Header {
+            method.version_response_header = Some((parameter.name.clone(), schema_ref));
+        }
     }
 
     fn collect_method(&mut self, method: MethodInfo) -> IdlcResult<()> {

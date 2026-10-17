@@ -72,7 +72,7 @@ struct Pet {
 }
 
 #[test]
-fn version_marker_with_arguments_is_rejected() {
+fn version_marker_with_unknown_arguments_is_rejected() {
     let error = analyze_error(
         r#"
 @version("1.0")
@@ -82,7 +82,7 @@ enum Versions { v1, v2 };
 
     assert!(matches!(
         error,
-        VersioningError::MalformedVersionMarker { .. }
+        VersioningError::MalformedVersionParameter { .. }
     ));
 }
 

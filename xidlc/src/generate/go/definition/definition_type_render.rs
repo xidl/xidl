@@ -8,7 +8,7 @@ use super::definition_templates::{
     EnumMemberTemplate, EnumTemplate, ExceptionTemplate, FieldTemplate, StructTemplate,
     TypeDeclTemplate, render_enum_member_block, render_field_block,
 };
-use super::definition_types::{constr_type_name, type_with_decl};
+use super::definition_types::{constr_type_name, render_const_expr};
 
 pub(super) fn render_type_dcl(
     ctx: &mut GoRenderContext,
@@ -42,7 +42,7 @@ pub(super) fn render_exception(
         "exception.go.j2",
         &ExceptionTemplate {
             name,
-            fields: render_field_block(ctx, field_templates(&def.member, &[], &ctx.packages))?,
+            fields: render_field_block(ctx, field_templates(ctx, &def.member, &[], prefix))?,
         },
     )
 }
@@ -56,7 +56,7 @@ fn render_typedef(
         hir::TypedefType::TypeSpec(ty) => {
             for decl in &def.decl {
                 let name = go_field_name(declarator_name(decl));
-                let base = type_with_decl(ty, decl, &ctx.packages);
+                let base = type_with_decl(ctx, ty, decl, prefix);
                 ctx.push_template(
                     "type_decl.go.j2",
                     &TypeDeclTemplate {
@@ -125,6 +125,7 @@ fn render_struct(
         go_export_name(prefix, &def.ident),
         &def.member,
         &def.annotations,
+        prefix,
     )
 }
 
@@ -178,6 +179,7 @@ fn render_field_struct(
     name: String,
     members: &[hir::Member],
     container_annotations: &[hir::Annotation],
+    prefix: &[String],
 ) -> IdlcResult<()> {
     ctx.push_template(
         "struct.go.j2",
@@ -185,16 +187,17 @@ fn render_field_struct(
             name,
             fields: render_field_block(
                 ctx,
-                field_templates(members, container_annotations, &ctx.packages),
+                field_templates(ctx, members, container_annotations, prefix),
             )?,
         },
     )
 }
 
 fn field_templates(
+    ctx: &GoRenderContext,
     members: &[hir::Member],
     container_annotations: &[hir::Annotation],
-    packages: &crate::generate::go::GoPackages,
+    prefix: &[String],
 ) -> Vec<FieldTemplate> {
     let mut fields = Vec::new();
     for member in members {
@@ -203,7 +206,7 @@ fn field_templates(
         for decl in &member.ident {
             let raw_name = declarator_name(decl);
             let field = go_field_name(raw_name);
-            let mut ty = type_with_decl(&member.ty, decl, packages);
+            let mut ty = type_with_decl(ctx, &member.ty, decl, prefix);
             if is_optional {
                 ty = pointer_type(&ty);
             }
@@ -227,4 +230,27 @@ fn field_templates(
         }
     }
     fields
+}
+
+fn type_with_decl(
+    ctx: &GoRenderContext,
+    ty: &hir::TypeSpec,
+    decl: &hir::Declarator,
+    prefix: &[String],
+) -> String {
+    let base = ctx.go_type(ty, prefix);
+    match decl {
+        hir::Declarator::SimpleDeclarator(_) => base,
+        hir::Declarator::ArrayDeclarator(value) => {
+            let mut out = base;
+            for len in value.len.iter().rev() {
+                out = format!(
+                    "[{}]{}",
+                    render_const_expr(&len.0).unwrap_or_else(|_| "0".to_string()),
+                    out
+                );
+            }
+            out
+        }
+    }
 }

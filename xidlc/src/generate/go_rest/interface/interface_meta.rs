@@ -1,6 +1,7 @@
 use crate::error::IdlcResult;
-use crate::generate::go::GoPackages;
-use crate::generate::go_rest::{MethodMeta, ParamMeta, ParamSource, definition};
+use crate::generate::go_rest::{
+    MethodMeta, ParamMeta, ParamSource, VersionParameterMeta, definition,
+};
 use convert_case::{Case, Casing};
 use xidl_parser::rest_hir::{
     HttpOperation, HttpOutputSource, HttpRequestBodyShape, HttpResponseBodyShape,
@@ -11,7 +12,9 @@ use super::interface_meta_support::{deprecated_context, http_method, validate_st
 pub(crate) fn build_method_meta(
     interface_name: &str,
     op: &HttpOperation,
-    packages: &GoPackages,
+    prefix: &[String],
+    version_parameter: Option<VersionParameterMeta>,
+    versioned_modules: bool,
 ) -> IdlcResult<MethodMeta> {
     validate_stream_support(op)?;
     let http_method = http_method(op.meta.method);
@@ -37,7 +40,7 @@ pub(crate) fn build_method_meta(
             xidl_parser::rest_hir::HttpSignatureParamDirection::In
                 | xidl_parser::rest_hir::HttpSignatureParamDirection::InOut
         ) {
-            let meta = build_param_meta(op, &p.name, packages);
+            let meta = build_param_meta(op, &p.name, prefix, versioned_modules);
             request_params.push(meta.clone());
             match meta.source {
                 ParamSource::Path => path_params.push(meta),
@@ -59,7 +62,7 @@ pub(crate) fn build_method_meta(
             xidl_parser::rest_hir::HttpSignatureParamDirection::Out
                 | xidl_parser::rest_hir::HttpSignatureParamDirection::InOut
         ) {
-            let meta = build_response_param_meta(op, &p.name, packages);
+            let meta = build_response_param_meta(op, &p.name, prefix, versioned_modules);
             match meta.source {
                 ParamSource::Header => response_header_params.push(meta),
                 ParamSource::Cookie => response_cookie_params.push(meta),
@@ -83,7 +86,7 @@ pub(crate) fn build_method_meta(
             } => (
                 None,
                 Some(source_param.to_case(Case::Pascal)),
-                Some(definition::go_type(ty, packages)),
+                Some(definition::go_type(ty, prefix, versioned_modules)),
             ),
             _ => (None, None, None),
         };
@@ -92,7 +95,7 @@ pub(crate) fn build_method_meta(
         .signature
         .return_type
         .as_ref()
-        .map(|ty| definition::go_type(ty, packages));
+        .map(|ty| definition::go_type(ty, prefix, versioned_modules));
 
     let (response_body_struct, response_body_direct_field, response_body_direct_ty) =
         match &op.http.response.body.shape {
@@ -102,14 +105,18 @@ pub(crate) fn build_method_meta(
             HttpResponseBodyShape::ReturnOnly { ty } => (
                 None,
                 Some("Return".to_string()),
-                Some(definition::go_type(ty, packages)),
+                Some(definition::go_type(ty, prefix, versioned_modules)),
             ),
             HttpResponseBodyShape::SingleValue { source, ty } => {
                 let name = match source {
                     HttpOutputSource::ReturnValue => "Return".to_string(),
                     HttpOutputSource::Param { name } => name.to_case(Case::Pascal),
                 };
-                (None, Some(name), Some(definition::go_type(ty, packages)))
+                (
+                    None,
+                    Some(name),
+                    Some(definition::go_type(ty, prefix, versioned_modules)),
+                )
             }
             _ => (None, None, None),
         };
@@ -123,16 +130,17 @@ pub(crate) fn build_method_meta(
         .websocket
         .as_ref()
         .and_then(|cfg| cfg.subprotocol.clone());
-    let stream_in_ty = if body_params.is_empty() {
+    let stream_in_ty = if body_params.is_empty() && !versioned_modules {
         "struct{}".to_string()
     } else {
         format!("{struct_prefix}StreamIn")
     };
-    let stream_out_ty = if response_body_params.is_empty() && return_ty.is_none() {
-        "struct{}".to_string()
-    } else {
-        format!("{struct_prefix}StreamOut")
-    };
+    let stream_out_ty =
+        if response_body_params.is_empty() && return_ty.is_none() && !versioned_modules {
+            "struct{}".to_string()
+        } else {
+            format!("{struct_prefix}StreamOut")
+        };
     let handshake_params = request_params
         .iter()
         .filter(|param| !matches!(param.source, ParamSource::Body))
@@ -147,6 +155,7 @@ pub(crate) fn build_method_meta(
         stream_in_ty,
         stream_out_ty,
         handshake_params,
+        version_parameter,
         http_method,
         paths: op
             .meta
@@ -200,7 +209,12 @@ pub(crate) fn build_method_meta(
     })
 }
 
-fn build_param_meta(op: &HttpOperation, name: &str, packages: &GoPackages) -> ParamMeta {
+fn build_param_meta(
+    op: &HttpOperation,
+    name: &str,
+    prefix: &[String],
+    versioned_modules: bool,
+) -> ParamMeta {
     let p = op.signature.params.iter().find(|p| p.name == name).unwrap();
     let optional = p.is_optional;
     let flatten = p.is_flatten;
@@ -262,13 +276,18 @@ fn build_param_meta(op: &HttpOperation, name: &str, packages: &GoPackages) -> Pa
         field_name: name.to_case(Case::Pascal),
         raw_name: name.to_string(),
         wire_name,
-        ty: definition::go_type(&p.ty, packages),
+        ty: definition::go_type(&p.ty, prefix, versioned_modules),
         optional,
         source,
     }
 }
 
-fn build_response_param_meta(op: &HttpOperation, name: &str, packages: &GoPackages) -> ParamMeta {
+fn build_response_param_meta(
+    op: &HttpOperation,
+    name: &str,
+    prefix: &[String],
+    versioned_modules: bool,
+) -> ParamMeta {
     let p = op.signature.params.iter().find(|p| p.name == name).unwrap();
     let (source, wire_name) = if let Some(b) =
         op.http.response.header.iter().find(|b| match &b.source {
@@ -289,7 +308,7 @@ fn build_response_param_meta(op: &HttpOperation, name: &str, packages: &GoPackag
         field_name: name.to_case(Case::Pascal),
         raw_name: name.to_string(),
         wire_name,
-        ty: definition::go_type(&p.ty, packages),
+        ty: definition::go_type(&p.ty, prefix, versioned_modules),
         optional: false,
         source,
     }

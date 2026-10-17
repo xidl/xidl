@@ -1,5 +1,6 @@
 import { errorResponse, XidlServerError } from './error.ts';
 import { executeOperation } from './execute.ts';
+import { decodeRouteParams } from './request.ts';
 import type {
   OperationDescriptor,
   RouteParams,
@@ -11,7 +12,6 @@ interface Route<TService> {
   operation: OperationDescriptor<TService>;
   segments: string[];
 }
-
 export function createRouter<TService>(
   operations: readonly OperationDescriptor<TService>[],
   service: TService,
@@ -40,7 +40,7 @@ export function createRouter<TService>(
           route.operation,
           service,
           request,
-          params,
+          () => decodeRouteParams(params),
           options,
         );
       }
@@ -67,7 +67,7 @@ function matchRoute<TService>(
     const expected = route.segments[index] as string;
     const parameter = parseParameter(expected);
     if (parameter?.catchAll) {
-      params[parameter.name] = requestSegments.slice(index).map(decodeSegment);
+      params[parameter.name] = requestSegments.slice(index);
       return params;
     }
     const actual = requestSegments[index];
@@ -75,7 +75,7 @@ function matchRoute<TService>(
       return undefined;
     }
     if (parameter) {
-      params[parameter.name] = decodeSegment(actual);
+      params[parameter.name] = actual;
     } else if (expected !== actual) {
       return undefined;
     }
@@ -97,12 +97,4 @@ function parseParameter(
   return name.startsWith('*')
     ? { catchAll: true, name: name.slice(1) }
     : { catchAll: false, name };
-}
-
-function decodeSegment(value: string): string {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    throw new XidlServerError(400, `invalid route segment: ${value}`);
-  }
 }

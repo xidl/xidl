@@ -18,34 +18,19 @@ pub fn generate(
     input_path: &Path,
     props: HashMap<String, serde_json::Value>,
 ) -> IdlcResult<Vec<Artifact>> {
-    crate::generate::versioning::reject_versioned_modules("go-rest", &props)?;
     GoRestRenderMode::from_properties(&props)?;
     let spec = rest_hir.spec.clone();
     let stem = input_path
         .file_stem()
         .and_then(|value| value.to_str())
         .unwrap_or("output");
-    // A unit keeps the directory its IDL path names, so a package generated
-    // from `pkg/a.idl` is `pkg/a_http.go` with package name `pkg`.
-    let unit_path = props
-        .get(crate::units::UNIT_PATH_PROPERTY)
-        .and_then(serde_json::Value::as_str);
-    let package = match unit_path.and_then(|path| path.rsplit_once('/')) {
-        Some((dir, _)) => {
-            let name = dir.rsplit('/').next().unwrap_or(dir);
-            go_package_name(if name.is_empty() { stem } else { name })
-        }
-        None => rest_hir
-            .document
-            .package
-            .as_deref()
-            .map(go_package_name)
-            .unwrap_or_else(|| go_package_name(stem)),
-    };
-    let filename = match unit_path {
-        Some(path) => format!("{}_http.go", path.trim_end_matches(".idl")),
-        None => format!("{}_http.go", package),
-    };
+    let package = rest_hir
+        .document
+        .package
+        .as_deref()
+        .map(go_package_name)
+        .unwrap_or_else(|| go_package_name(stem));
+    let filename = format!("{}_http.go", package);
     let content = spec::render_spec(&spec, &package, &rest_hir, &props)?;
 
     let mut artifacts = vec![Artifact::new_file(ArtifactFile {
@@ -64,6 +49,7 @@ pub fn generate(
             "enable_interfaces" => false,
             "enable_render_header" => false,
             "enable_metadata" => enable_metadata,
+            "allow_versioned_modules" => serde_json::Value::Bool(true),
             "package" => serde_json::Value::from(package)
         };
         artifacts.push(Artifact::new_hir(ArtifactHir {
@@ -138,7 +124,30 @@ pub(crate) struct GoRestRenderContext<'a> {
     pub(crate) renderer: &'a GoRestRenderer,
     pub(crate) rest_hir: &'a xidl_parser::rest_hir::RestHirDocument,
     pub(crate) mode: GoRestRenderMode,
-    pub(crate) packages: crate::generate::go::GoPackages,
+    pub(crate) versioned_modules: bool,
+}
+
+impl GoRestRenderContext<'_> {
+    pub(crate) fn version_parameter(&self, module_path: &[String]) -> Option<VersionParameterMeta> {
+        let parameter = self.rest_hir.document.version_parameter.as_ref()?;
+        let value = self.rest_hir.document.api_version(module_path)?.to_string();
+        Some(VersionParameterMeta {
+            location: parameter.location,
+            name: parameter.name.clone(),
+            value,
+        })
+    }
+
+    pub(crate) fn versioned_modules(&self) -> bool {
+        self.versioned_modules
+    }
+}
+
+#[derive(Clone)]
+pub(crate) struct VersionParameterMeta {
+    pub(crate) location: xidl_parser::hir::HttpParameterLocation,
+    pub(crate) name: String,
+    pub(crate) value: String,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -205,6 +214,7 @@ pub(crate) struct MethodMeta {
     pub(crate) stream_in_ty: String,
     pub(crate) stream_out_ty: String,
     pub(crate) handshake_params: Vec<ParamMeta>,
+    pub(crate) version_parameter: Option<VersionParameterMeta>,
     pub(crate) cors: Option<xidl_parser::rest_hir::semantics::HttpCorsProfile>,
     pub(crate) security: Vec<xidl_parser::rest_hir::semantics::HttpSecurityRequirement>,
     pub(crate) basic_realm: Option<String>,
@@ -252,5 +262,4 @@ pub(crate) struct GoRestRenderOutput {
     package_name: String,
     blocks: GoRestRenderBlocks,
     opt: ParserProperties,
-    imports: Vec<crate::generate::go::GoImport>,
 }

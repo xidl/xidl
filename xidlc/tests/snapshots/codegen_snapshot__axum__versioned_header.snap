@@ -114,15 +114,8 @@ pub mod v1 {
             }
         }
     }
-    #[derive(::serde::Serialize)]
-    pub struct StoreCreateRequestOutBody {
-        #[serde(default)]
-        pub item: __xidl_out_Store::v1_Item,
-    }
-    #[derive(::serde::Deserialize)]
-    pub struct StoreCreateRequestInBody {
-        pub item: __xidl_in_Store::v1_Item,
-    }
+    pub type StoreCreateRequestOutBody = __xidl_out_Store::v1_Item;
+    pub type StoreCreateRequestInBody = __xidl_in_Store::v1_Item;
     #[derive(::serde::Deserialize)]
     struct StoreCreateRequest {
         item: __xidl_in_Store::v1_Item,
@@ -167,7 +160,7 @@ pub mod v1 {
                         "application/json",
                     )
                     .from_slice(&xidl_body_bytes)?;
-                let StoreCreateRequestInBody { item } = xidl_body;
+                let item = xidl_body;
                 Ok(Self { item })
             }
         }
@@ -194,6 +187,24 @@ pub mod v1 {
                 .route("/items/{id}", xidl_rust_axum::axum::routing::get(Self::get))
                 .route("/items", xidl_rust_axum::axum::routing::post(Self::create))
                 .with_state(_svc)
+                .layer(
+                    xidl_rust_axum::axum::middleware::map_response(
+                        Self::with_api_version,
+                    ),
+                )
+        }
+        async fn with_api_version(
+            mut response: ::xidl_rust_axum::axum::response::Response,
+        ) -> ::xidl_rust_axum::axum::response::Response {
+            response
+                .headers_mut()
+                .insert(
+                    ::xidl_rust_axum::axum::http::HeaderName::from_static(
+                        "x-api-version",
+                    ),
+                    ::xidl_rust_axum::axum::http::HeaderValue::from_static("2025-01"),
+                );
+            response
         }
         #[allow(
             clippy::let_and_return,
@@ -248,13 +259,6 @@ pub mod v1 {
                     ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
                 }
             };
-            if let Some(version_value) = headers.get("X-Api-Version") {
-                let version_header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
-                        "X-Api-Version".as_bytes(),
-                    )
-                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-                resp.headers_mut().insert(version_header_name, version_value.clone());
-            }
             Ok(resp)
         }
         #[allow(
@@ -310,13 +314,6 @@ pub mod v1 {
                     ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
                 }
             };
-            if let Some(version_value) = headers.get("X-Api-Version") {
-                let version_header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
-                        "X-Api-Version".as_bytes(),
-                    )
-                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-                resp.headers_mut().insert(version_header_name, version_value.clone());
-            }
             Ok(resp)
         }
     }
@@ -333,7 +330,7 @@ pub mod v1 {
     }
     #[allow(non_snake_case)]
     impl StoreClient {
-        /// The API version value this client pins on every request.
+        /// The API version sent by this client on every request.
         pub const API_VERSION: &'static str = "2025-01";
         pub fn new(base_url: impl Into<String>) -> Self {
             Self {
@@ -380,19 +377,17 @@ pub mod v1 {
                             format!("{err:?}"),
                         ))?,
                 );
-            req.headers_mut()
-                .insert(
-                    "X-Api-Version",
-                    xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                            Self::API_VERSION,
-                        )
-                        .map_err(|err| xidl_rust_axum::Error::new(
-                            500,
-                            format!("{err:?}"),
-                        ))?,
-                );
             let auth_target = &self.client;
             let _ = auth_target;
+            req.headers_mut()
+                .insert(
+                    ::xidl_rust_axum::reqwest::header::HeaderName::from_static(
+                        "x-api-version",
+                    ),
+                    ::xidl_rust_axum::reqwest::header::HeaderValue::from_static(
+                        Self::API_VERSION,
+                    ),
+                );
             let resp = self
                 .client
                 .http()
@@ -443,22 +438,18 @@ pub mod v1 {
                             format!("{err:?}"),
                         ))?,
                 );
-            req.headers_mut()
-                .insert(
-                    "X-Api-Version",
-                    xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                            Self::API_VERSION,
-                        )
-                        .map_err(|err| xidl_rust_axum::Error::new(
-                            500,
-                            format!("{err:?}"),
-                        ))?,
-                );
             let auth_target = &self.client;
             let _ = auth_target;
-            let body = StoreCreateRequestOutBody {
-                item: item.into(),
-            };
+            req.headers_mut()
+                .insert(
+                    ::xidl_rust_axum::reqwest::header::HeaderName::from_static(
+                        "x-api-version",
+                    ),
+                    ::xidl_rust_axum::reqwest::header::HeaderValue::from_static(
+                        Self::API_VERSION,
+                    ),
+                );
+            let body: __xidl_out_Store::v1_Item = item.into();
             let body = xidl_rust_axum::SerializeFactory::new("application/json")
                 .to_vec(&body)?;
             req.headers_mut()
@@ -604,15 +595,8 @@ pub mod v2 {
             }
         }
     }
-    #[derive(::serde::Serialize)]
-    pub struct StoreCreateRequestOutBody {
-        #[serde(default)]
-        pub item: __xidl_out_Store::v2_Item,
-    }
-    #[derive(::serde::Deserialize)]
-    pub struct StoreCreateRequestInBody {
-        pub item: __xidl_in_Store::v2_Item,
-    }
+    pub type StoreCreateRequestOutBody = __xidl_out_Store::v2_Item;
+    pub type StoreCreateRequestInBody = __xidl_in_Store::v2_Item;
     #[derive(::serde::Deserialize)]
     struct StoreCreateRequest {
         item: __xidl_in_Store::v2_Item,
@@ -657,7 +641,7 @@ pub mod v2 {
                         "application/json",
                     )
                     .from_slice(&xidl_body_bytes)?;
-                let StoreCreateRequestInBody { item } = xidl_body;
+                let item = xidl_body;
                 Ok(Self { item })
             }
         }
@@ -684,6 +668,24 @@ pub mod v2 {
                 .route("/items/{id}", xidl_rust_axum::axum::routing::get(Self::get))
                 .route("/items", xidl_rust_axum::axum::routing::post(Self::create))
                 .with_state(_svc)
+                .layer(
+                    xidl_rust_axum::axum::middleware::map_response(
+                        Self::with_api_version,
+                    ),
+                )
+        }
+        async fn with_api_version(
+            mut response: ::xidl_rust_axum::axum::response::Response,
+        ) -> ::xidl_rust_axum::axum::response::Response {
+            response
+                .headers_mut()
+                .insert(
+                    ::xidl_rust_axum::axum::http::HeaderName::from_static(
+                        "x-api-version",
+                    ),
+                    ::xidl_rust_axum::axum::http::HeaderValue::from_static("2025-06"),
+                );
+            response
         }
         #[allow(
             clippy::let_and_return,
@@ -738,13 +740,6 @@ pub mod v2 {
                     ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
                 }
             };
-            if let Some(version_value) = headers.get("X-Api-Version") {
-                let version_header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
-                        "X-Api-Version".as_bytes(),
-                    )
-                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-                resp.headers_mut().insert(version_header_name, version_value.clone());
-            }
             Ok(resp)
         }
         #[allow(
@@ -800,13 +795,6 @@ pub mod v2 {
                     ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
                 }
             };
-            if let Some(version_value) = headers.get("X-Api-Version") {
-                let version_header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
-                        "X-Api-Version".as_bytes(),
-                    )
-                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-                resp.headers_mut().insert(version_header_name, version_value.clone());
-            }
             Ok(resp)
         }
     }
@@ -823,7 +811,7 @@ pub mod v2 {
     }
     #[allow(non_snake_case)]
     impl StoreClient {
-        /// The API version value this client pins on every request.
+        /// The API version sent by this client on every request.
         pub const API_VERSION: &'static str = "2025-06";
         pub fn new(base_url: impl Into<String>) -> Self {
             Self {
@@ -870,19 +858,17 @@ pub mod v2 {
                             format!("{err:?}"),
                         ))?,
                 );
-            req.headers_mut()
-                .insert(
-                    "X-Api-Version",
-                    xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                            Self::API_VERSION,
-                        )
-                        .map_err(|err| xidl_rust_axum::Error::new(
-                            500,
-                            format!("{err:?}"),
-                        ))?,
-                );
             let auth_target = &self.client;
             let _ = auth_target;
+            req.headers_mut()
+                .insert(
+                    ::xidl_rust_axum::reqwest::header::HeaderName::from_static(
+                        "x-api-version",
+                    ),
+                    ::xidl_rust_axum::reqwest::header::HeaderValue::from_static(
+                        Self::API_VERSION,
+                    ),
+                );
             let resp = self
                 .client
                 .http()
@@ -933,22 +919,18 @@ pub mod v2 {
                             format!("{err:?}"),
                         ))?,
                 );
-            req.headers_mut()
-                .insert(
-                    "X-Api-Version",
-                    xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                            Self::API_VERSION,
-                        )
-                        .map_err(|err| xidl_rust_axum::Error::new(
-                            500,
-                            format!("{err:?}"),
-                        ))?,
-                );
             let auth_target = &self.client;
             let _ = auth_target;
-            let body = StoreCreateRequestOutBody {
-                item: item.into(),
-            };
+            req.headers_mut()
+                .insert(
+                    ::xidl_rust_axum::reqwest::header::HeaderName::from_static(
+                        "x-api-version",
+                    ),
+                    ::xidl_rust_axum::reqwest::header::HeaderValue::from_static(
+                        Self::API_VERSION,
+                    ),
+                );
+            let body: __xidl_out_Store::v2_Item = item.into();
             let body = xidl_rust_axum::SerializeFactory::new("application/json")
                 .to_vec(&body)?;
             req.headers_mut()

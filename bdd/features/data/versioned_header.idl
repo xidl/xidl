@@ -1,6 +1,6 @@
 #pragma xidlc package versioned_header
 
-@version(header = "X-Api-Version")
+@version(in = "header", name = "X-Api-Version")
 enum ApiVersions {
     @rename("2025-01") v1,
     @rename("2025-06") v2,

@@ -171,9 +171,9 @@ pub(crate) fn availability(
                 removed = Some(resolved);
             }
             Annotation::Version => {}
-            // Discovery validates the header form and reports misuse; the
+            // Discovery validates the parameter and reports misuse; the
             // availability walk only needs to ignore it.
-            Annotation::VersionHeader { .. } => {}
+            Annotation::VersionParameter(_) => {}
             other => {
                 let Some(name) = raw_versioning_name(other) else {
                     continue;
@@ -294,7 +294,7 @@ pub(super) fn raw_versioning_name(annotation: &Annotation) -> Option<String> {
 pub(crate) fn is_versioning_annotation(annotation: &Annotation) -> bool {
     match annotation {
         Annotation::Version
-        | Annotation::VersionHeader { .. }
+        | Annotation::VersionParameter(_)
         | Annotation::Added { .. }
         | Annotation::Removed { .. } => true,
         other => raw_versioning_name(other).is_some_and(|name| {

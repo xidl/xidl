@@ -190,13 +190,11 @@ impl From<crate::typed_ast::AnnotationAppl> for Annotation {
                     if params.is_none() {
                         return Self::Version;
                     }
-                    // One `header` argument lowers to the typed variant; anything
-                    // else falls through so discovery reports the malformed form.
-                    let normalized = normalize_annotation_params(params.as_ref().expect("checked"));
-                    if normalized.len() == 1 && normalized.contains_key("header") {
-                        return Self::VersionHeader {
-                            name: normalized["header"].clone(),
-                        };
+                    if let Some(parameter) = params
+                        .as_ref()
+                        .and_then(|params| super::VersionParameter::parse(params).ok())
+                    {
+                        return Self::VersionParameter(parameter);
                     }
                 }
                 Some(AnnotationKind::Added | AnnotationKind::Removed) => {

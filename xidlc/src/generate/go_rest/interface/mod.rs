@@ -42,7 +42,15 @@ pub(crate) fn render_interface(
                     | HttpOperationSource::AttributeSet
             )
         })
-        .map(|operation| build_method_meta(&interface_name, operation, &context.packages))
+        .map(|operation| {
+            build_method_meta(
+                &interface_name,
+                operation,
+                prefix,
+                context.version_parameter(prefix),
+                context.versioned_modules(),
+            )
+        })
         .collect::<IdlcResult<Vec<_>>>()?;
 
     let mut blocks = GoRestRenderBlocks::default();

@@ -35,10 +35,10 @@ export const {{ service_name }}Operations = {
             bodyMode: "{{ method.response_body_mode }}",
             bodyFields: [{% for entry in method.response_body_entries %}{ wireName: "{{ entry.raw_name }}", key: "{{ entry.key_name }}" }{% if not loop.last %}, {% endif %}{% endfor %}],
             headers: [{% for param in method.response_header_params %}{ wireName: "{{ param.raw_name }}", key: "{{ param.key_name }}", multi: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}],
-            {%- if version_header %}
-                echoHeader: "{{ version_header }}",
-            {%- endif %}
             cookies: [{% for param in method.response_cookie_params %}{ wireName: "{{ param.raw_name }}", key: "{{ param.key_name }}", multi: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}],
+            {%- if fixed_response_headers %}
+                fixedHeaders: {{ fixed_response_headers | tojson }},
+            {%- endif %}
             {% if method.representations | length > 0 %}representations: [{% for repr in method.representations %}{ kind: "{{ repr.kind }}", contentType: "{{ repr.content_type }}"{% if not repr.is_byte %}, schema: {{ render_zod(repr.schema) }}{% endif %} }{% if not loop.last %}, {% endif %}{% endfor %}],
             {% endif %}{% if method.response_schema_ref and method.representations | length == 0 %}schema: ifaceSchemas.{{ method.response_schema_ref }}Schema,
             {% endif %}stream: {{ method.is_server_stream | lower }},

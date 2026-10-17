@@ -1,10 +1,10 @@
 use crate::generate::rust_axum::interface::{ApiKeyContext, DeprecatedContext, HttpMethod};
 use xidl_parser::hir;
+use xidl_parser::hir::HttpParameterLocation;
 use xidl_parser::rest_hir::{
     HttpMethod as RestHirMethod, HttpOperation,
     semantics::{
-        HttpApiKeyLocation, HttpCorsProfile, HttpSecurityOrigin, HttpSecurityProfile,
-        HttpSecurityRequirement,
+        HttpCorsProfile, HttpSecurityOrigin, HttpSecurityProfile, HttpSecurityRequirement,
     },
 };
 
@@ -152,11 +152,11 @@ pub(crate) fn security_context(profile: &Option<HttpSecurityProfile>) -> Securit
     }
 }
 
-fn api_key_location(location: &HttpApiKeyLocation) -> &'static str {
+fn api_key_location(location: &HttpParameterLocation) -> &'static str {
     match location {
-        HttpApiKeyLocation::Header => "Header",
-        HttpApiKeyLocation::Query => "Query",
-        HttpApiKeyLocation::Cookie => "Cookie",
+        HttpParameterLocation::Header => "Header",
+        HttpParameterLocation::Query => "Query",
+        HttpParameterLocation::Cookie => "Cookie",
     }
 }
 

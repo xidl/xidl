@@ -2,48 +2,8 @@
 //! quote/escape normalization and const-expression rendering.
 
 pub(super) fn parse_raw_annotation_params(raw: &str) -> Vec<(String, String)> {
-    let mut parts = Vec::new();
-    let mut buf = String::new();
-    let mut quote = None;
-    let mut escaped = false;
-
-    for ch in raw.chars() {
-        if escaped {
-            buf.push(ch);
-            escaped = false;
-            continue;
-        }
-        if ch == '\\' && quote.is_some() {
-            escaped = true;
-            buf.push(ch);
-            continue;
-        }
-        match ch {
-            '\'' | '"' => {
-                if quote == Some(ch) {
-                    quote = None;
-                } else if quote.is_none() {
-                    quote = Some(ch);
-                }
-                buf.push(ch);
-            }
-            ',' if quote.is_none() => {
-                let item = buf.trim();
-                if !item.is_empty() {
-                    parts.push(item.to_string());
-                }
-                buf.clear();
-            }
-            _ => buf.push(ch),
-        }
-    }
-
-    let item = buf.trim();
-    if !item.is_empty() {
-        parts.push(item.to_string());
-    }
-
-    parts
+    let raw = crate::parser::raw::RawArguments::without_comments(raw);
+    crate::parser::raw::RawArguments::split(&raw, ',')
         .into_iter()
         .map(|part| {
             if let Some((key, value)) = part.split_once('=') {
@@ -88,5 +48,87 @@ pub(super) fn trim_annotation_quotes(value: &str) -> Option<String> {
         Some(value[1..value.len() - 1].to_string())
     } else {
         None
+    }
+}
+
+impl super::VersionParameter {
+    pub(crate) fn parse(params: &super::AnnotationParams) -> Result<Self, String> {
+        use super::{AnnotationParams, ConstExpr, HttpParameterLocation, Literal};
+        let valid_shape = match params {
+            AnnotationParams::Params(values) => {
+                values.len() == 2
+                    && values.iter().all(|param| {
+                        matches!(
+                            param.value,
+                            Some(ConstExpr::Literal(Literal::StringLiteral(_)))
+                        )
+                    })
+            }
+            AnnotationParams::Raw(raw) => {
+                let raw = crate::parser::raw::RawArguments::without_comments(raw);
+                let parts = crate::parser::raw::RawArguments::split(&raw, ',');
+                parts.len() == 2 && parts.iter().all(|part| {
+                    let pair = crate::parser::raw::RawArguments::split(part, '=');
+                    matches!(pair.as_slice(), [_, value] if value.starts_with('"') && value.ends_with('"'))
+                })
+            }
+            _ => false,
+        };
+        if !valid_shape {
+            return Err("requires exactly in=... and name=... string arguments".to_string());
+        }
+        let values = super::normalize_annotation_params(params);
+        if values.len() != 2 || values.keys().any(|key| key != "in" && key != "name") {
+            return Err(
+                "requires exactly in=... and name=... without duplicate arguments".to_string(),
+            );
+        }
+        let location = values
+            .get("in")
+            .and_then(|value| HttpParameterLocation::parse(value))
+            .ok_or_else(|| "in must be one of header|query|cookie".to_string())?;
+        let name = values
+            .get("name")
+            .cloned()
+            .ok_or_else(|| "requires non-empty name=...".to_string())?;
+        let parameter = Self { location, name };
+        parameter.validate()?;
+        Ok(parameter)
+    }
+
+    pub(crate) fn validate(&self) -> Result<(), String> {
+        if !self.location.valid_name(&self.name) {
+            return Err(format!(
+                "invalid {} parameter name {:?}",
+                self.location.as_str(),
+                self.name
+            ));
+        }
+        if self.location == super::HttpParameterLocation::Header {
+            let name = self.name.to_ascii_lowercase();
+            if matches!(
+                name.as_str(),
+                "accept"
+                    | "content-type"
+                    | "content-length"
+                    | "content-encoding"
+                    | "content-range"
+                    | "transfer-encoding"
+                    | "host"
+                    | "connection"
+                    | "upgrade"
+                    | "trailer"
+                    | "te"
+                    | "cookie"
+                    | "set-cookie"
+            ) || name.starts_with("sec-websocket-")
+            {
+                return Err(format!(
+                    "version header {:?} is reserved for HTTP transport metadata",
+                    self.name
+                ));
+            }
+        }
+        Ok(())
     }
 }

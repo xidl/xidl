@@ -107,7 +107,17 @@ openapi_versioned_header.v1.json
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Bad Request",
+            "headers": {
+              "X-Api-Version": {
+                "schema": {
+                  "enum": [
+                    "2025-01"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
           },
           "500": {
             "content": {
@@ -117,7 +127,17 @@ openapi_versioned_header.v1.json
                 }
               }
             },
-            "description": "Internal Server Error"
+            "description": "Internal Server Error",
+            "headers": {
+              "X-Api-Version": {
+                "schema": {
+                  "enum": [
+                    "2025-01"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -179,7 +199,17 @@ openapi_versioned_header.v1.json
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Bad Request",
+            "headers": {
+              "X-Api-Version": {
+                "schema": {
+                  "enum": [
+                    "2025-01"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
           },
           "500": {
             "content": {
@@ -189,7 +219,17 @@ openapi_versioned_header.v1.json
                 }
               }
             },
-            "description": "Internal Server Error"
+            "description": "Internal Server Error",
+            "headers": {
+              "X-Api-Version": {
+                "schema": {
+                  "enum": [
+                    "2025-01"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -309,7 +349,17 @@ openapi_versioned_header.v2.json
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Bad Request",
+            "headers": {
+              "X-Api-Version": {
+                "schema": {
+                  "enum": [
+                    "2025-06"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
           },
           "500": {
             "content": {
@@ -319,7 +369,17 @@ openapi_versioned_header.v2.json
                 }
               }
             },
-            "description": "Internal Server Error"
+            "description": "Internal Server Error",
+            "headers": {
+              "X-Api-Version": {
+                "schema": {
+                  "enum": [
+                    "2025-06"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -381,7 +441,17 @@ openapi_versioned_header.v2.json
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Bad Request",
+            "headers": {
+              "X-Api-Version": {
+                "schema": {
+                  "enum": [
+                    "2025-06"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
           },
           "500": {
             "content": {
@@ -391,7 +461,17 @@ openapi_versioned_header.v2.json
                 }
               }
             },
-            "description": "Internal Server Error"
+            "description": "Internal Server Error",
+            "headers": {
+              "X-Api-Version": {
+                "schema": {
+                  "enum": [
+                    "2025-06"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "tags": [
