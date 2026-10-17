@@ -236,7 +236,8 @@
             "properties": {
               "two_or_three": {
                 "type": "integer",
-                "format": "int32",
+                "format": "int64",
+                "maximum": 4294967295,
                 "minimum": 0
               }
             }
