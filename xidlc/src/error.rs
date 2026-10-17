@@ -26,6 +26,8 @@ pub enum IdlcError {
     Fmt(String),
     /// Library (`xidl.toml`) resolution error.
     Library(crate::library::LibraryError),
+    /// Imported compilation unit resolution error.
+    Import(crate::units::ImportError),
     /// Collection of diagnostics.
     Diagnostics(DiagnosticListError),
 }
@@ -41,6 +43,7 @@ impl fmt::Display for IdlcError {
                 f.write_str(message)
             }
             Self::Library(err) => write!(f, "{err}"),
+            Self::Import(err) => write!(f, "{err}"),
             Self::Diagnostics(err) => write!(f, "{err}"),
         }
     }
@@ -56,6 +59,7 @@ impl Error for IdlcError {
             Self::Json(err) => err.source(),
             Self::Diagnostics(err) => Some(err),
             Self::Library(err) => Some(err),
+            Self::Import(err) => Some(err),
             Self::LintFailed | Self::Template(_) | Self::Rpc(_) | Self::Fmt(_) => None,
         }
     }
@@ -82,6 +86,12 @@ impl From<serde_json::Error> for IdlcError {
 impl From<crate::library::LibraryError> for IdlcError {
     fn from(err: crate::library::LibraryError) -> Self {
         Self::Library(err)
+    }
+}
+
+impl From<crate::units::ImportError> for IdlcError {
+    fn from(err: crate::units::ImportError) -> Self {
+        Self::Import(err)
     }
 }
 

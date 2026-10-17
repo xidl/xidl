@@ -222,6 +222,10 @@ pub(super) fn collect_defs(defs: Vec<crate::typed_ast::Definition>, out: &mut Ve
                 // Includes are now handled at the tree-sitter stage.
                 // If we see a PreprocInclude here, it means it was not expanded.
             }
+            crate::typed_ast::Definition::ImportDcl(_) => {
+                // Imports name another compilation unit. The unit graph owns
+                // them, so the lowered HIR of one unit stays unchanged.
+            }
             crate::typed_ast::Definition::TemplateModuleDcl(_)
             | crate::typed_ast::Definition::TemplateModuleInst(_)
             | crate::typed_ast::Definition::PreprocDefine(_) => {}

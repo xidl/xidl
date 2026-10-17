@@ -1,0 +1,46 @@
+---
+source: xidl-parser/tests/test-import.rs
+expression: hir
+---
+Specification(
+    [
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "Event",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "timestamp",
+                                            "v1",
+                                            "Instant",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "at",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                                recursive: false,
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+    ],
+)

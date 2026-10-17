@@ -89,6 +89,10 @@ export default defineConfig({
               label: 'API Versioning',
               link: '/guide/versioning/',
             },
+            {
+              label: 'Imported Units',
+              link: '/guide/import/',
+            },
           ],
           label: 'Guide',
         },

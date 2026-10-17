@@ -63,11 +63,7 @@ fn include_resolver(props: &ParserProperties) -> Box<dyn IncludeResolver> {
         .get(MOUNT_PROPERTY)
         .and_then(|value| serde_json::from_value::<BTreeMap<String, PathBuf>>(value.clone()).ok())
         .unwrap_or_default();
-    if mounts.is_empty() {
-        Box::new(xidl_parser::hir::FsIncludeResolver)
-    } else {
-        Box::new(xidl_parser::hir::MountIncludeResolver::new(mounts))
-    }
+    crate::library::include_resolver(&mounts)
 }
 
 /// Adds the projected API versions to the properties seen by the target.

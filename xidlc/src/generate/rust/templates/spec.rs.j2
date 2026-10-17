@@ -3,6 +3,9 @@
 
 {% endif %}{% filter rustfmt %}
 
+{% for import in imports -%}
+    use crate::{{ import }};
+{% endfor -%}
 {% for def in definitions %}
     {{ def }}
 {% endfor %}

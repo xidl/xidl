@@ -15,6 +15,9 @@ pub use annotation_builtin::*;
 mod preproc;
 pub use preproc::*;
 
+mod import_dcl;
+pub use import_dcl::*;
+
 mod bitmask;
 pub use bitmask::*;
 
@@ -48,6 +51,7 @@ pub enum Definition {
     InterfaceDcl(InterfaceDcl),
     TemplateModuleDcl(TemplateModuleDcl),
     TemplateModuleInst(TemplateModuleInst),
+    ImportDcl(ImportDcl),
     PreprocInclude(PreprocInclude),
     PreprocCall(PreprocCall),
     PreprocDefine(PreprocDefine),
