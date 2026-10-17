@@ -26,3 +26,6 @@ pub use spec::{ImportSpec, Unit};
 
 /// Generator property that carries a unit's resolved imports into its target.
 pub const IMPORT_PROPERTY: &str = "xidl_imports";
+
+/// Generator property that carries the unit's own path inside the mount tree.
+pub const UNIT_PATH_PROPERTY: &str = "xidl_unit_path";

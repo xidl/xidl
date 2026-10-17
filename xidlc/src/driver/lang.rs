@@ -58,10 +58,7 @@ impl Plugin {
     /// document reference they do not carry yet, so a unit that imports one
     /// fails instead of emitting output that does not build.
     pub fn resolves_imported_units(&self) -> bool {
-        !matches!(
-            self,
-            Self::Go | Self::GoRest | Self::Openapi | Self::Openrpc
-        )
+        !matches!(self, Self::GoRest | Self::Openapi | Self::Openrpc)
     }
 }
 

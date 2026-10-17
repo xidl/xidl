@@ -6,7 +6,6 @@ use super::definition_names::go_capitalize;
 use super::definition_templates::{
     EmptyStructTemplate, FieldTemplate, MethodTemplate, StructTemplate, render_field_block,
 };
-use super::definition_types::go_type;
 
 pub(super) fn render_attr_types(
     ctx: &mut GoRenderContext,
@@ -63,7 +62,7 @@ fn push_get_attr(
                 ctx,
                 vec![FieldTemplate {
                     name: "Return".to_string(),
-                    ty: go_type(ty),
+                    ty: ctx.type_ref(ty),
                     tag: "return".to_string(),
                 }],
             )?,
@@ -102,7 +101,7 @@ fn push_set_attr(
                 ctx,
                 vec![FieldTemplate {
                     name: "Value".to_string(),
-                    ty: go_type(ty),
+                    ty: ctx.type_ref(ty),
                     tag: "value".to_string(),
                 }],
             )?,

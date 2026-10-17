@@ -42,7 +42,7 @@ pub(super) fn render_exception(
         "exception.go.j2",
         &ExceptionTemplate {
             name,
-            fields: render_field_block(ctx, field_templates(&def.member, &[]))?,
+            fields: render_field_block(ctx, field_templates(&def.member, &[], &ctx.packages))?,
         },
     )
 }
@@ -56,7 +56,7 @@ fn render_typedef(
         hir::TypedefType::TypeSpec(ty) => {
             for decl in &def.decl {
                 let name = go_field_name(declarator_name(decl));
-                let base = type_with_decl(ty, decl);
+                let base = type_with_decl(ty, decl, &ctx.packages);
                 ctx.push_template(
                     "type_decl.go.j2",
                     &TypeDeclTemplate {
@@ -183,7 +183,10 @@ fn render_field_struct(
         "struct.go.j2",
         &StructTemplate {
             name,
-            fields: render_field_block(ctx, field_templates(members, container_annotations))?,
+            fields: render_field_block(
+                ctx,
+                field_templates(members, container_annotations, &ctx.packages),
+            )?,
         },
     )
 }
@@ -191,6 +194,7 @@ fn render_field_struct(
 fn field_templates(
     members: &[hir::Member],
     container_annotations: &[hir::Annotation],
+    packages: &crate::generate::go::GoPackages,
 ) -> Vec<FieldTemplate> {
     let mut fields = Vec::new();
     for member in members {
@@ -199,7 +203,7 @@ fn field_templates(
         for decl in &member.ident {
             let raw_name = declarator_name(decl);
             let field = go_field_name(raw_name);
-            let mut ty = type_with_decl(&member.ty, decl);
+            let mut ty = type_with_decl(&member.ty, decl, packages);
             if is_optional {
                 ty = pointer_type(&ty);
             }

@@ -168,11 +168,25 @@ impl<'a> UnitBuilder<'a> {
                 import: path.display().to_string(),
                 reason: "the file name provides no reference prefix".to_string(),
             })?;
-        self.visit(path.to_path_buf(), prefix.to_string())
+        let unit_path = Self::root_unit_path(path);
+        self.visit(path.to_path_buf(), prefix.to_string(), unit_path)
+    }
+
+    /// Path a root input is known by: the path it was given, relative to the
+    /// working directory, and its file name when it was given as an absolute
+    /// path, so a target never lays output out beside the source.
+    fn root_unit_path(path: &Path) -> String {
+        if path.is_absolute() {
+            return path
+                .file_name()
+                .map(|name| name.to_string_lossy().into_owned())
+                .unwrap_or_else(|| path.display().to_string());
+        }
+        Self::strip_leading_dot(path.display().to_string())
     }
 
     /// Registers `file` as the unit named `prefix`, resolving its imports.
-    fn visit(&mut self, file: PathBuf, prefix: String) -> Result<(), ImportError> {
+    fn visit(&mut self, file: PathBuf, prefix: String, path: String) -> Result<(), ImportError> {
         let identity = Self::identity(&file);
         if self.stack.contains(&identity) {
             let mut chain = self.stack.clone();
@@ -197,14 +211,24 @@ impl<'a> UnitBuilder<'a> {
 
         self.stack.push(identity.clone());
         for import in &imports {
-            self.visit(import.file().to_path_buf(), import.prefix().to_string())?;
+            self.visit(
+                import.file().to_path_buf(),
+                import.prefix().to_string(),
+                import.unit_path().to_string(),
+            )?;
         }
         self.stack.pop();
 
         self.register_prefix(&prefix, &file)?;
         self.by_file.insert(identity, self.units.len());
-        self.units.push(Unit::new(file, prefix, imports, prepared));
+        self.units
+            .push(Unit::new(file, prefix, imports, prepared, path));
         Ok(())
+    }
+
+    /// Drops the `./` a written path may start with.
+    fn strip_leading_dot(path: String) -> String {
+        path.strip_prefix("./").map(str::to_string).unwrap_or(path)
     }
 
     /// Version each import bound, keyed by the reference prefix it uses.
@@ -253,23 +277,28 @@ impl<'a> UnitBuilder<'a> {
             import: raw.to_string(),
             reason: "the path has no name to reference the unit by".to_string(),
         })?;
-        let file = self.resolve_target(importer, path.target())?;
+        let (file, unit_path) = self.resolve_target(importer, path.target())?;
         Ok(ImportSpec::new(
             prefix,
             path.version().map(str::to_string),
             raw.to_string(),
             file,
+            unit_path,
         ))
     }
 
     /// Turns an import target into the IDL file it names.
-    fn resolve_target(&self, importer: &Path, target: &str) -> Result<PathBuf, ImportError> {
-        let (root, rest) = self.split_mount(importer, target);
+    fn resolve_target(
+        &self,
+        importer: &Path,
+        target: &str,
+    ) -> Result<(PathBuf, String), ImportError> {
+        let (root, rest, unit_path) = self.split_mount(importer, target);
         let candidate = root.join(rest);
         if candidate.is_dir() {
             let entry = candidate.join(INDEX_FILE);
             if entry.is_file() {
-                return Ok(entry);
+                return Ok((entry, format!("{unit_path}/{INDEX_FILE}")));
             }
             return Err(ImportError::Unresolved {
                 importer: importer.to_path_buf(),
@@ -281,7 +310,7 @@ impl<'a> UnitBuilder<'a> {
             });
         }
         if candidate.is_file() {
-            return Ok(candidate);
+            return Ok((candidate, unit_path));
         }
         Err(ImportError::Unresolved {
             importer: importer.to_path_buf(),
@@ -294,20 +323,35 @@ impl<'a> UnitBuilder<'a> {
     ///
     /// A first segment that names a mount resolves inside that package, which
     /// mirrors how `#include "<name>/<file>"` reaches a dependency.
-    fn split_mount(&self, importer: &Path, target: &str) -> (PathBuf, String) {
+    fn split_mount(&self, importer: &Path, target: &str) -> (PathBuf, String, String) {
         let (name, rest) = match target.split_once('/') {
             Some((name, rest)) => (name, rest),
             None => (target, ""),
         };
         match self.mounts.get(name) {
-            Some(root) => (root.clone(), rest.to_string()),
+            Some(root) => {
+                let rest = rest.to_string();
+                let unit_path = Self::join_unit_path(name, &rest);
+                (root.clone(), rest, unit_path)
+            }
             None => (
                 importer
                     .parent()
                     .unwrap_or_else(|| Path::new("."))
                     .to_path_buf(),
                 target.to_string(),
+                Self::strip_leading_dot(target.to_string()),
             ),
+        }
+    }
+
+    /// VFS path of a dependency that a mount resolved.
+    fn join_unit_path(mount: &str, rest: &str) -> String {
+        let rest = rest.trim_matches('/');
+        if rest.is_empty() {
+            mount.to_string()
+        } else {
+            format!("{mount}/{rest}")
         }
     }
 
