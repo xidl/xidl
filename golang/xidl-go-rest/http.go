@@ -218,6 +218,11 @@ func GinCookieString(c *gin.Context, key string) (string, error) {
 	return c.Cookie(key)
 }
 
+// EncodeCookieValue preserves arbitrary version values in an HTTP cookie.
+func EncodeCookieValue(value string) string {
+	return strings.ReplaceAll(url.QueryEscape(value), "+", "%20")
+}
+
 func CORSMiddleware(origins []string) gin.HandlerFunc {
 	config := cors.DefaultConfig()
 	if len(origins) == 1 && origins[0] == "*" {

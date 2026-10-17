@@ -171,6 +171,9 @@ pub(crate) fn availability(
                 removed = Some(resolved);
             }
             Annotation::Version => {}
+            // Discovery validates the parameter and reports misuse; the
+            // availability walk only needs to ignore it.
+            Annotation::VersionParameter(_) => {}
             other => {
                 let Some(name) = raw_versioning_name(other) else {
                     continue;
@@ -290,7 +293,10 @@ pub(super) fn raw_versioning_name(annotation: &Annotation) -> Option<String> {
 /// Whether an annotation is `@version` or a lifecycle annotation.
 pub(crate) fn is_versioning_annotation(annotation: &Annotation) -> bool {
     match annotation {
-        Annotation::Version | Annotation::Added { .. } | Annotation::Removed { .. } => true,
+        Annotation::Version
+        | Annotation::VersionParameter(_)
+        | Annotation::Added { .. }
+        | Annotation::Removed { .. } => true,
         other => raw_versioning_name(other).is_some_and(|name| {
             AnnotationKind::from_name(&name).is_some_and(AnnotationKind::is_lifecycle)
         }),

@@ -1,7 +1,8 @@
 use crate::error::IdlcResult;
 use crate::generate::go_rest::{MethodMeta, ParamMeta, definition};
 use std::fmt::Write;
-use xidl_parser::rest_hir::semantics::{HttpApiKeyLocation, HttpSecurityRequirement};
+use xidl_parser::hir::HttpParameterLocation;
+use xidl_parser::rest_hir::semantics::HttpSecurityRequirement;
 
 use super::GoRestRenderer;
 use super::interface_binding::render_decode_response_fn;
@@ -150,9 +151,9 @@ fn render_security_requirements(out: &mut String, method: &MethodMeta) {
             }
             HttpSecurityRequirement::ApiKey { location, name } => {
                 let loc = match location {
-                    HttpApiKeyLocation::Header => "ApiKeyHeader",
-                    HttpApiKeyLocation::Query => "ApiKeyQuery",
-                    HttpApiKeyLocation::Cookie => "ApiKeyCookie",
+                    HttpParameterLocation::Header => "ApiKeyHeader",
+                    HttpParameterLocation::Query => "ApiKeyQuery",
+                    HttpParameterLocation::Cookie => "ApiKeyCookie",
                 };
                 writeln!(out, "\t\t{{Kind: xidlgohttp.SecurityAPIKey, Location: xidlgohttp.{loc}, Name: {:?}}},", name).unwrap();
             }

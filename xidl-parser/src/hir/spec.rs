@@ -94,22 +94,30 @@ impl Specification {
             return Ok(vec![VersionedProjection {
                 versions: Vec::new(),
                 version: None,
-                hir: Self::project_hir(spec, &properties)?,
+                hir: Self::project_hir(spec, &properties, None, Vec::new())?,
             }]);
         };
         let versions = versioning::selected_versions(selection.as_ref(), &record)?;
+        let version_parameter = record.parameter();
+        let version_values = |defs: &[versioning::VersionDef]| {
+            defs.iter()
+                .filter(|_| version_parameter.is_some())
+                .map(|def| (def.ident.clone(), def.value.clone()))
+                .collect::<Vec<_>>()
+        };
         match layout {
             versioning::VersionLayout::Merged => {
-                let spec = record.merge(&source, &versions)?;
-                let spec = Self::finalize(spec, expand)?;
                 let selected = versions
                     .iter()
                     .filter_map(|version| record.timeline().get(*version).cloned())
-                    .collect();
+                    .collect::<Vec<_>>();
+                let values = version_values(&selected);
+                let spec = record.merge(&source, &versions)?;
+                let spec = Self::finalize(spec, expand)?;
                 Ok(vec![VersionedProjection {
                     versions: selected,
                     version: None,
-                    hir: Self::project_hir(spec, &properties)?,
+                    hir: Self::project_hir(spec, &properties, version_parameter, values)?,
                 }])
             }
             versioning::VersionLayout::PerVersion => {
@@ -118,10 +126,15 @@ impl Specification {
                     let spec = record.project(&source, version)?;
                     let spec = Self::finalize(spec, expand)?;
                     let definition = record.timeline().get(version).cloned();
+                    let values = definition
+                        .iter()
+                        .filter(|_| version_parameter.is_some())
+                        .map(|def| (def.ident.clone(), def.value.clone()))
+                        .collect();
                     projections.push(VersionedProjection {
                         versions: definition.clone().into_iter().collect(),
                         version: definition,
-                        hir: Self::project_hir(spec, &properties)?,
+                        hir: Self::project_hir(spec, &properties, version_parameter, values)?,
                     });
                 }
                 Ok(projections)
@@ -150,10 +163,18 @@ impl Specification {
     fn project_hir(
         spec: Specification,
         properties: &ParserProperties,
+        version_parameter: Option<&super::VersionParameter>,
+        version_values: Vec<(String, String)>,
     ) -> crate::error::ParserResult<ProjectedHir> {
         match hir_projection_kind(properties) {
             HirProjectionKind::Rpc => Ok(ProjectedHir::Rpc(spec)),
-            HirProjectionKind::Http => rest_hir::project(&spec).map(ProjectedHir::Http),
+            HirProjectionKind::Http => {
+                let options = rest_hir::ProjectOptions {
+                    version_parameter: version_parameter.cloned(),
+                    version_values,
+                };
+                rest_hir::project_with_options(&spec, &options).map(ProjectedHir::Http)
+            }
             HirProjectionKind::JsonRpc => jsonrpc_hir::project(&spec).map(ProjectedHir::JsonRpc),
         }
     }

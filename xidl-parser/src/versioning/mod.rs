@@ -31,7 +31,7 @@ pub use timeline::{VersionDef, VersionId, VersionTimeline};
 use lifecycle::VersionVisitor as _;
 
 use crate::error::{ParseError, ParserResult};
-use crate::hir::{ParserProperties, Specification};
+use crate::hir::{ParserProperties, Specification, VersionParameter};
 use crate::rest_hir::ProjectedHir;
 
 /// Generation property that selects one API version by member ident or value.
@@ -67,6 +67,7 @@ pub struct VersionedProjection {
 #[derive(Debug, Clone)]
 pub struct VersioningRecord {
     timeline: VersionTimeline,
+    parameter: Option<VersionParameter>,
 }
 
 impl VersioningRecord {
@@ -84,13 +85,31 @@ impl VersioningRecord {
             claims::check(spec, None)?;
             return Ok(None);
         };
-        let timeline = VersionTimeline::from_members(ident, &members)?;
+        let timeline = VersionTimeline::from_members(ident.clone(), &members)?;
+        if let Some(parameter) = &discovery.version_parameter {
+            for (_, version) in timeline.iter() {
+                parameter.validate_value(&version.value).map_err(|reason| {
+                    VersioningError::MalformedVersionParameter {
+                        decl: format!("{ident}::{}", version.ident),
+                        reason,
+                    }
+                })?;
+            }
+        }
         let mut validator = lifecycle::LifecycleValidator {
             timeline: &timeline,
         };
         validator.walk(&spec.0, "", lifecycle::Availability::full())?;
         claims::check(spec, Some(&timeline))?;
-        Ok(Some(VersioningRecord { timeline }))
+        Ok(Some(VersioningRecord {
+            timeline,
+            parameter: discovery.version_parameter,
+        }))
+    }
+
+    /// The wire location and name carried by clients of this version timeline.
+    pub fn parameter(&self) -> Option<&VersionParameter> {
+        self.parameter.as_ref()
     }
 
     /// The version history declared by the `@version` enum.

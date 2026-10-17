@@ -293,3 +293,36 @@ test('createNextRoute maps XidlServerError code and msg to the HTTP response', a
     msg: 'teapot',
   });
 });
+
+test('Next params remain decoded and rejected parameter promises retain operation headers', async () => {
+  const operation = defineOperation<{ read(id: string): string }, 'read'>({
+    ...getUser,
+    handler: 'read',
+    request: { ...getUser.request, schema: z.object({ id: z.string() }) },
+    response: {
+      ...getUser.response,
+      contentType: 'text/plain',
+      fixedHeaders: { 'X-Version': 'v2' },
+    },
+  });
+  const handler = createNextRoute(operation, { read: id => id });
+  for (const id of ['%2F', '%', 'a/b']) {
+    const response = await handler(
+      new Request('http://localhost/users/ignored'),
+      {
+        params: Promise.resolve({ id }),
+      },
+    );
+    assert.equal(response.status, 200);
+    assert.equal(await response.text(), id);
+    assert.equal(response.headers.get('X-Version'), 'v2');
+  }
+  const rejected = await handler(
+    new Request('http://localhost/users/ignored'),
+    {
+      params: Promise.reject(new XidlServerError(400, 'invalid route')),
+    },
+  );
+  assert.equal(rejected.status, 400);
+  assert.equal(rejected.headers.get('X-Version'), 'v2');
+});

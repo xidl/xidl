@@ -1,0 +1,1344 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+openapi_version_parameter_cookie.v1.json
+===============
+{
+  "components": {
+    "schemas": {
+      "Error": {
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "msg"
+        ],
+        "type": "object"
+      },
+      "v1.Versions": {
+        "enum": [
+          "2026-04",
+          "版本 +/%;="
+        ],
+        "type": "string"
+      },
+      "v1.business.Conflict": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "type": "object"
+      },
+      "v1.business.Item": {
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "version_parameter",
+    "version": "2026-04"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/chat": {
+      "get": {
+        "operationId": "v1.business.Store.chat",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "room",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "API version; this document describes 2026-04.",
+            "in": "cookie",
+            "name": "api%v",
+            "required": false,
+            "schema": {
+              "enum": [
+                "2026-04"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-ndjson": {
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Store"
+        ],
+        "x-protocol": "websocket"
+      }
+    },
+    "/fail/{id}": {
+      "get": {
+        "operationId": "v1.business.Store.fail",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "API version; this document describes 2026-04.",
+            "in": "cookie",
+            "name": "api%v",
+            "required": false,
+            "schema": {
+              "enum": [
+                "2026-04"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v1.business.Item"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v1.business.Conflict"
+                }
+              }
+            },
+            "description": "Error: Conflict"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Store"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "v1.business.Health.health",
+        "parameters": [
+          {
+            "description": "API version; this document describes 2026-04.",
+            "in": "cookie",
+            "name": "api%v",
+            "required": false,
+            "schema": {
+              "enum": [
+                "2026-04"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Health"
+        ]
+      }
+    },
+    "/items/{id}": {
+      "delete": {
+        "operationId": "v1.business.Store.remove",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "API version; this document describes 2026-04.",
+            "in": "cookie",
+            "name": "api%v",
+            "required": false,
+            "schema": {
+              "enum": [
+                "2026-04"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Store"
+        ]
+      },
+      "get": {
+        "operationId": "v1.business.Store.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "API version; this document describes 2026-04.",
+            "in": "cookie",
+            "name": "api%v",
+            "required": false,
+            "schema": {
+              "enum": [
+                "2026-04"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "theme",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v1.business.Item"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Store"
+        ]
+      }
+    },
+    "/model": {
+      "get": {
+        "operationId": "v1.business.DuplexShapes.model",
+        "parameters": [
+          {
+            "description": "API version; this document describes 2026-04.",
+            "in": "cookie",
+            "name": "api%v",
+            "required": false,
+            "schema": {
+              "enum": [
+                "2026-04"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-ndjson": {
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/v1.business.Item"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "DuplexShapes"
+        ],
+        "x-protocol": "websocket"
+      }
+    },
+    "/scalar": {
+      "get": {
+        "operationId": "v1.business.DuplexShapes.scalar",
+        "parameters": [
+          {
+            "description": "API version; this document describes 2026-04.",
+            "in": "cookie",
+            "name": "api%v",
+            "required": false,
+            "schema": {
+              "enum": [
+                "2026-04"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-ndjson": {
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "DuplexShapes"
+        ],
+        "x-protocol": "websocket"
+      }
+    },
+    "/sink": {
+      "get": {
+        "operationId": "v1.business.DuplexShapes.sink",
+        "parameters": [
+          {
+            "description": "API version; this document describes 2026-04.",
+            "in": "cookie",
+            "name": "api%v",
+            "required": false,
+            "schema": {
+              "enum": [
+                "2026-04"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-ndjson": {
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "DuplexShapes"
+        ],
+        "x-protocol": "websocket"
+      }
+    },
+    "/source": {
+      "get": {
+        "operationId": "v1.business.DuplexShapes.source",
+        "parameters": [
+          {
+            "description": "API version; this document describes 2026-04.",
+            "in": "cookie",
+            "name": "api%v",
+            "required": false,
+            "schema": {
+              "enum": [
+                "2026-04"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "DuplexShapes"
+        ],
+        "x-protocol": "websocket"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "DuplexShapes"
+    },
+    {
+      "name": "Health"
+    },
+    {
+      "name": "Store"
+    }
+  ]
+}
+===============
+openapi_version_parameter_cookie.v2.json
+===============
+{
+  "components": {
+    "schemas": {
+      "Error": {
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "msg"
+        ],
+        "type": "object"
+      },
+      "v2.Versions": {
+        "enum": [
+          "2026-04",
+          "版本 +/%;="
+        ],
+        "type": "string"
+      },
+      "v2.business.Conflict": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "type": "object"
+      },
+      "v2.business.Item": {
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "version_parameter",
+    "version": "版本 +/%;="
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/chat": {
+      "get": {
+        "operationId": "v2.business.Store.chat",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "room",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "API version; this document describes 版本 +/%;=.",
+            "in": "cookie",
+            "name": "api%v",
+            "required": false,
+            "schema": {
+              "enum": [
+                "版本 +/%;="
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-ndjson": {
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Store"
+        ],
+        "x-protocol": "websocket"
+      }
+    },
+    "/fail/{id}": {
+      "get": {
+        "operationId": "v2.business.Store.fail",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "API version; this document describes 版本 +/%;=.",
+            "in": "cookie",
+            "name": "api%v",
+            "required": false,
+            "schema": {
+              "enum": [
+                "版本 +/%;="
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2.business.Item"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2.business.Conflict"
+                }
+              }
+            },
+            "description": "Error: Conflict"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Store"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "v2.business.Health.health",
+        "parameters": [
+          {
+            "description": "API version; this document describes 版本 +/%;=.",
+            "in": "cookie",
+            "name": "api%v",
+            "required": false,
+            "schema": {
+              "enum": [
+                "版本 +/%;="
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Health"
+        ]
+      }
+    },
+    "/items/{id}": {
+      "delete": {
+        "operationId": "v2.business.Store.remove",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "API version; this document describes 版本 +/%;=.",
+            "in": "cookie",
+            "name": "api%v",
+            "required": false,
+            "schema": {
+              "enum": [
+                "版本 +/%;="
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Store"
+        ]
+      },
+      "get": {
+        "operationId": "v2.business.Store.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "API version; this document describes 版本 +/%;=.",
+            "in": "cookie",
+            "name": "api%v",
+            "required": false,
+            "schema": {
+              "enum": [
+                "版本 +/%;="
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "theme",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2.business.Item"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Store"
+        ]
+      }
+    },
+    "/model": {
+      "get": {
+        "operationId": "v2.business.DuplexShapes.model",
+        "parameters": [
+          {
+            "description": "API version; this document describes 版本 +/%;=.",
+            "in": "cookie",
+            "name": "api%v",
+            "required": false,
+            "schema": {
+              "enum": [
+                "版本 +/%;="
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-ndjson": {
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/v2.business.Item"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "DuplexShapes"
+        ],
+        "x-protocol": "websocket"
+      }
+    },
+    "/scalar": {
+      "get": {
+        "operationId": "v2.business.DuplexShapes.scalar",
+        "parameters": [
+          {
+            "description": "API version; this document describes 版本 +/%;=.",
+            "in": "cookie",
+            "name": "api%v",
+            "required": false,
+            "schema": {
+              "enum": [
+                "版本 +/%;="
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-ndjson": {
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "DuplexShapes"
+        ],
+        "x-protocol": "websocket"
+      }
+    },
+    "/sink": {
+      "get": {
+        "operationId": "v2.business.DuplexShapes.sink",
+        "parameters": [
+          {
+            "description": "API version; this document describes 版本 +/%;=.",
+            "in": "cookie",
+            "name": "api%v",
+            "required": false,
+            "schema": {
+              "enum": [
+                "版本 +/%;="
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-ndjson": {
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "DuplexShapes"
+        ],
+        "x-protocol": "websocket"
+      }
+    },
+    "/source": {
+      "get": {
+        "operationId": "v2.business.DuplexShapes.source",
+        "parameters": [
+          {
+            "description": "API version; this document describes 版本 +/%;=.",
+            "in": "cookie",
+            "name": "api%v",
+            "required": false,
+            "schema": {
+              "enum": [
+                "版本 +/%;="
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "DuplexShapes"
+        ],
+        "x-protocol": "websocket"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "DuplexShapes"
+    },
+    {
+      "name": "Health"
+    },
+    {
+      "name": "Store"
+    }
+  ]
+}

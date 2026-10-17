@@ -265,3 +265,46 @@ async fn decode_ndjson_body_reports_codec_errors_for_long_lines() {
     let err = stream.next().await.unwrap().unwrap_err();
     assert_eq!(err.code, 400);
 }
+
+#[tokio::test]
+async fn bidi_peer_close_flushes_the_handshake_reply() {
+    let router = Router::new().route(
+        "/ws",
+        get(|ws: WebSocketUpgrade| async move {
+            ws.on_upgrade(|socket| async move {
+                let mut stream = open_bidi_server::<Payload, Payload>(socket);
+                while let Some(payload) = stream.read().await {
+                    stream.write(payload.unwrap()).await.unwrap();
+                }
+            })
+        }),
+    );
+    let (addr, handle) = spawn_router(router).await;
+    for custom_headers in [false, true] {
+        let url = format!("ws://{addr}/ws");
+        let mut client = if custom_headers {
+            let mut headers = HeaderMap::new();
+            headers.insert("x-version", "v2".parse().unwrap());
+            open_bidi_client_with_headers::<Payload, Payload>(&url, headers)
+                .await
+                .unwrap()
+        } else {
+            open_bidi_client::<Payload, Payload>(&url).await.unwrap()
+        };
+        client.write(Payload { value: 7 }).await.unwrap();
+        let echoed = tokio::time::timeout(std::time::Duration::from_secs(5), client.read())
+            .await
+            .unwrap();
+        assert_eq!(echoed.unwrap().unwrap(), Payload { value: 7 });
+        client.close();
+        let closed = tokio::time::timeout(std::time::Duration::from_secs(5), client.read())
+            .await
+            .unwrap();
+        assert!(
+            closed.is_none(),
+            "normal peer close must not be a transport error: {closed:?}"
+        );
+        assert!(client.read().await.is_none());
+    }
+    stop_server(handle).await;
+}

@@ -61,6 +61,72 @@ and selection flags; the value (`2025-06`) is what versioned documents carry.
 Per-version documents ignore `#pragma xidlc version` and use the projected
 version value as `info.version`.
 
+## Carrying the version
+
+Use `@version(in = "header" | "query" | "cookie", name = "...")` to declare
+where clients send their module's version. Both arguments are required; `in`
+ignores case. A bare `@version` does not add a transport parameter.
+
+```idl
+@version(in = "query", name = "api_version")
+enum ApiVersions {
+    @rename("2025-01") v2025_01,
+    @rename("2025-06") v2025_06,
+};
+```
+
+Header and cookie names must be non-empty HTTP tokens. Query names must be
+non-empty and contain no control characters. A version parameter cannot share
+its name and location with an operation parameter or an API key. Header names
+ignore case; query and cookie names are case-sensitive. A version header also
+cannot overwrite a business response header. Header version values must be
+ASCII without leading or trailing HTTP whitespace. Transport fields such as
+`Content-Type`, `Cookie`, `Set-Cookie`, and WebSocket handshake headers cannot
+be used as version headers; an active authentication scheme also reserves
+`Authorization`. Query and cookie values
+are encoded for their transport.
+
+Each OpenAPI operation declares an optional parameter with a singleton enum
+containing its own version. Generated Rust, TypeScript, and Go REST clients
+pin the parameter after request parameters and credentials are applied. Other
+query parameters and cookies in the request are preserved.
+For Rust, pass cookies through operation parameters or authentication; cookies
+hidden in a custom reqwest client's default headers cannot be merged with an
+explicit generated Cookie header.
+
+With `in = "header"`, every generated operation response declares the header
+and the server writes **its own module's version**, including errors. A v2
+server writes v2 even when the request carries v1, an unknown value, or no
+version. Query and cookie parameters are not echoed.
+
+**Servers never resolve the version.** Routing to a version remains the
+application or gateway's responsibility. A generated server does not read the
+version parameter to choose a module or reject a request.
+
+| Location | HTTP clients | WebSocket handshake |
+| --- | --- | --- |
+| header | Rust, TypeScript, and Go REST send the pinned header | Rust and Node send it; browsers use the server default |
+| query | Every client sends the encoded query parameter | Every client, including browsers, pins it in the URL |
+| cookie | Node and Rust send Cookie; browser HTTP and WebSocket clients use app-set cookies | Node and Rust send Cookie; browsers use app-set cookies |
+
+Browser WebSocket constructors cannot set custom headers. In Node, pass a
+headers-capable factory to the generated `open_*Session` helper:
+
+```typescript
+import WebSocket from "ws";
+
+const session = await open_watchSession(baseUrl, {
+    connect: ({ url, protocols, headers }) =>
+        new WebSocket(url, protocols, { headers }),
+});
+```
+
+The generated helper combines caller headers with the pinned version before
+calling `connect`. Browser callers can use the default WebSocket constructor;
+query versions work without a custom factory. An application's WebSocket
+upgrade entry point owns the HTTP handshake response; generated TypeScript
+server operation metadata exposes `response.fixedHeaders` for that entry point.
+
 ## Lifecycle annotations
 
 | Annotation | Meaning |
@@ -158,9 +224,9 @@ whose module support renders a single module per API version:
 
 | Target | Versioned contracts |
 | --- | --- |
-| `rust`, `rust-axum`, `typescript`, `typescript-rest` | supported |
+| `rust`, `rust-axum`, `typescript`, `typescript-rest`, `go-rest` | supported |
 | `openapi`, `openrpc` | supported, one document per version |
-| `go`, `go-rest`, `rust-jsonrpc` | rejected with a clear error |
+| `go`, `rust-jsonrpc` | rejected with a clear error |
 
 The remaining targets already misinterpret modules today (they repeat the
 module wrapper or reference unqualified type names), so generation for them

@@ -66,6 +66,8 @@ export interface OperationResponseSpec {
   contentType: string;
   cookies: ValueBinding[];
   headers: ValueBinding[];
+  /** Fixed contract headers applied to every response of this operation. */
+  fixedHeaders?: Readonly<Record<string, string>>;
   schema?: XidlSchema;
   stream: boolean;
   streamSchema?: XidlSchema;

@@ -40,7 +40,7 @@ fn generate_fixture_error(
 
 #[test]
 fn targets_without_module_support_reject_versioned_contracts() {
-    for lang in ["go", "go-rest", "rust-jsonrpc"] {
+    for lang in ["go", "rust-jsonrpc"] {
         let err = generate_fixture_error(lang, "openapi", "versioned_petstore", HashMap::new());
         assert!(
             err.contains("cannot render one module per API version yet"),

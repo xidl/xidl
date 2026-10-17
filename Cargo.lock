@@ -3555,6 +3555,7 @@ name = "xidl-parser"
 version = "0.103.0"
 dependencies = [
  "convert_case",
+ "http",
  "include_dir",
  "insta",
  "jiff",
@@ -3634,6 +3635,7 @@ dependencies = [
  "miette",
  "minijinja",
  "owo-colors",
+ "percent-encoding",
  "prettyplease",
  "scopeguard",
  "semver",

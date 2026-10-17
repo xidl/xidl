@@ -1,0 +1,488 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+openapi_versioned_header.v1.json
+===============
+{
+  "components": {
+    "schemas": {
+      "Error": {
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "msg"
+        ],
+        "type": "object"
+      },
+      "v1.ApiVersions": {
+        "enum": [
+          "2025-01",
+          "2025-06"
+        ],
+        "type": "string"
+      },
+      "v1.Item": {
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "versioned_header",
+    "version": "2025-01"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/items": {
+      "post": {
+        "operationId": "v1.Store.create",
+        "parameters": [
+          {
+            "description": "API version; this document describes 2025-01.",
+            "in": "header",
+            "name": "X-Api-Version",
+            "required": false,
+            "schema": {
+              "enum": [
+                "2025-01"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/v1.Item"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v1.Item"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "X-Api-Version": {
+                "schema": {
+                  "enum": [
+                    "2025-01"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request",
+            "headers": {
+              "X-Api-Version": {
+                "schema": {
+                  "enum": [
+                    "2025-01"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error",
+            "headers": {
+              "X-Api-Version": {
+                "schema": {
+                  "enum": [
+                    "2025-01"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Store"
+        ]
+      }
+    },
+    "/items/{id}": {
+      "get": {
+        "operationId": "v1.Store.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "API version; this document describes 2025-01.",
+            "in": "header",
+            "name": "X-Api-Version",
+            "required": false,
+            "schema": {
+              "enum": [
+                "2025-01"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v1.Item"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "X-Api-Version": {
+                "schema": {
+                  "enum": [
+                    "2025-01"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request",
+            "headers": {
+              "X-Api-Version": {
+                "schema": {
+                  "enum": [
+                    "2025-01"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error",
+            "headers": {
+              "X-Api-Version": {
+                "schema": {
+                  "enum": [
+                    "2025-01"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Store"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Store"
+    }
+  ]
+}
+===============
+openapi_versioned_header.v2.json
+===============
+{
+  "components": {
+    "schemas": {
+      "Error": {
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "msg"
+        ],
+        "type": "object"
+      },
+      "v2.ApiVersions": {
+        "enum": [
+          "2025-01",
+          "2025-06"
+        ],
+        "type": "string"
+      },
+      "v2.Item": {
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "versioned_header",
+    "version": "2025-06"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/items": {
+      "post": {
+        "operationId": "v2.Store.create",
+        "parameters": [
+          {
+            "description": "API version; this document describes 2025-06.",
+            "in": "header",
+            "name": "X-Api-Version",
+            "required": false,
+            "schema": {
+              "enum": [
+                "2025-06"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/v2.Item"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2.Item"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "X-Api-Version": {
+                "schema": {
+                  "enum": [
+                    "2025-06"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request",
+            "headers": {
+              "X-Api-Version": {
+                "schema": {
+                  "enum": [
+                    "2025-06"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error",
+            "headers": {
+              "X-Api-Version": {
+                "schema": {
+                  "enum": [
+                    "2025-06"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Store"
+        ]
+      }
+    },
+    "/items/{id}": {
+      "get": {
+        "operationId": "v2.Store.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "API version; this document describes 2025-06.",
+            "in": "header",
+            "name": "X-Api-Version",
+            "required": false,
+            "schema": {
+              "enum": [
+                "2025-06"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2.Item"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "X-Api-Version": {
+                "schema": {
+                  "enum": [
+                    "2025-06"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request",
+            "headers": {
+              "X-Api-Version": {
+                "schema": {
+                  "enum": [
+                    "2025-06"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error",
+            "headers": {
+              "X-Api-Version": {
+                "schema": {
+                  "enum": [
+                    "2025-06"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Store"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Store"
+    }
+  ]
+}

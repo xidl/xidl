@@ -22,7 +22,7 @@ fn effective_security_prefers_method_then_interface_and_supports_explicit_none()
     assert_eq!(
         effective_security(&interface, &method).expect("method security"),
         Some(vec![HttpSecurityRequirement::ApiKey {
-            location: HttpApiKeyLocation::Header,
+            location: HttpParameterLocation::Header,
             name: "X-Token".to_string(),
         }])
     );
@@ -60,7 +60,7 @@ fn parse_api_key_validates_location_and_name() {
     assert_eq!(
         parse_api_key(&builtin("api_key", r#"in="query", name="token""#)).expect("api key"),
         HttpSecurityRequirement::ApiKey {
-            location: HttpApiKeyLocation::Query,
+            location: HttpParameterLocation::Query,
             name: "token".to_string(),
         }
     );
