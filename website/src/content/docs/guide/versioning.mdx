@@ -201,3 +201,54 @@ fails loudly instead of emitting code that does not compile.
 Serving several versions from one implementation (runtime conversion) is not
 part of this feature; each version module is an ordinary generated server that
 can be started on its own.
+
+
+### Optional TypeScript version adapters
+
+Generate the ordinary SDK and the adapter module independently:
+
+```sh
+xidlc gen --out-dir gen typescript-rest api.idl
+xidlc gen --out-dir gen typescript-rest-adapters api.idl
+```
+
+The second target writes only `api.adapters.ts`. Ordinary SDK and server
+artifacts are unchanged. It consumes projected HIR and format-2
+`props.version_map`; the compiler core records facts and does not select an
+application architecture.
+
+The application resolves a version identifier and extracts HTTP parameters.
+Pass a source-parameter envelope to `dispatch<Interface><Operation>(version,
+raw, handler, adapters)`: the envelope uses IDL parameter names, while nested
+JSON payloads retain wire keys. For example, `{ parcel: await request.json() }`
+preserves unknown fields for served-version validation. Do not deserialize the
+payload first: an ordinary schema may discard fields that an older version
+must reject. Header, query and cookie parameters with the same wire name remain
+separate source parameters.
+
+Generated decoders recursively validate required fields, named types, sequences,
+fixed arrays, records and unions before calling any conversion hook. Renamed
+keys and flattened fields become model properties only after wire validation.
+Unknown object keys and known fields belonging to another version are rejected;
+flattened records retain their own arbitrary keys. Reserved `__proto__` object
+keys are rejected before Zod can discard them.
+
+Implement the generated `VersionAdapters` interface with pure decisions. Missing
+hooks fail TypeScript compilation. Removed input members require `IGNORED`;
+optional additions remain absent unless a simultaneous removal/addition requires
+an explicit replacement decision. Conversion follows every adjacent step to
+Head, short-circuiting on refusal. Handlers receive both the original version id
+and its declared display value. Typed exceptions downgrade through every step;
+framework errors preserve their identity.
+
+`downcast<Interface><Operation>OutcomeTo<Version>` preserves the original Head
+outcome when conversion fails. A write may already have committed: the application
+owns idempotency, recording that outcome and rendering its declared refusal
+error. Dispatch never retries the handler. `downcast<Type>(version, head,
+adapters)` exposes the same complete chain for reachable result types.
+
+Phase one rejects retired or replaced operation declarations, stream/upgrade
+frame conversion, inherited structs, custom template types and inline union
+case declarations whose nested identity is not exposed by the public map.
+These are explicit generation errors, not silent field loss. This target does
+not read version headers, choose routes, provide defaults or infer rename intent.

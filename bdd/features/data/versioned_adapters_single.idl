@@ -1,0 +1,10 @@
+@version enum V { only };
+
+struct Parcel {
+    string id;
+    @optional string note;
+};
+
+interface Depot {
+    @post(path = "/parcels") Parcel ship(@body Parcel parcel);
+};

@@ -22,6 +22,7 @@ default = [
   "gen-rust-axum",
   "gen-typescript",
   "gen-typescript-rest",
+  "gen-typescript-rest-adapters",
   "gen-go",
   "gen-go-rest",
   "gen-openapi",
@@ -32,6 +33,7 @@ gen-rust-jsonrpc = ["gen-rust"]
 gen-rust-axum = ["gen-rust"]
 gen-typescript = []
 gen-typescript-rest = ["gen-typescript"]
+gen-typescript-rest-adapters = ["gen-typescript-rest"]
 gen-go = []
 gen-go-rest = ["gen-go"]
 gen-openapi = []

@@ -52,12 +52,7 @@ impl MethodModel {
 
         // A lone `sequence<octet>` body is raw bytes: it carries no schema and
         // surfaces to clients as `Uint8Array`.
-        let byte_body_param = match &op.http.request.body.shape {
-            HttpRequestBodyShape::SingleValue {
-                source_param, ty, ..
-            } if is_byte_sequence(ty) => Some(source_param.clone()),
-            _ => None,
-        };
+        let byte_body_param = op.http.request.body.shape.byte_parameter();
 
         let request_fields = op
             .signature
@@ -74,12 +69,12 @@ impl MethodModel {
                 prop: crate::generate::typescript::definition::names::ts_prop_name(&p.name),
                 // The iface file is separate from the model file, so model types are
                 // referenced through the `types` namespace import.
-                ty: if byte_body_param.as_deref() == Some(p.name.as_str()) {
+                ty: if byte_body_param == Some(p.name.as_str()) {
                     TsType::Primitive("Uint8Array".into())
                 } else {
                     ts_type_for_type_spec(&p.ty, module_path, TypeRefTarget::Client)
                 },
-                schema: if byte_body_param.as_deref() == Some(p.name.as_str()) {
+                schema: if byte_body_param == Some(p.name.as_str()) {
                     ZodSchema::Primitive("instanceof(Uint8Array)".into())
                 } else {
                     zod_schema_for_type_spec_with_prefix(&p.ty, module_path, Some("models"))
