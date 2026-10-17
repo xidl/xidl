@@ -41,14 +41,13 @@ impl TsGenerator {
             recursive,
         };
         let blocks = render_module_body(&spec.0, &[], mode, &ctx)?;
-        let types = renderer.render_template(
-            "types.d.ts.j2",
-            &TypesFileContext {
-                blocks: blocks.types,
-            },
-        )?;
-        let zod =
-            renderer.render_template("zod.ts.j2", &TypesFileContext { blocks: blocks.zod })?;
+        let types_reexports = renderer.referenced_imports(&blocks.types);
+        let types = Self::with_reexports(blocks.types, &types_reexports, "");
+        let types =
+            renderer.render_template("types.d.ts.j2", &TypesFileContext { blocks: types })?;
+        let zod_reexports = renderer.referenced_imports(&blocks.zod);
+        let zod = Self::with_reexports(blocks.zod, &zod_reexports, ".zod");
+        let zod = renderer.render_template("zod.ts.j2", &TypesFileContext { blocks: zod })?;
         let client = if mode.allows_interfaces() {
             renderer.render_template(
                 "client.ts.j2",
@@ -61,6 +60,26 @@ impl TsGenerator {
             String::new()
         };
         Ok(TypescriptRenderOutput { types, zod, client })
+    }
+
+    /// Re-exports each imported unit as the first block of the file.
+    ///
+    /// A reference renders as `<prefix>.<version>.<Name>`, so the file exposes
+    /// the unit under the prefix the reference already uses. The block list is
+    /// the file's own statement list, which keeps the module template and the
+    /// output of files without imports unchanged.
+    fn with_reexports(mut blocks: Vec<String>, prefixes: &[String], suffix: &str) -> Vec<String> {
+        if prefixes.is_empty() {
+            return blocks;
+        }
+        let mut reexports = String::new();
+        for prefix in prefixes {
+            reexports.push_str(&format!(
+                "export * as {prefix} from \"./{prefix}{suffix}\";\n"
+            ));
+        }
+        blocks.insert(0, reexports);
+        blocks
     }
 }
 

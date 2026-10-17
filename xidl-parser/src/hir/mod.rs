@@ -16,6 +16,7 @@ mod spec;
 mod struct_dcl;
 mod type_dcl;
 mod types;
+mod versioned_include;
 
 pub use annotation::*;
 pub use compound::*;
@@ -31,6 +32,7 @@ pub use scoped_name::*;
 pub use struct_dcl::*;
 pub use type_dcl::*;
 pub use types::*;
+pub(crate) use versioned_include::VersionedIncludes;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;

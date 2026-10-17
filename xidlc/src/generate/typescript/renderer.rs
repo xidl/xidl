@@ -10,13 +10,17 @@ static TEMPLATES: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/src/generate/types
 // Force rebuild for template changes
 pub struct TypescriptRenderer {
     env: Environment<'static>,
+    properties: HashMap<String, serde_json::Value>,
 }
 
 impl TypescriptRenderer {
     pub fn new() -> IdlcResult<Self> {
         let mut env = Environment::new();
         env.set_loader(|name| load_template(name).map(Some));
-        Ok(Self { env })
+        Ok(Self {
+            env,
+            properties: HashMap::new(),
+        })
     }
 
     pub fn render_template<T: Serialize>(&self, template: &str, ctx: &T) -> IdlcResult<String> {
@@ -30,6 +34,12 @@ impl TypescriptRenderer {
     pub fn extend(&mut self, props: &HashMap<String, serde_json::Value>) {
         self.env
             .add_global("opt", minijinja::Value::from_serialize(props));
+        self.properties = props.clone();
+    }
+
+    /// Imported units `definitions` reference, by their prefixes.
+    pub fn referenced_imports(&self, definitions: &[String]) -> Vec<String> {
+        crate::generate::utils::referenced_imports(&self.properties, definitions, ".")
     }
 }
 

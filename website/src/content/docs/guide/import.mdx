@@ -76,12 +76,47 @@ directory without an `index.idl`.
 | Shares one output | yes | no |
 | Generated separately | no | yes |
 | Reference form | `Pet` | `x::v1::Pet` |
-| Version selector | unsupported | binds the default version |
+| Version selector | copies that projection | binds the default version |
 
-## Current limits
+## Version selectors
 
-- The Rust target emits the type import that resolves a cross-unit reference.
-  Other targets still render the qualified name without an import.
-- A version selector binds the default version of a unit. References spell the
-  version explicitly for now, as in `timestamp::v1::Instant`.
-- A version selector on `#include` is not implemented yet.
+A version selector picks one version of the named unit. `import "timestamp@v1"`
+binds it, so `timestamp::Instant` means `timestamp::v1::Instant`:
+
+```idl
+import "timestamp@v1";
+
+struct Event {
+    timestamp::Instant at;
+};
+```
+
+`#include "types.idl@v1"` copies only the projection of `types.idl` at `v1`. The
+projection keeps the definitions that version declares and wraps them in a
+module named after the version, so references read `v1::Instant`:
+
+```idl
+#include "types.idl@v1"
+
+struct Event {
+    v1::Instant at;
+};
+```
+
+## Validation
+
+Every reference into an imported unit is checked against that unit. A reference
+that names an unknown unit, an unknown version, or a declaration the version
+does not have fails with a diagnostic naming the reference and the unit.
+Naming a version is required for a versioned unit, and naming one for an
+unversioned unit is an error.
+
+## Targets
+
+`rust`, `rust-axum`, `typescript`, and `typescript-rest` bring an imported unit
+into scope: Rust with `use crate::<unit>;` and TypeScript by re-exporting the
+unit under its prefix. `rust-jsonrpc` does the same for units without a version
+timeline. The `go`, `go-rest`, `openapi`, and `openrpc` targets reach another
+unit through a package path or a document reference they do not carry yet, so a
+file that references an imported unit fails for them instead of emitting output
+that does not build.

@@ -9,7 +9,9 @@
 
 mod error;
 mod graph;
+mod interface;
 mod path;
+mod refs;
 mod scan;
 mod spec;
 
@@ -19,6 +21,7 @@ mod tests;
 pub use error::ImportError;
 pub use graph::UnitGraph;
 pub use path::ImportPath;
+pub use refs::UnitRef;
 pub use spec::{ImportSpec, Unit};
 
 /// Generator property that carries a unit's resolved imports into its target.

@@ -27,11 +27,13 @@ pub fn generate(
     let mut renderer = JsonRpcRenderer::new()?;
     renderer.extend(&props);
     let output = document.render(&renderer)?;
+    let imports = crate::generate::utils::referenced_imports(&props, &output.source, "::");
 
     let content = renderer.render_template(
         "spec.rs.j2",
         &json!({
             "definitions": output.source,
+            "imports": imports,
         }),
     )?;
 

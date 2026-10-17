@@ -41,11 +41,13 @@ pub fn generate(
     let rust_renderer = crate::generate::rust::RustRenderer::new(std::collections::HashMap::new())?;
     let builder = merged::MergedAxumSpecBuilder::new(&renderer, rust_renderer, registry, reachable);
     let definitions = builder.render(&spec)?;
+    let imports = crate::generate::utils::referenced_imports(&props, &definitions, "::");
 
     let content = renderer.render_template(
         "spec.rs.j2",
         &json!({
             "definitions": definitions,
+            "imports": imports,
         }),
     )?;
 

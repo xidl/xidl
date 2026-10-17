@@ -55,7 +55,11 @@ fn a_directory_unit_is_generated_under_its_prefix() {
 #[test]
 fn a_named_file_import_uses_its_file_stem() {
     let dir = TempDir::new("graph-named-file");
-    dir.write("pkg/util.idl", "struct Id { string value; };\n");
+    dir.write(
+        "pkg/util.idl",
+        "@version\nenum ApiVersions {\n    @rename(\"1.0\") v1,\n    @rename(\"2.0\") v2,\n};\n\n\
+         struct Id { string value; };\n",
+    );
     let app = dir.write(
         "app.idl",
         "import \"pkg/util.idl@v1\";\n\nstruct Event { util::Id id; };\n",
@@ -213,4 +217,125 @@ fn a_unit_import_property_carries_its_prefix_and_version() {
     assert_eq!(imports[0]["prefix"], "util");
     assert_eq!(imports[0]["version"], "v1");
     assert_eq!(imports[0]["file"], dep.to_string_lossy().as_ref());
+}
+
+/// A versioned unit used by the reference tests.
+const VERSIONED: &str = "@version\nenum ApiVersions {\n    @rename(\"1.0\") v1,\n    \
+                         @rename(\"2.0\") v2,\n};\n\nstruct Instant { string at; };\n";
+
+/// Builds a graph over an app that imports `timestamp` as `import_line`.
+fn app_importing(import_line: &str, reference: &str) -> (TempDir, UnitGraph) {
+    let dir = TempDir::new("graph-reference");
+    dir.write("timestamp/index.idl", VERSIONED);
+    let app = dir.write(
+        "app.idl",
+        &format!("{import_line}\n\nstruct Event {{\n    {reference} at;\n}};\n"),
+    );
+    let graph = UnitGraph::build(&[app], &BTreeMap::new()).expect("graph builds");
+    (dir, graph)
+}
+
+/// The app unit of `graph`.
+fn app_unit(graph: &UnitGraph) -> &crate::units::Unit {
+    graph
+        .units()
+        .iter()
+        .find(|unit| unit.prefix() == "app")
+        .expect("app unit")
+}
+
+#[test]
+fn a_bound_version_qualifies_a_reference() {
+    let (_dir, graph) = app_importing("import \"timestamp@v1\";", "timestamp::Instant");
+
+    let app = app_unit(&graph);
+    assert!(
+        app.source().contains("timestamp::v1::Instant"),
+        "source: {}",
+        app.source()
+    );
+    assert_eq!(app.refs()[0].version(), Some("v1"));
+    assert_eq!(app.refs()[0].qualified(), "timestamp::v1::Instant");
+}
+
+#[test]
+fn a_version_the_unit_does_not_declare_is_rejected() {
+    let dir = TempDir::new("graph-unknown-version");
+    dir.write("timestamp/index.idl", VERSIONED);
+    let app = dir.write(
+        "app.idl",
+        "import \"timestamp\";\n\nstruct Event { timestamp::v9::Instant at; };\n",
+    );
+
+    let err = build(&[app]).expect_err("the version is unknown");
+    let ImportError::UnknownVersion {
+        version, versions, ..
+    } = err
+    else {
+        panic!("expected an unknown version, got {err}");
+    };
+    assert_eq!(version, "v9");
+    assert_eq!(versions, vec!["v1", "v2"]);
+}
+
+#[test]
+fn a_versioned_unit_needs_a_version_in_its_references() {
+    let dir = TempDir::new("graph-missing-version");
+    dir.write("timestamp/index.idl", VERSIONED);
+    let app = dir.write(
+        "app.idl",
+        "import \"timestamp\";\n\nstruct Event { timestamp::Instant at; };\n",
+    );
+
+    let err = build(&[app]).expect_err("a version is required");
+    let ImportError::MissingVersion { versions, .. } = err else {
+        panic!("expected a missing version, got {err}");
+    };
+    assert_eq!(versions, vec!["v1", "v2"]);
+}
+
+#[test]
+fn a_name_the_versioned_unit_does_not_declare_is_rejected() {
+    let dir = TempDir::new("graph-unknown-type");
+    dir.write("timestamp/index.idl", VERSIONED);
+    let app = dir.write(
+        "app.idl",
+        "import \"timestamp\";\n\nstruct Event { timestamp::v1::Nope at; };\n",
+    );
+
+    let err = build(&[app]).expect_err("the name is unknown");
+    let ImportError::UnknownType { reference, .. } = err else {
+        panic!("expected an unknown type, got {err}");
+    };
+    assert_eq!(reference, "timestamp::v1::Nope");
+}
+
+#[test]
+fn a_name_an_unversioned_unit_does_not_declare_is_rejected() {
+    let dir = TempDir::new("graph-unknown-type-plain");
+    dir.write("metrics/index.idl", "struct Counter { string name; };\n");
+    let app = dir.write(
+        "app.idl",
+        "import \"metrics\";\n\nstruct Event { metrics::Nope at; };\n",
+    );
+
+    let err = build(&[app]).expect_err("the name is unknown");
+    let ImportError::UnknownType { version, .. } = err else {
+        panic!("expected an unknown type, got {err}");
+    };
+    assert_eq!(version, None);
+}
+
+#[test]
+fn a_reference_into_a_declared_module_is_left_alone() {
+    let dir = TempDir::new("graph-local-module");
+    dir.write("metrics/index.idl", "struct Counter { string name; };\n");
+    let app = dir.write(
+        "app.idl",
+        "import \"metrics\";\n\nmodule helpers { struct Tool { string name; }; };\n\n\
+         struct Event { helpers::Tool at; };\n",
+    );
+
+    let graph = build(&[app]).expect("module references are not imports");
+    assert!(app_unit(&graph).refs().is_empty());
 }

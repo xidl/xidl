@@ -151,6 +151,14 @@ fn expand_includes(
         let node_end_pos = node.end_position();
 
         let path_str = extract_include_path(node, tree_source)?;
+
+        // A versioned include is spliced while the HIR is lowered: the version
+        // projection only exists there, so the directive stays in the tree.
+        if crate::hir::split_version_selector(&path_str).1.is_some() {
+            search_start = node_end;
+            continue;
+        }
+
         let (actual_path, content) = resolver.resolve(Some(&current_path), &path_str)?;
 
         let normalized_content = normalize::source(&content);

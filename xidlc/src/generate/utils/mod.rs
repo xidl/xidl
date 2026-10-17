@@ -7,6 +7,36 @@ pub use filter::rust_format_filter;
 
 use xidl_parser::hir;
 
+/// Imported units that `definitions` reference, by their prefixes.
+///
+/// The rendered definitions already spell every reference, so a prefix that
+/// appears as `<prefix><separator>` is a unit the file reaches into. Targets
+/// that can bring the unit into scope turn each prefix into their own import.
+pub fn referenced_imports(
+    properties: &xidl_parser::hir::ParserProperties,
+    definitions: &[String],
+    separator: &str,
+) -> Vec<String> {
+    let Some(imports) = properties
+        .get(crate::units::IMPORT_PROPERTY)
+        .and_then(serde_json::Value::as_array)
+    else {
+        return Vec::new();
+    };
+    imports
+        .iter()
+        .filter_map(|import| import.get("prefix"))
+        .filter_map(serde_json::Value::as_str)
+        .filter(|prefix| {
+            let marker = format!("{prefix}{separator}");
+            definitions
+                .iter()
+                .any(|definition| definition.contains(&marker))
+        })
+        .map(str::to_string)
+        .collect()
+}
+
 /// Whether any annotation carries the given name (e.g. `http`, `header`).
 pub fn has_annotation(annotations: &[hir::Annotation], target: &str) -> bool {
     annotations.iter().any(|annotation| {

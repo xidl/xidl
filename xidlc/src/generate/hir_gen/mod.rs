@@ -35,12 +35,15 @@ impl crate::jsonrpc::Codegen for HirGen {
         let typed =
             xidl_parser::parser::parser_text_with_resolver(&source, Some(&input), &mut *resolver)
                 .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
-        let projections = xidl_parser::hir::Specification::project_typed_ast_versions(
-            typed,
-            props.clone(),
-            std::path::Path::new(&input),
-        )
-        .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
+        // The same resolver reads the units a versioned include names.
+        let projections =
+            xidl_parser::hir::Specification::project_typed_ast_versions_with_resolver(
+                typed,
+                props.clone(),
+                std::path::Path::new(&input),
+                &mut *resolver,
+            )
+            .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
 
         let mut artifacts = Vec::new();
         for projection in projections {

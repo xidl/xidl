@@ -67,6 +67,52 @@ pub enum ImportError {
         /// Import chain, from the first unit back to itself.
         chain: Vec<PathBuf>,
     },
+    /// A reference names a declaration the imported unit never declares.
+    UnknownType {
+        /// File holding the reference.
+        importer: PathBuf,
+        /// Unit the reference resolved to.
+        unit: PathBuf,
+        /// Reference as written.
+        reference: String,
+        /// Version the reference named, when it named one.
+        version: Option<String>,
+    },
+    /// A reference names an API version the imported unit does not declare.
+    UnknownVersion {
+        /// File holding the reference.
+        importer: PathBuf,
+        /// Unit the reference resolved to.
+        unit: PathBuf,
+        /// Reference as written.
+        reference: String,
+        /// Version the reference named.
+        version: String,
+        /// Versions the unit declares.
+        versions: Vec<String>,
+    },
+    /// A reference reaches a versioned unit without naming a version.
+    MissingVersion {
+        /// File holding the reference.
+        importer: PathBuf,
+        /// Unit the reference resolved to.
+        unit: PathBuf,
+        /// Reference as written.
+        reference: String,
+        /// Versions the unit declares.
+        versions: Vec<String>,
+    },
+    /// A reference names a version on a unit without a version timeline.
+    UnexpectedVersion {
+        /// File holding the reference.
+        importer: PathBuf,
+        /// Unit the reference resolved to.
+        unit: PathBuf,
+        /// Reference as written.
+        reference: String,
+        /// Version the reference named.
+        version: String,
+    },
 }
 
 impl fmt::Display for ImportError {
@@ -131,6 +177,63 @@ impl fmt::Display for ImportError {
                     .join(" -> ");
                 write!(f, "xidl import: cyclic import detected: {chain}")
             }
+            Self::UnknownType {
+                importer,
+                unit,
+                reference,
+                version,
+            } => {
+                let at = match version {
+                    Some(version) => format!("`{version}`"),
+                    None => "its only version".to_string(),
+                };
+                write!(
+                    f,
+                    "xidl import: {} references `{reference}`, which {} does not declare at {at}",
+                    importer.display(),
+                    unit.display()
+                )
+            }
+            Self::UnknownVersion {
+                importer,
+                unit,
+                reference,
+                version,
+                versions,
+            } => write!(
+                f,
+                "xidl import: {} references `{reference}`, and `{version}` is not a version of {} \
+                 (declared versions: {})",
+                importer.display(),
+                unit.display(),
+                versions.join(", ")
+            ),
+            Self::MissingVersion {
+                importer,
+                unit,
+                reference,
+                versions,
+            } => write!(
+                f,
+                "xidl import: {} references `{reference}`, and {} is versioned \
+                 (declared versions: {}); name the version in the reference or bind it with an \
+                 import that carries `@<version>`",
+                importer.display(),
+                unit.display(),
+                versions.join(", ")
+            ),
+            Self::UnexpectedVersion {
+                importer,
+                unit,
+                reference,
+                version,
+            } => write!(
+                f,
+                "xidl import: {} references `{reference}` with version `{version}`, and {} \
+                 declares no version timeline",
+                importer.display(),
+                unit.display()
+            ),
         }
     }
 }
@@ -145,7 +248,11 @@ impl Error for ImportError {
             | Self::Unresolved { .. }
             | Self::PrefixConflict { .. }
             | Self::UnitAliased { .. }
-            | Self::Cycle { .. } => None,
+            | Self::Cycle { .. }
+            | Self::UnknownType { .. }
+            | Self::UnknownVersion { .. }
+            | Self::MissingVersion { .. }
+            | Self::UnexpectedVersion { .. } => None,
         }
     }
 }
