@@ -1,0 +1,76 @@
+{% macro decode(schema, source) -%}
+    {%- if schema.kind == "Scalar" -%}::serde_json::from_value::<{{ schema.data }}>(({{ source }}).clone()).map_err(|error| error.to_string())
+    {%- elif schema.kind == "Named" -%}{{ schema.data }}({{ source }})
+    {%- elif schema.kind == "Optional" -%}if ({{ source }}).is_null() { Ok::<_, String>(None) } else { {{ decode(schema.data, source) }}.map(Some) }
+    {%- elif schema.kind == "Boxed" -%}{{ decode(schema.data, source) }}.map(Box::new)
+    {%- elif schema.kind == "Sequence" or schema.kind == "Array" -%}(|| {
+        let array = ({{ source }}).as_array().ok_or_else(|| "expected an array".to_string())?;
+        {% if schema.kind == "Array" %}if array.len() != ({{ schema.data.length }}) as usize { return Err("fixed array length differs".into()); }{% endif %}
+            let values = array.iter().map(|item| {{ decode(schema.data.inner if schema.kind == "Array" else schema.data, "item") }}).collect::<Result<Vec<_>, String>>()?;
+            {% if schema.kind == "Array" %}values.try_into().map_err(|_: Vec<_>| "fixed array length differs".to_string()){% else %}Ok::<_, String>(values){% endif %}
+            })()
+            {%- elif schema.kind == "Map" -%}(|| {
+                let object = ({{ source }}).as_object().ok_or_else(|| "expected a map".to_string())?;
+                let mut decoded = ::std::collections::BTreeMap::new();
+                for (raw_key, raw_value) in object {
+                    let singleton = ::serde_json::Value::Object(::serde_json::Map::from_iter([(raw_key.clone(), ::serde_json::Value::Null)]));
+                    let parsed = ::serde_json::from_value::<::std::collections::BTreeMap<{{ schema.data.key }}, ::serde_json::Value>>(singleton).map_err(|error| error.to_string())?;
+                    let key = parsed.into_keys().next().ok_or_else(|| "map key was not decoded".to_string())?;
+                    let value = {{ decode(schema.data.value, "raw_value") }}?;
+                    if decoded.insert(key, value).is_some() { return Err("distinct wire keys decode to the same map key".into()); }
+                }
+                Ok::<_, String>(decoded)
+            })()
+        {%- endif -%}
+    {%- endmacro %}
+    {% for definition in wire %}
+        fn {{ definition.name }}(wire: &::serde_json::Value) -> Result<{{ definition.ty }}, String> {
+            {% if definition.kind == "enum" %}
+                ::serde_json::from_value(wire.clone()).map_err(|error| error.to_string())
+            {% elif definition.kind == "alias" %}
+                {{ decode(definition.inner, "wire") }}
+            {% elif definition.kind == "http_union" %}
+                let mut decoded = None;
+                {% for field in definition.fields %}
+                    if let Ok(value) = {{ decode(field.schema, "wire") }} {
+                        if decoded.is_some() { return Err("HTTP union payload matches more than one served case".into()); }
+                        decoded = Some({{ definition.ty }}::{{ field.name }}(value));
+                    }
+                {% endfor %}
+                decoded.ok_or_else(|| "HTTP union payload is not declared in served version".into())
+            {% elif definition.kind == "union" %}
+                let object = wire.as_object().ok_or_else(|| "expected union tag/data object".to_string())?;
+                if object.keys().any(|key| key != "tag" && key != "data") { return Err("unknown union wire field".into()); }
+                let tag = object.get("tag").and_then(::serde_json::Value::as_str).ok_or_else(|| "union tag is missing".to_string())?;
+                let data = object.get("data").ok_or_else(|| "union payload is missing".to_string())?;
+                match tag {
+                    {% for field in definition.fields %}{{ field.wire | tojson }} => {{ decode(field.schema, "data") }}.map({{ definition.ty }}::new_{{ field.name }}),{% endfor %}
+                        _ => Err("union tag is not declared in served version".into()),
+                    }
+                {% else %}
+                    let object = wire.as_object().ok_or_else(|| "expected a served-version object".to_string())?;
+                    let keys: &[&str] = &[{% for key in definition.keys %}{{ key | tojson }},{% endfor %}];
+                    let forbidden: &[&str] = &[{% for key in definition.forbidden %}{{ key | tojson }},{% endfor %}];
+                    for key in object.keys() {
+                        if forbidden.contains(&key.as_str()) {% if not definition.catch_all %}|| !keys.contains(&key.as_str()){% endif %} { return Err(format!("field {key} is not declared in served version")); }
+                    }
+                    {% for field in definition.fields %}
+                        {% if field.flatten %}
+                            let flattened = object.iter().filter(|(key, _)| {
+                                let promoted: &[&str] = &[{% for key in field.flatten.keys %}{{ key | tojson }},{% endfor %}];
+                                promoted.contains(&key.as_str()) {% if field.flatten.receives_rest %}|| !keys.contains(&key.as_str()){% endif %}
+                            }).map(|(key, value)| (key.clone(), value.clone())).collect::<::serde_json::Map<_, _>>();
+                            {% if field.optional %}let absent = flattened.is_empty();{% endif %}
+                                let flattened_wire = ::serde_json::Value::Object(flattened);
+                                let value_{{ loop.index0 }}: {{ field.ty }} = {% if field.optional %}if absent { None } else { {% endif %}
+                                    {{ decode(field.schema, "&flattened_wire") }}?
+                                    {% if field.optional %} } {% endif %};
+                            {% else %}
+                                let raw_{{ loop.index0 }} = object.get({{ field.wire | tojson }}){% if field.optional %}.unwrap_or(&::serde_json::Value::Null){% else %}.ok_or_else(|| concat!("required wire field is missing: ", {{ field.wire | tojson }}).to_string())?{% endif %};
+                                let value_{{ loop.index0 }}: {{ field.ty }} = {{ decode(field.schema, "raw_" ~ loop.index0) }}?;
+                            {% endif %}
+                        {% endfor %}
+                        Ok({{ definition.ty }} { {% for field in definition.fields %}{{ field.name }}: value_{{ loop.index0 }},{% endfor %} })
+                    {% endif %}
+                }
+            {% endfor %}

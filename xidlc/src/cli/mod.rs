@@ -111,6 +111,9 @@ enum GenLang {
         alias = "axum"
     )]
     RustAxum(ClientServerArgs),
+    #[cfg(feature = "gen-rust-axum-adapters")]
+    #[command(name = "rust-axum-adapters")]
+    RustAxumAdapters(FilesArgs),
     #[command(name = "typescript", alias = "ts")]
     Typescript(ClientServerArgs),
     #[command(
@@ -212,6 +215,8 @@ impl GenLang {
             Self::Rust(args) => Ok(shared.into_client_server("rust", args)),
             Self::RustJsonRpc(args) => Ok(shared.into_client_server("rust-jsonrpc", args)),
             Self::RustAxum(args) => Ok(shared.into_client_server("rust-axum", args)),
+            #[cfg(feature = "gen-rust-axum-adapters")]
+            Self::RustAxumAdapters(args) => Ok(shared.into_plain("rust-axum-adapters", args.files)),
             Self::Typescript(args) => Ok(shared.into_client_server("typescript", args)),
             Self::TypescriptRest(args) => Ok(shared.into_client_server("typescript-rest", args)),
             #[cfg(feature = "gen-typescript-rest-adapters")]
@@ -244,6 +249,8 @@ impl GenLang {
             Self::Rust(_) => gen_cmd.find_subcommand_mut("rust"),
             Self::RustJsonRpc(_) => gen_cmd.find_subcommand_mut("rust-jsonrpc"),
             Self::RustAxum(_) => gen_cmd.find_subcommand_mut("rust-axum"),
+            #[cfg(feature = "gen-rust-axum-adapters")]
+            Self::RustAxumAdapters(_) => gen_cmd.find_subcommand_mut("rust-axum-adapters"),
             Self::Typescript(_) => gen_cmd.find_subcommand_mut("typescript"),
             Self::TypescriptRest(_) => gen_cmd.find_subcommand_mut("typescript-rest"),
             #[cfg(feature = "gen-typescript-rest-adapters")]
@@ -272,6 +279,8 @@ impl GenLang {
             Self::Rust(_) => "xidlc gen rust [OPTIONS] [FILES]...",
             Self::RustJsonRpc(_) => "xidlc gen rust-jsonrpc [OPTIONS] [FILES]...",
             Self::RustAxum(_) => "xidlc gen rust-axum [OPTIONS] [FILES]...",
+            #[cfg(feature = "gen-rust-axum-adapters")]
+            Self::RustAxumAdapters(_) => "xidlc gen rust-axum-adapters [FILES]...",
             Self::Typescript(_) => "xidlc gen typescript [OPTIONS] [FILES]...",
             Self::TypescriptRest(_) => "xidlc gen typescript-rest [OPTIONS] [FILES]...",
             #[cfg(feature = "gen-typescript-rest-adapters")]

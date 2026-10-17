@@ -25,6 +25,9 @@ pub enum Plugin {
         alias = "rs-axum"
     )]
     Axum,
+    /// Separate opt-in generation of Rust Axum version adapters.
+    #[serde(alias = "rust-axum-adapters")]
+    RustAxumAdapters,
     #[serde(alias = "ts", alias = "typescript")]
     Typescript,
     #[serde(

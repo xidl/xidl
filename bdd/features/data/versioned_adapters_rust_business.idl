@@ -1,0 +1,94 @@
+@version enum Versions {
+    @rename("2026-01") v1,
+    @rename("2026-04") v2,
+    @rename("2026-07") v3,
+};
+
+struct Address {
+    @rename("zip_code") string zip;
+    @added(Versions::v3) @optional string zone;
+};
+
+struct Parcel {
+    string id;
+    @removed(Versions::v2) @rename("reference") string legacy;
+    @added(Versions::v2) @rename("reference") string tracking;
+    @added(Versions::v2) string carrier;
+    @added(Versions::v2) @optional string note;
+    @added(Versions::v3) @optional string inspected;
+    @added(Versions::v3) string audit;
+    Address address;
+    sequence<Address> stops;
+    map<string, Address> by_tag;
+    long fixed[2];
+};
+
+struct Contact {
+    @flatten Address address;
+    @flatten map<string, string> tags;
+};
+
+struct Extra {
+    string fixed;
+    @flatten any metadata;
+    @added(Versions::v3) @optional string future;
+};
+
+struct OptionalChange {
+    @removed(Versions::v2) @optional string note;
+    @added(Versions::v2) @optional string note;
+};
+
+struct Node { string name; @optional sequence<Node> children; };
+
+@derive(PartialOrd, Ord)
+enum State {
+    pending,
+    @added(Versions::v2) shipping,
+    @added(Versions::v3) delivered,
+};
+
+union Choice switch(long) {
+    case 0: string text;
+    case 1: @added(Versions::v2) long count;
+};
+
+@http(422) exception CannotRepresent { string reason; };
+@http(404) exception NotFound { string id; };
+@added(Versions::v2) @http(409) exception Busy { string reason; };
+@added(Versions::v3) @http(429) exception Framework { string reason; };
+@added(Versions::v3) @http(403) exception Denied { string reason; };
+
+@http(418) exception StateIndex { map<State, string> states; };
+struct NumericIndex { map<long, Address> addresses; };
+struct ShortPayload { string id; };
+struct FullPayload { string id; string extra; };
+@http union Representation switch(ContentType) {
+    case Json: ShortPayload short_value;
+    case Text: FullPayload full_value;
+};
+
+@http union AmbiguousRepresentation switch(ContentType) {
+    case Json: ShortPayload short_json;
+    case Text: ShortPayload short_text;
+};
+
+interface Depot {
+    @post(path = "/verified") State verify(@body Parcel parcel, @query string actor);
+    @post(path = "/ambiguous") AmbiguousRepresentation ambiguous(@body AmbiguousRepresentation value);
+    @post(path = "/indexes") NumericIndex index(@body NumericIndex index);
+    @post(path = "/representations") Representation representation(@body Representation value);
+    @post(path = "/exchange") Parcel exchange(@body inout Parcel parcel, @header out string etag);
+
+    @post(path = "/parcels") State ship(@body Parcel parcel) raises(CannotRepresent);
+    @get(path = "/parcels/{id}") Parcel get(@path string id) raises(NotFound, Busy, Framework, Denied, StateIndex);
+    @post(path = "/contacts") Contact contact(@body Contact contact);
+    @post(path = "/extra") Extra extra(@body Extra extra);
+    @post(path = "/optional") OptionalChange optional_change(@body OptionalChange value);
+    @post(path = "/nodes") Node inspect(@body Node node);
+    @post(path = "/states") State state(@body State state);
+    @post(path = "/choices") Choice choose(@body Choice choice);
+    @post(path = "/blobs") long blob(@body sequence<octet> data);
+    @get(path = "/bindings") string bindings(@query @rename("x") string q, @header @rename("x") string h);
+    @added(Versions::v3) @get(path = "/head") string head_only();
+};

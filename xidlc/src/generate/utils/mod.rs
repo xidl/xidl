@@ -41,6 +41,7 @@ pub fn referenced_imports(
 }
 
 /// Prefixes of every unit `properties` imports.
+#[cfg(feature = "gen-typescript")]
 pub fn imported_units(properties: &xidl_parser::hir::ParserProperties) -> Vec<String> {
     properties
         .get(crate::units::IMPORT_PROPERTY)

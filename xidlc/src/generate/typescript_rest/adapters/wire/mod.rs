@@ -1,11 +1,11 @@
 //! Decode served-version wire objects before any adapter hook executes.
 
-mod layout;
 mod schema;
 
 use super::names::Names;
 use super::wire_context::*;
 use crate::error::{IdlcError, IdlcResult};
+use crate::generate::adapter::wire_layout::WireLayouts;
 use crate::generate::adapter::{AdapterPlan, Member, TypeShape};
 use crate::generate::typescript::definition::contexts::{TsType, ZodSchema};
 use std::collections::{BTreeMap, BTreeSet};
@@ -100,8 +100,11 @@ impl<'a> WireDecoderBuilder<'a> {
                 let mut reserved = BTreeSet::new();
                 for (other_version, types) in &self.versions {
                     if matches!(types.get(key), Some(TypeShape::Struct(_))) {
-                        reserved
-                            .extend(self.layout(other_version, key, &mut BTreeSet::new())?.keys);
+                        reserved.extend(
+                            self.layouts(other_version)?
+                                .layout(key, &mut BTreeSet::new())?
+                                .keys,
+                        );
                     }
                 }
                 WireBody::Object(self.object(version, &members, reserved)?)
@@ -152,7 +155,9 @@ impl<'a> WireDecoderBuilder<'a> {
                 .as_ref()
                 .ok_or_else(|| Self::error(&member.name, "wire field has no type"))?;
             let input = if member.flatten {
-                let layout = self.value_layout(version, value, &mut BTreeSet::new())?;
+                let layout = self
+                    .layouts(version)?
+                    .value_layout(value, &mut BTreeSet::new())?;
                 if catch_all && layout.catch_all {
                     return Err(Self::error(
                         &member.name,
@@ -195,5 +200,13 @@ impl<'a> WireDecoderBuilder<'a> {
         IdlcError::rpc(format!(
             "typescript adapters wire decoder {context}: {reason}"
         ))
+    }
+    fn layouts<'b>(&'b self, version: &'b str) -> IdlcResult<WireLayouts<'b>> {
+        let types = self
+            .versions
+            .get(version)
+            .copied()
+            .ok_or_else(|| Self::error(version, "wire surface is missing"))?;
+        Ok(WireLayouts { version, types })
     }
 }

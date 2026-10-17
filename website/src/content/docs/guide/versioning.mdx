@@ -338,3 +338,38 @@ frame conversion, inherited structs, custom template types and inline union
 case declarations whose nested identity is not exposed by the public map.
 These are explicit generation errors, not silent field loss. This target does
 not read version headers, choose routes, provide defaults or infer rename intent.
+
+### Optional Rust version adapters
+
+The Rust target writes a separate artifact beside the ordinary Axum models:
+
+```sh
+xidlc gen --out-dir gen rust-axum --client --server api.idl
+xidlc gen --out-dir gen rust-axum-adapters api.idl
+```
+
+Include `api.rs` and `api.adapters.rs` in the same Rust module. Implement the
+mandatory `VersionAdapters` trait with pure hooks, then pass an explicitly
+resolved `Version` to `dispatch_<interface>_<operation>`. As in TypeScript, raw
+request envelopes use IDL parameter names and nested payloads use wire keys.
+The application owns parameter extraction, version resolution and routing.
+
+The decoder constructs the exact served model while checking its wire layout.
+Nested structs, flattened records, arrays, recursion and unions follow the same
+rules before any hook or handler runs. Numeric record keys use ordinary Serde
+map-key decoding; distinct wire keys that decode to the same key are rejected.
+An HTTP union constructs its strictly matching variant directly; ambiguous
+payloads are rejected instead of choosing a different variant and losing data.
+
+Conversions borrow their sources. `downcast_<interface>_<operation>_outcome`
+returns the original owned Head result on refusal, including composite responses
+and typed errors that do not implement `Clone`. The Head identity branch moves
+that result directly. `downcast_<type>` consumes its Head model so its identity
+branch also avoids a whole-value clone. Asynchronous dispatch accepts thread-safe
+hooks and can be awaited inside an Axum handler; it never retries the handler.
+
+In addition to the shared phase-one limits, Rust rejects skipped physical model
+fields or cases and ordinary unions with multiple or default discriminator
+labels. Their public model constructors do not expose a lossless construction
+contract. Ordinary `rust-axum` output remains byte-identical when generating
+adapters separately.
