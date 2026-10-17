@@ -29,6 +29,7 @@ impl Checker {
                 }
             }
             Definition::TemplateModuleInst(_)
+            | Definition::ImportDcl(_)
             | Definition::PreprocInclude(_)
             | Definition::PreprocCall(_)
             | Definition::PreprocDefine(_) => {}
