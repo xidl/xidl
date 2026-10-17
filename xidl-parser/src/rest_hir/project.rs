@@ -1,11 +1,10 @@
 use crate::error::{ParseError, ParserResult};
 use crate::hir;
-use std::collections::HashSet;
 
 use super::attr::project_attribute;
 use super::mapping;
 use super::model::{HttpException, HttpExceptionRef, HttpRepresentation, HttpUnion};
-use super::project_params::project_params;
+use super::project_params::{project_params, sources::ParameterSources};
 use super::route::{
     auto_default_method_path, operation_id, parse_route_template, route_from_annotations,
 };
@@ -279,24 +278,9 @@ fn project_operation(
         .iter()
         .map(|path| parse_route_template(path).map_err(parse_err))
         .collect::<ParserResult<Vec<_>>>()?;
-    let route_path_names = routes
-        .iter()
-        .map(|route| route.path_params.iter().cloned().collect::<HashSet<_>>())
-        .collect::<Vec<_>>();
-    let route_query_names = routes
-        .iter()
-        .map(|route| route.query_params.iter().cloned().collect::<HashSet<_>>())
-        .collect::<Vec<_>>();
-
+    let sources = ParameterSources::new(method, stream.kind, &routes);
     let (request_params, response_params, path_binding_count, query_binding_count) =
-        project_params(
-            op,
-            method,
-            stream.kind,
-            &route_path_names,
-            &route_query_names,
-        )
-        .map_err(parse_err)?;
+        project_params(op, &sources).map_err(parse_err)?;
 
     validate_route_bindings(
         &op.ident,

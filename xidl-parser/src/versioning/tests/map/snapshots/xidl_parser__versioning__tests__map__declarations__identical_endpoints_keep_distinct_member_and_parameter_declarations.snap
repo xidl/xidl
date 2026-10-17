@@ -1,0 +1,266 @@
+---
+source: xidl-parser/src/versioning/tests/map/declarations.rs
+expression: "crate::versioning::map::to_json(&map).expect(\"canonical map\")"
+---
+{
+  "format": 2,
+  "contract": "replacement.idl",
+  "versions": [
+    {
+      "id": "v1",
+      "value": "v1"
+    },
+    {
+      "id": "v2",
+      "value": "v2"
+    },
+    {
+      "id": "v3",
+      "value": "v3"
+    }
+  ],
+  "steps": [
+    {
+      "from": "v1",
+      "to": "v2",
+      "types": {
+        "Failure": {
+          "change": "changed",
+          "kind": "exception",
+          "from": {
+            "kind": "exception"
+          },
+          "to": {
+            "kind": "exception"
+          },
+          "members": {
+            "reason": {
+              "change": "changed",
+              "from": {
+                "declaration_id": "d8",
+                "name": "reason",
+                "optional": false,
+                "type": "string"
+              },
+              "to": {
+                "declaration_id": "d9",
+                "name": "reason",
+                "optional": false,
+                "type": "string"
+              }
+            }
+          }
+        },
+        "Item": {
+          "change": "changed",
+          "kind": "struct",
+          "from": {
+            "kind": "struct"
+          },
+          "to": {
+            "kind": "struct"
+          },
+          "members": {
+            "label": {
+              "change": "changed",
+              "from": {
+                "declaration_id": "d4",
+                "name": "label",
+                "optional": false,
+                "type": "string"
+              },
+              "to": {
+                "declaration_id": "d5",
+                "name": "label",
+                "optional": false,
+                "type": "string"
+              }
+            },
+            "note": {
+              "change": "changed",
+              "from": {
+                "declaration_id": "d6",
+                "name": "note",
+                "optional": true,
+                "type": "string"
+              },
+              "to": {
+                "declaration_id": "d7",
+                "name": "note",
+                "optional": true,
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "operations": {
+        "Items.send": {
+          "change": "changed",
+          "from": {
+            "declaration_id": "d10",
+            "method": "post",
+            "parameters": {
+              "query:token": {
+                "declaration_id": "d11",
+                "location": "query",
+                "name": "token",
+                "optional": false,
+                "type": "string",
+                "wire_name": "token"
+              }
+            },
+            "raises": [
+              "Failure"
+            ],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [],
+              "query": [
+                {
+                  "optional": false,
+                  "source_param": "token",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "token"
+                }
+              ]
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "Item"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "Item",
+            "route": "/items",
+            "routes": [
+              {
+                "path": "/items",
+                "path_params": [],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          },
+          "to": {
+            "declaration_id": "d10",
+            "method": "post",
+            "parameters": {
+              "query:token": {
+                "declaration_id": "d12",
+                "location": "query",
+                "name": "token",
+                "optional": false,
+                "type": "string",
+                "wire_name": "token"
+              }
+            },
+            "raises": [
+              "Failure"
+            ],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [],
+              "query": [
+                {
+                  "optional": false,
+                  "source_param": "token",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "token"
+                }
+              ]
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "Item"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "Item",
+            "route": "/items",
+            "routes": [
+              {
+                "path": "/items",
+                "path_params": [],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        }
+      }
+    },
+    {
+      "from": "v2",
+      "to": "v3"
+    }
+  ]
+}

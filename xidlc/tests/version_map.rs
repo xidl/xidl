@@ -26,7 +26,7 @@ fn version_map_target_is_a_stable_json_artifact() {
     assert_eq!(first[0].0, "api.version-map.json");
     assert!(first[0].1.ends_with('\n'));
     let document: serde_json::Value = serde_json::from_str(&first[0].1).expect("valid JSON");
-    assert_eq!(document["format"], 1);
+    assert_eq!(document["format"], 2);
     assert_eq!(document["versions"][0]["id"], "v1");
     insta::assert_snapshot!("version_map_artifact", &first[0].1);
 }
@@ -73,7 +73,7 @@ fn hir_artifact_carries_the_same_version_map() {
         panic!("expected a REST HIR artifact");
     };
     let version_map = artifact.props.get("version_map").expect("version map prop");
-    assert_eq!(version_map["format"], 1);
+    assert_eq!(version_map["format"], 2);
     assert_eq!(version_map["contract"], "api.idl");
     let file_map: serde_json::Value = serde_json::from_str(&version_map_files("version-map")[0].1)
         .expect("version-map artifact JSON");

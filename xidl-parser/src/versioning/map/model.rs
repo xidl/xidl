@@ -7,7 +7,9 @@ use std::collections::BTreeMap;
 /// Stable, JSON-serializable version history facts.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct VersionMap {
-    /// Schema version for readers of this file.
+    /// Schema version. Format 2 includes source declaration identity in
+    /// direct member, operation and parameter descriptors. Tokens are opaque
+    /// and comparable only within this map, not across source revisions.
     pub format: u32,
     /// Contract filename supplied by the caller.
     pub contract: String,
@@ -116,6 +118,8 @@ pub(super) type TypeParts<'a> = (
 
 #[derive(Debug, Clone, PartialEq)]
 pub(super) struct OperationSurface {
+    pub(super) source: crate::rest_hir::HttpOperationSource,
+    pub(super) parameter_sources: crate::rest_hir::project_params::sources::ParameterSources,
     pub(super) descriptor: BTreeMap<String, Value>,
     pub(super) params: BTreeMap<String, BTreeMap<String, Value>>,
 }

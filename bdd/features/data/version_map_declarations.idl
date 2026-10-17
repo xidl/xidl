@@ -1,0 +1,33 @@
+@version enum V { v1, v2, v3 };
+
+struct Item {
+    string stable;
+    @removed(V::v2) @id(7) string label;
+    @added(V::v2) @id(7) string label;
+};
+
+@http(400)
+exception Failure {
+    @removed(V::v2) string reason;
+    @added(V::v2) string reason;
+};
+
+@removed(V::v2) bitset Flags { bitfield<1> enabled; };
+@added(V::v2) bitset Flags { bitfield<1> enabled; };
+
+interface Items {
+    @post(path = "/items")
+    Item send(@removed(V::v2) @query string token,
+              @added(V::v2) @query string token) raises(Failure);
+
+    @post(path = "/split")
+    void split(in string token,
+               @removed(V::v2) out string token,
+               @added(V::v2) out string token);
+
+    attribute string status;
+    @get(path = "/status")
+    string status(@query @rename("left") string value,
+                  @query @rename("right") string value,
+                  @added(V::v2) @header string audit);
+};

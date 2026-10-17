@@ -1,7 +1,7 @@
 //! Collects shallow type and HTTP facts from projected HIR.
 
 mod http;
-mod render;
+pub(super) mod render;
 mod types;
 
 pub(super) use http::collect_operations;

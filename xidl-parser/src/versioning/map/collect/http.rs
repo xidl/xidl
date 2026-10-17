@@ -147,7 +147,16 @@ pub(crate) fn collect_operations(
             ]);
             operations.insert(
                 format!("{interface_path}.{}", operation.meta.name),
-                OperationSurface { descriptor, params },
+                OperationSurface {
+                    source: operation.meta.source,
+                    parameter_sources: rest_hir::project_params::sources::ParameterSources::new(
+                        operation.meta.method,
+                        operation.meta.stream.kind,
+                        &operation.meta.routes,
+                    ),
+                    descriptor,
+                    params,
+                },
             );
         }
     }
@@ -155,15 +164,6 @@ pub(crate) fn collect_operations(
 }
 
 fn body_params(operation: &rest_hir::HttpOperation) -> Vec<(String, BTreeMap<String, Value>)> {
-    let optional = |name: &str| {
-        operation
-            .signature
-            .params
-            .iter()
-            .find(|parameter| parameter.name == name)
-            .map(|parameter| parameter.is_optional)
-            .unwrap_or(false)
-    };
     match &operation.http.request.body.shape {
         rest_hir::HttpRequestBodyShape::Empty => Vec::new(),
         rest_hir::HttpRequestBodyShape::SingleValue {
@@ -178,7 +178,6 @@ fn body_params(operation: &rest_hir::HttpOperation) -> Vec<(String, BTreeMap<Str
                 ("location", Value::String("body".to_string())),
                 ("wire_name", Value::String(wire_name.clone())),
                 ("type", Value::String(render_type(ty))),
-                ("optional", Value::Bool(optional(source_param))),
             ]),
         )],
         rest_hir::HttpRequestBodyShape::Object { fields } => fields

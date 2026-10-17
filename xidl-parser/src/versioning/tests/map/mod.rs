@@ -1,8 +1,10 @@
 use super::{analyze, parse};
 
+mod declarations;
+
 #[test]
 fn version_map_snapshot_contains_only_adjacent_direct_facts() {
-    let source = include_str!("../../../../bdd/features/data/versioned_rest.idl");
+    let source = include_str!("../../../../../bdd/features/data/versioned_rest.idl");
     let (spec, record) = analyze(source);
     let map = crate::versioning::map::from_spec(&spec, &record, "versioned_rest.idl")
         .expect("map should compute");

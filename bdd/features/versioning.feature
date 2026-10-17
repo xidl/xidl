@@ -20,6 +20,12 @@ Feature: API versioning
     When I generate a version map for the IDL
     Then the version map should describe both versions and remain byte-stable
 
+  Scenario: identical wire shapes preserve distinct source declarations
+    Given a versioned REST IDL file "bdd/features/data/version_map_declarations.idl"
+    When I generate a version map for the IDL
+    Then the version map distinguishes replacements from surviving declarations
+    And source trivia and version selection preserve the complete declaration map
+
   Scenario: one binary serves every API version
     Given a versioned REST IDL file "bdd/features/data/versioned_rest.idl"
     When I generate rust code for the IDL

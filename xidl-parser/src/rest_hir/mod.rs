@@ -3,7 +3,7 @@ mod exceptions;
 pub mod mapping;
 mod model;
 mod project;
-mod project_params;
+pub(crate) mod project_params;
 mod route;
 pub mod semantics;
 #[cfg(test)]

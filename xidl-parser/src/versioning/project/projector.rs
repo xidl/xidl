@@ -177,6 +177,7 @@ impl<'a> Projector<'a> {
             kind,
             annotations,
             enum_members: None,
+            parameter: None,
         }
     }
 
