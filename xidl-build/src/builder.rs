@@ -20,6 +20,7 @@ pub(crate) struct GenerateSpec {
     pub(crate) mock: bool,
     pub(crate) api_version: Option<String>,
     pub(crate) api_versions: Option<String>,
+    pub(crate) openapi_version: Option<String>,
     pub(crate) inputs: Vec<PathBuf>,
 }
 
@@ -51,6 +52,7 @@ pub struct Builder {
     mock: bool,
     api_version: Option<String>,
     api_versions: Option<String>,
+    openapi_version: Option<String>,
 }
 
 impl Default for Builder {
@@ -64,6 +66,7 @@ impl Default for Builder {
             mock: false,
             api_version: None,
             api_versions: None,
+            openapi_version: None,
         }
     }
 }
@@ -140,6 +143,17 @@ impl Builder {
         self
     }
 
+    /// Selects the OpenAPI document version for the `openapi` generator.
+    ///
+    /// Accepts `auto` (the default, which upgrades the document to OpenAPI 3.2
+    /// when the contract has streams) or `3.1` (which forces an OpenAPI 3.1
+    /// document, rendering streams best-effort). Setting it for any other
+    /// language is rejected.
+    pub fn with_openapi_version(mut self, version: impl Into<String>) -> Self {
+        self.openapi_version = Some(version.into());
+        self
+    }
+
     /// Enables or disables client-side artifact generation.
     pub fn with_client(mut self, value: bool) -> Self {
         self.client = value;
@@ -189,6 +203,7 @@ impl Builder {
             mock: self.mock,
             api_version: self.api_version.clone(),
             api_versions: self.api_versions.clone(),
+            openapi_version: self.openapi_version.clone(),
             inputs: inputs.iter().map(|p| p.as_ref().to_path_buf()).collect(),
         };
         #[cfg(feature = "bundle")]

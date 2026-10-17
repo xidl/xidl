@@ -141,9 +141,47 @@ fn codegen_snapshots_from_idl_folders() {
             )
             .expect("generate");
         let output = render_output(files);
+        // OpenAPI streams render differently under a forced 3.1 document, so
+        // every case whose output changes also gets a second snapshot.
+        let forced_31 = if lang == "openapi" {
+            let forced =
+                render_openapi_output(&folder, case_name, &source, &case_path, Some("3.1"));
+            (forced != output).then_some(forced)
+        } else {
+            None
+        };
         let snapshot_name = format!("{folder}__{case_name}");
+        let v31_name = format!("{snapshot_name}__v31");
         insta::assert_snapshot!(snapshot_name, output);
+        if let Some(output) = forced_31 {
+            insta::assert_snapshot!(v31_name, output);
+        }
     }
+}
+
+/// Renders one `openapi` case, optionally pinning the document version.
+fn render_openapi_output(
+    folder: &str,
+    case_name: &str,
+    source: &str,
+    case_path: &Path,
+    version: Option<&str>,
+) -> String {
+    let mut props = case_props(folder, case_name);
+    if let Some(version) = version {
+        props.insert(String::from("openapi_version"), version.into());
+    }
+    let mut generator = xidlc::driver::Generator::new(String::from("openapi"));
+    let files = generator
+        .generate_from_idl(
+            source,
+            case_path
+                .strip_prefix(env!("CARGO_MANIFEST_DIR"))
+                .unwrap_or(case_path),
+            props,
+        )
+        .expect("generate openapi");
+    render_output(files)
 }
 
 #[test]

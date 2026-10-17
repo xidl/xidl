@@ -13,6 +13,31 @@ The `openapi` target generates `openapi_{filename}.json` for HTTP-style interfac
 xidlc gen --out-dir generated openapi api.idl
 ```
 
+## Document Version
+
+The `openapi` target accepts a `--version` option that selects the OpenAPI
+specification version of the generated document:
+
+```bash
+xidlc gen --out-dir generated openapi --version 3.1 api.idl
+```
+
+| Value | Behavior |
+| --- | --- |
+| `auto` (default) | Emits OpenAPI 3.1, upgrading the whole document to `3.2.0` when the contract contains any streaming operation. |
+| `3.1` | Always emits `3.1.0`. Streaming operations are rendered best-effort: the stream item type stays in the media type `schema`, without the OpenAPI 3.2 `itemSchema` field. |
+
+Streaming operations need OpenAPI 3.2 for `itemSchema`, which describes the
+structure of a single streamed message. Many documentation tools still only
+read 3.1, and an unsupported version makes the whole document unusable,
+including its non-streaming operations. Use `--version 3.1` when the document
+must stay readable by those tools; the streamed message structure is then left
+approximate.
+
+`--version` is not the document's `info.version`; that comes from the
+`version` pragma below. It is also unrelated to `--api-version`, which selects
+which API version of a versioned contract to generate.
+
 ## Metadata Pragmas
 
 The generator reads the following pragmas to populate the document metadata:

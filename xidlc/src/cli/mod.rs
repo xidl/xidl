@@ -103,7 +103,7 @@ enum GenLang {
     #[command(name = "go-rest", alias = "go_rest")]
     GoRest(ClientServerArgs),
     #[command(name = "openapi")]
-    Openapi(FilesArgs),
+    Openapi(OpenApiArgs),
     #[command(name = "openrpc", alias = "open-rpc")]
     Openrpc(FilesArgs),
     #[command(external_subcommand)]
@@ -113,6 +113,37 @@ enum GenLang {
 #[derive(Debug, Args)]
 struct FilesArgs {
     files: Vec<PathBuf>,
+}
+
+/// Generates an OpenAPI JSON document for HTTP interfaces.
+#[derive(Debug, Args)]
+struct OpenApiArgs {
+    /// OpenAPI document version. `auto` keeps the generator's choice (OpenAPI
+    /// 3.1, upgraded to 3.2 when the contract has streams); `3.1` forces an
+    /// OpenAPI 3.1 document, where streams are rendered best-effort.
+    #[arg(long = "version", value_name = "VERSION", default_value = "auto")]
+    version: OpenApiVersion,
+    files: Vec<PathBuf>,
+}
+
+/// Accepted `--version` values for the `openapi` target.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, clap::ValueEnum)]
+enum OpenApiVersion {
+    /// Let the generator choose the document version.
+    Auto,
+    /// Force an OpenAPI 3.1 document.
+    #[value(name = "3.1")]
+    V31,
+}
+
+impl OpenApiVersion {
+    /// Generator property value, or `None` to keep the `auto` behaviour.
+    fn property(self) -> Option<String> {
+        match self {
+            Self::Auto => None,
+            Self::V31 => Some("3.1".to_string()),
+        }
+    }
 }
 
 #[derive(Debug, Args)]
@@ -160,7 +191,11 @@ impl GenLang {
             Self::TypescriptRest(args) => Ok(shared.into_client_server("typescript-rest", args)),
             Self::Go(args) => Ok(shared.into_client_server("go", args)),
             Self::GoRest(args) => Ok(shared.into_client_server("go-rest", args)),
-            Self::Openapi(args) => Ok(shared.into_plain("openapi", args.files)),
+            Self::Openapi(args) => {
+                let mut generate = shared.into_plain("openapi", args.files);
+                generate.openapi_version = args.version.property();
+                Ok(generate)
+            }
             Self::Openrpc(args) => Ok(shared.into_plain("openrpc", args.files)),
             Self::External(values) => parse_external(shared, values),
         }
@@ -208,7 +243,7 @@ impl GenLang {
             Self::TypescriptRest(_) => "xidlc gen typescript-rest [OPTIONS] [FILES]...",
             Self::Go(_) => "xidlc gen go [OPTIONS] [FILES]...",
             Self::GoRest(_) => "xidlc gen go-rest [OPTIONS] [FILES]...",
-            Self::Openapi(_) => "xidlc gen openapi [FILES]...",
+            Self::Openapi(_) => "xidlc gen openapi [OPTIONS] [FILES]...",
             Self::Openrpc(_) => "xidlc gen openrpc [FILES]...",
             Self::External(_) => "xidlc gen <lang> [FILES]...",
         }
@@ -226,6 +261,7 @@ impl SharedGenArgs {
             mock: false,
             api_version: self.api_version,
             api_versions: self.api_versions,
+            openapi_version: None,
             files,
         }
     }
@@ -250,6 +286,7 @@ impl SharedGenArgs {
             dry_run: self.dry_run,
             api_version: self.api_version,
             api_versions: self.api_versions,
+            openapi_version: None,
             files: args.files,
         }
     }
