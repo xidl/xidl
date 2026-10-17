@@ -11,6 +11,8 @@ pub mod library;
 pub mod macros;
 pub mod openapi;
 pub mod units;
+#[cfg(feature = "cli")]
+mod version_diff;
 
 use std::collections::HashMap;
 use std::path::Path as FsPath;

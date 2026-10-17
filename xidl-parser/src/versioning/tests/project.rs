@@ -175,6 +175,42 @@ interface Pets {
 }
 
 #[test]
+fn projection_drops_empty_raises_clauses_before_idl_printing() {
+    let source = r#"
+@version
+enum Versions { v1, v2 };
+
+exception Current { string id; };
+
+@added(Versions::v2)
+exception Future { string reason; };
+
+interface Api {
+    void call() raises(Future);
+    readonly attribute string status raises(Future);
+    attribute string value getraises(Future) setraises(Current);
+    attribute string get_only getraises(Current) setraises(Future);
+    attribute string write_only setraises(Future);
+};
+"#;
+    let (spec, record) = analyze(source);
+    let version = project_ids(&record)[0];
+    let projected = record.project(&spec, version).expect("v1 projection");
+    let printed = crate::hir::printer::IdlPrinter::render(&projected);
+    let reparsed = parse(&printed);
+
+    assert!(!printed.contains("raises()"), "{printed}");
+    assert!(!printed.contains("getraises()"), "{printed}");
+    assert!(!printed.contains("setraises()"), "{printed}");
+    assert!(printed.contains("attribute string value setraises(Current);"));
+    assert!(printed.contains("attribute string get_only getraises(Current);"));
+    assert_eq!(
+        serde_json::to_value(&reparsed).expect("serialize reparsed"),
+        serde_json::to_value(&projected).expect("serialize projected")
+    );
+}
+
+#[test]
 fn merge_keeps_one_module_per_version_in_order() {
     let (spec, record) = analyze(VERSIONED);
     let versions = project_ids(&record);

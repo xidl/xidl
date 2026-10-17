@@ -1,0 +1,23 @@
+---
+source: xidlc/src/version_diff/tests.rs
+expression: rendered
+---
+--- api.idl @ v1 (2026-04)
++++ api.idl @ v2 (2026-07)
+@@ -1,11 +1,14 @@
+ struct Item {
+-    string title;
++    @optional
++    @rename("title")
++    @id(2)
++    string caption;
+ };
+ 
+ interface Store {
+-    @get(path = "/items/{id}")
++    @get(path = "/items")
+     Item get(
+-        @path
++        @query
+         string id
+     );

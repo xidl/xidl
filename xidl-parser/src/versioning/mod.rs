@@ -141,6 +141,11 @@ impl VersioningRecord {
         lifecycle::collect_intervals(&spec.0, &self.timeline)
     }
 
+    /// Resolves a version member name or display value for a CLI or plugin.
+    pub fn resolve_version(&self, raw: &str) -> ParserResult<VersionId> {
+        self.timeline.find(raw).map_err(Into::into)
+    }
+
     /// Projects `version` into an ordinary specification.
     pub fn project(&self, spec: &Specification, version: VersionId) -> ParserResult<Specification> {
         project::project_version(spec, &self.timeline, version)

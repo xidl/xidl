@@ -137,6 +137,26 @@ out/openapi_petstore.v1.json   # info.version = "1.0"
 out/openapi_petstore.v2.json   # info.version = "2.0"
 ```
 
+To freeze released documents in CI, regenerate the version directory and let
+the repository review the byte-level result:
+
+```bash
+xidlc gen --out-dir api/versions openapi api.idl
+git diff --exit-code api/versions
+```
+
+For a human-readable contract review, compare two projections as formatted IDL:
+
+```bash
+xidlc version diff v1 v2 api.idl
+```
+
+The two version arguments accept enum member names or display values. The diff
+shows contract annotations, routes, and parameter locations, while ignoring
+source whitespace and documentation comments. Identical projections produce no
+output and exit with `0`; differences exit with `1`; invalid inputs or output
+failures exit with `2`. Unknown versions report the available choices.
+
 Every declared version is emitted by default. Narrow the output with
 `--api-version` (one version) or `--api-versions` (a comma separated list, or
 `*` for every version). Selection accepts the member name or the display value,

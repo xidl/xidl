@@ -1,4 +1,4 @@
-use super::{AttrDeclarator, AttrRaisesExpr, SimpleDeclarator};
+use super::{AttrDeclarator, AttrRaisesExpr, RaisesExpr, ReadonlyAttrDeclarator, SimpleDeclarator};
 use crate::parser::FromTreeSitter;
 
 impl<'a> FromTreeSitter<'a> for AttrDeclarator {
@@ -72,6 +72,47 @@ impl<'a> FromTreeSitter<'a> for AttrRaisesExpr {
                 "parent: {}, got: missing raises",
                 node.kind()
             )))
+        }
+    }
+}
+
+impl<'a> FromTreeSitter<'a> for ReadonlyAttrDeclarator {
+    fn from_node(
+        node: tree_sitter::Node<'a>,
+        ctx: &mut crate::parser::ParseContext<'a>,
+    ) -> crate::error::ParserResult<Self> {
+        let mut declarators = Vec::new();
+        let mut raises = None;
+        for child in node
+            .named_children(&mut node.walk())
+            .filter(|child| !child.is_extra())
+        {
+            match child.kind() {
+                "simple_declarator" => declarators.push(SimpleDeclarator::from_node(child, ctx)?),
+                "raises_expr" => raises = Some(RaisesExpr::from_node(child, ctx)?),
+                kind => {
+                    return Err(crate::error::ParseError::UnexpectedNode(format!(
+                        "readonly attribute declarator contains unexpected {kind}"
+                    )));
+                }
+            }
+        }
+        if let Some(raises) = raises {
+            if declarators.len() != 1 {
+                return Err(crate::error::ParseError::UnexpectedNode(
+                    "readonly attribute raises clause requires exactly one declarator".into(),
+                ));
+            }
+            Ok(Self::WithRaises {
+                declarator: declarators.remove(0),
+                raises,
+            })
+        } else if declarators.is_empty() {
+            Err(crate::error::ParseError::UnexpectedNode(
+                "readonly attribute requires a declarator".into(),
+            ))
+        } else {
+            Ok(Self::SimpleDeclarator(declarators))
         }
     }
 }

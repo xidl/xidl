@@ -54,13 +54,17 @@ pub(crate) fn cors_layer(http_op: &HttpOperation) -> Option<String> {
 
 pub(crate) fn attr_operation_names(attr: &hir::AttrDcl) -> Vec<String> {
     match &attr.decl {
-        hir::AttrDclInner::ReadonlyAttrSpec(spec) => match &spec.declarator {
-            hir::ReadonlyAttrDeclarator::SimpleDeclarator(decl) => vec![
-                format!("get_attribute_{}", decl.0),
-                format!("watch_attribute_{}", decl.0),
-            ],
-            hir::ReadonlyAttrDeclarator::RaisesExpr(_) => Vec::new(),
-        },
+        hir::AttrDclInner::ReadonlyAttrSpec(spec) => spec
+            .declarator
+            .declarators()
+            .iter()
+            .flat_map(|decl| {
+                [
+                    format!("get_attribute_{}", decl.0),
+                    format!("watch_attribute_{}", decl.0),
+                ]
+            })
+            .collect(),
         hir::AttrDclInner::AttrSpec(spec) => match &spec.declarator {
             hir::AttrDeclarator::SimpleDeclarator(list) => list
                 .iter()

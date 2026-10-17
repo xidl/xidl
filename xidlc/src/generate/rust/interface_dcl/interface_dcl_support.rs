@@ -86,12 +86,11 @@ impl InterfaceMethodRenderer {
     }
 
     fn readonly_attr_names(&self, spec: &hir::ReadonlyAttrSpec) -> Vec<String> {
-        match &spec.declarator {
-            hir::ReadonlyAttrDeclarator::SimpleDeclarator(decl) => {
-                vec![crate::generate::rust::util::rust_ident(&decl.0)]
-            }
-            hir::ReadonlyAttrDeclarator::RaisesExpr(_) => Vec::new(),
-        }
+        spec.declarator
+            .declarators()
+            .iter()
+            .map(|decl| crate::generate::rust::util::rust_ident(&decl.0))
+            .collect()
     }
 
     fn render_accessor_methods(

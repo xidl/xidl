@@ -34,8 +34,21 @@ impl Specification {
         path: impl AsRef<Path>,
     ) -> crate::error::ParserResult<Self> {
         let mut resolver = FsIncludeResolver;
+        Self::from_typed_ast_with_resolver(value, properties, path, &mut resolver)
+    }
+
+    /// Lowers an unprojected typed AST using the caller's include resolver.
+    ///
+    /// Preserves dependency mounts when a versioned include is resolved during
+    /// lowering, after the outer source has already been parsed.
+    pub fn from_typed_ast_with_resolver(
+        value: crate::typed_ast::Specification,
+        properties: ParserProperties,
+        path: impl AsRef<Path>,
+        resolver: &mut dyn IncludeResolver,
+    ) -> crate::error::ParserResult<Self> {
         let current = Self::current_path(path.as_ref());
-        let mut includes = VersionedIncludes::new(&mut resolver, current);
+        let mut includes = VersionedIncludes::new(resolver, current);
         Self::lower(value, expand_interface(&properties), &mut includes)
     }
 

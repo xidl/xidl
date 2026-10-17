@@ -1,0 +1,31 @@
+@version
+enum ApiVersions {
+    @rename("2026-04") v1,
+    @rename("2026-07") v2,
+    @rename("2026-10") v3,
+};
+
+@rust-derive(Debug)
+struct Message {
+    string id;
+
+    @removed(ApiVersions::v2)
+    string text;
+
+    @added(ApiVersions::v2)
+    @optional
+    string body;
+};
+
+interface Messages {
+    @get(path = "/messages/{id}")
+    Message get(@path string id);
+
+    @added(ApiVersions::v2)
+    @get(path = "/messages")
+    Message list(@query string limit);
+
+    @removed(ApiVersions::v2)
+    @get(path = "/messages/export")
+    string export_csv();
+};

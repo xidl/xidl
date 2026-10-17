@@ -158,12 +158,15 @@ interface Store : ::Parent {
             else {
                 continue;
             };
-            let hir::AttrDeclarator::WithRaises { raises, .. } = &attribute.declarator else {
+            let hir::AttrDeclarator::WithRaises { declarator, raises } = &attribute.declarator
+            else {
                 panic!("raises contract")
             };
             attributes += 1;
             match raises {
                 hir::AttrRaisesExpr::Case1(get, Some(set)) => {
+                    assert_eq!(declarator.0, "selected");
+                    assert_eq!(definition.ident, "v1");
                     assert_eq!(names(&get.expr.0), expected);
                     assert_eq!(
                         names(&set.expr.0),
@@ -174,11 +177,24 @@ interface Store : ::Parent {
                         }
                     );
                 }
-                hir::AttrRaisesExpr::SetExcepExpr(set) => assert_eq!(names(&set.expr.0), expected),
-                _ => panic!("both declared attribute contracts must survive"),
+                hir::AttrRaisesExpr::Case1(get, None) => {
+                    assert_eq!(declarator.0, "selected");
+                    assert_eq!(definition.ident, "v2");
+                    assert_eq!(names(&get.expr.0), expected);
+                }
+                hir::AttrRaisesExpr::SetExcepExpr(set) => {
+                    assert_eq!(declarator.0, "updated");
+                    assert_eq!(names(&set.expr.0), expected);
+                }
             }
         }
         assert_eq!(attributes, 2);
+        let printed = hir::printer::IdlPrinter::render(&projected);
+        assert_eq!(
+            serde_json::to_value(lower(&printed)).unwrap(),
+            serde_json::to_value(&projected).unwrap(),
+            "{printed}"
+        );
         let batch = body
             .iter()
             .find_map(|d| match d {

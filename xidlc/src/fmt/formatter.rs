@@ -18,14 +18,12 @@ impl<'a> Formatter<'a> {
         parser
             .set_language(&self.config.language)
             .map_err(|err| IdlcError::fmt(format!("set {} language: {err}", self.config.label)))?;
+        let normalized = xidl_parser::parser::normalize_source_for_tree_sitter(source);
         let tree = parser
-            .parse(source, None)
+            .parse(normalized.as_ref(), None)
             .ok_or_else(|| IdlcError::fmt(format!("failed to parse {}", self.config.label)))?;
         let root = tree.root_node();
         if root.has_error() {
-            if cfg!(test) {
-                unreachable!()
-            }
             return Err(IdlcError::fmt(format!("parse {} error", self.config.label)));
         }
         let query = Query::new(&self.config.language, self.config.query_source)
