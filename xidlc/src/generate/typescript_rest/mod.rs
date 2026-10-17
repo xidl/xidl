@@ -1,3 +1,5 @@
+#[cfg(feature = "gen-typescript-rest-adapters")]
+pub(crate) mod adapters;
 mod interface;
 mod model;
 mod server;

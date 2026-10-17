@@ -120,6 +120,9 @@ enum GenLang {
         alias = "ts_rest"
     )]
     TypescriptRest(ClientServerArgs),
+    #[cfg(feature = "gen-typescript-rest-adapters")]
+    #[command(name = "typescript-rest-adapters")]
+    TypescriptRestAdapters(FilesArgs),
     #[command(name = "go", alias = "golang")]
     Go(ClientServerArgs),
     #[command(name = "go-rest", alias = "go_rest")]
@@ -211,6 +214,10 @@ impl GenLang {
             Self::RustAxum(args) => Ok(shared.into_client_server("rust-axum", args)),
             Self::Typescript(args) => Ok(shared.into_client_server("typescript", args)),
             Self::TypescriptRest(args) => Ok(shared.into_client_server("typescript-rest", args)),
+            #[cfg(feature = "gen-typescript-rest-adapters")]
+            Self::TypescriptRestAdapters(args) => {
+                Ok(shared.into_plain("typescript-rest-adapters", args.files))
+            }
             Self::Go(args) => Ok(shared.into_client_server("go", args)),
             Self::GoRest(args) => Ok(shared.into_client_server("go-rest", args)),
             Self::Openapi(args) => {
@@ -239,6 +246,10 @@ impl GenLang {
             Self::RustAxum(_) => gen_cmd.find_subcommand_mut("rust-axum"),
             Self::Typescript(_) => gen_cmd.find_subcommand_mut("typescript"),
             Self::TypescriptRest(_) => gen_cmd.find_subcommand_mut("typescript-rest"),
+            #[cfg(feature = "gen-typescript-rest-adapters")]
+            Self::TypescriptRestAdapters(_) => {
+                gen_cmd.find_subcommand_mut("typescript-rest-adapters")
+            }
             Self::Go(_) => gen_cmd.find_subcommand_mut("go"),
             Self::GoRest(_) => gen_cmd.find_subcommand_mut("go-rest"),
             Self::Openapi(_) => gen_cmd.find_subcommand_mut("openapi"),
@@ -263,6 +274,8 @@ impl GenLang {
             Self::RustAxum(_) => "xidlc gen rust-axum [OPTIONS] [FILES]...",
             Self::Typescript(_) => "xidlc gen typescript [OPTIONS] [FILES]...",
             Self::TypescriptRest(_) => "xidlc gen typescript-rest [OPTIONS] [FILES]...",
+            #[cfg(feature = "gen-typescript-rest-adapters")]
+            Self::TypescriptRestAdapters(_) => "xidlc gen typescript-rest-adapters [FILES]...",
             Self::Go(_) => "xidlc gen go [OPTIONS] [FILES]...",
             Self::GoRest(_) => "xidlc gen go-rest [OPTIONS] [FILES]...",
             Self::Openapi(_) => "xidlc gen openapi [OPTIONS] [FILES]...",

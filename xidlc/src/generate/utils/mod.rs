@@ -1,10 +1,13 @@
 pub mod doc;
+#[cfg(feature = "gen-rust")]
 pub mod filter;
 pub mod scope;
 
 pub use doc::doc_lines_from_annotations;
+#[cfg(feature = "gen-rust")]
 pub use filter::rust_format_filter;
 
+#[cfg(any(feature = "gen-rust", feature = "gen-openapi"))]
 use xidl_parser::hir;
 
 /// Imported units that `definitions` reference, by their prefixes.
@@ -54,6 +57,7 @@ pub fn imported_units(properties: &xidl_parser::hir::ParserProperties) -> Vec<St
 }
 
 /// Whether any annotation carries the given name (e.g. `http`, `header`).
+#[cfg(any(feature = "gen-rust", feature = "gen-openapi"))]
 pub fn has_annotation(annotations: &[hir::Annotation], target: &str) -> bool {
     annotations.iter().any(|annotation| match annotation {
         hir::Annotation::Builtin { name, .. } => name == target,
@@ -64,8 +68,10 @@ pub fn has_annotation(annotations: &[hir::Annotation], target: &str) -> bool {
     })
 }
 
+#[cfg(feature = "gen-go")]
 use convert_case::{Case, Casing};
 
+#[cfg(feature = "gen-go")]
 pub fn go_package_name(value: &str) -> String {
     let mut out = value.to_case(Case::Snake);
     out = out.replace('-', "_");

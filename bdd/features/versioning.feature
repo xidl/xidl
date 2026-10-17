@@ -89,3 +89,18 @@ Feature: API versioning
       | header   |
       | query    |
       | cookie   |
+
+  Scenario: an independent TypeScript adapter target preserves frozen HTTP contracts
+    Given a versioned REST IDL file "bdd/features/data/versioned_adapters.idl"
+    When I generate TypeScript with the independent adapter target
+    Then one TypeScript Head implementation passes the unchanged adapter Hurl contracts
+
+  Scenario: three-version business decisions preserve validation and committed outcomes
+    Given a versioned REST IDL file "bdd/features/data/versioned_adapters_business.idl"
+    When I generate TypeScript with the independent adapter target
+    Then the three-version TypeScript application enforces wire and business boundaries
+
+  Scenario: single-version adapters validate requests before an identity dispatch
+    Given a versioned REST IDL file "bdd/features/data/versioned_adapters_single.idl"
+    When I generate TypeScript with the independent adapter target
+    Then the single-version TypeScript application validates before dispatch

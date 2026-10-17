@@ -81,12 +81,7 @@ pub(super) fn build_client_params(
             )
         })
         .map(|p| {
-            let byte_body = matches!(
-                &op.http.request.body.shape,
-                HttpRequestBodyShape::SingleValue { source_param, ty, .. }
-                    if *source_param == p.name
-                        && xidl_parser::rest_hir::is_byte_sequence(ty)
-            );
+            let byte_body = op.http.request.body.shape.byte_parameter() == Some(p.name.as_str());
             let base = if byte_body {
                 TsType::Primitive("Uint8Array".to_string())
             } else {
