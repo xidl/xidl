@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.104.0](https://github.com/xidl/xidl/compare/v0.103.0...v0.104.0) (2026-10-17)
+
+
+### Features
+
+* **openapi:** add an explicit document version option ([2682f21](https://github.com/xidl/xidl/commit/2682f21c9c853126432ccd7e0d46f78a41573397))
+* **versioning:** add canonical version map generation ([2707398](https://github.com/xidl/xidl/commit/27073985dc21359514a5d295e64ebdb35095fc61))
+* **versioning:** complete canonical version map ([40db547](https://github.com/xidl/xidl/commit/40db5473bf36ceacc8ad31a6537ece20bc29313d))
+
+
+### Bug Fixes
+
+* **versioning:** preserve selection error precedence ([d98bc37](https://github.com/xidl/xidl/commit/d98bc37a0c717b5f398dcb22383b41d68e470125))
+
 ## [0.103.0](https://github.com/xidl/xidl/compare/v0.102.0...v0.103.0) (2026-10-17)
 
 
