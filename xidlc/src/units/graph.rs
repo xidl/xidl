@@ -1,8 +1,11 @@
 use super::error::ImportError;
+use super::interface::UnitInterface;
 use super::path::ImportPath;
+use super::refs::PreparedSource;
 use super::scan::{DeclaredImports, ImportDecl};
 use super::spec::{ImportSpec, Unit};
 use std::collections::BTreeMap;
+use std::collections::btree_map::Entry;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -13,6 +16,7 @@ const INDEX_FILE: &str = "index.idl";
 #[derive(Debug)]
 pub struct UnitGraph {
     units: Vec<Unit>,
+    mounts: BTreeMap<String, PathBuf>,
 }
 
 impl UnitGraph {
@@ -36,14 +40,100 @@ impl UnitGraph {
         for input in inputs {
             builder.add_root(input)?;
         }
-        Ok(Self {
+        let graph = Self {
             units: builder.units,
-        })
+            mounts: mounts.clone(),
+        };
+        graph.validate()?;
+        Ok(graph)
     }
 
     /// Units in dependency order: every unit follows the units it imports.
     pub fn units(&self) -> &[Unit] {
         &self.units
+    }
+
+    /// Checks every reference a unit makes against the unit it names.
+    ///
+    /// A reference into an imported unit must name a version that unit
+    /// declares and a declaration that exists at that version, so a stale or
+    /// misspelled cross-unit type fails here instead of inside a target.
+    fn validate(&self) -> Result<(), ImportError> {
+        let mut interfaces: BTreeMap<String, UnitInterface> = BTreeMap::new();
+        for unit in &self.units {
+            for reference in unit.refs() {
+                if unit.import(reference.prefix()).is_none() {
+                    continue;
+                }
+                let Some(target) = self
+                    .units
+                    .iter()
+                    .find(|candidate| candidate.prefix() == reference.prefix())
+                else {
+                    continue;
+                };
+                let interface = match interfaces.entry(reference.prefix().to_string()) {
+                    Entry::Occupied(entry) => entry.into_mut(),
+                    Entry::Vacant(entry) => entry.insert(UnitInterface::of(
+                        target.source(),
+                        target.file(),
+                        &self.mounts,
+                    )?),
+                };
+                Self::check(unit, target, interface, reference)?;
+            }
+        }
+        Ok(())
+    }
+
+    /// Checks one reference against the interface of the unit it names.
+    fn check(
+        unit: &Unit,
+        target: &Unit,
+        interface: &UnitInterface,
+        reference: &super::refs::UnitRef,
+    ) -> Result<(), ImportError> {
+        let importer = unit.file().to_path_buf();
+        let referenced = target.file().to_path_buf();
+        let written = reference.qualified();
+        let declared = |version: Option<&str>| interface.declares(version, reference.name());
+        match reference.version() {
+            Some(version) if !interface.is_versioned() => Err(ImportError::UnexpectedVersion {
+                importer,
+                unit: referenced,
+                reference: written,
+                version: version.to_string(),
+            }),
+            Some(version) if !interface.knows_version(version) => {
+                Err(ImportError::UnknownVersion {
+                    importer,
+                    unit: referenced,
+                    reference: written,
+                    version: version.to_string(),
+                    versions: interface.versions(),
+                })
+            }
+            Some(version) if !declared(Some(version)) => Err(ImportError::UnknownType {
+                importer,
+                unit: referenced,
+                reference: written,
+                version: Some(version.to_string()),
+            }),
+            Some(_) => Ok(()),
+            None if interface.is_versioned() => Err(ImportError::MissingVersion {
+                importer,
+                unit: referenced,
+                reference: written,
+                versions: interface.versions(),
+            }),
+            None if !declared(None) => Err(ImportError::UnknownType {
+                importer,
+                unit: referenced,
+                reference: written,
+                version: None,
+            }),
+            None => Ok(()),
+        }
     }
 }
 
@@ -103,6 +193,7 @@ impl<'a> UnitBuilder<'a> {
 
         let source = Self::read(&file)?;
         let imports = self.resolve_imports(&file, &source)?;
+        let prepared = PreparedSource::of(&source, &Self::bindings(&imports))?;
 
         self.stack.push(identity.clone());
         for import in &imports {
@@ -112,8 +203,21 @@ impl<'a> UnitBuilder<'a> {
 
         self.register_prefix(&prefix, &file)?;
         self.by_file.insert(identity, self.units.len());
-        self.units.push(Unit::new(file, prefix, imports));
+        self.units.push(Unit::new(file, prefix, imports, prepared));
         Ok(())
+    }
+
+    /// Version each import bound, keyed by the reference prefix it uses.
+    fn bindings(imports: &[ImportSpec]) -> BTreeMap<String, Option<String>> {
+        imports
+            .iter()
+            .map(|import| {
+                (
+                    import.prefix().to_string(),
+                    import.version().map(str::to_string),
+                )
+            })
+            .collect()
     }
 
     /// Resolves every import declaration of one file.

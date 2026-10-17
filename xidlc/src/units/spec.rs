@@ -1,3 +1,4 @@
+use super::refs::{PreparedSource, UnitRef};
 use std::path::{Path, PathBuf};
 
 /// One resolved import of a unit.
@@ -67,15 +68,22 @@ pub struct Unit {
     file: PathBuf,
     prefix: String,
     imports: Vec<ImportSpec>,
+    prepared: PreparedSource,
 }
 
 impl Unit {
-    /// Creates a unit from its file, reference prefix, and resolved imports.
-    pub(super) fn new(file: PathBuf, prefix: String, imports: Vec<ImportSpec>) -> Self {
+    /// Creates a unit from its file, prefix, imports, source and references.
+    pub(super) fn new(
+        file: PathBuf,
+        prefix: String,
+        imports: Vec<ImportSpec>,
+        prepared: PreparedSource,
+    ) -> Self {
         Self {
             file,
             prefix,
             imports,
+            prepared,
         }
     }
 
@@ -92,6 +100,21 @@ impl Unit {
     /// Imports this unit declares, resolved and deduplicated.
     pub fn imports(&self) -> &[ImportSpec] {
         &self.imports
+    }
+
+    /// Import that binds `prefix`, when this unit imports that name.
+    pub fn import(&self, prefix: &str) -> Option<&ImportSpec> {
+        self.imports.iter().find(|import| import.prefix() == prefix)
+    }
+
+    /// Source handed to generation, with bound versions spelled out.
+    pub fn source(&self) -> &str {
+        self.prepared.source()
+    }
+
+    /// References this unit makes into other units.
+    pub fn refs(&self) -> &[UnitRef] {
+        self.prepared.refs()
     }
 
     /// Input path handed to generation.

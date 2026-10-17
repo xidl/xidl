@@ -53,7 +53,9 @@ pub fn expand_interface(
 
     let idl = render::render_template("interface.idl.j2", &ctx)?;
     let typed = crate::parser::parser_text(&idl)?;
-    let spec = super::spec::spec_from_typed_ast(typed, false);
+    let mut resolver = super::FsIncludeResolver;
+    let mut includes = super::VersionedIncludes::new(&mut resolver, None);
+    let spec = super::spec::spec_from_typed_ast(typed, false, &mut includes);
     Ok(spec.0)
 }
 

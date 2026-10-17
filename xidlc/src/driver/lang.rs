@@ -51,6 +51,20 @@ impl From<&str> for Plugin {
     }
 }
 
+impl Plugin {
+    /// Whether the target can resolve a reference into an imported unit.
+    ///
+    /// The remaining targets reach another unit through a package path or a
+    /// document reference they do not carry yet, so a unit that imports one
+    /// fails instead of emitting output that does not build.
+    pub fn resolves_imported_units(&self) -> bool {
+        !matches!(
+            self,
+            Self::Go | Self::GoRest | Self::Openapi | Self::Openrpc
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
