@@ -61,7 +61,7 @@ def prepare_application(context, script):
     shutil.copy(boilerplate / script, output)
     if script == "business.ts":
         shutil.copy(boilerplate / "business_http.ts", output)
-    run(["pnpm", "install", "--no-frozen-lockfile"], cwd=output)
+    run(["pnpm", "install", "--ignore-scripts", "--no-frozen-lockfile"], cwd=output)
     run(["pnpm", "exec", "tsc", "--noEmit"], cwd=output)
     return output
 
