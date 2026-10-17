@@ -1,8 +1,8 @@
 use crate::error::IdlcResult;
-use std::collections::BTreeSet;
 
 use xidl_parser::hir;
 
+use super::super::GoPackages;
 use super::definition_names::{go_capitalize, go_export_name};
 
 pub(crate) fn constr_type_name(constr: &hir::ConstrTypeDcl, prefix: &[String]) -> String {
@@ -17,15 +17,44 @@ pub(crate) fn constr_type_name(constr: &hir::ConstrTypeDcl, prefix: &[String]) -
     }
 }
 
-pub(crate) fn render_const_expr(expr: &hir::ConstExpr) -> IdlcResult<String> {
+pub(crate) fn type_with_decl(
+    ty: &hir::TypeSpec,
+    decl: &hir::Declarator,
+    packages: &GoPackages,
+) -> String {
+    let base = go_type(ty, packages);
+    match decl {
+        hir::Declarator::SimpleDeclarator(_) => base,
+        hir::Declarator::ArrayDeclarator(value) => {
+            let mut out = base;
+            for len in value.len.iter().rev() {
+                out = format!(
+                    "[{}]{}",
+                    render_const_expr(&len.0, packages).unwrap_or_else(|_| "0".to_string()),
+                    out
+                );
+            }
+            out
+        }
+    }
+}
+
+pub(crate) fn render_const_expr(
+    expr: &hir::ConstExpr,
+    packages: &GoPackages,
+) -> IdlcResult<String> {
     Ok(crate::generate::render_const_expr(
         expr,
-        &go_scoped_name,
+        &|value| go_scoped_name(value, packages),
         &go_literal,
     ))
 }
 
-pub(crate) fn go_scoped_name(value: &hir::ScopedName) -> String {
+/// Go name of a scoped reference inside the file that renders it.
+pub(crate) fn go_scoped_name(value: &hir::ScopedName, packages: &GoPackages) -> String {
+    if let Some(reference) = packages.reference(value) {
+        return reference;
+    }
     value
         .name
         .iter()
@@ -55,7 +84,7 @@ pub(crate) fn go_literal(value: &hir::Literal) -> String {
     }
 }
 
-pub(crate) fn go_const_type(ty: &hir::ConstType) -> String {
+pub(crate) fn go_const_type(ty: &hir::ConstType, packages: &GoPackages) -> String {
     match ty {
         hir::ConstType::IntegerType(value) => go_integer_type(value),
         hir::ConstType::FloatingPtType | hir::ConstType::FixedPtConstType => "float64".to_string(),
@@ -63,17 +92,12 @@ pub(crate) fn go_const_type(ty: &hir::ConstType) -> String {
         hir::ConstType::BooleanType => "bool".to_string(),
         hir::ConstType::OctetType => "byte".to_string(),
         hir::ConstType::StringType(_) | hir::ConstType::WideStringType(_) => "string".to_string(),
-        hir::ConstType::ScopedName(value) => go_scoped_name(value),
+        hir::ConstType::ScopedName(value) => go_scoped_name(value, packages),
         hir::ConstType::SequenceType(_) => "any".to_string(),
     }
 }
 
-pub(crate) fn go_type_with_prefix(
-    ty: &hir::TypeSpec,
-    current_prefix: &[String],
-    versioned: bool,
-    type_paths: &BTreeSet<Vec<String>>,
-) -> String {
+pub(crate) fn go_type(ty: &hir::TypeSpec, packages: &GoPackages) -> String {
     match ty {
         hir::TypeSpec::IntegerType(value) => go_integer_type(value),
         hir::TypeSpec::FloatingPtType => "float64".to_string(),
@@ -82,22 +106,15 @@ pub(crate) fn go_type_with_prefix(
         hir::TypeSpec::AnyType | hir::TypeSpec::ObjectType | hir::TypeSpec::ValueBaseType => {
             "any".to_string()
         }
-        hir::TypeSpec::ScopedName(value) => {
-            go_scoped_name_with_prefix(value, current_prefix, versioned, type_paths)
-        }
-        hir::TypeSpec::SequenceType(seq) => {
-            format!(
-                "[]{}",
-                go_type_with_prefix(&seq.ty, current_prefix, versioned, type_paths)
-            )
-        }
+        hir::TypeSpec::ScopedName(value) => go_scoped_name(value, packages),
+        hir::TypeSpec::SequenceType(seq) => format!("[]{}", go_type(&seq.ty, packages)),
         hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => "string".to_string(),
         hir::TypeSpec::FixedPtType(_) => "float64".to_string(),
         hir::TypeSpec::MapType(map) => {
             format!(
                 "map[{}]{}",
-                go_type_with_prefix(&map.key, current_prefix, versioned, type_paths),
-                go_type_with_prefix(&map.value, current_prefix, versioned, type_paths)
+                go_type(&map.key, packages),
+                go_type(&map.value, packages)
             )
         }
         hir::TypeSpec::TemplateType(value) => format!(
@@ -106,73 +123,11 @@ pub(crate) fn go_type_with_prefix(
             value
                 .args
                 .iter()
-                .map(|value| go_type_with_prefix(value, current_prefix, versioned, type_paths))
+                .map(|arg| go_type(arg, packages))
                 .collect::<Vec<_>>()
                 .join(", "),
         ),
     }
-}
-
-fn go_scoped_name_with_prefix(
-    value: &hir::ScopedName,
-    current_prefix: &[String],
-    versioned: bool,
-    type_paths: &BTreeSet<Vec<String>>,
-) -> String {
-    if value.name.is_empty() {
-        return go_scoped_name(value);
-    }
-    if !versioned {
-        return go_scoped_name(value);
-    }
-    if let Some(path) = resolve_type_path(value, current_prefix, type_paths) {
-        return path
-            .iter()
-            .map(|part| go_capitalize(part))
-            .collect::<Vec<_>>()
-            .join("");
-    }
-    let mut parts = Vec::new();
-    if value.name.len() == 1 {
-        parts.extend(current_prefix.iter().cloned());
-    } else if let Some(version) = current_prefix.first() {
-        parts.push(version.clone());
-    }
-    parts.extend(value.name.iter().cloned());
-    parts
-        .iter()
-        .map(|part| go_capitalize(part))
-        .collect::<Vec<_>>()
-        .join("")
-}
-
-fn resolve_type_path(
-    value: &hir::ScopedName,
-    current_prefix: &[String],
-    type_paths: &BTreeSet<Vec<String>>,
-) -> Option<Vec<String>> {
-    if value.is_root {
-        return type_paths
-            .iter()
-            .find(|path| path.as_slice() == value.name.as_slice())
-            .cloned();
-    }
-    if value.name.len() == 1 {
-        for end in (0..=current_prefix.len()).rev() {
-            let mut candidate = current_prefix[..end].to_vec();
-            candidate.extend(value.name.iter().cloned());
-            if type_paths.contains(&candidate) {
-                return Some(candidate);
-            }
-        }
-    } else if let Some(version) = current_prefix.first() {
-        let mut candidate = vec![version.clone()];
-        candidate.extend(value.name.iter().cloned());
-        if type_paths.contains(&candidate) {
-            return Some(candidate);
-        }
-    }
-    None
 }
 
 fn go_integer_type(value: &hir::IntegerType) -> String {

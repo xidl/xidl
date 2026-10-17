@@ -8,7 +8,6 @@ use crate::generate::utils::go_package_name;
 use crate::jsonrpc::{Artifact, ArtifactFile};
 pub use render::GoRenderer;
 use serde::Serialize;
-use std::collections::BTreeSet;
 use std::path::Path;
 use xidl_parser::hir;
 use xidl_parser::hir::ParserProperties;
@@ -108,7 +107,6 @@ pub(crate) struct GoRenderContext {
     pub(crate) packages: GoPackages,
     renderer: GoRenderer,
     pub(crate) body: String,
-    pub(crate) type_paths: BTreeSet<Vec<String>>,
 }
 
 impl GoRenderContext {
@@ -122,7 +120,6 @@ impl GoRenderContext {
             packages,
             renderer,
             body: String::new(),
-            type_paths: BTreeSet::new(),
         })
     }
 
@@ -149,19 +146,6 @@ impl GoRenderContext {
 
     pub(crate) fn render_template<S: Serialize>(&self, name: &str, ctx: &S) -> IdlcResult<String> {
         self.renderer.render_template(name, ctx)
-    }
-
-    pub(crate) fn go_type(&self, ty: &hir::TypeSpec, prefix: &[String]) -> String {
-        let versioned = self
-            .properties
-            .get(xidl_parser::versioning::API_VERSION_MODULES_PROPERTY)
-            .and_then(serde_json::Value::as_array)
-            .is_some_and(|modules| !modules.is_empty());
-        definition::go_type_with_prefix(ty, prefix, versioned, &self.type_paths)
-    }
-
-    pub(crate) fn collect_type_paths(&mut self, spec: &hir::Specification) {
-        self.type_paths = definition::collect_type_paths(spec);
     }
 
     pub(crate) fn finish(self, blocks: Vec<String>) -> IdlcResult<String> {

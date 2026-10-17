@@ -11,20 +11,19 @@ pub(super) fn render_attr_types(
     ctx: &mut GoRenderContext,
     interface_name: &str,
     attr: &hir::AttrDcl,
-    prefix: &[String],
 ) -> IdlcResult<Vec<MethodTemplate>> {
     let mut out = Vec::new();
     match &attr.decl {
         hir::AttrDclInner::ReadonlyAttrSpec(spec) => {
             if let hir::ReadonlyAttrDeclarator::SimpleDeclarator(decl) = &spec.declarator {
-                push_get_attr(ctx, &mut out, interface_name, &decl.0, &spec.ty, prefix)?;
+                push_get_attr(ctx, &mut out, interface_name, &decl.0, &spec.ty)?;
             }
         }
         hir::AttrDclInner::AttrSpec(spec) => {
             if let hir::AttrDeclarator::SimpleDeclarator(values) = &spec.declarator {
                 for decl in values {
-                    push_get_attr(ctx, &mut out, interface_name, &decl.0, &spec.ty, prefix)?;
-                    push_set_attr(ctx, &mut out, interface_name, &decl.0, &spec.ty, prefix)?;
+                    push_get_attr(ctx, &mut out, interface_name, &decl.0, &spec.ty)?;
+                    push_set_attr(ctx, &mut out, interface_name, &decl.0, &spec.ty)?;
                 }
             }
         }
@@ -38,7 +37,6 @@ fn push_get_attr(
     interface_name: &str,
     raw: &str,
     ty: &hir::TypeSpec,
-    prefix: &[String],
 ) -> IdlcResult<()> {
     let request_name = format!(
         "{}GetAttribute{}Request",
@@ -64,7 +62,7 @@ fn push_get_attr(
                 ctx,
                 vec![FieldTemplate {
                     name: "Return".to_string(),
-                    ty: ctx.go_type(ty, prefix),
+                    ty: ctx.type_ref(ty),
                     tag: "return".to_string(),
                 }],
             )?,
@@ -84,7 +82,6 @@ fn push_set_attr(
     interface_name: &str,
     raw: &str,
     ty: &hir::TypeSpec,
-    prefix: &[String],
 ) -> IdlcResult<()> {
     let request_name = format!(
         "{}SetAttribute{}Request",
@@ -104,7 +101,7 @@ fn push_set_attr(
                 ctx,
                 vec![FieldTemplate {
                     name: "Value".to_string(),
-                    ty: ctx.go_type(ty, prefix),
+                    ty: ctx.type_ref(ty),
                     tag: "value".to_string(),
                 }],
             )?,

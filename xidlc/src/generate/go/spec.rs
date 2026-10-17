@@ -10,7 +10,6 @@ pub(crate) fn render_spec(
     properties: &ParserProperties,
 ) -> IdlcResult<String> {
     let mut ctx = GoRenderContext::new(package_name.to_string(), properties.clone())?;
-    ctx.collect_type_paths(spec);
     let blocks = definition::render_spec(&mut ctx, spec)?;
     ctx.finish(blocks)
 }

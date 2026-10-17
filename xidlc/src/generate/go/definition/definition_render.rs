@@ -10,7 +10,6 @@ use super::definition_templates::{
     StructTemplate, render_field_block, render_method_block,
 };
 use super::definition_type_render::{render_exception, render_type_dcl};
-use super::definition_types::{go_const_type, render_const_expr};
 
 pub(super) fn render_const(
     ctx: &mut GoRenderContext,
@@ -18,8 +17,8 @@ pub(super) fn render_const(
     prefix: &[String],
 ) -> IdlcResult<()> {
     let name = go_export_name(prefix, &def.ident);
-    let ty = go_const_type(&def.ty);
-    let value = render_const_expr(&def.value)?;
+    let ty = ctx.const_type(&def.ty);
+    let value = ctx.const_expr(&def.value)?;
     ctx.push_template("const.go.j2", &ConstTemplate { name, ty, value })
 }
 
@@ -44,11 +43,10 @@ pub(super) fn render_interface(
                         &interface_name,
                         op,
                         container_annotations,
-                        prefix,
                     )?);
                 }
                 hir::Export::AttrDcl(attr) => {
-                    methods.extend(render_attr_types(ctx, &interface_name, attr, prefix)?)
+                    methods.extend(render_attr_types(ctx, &interface_name, attr)?)
                 }
                 hir::Export::TypeDcl(type_dcl) => render_type_dcl(ctx, type_dcl, prefix)?,
                 hir::Export::ConstDcl(const_dcl) => render_const(ctx, const_dcl, prefix)?,
@@ -70,7 +68,6 @@ fn render_operation_types(
     interface_name: &str,
     op: &hir::OpDcl,
     container_annotations: &[hir::Annotation],
-    prefix: &[String],
 ) -> IdlcResult<MethodTemplate> {
     let request_name = format!("{}{}Request", interface_name, go_capitalize(&op.ident));
     let response_name = format!("{}{}Response", interface_name, go_capitalize(&op.ident));
@@ -97,7 +94,7 @@ fn render_operation_types(
 
         request_fields.push(FieldTemplate {
             name: field,
-            ty: ctx.go_type(&param.ty, prefix),
+            ty: ctx.type_ref(&param.ty),
             tag: wire_name,
         });
     }
@@ -130,7 +127,7 @@ fn render_operation_types(
 
         response_fields.push(FieldTemplate {
             name: field,
-            ty: ctx.go_type(ty, prefix),
+            ty: ctx.type_ref(ty),
             tag: wire_name,
         });
     }
@@ -150,7 +147,7 @@ fn render_operation_types(
 
         response_fields.push(FieldTemplate {
             name: field,
-            ty: ctx.go_type(&param.ty, prefix),
+            ty: ctx.type_ref(&param.ty),
             tag: wire_name,
         });
     }
