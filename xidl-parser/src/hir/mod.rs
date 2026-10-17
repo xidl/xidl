@@ -11,6 +11,7 @@ mod include;
 mod interface;
 mod interface_codegen;
 mod pragma;
+pub mod printer;
 mod scoped_name;
 mod spec;
 mod struct_dcl;

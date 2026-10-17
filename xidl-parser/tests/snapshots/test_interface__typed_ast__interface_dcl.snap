@@ -493,11 +493,23 @@ Specification(
                                                         ),
                                                     ),
                                                     declarator: SimpleDeclarator(
-                                                        SimpleDeclarator(
-                                                            Identifier(
-                                                                "attr1",
+                                                        [
+                                                            SimpleDeclarator(
+                                                                Identifier(
+                                                                    "attr1",
+                                                                ),
                                                             ),
-                                                        ),
+                                                            SimpleDeclarator(
+                                                                Identifier(
+                                                                    "attr2",
+                                                                ),
+                                                            ),
+                                                            SimpleDeclarator(
+                                                                Identifier(
+                                                                    "attr3",
+                                                                ),
+                                                            ),
+                                                        ],
                                                     ),
                                                 },
                                             ),
@@ -519,13 +531,24 @@ Specification(
                                                             },
                                                         ),
                                                     ),
-                                                    declarator: SimpleDeclarator(
-                                                        SimpleDeclarator(
+                                                    declarator: WithRaises {
+                                                        declarator: SimpleDeclarator(
                                                             Identifier(
                                                                 "attr4",
                                                             ),
                                                         ),
-                                                    ),
+                                                        raises: RaisesExpr(
+                                                            [
+                                                                ScopedName {
+                                                                    scoped_name: None,
+                                                                    identifier: Identifier(
+                                                                        "A",
+                                                                    ),
+                                                                    node_text: "A",
+                                                                },
+                                                            ],
+                                                        ),
+                                                    },
                                                 },
                                             ),
                                         },
@@ -546,13 +569,38 @@ Specification(
                                                             },
                                                         ),
                                                     ),
-                                                    declarator: SimpleDeclarator(
-                                                        SimpleDeclarator(
+                                                    declarator: WithRaises {
+                                                        declarator: SimpleDeclarator(
                                                             Identifier(
                                                                 "attr5",
                                                             ),
                                                         ),
-                                                    ),
+                                                        raises: RaisesExpr(
+                                                            [
+                                                                ScopedName {
+                                                                    scoped_name: None,
+                                                                    identifier: Identifier(
+                                                                        "A",
+                                                                    ),
+                                                                    node_text: "A",
+                                                                },
+                                                                ScopedName {
+                                                                    scoped_name: None,
+                                                                    identifier: Identifier(
+                                                                        "B",
+                                                                    ),
+                                                                    node_text: "B",
+                                                                },
+                                                                ScopedName {
+                                                                    scoped_name: None,
+                                                                    identifier: Identifier(
+                                                                        "C",
+                                                                    ),
+                                                                    node_text: "C",
+                                                                },
+                                                            ],
+                                                        ),
+                                                    },
                                                 },
                                             ),
                                         },

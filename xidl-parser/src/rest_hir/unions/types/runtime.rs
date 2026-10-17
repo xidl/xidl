@@ -255,7 +255,7 @@ impl TypeDeclarations<'_> {
         match &attr.decl {
             hir::AttrDclInner::ReadonlyAttrSpec(spec) => {
                 self.runtime_type(&spec.ty, scope)?;
-                if let hir::ReadonlyAttrDeclarator::RaisesExpr(raises) = &spec.declarator {
+                if let Some(raises) = spec.declarator.raises() {
                     for name in &raises.0 {
                         self.runtime_name(name, scope)?;
                     }

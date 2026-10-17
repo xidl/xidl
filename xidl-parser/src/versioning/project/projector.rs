@@ -73,25 +73,53 @@ impl<'a> Projector<'a> {
             Export::OpDcl(operation) => {
                 if let Some(raises) = operation.raises.as_mut() {
                     self.prune_names(&mut raises.0);
+                    if raises.0.is_empty() {
+                        operation.raises = None;
+                    }
                 }
             }
             Export::AttrDcl(attribute) => match &mut attribute.decl {
                 AttrDclInner::ReadonlyAttrSpec(spec) => {
-                    if let ReadonlyAttrDeclarator::RaisesExpr(raises) = &mut spec.declarator {
+                    if let ReadonlyAttrDeclarator::WithRaises { declarator, raises } =
+                        &mut spec.declarator
+                    {
                         self.prune_names(&mut raises.0);
+                        if raises.0.is_empty() {
+                            spec.declarator =
+                                ReadonlyAttrDeclarator::SimpleDeclarator(vec![declarator.clone()]);
+                        }
                     }
                 }
                 AttrDclInner::AttrSpec(spec) => {
-                    if let AttrDeclarator::WithRaises { raises, .. } = &mut spec.declarator {
+                    if let AttrDeclarator::WithRaises { declarator, raises } = &mut spec.declarator
+                    {
                         match raises {
                             AttrRaisesExpr::Case1(get, set) => {
                                 self.prune_names(&mut get.expr.0);
                                 if let Some(set) = set {
                                     self.prune_names(&mut set.expr.0);
                                 }
+                                match (get.expr.0.is_empty(), set.as_ref()) {
+                                    (true, Some(set)) if !set.expr.0.is_empty() => {
+                                        *raises = AttrRaisesExpr::SetExcepExpr(set.clone());
+                                    }
+                                    (false, Some(set)) if set.expr.0.is_empty() => {
+                                        *raises = AttrRaisesExpr::Case1(get.clone(), None);
+                                    }
+                                    (true, _) => {
+                                        spec.declarator = AttrDeclarator::SimpleDeclarator(vec![
+                                            declarator.clone(),
+                                        ]);
+                                    }
+                                    _ => {}
+                                }
                             }
                             AttrRaisesExpr::SetExcepExpr(set) => {
                                 self.prune_names(&mut set.expr.0);
+                                if set.expr.0.is_empty() {
+                                    spec.declarator =
+                                        AttrDeclarator::SimpleDeclarator(vec![declarator.clone()]);
+                                }
                             }
                         }
                     }

@@ -474,7 +474,9 @@ expression: "&snapshots[1]"
                             "IntegerType": "U16"
                           },
                           "declarator": {
-                            "SimpleDeclarator": "port"
+                            "SimpleDeclarator": [
+                              "port"
+                            ]
                           }
                         }
                       }

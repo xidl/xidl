@@ -193,10 +193,11 @@ fn stream_source_method(
 }
 
 fn readonly_names(spec: &hir::ReadonlyAttrSpec) -> Vec<String> {
-    match &spec.declarator {
-        hir::ReadonlyAttrDeclarator::SimpleDeclarator(decl) => vec![decl.0.clone()],
-        hir::ReadonlyAttrDeclarator::RaisesExpr(_) => Vec::new(),
-    }
+    spec.declarator
+        .declarators()
+        .iter()
+        .map(|decl| decl.0.clone())
+        .collect()
 }
 
 fn attr_names(spec: &hir::AttrSpec) -> Vec<String> {

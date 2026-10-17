@@ -20,6 +20,12 @@ fn main() {
     if let Err(err) = Cli::parse().run() {
         match err {
             IdlcError::LintFailed => {}
+            IdlcError::CliExit { code, message } => {
+                if let Some(message) = message {
+                    eprintln!("{message}");
+                }
+                std::process::exit(code.into());
+            }
             IdlcError::Diagnostics(DiagnosticListError { diagnostics }) => {
                 for (index, diagnostic) in diagnostics.into_iter().enumerate() {
                     if index > 0 {

@@ -51,19 +51,21 @@ struct AttrInfo {
 }
 
 fn readonly_attrs(spec: &ReadonlyAttrSpec) -> Vec<AttrInfo> {
-    match &spec.declarator {
-        ReadonlyAttrDeclarator::SimpleDeclarator(decl) => vec![AttrInfo {
+    spec.declarator
+        .declarators()
+        .iter()
+        .map(|decl| AttrInfo {
             name: decl.0.clone(),
             ty: spec.ty.clone(),
-            get_raises: Vec::new(),
+            get_raises: spec
+                .declarator
+                .raises()
+                .map(|raises| raises.0.clone())
+                .unwrap_or_default(),
             set_raises: Vec::new(),
             readonly: true,
-        }],
-        ReadonlyAttrDeclarator::RaisesExpr(raises) => {
-            let _ = raises;
-            Vec::new()
-        }
-    }
+        })
+        .collect()
 }
 
 fn attrs_with_set(spec: &AttrSpec) -> Vec<AttrInfo> {

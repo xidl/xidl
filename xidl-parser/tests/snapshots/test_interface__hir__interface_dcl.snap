@@ -264,6 +264,38 @@ Specification(
                 ty: IntegerType(
                     I32,
                 ),
+                ident: "A_get_attribute_attr2_Hash",
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "2525005575",
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                annotations: [],
+                ty: IntegerType(
+                    I32,
+                ),
+                ident: "A_get_attribute_attr3_Hash",
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "3118622849",
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                annotations: [],
+                ty: IntegerType(
+                    I32,
+                ),
                 ident: "A_get_attribute_attr4_Hash",
                 value: Literal(
                     IntegerLiteral(
@@ -1657,6 +1689,258 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
+                        ident: "A_get_attribute_attr2_In",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "UnusedMember",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "dummy",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                                recursive: false,
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "A_get_attribute_attr2_Out",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "u8",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "return_",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                                recursive: false,
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                UnionDef(
+                    UnionDef {
+                        annotations: [],
+                        ident: "A_get_attribute_attr2_Result",
+                        switch_type_spec: IntegerType(
+                            I32,
+                        ),
+                        case: [
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "RETCODE_OK",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr2_Out",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "result",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "A_get_attribute_attr3_In",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "UnusedMember",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "dummy",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                                recursive: false,
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "A_get_attribute_attr3_Out",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "u8",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "return_",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                                recursive: false,
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                UnionDef(
+                    UnionDef {
+                        annotations: [],
+                        ident: "A_get_attribute_attr3_Result",
+                        switch_type_spec: IntegerType(
+                            I32,
+                        ),
+                        case: [
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "RETCODE_OK",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr3_Out",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "result",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
                         ident: "A_get_attribute_attr4_In",
                         parent: [],
                         member: [
@@ -1769,6 +2053,42 @@ Specification(
                                     ),
                                     field_id: Some(
                                         1,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_Ex_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "a_ex",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        2,
                                     ),
                                     recursive: false,
                                 },
@@ -1895,6 +2215,114 @@ Specification(
                                     ),
                                     field_id: Some(
                                         1,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_Ex_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "a_ex",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        2,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "B_Ex_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "B",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "b_ex",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        3,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_Ex_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "c_ex",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        4,
                                     ),
                                     recursive: false,
                                 },
@@ -3929,6 +4357,78 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
+                                                    "A_get_attribute_attr2_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr2_In",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "get_attribute_attr2",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        9,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr3_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr3_In",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "get_attribute_attr3",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        10,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
                                                     "A_get_attribute_attr4_Hash",
                                                 ],
                                                 is_root: false,
@@ -3954,7 +4454,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        9,
+                                        11,
                                     ),
                                     recursive: false,
                                 },
@@ -3990,7 +4490,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        10,
+                                        12,
                                     ),
                                     recursive: false,
                                 },
@@ -4026,7 +4526,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        11,
+                                        13,
                                     ),
                                     recursive: false,
                                 },
@@ -4062,7 +4562,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        12,
+                                        14,
                                     ),
                                     recursive: false,
                                 },
@@ -4098,7 +4598,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        13,
+                                        15,
                                     ),
                                     recursive: false,
                                 },
@@ -4134,7 +4634,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        14,
+                                        16,
                                     ),
                                     recursive: false,
                                 },
@@ -4170,7 +4670,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        15,
+                                        17,
                                     ),
                                     recursive: false,
                                 },
@@ -4206,7 +4706,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        16,
+                                        18,
                                     ),
                                     recursive: false,
                                 },
@@ -4242,7 +4742,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        17,
+                                        19,
                                     ),
                                     recursive: false,
                                 },
@@ -4278,7 +4778,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        18,
+                                        20,
                                     ),
                                     recursive: false,
                                 },
@@ -4314,7 +4814,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        19,
+                                        21,
                                     ),
                                     recursive: false,
                                 },
@@ -4350,7 +4850,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        20,
+                                        22,
                                     ),
                                     recursive: false,
                                 },
@@ -4386,7 +4886,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        21,
+                                        23,
                                     ),
                                     recursive: false,
                                 },
@@ -4422,7 +4922,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        22,
+                                        24,
                                     ),
                                     recursive: false,
                                 },
@@ -4790,6 +5290,78 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
+                                                    "A_get_attribute_attr2_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr2_Result",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "get_attribute_attr2",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        9,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr3_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_get_attribute_attr3_Result",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "get_attribute_attr3",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        10,
+                                    ),
+                                    recursive: false,
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
                                                     "A_get_attribute_attr4_Hash",
                                                 ],
                                                 is_root: false,
@@ -4815,7 +5387,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        9,
+                                        11,
                                     ),
                                     recursive: false,
                                 },
@@ -4851,7 +5423,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        10,
+                                        12,
                                     ),
                                     recursive: false,
                                 },
@@ -4887,7 +5459,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        11,
+                                        13,
                                     ),
                                     recursive: false,
                                 },
@@ -4923,7 +5495,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        12,
+                                        14,
                                     ),
                                     recursive: false,
                                 },
@@ -4959,7 +5531,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        13,
+                                        15,
                                     ),
                                     recursive: false,
                                 },
@@ -4995,7 +5567,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        14,
+                                        16,
                                     ),
                                     recursive: false,
                                 },
@@ -5031,7 +5603,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        15,
+                                        17,
                                     ),
                                     recursive: false,
                                 },
@@ -5067,7 +5639,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        16,
+                                        18,
                                     ),
                                     recursive: false,
                                 },
@@ -5103,7 +5675,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        17,
+                                        19,
                                     ),
                                     recursive: false,
                                 },
@@ -5139,7 +5711,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        18,
+                                        20,
                                     ),
                                     recursive: false,
                                 },
@@ -5175,7 +5747,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        19,
+                                        21,
                                     ),
                                     recursive: false,
                                 },
@@ -5211,7 +5783,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        20,
+                                        22,
                                     ),
                                     recursive: false,
                                 },
@@ -5247,7 +5819,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        21,
+                                        23,
                                     ),
                                     recursive: false,
                                 },
@@ -5283,7 +5855,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        22,
+                                        24,
                                     ),
                                     recursive: false,
                                 },
@@ -5664,9 +6236,17 @@ Specification(
                                                         },
                                                     ),
                                                     declarator: SimpleDeclarator(
-                                                        SimpleDeclarator(
-                                                            "attr1",
-                                                        ),
+                                                        [
+                                                            SimpleDeclarator(
+                                                                "attr1",
+                                                            ),
+                                                            SimpleDeclarator(
+                                                                "attr2",
+                                                            ),
+                                                            SimpleDeclarator(
+                                                                "attr3",
+                                                            ),
+                                                        ],
                                                     ),
                                                 },
                                             ),
@@ -5685,11 +6265,21 @@ Specification(
                                                             is_root: false,
                                                         },
                                                     ),
-                                                    declarator: SimpleDeclarator(
-                                                        SimpleDeclarator(
+                                                    declarator: WithRaises {
+                                                        declarator: SimpleDeclarator(
                                                             "attr4",
                                                         ),
-                                                    ),
+                                                        raises: RaisesExpr(
+                                                            [
+                                                                ScopedName {
+                                                                    name: [
+                                                                        "A",
+                                                                    ],
+                                                                    is_root: false,
+                                                                },
+                                                            ],
+                                                        ),
+                                                    },
                                                 },
                                             ),
                                         },
@@ -5707,11 +6297,33 @@ Specification(
                                                             is_root: false,
                                                         },
                                                     ),
-                                                    declarator: SimpleDeclarator(
-                                                        SimpleDeclarator(
+                                                    declarator: WithRaises {
+                                                        declarator: SimpleDeclarator(
                                                             "attr5",
                                                         ),
-                                                    ),
+                                                        raises: RaisesExpr(
+                                                            [
+                                                                ScopedName {
+                                                                    name: [
+                                                                        "A",
+                                                                    ],
+                                                                    is_root: false,
+                                                                },
+                                                                ScopedName {
+                                                                    name: [
+                                                                        "B",
+                                                                    ],
+                                                                    is_root: false,
+                                                                },
+                                                                ScopedName {
+                                                                    name: [
+                                                                        "C",
+                                                                    ],
+                                                                    is_root: false,
+                                                                },
+                                                            ],
+                                                        ),
+                                                    },
                                                 },
                                             ),
                                         },

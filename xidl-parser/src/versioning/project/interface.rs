@@ -10,7 +10,7 @@ use super::strip_annotations;
 use crate::error::ParserResult;
 use crate::hir::{
     AttrDcl, AttrDclInner, AttrRaisesExpr, Export, InterfaceDcl, InterfaceDclInner, Member, OpDcl,
-    OpTypeSpec, ParamDcl, ReadonlyAttrDeclarator,
+    OpTypeSpec, ParamDcl,
 };
 
 impl<'a> Projector<'a> {
@@ -143,7 +143,7 @@ impl<'a> Projector<'a> {
         match &mut projected.decl {
             AttrDclInner::ReadonlyAttrSpec(spec) => {
                 touch_type(&mut spec.ty, &mut self.references, &here);
-                if let ReadonlyAttrDeclarator::RaisesExpr(raises) = &mut spec.declarator {
+                if let Some(raises) = spec.declarator.raises_mut() {
                     relativize_names(&mut raises.0);
                 }
             }

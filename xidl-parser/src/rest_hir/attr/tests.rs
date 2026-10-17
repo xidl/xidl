@@ -14,9 +14,9 @@ fn projects_readonly_and_watch_attributes() {
         annotations: Vec::new(),
         decl: AttrDclInner::ReadonlyAttrSpec(ReadonlyAttrSpec {
             ty: string_ty(),
-            declarator: ReadonlyAttrDeclarator::SimpleDeclarator(SimpleDeclarator(
+            declarator: ReadonlyAttrDeclarator::SimpleDeclarator(vec![SimpleDeclarator(
                 "statusFlag".to_string(),
-            )),
+            )]),
         }),
     };
     let ops = project_attribute("DeviceApi", &["iot".to_string()], &attr, None, None, true);

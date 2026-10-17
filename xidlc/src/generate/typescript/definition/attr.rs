@@ -196,10 +196,11 @@ struct AttrNames {
 }
 
 fn readonly_attr_names(spec: &hir::ReadonlyAttrSpec) -> Vec<AttrNames> {
-    match &spec.declarator {
-        hir::ReadonlyAttrDeclarator::SimpleDeclarator(decl) => vec![AttrNames {
+    spec.declarator
+        .declarators()
+        .iter()
+        .map(|decl| AttrNames {
             raw: decl.0.clone(),
-        }],
-        hir::ReadonlyAttrDeclarator::RaisesExpr(_) => Vec::new(),
-    }
+        })
+        .collect()
 }

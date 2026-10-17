@@ -52,7 +52,9 @@ pub(crate) fn project_version(
         ident: def.ident.clone(),
         definition: body,
     }));
-    Ok(Specification(definitions))
+    let mut projected = Specification(definitions);
+    crate::semantic::analyze(&mut projected);
+    Ok(projected)
 }
 
 /// Merges several projected versions into one specification with one module per

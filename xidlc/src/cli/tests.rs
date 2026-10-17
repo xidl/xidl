@@ -1,6 +1,28 @@
 use super::*;
 
 #[test]
+fn version_diff_uses_three_positional_arguments_and_rejects_legacy_options() {
+    let cli = Cli::try_parse_from(["xidlc", "version", "diff", "v1", "2026-07", "api.idl"])
+        .expect("parse version diff");
+    let Command::Version(args) = cli.command else {
+        panic!("expected version command");
+    };
+    let VersionCommand::Diff(args) = args.command;
+    assert_eq!(args.from, "v1");
+    assert_eq!(args.to, "2026-07");
+    assert_eq!(args.idl, PathBuf::from("api.idl"));
+    for args in [
+        vec![
+            "xidlc", "version", "diff", "--from", "v1", "--to", "v2", "api.idl",
+        ],
+        vec!["xidlc", "version", "diff", "v1", "v2"],
+        vec!["xidlc", "version", "verify", "api.idl"],
+    ] {
+        assert!(Cli::try_parse_from(args).is_err());
+    }
+}
+
+#[test]
 fn parses_gen_subcommand_with_lang_enum_and_files() {
     let cli = Cli::try_parse_from(["xidlc", "gen", "rust", "demo.idl"]).expect("parse cli");
     match cli.command {
@@ -14,6 +36,7 @@ fn parses_gen_subcommand_with_lang_enum_and_files() {
         },
         Command::Fmt(_) | Command::Lint(_) => panic!("expected gen command"),
         Command::Import(_) => panic!("expected gen command"),
+        Command::Version(_) => panic!("expected gen command"),
     }
 }
 
