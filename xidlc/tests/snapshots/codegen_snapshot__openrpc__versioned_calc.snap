@@ -3,7 +3,7 @@ source: xidlc/tests/codegen_snapshot.rs
 expression: output
 ---
 ===============
-openrpc.v1.json
+openrpc_versioned_calc.v1.json
 ===============
 {
   "components": {
@@ -95,7 +95,7 @@ openrpc.v1.json
   "openrpc": "1.3.2"
 }
 ===============
-openrpc.v2.json
+openrpc_versioned_calc.v2.json
 ===============
 {
   "components": {

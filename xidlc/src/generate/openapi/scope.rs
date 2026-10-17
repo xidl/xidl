@@ -4,6 +4,8 @@ use crate::error::{IdlcError, IdlcResult};
 use crate::generate::utils::scope::resolve_canonical;
 use xidl_parser::hir;
 
+use super::units::DocumentUnits;
+
 /// Names of the components emitted by this document, including later declarations.
 pub(crate) struct SchemaNames(BTreeSet<String>);
 
@@ -71,11 +73,20 @@ impl SchemaNames {
 pub(crate) struct SchemaScope<'a> {
     names: &'a SchemaNames,
     pub(crate) module_path: &'a [String],
+    pub(crate) units: &'a DocumentUnits,
 }
 
 impl<'a> SchemaScope<'a> {
-    pub(crate) fn new(names: &'a SchemaNames, module_path: &'a [String]) -> Self {
-        Self { names, module_path }
+    pub(crate) fn new(
+        names: &'a SchemaNames,
+        module_path: &'a [String],
+        units: &'a DocumentUnits,
+    ) -> Self {
+        Self {
+            names,
+            module_path,
+            units,
+        }
     }
 
     pub(crate) fn in_module(self, module_path: &'a [String]) -> Self {

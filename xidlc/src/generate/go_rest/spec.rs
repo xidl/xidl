@@ -13,10 +13,12 @@ pub(crate) fn render_spec(
     properties: &xidl_parser::hir::ParserProperties,
 ) -> IdlcResult<String> {
     let renderer = GoRestRenderer::new()?;
+    let packages = crate::generate::go::GoPackages::of(properties);
     let context = GoRestRenderContext {
         renderer: &renderer,
         rest_hir,
         mode: GoRestRenderMode::from_properties(properties)?,
+        packages: packages.clone(),
     };
     let mut template_properties = properties.clone();
     template_properties.insert(
@@ -35,6 +37,7 @@ pub(crate) fn render_spec(
         package_name: package_name.to_string(),
         blocks,
         opt: template_properties,
+        imports: packages.imports(),
     })
 }
 

@@ -103,7 +103,6 @@ impl Driver {
         // Imports name other units, so the inputs are walked into a graph first
         // and every unit it reaches is generated exactly once.
         let graph = UnitGraph::build(resolved.files(), resolved.mounts())?;
-        Self::check_target(&self.args.lang, &graph)?;
         for unit in graph.units() {
             let mut unit_props = props.clone();
             unit_props.insert(IMPORT_PROPERTY.to_string(), unit.import_property());
@@ -116,27 +115,6 @@ impl Driver {
             output.write_files(files)?;
         }
 
-        Ok(())
-    }
-
-    /// Rejects a target that cannot reach another compilation unit yet.
-    fn check_target(lang: &str, graph: &UnitGraph) -> IdlcResult<()> {
-        let target = crate::driver::lang::Plugin::from(lang);
-        if target.resolves_imported_units() {
-            return Ok(());
-        }
-        for unit in graph.units() {
-            let Some(reference) = unit.refs().first() else {
-                continue;
-            };
-            return Err(crate::error::IdlcError::fmt(format!(
-                "xidl import: the `{lang}` target cannot resolve a reference into an imported \
-                 unit yet, and {} references `{}`; generate that target from a single unit or use \
-                 a target that resolves imported units",
-                unit.file().display(),
-                reference.qualified()
-            )));
-        }
         Ok(())
     }
 }

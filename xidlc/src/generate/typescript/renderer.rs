@@ -41,6 +41,15 @@ impl TypescriptRenderer {
     pub fn referenced_imports(&self, definitions: &[String]) -> Vec<String> {
         crate::generate::utils::referenced_imports(&self.properties, definitions, ".")
     }
+
+    /// Every unit the file imports, by prefix.
+    ///
+    /// The model file is the module the rest of the file set imports from, so
+    /// it re-exports each unit a reference may name, including one only a
+    /// client or server file references.
+    pub fn imported_units(&self) -> Vec<String> {
+        crate::generate::utils::imported_units(&self.properties)
+    }
 }
 
 fn load_template(name: &str) -> std::result::Result<String, Error> {

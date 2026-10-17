@@ -25,13 +25,27 @@ pub fn generate(
         .file_stem()
         .and_then(|value| value.to_str())
         .unwrap_or("output");
-    let package = rest_hir
-        .document
-        .package
-        .as_deref()
-        .map(go_package_name)
-        .unwrap_or_else(|| go_package_name(stem));
-    let filename = format!("{}_http.go", package);
+    // A unit keeps the directory its IDL path names, so a package generated
+    // from `pkg/a.idl` is `pkg/a_http.go` with package name `pkg`.
+    let unit_path = props
+        .get(crate::units::UNIT_PATH_PROPERTY)
+        .and_then(serde_json::Value::as_str);
+    let package = match unit_path.and_then(|path| path.rsplit_once('/')) {
+        Some((dir, _)) => {
+            let name = dir.rsplit('/').next().unwrap_or(dir);
+            go_package_name(if name.is_empty() { stem } else { name })
+        }
+        None => rest_hir
+            .document
+            .package
+            .as_deref()
+            .map(go_package_name)
+            .unwrap_or_else(|| go_package_name(stem)),
+    };
+    let filename = match unit_path {
+        Some(path) => format!("{}_http.go", path.trim_end_matches(".idl")),
+        None => format!("{}_http.go", package),
+    };
     let content = spec::render_spec(&spec, &package, &rest_hir, &props)?;
 
     let mut artifacts = vec![Artifact::new_file(ArtifactFile {
@@ -124,6 +138,7 @@ pub(crate) struct GoRestRenderContext<'a> {
     pub(crate) renderer: &'a GoRestRenderer,
     pub(crate) rest_hir: &'a xidl_parser::rest_hir::RestHirDocument,
     pub(crate) mode: GoRestRenderMode,
+    pub(crate) packages: crate::generate::go::GoPackages,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -237,4 +252,5 @@ pub(crate) struct GoRestRenderOutput {
     package_name: String,
     blocks: GoRestRenderBlocks,
     opt: ParserProperties,
+    imports: Vec<crate::generate::go::GoImport>,
 }
