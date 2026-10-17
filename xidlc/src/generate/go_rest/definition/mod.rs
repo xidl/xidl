@@ -6,6 +6,7 @@ use convert_case::Casing;
 use xidl_parser::hir;
 
 use super::HttpMethod;
+use crate::generate::go::GoPackages;
 
 pub(crate) use self::definition_emit::{
     emit_cookie_encode, emit_header_encode, emit_query_encode, emit_request_bind,
@@ -14,7 +15,7 @@ pub(crate) use self::definition_emit::{
 };
 pub(crate) use self::definition_format::{render_format_path_fn, strip_interfaces};
 
-pub(crate) fn go_type(ty: &hir::TypeSpec) -> String {
+pub(crate) fn go_type(ty: &hir::TypeSpec, packages: &GoPackages) -> String {
     match ty {
         hir::TypeSpec::IntegerType(value) => match value {
             hir::IntegerType::Char => "int8".to_string(),
@@ -35,17 +36,23 @@ pub(crate) fn go_type(ty: &hir::TypeSpec) -> String {
         hir::TypeSpec::AnyType | hir::TypeSpec::ObjectType | hir::TypeSpec::ValueBaseType => {
             "any".to_string()
         }
-        hir::TypeSpec::ScopedName(value) => value
-            .name
-            .iter()
-            .map(|part| part.to_case(convert_case::Case::Pascal))
-            .collect::<Vec<_>>()
-            .join(""),
-        hir::TypeSpec::SequenceType(seq) => format!("[]{}", go_type(&seq.ty)),
+        hir::TypeSpec::ScopedName(value) => packages.reference(value).unwrap_or_else(|| {
+            value
+                .name
+                .iter()
+                .map(|part| part.to_case(convert_case::Case::Pascal))
+                .collect::<Vec<_>>()
+                .join("")
+        }),
+        hir::TypeSpec::SequenceType(seq) => format!("[]{}", go_type(&seq.ty, packages)),
         hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => "string".to_string(),
         hir::TypeSpec::FixedPtType(_) => "float64".to_string(),
         hir::TypeSpec::MapType(map) => {
-            format!("map[{}]{}", go_type(&map.key), go_type(&map.value))
+            format!(
+                "map[{}]{}",
+                go_type(&map.key, packages),
+                go_type(&map.value, packages)
+            )
         }
         hir::TypeSpec::TemplateType(value) => value.ident.to_case(convert_case::Case::Pascal),
     }

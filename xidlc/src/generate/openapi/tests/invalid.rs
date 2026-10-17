@@ -15,7 +15,7 @@ fn render_openapi_json_from_spec(
     spec: &hir::Specification,
 ) -> Result<serde_json::Value, crate::error::IdlcError> {
     let rest_hir = xidl_parser::rest_hir::project(spec).expect("project http hir");
-    render_openapi_json(spec, &rest_hir)
+    render_openapi_json(spec, &rest_hir, &Default::default())
 }
 
 fn panic_message(payload: Box<dyn std::any::Any + Send>) -> String {

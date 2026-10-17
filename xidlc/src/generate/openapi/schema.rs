@@ -48,7 +48,8 @@ pub(crate) fn parameter_schema(
 #[cfg(test)]
 pub(crate) fn schema_for_struct(members: &[hir::Member]) -> RefOr<Schema> {
     let names = super::scope::SchemaNames::collect(&hir::Specification(Vec::new()));
-    SchemaScope::new(&names, &[])
+    let units = super::units::DocumentUnits::default();
+    SchemaScope::new(&names, &[], &units)
         .schema_for_struct_with_annotations(members, &[])
         .expect("schema")
 }
@@ -133,6 +134,14 @@ pub(crate) fn schema_ref(name: &str) -> RefOr<Schema> {
 }
 
 impl SchemaScope<'_> {
+    /// Schema a scoped reference names, in this document or in another one.
+    pub(crate) fn schema_reference(self, value: &hir::ScopedName) -> IdlcResult<RefOr<Schema>> {
+        match self.units.reference(value) {
+            Some(location) => Ok(RefOr::Ref(Ref::new(location))),
+            None => Ok(schema_ref(&self.resolve(value)?)),
+        }
+    }
+
     pub(crate) fn schema_for_struct_with_annotations(
         self,
         members: &[hir::Member],
@@ -251,7 +260,7 @@ impl SchemaScope<'_> {
             hir::TypeSpec::AnyType | hir::TypeSpec::ObjectType | hir::TypeSpec::ValueBaseType => {
                 RefOr::T(Schema::from(ObjectBuilder::new()))
             }
-            hir::TypeSpec::ScopedName(value) => schema_ref(&self.resolve(value)?),
+            hir::TypeSpec::ScopedName(value) => self.schema_reference(value)?,
             hir::TypeSpec::SequenceType(seq) => {
                 let mut schema = ArrayBuilder::new().items(self.schema_for_type(&seq.ty)?);
                 if let Some(size) = seq

@@ -7,6 +7,7 @@ mod methods;
 mod names;
 mod schema;
 mod schema_types;
+mod units;
 
 use serde_json::{Value, json};
 use xidl_parser::hir::ParserProperties;
@@ -14,6 +15,7 @@ use xidl_parser::jsonrpc_hir::JsonRpcHirDocument;
 
 use crate::jsonrpc::{Artifact, ArtifactFile};
 use context::OpenRpcContext;
+use units::DocumentUnits;
 
 pub(crate) struct OpenRpcCodegen;
 
@@ -42,11 +44,17 @@ impl crate::jsonrpc::Codegen for OpenRpcCodegen {
         props: ParserProperties,
     ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
         let hir = input_hir.into_jsonrpc_hir();
-        let openrpc = render_openrpc(&hir);
+        let units = DocumentUnits::of(&props);
+        let openrpc = render_openrpc(&hir, &units);
         let content = serde_json::to_string_pretty(&openrpc)?;
+        // Each unit is a document of its own, so the file carries its name.
+        let stem = std::path::Path::new(&_path)
+            .file_stem()
+            .and_then(|value| value.to_str())
+            .unwrap_or("openrpc");
         let path = match api_version(&props) {
-            Some(version) => format!("openrpc.{version}.json"),
-            None => "openrpc.json".to_string(),
+            Some(version) => format!("openrpc_{stem}.{version}.json"),
+            None => format!("openrpc_{stem}.json"),
         };
         Ok(vec![Artifact::new_file(ArtifactFile { path, content })])
     }
@@ -59,7 +67,7 @@ fn api_version(props: &ParserProperties) -> Option<&str> {
         .and_then(serde_json::Value::as_str)
 }
 
-pub fn render_openrpc(doc: &JsonRpcHirDocument) -> Value {
+pub(crate) fn render_openrpc(doc: &JsonRpcHirDocument, units: &DocumentUnits) -> Value {
     let mut ctx = OpenRpcContext::default();
     ctx.collect_doc(doc);
     ctx.methods.sort_by(|left, right| {
@@ -82,9 +90,10 @@ pub fn render_openrpc(doc: &JsonRpcHirDocument) -> Value {
 
     if !ctx.schemas.is_empty() {
         out["components"] = json!({
-            "schemas": ctx.schemas,
+            "schemas": ctx.schemas.clone(),
         });
     }
+    units.rewrite(&mut out, &ctx.schemas);
 
     out
 }

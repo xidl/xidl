@@ -113,25 +113,12 @@ unversioned unit is an error.
 
 ## Targets
 
-`rust`, `rust-axum`, `typescript`, and `typescript-rest` bring an imported unit
-into scope: Rust with `use crate::<unit>;` and TypeScript by re-exporting the
-unit under its prefix. `rust-jsonrpc` does the same for units without a version
-timeline.
+Every target reaches an imported unit the way its language does:
 
-`go` mirrors the paths the units have. A unit at `pkg/timestamp.idl` becomes
-`pkg/timestamp.go` with package name `pkg`, and a file that references it
-imports that package:
-
-```go
-package app
-
-import "pkg"
-
-type Event struct {
-    At pkg.Instant `xjson:"at"`
-}
-```
-
-The `go-rest`, `openapi`, and `openrpc` targets reach another unit through a
-document reference they do not carry yet, so a file that references an imported
-unit fails for them instead of emitting output that does not build.
+- `rust`, `rust-axum`, and `rust-jsonrpc` emit `use crate::<unit>;`.
+- `typescript` and `typescript-rest` re-export the unit under its prefix.
+- `go` and `go-rest` mirror the unit paths: a unit at `pkg/timestamp.idl`
+  becomes `pkg/timestamp.go` with package name `pkg`, and a file that
+  references it imports that package and qualifies the reference.
+- `openapi` and `openrpc` emit a `$ref` to the document the unit is generated
+  as, such as `openapi_timestamp.v1.json#/components/schemas/v1.Instant`.

@@ -6,6 +6,7 @@ mod schema;
 mod scope;
 mod security;
 mod stream;
+mod units;
 
 #[cfg(test)]
 mod tests;
@@ -18,6 +19,8 @@ use std::collections::HashMap;
 use xidl_parser::hir;
 use xidl_parser::hir::ParserProperties;
 use xidl_parser::rest_hir::RestHirDocument;
+
+use units::DocumentUnits;
 
 pub(crate) struct OpenApiCodegen;
 
@@ -46,7 +49,8 @@ impl crate::jsonrpc::Codegen for OpenApiCodegen {
         props: ParserProperties,
     ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
         let rest_hir = input_hir.into_rest_hir();
-        let openapi = render_openapi_json(&rest_hir.spec, &rest_hir)?;
+        let units = DocumentUnits::of(&props);
+        let openapi = render_openapi_json(&rest_hir.spec, &rest_hir, &units)?;
         let content = serde_json::to_string_pretty(&openapi)?;
 
         let stem = std::path::Path::new(&input)
@@ -69,8 +73,12 @@ fn api_version(props: &ParserProperties) -> Option<&str> {
         .and_then(serde_json::Value::as_str)
 }
 
-fn render_openapi_json(spec: &hir::Specification, rest_hir: &RestHirDocument) -> IdlcResult<Value> {
-    let ctx = render_openapi(spec, rest_hir)?;
+fn render_openapi_json(
+    spec: &hir::Specification,
+    rest_hir: &RestHirDocument,
+    units: &DocumentUnits,
+) -> IdlcResult<Value> {
+    let ctx = render_openapi(spec, rest_hir, units)?;
     let version = select_openapi_version(&ctx);
     let mut value = serde_json::to_value(ctx.document)?;
     if let Some(openapi) = value.get_mut("openapi") {
@@ -91,14 +99,15 @@ fn select_openapi_version(ctx: &RenderedOpenApi) -> &'static str {
 }
 
 /// Renders an OpenAPI document from an XIDL specification and projected REST HIR.
-pub fn render_openapi(
+pub(crate) fn render_openapi(
     spec: &hir::Specification,
     rest_hir: &RestHirDocument,
+    units: &DocumentUnits,
 ) -> IdlcResult<RenderedOpenApi> {
     let names = scope::SchemaNames::collect(spec);
     let ctx = context::OpenApiContext::new(rest_hir).collect(
         spec,
-        scope::SchemaScope::new(&names, &[]),
+        scope::SchemaScope::new(&names, &[], units),
         rest_hir,
     )?;
     let mut components = crate::openapi::ComponentsBuilder::new();

@@ -34,11 +34,22 @@ fn write(path: &Path, content: &str) {
 
 /// Generates `lang` for `files` into `out_dir`.
 fn generate(lang: &str, out_dir: &Path, files: Vec<PathBuf>) -> Result<(), String> {
+    generate_with_http(lang, out_dir, files, false, false)
+}
+
+/// Generates `lang` with the client and server switches a REST target needs.
+fn generate_with_http(
+    lang: &str,
+    out_dir: &Path,
+    files: Vec<PathBuf>,
+    client: bool,
+    server: bool,
+) -> Result<(), String> {
     Driver::run(ArgsGenerate {
         lang: lang.to_string(),
         out_dir: out_dir.to_string_lossy().into_owned(),
-        client: false,
-        server: false,
+        client,
+        server,
         dry_run: false,
         mock: false,
         api_version: None,
@@ -217,16 +228,72 @@ fn go_mirrors_the_unit_path_and_qualifies_the_reference() {
 }
 
 #[test]
-fn a_target_that_cannot_reach_another_unit_fails_the_run() {
-    let root = temp_dir("unsupported-target");
+fn openapi_references_an_imported_unit_by_document() {
+    let root = temp_dir("openapi");
     let out = root.join("out");
     let app = root.join("app.idl");
     write(&root.join("timestamp/index.idl"), TIMESTAMP_ENTRY);
-    write(&app, BOUND_APP_SOURCE);
+    write(
+        &app,
+        "#pragma xidlc package app\n\nimport \"timestamp\";\n\ninterface Clock {\n    \
+         @get(path = \"/now\")\n    timestamp::v1::Instant now();\n};\n",
+    );
 
-    let err = generate("openapi", &out, vec![app]).expect_err("openapi cannot import units yet");
-    assert!(err.contains("`openapi` target"), "error: {err}");
-    assert!(err.contains("timestamp::v1::Instant"), "error: {err}");
+    generate("openapi", &out, vec![app]).expect("generation succeeds");
+
+    let document = fs::read_to_string(out.join("openapi_app.json")).expect("openapi_app.json");
+    assert!(
+        document.contains("openapi_timestamp.v1.json#/components/schemas/v1.Instant"),
+        "openapi_app.json: {document}"
+    );
+    assert!(
+        out.join("openapi_timestamp.v1.json").is_file(),
+        "the imported unit keeps its own document"
+    );
+}
+
+#[test]
+fn openrpc_references_an_imported_unit_by_document() {
+    let root = temp_dir("openrpc");
+    let out = root.join("out");
+    let app = root.join("app.idl");
+    write(&root.join("timestamp/index.idl"), TIMESTAMP_ENTRY);
+    write(
+        &app,
+        "#pragma xidlc package app\n\nimport \"timestamp\";\n\ninterface Clock {\n    \
+         timestamp::v1::Instant now();\n};\n",
+    );
+
+    generate("openrpc", &out, vec![app]).expect("generation succeeds");
+
+    let document = fs::read_to_string(out.join("openrpc_app.json")).expect("openrpc_app.json");
+    assert!(
+        document.contains("openrpc_timestamp.v1.json#/components/schemas/v1.Instant"),
+        "openrpc_app.json: {document}"
+    );
+}
+
+#[test]
+fn go_rest_imports_the_unit_package() {
+    let root = temp_dir("go-rest");
+    let out = root.join("out");
+    let app = root.join("app.idl");
+    write(
+        &root.join("pkg/types.idl"),
+        "struct Instant { string at; };\n",
+    );
+    write(
+        &app,
+        "#pragma xidlc package app\n\nimport \"pkg/types.idl\";\n\ninterface Clock {\n    \
+         @get(path = \"/now\")\n    types::Instant now();\n};\n",
+    );
+
+    generate_with_http("go-rest", &out, vec![app], false, true).expect("generation succeeds");
+
+    let source = fs::read_to_string(out.join("app_http.go")).expect("app_http.go");
+    assert!(source.contains("import ("), "app_http.go: {source}");
+    assert!(source.contains("\"pkg\""), "app_http.go: {source}");
+    assert!(source.contains("pkg.Instant"), "app_http.go: {source}");
 }
 
 #[test]

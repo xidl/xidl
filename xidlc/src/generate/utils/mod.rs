@@ -37,10 +37,30 @@ pub fn referenced_imports(
         .collect()
 }
 
+/// Prefixes of every unit `properties` imports.
+pub fn imported_units(properties: &xidl_parser::hir::ParserProperties) -> Vec<String> {
+    properties
+        .get(crate::units::IMPORT_PROPERTY)
+        .and_then(serde_json::Value::as_array)
+        .map(|imports| {
+            imports
+                .iter()
+                .filter_map(|import| import.get("prefix"))
+                .filter_map(serde_json::Value::as_str)
+                .map(str::to_string)
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
 /// Whether any annotation carries the given name (e.g. `http`, `header`).
 pub fn has_annotation(annotations: &[hir::Annotation], target: &str) -> bool {
-    annotations.iter().any(|annotation| {
-        hir::annotation_name(annotation).is_some_and(|name| name.eq_ignore_ascii_case(target))
+    annotations.iter().any(|annotation| match annotation {
+        hir::Annotation::Builtin { name, .. } => name == target,
+        hir::Annotation::ScopedName { name, .. } => {
+            name.name.last().map(String::as_str) == Some(target)
+        }
+        _ => false,
     })
 }
 

@@ -246,7 +246,14 @@ impl Builder {
                     .unwrap_or("openapi");
                 format!("openapi_{stem}.json")
             }
-            "openrpc" | "open-rpc" => "openrpc.json".to_string(),
+            "openrpc" | "open-rpc" => {
+                let stem = inputs
+                    .first()
+                    .and_then(|p| p.file_stem())
+                    .and_then(|s| s.to_str())
+                    .unwrap_or("openrpc");
+                format!("openrpc_{stem}.json")
+            }
             _ => {
                 return Err(Error::Config(format!(
                     "with_output_filename is only supported for openapi/openrpc generators, got '{}'",

@@ -41,11 +41,11 @@ impl TsGenerator {
             recursive,
         };
         let blocks = render_module_body(&spec.0, &[], mode, &ctx)?;
-        let types_reexports = renderer.referenced_imports(&blocks.types);
+        let types_reexports = renderer.imported_units();
         let types = Self::with_reexports(blocks.types, &types_reexports, "");
         let types =
             renderer.render_template("types.d.ts.j2", &TypesFileContext { blocks: types })?;
-        let zod_reexports = renderer.referenced_imports(&blocks.zod);
+        let zod_reexports = renderer.imported_units();
         let zod = Self::with_reexports(blocks.zod, &zod_reexports, ".zod");
         let zod = renderer.render_template("zod.ts.j2", &TypesFileContext { blocks: zod })?;
         let client = if mode.allows_interfaces() {
