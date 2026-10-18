@@ -8,7 +8,8 @@ mod tests;
 mod utils;
 use utils::*;
 
-pub fn build_operation_signature(op: &hir::OpDcl) -> HttpOperationSignature {
+/// Builds signature metadata using the same explicit bindings as HTTP projection.
+pub fn build_operation_signature(op: &hir::OpDcl) -> Result<HttpOperationSignature, String> {
     let params = op
         .parameter
         .as_ref()
@@ -24,27 +25,29 @@ pub fn build_operation_signature(op: &hir::OpDcl) -> HttpOperationSignature {
                 HttpParamDirection::InOut => HttpSignatureParamDirection::InOut,
             };
 
-            HttpSignatureParam {
+            Ok(HttpSignatureParam {
                 name: param.declarator.0.clone(),
                 ty: param.ty.clone(),
                 direction,
                 is_optional: super::semantics::has_optional_annotation(&param.annotations),
                 is_flatten: super::semantics::has_annotation(&param.annotations, "flatten"),
-                annotations: get_signature_annotations(param),
-            }
+                annotations: get_signature_annotations(param)?,
+            })
         })
-        .collect();
+        .collect::<RestHirResult<_>>()?;
 
-    HttpOperationSignature {
+    Ok(HttpOperationSignature {
         params: sig_params,
         return_type: match &op.ty {
             hir::OpTypeSpec::Void => None,
             hir::OpTypeSpec::TypeSpec(ty) => Some(ty.clone()),
         },
-    }
+    })
 }
 
-fn get_signature_annotations(param: &hir::ParamDcl) -> Vec<HttpSignatureParamAnnotation> {
+fn get_signature_annotations(
+    param: &hir::ParamDcl,
+) -> RestHirResult<Vec<HttpSignatureParamAnnotation>> {
     let mut sig_annos = Vec::new();
     if super::semantics::has_optional_annotation(&param.annotations) {
         sig_annos.push(HttpSignatureParamAnnotation::Optional);
@@ -56,25 +59,19 @@ fn get_signature_annotations(param: &hir::ParamDcl) -> Vec<HttpSignatureParamAnn
         sig_annos.push(HttpSignatureParamAnnotation::Body);
     }
 
-    for annotation in &param.annotations {
-        let Some(name) = super::semantics::annotation_name(annotation) else {
-            continue;
-        };
-        let name_lc = name.to_lowercase();
-        let value = super::semantics::annotation_params(annotation)
-            .map(super::semantics::normalize_annotation_params)
-            .and_then(|p| p.get("value").cloned())
-            .unwrap_or_else(|| param.declarator.0.clone());
-
-        match name_lc.as_str() {
-            "path" => sig_annos.push(HttpSignatureParamAnnotation::Path { name: value }),
-            "query" => sig_annos.push(HttpSignatureParamAnnotation::Query { name: value }),
-            "header" => sig_annos.push(HttpSignatureParamAnnotation::Header { name: value }),
-            "cookie" => sig_annos.push(HttpSignatureParamAnnotation::Cookie { name: value }),
-            _ => {}
+    if let Some(binding) =
+        super::semantics::SourceBinding::read(&param.annotations, &param.declarator.0)?
+    {
+        let name = binding.wire_name(&param.declarator.0, &param.annotations, &[]);
+        match binding.source {
+            HttpParamKind::Path => sig_annos.push(HttpSignatureParamAnnotation::Path { name }),
+            HttpParamKind::Query => sig_annos.push(HttpSignatureParamAnnotation::Query { name }),
+            HttpParamKind::Header => sig_annos.push(HttpSignatureParamAnnotation::Header { name }),
+            HttpParamKind::Cookie => sig_annos.push(HttpSignatureParamAnnotation::Cookie { name }),
+            HttpParamKind::Body => {}
         }
     }
-    sig_annos
+    Ok(sig_annos)
 }
 
 /// Returns true iff `ty` is `sequence<octet>`, indicating a raw byte buffer

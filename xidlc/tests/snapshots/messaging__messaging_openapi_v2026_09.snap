@@ -1,0 +1,1728 @@
+---
+source: xidlc/tests/messaging.rs
+expression: document
+---
+{
+  "components": {
+    "schemas": {
+      "Error": {
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "msg"
+        ],
+        "type": "object"
+      },
+      "v2026_09.Photon.Attachment": {
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/v2026_09.Photon.AttachmentId"
+          },
+          "mime_type": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "mime_type",
+          "size"
+        ],
+        "type": "object"
+      },
+      "v2026_09.Photon.AttachmentId": {
+        "type": "string"
+      },
+      "v2026_09.Photon.Capability": {
+        "type": "integer"
+      },
+      "v2026_09.Photon.Conflict": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
+      "v2026_09.Photon.Content": {
+        "oneOf": [
+          {
+            "properties": {
+              "text": {
+                "$ref": "#/components/schemas/v2026_09.Photon.TextContent"
+              }
+            },
+            "required": [
+              "text"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "attachment": {
+                "$ref": "#/components/schemas/v2026_09.Photon.Attachment"
+              }
+            },
+            "required": [
+              "attachment"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "poll": {
+                "$ref": "#/components/schemas/v2026_09.Photon.PollContent"
+              }
+            },
+            "required": [
+              "poll"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "v2026_09.Photon.Gone": {
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "v2026_09.Photon.Message": {
+        "properties": {
+          "attachments": {
+            "items": {
+              "$ref": "#/components/schemas/v2026_09.Photon.Attachment"
+            },
+            "type": "array"
+          },
+          "content": {
+            "$ref": "#/components/schemas/v2026_09.Photon.Content"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "edited_at": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "space_id": {
+            "$ref": "#/components/schemas/v2026_09.Photon.SpaceId"
+          },
+          "status": {
+            "$ref": "#/components/schemas/v2026_09.Photon.MessageStatus"
+          }
+        },
+        "required": [
+          "id",
+          "space_id",
+          "content",
+          "status",
+          "created_at",
+          "attachments"
+        ],
+        "type": "object"
+      },
+      "v2026_09.Photon.MessagePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/v2026_09.Photon.Message"
+            },
+            "type": "array"
+          },
+          "next_cursor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "type": "object"
+      },
+      "v2026_09.Photon.MessageStatus": {
+        "enum": [
+          "QUEUED",
+          "SENT",
+          "DELIVERED",
+          "READ",
+          "FAILED"
+        ],
+        "type": "string"
+      },
+      "v2026_09.Photon.NotFound": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "resource": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "resource",
+          "id"
+        ],
+        "type": "object"
+      },
+      "v2026_09.Photon.Participant": {
+        "properties": {
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "role": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "labels"
+        ],
+        "type": "object"
+      },
+      "v2026_09.Photon.PollContent": {
+        "properties": {
+          "options": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "question": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "question",
+          "options"
+        ],
+        "type": "object"
+      },
+      "v2026_09.Photon.RateLimited": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "type": "object"
+      },
+      "v2026_09.Photon.Reaction": {
+        "oneOf": [
+          {
+            "properties": {
+              "like_by": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "like_by"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "love_by": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "love_by"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "emphasize_by": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "emphasize_by"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "v2026_09.Photon.ReactionKind": {
+        "enum": [
+          "LIKE",
+          "LOVE",
+          "EMPHASIZE"
+        ],
+        "type": "string"
+      },
+      "v2026_09.Photon.Space": {
+        "properties": {
+          "capabilities": {
+            "$ref": "#/components/schemas/v2026_09.Photon.Capability"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/components/schemas/v2026_09.Photon.SpaceId"
+          },
+          "member_count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "topic": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "display_name",
+          "topic",
+          "member_count",
+          "capabilities"
+        ],
+        "type": "object"
+      },
+      "v2026_09.Photon.SpaceId": {
+        "type": "string"
+      },
+      "v2026_09.Photon.TextContent": {
+        "properties": {
+          "markdown": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "type": "object"
+      },
+      "v2026_09.Photon.Transcript": {
+        "oneOf": [
+          {
+            "properties": {
+              "json": {
+                "$ref": "#/components/schemas/v2026_09.Photon.TranscriptJson"
+              }
+            },
+            "required": [
+              "json"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "v2026_09.Photon.TranscriptJson": {
+        "properties": {
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/v2026_09.Photon.Message"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "messages"
+        ],
+        "type": "object"
+      },
+      "v2026_09.Photon.UploadChunk": {
+        "properties": {
+          "bytes": {
+            "items": {
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "index": {
+            "format": "int64",
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "upload_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "upload_id",
+          "index",
+          "bytes"
+        ],
+        "type": "object"
+      },
+      "v2026_09.Photon.UploadSummary": {
+        "properties": {
+          "total_bytes": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "upload_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "upload_id",
+          "total_bytes"
+        ],
+        "type": "object"
+      },
+      "v2026_09.Photon.UserRef": {
+        "properties": {
+          "avatar_url": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "v2026_09.Photon.WebhookDestination": {
+        "properties": {
+          "api_version": {
+            "type": "string"
+          },
+          "events": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "api_version",
+          "events"
+        ],
+        "type": "object"
+      },
+      "v2026_09.Photon.WebhookDestinationInput": {
+        "properties": {
+          "events": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "events"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "api_key-header-x-photon-key": {
+        "in": "header",
+        "name": "X-Photon-Key",
+        "type": "apiKey"
+      },
+      "http_bearer": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "photon_messaging",
+    "version": "2026-09"
+  },
+  "openapi": "3.2.0",
+  "paths": {
+    "/attribute/region": {
+      "get": {
+        "operationId": "v2026_09.Photon.Users.get_attribute_region",
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "http_bearer": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/messages/search": {
+      "get": {
+        "operationId": "v2026_09.Photon.Messages.search",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.MessagePage"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Messages"
+        ]
+      }
+    },
+    "/messages/{id}": {
+      "get": {
+        "operationId": "v2026_09.Photon.Messages.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.Message"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.NotFound"
+                }
+              }
+            },
+            "description": "Error: NotFound"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Messages"
+        ]
+      },
+      "patch": {
+        "operationId": "v2026_09.Photon.Messages.edit",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/v2026_09.Photon.TextContent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.Message"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.NotFound"
+                }
+              }
+            },
+            "description": "Error: NotFound"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.Conflict"
+                }
+              }
+            },
+            "description": "Error: Conflict"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Messages"
+        ]
+      }
+    },
+    "/messages/{id}/archive": {
+      "post": {
+        "operationId": "v2026_09.Photon.Messages.archive",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.NotFound"
+                }
+              }
+            },
+            "description": "Error: NotFound"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.Conflict"
+                }
+              }
+            },
+            "description": "Error: Conflict"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Messages"
+        ]
+      }
+    },
+    "/messages/{id}/reactions": {
+      "post": {
+        "operationId": "v2026_09.Photon.Media.react",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/v2026_09.Photon.Reaction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.Reaction"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Media"
+        ]
+      }
+    },
+    "/poll": {
+      "get": {
+        "operationId": "v2026_09.Photon.LegacyPolling.poll",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "since",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/v2026_09.Photon.Message"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.Gone"
+                }
+              }
+            },
+            "description": "Error: Gone"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "LegacyPolling"
+        ]
+      }
+    },
+    "/spaces/{id}": {
+      "get": {
+        "operationId": "v2026_09.Photon.Spaces.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/v2026_09.Photon.SpaceId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.Space"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.NotFound"
+                }
+              }
+            },
+            "description": "Error: NotFound"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Spaces"
+        ]
+      }
+    },
+    "/spaces/{space_id}/messages": {
+      "get": {
+        "operationId": "v2026_09.Photon.Messages.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "space_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/v2026_09.Photon.SpaceId"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.MessagePage"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Messages"
+        ]
+      },
+      "post": {
+        "operationId": "v2026_09.Photon.Messages.send",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "space_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/v2026_09.Photon.SpaceId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/v2026_09.Photon.Content"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.Message"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Messages"
+        ]
+      }
+    },
+    "/spaces/{space_id}/messages/watch": {
+      "get": {
+        "operationId": "v2026_09.Photon.Messages.watch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "space_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/v2026_09.Photon.SpaceId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {
+                "itemSchema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.Message"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Messages"
+        ]
+      }
+    },
+    "/spaces/{space_id}/transcript": {
+      "get": {
+        "operationId": "v2026_09.Photon.Media.transcript",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "space_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/v2026_09.Photon.SpaceId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.TranscriptJson"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Media"
+        ]
+      }
+    },
+    "/u/{id}": {
+      "get": {
+        "operationId": "v2026_09.Photon.Users.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.Participant"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.NotFound"
+                }
+              }
+            },
+            "description": "Error: NotFound"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.RateLimited"
+                }
+              }
+            },
+            "description": "Error: RateLimited",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "http_bearer": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/uploads": {
+      "post": {
+        "operationId": "v2026_09.Photon.Media.upload",
+        "requestBody": {
+          "content": {
+            "application/x-ndjson": {
+              "itemSchema": {
+                "$ref": "#/components/schemas/v2026_09.Photon.UploadChunk"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.UploadSummary"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Media"
+        ]
+      }
+    },
+    "/users": {
+      "get": {
+        "operationId": "v2026_09.Photon.Users.list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/v2026_09.Photon.Participant"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "http_bearer": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "operationId": "v2026_09.Photon.Users.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.Participant"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.NotFound"
+                }
+              }
+            },
+            "description": "Error: NotFound"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.RateLimited"
+                }
+              }
+            },
+            "description": "Error: RateLimited",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "http_bearer": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/{id}/block": {
+      "post": {
+        "operationId": "v2026_09.Photon.Users.block",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.RateLimited"
+                }
+              }
+            },
+            "description": "Error: RateLimited",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "api_key-header-x-photon-key": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/{id}/unread": {
+      "get": {
+        "operationId": "v2026_09.Photon.Users.unread",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "count": {
+                      "format": "int32",
+                      "type": "integer"
+                    },
+                    "mentions": {
+                      "format": "int32",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "count",
+                    "mentions"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "http_bearer": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/webhooks": {
+      "post": {
+        "operationId": "v2026_09.Photon.Webhooks.create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/v2026_09.Photon.WebhookDestinationInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2026_09.Photon.WebhookDestination"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Webhooks"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "LegacyPolling"
+    },
+    {
+      "name": "Media"
+    },
+    {
+      "name": "Messages"
+    },
+    {
+      "name": "Spaces"
+    },
+    {
+      "name": "Users"
+    },
+    {
+      "name": "Webhooks"
+    }
+  ]
+}

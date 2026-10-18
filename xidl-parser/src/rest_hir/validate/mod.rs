@@ -81,6 +81,8 @@ pub(super) fn validate_header_name(bound_name: &str, param_name: &str) -> RestHi
             param_name, bound_name
         ));
     }
+    http::header::HeaderName::from_bytes(bound_name.as_bytes())
+        .map_err(|_| format!("parameter '{param_name}' has invalid @header name '{bound_name}'"))?;
     Ok(())
 }
 
@@ -88,10 +90,7 @@ pub(super) fn validate_cookie_name(bound_name: &str, param_name: &str) -> RestHi
     if bound_name.is_empty() {
         return Err(format!("parameter '{}' has empty @cookie name", param_name));
     }
-    if bound_name
-        .chars()
-        .any(|ch| ch.is_ascii_whitespace() || ch == ';' || ch == '=')
-    {
+    if http::header::HeaderName::from_bytes(bound_name.as_bytes()).is_err() {
         return Err(format!(
             "parameter '{}' has invalid @cookie name '{}'",
             param_name, bound_name

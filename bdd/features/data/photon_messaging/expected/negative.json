@@ -1,0 +1,61 @@
+{
+  "N01_renamed_from": {
+    "contains": "@renamedFrom on S::name_ is not supported yet",
+    "expect": "gen-error"
+  },
+  "N02_empty_interval": {
+    "contains": "unavailable in every version",
+    "expect": "gen-error"
+  },
+  "N03_child_outside_parent": {
+    "contains": "outside the availability of S",
+    "expect": "gen-error"
+  },
+  "N04_dangling_ref": {
+    "contains": "references Old, which does not exist in v3",
+    "expect": "gen-error"
+  },
+  "N05_dup_wire_overlap": {
+    "contains": "both serialize as \"ts\" in version 2026-07",
+    "expect": "gen-error"
+  },
+  "N06_unknown_version": {
+    "contains": "references V::v9, which is not declared",
+    "expect": "gen-error"
+  },
+  "N07_malformed_ref": {
+    "contains": "requires a version reference",
+    "expect": "gen-error"
+  },
+  "N08_overlapping_same_name_ops": {
+    "contains": "duplicate HTTP route binding",
+    "expect": "gen-error"
+  },
+  "N09_route_collision_one_version": {
+    "contains": "duplicate HTTP route binding",
+    "expect": "gen-error"
+  },
+  "N11_dup_lifecycle": {
+    "contains": "duplicate @added on S::a",
+    "expect": "gen-error"
+  },
+  "N12_typo_annotation": {
+    "contains": "remvoed",
+    "expect": "gen-error",
+    "gap": "G5"
+  },
+  "N14_header_named": {
+    "expect": "header-name",
+    "gap": "G1",
+    "value": "Idempotency-Key"
+  },
+  "N15_deprecated_on_member": {
+    "contains": "@deprecated is not allowed on Member",
+    "expect": "gen-error",
+    "gap": "G5"
+  },
+  "N16_raises_removed_exception": {
+    "expect": "errors-by-version",
+    "value": { "v1": ["410"], "v2": ["410"], "v3": [], "v4": [], "v5": [] }
+  }
+}

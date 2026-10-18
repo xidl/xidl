@@ -3555,6 +3555,7 @@ name = "xidl-parser"
 version = "0.104.0"
 dependencies = [
  "convert_case",
+ "http",
  "include_dir",
  "insta",
  "jiff",

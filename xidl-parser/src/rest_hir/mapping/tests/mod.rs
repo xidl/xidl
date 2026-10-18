@@ -55,7 +55,7 @@ fn test_build_operation_signature() {
         _ => panic!("expected interface"),
     };
 
-    let sig = build_operation_signature(op);
+    let sig = build_operation_signature(op).expect("valid signature");
     assert_eq!(sig.params.len(), 3);
     assert_eq!(sig.params[0].name, "id");
     assert_eq!(sig.params[0].direction, HttpSignatureParamDirection::In);

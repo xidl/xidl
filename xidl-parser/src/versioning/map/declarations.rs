@@ -29,7 +29,7 @@ struct DeclarationQuery<'a> {
 
 impl Declaration {
     fn matches(&self, query: &DeclarationQuery<'_>) -> ParserResult<bool> {
-        if self.kind != query.kind || query.wire_name.is_some_and(|wire| wire != self.wire_name) {
+        if self.kind != query.kind {
             return Ok(false);
         }
         if let Some((sources, location)) = query.parameter_binding {
@@ -41,9 +41,10 @@ impl Declaration {
             })?;
             return Ok(projected.is_some_and(|param| {
                 super::collect::render::render_param_kind(param.kind) == location
+                    && query.wire_name.is_none_or(|wire| wire == param.wire_name)
             }));
         }
-        Ok(true)
+        Ok(query.wire_name.is_none_or(|wire| wire == self.wire_name))
     }
 
     fn token(&self) -> String {

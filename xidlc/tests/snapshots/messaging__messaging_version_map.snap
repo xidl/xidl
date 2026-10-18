@@ -1,0 +1,4460 @@
+---
+source: xidlc/tests/messaging.rs
+expression: "all[0].content()"
+---
+{
+  "format": 2,
+  "contract": "photon_messaging.idl",
+  "versions": [
+    {
+      "id": "v2026_03",
+      "value": "2026-03"
+    },
+    {
+      "id": "v2026_05",
+      "value": "2026-05"
+    },
+    {
+      "id": "v2026_07",
+      "value": "2026-07"
+    },
+    {
+      "id": "v2026_09",
+      "value": "2026-09"
+    },
+    {
+      "id": "v2026_11",
+      "value": "2026-11"
+    }
+  ],
+  "steps": [
+    {
+      "from": "v2026_03",
+      "to": "v2026_05",
+      "types": {
+        "Photon::Attachment": {
+          "change": "added",
+          "kind": "struct"
+        },
+        "Photon::AttachmentId": {
+          "change": "added",
+          "kind": "typedef",
+          "details": {
+            "declarators": [
+              {
+                "array": false,
+                "name": "AttachmentId"
+              }
+            ],
+            "type": "string"
+          }
+        },
+        "Photon::Content": {
+          "change": "changed",
+          "kind": "union",
+          "details": {
+            "switch_type": "long"
+          },
+          "from": {
+            "kind": "union",
+            "switch_type": "long"
+          },
+          "to": {
+            "kind": "union",
+            "switch_type": "long"
+          },
+          "members": {
+            "attachment": {
+              "change": "added",
+              "to": {
+                "declaration_id": "d25",
+                "labels": [
+                  {
+                    "Value": {
+                      "Literal": {
+                        "IntegerLiteral": "2"
+                      }
+                    }
+                  }
+                ],
+                "name": "attachment",
+                "type": "Attachment"
+              }
+            }
+          }
+        },
+        "Photon::Message": {
+          "change": "changed",
+          "kind": "struct",
+          "from": {
+            "kind": "struct"
+          },
+          "to": {
+            "kind": "struct"
+          },
+          "members": {
+            "attachments": {
+              "change": "added",
+              "to": {
+                "declaration_id": "d37",
+                "name": "attachments",
+                "optional": false,
+                "type": "sequence<Attachment>"
+              }
+            },
+            "edited_at": {
+              "change": "added",
+              "to": {
+                "declaration_id": "d35",
+                "name": "edited_at",
+                "optional": true,
+                "type": "string"
+              }
+            },
+            "legacy_thread": {
+              "change": "removed",
+              "from": {
+                "declaration_id": "d36",
+                "name": "legacy_thread",
+                "optional": true,
+                "type": "string"
+              }
+            }
+          }
+        },
+        "Photon::MessageStatus": {
+          "change": "changed",
+          "kind": "enum",
+          "from": {
+            "kind": "enum"
+          },
+          "to": {
+            "kind": "enum"
+          },
+          "members": {
+            "FAILED_LEGACY": {
+              "change": "changed",
+              "from": {
+                "declaration_id": "d9",
+                "index": 3,
+                "name": "FAILED_LEGACY"
+              },
+              "to": {
+                "declaration_id": "d9",
+                "index": 4,
+                "name": "FAILED_LEGACY"
+              }
+            },
+            "READ": {
+              "change": "added",
+              "to": {
+                "declaration_id": "d8",
+                "index": 3,
+                "name": "READ"
+              }
+            }
+          }
+        }
+      },
+      "operations": {
+        "Photon::Messages.edit": {
+          "change": "added",
+          "to": {
+            "declaration_id": "d75",
+            "method": "patch",
+            "parameters": {
+              "body:content": {
+                "declaration_id": "d77",
+                "location": "body",
+                "name": "content",
+                "optional": false,
+                "type": "TextContent",
+                "wire_name": "content"
+              },
+              "path:id": {
+                "declaration_id": "d76",
+                "location": "path",
+                "name": "id",
+                "optional": false,
+                "type": "string",
+                "wire_name": "id"
+              }
+            },
+            "raises": [
+              "Photon::NotFound"
+            ],
+            "request": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "SingleValue": {
+                    "flatten": false,
+                    "source_param": "content",
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "TextContent"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "id",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "Message"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "Message",
+            "route": "/messages/{id}",
+            "routes": [
+              {
+                "path": "/messages/{id}",
+                "path_params": [
+                  "id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Messages.get": {
+          "change": "changed",
+          "from": {
+            "declaration_id": "d66",
+            "method": "get",
+            "parameters": {
+              "path:id": {
+                "declaration_id": "d67",
+                "location": "path",
+                "name": "id",
+                "optional": false,
+                "type": "string",
+                "wire_name": "id"
+              }
+            },
+            "raises": [
+              "Photon::NotFound"
+            ],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "id",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "Message"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "Message",
+            "route": "/messages/{id}",
+            "routes": [
+              {
+                "path": "/messages/{id}",
+                "path_params": [
+                  "id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          },
+          "to": {
+            "declaration_id": "d66",
+            "method": "get",
+            "parameters": {
+              "path:id": {
+                "declaration_id": "d67",
+                "location": "path",
+                "name": "id",
+                "optional": false,
+                "type": "string",
+                "wire_name": "id"
+              },
+              "query:expand": {
+                "declaration_id": "d68",
+                "location": "query",
+                "name": "expand",
+                "optional": true,
+                "type": "sequence<string>",
+                "wire_name": "expand"
+              }
+            },
+            "raises": [
+              "Photon::NotFound"
+            ],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "id",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "id"
+                }
+              ],
+              "query": [
+                {
+                  "optional": true,
+                  "source_param": "expand",
+                  "ty": {
+                    "SequenceType": {
+                      "len": null,
+                      "ty": {
+                        "StringType": {
+                          "bound": null
+                        }
+                      }
+                    }
+                  },
+                  "wire_name": "expand"
+                }
+              ]
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "Message"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "Message",
+            "route": "/messages/{id}",
+            "routes": [
+              {
+                "path": "/messages/{id}",
+                "path_params": [
+                  "id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Messages.legacy_send": {
+          "change": "changed",
+          "from": {
+            "declaration_id": "d82",
+            "method": "post",
+            "parameters": {
+              "body:envelope": {
+                "declaration_id": "d83",
+                "location": "body",
+                "name": "envelope",
+                "optional": false,
+                "type": "LegacyEnvelope",
+                "wire_name": "envelope"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "SingleValue": {
+                    "flatten": false,
+                    "source_param": "envelope",
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "LegacyEnvelope"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "path": [],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "Message"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "Message",
+            "route": "/messages/legacy",
+            "routes": [
+              {
+                "path": "/messages/legacy",
+                "path_params": [],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          },
+          "to": {
+            "declaration_id": "d84",
+            "method": "post",
+            "parameters": {
+              "body:envelope": {
+                "declaration_id": "d85",
+                "location": "body",
+                "name": "envelope",
+                "optional": false,
+                "type": "LegacyEnvelope",
+                "wire_name": "envelope"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "SingleValue": {
+                    "flatten": false,
+                    "source_param": "envelope",
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "LegacyEnvelope"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "path": [],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "Message"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "Message",
+            "route": "/messages/legacy",
+            "routes": [
+              {
+                "path": "/messages/legacy",
+                "path_params": [],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Users.unread": {
+          "change": "added",
+          "to": {
+            "declaration_id": "d134",
+            "method": "get",
+            "parameters": {
+              "path:id": {
+                "declaration_id": "d135",
+                "location": "path",
+                "name": "id",
+                "optional": false,
+                "type": "string",
+                "wire_name": "id"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "id",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Text",
+                "content_type": "text/plain",
+                "content_type_explicit": false,
+                "shape": {
+                  "SingleValue": {
+                    "source": {
+                      "Param": {
+                        "name": "count"
+                      }
+                    },
+                    "ty": {
+                      "IntegerType": "I32"
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "response_parameters": {
+              "body:count": [
+                {
+                  "declaration_id": "d136",
+                  "location": "body",
+                  "name": "count",
+                  "wire_name": "count"
+                }
+              ]
+            },
+            "return_type": null,
+            "route": "/users/{id}/unread",
+            "routes": [
+              {
+                "path": "/users/{id}/unread",
+                "path_params": [
+                  "id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        }
+      }
+    },
+    {
+      "from": "v2026_05",
+      "to": "v2026_07",
+      "types": {
+        "Photon::Capability": {
+          "change": "changed",
+          "kind": "bitmask",
+          "from": {
+            "kind": "bitmask"
+          },
+          "to": {
+            "kind": "bitmask"
+          },
+          "members": {
+            "POLL": {
+              "change": "added",
+              "to": {
+                "declaration_id": "d13",
+                "name": "POLL",
+                "position": "2"
+              }
+            }
+          }
+        },
+        "Photon::Content": {
+          "change": "changed",
+          "kind": "union",
+          "details": {
+            "switch_type": "long"
+          },
+          "from": {
+            "kind": "union",
+            "switch_type": "long"
+          },
+          "to": {
+            "kind": "union",
+            "switch_type": "long"
+          },
+          "members": {
+            "legacy": {
+              "change": "removed",
+              "from": {
+                "declaration_id": "d27",
+                "labels": [
+                  {
+                    "Value": {
+                      "Literal": {
+                        "IntegerLiteral": "4"
+                      }
+                    }
+                  }
+                ],
+                "name": "legacy",
+                "type": "LegacyEnvelope"
+              }
+            },
+            "poll": {
+              "change": "added",
+              "to": {
+                "declaration_id": "d26",
+                "labels": [
+                  {
+                    "Value": {
+                      "Literal": {
+                        "IntegerLiteral": "3"
+                      }
+                    }
+                  }
+                ],
+                "name": "poll",
+                "type": "PollContent"
+              }
+            }
+          }
+        },
+        "Photon::LegacyEnvelope": {
+          "change": "removed",
+          "kind": "struct"
+        },
+        "Photon::Message": {
+          "change": "changed",
+          "kind": "struct",
+          "from": {
+            "kind": "struct"
+          },
+          "to": {
+            "kind": "struct"
+          },
+          "members": {
+            "body": {
+              "change": "removed",
+              "from": {
+                "declaration_id": "d30",
+                "name": "body",
+                "optional": false,
+                "type": "string"
+              }
+            },
+            "content": {
+              "change": "added",
+              "to": {
+                "declaration_id": "d31",
+                "name": "content",
+                "optional": false,
+                "type": "Content"
+              }
+            }
+          }
+        },
+        "Photon::MessagePage": {
+          "change": "added",
+          "kind": "struct"
+        },
+        "Photon::PollContent": {
+          "change": "added",
+          "kind": "struct"
+        },
+        "Photon::RateLimited": {
+          "change": "added",
+          "kind": "exception"
+        },
+        "Photon::Space": {
+          "change": "changed",
+          "kind": "struct",
+          "from": {
+            "kind": "struct"
+          },
+          "to": {
+            "kind": "struct"
+          },
+          "members": {
+            "display_name": {
+              "change": "added",
+              "to": {
+                "declaration_id": "d41",
+                "name": "display_name",
+                "optional": false,
+                "type": "string"
+              }
+            },
+            "name": {
+              "change": "removed",
+              "from": {
+                "declaration_id": "d40",
+                "name": "name",
+                "optional": false,
+                "type": "string"
+              }
+            }
+          }
+        },
+        "Photon::TextContent": {
+          "change": "changed",
+          "kind": "struct",
+          "from": {
+            "kind": "struct"
+          },
+          "to": {
+            "kind": "struct"
+          },
+          "members": {
+            "markdown": {
+              "change": "added",
+              "to": {
+                "declaration_id": "d21",
+                "name": "markdown",
+                "optional": true,
+                "type": "string"
+              }
+            }
+          }
+        },
+        "Photon::UploadChunk": {
+          "change": "added",
+          "kind": "struct"
+        },
+        "Photon::UploadSummary": {
+          "change": "added",
+          "kind": "struct"
+        },
+        "Photon::UserRef": {
+          "change": "changed",
+          "kind": "struct",
+          "from": {
+            "kind": "struct"
+          },
+          "to": {
+            "kind": "struct"
+          },
+          "members": {
+            "avatar_url": {
+              "change": "added",
+              "to": {
+                "declaration_id": "d106",
+                "name": "avatar_url",
+                "optional": true,
+                "type": "string"
+              }
+            }
+          }
+        },
+        "Photon::WebhookDestination": {
+          "change": "added",
+          "kind": "struct"
+        },
+        "Photon::WebhookDestinationInput": {
+          "change": "added",
+          "kind": "struct"
+        }
+      },
+      "operations": {
+        "Photon::Media.upload": {
+          "change": "added",
+          "to": {
+            "declaration_id": "d149",
+            "method": "post",
+            "parameters": {
+              "body:chunk": {
+                "declaration_id": "d150",
+                "location": "body",
+                "name": "chunk",
+                "optional": false,
+                "type": "stream<UploadChunk>",
+                "wire_name": "chunk"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": "application/x-ndjson",
+                "content_type_explicit": false,
+                "shape": {
+                  "Stream": {
+                    "codec": "Ndjson",
+                    "item_ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "UploadChunk"
+                        ]
+                      }
+                    },
+                    "source_param": "chunk"
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "path": [],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "UploadSummary"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "UploadSummary",
+            "route": "/uploads",
+            "routes": [
+              {
+                "path": "/uploads",
+                "path_params": [],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": "Client"
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Messages.legacy_send": {
+          "change": "removed",
+          "from": {
+            "declaration_id": "d84",
+            "method": "post",
+            "parameters": {
+              "body:envelope": {
+                "declaration_id": "d85",
+                "location": "body",
+                "name": "envelope",
+                "optional": false,
+                "type": "LegacyEnvelope",
+                "wire_name": "envelope"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "SingleValue": {
+                    "flatten": false,
+                    "source_param": "envelope",
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "LegacyEnvelope"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "path": [],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "Message"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "Message",
+            "route": "/messages/legacy",
+            "routes": [
+              {
+                "path": "/messages/legacy",
+                "path_params": [],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Messages.list": {
+          "change": "changed",
+          "from": {
+            "declaration_id": "d60",
+            "method": "get",
+            "parameters": {
+              "path:space_id": {
+                "declaration_id": "d61",
+                "location": "path",
+                "name": "space_id",
+                "optional": false,
+                "type": "SpaceId",
+                "wire_name": "space_id"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "space_id",
+                  "ty": {
+                    "ScopedName": {
+                      "is_root": false,
+                      "name": [
+                        "SpaceId"
+                      ]
+                    }
+                  },
+                  "wire_name": "space_id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "SequenceType": {
+                        "len": null,
+                        "ty": {
+                          "ScopedName": {
+                            "is_root": false,
+                            "name": [
+                              "Message"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "sequence<Message>",
+            "route": "/spaces/{space_id}/messages",
+            "routes": [
+              {
+                "path": "/spaces/{space_id}/messages",
+                "path_params": [
+                  "space_id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          },
+          "to": {
+            "declaration_id": "d62",
+            "method": "get",
+            "parameters": {
+              "path:space_id": {
+                "declaration_id": "d63",
+                "location": "path",
+                "name": "space_id",
+                "optional": false,
+                "type": "SpaceId",
+                "wire_name": "space_id"
+              },
+              "query:cursor": {
+                "declaration_id": "d64",
+                "location": "query",
+                "name": "cursor",
+                "optional": true,
+                "type": "string",
+                "wire_name": "cursor"
+              },
+              "query:include_deleted": {
+                "declaration_id": "d65",
+                "location": "query",
+                "name": "include_deleted",
+                "optional": true,
+                "type": "boolean",
+                "wire_name": "include_deleted"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "space_id",
+                  "ty": {
+                    "ScopedName": {
+                      "is_root": false,
+                      "name": [
+                        "SpaceId"
+                      ]
+                    }
+                  },
+                  "wire_name": "space_id"
+                }
+              ],
+              "query": [
+                {
+                  "optional": true,
+                  "source_param": "cursor",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "cursor"
+                },
+                {
+                  "optional": true,
+                  "source_param": "include_deleted",
+                  "ty": "Boolean",
+                  "wire_name": "include_deleted"
+                }
+              ]
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "MessagePage"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "MessagePage",
+            "route": "/spaces/{space_id}/messages",
+            "routes": [
+              {
+                "path": "/spaces/{space_id}/messages",
+                "path_params": [
+                  "space_id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Messages.send": {
+          "change": "changed",
+          "from": {
+            "declaration_id": "d69",
+            "method": "post",
+            "parameters": {
+              "body:body": {
+                "declaration_id": "d71",
+                "location": "body",
+                "name": "body",
+                "optional": false,
+                "type": "string",
+                "wire_name": "body"
+              },
+              "path:space_id": {
+                "declaration_id": "d70",
+                "location": "path",
+                "name": "space_id",
+                "optional": false,
+                "type": "SpaceId",
+                "wire_name": "space_id"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": "Text",
+                "content_type": "text/plain",
+                "content_type_explicit": false,
+                "shape": {
+                  "SingleValue": {
+                    "flatten": false,
+                    "source_param": "body",
+                    "ty": {
+                      "StringType": {
+                        "bound": null
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "space_id",
+                  "ty": {
+                    "ScopedName": {
+                      "is_root": false,
+                      "name": [
+                        "SpaceId"
+                      ]
+                    }
+                  },
+                  "wire_name": "space_id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "Message"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "Message",
+            "route": "/spaces/{space_id}/messages",
+            "routes": [
+              {
+                "path": "/spaces/{space_id}/messages",
+                "path_params": [
+                  "space_id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          },
+          "to": {
+            "declaration_id": "d72",
+            "method": "post",
+            "parameters": {
+              "body:content": {
+                "declaration_id": "d74",
+                "location": "body",
+                "name": "content",
+                "optional": false,
+                "type": "Content",
+                "wire_name": "content"
+              },
+              "path:space_id": {
+                "declaration_id": "d73",
+                "location": "path",
+                "name": "space_id",
+                "optional": false,
+                "type": "SpaceId",
+                "wire_name": "space_id"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "SingleValue": {
+                    "flatten": false,
+                    "source_param": "content",
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "Content"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "space_id",
+                  "ty": {
+                    "ScopedName": {
+                      "is_root": false,
+                      "name": [
+                        "SpaceId"
+                      ]
+                    }
+                  },
+                  "wire_name": "space_id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "Message"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "Message",
+            "route": "/spaces/{space_id}/messages",
+            "routes": [
+              {
+                "path": "/spaces/{space_id}/messages",
+                "path_params": [
+                  "space_id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Users.get": {
+          "change": "changed",
+          "from": {
+            "declaration_id": "d130",
+            "method": "get",
+            "parameters": {
+              "path:id": {
+                "declaration_id": "d131",
+                "location": "path",
+                "name": "id",
+                "optional": false,
+                "type": "string",
+                "wire_name": "id"
+              }
+            },
+            "raises": [
+              "Photon::NotFound"
+            ],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "id",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "Participant"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "Participant",
+            "route": "/users/{id}",
+            "routes": [
+              {
+                "path": "/users/{id}",
+                "path_params": [
+                  "id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          },
+          "to": {
+            "declaration_id": "d132",
+            "method": "get",
+            "parameters": {
+              "path:id": {
+                "declaration_id": "d133",
+                "location": "path",
+                "name": "id",
+                "optional": false,
+                "type": "string",
+                "wire_name": "id"
+              }
+            },
+            "raises": [
+              "Photon::NotFound",
+              "Photon::RateLimited"
+            ],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "id",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "Participant"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "Participant",
+            "route": "/users/{id}",
+            "routes": [
+              {
+                "path": "/users/{id}",
+                "path_params": [
+                  "id"
+                ],
+                "query_params": []
+              },
+              {
+                "path": "/u/{id}",
+                "path_params": [
+                  "id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Users.get_attribute_region": {
+          "change": "added",
+          "to": {
+            "declaration_id": "d148",
+            "method": "get",
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Text",
+                "content_type": "text/plain",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "StringType": {
+                        "bound": null
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "string",
+            "route": "/attribute/region",
+            "routes": [
+              {
+                "path": "/attribute/region",
+                "path_params": [],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Users.list": {
+          "change": "changed",
+          "from": {
+            "declaration_id": "d141",
+            "method": "get",
+            "parameters": {
+              "cookie:session": {
+                "declaration_id": "d142",
+                "location": "cookie",
+                "name": "session",
+                "optional": true,
+                "type": "string",
+                "wire_name": "session"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [
+                {
+                  "optional": true,
+                  "source_param": "session",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "session"
+                }
+              ],
+              "header": [],
+              "path": [],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "SequenceType": {
+                        "len": null,
+                        "ty": {
+                          "ScopedName": {
+                            "is_root": false,
+                            "name": [
+                              "Participant"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "sequence<Participant>",
+            "route": "/users",
+            "routes": [
+              {
+                "path": "/users",
+                "path_params": [],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          },
+          "to": {
+            "declaration_id": "d141",
+            "method": "get",
+            "parameters": {
+              "cookie:session": {
+                "declaration_id": "d142",
+                "location": "cookie",
+                "name": "session",
+                "optional": true,
+                "type": "string",
+                "wire_name": "session"
+              },
+              "query:page_size": {
+                "declaration_id": "d143",
+                "location": "query",
+                "name": "page_size",
+                "optional": true,
+                "type": "long",
+                "wire_name": "page_size"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [
+                {
+                  "optional": true,
+                  "source_param": "session",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "session"
+                }
+              ],
+              "header": [],
+              "path": [],
+              "query": [
+                {
+                  "optional": true,
+                  "source_param": "page_size",
+                  "ty": {
+                    "IntegerType": "I32"
+                  },
+                  "wire_name": "page_size"
+                }
+              ]
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "SequenceType": {
+                        "len": null,
+                        "ty": {
+                          "ScopedName": {
+                            "is_root": false,
+                            "name": [
+                              "Participant"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "sequence<Participant>",
+            "route": "/users",
+            "routes": [
+              {
+                "path": "/users",
+                "path_params": [],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Webhooks.create": {
+          "change": "added",
+          "to": {
+            "declaration_id": "d99",
+            "method": "post",
+            "parameters": {
+              "body:input": {
+                "declaration_id": "d100",
+                "location": "body",
+                "name": "input",
+                "optional": false,
+                "type": "WebhookDestinationInput",
+                "wire_name": "input"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "SingleValue": {
+                    "flatten": false,
+                    "source_param": "input",
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "WebhookDestinationInput"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "path": [],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "WebhookDestination"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "WebhookDestination",
+            "route": "/webhooks",
+            "routes": [
+              {
+                "path": "/webhooks",
+                "path_params": [],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        }
+      }
+    },
+    {
+      "from": "v2026_07",
+      "to": "v2026_09",
+      "types": {
+        "Photon::Admin::Quota": {
+          "change": "removed",
+          "kind": "struct"
+        },
+        "Photon::Attachment": {
+          "change": "changed",
+          "kind": "struct",
+          "from": {
+            "kind": "struct"
+          },
+          "to": {
+            "kind": "struct"
+          },
+          "members": {
+            "sha256": {
+              "change": "added",
+              "to": {
+                "declaration_id": "d18",
+                "name": "sha256",
+                "optional": true,
+                "type": "string"
+              }
+            }
+          }
+        },
+        "Photon::Conflict": {
+          "change": "added",
+          "kind": "exception"
+        },
+        "Photon::Message": {
+          "change": "changed",
+          "kind": "struct",
+          "from": {
+            "kind": "struct"
+          },
+          "to": {
+            "kind": "struct"
+          },
+          "members": {
+            "created_at": {
+              "change": "changed",
+              "from": {
+                "declaration_id": "d33",
+                "name": "created_at_epoch",
+                "optional": false,
+                "type": "long long"
+              },
+              "to": {
+                "declaration_id": "d34",
+                "name": "created_at_rfc3339",
+                "optional": false,
+                "type": "string"
+              }
+            }
+          }
+        },
+        "Photon::MessageStatus": {
+          "change": "changed",
+          "kind": "enum",
+          "from": {
+            "kind": "enum"
+          },
+          "to": {
+            "kind": "enum"
+          },
+          "members": {
+            "FAILED": {
+              "change": "added",
+              "to": {
+                "declaration_id": "d10",
+                "index": 4,
+                "name": "FAILED"
+              }
+            },
+            "FAILED_LEGACY": {
+              "change": "removed",
+              "from": {
+                "declaration_id": "d9",
+                "index": 4,
+                "name": "FAILED_LEGACY"
+              }
+            }
+          }
+        },
+        "Photon::Participant": {
+          "change": "changed",
+          "kind": "struct",
+          "from": {
+            "kind": "struct"
+          },
+          "to": {
+            "kind": "struct"
+          },
+          "members": {
+            "labels": {
+              "change": "added",
+              "to": {
+                "declaration_id": "d108",
+                "name": "labels",
+                "optional": false,
+                "type": "map<string, string>"
+              }
+            }
+          }
+        },
+        "Photon::Reaction": {
+          "change": "changed",
+          "kind": "union",
+          "details": {
+            "switch_type": "ReactionKind"
+          },
+          "from": {
+            "kind": "union",
+            "switch_type": "ReactionKind"
+          },
+          "to": {
+            "kind": "union",
+            "switch_type": "ReactionKind"
+          },
+          "members": {
+            "emphasize_by": {
+              "change": "added",
+              "to": {
+                "declaration_id": "d114",
+                "labels": [
+                  {
+                    "Value": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "EMPHASIZE"
+                        ]
+                      }
+                    }
+                  }
+                ],
+                "name": "emphasize_by",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "Photon::ReactionKind": {
+          "change": "changed",
+          "kind": "enum",
+          "from": {
+            "kind": "enum"
+          },
+          "to": {
+            "kind": "enum"
+          },
+          "members": {
+            "EMPHASIZE": {
+              "change": "added",
+              "to": {
+                "declaration_id": "d111",
+                "index": 2,
+                "name": "EMPHASIZE"
+              }
+            }
+          }
+        },
+        "Photon::Space": {
+          "change": "changed",
+          "kind": "struct",
+          "from": {
+            "kind": "struct"
+          },
+          "to": {
+            "kind": "struct"
+          },
+          "members": {
+            "topic": {
+              "change": "changed",
+              "from": {
+                "declaration_id": "d42",
+                "name": "topic_optional",
+                "optional": true,
+                "type": "string"
+              },
+              "to": {
+                "declaration_id": "d43",
+                "name": "topic_required",
+                "optional": false,
+                "type": "string"
+              }
+            }
+          }
+        },
+        "Photon::Transcript": {
+          "change": "added",
+          "kind": "union",
+          "details": {
+            "switch_type": "ContentType"
+          }
+        },
+        "Photon::TranscriptJson": {
+          "change": "added",
+          "kind": "struct"
+        }
+      },
+      "operations": {
+        "Photon::Admin::Quotas.get": {
+          "change": "removed",
+          "from": {
+            "declaration_id": "d128",
+            "method": "get",
+            "parameters": {
+              "path:space_id": {
+                "declaration_id": "d129",
+                "location": "path",
+                "name": "space_id",
+                "optional": false,
+                "type": "Photon::SpaceId",
+                "wire_name": "space_id"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "space_id",
+                  "ty": {
+                    "ScopedName": {
+                      "is_root": false,
+                      "name": [
+                        "Photon",
+                        "SpaceId"
+                      ]
+                    }
+                  },
+                  "wire_name": "space_id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "Quota"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "Quota",
+            "route": "/admin/quotas/{space_id}",
+            "routes": [
+              {
+                "path": "/admin/quotas/{space_id}",
+                "path_params": [
+                  "space_id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Media.transcript": {
+          "change": "added",
+          "to": {
+            "declaration_id": "d154",
+            "method": "get",
+            "parameters": {
+              "path:space_id": {
+                "declaration_id": "d155",
+                "location": "path",
+                "name": "space_id",
+                "optional": false,
+                "type": "SpaceId",
+                "wire_name": "space_id"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "space_id",
+                  "ty": {
+                    "ScopedName": {
+                      "is_root": false,
+                      "name": [
+                        "SpaceId"
+                      ]
+                    }
+                  },
+                  "wire_name": "space_id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "Transcript"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [
+                {
+                  "content_type": "application/json",
+                  "is_byte": false,
+                  "ty": {
+                    "ScopedName": {
+                      "is_root": true,
+                      "name": [
+                        "v2026_09",
+                        "Photon",
+                        "TranscriptJson"
+                      ]
+                    }
+                  }
+                }
+              ],
+              "status": "200"
+            },
+            "return_type": "Transcript",
+            "route": "/spaces/{space_id}/transcript",
+            "routes": [
+              {
+                "path": "/spaces/{space_id}/transcript",
+                "path_params": [
+                  "space_id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Messages.archive": {
+          "change": "added",
+          "to": {
+            "declaration_id": "d93",
+            "method": "post",
+            "parameters": {
+              "path:id": {
+                "declaration_id": "d94",
+                "location": "path",
+                "name": "id",
+                "optional": false,
+                "type": "string",
+                "wire_name": "id"
+              }
+            },
+            "raises": [
+              "Photon::NotFound",
+              "Photon::Conflict"
+            ],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "id",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "204"
+            },
+            "return_type": null,
+            "route": "/messages/{id}/archive",
+            "routes": [
+              {
+                "path": "/messages/{id}/archive",
+                "path_params": [
+                  "id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Messages.edit": {
+          "change": "changed",
+          "from": {
+            "declaration_id": "d75",
+            "method": "patch",
+            "parameters": {
+              "body:content": {
+                "declaration_id": "d77",
+                "location": "body",
+                "name": "content",
+                "optional": false,
+                "type": "TextContent",
+                "wire_name": "content"
+              },
+              "path:id": {
+                "declaration_id": "d76",
+                "location": "path",
+                "name": "id",
+                "optional": false,
+                "type": "string",
+                "wire_name": "id"
+              }
+            },
+            "raises": [
+              "Photon::NotFound"
+            ],
+            "request": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "SingleValue": {
+                    "flatten": false,
+                    "source_param": "content",
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "TextContent"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "id",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "Message"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "Message",
+            "route": "/messages/{id}",
+            "routes": [
+              {
+                "path": "/messages/{id}",
+                "path_params": [
+                  "id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          },
+          "to": {
+            "declaration_id": "d78",
+            "method": "patch",
+            "parameters": {
+              "body:content": {
+                "declaration_id": "d80",
+                "location": "body",
+                "name": "content",
+                "optional": false,
+                "type": "TextContent",
+                "wire_name": "content"
+              },
+              "header:Idempotency-Key": {
+                "declaration_id": "d81",
+                "location": "header",
+                "name": "idempotency_key",
+                "optional": true,
+                "type": "string",
+                "wire_name": "Idempotency-Key"
+              },
+              "path:id": {
+                "declaration_id": "d79",
+                "location": "path",
+                "name": "id",
+                "optional": false,
+                "type": "string",
+                "wire_name": "id"
+              }
+            },
+            "raises": [
+              "Photon::NotFound",
+              "Photon::Conflict"
+            ],
+            "request": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "SingleValue": {
+                    "flatten": false,
+                    "source_param": "content",
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "TextContent"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [
+                {
+                  "optional": true,
+                  "source_param": "idempotency_key",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "Idempotency-Key"
+                }
+              ],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "id",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "Message"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "Message",
+            "route": "/messages/{id}",
+            "routes": [
+              {
+                "path": "/messages/{id}",
+                "path_params": [
+                  "id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Messages.find": {
+          "change": "removed",
+          "from": {
+            "declaration_id": "d86",
+            "method": "get",
+            "parameters": {
+              "query:q": {
+                "declaration_id": "d87",
+                "location": "query",
+                "name": "q",
+                "optional": false,
+                "type": "string",
+                "wire_name": "q"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [],
+              "query": [
+                {
+                  "optional": false,
+                  "source_param": "q",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "q"
+                }
+              ]
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "SequenceType": {
+                        "len": null,
+                        "ty": {
+                          "ScopedName": {
+                            "is_root": false,
+                            "name": [
+                              "Message"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "sequence<Message>",
+            "route": "/messages/search",
+            "routes": [
+              {
+                "path": "/messages/search",
+                "path_params": [],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Messages.list": {
+          "change": "changed",
+          "from": {
+            "declaration_id": "d62",
+            "method": "get",
+            "parameters": {
+              "path:space_id": {
+                "declaration_id": "d63",
+                "location": "path",
+                "name": "space_id",
+                "optional": false,
+                "type": "SpaceId",
+                "wire_name": "space_id"
+              },
+              "query:cursor": {
+                "declaration_id": "d64",
+                "location": "query",
+                "name": "cursor",
+                "optional": true,
+                "type": "string",
+                "wire_name": "cursor"
+              },
+              "query:include_deleted": {
+                "declaration_id": "d65",
+                "location": "query",
+                "name": "include_deleted",
+                "optional": true,
+                "type": "boolean",
+                "wire_name": "include_deleted"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "space_id",
+                  "ty": {
+                    "ScopedName": {
+                      "is_root": false,
+                      "name": [
+                        "SpaceId"
+                      ]
+                    }
+                  },
+                  "wire_name": "space_id"
+                }
+              ],
+              "query": [
+                {
+                  "optional": true,
+                  "source_param": "cursor",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "cursor"
+                },
+                {
+                  "optional": true,
+                  "source_param": "include_deleted",
+                  "ty": "Boolean",
+                  "wire_name": "include_deleted"
+                }
+              ]
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "MessagePage"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "MessagePage",
+            "route": "/spaces/{space_id}/messages",
+            "routes": [
+              {
+                "path": "/spaces/{space_id}/messages",
+                "path_params": [
+                  "space_id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          },
+          "to": {
+            "declaration_id": "d62",
+            "method": "get",
+            "parameters": {
+              "path:space_id": {
+                "declaration_id": "d63",
+                "location": "path",
+                "name": "space_id",
+                "optional": false,
+                "type": "SpaceId",
+                "wire_name": "space_id"
+              },
+              "query:cursor": {
+                "declaration_id": "d64",
+                "location": "query",
+                "name": "cursor",
+                "optional": true,
+                "type": "string",
+                "wire_name": "cursor"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "space_id",
+                  "ty": {
+                    "ScopedName": {
+                      "is_root": false,
+                      "name": [
+                        "SpaceId"
+                      ]
+                    }
+                  },
+                  "wire_name": "space_id"
+                }
+              ],
+              "query": [
+                {
+                  "optional": true,
+                  "source_param": "cursor",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "cursor"
+                }
+              ]
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "MessagePage"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "MessagePage",
+            "route": "/spaces/{space_id}/messages",
+            "routes": [
+              {
+                "path": "/spaces/{space_id}/messages",
+                "path_params": [
+                  "space_id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Messages.remove": {
+          "change": "removed",
+          "from": {
+            "declaration_id": "d91",
+            "method": "delete",
+            "parameters": {
+              "path:id": {
+                "declaration_id": "d92",
+                "location": "path",
+                "name": "id",
+                "optional": false,
+                "type": "string",
+                "wire_name": "id"
+              }
+            },
+            "raises": [
+              "Photon::NotFound",
+              "Photon::Gone"
+            ],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "id",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "204"
+            },
+            "return_type": null,
+            "route": "/messages/{id}",
+            "routes": [
+              {
+                "path": "/messages/{id}",
+                "path_params": [
+                  "id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Messages.search": {
+          "change": "added",
+          "to": {
+            "declaration_id": "d88",
+            "method": "get",
+            "parameters": {
+              "query:cursor": {
+                "declaration_id": "d90",
+                "location": "query",
+                "name": "cursor",
+                "optional": true,
+                "type": "string",
+                "wire_name": "cursor"
+              },
+              "query:q": {
+                "declaration_id": "d89",
+                "location": "query",
+                "name": "q",
+                "optional": false,
+                "type": "string",
+                "wire_name": "q"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [],
+              "query": [
+                {
+                  "optional": false,
+                  "source_param": "q",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "q"
+                },
+                {
+                  "optional": true,
+                  "source_param": "cursor",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "cursor"
+                }
+              ]
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "MessagePage"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "MessagePage",
+            "route": "/messages/search",
+            "routes": [
+              {
+                "path": "/messages/search",
+                "path_params": [],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Messages.watch": {
+          "change": "added",
+          "to": {
+            "declaration_id": "d95",
+            "method": "get",
+            "parameters": {
+              "path:space_id": {
+                "declaration_id": "d96",
+                "location": "path",
+                "name": "space_id",
+                "optional": false,
+                "type": "SpaceId",
+                "wire_name": "space_id"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "space_id",
+                  "ty": {
+                    "ScopedName": {
+                      "is_root": false,
+                      "name": [
+                        "SpaceId"
+                      ]
+                    }
+                  },
+                  "wire_name": "space_id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": null,
+                "content_type": "text/event-stream",
+                "content_type_explicit": false,
+                "shape": {
+                  "Stream": {
+                    "codec": "Sse",
+                    "item_source": "ReturnValue",
+                    "item_ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "Message"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "Message",
+            "route": "/spaces/{space_id}/messages/watch",
+            "routes": [
+              {
+                "path": "/spaces/{space_id}/messages/watch",
+                "path_params": [
+                  "space_id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Sse",
+              "kind": "Server"
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Users.block": {
+          "change": "changed",
+          "from": {
+            "declaration_id": "d144",
+            "method": "post",
+            "parameters": {
+              "path:id": {
+                "declaration_id": "d145",
+                "location": "path",
+                "name": "id",
+                "optional": false,
+                "type": "string",
+                "wire_name": "id"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "id",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "204"
+            },
+            "return_type": null,
+            "route": "/users/{id}/block",
+            "routes": [
+              {
+                "path": "/users/{id}/block",
+                "path_params": [
+                  "id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          },
+          "to": {
+            "declaration_id": "d146",
+            "method": "post",
+            "parameters": {
+              "path:id": {
+                "declaration_id": "d147",
+                "location": "path",
+                "name": "id",
+                "optional": false,
+                "type": "string",
+                "wire_name": "id"
+              }
+            },
+            "raises": [
+              "Photon::RateLimited"
+            ],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "id",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "204"
+            },
+            "return_type": null,
+            "route": "/users/{id}/block",
+            "routes": [
+              {
+                "path": "/users/{id}/block",
+                "path_params": [
+                  "id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Users.list": {
+          "change": "changed",
+          "from": {
+            "declaration_id": "d141",
+            "method": "get",
+            "parameters": {
+              "cookie:session": {
+                "declaration_id": "d142",
+                "location": "cookie",
+                "name": "session",
+                "optional": true,
+                "type": "string",
+                "wire_name": "session"
+              },
+              "query:page_size": {
+                "declaration_id": "d143",
+                "location": "query",
+                "name": "page_size",
+                "optional": true,
+                "type": "long",
+                "wire_name": "page_size"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [
+                {
+                  "optional": true,
+                  "source_param": "session",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "session"
+                }
+              ],
+              "header": [],
+              "path": [],
+              "query": [
+                {
+                  "optional": true,
+                  "source_param": "page_size",
+                  "ty": {
+                    "IntegerType": "I32"
+                  },
+                  "wire_name": "page_size"
+                }
+              ]
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "SequenceType": {
+                        "len": null,
+                        "ty": {
+                          "ScopedName": {
+                            "is_root": false,
+                            "name": [
+                              "Participant"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "sequence<Participant>",
+            "route": "/users",
+            "routes": [
+              {
+                "path": "/users",
+                "path_params": [],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          },
+          "to": {
+            "declaration_id": "d141",
+            "method": "get",
+            "parameters": {
+              "query:page_size": {
+                "declaration_id": "d143",
+                "location": "query",
+                "name": "page_size",
+                "optional": true,
+                "type": "long",
+                "wire_name": "page_size"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [],
+              "query": [
+                {
+                  "optional": true,
+                  "source_param": "page_size",
+                  "ty": {
+                    "IntegerType": "I32"
+                  },
+                  "wire_name": "page_size"
+                }
+              ]
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "SequenceType": {
+                        "len": null,
+                        "ty": {
+                          "ScopedName": {
+                            "is_root": false,
+                            "name": [
+                              "Participant"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "sequence<Participant>",
+            "route": "/users",
+            "routes": [
+              {
+                "path": "/users",
+                "path_params": [],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Users.unread": {
+          "change": "changed",
+          "from": {
+            "declaration_id": "d134",
+            "method": "get",
+            "parameters": {
+              "path:id": {
+                "declaration_id": "d135",
+                "location": "path",
+                "name": "id",
+                "optional": false,
+                "type": "string",
+                "wire_name": "id"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "id",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Text",
+                "content_type": "text/plain",
+                "content_type_explicit": false,
+                "shape": {
+                  "SingleValue": {
+                    "source": {
+                      "Param": {
+                        "name": "count"
+                      }
+                    },
+                    "ty": {
+                      "IntegerType": "I32"
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "response_parameters": {
+              "body:count": [
+                {
+                  "declaration_id": "d136",
+                  "location": "body",
+                  "name": "count",
+                  "wire_name": "count"
+                }
+              ]
+            },
+            "return_type": null,
+            "route": "/users/{id}/unread",
+            "routes": [
+              {
+                "path": "/users/{id}/unread",
+                "path_params": [
+                  "id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          },
+          "to": {
+            "declaration_id": "d137",
+            "method": "get",
+            "parameters": {
+              "path:id": {
+                "declaration_id": "d138",
+                "location": "path",
+                "name": "id",
+                "optional": false,
+                "type": "string",
+                "wire_name": "id"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "id",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "Object": {
+                    "fields": [
+                      {
+                        "field_name": "count",
+                        "source": {
+                          "Param": {
+                            "name": "count"
+                          }
+                        },
+                        "ty": {
+                          "IntegerType": "I32"
+                        }
+                      },
+                      {
+                        "field_name": "mentions",
+                        "source": {
+                          "Param": {
+                            "name": "mentions"
+                          }
+                        },
+                        "ty": {
+                          "IntegerType": "I32"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "response_parameters": {
+              "body:count": [
+                {
+                  "declaration_id": "d139",
+                  "location": "body",
+                  "name": "count",
+                  "wire_name": "count"
+                }
+              ],
+              "body:mentions": [
+                {
+                  "declaration_id": "d140",
+                  "location": "body",
+                  "name": "mentions",
+                  "wire_name": "mentions"
+                }
+              ]
+            },
+            "return_type": null,
+            "route": "/users/{id}/unread",
+            "routes": [
+              {
+                "path": "/users/{id}/unread",
+                "path_params": [
+                  "id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        }
+      }
+    },
+    {
+      "from": "v2026_09",
+      "to": "v2026_11",
+      "types": {
+        "Analytics::UsageReport": {
+          "change": "added",
+          "kind": "struct"
+        },
+        "Photon::Capability": {
+          "change": "changed",
+          "kind": "bitmask",
+          "from": {
+            "kind": "bitmask"
+          },
+          "to": {
+            "kind": "bitmask"
+          },
+          "members": {
+            "LEGACY_RICHLINK": {
+              "change": "removed",
+              "from": {
+                "declaration_id": "d14",
+                "name": "LEGACY_RICHLINK",
+                "position": "3"
+              }
+            }
+          }
+        },
+        "Photon::Gone": {
+          "change": "removed",
+          "kind": "exception"
+        },
+        "Photon::Message": {
+          "change": "changed",
+          "kind": "struct",
+          "from": {
+            "kind": "struct"
+          },
+          "to": {
+            "kind": "struct"
+          },
+          "members": {
+            "attachments": {
+              "change": "removed",
+              "from": {
+                "declaration_id": "d37",
+                "name": "attachments",
+                "optional": false,
+                "type": "sequence<Attachment>"
+              }
+            }
+          }
+        },
+        "Photon::Space": {
+          "change": "changed",
+          "kind": "struct",
+          "from": {
+            "kind": "struct"
+          },
+          "to": {
+            "kind": "struct"
+          },
+          "members": {
+            "member_count": {
+              "change": "changed",
+              "from": {
+                "declaration_id": "d44",
+                "name": "members",
+                "optional": false,
+                "type": "long"
+              },
+              "to": {
+                "declaration_id": "d45",
+                "name": "member_count",
+                "optional": false,
+                "type": "long"
+              }
+            }
+          }
+        },
+        "Photon::Transcript": {
+          "change": "changed",
+          "kind": "union",
+          "details": {
+            "switch_type": "ContentType"
+          },
+          "from": {
+            "kind": "union",
+            "switch_type": "ContentType"
+          },
+          "to": {
+            "kind": "union",
+            "switch_type": "ContentType"
+          },
+          "members": {
+            "text": {
+              "change": "added",
+              "to": {
+                "declaration_id": "d125",
+                "labels": [
+                  {
+                    "Value": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "ContentType",
+                          "Text"
+                        ]
+                      }
+                    }
+                  }
+                ],
+                "name": "text",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "Photon::UploadSummary": {
+          "change": "changed",
+          "kind": "struct",
+          "from": {
+            "kind": "struct"
+          },
+          "to": {
+            "kind": "struct"
+          },
+          "members": {
+            "attachment_id": {
+              "change": "added",
+              "to": {
+                "declaration_id": "d122",
+                "name": "attachment_id",
+                "optional": true,
+                "type": "AttachmentId"
+              }
+            }
+          }
+        },
+        "Photon::WebhookDestinationInput": {
+          "change": "changed",
+          "kind": "struct",
+          "from": {
+            "kind": "struct"
+          },
+          "to": {
+            "kind": "struct"
+          },
+          "members": {
+            "description": {
+              "change": "added",
+              "to": {
+                "declaration_id": "d51",
+                "name": "description",
+                "optional": true,
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "operations": {
+        "Analytics::Usage.usage": {
+          "change": "added",
+          "to": {
+            "declaration_id": "d160",
+            "method": "get",
+            "parameters": {
+              "query:space_id": {
+                "declaration_id": "d161",
+                "location": "query",
+                "name": "space_id",
+                "optional": false,
+                "type": "string",
+                "wire_name": "space_id"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [],
+              "query": [
+                {
+                  "optional": false,
+                  "source_param": "space_id",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "space_id"
+                }
+              ]
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "UsageReport"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "UsageReport",
+            "route": "/analytics/usage",
+            "routes": [
+              {
+                "path": "/analytics/usage",
+                "path_params": [],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::LegacyPolling.poll": {
+          "change": "removed",
+          "from": {
+            "declaration_id": "d103",
+            "method": "get",
+            "parameters": {
+              "query:since": {
+                "declaration_id": "d104",
+                "location": "query",
+                "name": "since",
+                "optional": true,
+                "type": "string",
+                "wire_name": "since"
+              }
+            },
+            "raises": [
+              "Photon::Gone"
+            ],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [],
+              "query": [
+                {
+                  "optional": true,
+                  "source_param": "since",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "since"
+                }
+              ]
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "SequenceType": {
+                        "len": null,
+                        "ty": {
+                          "ScopedName": {
+                            "is_root": false,
+                            "name": [
+                              "Message"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "200"
+            },
+            "return_type": "sequence<Message>",
+            "route": "/poll",
+            "routes": [
+              {
+                "path": "/poll",
+                "path_params": [],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Media.realtime": {
+          "change": "added",
+          "to": {
+            "declaration_id": "d156",
+            "method": "get",
+            "parameters": {
+              "query:token": {
+                "declaration_id": "d157",
+                "location": "query",
+                "name": "token",
+                "optional": false,
+                "type": "string",
+                "wire_name": "token"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [],
+              "query": [
+                {
+                  "optional": false,
+                  "source_param": "token",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "token"
+                }
+              ]
+            },
+            "response": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "204"
+            },
+            "return_type": null,
+            "route": "/realtime",
+            "routes": [
+              {
+                "path": "/realtime",
+                "path_params": [],
+                "query_params": [
+                  "token"
+                ]
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": "Raw",
+            "upgrade_protocol": "photon-realtime",
+            "websocket": null
+          }
+        },
+        "Photon::Media.transcript": {
+          "change": "changed",
+          "from": {
+            "declaration_id": "d154",
+            "method": "get",
+            "parameters": {
+              "path:space_id": {
+                "declaration_id": "d155",
+                "location": "path",
+                "name": "space_id",
+                "optional": false,
+                "type": "SpaceId",
+                "wire_name": "space_id"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "space_id",
+                  "ty": {
+                    "ScopedName": {
+                      "is_root": false,
+                      "name": [
+                        "SpaceId"
+                      ]
+                    }
+                  },
+                  "wire_name": "space_id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "Transcript"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [
+                {
+                  "content_type": "application/json",
+                  "is_byte": false,
+                  "ty": {
+                    "ScopedName": {
+                      "is_root": true,
+                      "name": [
+                        "v2026_09",
+                        "Photon",
+                        "TranscriptJson"
+                      ]
+                    }
+                  }
+                }
+              ],
+              "status": "200"
+            },
+            "return_type": "Transcript",
+            "route": "/spaces/{space_id}/transcript",
+            "routes": [
+              {
+                "path": "/spaces/{space_id}/transcript",
+                "path_params": [
+                  "space_id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          },
+          "to": {
+            "declaration_id": "d154",
+            "method": "get",
+            "parameters": {
+              "path:space_id": {
+                "declaration_id": "d155",
+                "location": "path",
+                "name": "space_id",
+                "optional": false,
+                "type": "SpaceId",
+                "wire_name": "space_id"
+              }
+            },
+            "raises": [],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "space_id",
+                  "ty": {
+                    "ScopedName": {
+                      "is_root": false,
+                      "name": [
+                        "SpaceId"
+                      ]
+                    }
+                  },
+                  "wire_name": "space_id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": "Json",
+                "content_type": "application/json",
+                "content_type_explicit": false,
+                "shape": {
+                  "ReturnOnly": {
+                    "ty": {
+                      "ScopedName": {
+                        "is_root": false,
+                        "name": [
+                          "Transcript"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [
+                {
+                  "content_type": "application/json",
+                  "is_byte": false,
+                  "ty": {
+                    "ScopedName": {
+                      "is_root": true,
+                      "name": [
+                        "v2026_11",
+                        "Photon",
+                        "TranscriptJson"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "content_type": "text/plain",
+                  "is_byte": false,
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  }
+                }
+              ],
+              "status": "200"
+            },
+            "return_type": "Transcript",
+            "route": "/spaces/{space_id}/transcript",
+            "routes": [
+              {
+                "path": "/spaces/{space_id}/transcript",
+                "path_params": [
+                  "space_id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        },
+        "Photon::Webhooks.delete_destination": {
+          "change": "added",
+          "to": {
+            "declaration_id": "d101",
+            "method": "delete",
+            "parameters": {
+              "path:id": {
+                "declaration_id": "d102",
+                "location": "path",
+                "name": "id",
+                "optional": false,
+                "type": "string",
+                "wire_name": "id"
+              }
+            },
+            "raises": [
+              "Photon::NotFound"
+            ],
+            "request": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "path": [
+                {
+                  "optional": false,
+                  "source_param": "id",
+                  "ty": {
+                    "StringType": {
+                      "bound": null
+                    }
+                  },
+                  "wire_name": "id"
+                }
+              ],
+              "query": []
+            },
+            "response": {
+              "body": {
+                "codec": null,
+                "content_type": null,
+                "content_type_explicit": false,
+                "shape": "Empty"
+              },
+              "cookie": [],
+              "header": [],
+              "representations": [],
+              "status": "204"
+            },
+            "return_type": null,
+            "route": "/webhooks/{id}",
+            "routes": [
+              {
+                "path": "/webhooks/{id}",
+                "path_params": [
+                  "id"
+                ],
+                "query_params": []
+              }
+            ],
+            "stream": {
+              "codec": "Ndjson",
+              "kind": null
+            },
+            "upgrade_mode": null,
+            "upgrade_protocol": null,
+            "websocket": null
+          }
+        }
+      }
+    }
+  ]
+}
