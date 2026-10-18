@@ -32,12 +32,12 @@
                     xidlPath = `${xidlPath}?${queryString}`;
                 }
                 const url = joinUrl(this.baseUrl, xidlPath);
-                {% if method.is_server_stream %}{% if method.response_content_type == "application/octet-stream" %}return byteResponseStream(this.fetchImpl, url, { method: "{{ method.http_method }}", headers });
-                {% else %}return sseJsonStream<{{ render_type(method.stream_item_ty) }}>(this.fetchImpl, url, { method: "{{ method.http_method }}", headers }, {% if method.stream_item_schema_ref %}ifaceSchemas.{{ method.stream_item_schema_ref }}Schema{% else %}undefined{% endif %});
+                {% if method.is_server_stream %}{% if method.response_content_type == "application/octet-stream" %}return byteResponseStream(this.fetchImpl, url, { method: "{{ method.http_method }}", headers{% if cookie_version %}, credentials: "include"{% endif %} });
+                {% else %}return sseJsonStream<{{ render_type(method.stream_item_ty) }}>(this.fetchImpl, url, { method: "{{ method.http_method }}", headers{% if cookie_version %}, credentials: "include"{% endif %} }, {% if method.stream_item_schema_ref %}ifaceSchemas.{{ method.stream_item_schema_ref }}Schema{% else %}undefined{% endif %});
             {% endif %}
             {% elif method.is_client_stream %}headers.set("Content-Type", "{{ method.request_content_type }}");
             headers.set("Accept", "{{ method.response_content_type }}");
-            const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers, body: {% if method.request_content_type == "application/octet-stream" %}byteStreamBody(stream){% else %}ndjsonBody(stream, {% if method.request_schema_ref %}ifaceSchemas.{{ method.request_schema_ref }}Schema{% else %}undefined{% endif %}){% endif %} });
+            const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers{% if cookie_version %}, credentials: "include"{% endif %}, body: {% if method.request_content_type == "application/octet-stream" %}byteStreamBody(stream){% else %}ndjsonBody(stream, {% if method.request_schema_ref %}ifaceSchemas.{{ method.request_schema_ref }}Schema{% else %}undefined{% endif %}){% endif %} });
             if (!resp.ok) {
                 {% if method.raises | length > 0 %}await this.{{ method.raise_helper }}(resp);
                 {% else %}throw await parseXidlError(resp);
@@ -57,7 +57,7 @@
         {% else %}headers.set("Content-Type", "{{ method.request_content_type }}");
         {% endif %}
         {% endif %}headers.set("Accept", "{% if method.representations | length > 0 %}{{ method.union_accept }}{% else %}{{ method.response_content_type }}{% endif %}");
-        const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers{% if method.body_single or method.body_entries | length > 0 %}, body: encodeRequestBody(xidlBody, "{{ method.request_content_type }}", this.codecs, {% if method.body_schema_ref %}ifaceSchemas.{{ method.body_schema_ref }}Schema{% else %}undefined{% endif %}){% endif %} });
+        const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers{% if cookie_version %}, credentials: "include"{% endif %}{% if method.body_single or method.body_entries | length > 0 %}, body: encodeRequestBody(xidlBody, "{{ method.request_content_type }}", this.codecs, {% if method.body_schema_ref %}ifaceSchemas.{{ method.body_schema_ref }}Schema{% else %}undefined{% endif %}){% endif %} });
         if (!resp.ok) {
             {% if method.raises | length > 0 %}await this.{{ method.raise_helper }}(resp);
             {% else %}throw await parseXidlError(resp);

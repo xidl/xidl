@@ -43,5 +43,10 @@ export type {
   ResponseValueSpec,
   SecurityRequirement,
 } from './types.ts';
-export type { OpenWsOptions, WsBidiSession } from './websocket.ts';
+export type {
+  OpenWsOptions,
+  WebSocketConnectRequest,
+  WebSocketLike,
+  WsBidiSession,
+} from './websocket.ts';
 export { openWsBidiClient } from './websocket.ts';

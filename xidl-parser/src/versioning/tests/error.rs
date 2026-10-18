@@ -48,7 +48,7 @@ fn every_diagnostic_names_the_failing_contract() {
             VersioningError::MalformedVersionMarker {
                 decl: "Versions".to_string(),
             },
-            "takes no arguments",
+            "must be bare or declare in=... and name=...",
         ),
         (
             VersioningError::UnknownVersionReference {

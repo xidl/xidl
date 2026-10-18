@@ -23,6 +23,8 @@ pub(crate) struct MethodInfo {
     pub(crate) request_stream_item_schema: Option<RefOr<Schema>>,
     pub(crate) response_status: String,
     pub(crate) response_headers: Vec<(String, RefOr<Schema>)>,
+    /// The module's fixed version header, shared by every response status.
+    pub(crate) version_response_header: Option<(String, RefOr<Schema>)>,
     pub(crate) response_schema: Option<RefOr<Schema>>,
     pub(crate) response_stream_item_schema: Option<RefOr<Schema>>,
     pub(crate) summary: Option<String>,
@@ -218,6 +220,7 @@ pub(crate) fn render_http_operation(
             .flatten(),
         response_status,
         response_headers,
+        version_response_header: None,
         response_schema: final_response_schema,
         response_stream_item_schema: matches!(op.meta.stream.kind, Some(HttpStreamKind::Server))
             .then_some(response_schema)

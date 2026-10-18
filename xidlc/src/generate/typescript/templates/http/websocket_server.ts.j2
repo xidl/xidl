@@ -1,0 +1,18 @@
+{% from "macros.j2" import render_type %}
+
+export function create_{{ name }}Handler(
+impl: {
+    {{ name }}(session: import('xidl-typescript-server').WsBidiServerSession<{{ render_type(stream_in) }}, {{ render_type(stream_out) }}>): Promise<void>;
+},
+runtime: {
+    wrapWsBidiServer<TIn, TOut>(
+    socket: import('xidl-typescript-server').WsLikeSocket,
+    ): import('xidl-typescript-server').WsBidiServerSession<TIn, TOut>;
+},
+) {
+    return (socket: import('xidl-typescript-server').WsLikeSocket) => {
+        const session = runtime.wrapWsBidiServer<{{ render_type(stream_in) }}, {{ render_type(stream_out) }}>(socket);
+        return impl.{{ name }}(session).finally(() => session.close());
+    };
+}
+export const {{ name }}_ws_subprotocol: string | undefined = {% if subprotocol is not none %}{{ subprotocol | tojson }}{% else %}undefined{% endif %};

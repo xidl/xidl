@@ -27,6 +27,14 @@ pub(super) struct ClientBuildRequestMethod<'a> {
     pub(super) query_encode: String,
     pub(super) header_encode: String,
     pub(super) cookie_encode: String,
+    pub(super) version_parameter: Option<VersionParameterTemplate>,
+}
+
+#[derive(Serialize)]
+pub(super) struct VersionParameterTemplate {
+    pub(super) location: &'static str,
+    pub(super) name: String,
+    pub(super) value: String,
 }
 
 #[derive(Serialize)]

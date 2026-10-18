@@ -1,4 +1,4 @@
-use crate::hir;
+use crate::hir::{self, HttpParameterLocation};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
@@ -8,18 +8,11 @@ use super::annotations::{annotation_name, annotation_params, normalize_annotatio
 mod tests;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum HttpApiKeyLocation {
-    Header,
-    Query,
-    Cookie,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum HttpSecurityRequirement {
     HttpBasic,
     HttpBearer,
     ApiKey {
-        location: HttpApiKeyLocation,
+        location: HttpParameterLocation,
         name: String,
     },
 }
@@ -146,17 +139,15 @@ fn parse_api_key(annotation: &hir::Annotation) -> Result<HttpSecurityRequirement
     let params = annotation_params(annotation)
         .ok_or_else(|| "@api_key requires in=... and name=...".to_string())?;
     let params = normalize_annotation_params(params);
-    let location = match params.get("in").map(|value| value.to_ascii_lowercase()) {
-        Some(value) if value == "header" => HttpApiKeyLocation::Header,
-        Some(value) if value == "query" => HttpApiKeyLocation::Query,
-        Some(value) if value == "cookie" => HttpApiKeyLocation::Cookie,
-        Some(value) => {
-            return Err(format!(
-                "@api_key(in=...) must be one of header|query|cookie, got '{value}'"
-            ));
-        }
-        None => return Err("@api_key requires non-empty in=...".to_string()),
-    };
+    let location = params
+        .get("in")
+        .ok_or_else(|| "@api_key requires non-empty in=...".to_string())?;
+    let location = HttpParameterLocation::parse(location).ok_or_else(|| {
+        format!(
+            "@api_key(in=...) must be one of header|query|cookie, got '{}'",
+            location.to_ascii_lowercase()
+        )
+    })?;
     let name = params
         .get("name")
         .cloned()

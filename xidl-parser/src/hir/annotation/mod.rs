@@ -3,8 +3,12 @@ use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
 mod convert;
+mod location;
+pub(super) mod params;
 #[cfg(test)]
 mod tests;
+
+pub use location::{HttpParameterLocation, VersionParameter};
 
 pub use convert::{
     annotation_id_value, annotation_name, annotation_params, effective_wire_name,
@@ -129,6 +133,8 @@ pub enum Annotation {
     Skip,
     /// The `@version` marker that designates an enum as the API version timeline.
     Version,
+    /// A version timeline with an explicit request parameter location and name.
+    VersionParameter(VersionParameter),
     /// The `@added(Version::member)` lifecycle annotation: the declaration exists
     /// from that version onward.
     Added {

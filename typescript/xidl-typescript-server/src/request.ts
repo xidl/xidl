@@ -177,3 +177,20 @@ function applyBody(
     }
   }
 }
+
+/** Decode captured path parameters after a route and its operation are selected. */
+export function decodeRouteParams(params: RouteParams): RouteParams {
+  const decode = (value: string): string => {
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      throw new XidlServerError(400, `invalid route segment: ${value}`);
+    }
+  };
+  return Object.fromEntries(
+    Object.entries(params).map(([name, value]) => [
+      name,
+      typeof value === 'string' ? decode(value) : value?.map(decode),
+    ]),
+  );
+}

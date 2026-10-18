@@ -112,6 +112,11 @@ impl IdlPrinter {
             }
             Annotation::Skip => "@skip".to_string(),
             Annotation::Version => "@version".to_string(),
+            Annotation::VersionParameter(parameter) => format!(
+                "@version(in = {}, name = {})",
+                Self::quote(parameter.location.as_str()),
+                Self::quote(&parameter.name)
+            ),
             Annotation::Added { version } => format!("@added({})", Self::render_scoped(version)),
             Annotation::Removed { version } => {
                 format!("@removed({})", Self::render_scoped(version))

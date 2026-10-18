@@ -4,7 +4,7 @@ use super::super::VersioningError;
 use super::super::timeline::VersionTimeline;
 use super::availability::{Availability, Site, VersionVisitor, availability, raw_versioning_name};
 use crate::error::ParserResult;
-use crate::hir::{Annotation, Definition, Enumerator};
+use crate::hir::{Annotation, Definition, Enumerator, VersionParameter};
 
 /// Version enum found during discovery.
 pub(crate) struct Discovery {
@@ -12,6 +12,8 @@ pub(crate) struct Discovery {
     pub(crate) version_enum: Option<(String, Vec<Enumerator>)>,
     /// First `@added`/`@removed` found outside a versioned specification.
     pub(crate) saw_lifecycle: Option<(String, String)>,
+    /// The request parameter declared by the version timeline.
+    pub(crate) version_parameter: Option<VersionParameter>,
 }
 
 struct DiscoverVisitor {
@@ -22,9 +24,34 @@ impl VersionVisitor for DiscoverVisitor {
     fn enter(&mut self, site: &Site<'_>, _parent: Availability) -> ParserResult<Availability> {
         let mut marker = false;
         let mut lifecycle: Vec<String> = Vec::new();
+        let mut parameter: Option<VersionParameter> = None;
         for annotation in site.annotations {
             match annotation {
-                Annotation::Version => marker = true,
+                Annotation::Version => {
+                    if marker {
+                        return Err(VersioningError::DuplicateVersionParameter {
+                            decl: site.path.clone(),
+                        }
+                        .into());
+                    }
+                    marker = true;
+                }
+                Annotation::VersionParameter(value) => {
+                    if marker {
+                        return Err(VersioningError::DuplicateVersionParameter {
+                            decl: site.path.clone(),
+                        }
+                        .into());
+                    }
+                    marker = true;
+                    value.validate().map_err(|reason| {
+                        VersioningError::MalformedVersionParameter {
+                            decl: site.path.clone(),
+                            reason,
+                        }
+                    })?;
+                    parameter = Some(value.clone());
+                }
                 Annotation::Added { .. } => lifecycle.push("@added".to_string()),
                 Annotation::Removed { .. } => lifecycle.push("@removed".to_string()),
                 other => {
@@ -34,7 +61,25 @@ impl VersionVisitor for DiscoverVisitor {
                         crate::lint::AnnotationKind::from_name(&name)
                             == Some(crate::lint::AnnotationKind::Version)
                     }) {
+                        if marker {
+                            return Err(VersioningError::DuplicateVersionParameter {
+                                decl: site.path.clone(),
+                            }
+                            .into());
+                        }
                         marker = true;
+                        let value = crate::hir::annotation_params(other).ok_or_else(|| {
+                            VersioningError::MalformedVersionParameter {
+                                decl: site.path.clone(),
+                                reason: "requires in=... and name=...".to_string(),
+                            }
+                        })?;
+                        parameter = Some(VersionParameter::parse(value).map_err(|reason| {
+                            VersioningError::MalformedVersionParameter {
+                                decl: site.path.clone(),
+                                reason,
+                            }
+                        })?);
                     }
                 }
             }
@@ -83,6 +128,7 @@ impl VersionVisitor for DiscoverVisitor {
             .into());
         }
         self.discovery.version_enum = Some((site.path.clone(), members.to_vec()));
+        self.discovery.version_parameter = parameter;
         Ok(Availability::full())
     }
 }
@@ -93,6 +139,7 @@ pub(crate) fn discover(definitions: &[Definition]) -> ParserResult<Discovery> {
         discovery: Discovery {
             version_enum: None,
             saw_lifecycle: None,
+            version_parameter: None,
         },
     };
     visitor.walk(definitions, "", Availability::full())?;

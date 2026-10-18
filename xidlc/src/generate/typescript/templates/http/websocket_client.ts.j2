@@ -1,0 +1,20 @@
+{% from "macros.j2" import render_type %}
+{% from "http/version_parameter.ts.j2" import pin_headers %}
+export async function open_{{ name }}Session(
+baseUrl: string,
+options?: {% if version_parameter %}import('xidl-typescript-client').OpenWsOptions{% else %}{ subprotocol?: string; WebSocketImpl?: typeof WebSocket }{% endif %},
+): Promise<import('xidl-typescript-client').WsBidiSession<{{ render_type(stream_in) }}, {{ render_type(stream_out) }}>> {
+    const { openWsBidiClient } = await import('xidl-typescript-client');
+    const path = {{ path | tojson }};
+    {% if version_parameter %}  const versionUrl = new URL(baseUrl);
+    versionUrl.pathname = versionUrl.pathname.replace(/\/$/, '') + path;
+    const headers = new Headers(options?.headers);
+    {% if version_parameter.location == "Query" %}  versionUrl.searchParams.set({{ version_parameter.name | tojson }}, {{ api_version | tojson }});
+    {% else %}  {{ pin_headers("headers", version_parameter, api_version | tojson) }}{% endif %}  return openWsBidiClient<{{ render_type(stream_in) }}, {{ render_type(stream_out) }}>(versionUrl.toString(), {
+        {% else %}  const url = baseUrl.replace(/\/$/, '') + path;
+        return openWsBidiClient<{{ render_type(stream_in) }}, {{ render_type(stream_out) }}>(url, {
+            {% endif %}    subprotocol: {% if subprotocol is not none %}{{ subprotocol | tojson }}{% else %}undefined{% endif %},
+            ...options,
+            {% if version_parameter %}    headers: Object.fromEntries(headers.entries()),
+            {% endif %}  });
+    }

@@ -14,6 +14,7 @@ mod map;
 mod project;
 mod references;
 mod timeline;
+mod version_parameter;
 
 /// Lowers IDL text into source HIR without interface expansion.
 pub(super) fn parse(text: &str) -> Specification {

@@ -5,6 +5,8 @@ use serde::{Deserialize, Serialize};
 #[cfg(test)]
 mod tests;
 
+use std::collections::BTreeMap;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum HttpMethod {
     Get,
@@ -56,11 +58,27 @@ pub struct HttpDocumentServer {
     pub description: Option<String>,
 }
 
+/// Inputs the HIR stage passes down that the specification itself does not carry.
+#[derive(Debug, Default)]
+pub struct ProjectOptions {
+    /// The API version parameter declared by the source timeline.
+    pub version_parameter: Option<hir::VersionParameter>,
+    /// Version module idents and their wire values for this projection.
+    pub version_values: Vec<(String, String)>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct HttpDocumentMetadata {
     pub package: Option<String>,
     pub version: Option<String>,
     pub servers: Vec<HttpDocumentServer>,
+    /// API version parameter declaration. Typed stage metadata, not a pragma.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub version_parameter: Option<hir::VersionParameter>,
+    /// Version module ident to wire value, so merged-layout output can
+    /// resolve the version of its enclosing module.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub version_values: BTreeMap<String, String>,
     /// Document-level `exception` declarations projected for HTTP use.
     #[serde(default)]
     pub exceptions: Vec<HttpException>,
@@ -360,5 +378,17 @@ impl RestHirDocument {
         self.interfaces
             .iter()
             .find(|interface| interface.name == name && interface.module_path == module_path)
+    }
+}
+
+impl HttpDocumentMetadata {
+    /// Finds the version of an interface, including nested business modules.
+    pub fn api_version(&self, module_path: &[String]) -> Option<&str> {
+        self.version.as_deref().or_else(|| {
+            module_path
+                .first()
+                .and_then(|module| self.version_values.get(module))
+                .map(String::as_str)
+        })
     }
 }
