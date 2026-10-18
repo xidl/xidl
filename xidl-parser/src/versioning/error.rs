@@ -20,8 +20,12 @@ pub enum VersioningError {
     MissingVersionEnum { annotation: String, decl: String },
     /// A lifecycle annotation argument is not an `Enum::member` reference.
     MalformedVersionReference { annotation: String, decl: String },
-    /// `@version` carries arguments; the marker takes none.
+    /// A raw version marker failed to lower into a valid typed annotation.
     MalformedVersionMarker { decl: String },
+    /// A version parameter violates its argument or wire-location contract.
+    MalformedVersionParameter { decl: String, reason: String },
+    /// A version timeline declares more than one version marker or parameter.
+    DuplicateVersionParameter { decl: String },
     /// A lifecycle annotation references a version the timeline does not declare.
     UnknownVersionReference {
         annotation: String,
@@ -118,8 +122,18 @@ impl fmt::Display for VersioningError {
                 "xidl versioning: {annotation} on {decl} requires a version reference like Versions::v1"
             ),
             Self::MalformedVersionMarker { decl } => {
-                write!(f, "xidl versioning: @version on {decl} takes no arguments")
+                write!(
+                    f,
+                    "xidl versioning: @version on {decl} must be bare or declare in=... and name=..."
+                )
             }
+            Self::MalformedVersionParameter { decl, reason } => {
+                write!(f, "xidl versioning: @version on {decl}: {reason}")
+            }
+            Self::DuplicateVersionParameter { decl } => write!(
+                f,
+                "xidl versioning: @version on {decl} is declared more than once"
+            ),
             Self::UnknownVersionReference {
                 annotation,
                 decl,

@@ -1,0 +1,2 @@
+{% from "http/version_parameter.ts.j2" import pin_headers %}{% if parameter.location == "Query" %}query.set({{ parameter.name | tojson }}, {{ client_name }}Client.API_VERSION);
+{% else %}{{ pin_headers("headers", parameter, client_name ~ "Client.API_VERSION") }}{% endif %}

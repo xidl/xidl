@@ -187,7 +187,10 @@ where
                 }
             }
         }
-        let _ = ws.send(AxumWsMessage::Close(None)).await;
+        // A peer Close queues its reply inside the WebSocket implementation.
+        // Closing the sink flushes that reply; sending another frame after
+        // receiving Close is rejected and would reset the connection instead.
+        let _ = ws.close().await;
     });
 
     BidiServerStream {

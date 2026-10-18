@@ -38,9 +38,18 @@ Feature: API versioning
     When I generate the "v1" API version of the IDL as openapi
     Then only the "v1" openapi document is generated
 
-  Scenario: targets without versioned module support fail loudly
+  Scenario: the version header round-trips on every generated server
+    Given a versioned REST IDL file "bdd/features/data/versioned_header.idl"
+    When I generate rust code for the IDL
+    Then the generated rust client pins the API version header
+    And I can run the generated rust servers for every API version using boilerplate
+    Then I can run hurl tests for API version "v1" against the server
+    And I can run hurl tests for API version "v2" against the server
+
+  Scenario: Go targets render every selected version module
     Given a versioned REST IDL file "bdd/features/data/versioned_rest.idl"
-    When I generate go code for the IDL and expect failure containing "cannot render one module per API version yet"
+    When I generate go code for the IDL
+    Then the generated go code should be valid
 
   Scenario: unimplemented versioning annotations are rejected
     Given a versioned REST IDL file "bdd/features/data/versioning_unsupported.idl"
@@ -67,3 +76,16 @@ Feature: API versioning
     When I check the contract with xidlc lint
     Then lint reports the annotation mistakes without rewriting the contract
     And plugin warnings obey the CI policy across multiple files
+  Scenario Outline: generated SDKs pin each version parameter over real transports
+    Given a version parameter contract carried in "<location>"
+    When I generate both SDKs and OpenAPI for the version parameter contract
+    Then every operation describes its own optional version parameter
+    And the generated Rust SDK exchanges HTTP and WebSocket messages with both versions
+    And the generated Go SDK exchanges HTTP messages with both versions
+    And the generated TypeScript SDK exchanges HTTP and WebSocket messages with both versions
+
+    Examples:
+      | location |
+      | header   |
+      | query    |
+      | cookie   |

@@ -11,7 +11,12 @@ export function createNextRoute<TService, THandler extends keyof TService>(
   options: ServerOptions = {},
 ): NextRouteHandler {
   return async (request, routeContext) => {
-    const params = await routeContext.params;
-    return executeOperation(operation, service, request, params, options);
+    return executeOperation(
+      operation,
+      service,
+      request,
+      () => routeContext.params,
+      options,
+    );
   };
 }

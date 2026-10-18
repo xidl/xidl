@@ -1,0 +1,50 @@
+{% macro pin_query(url) %}
+    let version_query: Vec<(String, String)> = {{ url }}.query_pairs()
+    .filter(|(name, _)| name != {{ version_parameter.name }})
+    .map(|(name, value)| (name.into_owned(), value.into_owned()))
+    .collect();
+    {{ url }}.query_pairs_mut().clear().extend_pairs(version_query)
+    .append_pair({{ version_parameter.name }}, Self::API_VERSION);
+{% endmacro %}
+
+{% macro pin_headers(headers) %}
+    {% if version_parameter.location == "Header" %}
+        {{ headers }}.insert(
+        ::xidl_rust_axum::reqwest::header::HeaderName::from_static({{ version_parameter.header_name }}),
+        ::xidl_rust_axum::reqwest::header::HeaderValue::from_static(Self::API_VERSION),
+        );
+    {% elif version_parameter.location == "Cookie" %}
+        let mut version_cookies = Vec::new();
+        for header in {{ headers }}.get_all(::xidl_rust_axum::reqwest::header::COOKIE) {
+            let header = header.to_str().map_err(|error| ::xidl_rust_axum::Error::new(400, format!("invalid Cookie header: {error}")))?;
+            version_cookies.extend(header.split(';').map(str::trim)
+            .filter(|cookie| !cookie.is_empty() && cookie.split_once('=').is_none_or(|(name, _)| name.trim() != {{ version_parameter.name }}))
+            .map(str::to_string));
+        }
+        version_cookies.push({{ version_parameter.cookie }}.to_string());
+        {{ headers }}.insert(
+        ::xidl_rust_axum::reqwest::header::COOKIE,
+        ::xidl_rust_axum::reqwest::header::HeaderValue::from_str(&version_cookies.join("; "))
+        .map_err(|error| ::xidl_rust_axum::Error::new(400, format!("invalid version cookie: {error}")))?,
+        );
+    {% endif %}
+{% endmacro %}
+
+{% macro pin_http() %}
+    {% if version_parameter.location == "Query" %}
+        {{ pin_query("req.url_mut()") }}
+    {% else %}
+        {{ pin_headers("req.headers_mut()") }}
+    {% endif %}
+{% endmacro %}
+
+{% macro pin_ws() %}
+    {% if version_parameter.location == "Query" %}
+        let mut version_url = ::xidl_rust_axum::reqwest::Url::parse(&ws_url)
+        .map_err(|error| ::xidl_rust_axum::Error::new(400, format!("invalid WebSocket version URL: {error}")))?;
+        {{ pin_query("version_url") }}
+        ws_url = version_url.to_string();
+    {% else %}
+        {{ pin_headers("auth_headers") }}
+    {% endif %}
+{% endmacro %}

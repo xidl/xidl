@@ -1,5 +1,5 @@
 use crate::error::IdlcResult;
-use crate::generate::go_rest::MethodMeta;
+use crate::generate::go_rest::{MethodMeta, definition};
 use std::fmt::Write;
 use xidl_parser::rest_hir::semantics::{HttpStreamCodec, HttpStreamKind};
 
@@ -202,7 +202,21 @@ pub(super) fn render_unary_handler(
     Ok(())
 }
 
-pub(super) fn render_bidi_stream_handler(out: &mut String, method: &MethodMeta) {
+pub(super) fn render_bidi_stream_handler(
+    out: &mut String,
+    method: &MethodMeta,
+    _renderer: &GoRestRenderer,
+) -> IdlcResult<()> {
+    if !method.handshake_params.is_empty() {
+        writeln!(out, "\t\treq := &{}{{}}", method.request_struct).unwrap();
+        let mut bindings = String::new();
+        for param in &method.handshake_params {
+            definition::emit_bidi_request_bind(&mut bindings, param)?;
+        }
+        for line in bindings.lines() {
+            writeln!(out, "\t{line}").unwrap();
+        }
+    }
     let subproto = method
         .websocket_subprotocol
         .as_deref()
@@ -235,7 +249,7 @@ pub(super) fn render_bidi_stream_handler(out: &mut String, method: &MethodMeta) 
     .unwrap();
     let mut args = String::from("c.Request.Context(), stream");
     for param in &method.handshake_params {
-        args.push_str(&format!(", {}", param.field_name.to_ascii_lowercase()));
+        args.push_str(&format!(", req.{}", param.field_name));
     }
     writeln!(
         out,
@@ -250,4 +264,5 @@ pub(super) fn render_bidi_stream_handler(out: &mut String, method: &MethodMeta) 
     .unwrap();
     writeln!(out, "\t\t}}").unwrap();
     writeln!(out, "\t\t_ = stream.Close()").unwrap();
+    Ok(())
 }

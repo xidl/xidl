@@ -1,0 +1,44 @@
+#pragma xidlc package version_parameter
+
+@version(in = "header", name = "X-Version")
+enum Versions {
+    @rename("2026-04") v1,
+    @rename("2026-07") v2,
+};
+
+module business {
+    struct Item { string id; };
+
+    @http(status = 409)
+    exception Conflict { string message; };
+
+    interface Store {
+        @get(path = "/items/{id}")
+        Item get(@path long id, @query string search, @cookie string theme);
+
+        @delete(path = "/items/{id}")
+        void remove(@path long id);
+
+        @get(path = "/fail/{id}")
+        Item fail(@path long id) raises(Conflict);
+
+        @upgrade(protocol = "websocket", codec = "json")
+        @get(path = "/chat")
+        void chat(@query string room, in string text, out string reply);
+    };
+
+    interface Health {
+        @get(path = "/health")
+        string health();
+    };
+    interface DuplexShapes {
+        @bidi_stream @get(path = "/scalar")
+        string scalar(in string text);
+        @bidi_stream @get(path = "/model")
+        Item model(in string id);
+        @bidi_stream @get(path = "/sink")
+        void sink(in string text);
+        @bidi_stream @get(path = "/source")
+        string source();
+    };
+};

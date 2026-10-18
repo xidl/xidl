@@ -60,6 +60,17 @@ pub(crate) fn build_operation(method: &MethodInfo) -> crate::openapi::path::Oper
         &declared_statuses,
     );
 
+    let mut responses = responses.build();
+    if let Some((name, schema)) = &method.version_response_header {
+        for response in responses.responses.values_mut() {
+            if let RefOr::T(response) = response {
+                response
+                    .headers
+                    .insert(name.clone(), Header::new(schema.clone()));
+            }
+        }
+    }
+
     let mut operation = crate::openapi::path::OperationBuilder::new()
         .operation_id(Some(method.operation_id.clone()))
         .deprecated(
@@ -68,7 +79,7 @@ pub(crate) fn build_operation(method: &MethodInfo) -> crate::openapi::path::Oper
                 .then_some(crate::openapi::Deprecated::True),
         )
         .tag(method.tag.clone())
-        .responses(responses.build());
+        .responses(responses);
     if method.summary.is_some() || method.description.is_some() {
         operation = operation
             .summary(method.summary.as_deref())

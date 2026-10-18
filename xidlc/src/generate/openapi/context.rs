@@ -1,13 +1,13 @@
 use super::builder::{build_error_schema, build_operation};
 use super::naming::{declarator_name, openapi_method_name, scoped_name};
 use super::operation::{MethodInfo, render_http_operation};
-use super::schema::{apply_schema_description, doc_text};
+use super::schema::{apply_schema_description, doc_text, parameter_schema};
 use super::scope::SchemaScope;
 use super::security::register_security_schemes;
 use super::stream::{OpenApiStreamPatch, request_stream_content_type, stream_patch_item_schema};
 use crate::error::IdlcResult;
 use crate::openapi::RefOr;
-use crate::openapi::path::PathItem;
+use crate::openapi::path::{ParameterIn, PathItem};
 use crate::openapi::schema::{ObjectBuilder, Schema, Type};
 use crate::openapi::server::Server;
 use std::collections::{BTreeMap, BTreeSet};
@@ -217,12 +217,58 @@ impl OpenApiContext {
         for method in http_interface.operations.iter().map(|op| {
             render_http_operation(op, scope, &def.header.ident, &rest_hir.document.exceptions)
         }) {
-            self.collect_method(method?)?;
+            let mut method = method?;
+            self.apply_version_parameter(&mut method, rest_hir);
+            self.collect_method(method)?;
         }
         self.schemas
             .entry("Error".to_string())
             .or_insert_with(build_error_schema);
         Ok(())
+    }
+
+    /// Declares the optional request parameter and fixed header response value.
+    fn apply_version_parameter(&self, method: &mut MethodInfo, rest_hir: &RestHirDocument) {
+        let Some(parameter) = &rest_hir.document.version_parameter else {
+            return;
+        };
+        let location = match parameter.location {
+            xidl_parser::hir::HttpParameterLocation::Header => ParameterIn::Header,
+            xidl_parser::hir::HttpParameterLocation::Query => ParameterIn::Query,
+            xidl_parser::hir::HttpParameterLocation::Cookie => ParameterIn::Cookie,
+        };
+        let description = match &rest_hir.document.version {
+            Some(version) => format!("API version; this document describes {version}."),
+            None => "API version.".to_string(),
+        };
+        let mut schema = ObjectBuilder::new().schema_type(Type::String);
+        if let Some(version) = &rest_hir.document.version {
+            schema = schema.enum_values(Some([version.as_str()]));
+        }
+        let schema_ref = RefOr::T(Schema::from(schema));
+        let insert_at = method
+            .parameters
+            .iter()
+            .take_while(|parameter| {
+                matches!(
+                    parameter.parameter_in,
+                    ParameterIn::Path | ParameterIn::Query
+                )
+            })
+            .count();
+        method.parameters.insert(
+            insert_at,
+            parameter_schema(
+                location,
+                &parameter.name,
+                schema_ref.clone(),
+                false,
+                Some(description.clone()),
+            ),
+        );
+        if parameter.location == xidl_parser::hir::HttpParameterLocation::Header {
+            method.version_response_header = Some((parameter.name.clone(), schema_ref));
+        }
     }
 
     fn collect_method(&mut self, method: MethodInfo) -> IdlcResult<()> {

@@ -80,6 +80,10 @@ fn render_annotations_covers_builtin_and_parameter_shapes() {
         },
         Annotation::Skip,
         Annotation::Version,
+        Annotation::VersionParameter(VersionParameter {
+            location: HttpParameterLocation::Query,
+            name: "api_version".into(),
+        }),
         Annotation::Added {
             version: version.clone(),
         },
@@ -130,6 +134,7 @@ fn render_annotations_covers_builtin_and_parameter_shapes() {
         "@rename_all(\"camelCase\")",
         "@skip",
         "@version",
+        "@version(in = \"query\", name = \"api_version\")",
         "@added(Versions::v2)",
         "@removed(Versions::v2)",
     ] {

@@ -19,7 +19,7 @@ export async function executeOperation<
   operation: OperationDescriptor<TService, THandler>,
   service: TService,
   request: Request,
-  params: RouteParams,
+  resolveParams: () => Awaitable<RouteParams>,
   options: ServerOptions,
 ): Promise<Response> {
   const context: ServerContext = {
@@ -28,10 +28,12 @@ export async function executeOperation<
       method: operation.method,
       path: operation.path,
     },
-    params,
+    params: {},
     request,
   };
+  let response: Response;
   try {
+    context.params = await resolveParams();
     await options.authorize?.(request, operation.security, context);
     if (!operation.response.representations?.length) {
       assertAccepts(request.headers, operation.response.contentType);
@@ -39,7 +41,7 @@ export async function executeOperation<
     const input = await decodeOperationRequest(
       operation,
       request,
-      params,
+      context.params,
       options.codecs ?? {},
     );
     const method = service[operation.handler];
@@ -60,7 +62,7 @@ export async function executeOperation<
       const args = (operation.request.args ?? []).map(key => record[key]);
       result = await invoke.call(service, ...args);
     }
-    return encodeOperationResponse(
+    response = encodeOperationResponse(
       operation,
       result,
       request.headers,
@@ -70,17 +72,29 @@ export async function executeOperation<
     const typed = operation.errors?.match(error);
     if (typed) {
       const headers = typed.headers ?? new Headers();
-      return new Response(
+      response = new Response(
         typed.body === undefined ? null : JSON.stringify(typed.body),
         {
           headers,
           status: typed.status,
         },
       );
+    } else if (options.onError) {
+      response = await options.onError(error, context);
+    } else {
+      response = errorResponse(error);
     }
-    if (options.onError) {
-      return options.onError(error, context);
-    }
-    return errorResponse(error);
   }
+  if (!operation.response.fixedHeaders) {
+    return response;
+  }
+  const headers = new Headers(response.headers);
+  for (const [name, value] of Object.entries(operation.response.fixedHeaders)) {
+    headers.set(name, value);
+  }
+  return new Response(response.body, {
+    headers,
+    status: response.status,
+    statusText: response.statusText,
+  });
 }

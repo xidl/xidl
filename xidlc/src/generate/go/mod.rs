@@ -19,7 +19,13 @@ pub fn generate_with_properties(
     input_path: &Path,
     properties: &ParserProperties,
 ) -> IdlcResult<Vec<Artifact>> {
-    crate::generate::versioning::reject_versioned_modules("go", properties)?;
+    let allow_versioned_modules = properties
+        .get("allow_versioned_modules")
+        .and_then(serde_json::Value::as_bool)
+        .unwrap_or(false);
+    if !allow_versioned_modules {
+        crate::generate::versioning::reject_versioned_modules("go", properties)?;
+    }
     let stem = input_path
         .file_stem()
         .and_then(|value| value.to_str())

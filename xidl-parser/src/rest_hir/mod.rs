@@ -14,8 +14,9 @@ mod validate;
 use serde::{Deserialize, Serialize};
 
 pub use mapping::is_byte_sequence;
+pub use model::ProjectOptions;
 pub use model::*;
-pub use project::project;
+pub use project::{project, project_with_options};
 pub use semantics::{UpgradeMode, WebSocketCodec, WebSocketConfig};
 
 /// Selects the projected HIR shape produced from typed AST input.
