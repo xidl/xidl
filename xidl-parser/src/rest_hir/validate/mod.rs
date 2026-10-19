@@ -185,53 +185,98 @@ pub(super) fn validate_projected_param(
 pub(super) fn validate_route_bindings(
     op_name: &str,
     routes: &[HttpRoute],
-    path_binding_count: &HashMap<String, usize>,
-    query_binding_count: &HashMap<String, usize>,
+    bindings: &RouteBindingIndex<'_>,
 ) -> RestHirResult<()> {
     for route in routes {
-        validate_route_group(
-            op_name,
-            &route.path_params,
-            path_binding_count,
-            "route template variable",
-            "request-side path parameter",
-        )?;
-        validate_route_group(
-            op_name,
-            &route.query_params,
-            query_binding_count,
-            "query template variable",
-            "request-side query parameter",
-        )?;
+        bindings.validate_group(op_name, &route.path_params, RouteBindingKind::Path)?;
+        bindings.validate_group(op_name, &route.query_params, RouteBindingKind::Query)?;
     }
     Ok(())
 }
 
-fn validate_route_group(
-    op_name: &str,
-    route_params: &[String],
-    binding_count: &HashMap<String, usize>,
-    label: &str,
-    binding_label: &str,
-) -> RestHirResult<()> {
-    for route_param in route_params {
-        match binding_count.get(route_param).copied().unwrap_or(0) {
-            0 => {
-                return Err(format!(
-                    "{label} '{}' has no matching {binding_label} in method '{}'",
-                    route_param, op_name
-                ));
-            }
-            1 => {}
-            _ => {
-                return Err(format!(
-                    "{label} '{}' is bound by multiple {}s in method '{}'",
-                    route_param, binding_label, op_name
-                ));
+pub(super) struct RouteBindingIndex<'a> {
+    pub(super) request_params: &'a [HttpParam],
+    pub(super) path: &'a HashMap<String, usize>,
+    pub(super) query: &'a HashMap<String, usize>,
+}
+
+impl RouteBindingIndex<'_> {
+    fn validate_group(
+        &self,
+        op_name: &str,
+        route_params: &[String],
+        kind: RouteBindingKind,
+    ) -> RestHirResult<()> {
+        let binding_count = match kind {
+            RouteBindingKind::Path => self.path,
+            RouteBindingKind::Query => self.query,
+        };
+        for route_param in route_params {
+            match binding_count.get(route_param).copied().unwrap_or(0) {
+                0 => return Err(self.missing_binding_error(op_name, route_param, kind)),
+                1 => {}
+                _ => {
+                    return Err(format!(
+                        "{} '{}' is bound by multiple {}s in method '{}'",
+                        kind.label(),
+                        route_param,
+                        kind.binding_label(),
+                        op_name
+                    ));
+                }
             }
         }
+        Ok(())
     }
-    Ok(())
+
+    fn missing_binding_error(
+        &self,
+        op_name: &str,
+        route_param: &str,
+        kind: RouteBindingKind,
+    ) -> String {
+        let mut message = format!(
+            "{} '{}' has no matching {} in method '{}'",
+            kind.label(),
+            route_param,
+            kind.binding_label(),
+            op_name
+        );
+        if matches!(kind, RouteBindingKind::Path)
+            && let Some(param) = self
+                .request_params
+                .iter()
+                .find(|param| param.wire_name == route_param)
+        {
+            message.push_str(&format!(
+                "; parameter '{}' uses @rename(\"{route_param}\") but is not annotated with @path, so it is not bound as a path parameter (use `@path @rename(\"{route_param}\") string {}`)",
+                param.name, param.name
+            ));
+        }
+        message
+    }
+}
+
+#[derive(Clone, Copy)]
+enum RouteBindingKind {
+    Path,
+    Query,
+}
+
+impl RouteBindingKind {
+    fn label(self) -> &'static str {
+        match self {
+            Self::Path => "route template variable",
+            Self::Query => "query template variable",
+        }
+    }
+
+    fn binding_label(self) -> &'static str {
+        match self {
+            Self::Path => "request-side path parameter",
+            Self::Query => "request-side query parameter",
+        }
+    }
 }
 
 pub(super) fn validate_request_shape(

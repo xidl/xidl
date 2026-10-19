@@ -144,6 +144,21 @@ fn rejects_missing_query_template_bindings() {
 }
 
 #[test]
+fn rejects_renamed_path_parameters_without_path_annotation() {
+    for lang in ["rest-hir", "axum", "ts-rest", "go-rest", "openapi"] {
+        let err = generate_error(lang, "http_renamed_path_missing_path_annotation.idl");
+        assert!(
+            err.contains("uses @rename(\"message_id\") but is not annotated with @path"),
+            "{lang}: {err}"
+        );
+        assert!(
+            err.contains("@path @rename(\"message_id\") string id"),
+            "{lang}: {err}"
+        );
+    }
+}
+
+#[test]
 fn rejects_duplicate_route_bindings_for_http_targets() {
     // The invariant lives in `rest_hir`, so every HTTP target rejects it,
     // including the ones that used to have no check of their own.
