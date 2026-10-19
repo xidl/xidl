@@ -22,6 +22,7 @@ cookie "session" == "renewed"
 cookie "retry" exists
 header "X-Hint" contains "reload"
 header "X-Hint" contains "retry"
+header "Abc" == "legacy"
 header "Set-Cookie" contains "attempt=first"
 header "Set-Cookie" contains "attempt=second"
 jsonpath "$.code" == 41201
@@ -33,6 +34,8 @@ jsonpath "$.session_id" not exists
 jsonpath "$.retry_token" not exists
 jsonpath "$.attempts" not exists
 jsonpath "$.hints" not exists
+jsonpath "$.rename_abc" not exists
+jsonpath "$.Abc" not exists
 
 GET {{base_url}}/files/stale-minimal
 HTTP 412
@@ -43,6 +46,8 @@ cookie "session" == "renewed"
 cookie "retry" not exists
 cookie "attempt" not exists
 header "X-Hint" not exists
+header "Abc" == "legacy"
+jsonpath "$.rename_abc" not exists
 jsonpath "$.code" == 41201
 jsonpath "$.message" == "stale revision"
 
