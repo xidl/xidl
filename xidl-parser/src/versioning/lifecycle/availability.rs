@@ -6,7 +6,7 @@ use crate::error::ParserResult;
 use crate::hir::{Annotation, Enumerator, ScopedName};
 use crate::lint::AnnotationKind;
 
-/// Annotations reserved for later versioning phases.
+/// Rejected versioning annotations, rather than promises of future syntax.
 pub(super) const UNSUPPORTED_ANNOTATIONS: [&str; 7] = [
     "versioned",
     "renamedfrom",
@@ -92,6 +92,22 @@ pub(crate) struct Site<'a> {
 }
 
 impl<'a> Site<'a> {
+    /// Rejects unsupported names independently of whether a timeline exists.
+    pub(crate) fn validate_supported_annotations(&self) -> ParserResult<()> {
+        for annotation in self.annotations {
+            if let Some(name) = raw_versioning_name(annotation) {
+                if UNSUPPORTED_ANNOTATIONS.contains(&name.to_ascii_lowercase().as_str()) {
+                    return Err(VersioningError::UnsupportedVersionAnnotation {
+                        name: format!("@{name}"),
+                        decl: self.path.clone(),
+                    }
+                    .into());
+                }
+            }
+        }
+        Ok(())
+    }
+
     /// Builds a site that carries no enum members.
     pub(crate) fn new(
         kind: SiteKind,
@@ -150,6 +166,7 @@ pub(crate) fn availability(
     parent: Availability,
     timeline: &VersionTimeline,
 ) -> ParserResult<Availability> {
+    site.validate_supported_annotations()?;
     let mut added: Option<VersionId> = None;
     let mut removed: Option<VersionId> = None;
     let mut added_name = String::new();
@@ -186,7 +203,6 @@ pub(crate) fn availability(
                 let Some(name) = raw_versioning_name(other) else {
                     continue;
                 };
-                let lowered = name.to_ascii_lowercase();
                 if matches!(
                     AnnotationKind::from_name(name.as_str()),
                     Some(AnnotationKind::Added | AnnotationKind::Removed)
@@ -199,13 +215,6 @@ pub(crate) fn availability(
                 }
                 if AnnotationKind::from_name(name.as_str()) == Some(AnnotationKind::Version) {
                     return Err(VersioningError::MalformedVersionMarker {
-                        decl: site.path.clone(),
-                    }
-                    .into());
-                }
-                if UNSUPPORTED_ANNOTATIONS.contains(&lowered.as_str()) {
-                    return Err(VersioningError::UnsupportedVersionAnnotation {
-                        name: format!("@{name}"),
                         decl: site.path.clone(),
                     }
                     .into());

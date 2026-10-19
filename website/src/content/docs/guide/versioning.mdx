@@ -92,10 +92,13 @@ Rules:
   declaration: projection rewrites them relative to the version module, so they
   resolve inside `module <version>` rather than at the file root.
 
-Unimplemented versioning annotations (`@versioned`, `@renamedFrom`,
+Unsupported versioning annotations (`@versioned`, `@renamedFrom`,
 `@madeOptional`, `@madeRequired`, `@typeChangedFrom`,
 `@returnTypeChangedFrom`, `@defaultVersion`) are rejected with an explicit
-error instead of being silently ignored.
+error instead of being silently ignored. These names do not imply planned
+support. Use `@rename("wire_name")` to select a serialized name; it does not
+describe a rename at a particular version. Changes between versions use the
+disjoint declarations described below.
 
 ### Renames and other changes in phase 1
 

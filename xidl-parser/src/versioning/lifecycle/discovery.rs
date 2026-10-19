@@ -20,6 +20,7 @@ struct DiscoverVisitor {
 
 impl VersionVisitor for DiscoverVisitor {
     fn enter(&mut self, site: &Site<'_>, _parent: Availability) -> ParserResult<Availability> {
+        site.validate_supported_annotations()?;
         let mut marker = false;
         let mut lifecycle: Vec<String> = Vec::new();
         for annotation in site.annotations {

@@ -29,7 +29,7 @@ pub enum VersioningError {
         reference: String,
         declared: String,
     },
-    /// The projection knows the annotation name but phase 1 does not implement it.
+    /// A rejected versioning annotation has no supported contract semantics.
     UnsupportedVersionAnnotation { name: String, decl: String },
     /// A lifecycle annotation applied to a declaration that cannot carry it.
     UnsupportedVersionTarget { annotation: String, target: String },
@@ -129,10 +129,20 @@ impl fmt::Display for VersioningError {
                 f,
                 "xidl versioning: {annotation} on {decl} references {reference}, which is not declared ({declared})"
             ),
-            Self::UnsupportedVersionAnnotation { name, decl } => write!(
-                f,
-                "xidl versioning: {name} on {decl} is not supported yet; phase 1 implements @version, @added and @removed"
-            ),
+            Self::UnsupportedVersionAnnotation { name, decl } => {
+                write!(f, "xidl versioning: {name} on {decl} is not supported; ")?;
+                if name.eq_ignore_ascii_case("@renamedFrom") {
+                    write!(
+                        f,
+                        "use @rename(\"wire_name\") for the serialized name; use @added/@removed declarations for changes between versions"
+                    )
+                } else {
+                    write!(
+                        f,
+                        "use @version, @added and @removed for version availability"
+                    )
+                }
+            }
             Self::UnsupportedVersionTarget { annotation, target } => write!(
                 f,
                 "xidl versioning: {annotation} cannot be applied to {target}"

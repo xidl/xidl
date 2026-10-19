@@ -1,6 +1,34 @@
 use crate::versioning::VersioningError;
 
 #[test]
+fn rejected_renames_offer_wire_names_without_promising_versioned_aliases() {
+    for name in ["@renamedFrom", "@RENAMEDFROM"] {
+        let message = VersioningError::UnsupportedVersionAnnotation {
+            name: name.into(),
+            decl: "Pet.name".into(),
+        }
+        .to_string();
+        assert!(message.contains("Pet.name"), "{message}");
+        assert!(
+            message.contains("is not supported; use @rename(\"wire_name\")"),
+            "{message}"
+        );
+        assert!(
+            message.contains("@added/@removed declarations"),
+            "{message}"
+        );
+        assert!(!message.contains("yet"), "{message}");
+        assert!(!message.contains("phase"), "{message}");
+    }
+    let message = VersioningError::UnsupportedVersionAnnotation {
+        name: "@madeOptional".into(),
+        decl: "Pet.name".into(),
+    }
+    .to_string();
+    assert!(!message.contains("@rename"), "{message}");
+}
+
+#[test]
 fn every_diagnostic_names_the_failing_contract() {
     let cases = vec![
         (
@@ -64,7 +92,7 @@ fn every_diagnostic_names_the_failing_contract() {
                 name: "@renamedFrom".to_string(),
                 decl: "Pet.name".to_string(),
             },
-            "is not supported yet",
+            "is not supported; use @rename",
         ),
         (
             VersioningError::UnsupportedVersionTarget {

@@ -164,6 +164,29 @@ struct Pet {
 }
 
 #[test]
+fn unsupported_annotations_cannot_bypass_validation_without_a_version_marker() {
+    for annotation in [
+        "versioned",
+        "renamedFrom",
+        "RENAMEDFROM",
+        "madeOptional",
+        "madeRequired",
+        "typeChangedFrom",
+        "returnTypeChangedFrom",
+        "defaultVersion",
+    ] {
+        let source = format!("enum V {{ v1, v2 }}; struct Pet {{ @{annotation} string name; }};");
+        assert!(
+            matches!(
+                analyze_error(&source),
+                VersioningError::UnsupportedVersionAnnotation { .. }
+            ),
+            "{annotation}"
+        );
+    }
+}
+
+#[test]
 fn malformed_lifecycle_arguments_are_rejected() {
     let error = analyze_error(
         r#"
