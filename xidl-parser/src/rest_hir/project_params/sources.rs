@@ -1,6 +1,6 @@
 //! Canonical HTTP parameter bindings shared by projection and version facts.
 
-use super::super::route::explicit_param_binding;
+use super::super::semantics::SourceBinding;
 use super::super::semantics::{HttpStreamKind, has_annotation, has_optional_annotation};
 use super::super::validate::{HttpParamDirection, default_param_source, param_direction};
 use super::super::{HttpMethod, HttpParam, HttpParamKind, HttpRoute, RestHirResult};
@@ -60,7 +60,11 @@ impl ParameterSources {
 
     /// Projects a parameter without changing its direction.
     pub(crate) fn project(&self, param: &hir::ParamDcl) -> RestHirResult<HttpParam> {
-        let binding = explicit_param_binding(param)?;
+        let binding = SourceBinding::read(&param.annotations, &param.declarator.0)?;
+        let wire_name = binding.as_ref().map_or_else(
+            || hir::field_rename(&param.annotations).unwrap_or_else(|| param.declarator.0.clone()),
+            |binding| binding.wire_name(&param.declarator.0, &param.annotations, &[]),
+        );
         let kind = match param_direction(param.attr.as_ref()) {
             HttpParamDirection::Out | HttpParamDirection::InOut => binding
                 .map(|value| value.source)
@@ -85,8 +89,7 @@ impl ParameterSources {
         };
         Ok(HttpParam {
             name: param.declarator.0.clone(),
-            wire_name: hir::field_rename(&param.annotations)
-                .unwrap_or_else(|| param.declarator.0.clone()),
+            wire_name,
             ty: param.ty.clone(),
             kind,
             optional: has_optional_annotation(&param.annotations),

@@ -13,6 +13,7 @@ repository.workspace = true
 workspace = true
 
 [dependencies]
+http.workspace = true
 strsim.workspace = true
 xidl-http.workspace = true
 tree-sitter.workspace = true

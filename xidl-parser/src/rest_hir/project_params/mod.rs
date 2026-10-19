@@ -56,12 +56,34 @@ pub(super) fn project_params(
         );
     }
 
+    HttpParam::validate_unique_inputs(&request_params, &op.ident)?;
     Ok((
         request_params,
         response_params,
         path_binding_count,
         query_binding_count,
     ))
+}
+
+impl HttpParam {
+    fn validate_unique_inputs(params: &[Self], operation: &str) -> RestHirResult<()> {
+        for (index, first) in params.iter().enumerate() {
+            for second in &params[index + 1..] {
+                let same_name = if first.kind == HttpParamKind::Header {
+                    first.wire_name.eq_ignore_ascii_case(&second.wire_name)
+                } else {
+                    first.wire_name == second.wire_name
+                };
+                if first.kind == second.kind && same_name {
+                    return Err(format!(
+                        "operation '{operation}' binds inputs '{}' and '{}' to the same {:?} wire name '{}'",
+                        first.name, second.name, first.kind, first.wire_name
+                    ));
+                }
+            }
+        }
+        Ok(())
+    }
 }
 
 #[allow(clippy::too_many_arguments)]

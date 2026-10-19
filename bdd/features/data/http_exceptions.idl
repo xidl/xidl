@@ -3,16 +3,16 @@
 
 @http(304)
 exception NotModified {
-    @header @rename("ETag") string etag;
+    @header("ETag") string etag;
 };
 
 @http(status = 412)
 exception PreconditionFailed {
-    @header @rename("ETag") string etag;
-    @header @optional @rename("X-Hint") sequence<string> hints;
-    @cookie @rename("session") string session_id;
-    @cookie @optional @rename("retry") string retry_token;
-    @cookie @optional @rename("attempt") sequence<string> attempts;
+    @header(name="ETag") string etag;
+    @header("X-Hint") @optional sequence<string> hints;
+    @cookie(name="session") string session_id;
+    @cookie("retry") @optional string retry_token;
+    @cookie(name="attempt") @optional sequence<string> attempts;
     @body uint32 code;
     @body @rename("message") string msg;
     @body @optional string detail;

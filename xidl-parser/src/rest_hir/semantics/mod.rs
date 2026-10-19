@@ -2,6 +2,8 @@ mod annotation_parse;
 mod annotations;
 mod cors;
 mod security;
+mod source;
+pub(crate) use source::SourceBinding;
 mod stream;
 mod upgrade;
 
