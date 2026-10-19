@@ -44,7 +44,11 @@ Feature: API versioning
 
   Scenario: unimplemented versioning annotations are rejected
     Given a versioned REST IDL file "bdd/features/data/versioning_unsupported.idl"
-    When I generate rust code for the IDL and expect failure containing "is not supported yet"
+    When I generate rust code for the IDL and expect failure containing "is not supported"
+
+  Scenario: unsupported rename annotations fail without a version marker
+    Given a versioned REST IDL file "bdd/features/data/versioning_renamed_from.idl"
+    When I generate rust code for the IDL and expect failure containing "use @rename"
 
   Scenario: lint protects lifecycle spelling independently of generation
     Given a versioned contract with annotation mistakes
