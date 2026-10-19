@@ -160,6 +160,20 @@ fn version_diff_fixture_preserves_every_version_and_effective_field_id() {
 }
 
 #[test]
+fn five_version_messaging_contract_preserves_semantics_and_printing_is_idempotent() {
+    let spec = lower(include_str!(
+        "../../../../../bdd/features/data/photon_messaging/photon_messaging.idl"
+    ));
+    let record = crate::versioning::VersioningRecord::analyze(&spec)
+        .unwrap()
+        .unwrap();
+    assert_eq!(record.timeline().iter().count(), 5);
+    for (id, _) in record.timeline().iter() {
+        assert_semantic_roundtrip(&record.project(&spec, id).unwrap());
+    }
+}
+
+#[test]
 fn removed_leading_members_preserve_effective_field_ids() {
     let spec = lower(
         r#"
