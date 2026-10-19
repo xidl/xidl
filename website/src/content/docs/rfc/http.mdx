@@ -51,6 +51,44 @@ This RFC mainly covers:
 - `@flatten`
 - `@optional`
 
+### Names on Parameter Annotations
+
+A source annotation may contain one string name. These parameter declarations
+are equivalent:
+
+```idl
+@header @rename("Idempotency-Key") string key
+@header(name = "Idempotency-Key") string key
+@header("Idempotency-Key") string key
+```
+
+The same forms apply to `@path`, `@query`, and `@cookie`. A parameter-level
+`@path(path = "id")` is also accepted. The annotation selects the HTTP location;
+its string argument selects the transmitted name. The generated function
+argument keeps the source identifier, such as `key` above.
+
+The location annotation is still required when a renamed parameter does not
+match the normal source-based inference rules. `@rename` alone does not select
+the path or query location:
+
+```idl
+@get(path = "/messages/{message_id}{?expand}")
+string read(@path @rename("message_id") string id,
+            @query(name = "expand") @optional string fields);
+```
+
+If both the source annotation and `@rename` provide a name, `@rename` takes
+precedence regardless of annotation order. More than one string argument,
+unknown argument keys, non-string values, conflicting locations and conflicting
+names for repeated source annotations are rejected.
+
+Request names must be unique within each HTTP location. Header comparisons
+ignore ASCII case; query and cookie comparisons preserve case. Output headers
+may have repeated names. Header and cookie names must be valid HTTP tokens.
+
+Exception header and cookie members use the same name rules. Exception JSON
+body members retain the data model's `@rename` and `@rename_all` rules.
+
 ## HTTP Method Resolution
 
 Rules:

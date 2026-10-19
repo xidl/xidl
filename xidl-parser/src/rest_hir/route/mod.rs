@@ -1,3 +1,4 @@
+use super::semantics::SourceBinding;
 use crate::hir;
 use std::collections::{BTreeSet, HashSet};
 
@@ -7,42 +8,6 @@ use super::{HttpMethod, HttpParamKind, HttpRoute, RestHirResult};
 
 #[cfg(test)]
 mod tests;
-
-#[derive(Clone)]
-pub(super) struct SourceBinding {
-    pub(super) source: HttpParamKind,
-}
-
-pub(super) fn explicit_param_binding(
-    param: &hir::ParamDcl,
-) -> RestHirResult<Option<SourceBinding>> {
-    let mut found = None;
-    for annotation in &param.annotations {
-        let Some(name) = annotation_name(annotation) else {
-            continue;
-        };
-        let current = match name.to_ascii_lowercase().as_str() {
-            "path" => Some(HttpParamKind::Path),
-            "query" => Some(HttpParamKind::Query),
-            "body" => Some(HttpParamKind::Body),
-            "header" => Some(HttpParamKind::Header),
-            "cookie" => Some(HttpParamKind::Cookie),
-            _ => None,
-        };
-        let Some(current) = current else { continue };
-        match &found {
-            None => found = Some(SourceBinding { source: current }),
-            Some(previous) if previous.source == current => {}
-            Some(_) => {
-                return Err(format!(
-                    "parameter '{}' has conflicting source annotations (@path/@query/@body/@header/@cookie)",
-                    param.declarator.0
-                ));
-            }
-        }
-    }
-    Ok(found)
-}
 
 pub(super) fn route_from_annotations(
     annotations: &[hir::Annotation],
@@ -111,13 +76,15 @@ pub(super) fn auto_default_method_path(
         ) {
             continue;
         }
-        let binding = explicit_param_binding(param)?;
+        let binding = SourceBinding::read(&param.annotations, &param.declarator.0)?;
         let source = binding
             .as_ref()
             .map(|value| value.source)
             .unwrap_or(super::validate::default_param_source(method));
-        let bound_name =
-            hir::field_rename(&param.annotations).unwrap_or_else(|| param.declarator.0.clone());
+        let bound_name = binding.as_ref().map_or_else(
+            || hir::field_rename(&param.annotations).unwrap_or_else(|| param.declarator.0.clone()),
+            |binding| binding.wire_name(&param.declarator.0, &param.annotations, &[]),
+        );
         if matches!(source, HttpParamKind::Path) {
             path.push('/');
             path.push('{');

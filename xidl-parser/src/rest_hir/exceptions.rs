@@ -1,5 +1,6 @@
+use super::HttpParamKind;
 use super::model::{HttpException, HttpExceptionField, HttpExceptionMember, HttpExceptionRef};
-use super::semantics::{has_annotation, normalize_annotation_params};
+use super::semantics::{SourceBinding, normalize_annotation_params};
 use crate::error::{ParseError, ParserResult};
 use crate::hir;
 use std::collections::HashSet;
@@ -21,9 +22,39 @@ impl HttpException {
                         )));
                     }
                 };
-                let wire_name =
-                    hir::effective_wire_name(&field, &member.annotations, &except.annotations);
-                if has_annotation(&member.annotations, "header") {
+                let owner = format!("{}::{field}", except.ident);
+                let binding = SourceBinding::read(&member.annotations, &owner)
+                    .map_err(ParseError::Message)?;
+                if binding.as_ref().is_some_and(|binding| {
+                    matches!(binding.source, HttpParamKind::Path | HttpParamKind::Query)
+                }) {
+                    return Err(ParseError::Message(format!(
+                        "HTTP exception field '{owner}' cannot use request path or query bindings"
+                    )));
+                }
+                // JSON error fields keep the data model's rename rules. Source
+                // names describe headers and cookies, outside that JSON body.
+                let wire_name = binding
+                    .as_ref()
+                    .filter(|binding| binding.source != HttpParamKind::Body)
+                    .map_or_else(
+                        || {
+                            hir::effective_wire_name(
+                                &field,
+                                &member.annotations,
+                                &except.annotations,
+                            )
+                        },
+                        |binding| {
+                            binding.wire_name(&field, &member.annotations, &except.annotations)
+                        },
+                    );
+                if binding
+                    .as_ref()
+                    .is_some_and(|binding| binding.source == HttpParamKind::Header)
+                {
+                    super::validate::validate_header_name(&wire_name, &owner)
+                        .map_err(ParseError::Message)?;
                     headers.push(HttpExceptionMember {
                         field,
                         wire_name,
@@ -31,7 +62,12 @@ impl HttpException {
                         is_multi: matches!(member.ty, hir::TypeSpec::SequenceType(_)),
                         optional: member.is_optional(),
                     });
-                } else if has_annotation(&member.annotations, "cookie") {
+                } else if binding
+                    .as_ref()
+                    .is_some_and(|binding| binding.source == HttpParamKind::Cookie)
+                {
+                    super::validate::validate_cookie_name(&wire_name, &owner)
+                        .map_err(ParseError::Message)?;
                     cookies.push(HttpExceptionMember {
                         field,
                         wire_name,

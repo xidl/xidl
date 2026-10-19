@@ -33,7 +33,8 @@ fn op(name: &str, params: Vec<ParamDcl>) -> OpDcl {
 #[test]
 fn explicit_param_binding_detects_conflicts_and_defaults_name() {
     let param = string_param("city_id", vec![builtin("path", "")], None);
-    let binding = explicit_param_binding(&param).expect("path binding");
+    let binding =
+        SourceBinding::read(&param.annotations, &param.declarator.0).expect("path binding");
     assert_eq!(binding.expect("binding").source, HttpParamKind::Path);
 
     let conflict = string_param(
@@ -41,7 +42,7 @@ fn explicit_param_binding_detects_conflicts_and_defaults_name() {
         vec![builtin("path", ""), builtin("query", "")],
         None,
     );
-    let err = explicit_param_binding(&conflict)
+    let err = SourceBinding::read(&conflict.annotations, &conflict.declarator.0)
         .err()
         .expect("conflicting binding");
     assert!(err.contains("conflicting source annotations"));

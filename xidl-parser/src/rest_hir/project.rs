@@ -344,7 +344,7 @@ fn project_operation(
         hir::OpTypeSpec::TypeSpec(ty) => Some(ty.clone()),
     };
 
-    let signature = mapping::build_operation_signature(op);
+    let signature = mapping::build_operation_signature(op).map_err(parse_err)?;
     let http = mapping::build_http_mapping(
         method,
         &stream,

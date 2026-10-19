@@ -1,3 +1,4 @@
+mod http_bindings;
 mod http_contract;
 mod http_workflows;
 mod idl_printer;
