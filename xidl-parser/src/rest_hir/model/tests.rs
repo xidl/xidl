@@ -1,4 +1,5 @@
 use super::*;
+use crate::error::ParseError;
 
 #[test]
 fn from_props_and_find_interface_cover_success_and_failure_paths() {
