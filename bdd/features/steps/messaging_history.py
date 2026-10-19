@@ -151,7 +151,7 @@ def negative_history(context):
     for name, expected in expectations.items():
         source = context.messaging_corpus / "negative" / f"{name}.idl"
         output = context.messaging_work / name
-        if name in ("N12_typo_annotation", "N15_deprecated_on_member"):
+        if expected["expect"] == "lint-error":
             lint = run_cli(context, "lint", source)
             assert lint.returncode == 1, (name, lint.stderr)
             assert expected["contains"] in lint.stdout + lint.stderr, (
