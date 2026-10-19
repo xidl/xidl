@@ -14,7 +14,7 @@ use super::semantics::{
     parse_websocket_config, validate_http_annotations,
 };
 use super::validate::{
-    effective_basic_auth_realm, effective_deprecated, validate_head_constraints,
+    RouteBindingIndex, effective_basic_auth_realm, effective_deprecated, validate_head_constraints,
     validate_request_shape, validate_route_bindings, validate_stream_method, validate_stream_shape,
     validate_unique_route_bindings, validate_upgrade_constraints, validate_websocket_stream_items,
 };
@@ -285,8 +285,11 @@ fn project_operation(
     validate_route_bindings(
         &op.ident,
         &routes,
-        &path_binding_count,
-        &query_binding_count,
+        &RouteBindingIndex {
+            request_params: &request_params,
+            path: &path_binding_count,
+            query: &query_binding_count,
+        },
     )
     .map_err(parse_err)?;
     let allow_handshake_params = upgrade_mode == Some(UpgradeMode::WebSocket);

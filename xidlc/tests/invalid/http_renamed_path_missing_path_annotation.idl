@@ -1,0 +1,7 @@
+#pragma xidlc package xidlc
+#pragma xidlc version v1.0.0
+
+interface InvalidRenamedPathService {
+    @get(path = "/messages/{message_id}")
+    string read(@rename("message_id") string id);
+};

@@ -152,24 +152,59 @@ fn validates_route_bindings_request_shape_and_head_constraints() {
     }];
     let path_counts = std::collections::HashMap::from([("id".to_string(), 1_usize)]);
     let query_counts = std::collections::HashMap::from([("region".to_string(), 1_usize)]);
-    validate_route_bindings("get_city", &routes, &path_counts, &query_counts).unwrap();
+    let request_params = vec![param("id", HttpParamKind::Path)];
+    validate_route_bindings(
+        "get_city",
+        &routes,
+        &RouteBindingIndex {
+            request_params: &request_params,
+            path: &path_counts,
+            query: &query_counts,
+        },
+    )
+    .unwrap();
 
     let err = validate_route_bindings(
         "get_city",
         &routes,
-        &std::collections::HashMap::new(),
-        &query_counts,
+        &RouteBindingIndex {
+            request_params: &request_params,
+            path: &std::collections::HashMap::new(),
+            query: &query_counts,
+        },
     )
     .expect_err("missing path binding");
     assert!(err.contains("has no matching request-side path parameter"));
     let err = validate_route_bindings(
         "get_city",
         &routes,
-        &std::collections::HashMap::from([("id".to_string(), 2_usize)]),
-        &query_counts,
+        &RouteBindingIndex {
+            request_params: &request_params,
+            path: &std::collections::HashMap::from([("id".to_string(), 2_usize)]),
+            query: &query_counts,
+        },
     )
     .expect_err("duplicate path binding");
     assert!(err.contains("is bound by multiple"));
+
+    let mut renamed = param("message_id", HttpParamKind::Query);
+    renamed.name = "id".to_string();
+    let err = validate_route_bindings(
+        "read",
+        &[HttpRoute {
+            path: "/messages/{message_id}".to_string(),
+            path_params: vec!["message_id".to_string()],
+            query_params: Vec::new(),
+        }],
+        &RouteBindingIndex {
+            request_params: &[renamed],
+            path: &std::collections::HashMap::new(),
+            query: &std::collections::HashMap::new(),
+        },
+    )
+    .expect_err("missing @path annotation");
+    assert!(err.contains("uses @rename(\"message_id\") but is not annotated with @path"));
+    assert!(err.contains("@path @rename(\"message_id\") string id"));
 
     let request_params = vec![
         param("a", HttpParamKind::Body),

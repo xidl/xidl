@@ -141,6 +141,23 @@ fn render_openapi_json_rejects_missing_query_template_binding() {
 }
 
 #[test]
+fn render_openapi_json_hints_missing_path_annotation_for_renamed_parameter() {
+    let spec = parse_spec(
+        r#"
+        interface HttpApi {
+          @get(path = "/messages/{message_id}")
+          string read(@rename("message_id") string id);
+        };
+        "#,
+    );
+    let message = xidl_parser::rest_hir::project(&spec)
+        .expect_err("missing @path annotation should fail")
+        .to_string();
+    assert!(message.contains("uses @rename(\"message_id\") but is not annotated with @path"));
+    assert!(message.contains("@path @rename(\"message_id\") string id"));
+}
+
+#[test]
 fn render_openapi_json_rejects_duplicate_route_bindings() {
     let spec = parse_spec(
         r#"
