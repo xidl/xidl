@@ -1,0 +1,10 @@
+module Photon {
+    struct UserRef { string id; };
+    struct Participant : UserRef { string role; };
+    enum ReactionKind { LIKE, LOVE };
+    union Reaction switch (ReactionKind) { case LIKE: string like_by; case LOVE: string love_by; };
+    interface Media {
+        @post(path = "/r") Reaction react(@body Reaction reaction);
+        @get(path = "/p") Participant who();
+    };
+};

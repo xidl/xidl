@@ -1,0 +1,2 @@
+@version enum V { @rename("2026-03") v1, @rename("2026-05") v2, @rename("2026-07") v3, @rename("2026-09") v4, @rename("2026-11") v5 };
+struct S { @added(V::v9) string a; };

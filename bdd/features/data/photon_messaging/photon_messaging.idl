@@ -1,0 +1,378 @@
+// Versioned-API stress fixture: 5 lifecycle versions, Photon-style messaging API.
+// Target compiler: xidlc 0.104.0 (phase-1 versioning: @version / @added / @removed only).
+// Every change below carries a tag (F = field, T = type, M = method, A = annotation)
+// that the expectation document refers to.
+#pragma xidlc package photon_messaging
+
+@version
+enum ApiVersion {
+    @rename("2026-03") v2026_03,
+    @rename("2026-05") v2026_05,
+    @rename("2026-07") v2026_07,
+    @rename("2026-09") v2026_09,
+    @rename("2026-11") v2026_11,
+};
+
+module Photon {
+
+    // ---------------------------------------------------------------- types
+
+    typedef string SpaceId;
+
+    // T1 typedef added
+    @added(ApiVersion::v2026_05)
+    typedef string AttachmentId;
+
+    // T2 enumerators: added, removed, replaced
+    enum MessageStatus {
+        QUEUED,
+        SENT,
+        DELIVERED,
+        @added(ApiVersion::v2026_05) READ,
+        @removed(ApiVersion::v2026_09) FAILED_LEGACY,
+        @added(ApiVersion::v2026_09) FAILED,
+    };
+
+    // T3 bitmask values: added, removed
+    bitmask Capability {
+        TEXT,
+        MEDIA,
+        @added(ApiVersion::v2026_07) POLL,
+        @removed(ApiVersion::v2026_11) LEGACY_RICHLINK,
+    };
+
+    // T4 struct added, with a member added later inside it
+    @added(ApiVersion::v2026_05)
+    struct Attachment {
+        AttachmentId id;
+        string mime_type;
+        long long size;
+        @added(ApiVersion::v2026_09) @optional string sha256;     // F1
+    };
+
+    // T5 struct removed (all references must disappear at the same version)
+    @removed(ApiVersion::v2026_07)
+    struct LegacyEnvelope {
+        string raw;
+    };
+
+    struct TextContent {
+        string text;
+        @added(ApiVersion::v2026_07) @optional string markdown;   // F2
+    };
+
+    // T6 struct added only for a new union case
+    @added(ApiVersion::v2026_07)
+    struct PollContent {
+        string question;
+        sequence<string> options;
+    };
+
+    // T7 union cases: added, removed
+    union Content switch (long) {
+        case 1: TextContent text;
+        case 2: @added(ApiVersion::v2026_05) Attachment attachment;
+        case 3: @added(ApiVersion::v2026_07) PollContent poll;
+        case 4: @removed(ApiVersion::v2026_07) LegacyEnvelope legacy;
+    };
+
+    struct Message {
+        string id;
+        SpaceId space_id;
+        @removed(ApiVersion::v2026_07) string body;                        // F3 removed (replaced by content)
+        @added(ApiVersion::v2026_07) Content content;                      // F4 added, required
+        MessageStatus status;
+        // F5 type change on one wire name: epoch number -> RFC 3339 string
+        @removed(ApiVersion::v2026_09) @rename("created_at") long long created_at_epoch;
+        @added(ApiVersion::v2026_09) @rename("created_at") string created_at_rfc3339;
+        @added(ApiVersion::v2026_05) @optional string edited_at;           // F6 optional added
+        @removed(ApiVersion::v2026_05) @optional string legacy_thread;     // F7 removed in the first step
+        @added(ApiVersion::v2026_05) @removed(ApiVersion::v2026_11)
+        sequence<Attachment> attachments;                                  // F8 bounded interval [05, 11)
+        @skip string internal_trace;                                       // A1 never on the wire
+    };
+
+    struct Space {
+        SpaceId id;
+        @removed(ApiVersion::v2026_07) string name;                        // F9 wire rename name -> display_name
+        @added(ApiVersion::v2026_07) string display_name;
+        // F10 optional -> required, same wire name
+        @removed(ApiVersion::v2026_09) @optional @rename("topic") string topic_optional;
+        @added(ApiVersion::v2026_09) @rename("topic") string topic_required;
+        // F11 code-name rename, wire name unchanged
+        @removed(ApiVersion::v2026_11) @rename("member_count") long members;
+        @added(ApiVersion::v2026_11) @rename("member_count") long member_count;
+        Capability capabilities;
+    };
+
+    // T8 paging type introduced for the list signature change
+    @added(ApiVersion::v2026_07)
+    struct MessagePage {
+        sequence<Message> items;
+        @optional string next_cursor;
+    };
+
+    @added(ApiVersion::v2026_07)
+    struct WebhookDestinationInput {
+        string url;
+        sequence<string> events;
+        @added(ApiVersion::v2026_11) @optional string description;         // F12
+    };
+
+    @added(ApiVersion::v2026_07)
+    struct WebhookDestination {
+        string id;
+        string url;
+        string api_version;
+        sequence<string> events;
+    };
+
+    // T9 exceptions: stable, added, removed
+    @http(404) exception NotFound { string resource; string id; };
+    @added(ApiVersion::v2026_09) @http(409) exception Conflict { string reason; };
+    @removed(ApiVersion::v2026_11) @http(410) exception Gone { string id; };
+
+    // ----------------------------------------------------------- operations
+
+    interface Messages {
+        // M1 return type change on the same route: list -> page
+        @removed(ApiVersion::v2026_07)
+        @get(path = "/spaces/{space_id}/messages")
+        sequence<Message> list(@path SpaceId space_id);
+
+        @added(ApiVersion::v2026_07)
+        @get(path = "/spaces/{space_id}/messages")
+        MessagePage list(@path SpaceId space_id,
+                         @query @optional string cursor,
+                         @removed(ApiVersion::v2026_09) @query @optional boolean include_deleted); // M2 param removed
+
+        // M3 parameter added; error set stable
+        @get(path = "/messages/{id}")
+        Message get(@path string id,
+                    @added(ApiVersion::v2026_05) @query @optional sequence<string> expand)
+            raises(NotFound);
+
+        // M4 request body type change on the same route
+        @removed(ApiVersion::v2026_07)
+        @post(path = "/spaces/{space_id}/messages")
+        Message send(@path SpaceId space_id, @body string body);
+
+        @added(ApiVersion::v2026_07)
+        @post(path = "/spaces/{space_id}/messages")
+        Message send(@path SpaceId space_id, @body Content content);
+
+        // M5 operation added, header parameter added later, error set grows by split
+        @added(ApiVersion::v2026_05) @removed(ApiVersion::v2026_09)
+        @patch(path = "/messages/{id}")
+        Message edit(@path string id, @body TextContent content) raises(NotFound);
+
+        @added(ApiVersion::v2026_09)
+        @patch(path = "/messages/{id}")
+        Message edit(@path string id,
+                     @body TextContent content,
+                     @header("Idempotency-Key") @optional string idempotency_key)
+            raises(NotFound, Conflict);
+
+        // M6 + A2 deprecation introduced in a later version, then removal
+        @removed(ApiVersion::v2026_05)
+        @post(path = "/messages/legacy")
+        Message legacy_send(@body LegacyEnvelope envelope);
+
+        @added(ApiVersion::v2026_05) @removed(ApiVersion::v2026_07)
+        @deprecated(since = "2026-05-01", after = "2026-07-01")
+        @post(path = "/messages/legacy")
+        Message legacy_send(@body LegacyEnvelope envelope);
+
+        // M7 operation rename, same route, return type changes too
+        @removed(ApiVersion::v2026_09)
+        @get(path = "/messages/search")
+        sequence<Message> find(@query string q);
+
+        @added(ApiVersion::v2026_09)
+        @get(path = "/messages/search")
+        MessagePage search(@query string q, @query @optional string cursor);
+
+        // M8 + A3 HTTP method and path change: DELETE -> POST .../archive
+        @removed(ApiVersion::v2026_09)
+        @delete(path = "/messages/{id}")
+        void remove(@path string id) raises(NotFound, Gone);
+
+        @added(ApiVersion::v2026_09)
+        @post(path = "/messages/{id}/archive")
+        void archive(@path string id) raises(NotFound, Conflict);
+
+        // M9 + A4 streaming operation added
+        @added(ApiVersion::v2026_09)
+        @server_stream @stream_codec("sse")
+        @get(path = "/spaces/{space_id}/messages/watch")
+        Message watch(@path SpaceId space_id);
+    };
+
+    interface Spaces {
+        @get(path = "/spaces/{id}")
+        Space get(@path SpaceId id) raises(NotFound);
+    };
+
+    // M10 interface added; one operation added later inside it
+    @added(ApiVersion::v2026_07)
+    interface Webhooks {
+        @post(path = "/webhooks")
+        WebhookDestination create(@body WebhookDestinationInput input);
+
+        @added(ApiVersion::v2026_11)
+        @delete(path = "/webhooks/{id}")
+        void delete_destination(@path string id) raises(NotFound);
+    };
+
+    // M11 interface removed
+    @removed(ApiVersion::v2026_11)
+    interface LegacyPolling {
+        @get(path = "/poll")
+        sequence<Message> poll(@query @optional string since) raises(Gone);
+    };
+
+    // ======================= extended coverage (realistic edge cases) =======================
+
+    // T11 struct inheritance; the base gains a member later
+    struct UserRef {
+        string id;
+        @added(ApiVersion::v2026_07) @optional string avatar_url;          // F13 inherited field added
+    };
+    struct Participant : UserRef {
+        string role;
+        @added(ApiVersion::v2026_09) map<string, string> labels;          // F14 map field added
+    };
+
+    // T12 union with an enum discriminator; enumerator and case added together
+    enum ReactionKind {
+        LIKE,
+        LOVE,
+        @added(ApiVersion::v2026_09) EMPHASIZE,
+    };
+    union Reaction switch (ReactionKind) {
+        case LIKE: string like_by;
+        case LOVE: string love_by;
+        case EMPHASIZE: @added(ApiVersion::v2026_09) string emphasize_by;
+    };
+
+    // T13 exception with a header member, added mid-timeline
+    @added(ApiVersion::v2026_07)
+    @http(429) exception RateLimited {
+        @rename("Retry-After") @header long retry_after;
+        string message;
+    };
+
+    // T14 binary upload chunk (sequence<octet>, long long)
+    @added(ApiVersion::v2026_07)
+    struct UploadChunk {
+        string upload_id;
+        unsigned long index;
+        sequence<octet> bytes;
+    };
+    @added(ApiVersion::v2026_07)
+    struct UploadSummary {
+        string upload_id;
+        unsigned long long total_bytes;
+        @added(ApiVersion::v2026_11) @optional AttachmentId attachment_id;
+    };
+
+    // T15 content negotiation union (Accept-driven), case added later
+    @added(ApiVersion::v2026_09)
+    struct TranscriptJson { sequence<Message> messages; };
+    @added(ApiVersion::v2026_09)
+    @http union Transcript switch (::ContentType) {
+        case ::ContentType::Json: TranscriptJson json;
+        case ::ContentType::Text: @added(ApiVersion::v2026_11) string text;
+    };
+
+    // T16 nested module removed as a whole
+    @removed(ApiVersion::v2026_09)
+    module Admin {
+        struct Quota { long limit; long used; };
+        interface Quotas {
+            @get(path = "/admin/quotas/{space_id}")
+            Quota get(@path ::Photon::SpaceId space_id);
+        };
+    };
+
+    @http_bearer
+    interface Users {
+        // M12 alternative path added later (route alias) via split
+        @removed(ApiVersion::v2026_07)
+        @get(path = "/users/{id}")
+        Participant get(@path string id) raises(NotFound);
+
+        @added(ApiVersion::v2026_07)
+        @get(path = "/users/{id}")
+        @path("/u/{id}")
+        Participant get(@path string id) raises(NotFound, RateLimited);
+
+        // M13 out parameters: response object gains a field at v2026_09
+        @added(ApiVersion::v2026_05) @removed(ApiVersion::v2026_09)
+        @get(path = "/users/{id}/unread")
+        void unread(@path string id, out long count);
+
+        @added(ApiVersion::v2026_09)
+        @get(path = "/users/{id}/unread")
+        void unread(@path string id, out long count, out long mentions);
+
+        // M14 cookie parameter removed, query parameter with default/range added
+        @get(path = "/users")
+        sequence<Participant> list(
+            @removed(ApiVersion::v2026_09) @cookie @rename("session") @optional string session,
+            @added(ApiVersion::v2026_07) @query @optional @default(50) @range(min = 1, max = 200) long page_size);
+
+        // M15 security change: bearer -> API key at v2026_09 (operation split)
+        @removed(ApiVersion::v2026_09)
+        @post(path = "/users/{id}/block")
+        void block(@path string id);
+
+        @added(ApiVersion::v2026_09)
+        @api_key(in = "header", name = "X-Photon-Key")
+        @post(path = "/users/{id}/block")
+        void block(@path string id) raises(RateLimited);
+
+        // M16 attribute added (expands to operations)
+        @added(ApiVersion::v2026_07)
+        readonly attribute string region;
+    };
+
+    interface Media {
+        // M17 client stream (NDJSON) added
+        @added(ApiVersion::v2026_07)
+        @client_stream @stream_codec("ndjson")
+        @post(path = "/uploads")
+        UploadSummary upload(UploadChunk chunk);   // raises(...) is rejected on streams in 0.104
+
+        // M18 reaction union in a request body; new case reaches old clients only via response
+        @post(path = "/messages/{id}/reactions")
+        Reaction react(@path string id, @body Reaction reaction);
+
+        // M19 content-negotiated export added; text case added later
+        @added(ApiVersion::v2026_09)
+        @get(path = "/spaces/{space_id}/transcript")
+        Transcript transcript(@path SpaceId space_id);
+
+        // M20 WebSocket upgrade added in the last version
+        @added(ApiVersion::v2026_11)
+        @upgrade(protocol = "photon-realtime")
+        @path("/realtime{?token}")
+        void realtime(@query @rename("token") string token);
+    };
+
+};
+
+// T10 module added in the last version
+@added(ApiVersion::v2026_11)
+module Analytics {
+    @rename_all("camelCase")
+    struct UsageReport {
+        string space_id;
+        long long message_count;
+    };
+
+    interface Usage {
+        @get(path = "/analytics/usage")
+        UsageReport usage(@query string space_id);
+    };
+};
