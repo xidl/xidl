@@ -1,6 +1,6 @@
 {
   "N01_renamed_from": {
-    "contains": "@renamedFrom on S::name_ is not supported yet",
+    "contains": "@renamedFrom on S::name_ is not supported; use @rename",
     "expect": "gen-error"
   },
   "N02_empty_interval": {
@@ -41,7 +41,7 @@
   },
   "N12_typo_annotation": {
     "contains": "remvoed",
-    "expect": "gen-error",
+    "expect": "lint-error",
     "gap": "G5"
   },
   "N14_header_named": {
@@ -51,7 +51,7 @@
   },
   "N15_deprecated_on_member": {
     "contains": "@deprecated is not allowed on Member",
-    "expect": "gen-error",
+    "expect": "lint-error",
     "gap": "G5"
   },
   "N16_raises_removed_exception": {
