@@ -35,6 +35,7 @@ const service: Files = {
           etag: '"v2"',
           hints: full ? ['reload', 'retry'] : undefined,
           msg: 'stale revision',
+          rename_abc: 'legacy',
           retry_token: full ? '001/;%' : undefined,
           session_id: 'renewed',
         });
@@ -97,6 +98,7 @@ server.listen(0, '127.0.0.1', async () => {
           assert.ok(error instanceof PreconditionFailed);
           assert.equal(error.etag, '"v2"');
           assert.equal(error.session_id, 'renewed');
+          assert.equal(error.rename_abc, 'legacy');
           assert.equal(error.retry_token, full ? '001/;%' : undefined);
           assert.deepEqual(error.hints, full ? ['reload', 'retry'] : undefined);
           assert.deepEqual(
