@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.105.0](https://github.com/xidl/xidl/compare/v0.104.0...v0.105.0) (2026-10-19)
+
+
+### Features
+
+* **http:** support names on parameter annotations ([d29ca64](https://github.com/xidl/xidl/commit/d29ca64eb4c5c5646851e041c7fc44cc3f12eb55))
+* **versioning:** add independent rust-axum-adapters target ([4eaec75](https://github.com/xidl/xidl/commit/4eaec75d5167623aad4c1609bf6272d185938da4))
+* **versioning:** add independent typescript-rest-adapters target ([ee2f4c9](https://github.com/xidl/xidl/commit/ee2f4c9485e52f5fde6094a16f227f389154f45d))
+* **versioning:** compare canonical IDL projections ([e073367](https://github.com/xidl/xidl/commit/e0733675cd751487ee5278985ef6cd53034ff1cf))
+* **versioning:** declare version transport location and name ([994e178](https://github.com/xidl/xidl/commit/994e178fe7ddb8a7980e5f40718e7885f96b5bec))
+
+
+### Bug Fixes
+
+* **http:** hint missing path annotation for renamed parameters ([6e8707a](https://github.com/xidl/xidl/commit/6e8707add3075f8d7a78d5c83f7b0bdda551588f)), closes [#360](https://github.com/xidl/xidl/issues/360)
+* **versioning:** preserve declaration identity in version maps ([bd0a3ff](https://github.com/xidl/xidl/commit/bd0a3ffa0ec30c1ec1f56bf04e0f61529e7ebc3e))
+* **versioning:** reject unsupported annotations with actionable errors ([bb5cc01](https://github.com/xidl/xidl/commit/bb5cc01cbc6903edf25abf26bd32e28672851c60))
+
 ## [0.104.0](https://github.com/xidl/xidl/compare/v0.103.0...v0.104.0) (2026-10-17)
 
 
