@@ -183,7 +183,12 @@ go 1.23
 require github.com/xidl/xidl/golang/xidl-go-rest v0.0.0
 
 replace github.com/xidl/xidl/golang/xidl-go-rest => {{GOLANG_XIDL_GO_REST_PATH}}
-""".replace("{{GOLANG_XIDL_GO_REST_PATH}}", str(Path.cwd() / "golang/xidl-go-rest"))
+replace github.com/xidl/xidl/golang/xidl-go-codec => {{GOLANG_XIDL_GO_CODEC_PATH}}
+""".replace(
+            "{{GOLANG_XIDL_GO_REST_PATH}}", str(Path.cwd() / "golang/xidl-go-rest")
+        ).replace(
+            "{{GOLANG_XIDL_GO_CODEC_PATH}}", str(Path.cwd() / "golang/xidl-go-codec")
+        )
     )
     test = destination / "version_parameter_test.go"
     test.write_text(
@@ -257,4 +262,15 @@ func TestGeneratedVersionClients(t *testing.T) {
         .replace("{{VERSION_VALUE|quote}}", json.dumps(context.version_value))
     )
     run(["go", "mod", "tidy"], destination, env)
+    for name in ("xidl-go-rest", "xidl-go-codec"):
+        resolved = json.loads(
+            run(
+                ["go", "list", "-m", "-json", f"github.com/xidl/xidl/golang/{name}"],
+                destination,
+                env,
+            )
+        )
+        assert (
+            Path(resolved["Dir"]).resolve() == (Path.cwd() / "golang" / name).resolve()
+        ), f"{name} must resolve to the current checkout, got {resolved['Dir']}"
     run(["go", "test", "./..."], destination, env)
