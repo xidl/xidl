@@ -22,6 +22,7 @@ impl Files for FileService {
                 Err(FilesGetFileError::PreconditionFailed(PreconditionFailed {
                     etag: "\"v2\"".into(),
                     hints: full.then(|| vec!["reload".into(), "retry".into()]),
+                    rename_abc: "legacy".into(),
                     session_id: "renewed".into(),
                     retry_token: full.then(|| "001/;%".into()),
                     attempts: full.then(|| vec!["first".into(), "second".into()]),
@@ -84,6 +85,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         };
         assert_eq!(error.etag, "\"v2\"");
         assert_eq!(error.session_id, "renewed");
+        assert_eq!(error.rename_abc, "legacy");
         assert_eq!(error.code, 41201);
         assert_eq!(error.msg, "stale revision");
         assert_eq!(error.retry_token, full.then(|| "001/;%".into()));
