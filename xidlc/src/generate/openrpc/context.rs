@@ -116,7 +116,10 @@ fn collected_schema(
     match constr {
         hir::ConstrTypeDcl::StructDcl(def) => Some((
             scoped_name(module_path, &def.ident),
-            apply_schema_description(schema_for_struct(&def.member), doc_text(&def.annotations)),
+            apply_schema_description(
+                schema_for_struct(&def.members().cloned().collect::<Vec<_>>()),
+                doc_text(&def.annotations),
+            ),
         )),
         hir::ConstrTypeDcl::EnumDcl(def) => {
             let values = def

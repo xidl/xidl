@@ -156,10 +156,12 @@ fn render_operation_types(
         &OperationTypesTemplate {
             request: StructTemplate {
                 name: request_name.clone(),
+                embed: String::new(),
                 fields: render_field_block(ctx, request_fields)?,
             },
             response: StructTemplate {
                 name: response_name.clone(),
+                embed: String::new(),
                 fields: render_field_block(ctx, response_fields)?,
             },
         },

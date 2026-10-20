@@ -65,6 +65,7 @@ pub(crate) fn apply_schema_description(
         RefOr::T(Schema::Object(object)) => object.description = Some(doc.to_string()),
         RefOr::T(Schema::Array(array)) => array.description = Some(doc.to_string()),
         RefOr::T(Schema::OneOf(one_of)) => one_of.description = Some(doc.to_string()),
+        RefOr::T(Schema::AllOf(all_of)) => all_of.description = Some(doc.to_string()),
         _ => {}
     }
     schema
@@ -184,6 +185,26 @@ impl SchemaScope<'_> {
             combined.items.extend(flattened);
             RefOr::T(Schema::from(combined))
         })
+    }
+
+    /// Combines a struct's own object schema with its base struct references.
+    ///
+    /// Struct inheritance is flattened on the wire, so the resulting schema is
+    /// the intersection of the base schema and the struct's own fields.
+    pub(crate) fn with_base_schemas(
+        self,
+        object: RefOr<Schema>,
+        parents: &[hir::ScopedName],
+    ) -> IdlcResult<RefOr<Schema>> {
+        if parents.is_empty() {
+            return Ok(object);
+        }
+        let mut combined = AllOf::new();
+        combined.items.push(object);
+        for parent in parents {
+            combined.items.push(self.schema_reference(parent)?);
+        }
+        Ok(RefOr::T(Schema::from(combined)))
     }
 
     pub(crate) fn schema_for_union(self, def: &hir::UnionDef) -> IdlcResult<RefOr<Schema>> {

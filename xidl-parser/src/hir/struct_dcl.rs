@@ -1,5 +1,6 @@
 use super::*;
 use serde::{Deserialize, Serialize};
+use std::fmt;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct StructForwardDcl {
@@ -7,12 +8,33 @@ pub struct StructForwardDcl {
     pub ident: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct StructDcl {
     pub annotations: Vec<Annotation>,
     pub ident: String,
     pub parent: Vec<ScopedName>,
     pub member: Vec<Member>,
+    /// Members inherited from the single base struct, flattened into this
+    /// struct's wire shape. Populated by semantic analysis.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub inherited: Vec<Member>,
+}
+
+impl fmt::Debug for StructDcl {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut debug = f.debug_struct("StructDcl");
+        debug
+            .field("annotations", &self.annotations)
+            .field("ident", &self.ident)
+            .field("parent", &self.parent)
+            .field("member", &self.member);
+        // Structs without a base keep their historical debug shape so stored
+        // snapshots describe only declarations that carry inherited members.
+        if !self.inherited.is_empty() {
+            debug.field("inherited", &self.inherited);
+        }
+        debug.finish()
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -42,6 +64,18 @@ impl Member {
     }
 }
 
+impl StructDcl {
+    /// Members of this struct in wire order: inherited members first, then its
+    /// own members.
+    ///
+    /// Inherited members are the single base struct's fields, copied into this
+    /// struct by semantic analysis. A target that renders a flattened JSON shape
+    /// must use this iterator instead of [`Self::member`].
+    pub fn members(&self) -> impl Iterator<Item = &Member> {
+        self.inherited.iter().chain(self.member.iter())
+    }
+}
+
 impl From<crate::typed_ast::StructDef> for StructDcl {
     fn from(value: crate::typed_ast::StructDef) -> Self {
         let mut members = value
@@ -59,6 +93,7 @@ impl From<crate::typed_ast::StructDef> for StructDcl {
             ident: value.ident.0,
             parent: value.parent.into_iter().map(Into::into).collect(),
             member: members,
+            inherited: Vec::new(),
         }
     }
 }

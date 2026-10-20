@@ -41,6 +41,42 @@ struct Point {
 };
 ```
 
+### Struct Inheritance
+
+A struct may inherit from exactly one other struct. Inheritance is a data
+contract, not a class hierarchy: the base members are flattened into the
+derived struct's JSON shape.
+
+```idl
+struct UserRef {
+    string id;
+};
+
+struct Participant : UserRef {
+    string role;
+};
+```
+
+Both `UserRef` and `Participant` serialize `id` at the top level. A
+`Participant` value is `{ "id": "...", "role": "..." }`, never
+`{ "base": { "id": "..." }, "role": "..." }`.
+
+The rules are:
+
+- A struct has at most one base struct.
+- The base must be a complete struct declaration.
+- An inheritance cycle is rejected.
+- A derived struct may not declare a field that an ancestor already declares.
+- `@rename`, `@rename_all`, `@optional`, and `@skip` on base fields keep their
+  meaning in the derived wire shape.
+
+Targets keep their native type relation while using the same flat JSON shape:
+Rust stores the base in a flattened `base` field, TypeScript uses `extends`,
+Go embeds the base struct, OpenAPI emits an `allOf` composition, and the
+remaining JSON schemas and validators declare the inherited members directly.
+Version adapters treat a changed inherited model as an explicit application
+decision and require a conversion hook instead of guessing a field layout.
+
 ## Enums
 
 ```idl

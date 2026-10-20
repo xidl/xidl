@@ -39,7 +39,7 @@ pub(crate) fn ts_type_for_constr_inline(
     match constr {
         hir::ConstrTypeDcl::StructDcl(def) => {
             let mut fields = Vec::new();
-            for member in &def.member {
+            for member in def.members() {
                 let optional = member.is_optional();
                 for decl in &member.ident {
                     let name = hir::effective_wire_name(
@@ -130,7 +130,7 @@ pub(crate) fn zod_schema_for_constr_inline(
     match constr {
         hir::ConstrTypeDcl::StructDcl(def) => {
             let mut fields = Vec::new();
-            for member in &def.member {
+            for member in def.members() {
                 let optional = member.is_optional();
                 for decl in &member.ident {
                     let name = hir::effective_wire_name(

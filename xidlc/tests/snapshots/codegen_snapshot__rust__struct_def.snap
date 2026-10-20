@@ -25,7 +25,14 @@ pub struct A2 {
 impl A2 {}
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
+pub struct B {
+    pub value: i64,
+}
+impl B {}
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
 pub struct A3 {
+    #[serde(flatten)]
     pub base: B,
 }
 impl A3 {}

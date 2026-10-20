@@ -213,7 +213,7 @@ impl Specification {
         if expand_interfaces {
             Self::expand_interfaces(&mut spec.0, &mut Vec::new())?;
         }
-        semantic::analyze(&mut spec);
+        semantic::analyze(&mut spec)?;
         Ok(spec)
     }
 

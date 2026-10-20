@@ -191,22 +191,29 @@ expression: document
         "type": "object"
       },
       "v2026_09.Photon.Participant": {
-        "properties": {
-          "labels": {
-            "additionalProperties": {
-              "type": "string"
+        "allOf": [
+          {
+            "properties": {
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              "role": {
+                "type": "string"
+              }
             },
+            "required": [
+              "role",
+              "labels"
+            ],
             "type": "object"
           },
-          "role": {
-            "type": "string"
+          {
+            "$ref": "#/components/schemas/v2026_09.Photon.UserRef"
           }
-        },
-        "required": [
-          "role",
-          "labels"
-        ],
-        "type": "object"
+        ]
       },
       "v2026_09.Photon.PollContent": {
         "properties": {

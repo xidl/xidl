@@ -11,6 +11,11 @@ HTTP request and response bodies.
 Renaming and skipping annotations (`@rename`, `@rename_all`, `@skip`,
 `@optional`) are documented on the [Annotations](../../docs/annotations/) page.
 
+Struct inheritance is flattened into the same JSON object. A base struct's
+members participate in request decoding, response encoding, OpenAPI schemas,
+and generated validators exactly like the derived struct's own members. See
+[Struct Inheritance](../../docs/#struct-inheritance) for the inheritance rules.
+
 ## Parameter Encoding Methods
 
 ### Multi-parameter Input Encoding Method

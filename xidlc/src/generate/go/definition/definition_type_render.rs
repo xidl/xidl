@@ -8,7 +8,7 @@ use super::definition_templates::{
     EnumMemberTemplate, EnumTemplate, ExceptionTemplate, FieldTemplate, StructTemplate,
     TypeDeclTemplate, render_enum_member_block, render_field_block,
 };
-use super::definition_types::{constr_type_name, type_with_decl};
+use super::definition_types::{constr_type_name, go_scoped_name, type_with_decl};
 
 pub(super) fn render_type_dcl(
     ctx: &mut GoRenderContext,
@@ -125,6 +125,10 @@ fn render_struct(
         go_export_name(prefix, &def.ident),
         &def.member,
         &def.annotations,
+        def.parent
+            .first()
+            .map(|parent| format!("\t{}\n", go_scoped_name(parent, &ctx.packages)))
+            .unwrap_or_default(),
     )
 }
 
@@ -158,6 +162,7 @@ fn render_simple_struct(
         "struct.go.j2",
         &StructTemplate {
             name: name.to_string(),
+            embed: String::new(),
             fields: render_field_block(
                 ctx,
                 fields
@@ -178,11 +183,13 @@ fn render_field_struct(
     name: String,
     members: &[hir::Member],
     container_annotations: &[hir::Annotation],
+    embed: String,
 ) -> IdlcResult<()> {
     ctx.push_template(
         "struct.go.j2",
         &StructTemplate {
             name,
+            embed,
             fields: render_field_block(
                 ctx,
                 field_templates(members, container_annotations, &ctx.packages),

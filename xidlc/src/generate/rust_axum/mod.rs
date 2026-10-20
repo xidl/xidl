@@ -276,6 +276,9 @@ fn mark_reachable_from_constr(
 ) {
     match c {
         hir::ConstrTypeDcl::StructDcl(s) => {
+            if let Some(parent) = s.parent.first() {
+                mark_reachable_scoped(parent, reachable, registry, scope);
+            }
             for m in &s.member {
                 mark_reachable(&m.ty, reachable, registry, scope);
             }

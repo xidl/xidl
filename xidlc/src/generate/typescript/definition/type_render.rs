@@ -46,6 +46,7 @@ pub(crate) fn render_exception(
             ident: except.ident.clone(),
             parent: Vec::new(),
             member: except.member.clone(),
+            inherited: Vec::new(),
         },
         module_path,
         ctx,
@@ -138,6 +139,11 @@ fn render_struct(
         )
     };
     let fields = struct_fields(&def.member, &def.annotations, module_path);
+    let wire_fields = struct_fields(
+        &def.members().cloned().collect::<Vec<_>>(),
+        &def.annotations,
+        module_path,
+    );
     let types = ctx.renderer.render_template(
         "struct.d.ts.j2",
         &StructTypeContext {
@@ -160,7 +166,7 @@ fn render_struct(
         &StructZodContext {
             schema_name: ident.clone(), // Template will add 'Schema' suffix
             ident,
-            fields: fields
+            fields: wire_fields
                 .into_iter()
                 .map(|field| FieldZodContext {
                     prop: field.prop,

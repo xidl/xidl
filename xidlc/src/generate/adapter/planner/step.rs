@@ -166,6 +166,14 @@ impl StepPlanner<'_> {
                 };
                 Ok(TypeConversion::Alias(references.value(value)?))
             }
+            (TypeShape::Unsupported(kind), _) | (_, TypeShape::Unsupported(kind))
+                if kind == "struct inheritance" =>
+            {
+                // A flattened base changes the public model layout, so the
+                // adapter cannot copy fields mechanically. Keep the decision
+                // explicit instead of emitting an incorrect conversion.
+                Ok(TypeConversion::Hook)
+            }
             (TypeShape::Unsupported(kind), _) | (_, TypeShape::Unsupported(kind)) => {
                 Err(self.error(key, &format!("{kind} conversion is not supported")))
             }

@@ -11,6 +11,7 @@ fn widget_struct() -> StructDcl {
         annotations: vec![],
         ident: "Widget".to_string(),
         parent: vec![],
+        inherited: vec![],
         member: vec![
             Member {
                 annotations: vec![Annotation::Optional { value: None }],
@@ -115,4 +116,55 @@ fn skipped_members_mark_the_public_struct_for_default_fallback() {
 
     assert_eq!(tracked_item_fields(item).len(), 1);
     assert!(item.has_skipped_members);
+}
+
+#[test]
+fn inherited_base_is_a_flattened_transport_field() {
+    let base = widget_struct();
+    let mut child = widget_struct();
+    child.ident = "Child".to_string();
+    child.member = vec![Member {
+        annotations: vec![],
+        ty: TypeSpec::Boolean,
+        ident: vec![Declarator::SimpleDeclarator(SimpleDeclarator(
+            "active".to_string(),
+        ))],
+        default: None,
+        field_id: None,
+        recursive: false,
+    }];
+    child.parent = vec![ScopedName {
+        name: vec!["demo".to_string(), "Widget".to_string()],
+        is_root: false,
+    }];
+
+    let registry = TypeRegistry::from([
+        ("demo::Widget".to_string(), TransportTypeDef::Struct(base)),
+        ("demo::Child".to_string(), TransportTypeDef::Struct(child)),
+    ]);
+    let mut tracker = TransportTracker::new("DemoApi");
+    tracker
+        .map_type(
+            &TypeSpec::ScopedName(ScopedName {
+                name: vec!["demo".to_string(), "Child".to_string()],
+                is_root: false,
+            }),
+            TransportDirection::Out,
+            super::super::scope::TypeScope::new(&registry, &["demo".to_string()]),
+        )
+        .expect("track child type");
+    let modules = tracker
+        .render_modules(&registry, &["demo".to_string()])
+        .expect("render transport modules");
+    let child = modules
+        .outbound
+        .items
+        .iter()
+        .find(|item| item.transport_ident == "demo_Child")
+        .expect("child transport item");
+    assert_eq!(child.fields[0].name, "base");
+    assert!(child.fields[0].flatten);
+    assert_eq!(child.fields[0].ty, "__xidl_out_DemoApi::demo_Widget");
+    assert_eq!(child.fields[0].encode_expr, "value.base.into()");
+    assert_eq!(child.fields[0].decode_expr, "value.base.into()");
 }
