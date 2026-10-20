@@ -49,6 +49,21 @@ fn changed_source_declarations_require_decisions_even_with_identical_wire_shapes
 }
 
 #[test]
+fn inherited_models_require_explicit_adapter_decisions() {
+    let files = render(
+        r#"@version enum V { v1, v2 };
+        struct Base {
+            string id;
+            @added(V::v2) @optional string note;
+        };
+        struct Item : Base { string role; };
+        interface Store { @get(path="/item") Item read(); };"#,
+        "inheritance.idl",
+    );
+    assert!(files[0].1.contains("itemDowncastToV1"), "{}", files[0].1);
+}
+
+#[test]
 fn adapter_generation_rejects_unversioned_retired_and_incomplete_projected_inputs() {
     for (source, expected) in [
         ("struct Item { string id; };", "version_map"),

@@ -1,0 +1,64 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+openrpc_struct_inheritance.json
+===============
+{
+  "components": {
+    "schemas": {
+      "demo.Participant": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "role"
+        ],
+        "type": "object"
+      },
+      "demo.UserRef": {
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "xidl",
+    "version": "0.1.0"
+  },
+  "methods": [
+    {
+      "name": "demo.Media.who",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {
+          "properties": {
+            "return": {
+              "$ref": "#/components/schemas/Participant"
+            }
+          },
+          "required": [
+            "return"
+          ],
+          "type": "object"
+        }
+      }
+    }
+  ],
+  "openrpc": "1.3.2"
+}

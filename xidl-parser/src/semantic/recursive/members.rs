@@ -142,7 +142,7 @@ fn collect_struct_def_edges(
     edges: &mut Vec<(String, String)>,
 ) {
     let owner = join_path(&struct_path(module_path, &def.ident));
-    for member in &def.member {
+    for member in def.members() {
         let Some(target) = direct_struct_target(module_path, &member.ty, names) else {
             continue;
         };
@@ -239,7 +239,7 @@ fn apply_struct_recursive_flags(
     recursive_edges: &HashSet<(String, String)>,
 ) {
     let owner = join_path(&struct_path(module_path, &def.ident));
-    for member in &mut def.member {
+    for member in def.inherited.iter_mut().chain(def.member.iter_mut()) {
         member.recursive = direct_struct_target(module_path, &member.ty, names)
             .map(|target| recursive_edges.contains(&(owner.clone(), join_path(&target))))
             .unwrap_or(false);

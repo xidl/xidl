@@ -115,6 +115,30 @@ expression: "&snapshots[0]"
                     "field_id": 2,
                     "recursive": false
                   }
+                ],
+                "inherited": [
+                  {
+                    "annotations": [
+                      {
+                        "Rename": {
+                          "name": "id"
+                        }
+                      }
+                    ],
+                    "ty": {
+                      "StringType": {
+                        "bound": null
+                      }
+                    },
+                    "ident": [
+                      {
+                        "SimpleDeclarator": "id"
+                      }
+                    ],
+                    "default": null,
+                    "field_id": 1,
+                    "recursive": false
+                  }
                 ]
               }
             }

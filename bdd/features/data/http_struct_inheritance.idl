@@ -1,0 +1,19 @@
+#pragma xidlc package Inheritance API
+#pragma xidlc version v1
+
+struct UserRef {
+    string id;
+    @optional string avatar_url;
+};
+struct Participant : UserRef {
+    string role;
+};
+
+@no_security
+interface Accounts {
+    @get(path = "/participant")
+    Participant participant();
+
+    @post(path = "/echo")
+    Participant echo(@body Participant participant);
+};

@@ -5,6 +5,9 @@ struct A1 {
 struct A2 {
     ::A1::b a;
 };
+struct B {
+    int64 value;
+};
 struct A3: B {};
 
 struct _A {};

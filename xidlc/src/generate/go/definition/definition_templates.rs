@@ -26,6 +26,7 @@ pub(super) struct FieldTemplate {
 #[derive(Serialize)]
 pub(super) struct StructTemplate {
     pub(super) name: String,
+    pub(super) embed: String,
     pub(super) fields: String,
 }
 

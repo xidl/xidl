@@ -117,10 +117,11 @@ impl OpenApiContext {
         match constr {
             hir::ConstrTypeDcl::StructDcl(def) => {
                 let name = scoped_name(scope.module_path, &def.ident);
-                let schema = apply_schema_description(
-                    scope.schema_for_struct_with_annotations(&def.member, &def.annotations)?,
-                    doc_text(&def.annotations).as_deref(),
-                );
+                let own =
+                    scope.schema_for_struct_with_annotations(&def.member, &def.annotations)?;
+                let schema = scope.with_base_schemas(own, &def.parent)?;
+                let schema =
+                    apply_schema_description(schema, doc_text(&def.annotations).as_deref());
                 self.schemas.insert(name, schema);
             }
             hir::ConstrTypeDcl::EnumDcl(def) => {

@@ -53,7 +53,7 @@ pub(crate) fn project_version(
         definition: body,
     }));
     let mut projected = Specification(definitions);
-    crate::semantic::analyze(&mut projected);
+    crate::semantic::analyze(&mut projected)?;
     Ok(projected)
 }
 

@@ -33,6 +33,24 @@ fn single_version_rust_target_keeps_typed_decoding_and_owned_identity_outcomes()
 }
 
 #[test]
+fn inherited_models_require_explicit_adapter_decisions() {
+    let files = render(
+        r#"@version enum V { v1, v2 };
+        struct Base {
+            string id;
+            @added(V::v2) @optional string note;
+        };
+        struct Item : Base { string role; };
+        interface Store { @get(path="/item") Item read(); };"#,
+    );
+    assert!(
+        files[0].1.contains("item_downcast_to_v_1"),
+        "{}",
+        files[0].1
+    );
+}
+
+#[test]
 fn rust_target_rejects_public_layouts_without_an_explicit_construction_contract() {
     for source in [
         r#"@version enum V { only }; @derive(Ord, PartialOrd) enum Key { visible, @skip hidden }; typedef Key Alias; interface Store { @post(path="/values") string save(@body map<Alias,string> values); };"#,

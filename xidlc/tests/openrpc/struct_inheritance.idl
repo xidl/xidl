@@ -1,0 +1,11 @@
+module demo {
+    struct UserRef {
+        string id;
+    };
+    struct Participant : UserRef {
+        string role;
+    };
+    interface Media {
+        Participant who();
+    };
+};

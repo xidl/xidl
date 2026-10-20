@@ -12,6 +12,9 @@
 {% endif %}
 pub struct {{ ident }} {
     {% if parent %}
+        {% if enable_serde_attrs %}
+            #[serde(flatten)]
+        {% endif %}
         pub base: {{ parent }},
     {% endif %}
     {%- for member in members %}

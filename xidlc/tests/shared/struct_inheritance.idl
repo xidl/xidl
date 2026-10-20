@@ -1,0 +1,9 @@
+@rename_all("camelCase")
+struct UserRef {
+    string user_id;
+    @optional string avatar_url;
+};
+
+struct Participant : UserRef {
+    string role_name;
+};

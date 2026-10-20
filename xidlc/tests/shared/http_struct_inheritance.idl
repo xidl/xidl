@@ -1,0 +1,7 @@
+#include "./struct_inheritance.idl"
+
+@no_security
+interface Media {
+    @get(path = "/participant")
+    Participant who();
+};

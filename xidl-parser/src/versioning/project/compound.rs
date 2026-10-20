@@ -103,6 +103,9 @@ impl<'a> Projector<'a> {
             touch_scoped(parent_name, &mut self.references, &here);
         }
         projected.member = self.members(&value.member, own, &here)?;
+        // Semantic analysis recomputes inherited members from the projected
+        // base struct, so version availability filters them like own members.
+        projected.inherited.clear();
         Ok(Some(ConstrTypeDcl::StructDcl(projected)))
     }
 

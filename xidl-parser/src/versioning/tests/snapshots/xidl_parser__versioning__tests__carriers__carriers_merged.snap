@@ -110,6 +110,30 @@ expression: json
                     "field_id": 2,
                     "recursive": false
                   }
+                ],
+                "inherited": [
+                  {
+                    "annotations": [
+                      {
+                        "Rename": {
+                          "name": "id"
+                        }
+                      }
+                    ],
+                    "ty": {
+                      "StringType": {
+                        "bound": null
+                      }
+                    },
+                    "ident": [
+                      {
+                        "SimpleDeclarator": "id"
+                      }
+                    ],
+                    "default": null,
+                    "field_id": 1,
+                    "recursive": false
+                  }
                 ]
               }
             }
@@ -481,6 +505,30 @@ expression: json
                     "ident": [
                       {
                         "SimpleDeclarator": "extra"
+                      }
+                    ],
+                    "default": null,
+                    "field_id": 1,
+                    "recursive": false
+                  }
+                ],
+                "inherited": [
+                  {
+                    "annotations": [
+                      {
+                        "Rename": {
+                          "name": "id"
+                        }
+                      }
+                    ],
+                    "ty": {
+                      "StringType": {
+                        "bound": null
+                      }
+                    },
+                    "ident": [
+                      {
+                        "SimpleDeclarator": "id"
                       }
                     ],
                     "default": null,

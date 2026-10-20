@@ -58,6 +58,7 @@ fn push_get_attr(
         "struct.go.j2",
         &StructTemplate {
             name: response_name.clone(),
+            embed: String::new(),
             fields: render_field_block(
                 ctx,
                 vec![FieldTemplate {
@@ -97,6 +98,7 @@ fn push_set_attr(
         "struct.go.j2",
         &StructTemplate {
             name: request_name.clone(),
+            embed: String::new(),
             fields: render_field_block(
                 ctx,
                 vec![FieldTemplate {
