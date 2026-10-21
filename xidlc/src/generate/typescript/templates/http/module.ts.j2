@@ -1,5 +1,2 @@
-export namespace {{ ident }} {
-    {%- for block in blocks %}
-        {{- block }}
-    {%- endfor %}
-}
+{% for block in blocks %}{{ "export namespace " ~ ident ~ " {\n" }}{{ block }}
+{% endfor %}}

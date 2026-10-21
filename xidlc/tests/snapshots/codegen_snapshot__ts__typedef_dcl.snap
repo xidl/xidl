@@ -9,22 +9,16 @@ typedef_dcl.d.ts
 
 
 
-    
-
 export type FooSeq = Array<Foo>;
 
-    
 
 export type uint8_t = u8;
 
-    
 
 export type u8string = string;
 
-    
 
 export type u16string = string;
-
 export {};
 ===============
 typedef_dcl.zod.ts

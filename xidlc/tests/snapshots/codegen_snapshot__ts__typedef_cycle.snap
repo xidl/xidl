@@ -9,18 +9,11 @@ typedef_cycle.d.ts
 
 
 
-    
-
 export type FooAlias = Foo;
-
-    
-
 export interface Foo {
-        
-            next?: FooAlias;
-                more: Array<FooAlias>;
-            }
-
+    next?: FooAlias;
+    more: Array<FooAlias>;
+}
 export {};
 ===============
 typedef_cycle.zod.ts

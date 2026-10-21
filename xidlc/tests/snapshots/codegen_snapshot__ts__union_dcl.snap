@@ -9,14 +9,10 @@ union_dcl.d.ts
 
 
 
-    
-
 export type B = never;
 
-    
 
 export type C = { a: number } | { b: string };
-
 export {};
 ===============
 union_dcl.zod.ts
