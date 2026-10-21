@@ -224,7 +224,10 @@ fn go_mirrors_the_unit_path_and_qualifies_the_reference() {
     let unit = fs::read_to_string(out.join("pkg/timestamp.go")).expect("pkg/timestamp.go");
     assert!(unit.contains("package pkg"), "pkg/timestamp.go: {unit}");
     let importer = fs::read_to_string(out.join("main.go")).expect("main.go");
-    assert!(importer.contains("import \"pkg\""), "main.go: {importer}");
+    assert!(
+        importer.contains("import (\n\t\"pkg\""),
+        "main.go: {importer}"
+    );
     assert!(importer.contains("pkg.Instant"), "main.go: {importer}");
 }
 
