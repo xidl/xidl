@@ -7,8 +7,6 @@ enum FormatLang {
     Idl,
     #[value(aliases = ["rs"])]
     Rust,
-    #[value(aliases=["j2", "jinja2"])]
-    Jinja,
 }
 
 #[derive(Debug, Args)]
@@ -32,7 +30,6 @@ impl ArgsFormat {
                     file.to_string_lossy().as_ref(),
                 )?,
                 FormatLang::Rust => crate::fmt::format_rust_source(&source)?,
-                FormatLang::Jinja => crate::fmt::format_jinja_source(&source)?,
             };
 
             if self.inplace {

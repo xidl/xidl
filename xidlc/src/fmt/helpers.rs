@@ -71,39 +71,6 @@ pub(super) fn needs_token_separator(prev: &str, next: &str) -> bool {
     (prev_is_word && next_is_word) || (prev_char == ':' && next_char == ':')
 }
 
-pub(super) fn normalize_blank_lines(input: &str) -> String {
-    let mut out = String::with_capacity(input.len());
-    let mut started = false;
-    let mut blank_run = 0usize;
-    let mut pending_blank = false;
-    for line in input.lines() {
-        let trimmed = line.trim_end_matches('\r');
-        if trimmed.trim().is_empty() {
-            if !started {
-                continue;
-            }
-            blank_run += 1;
-            if blank_run > 1 {
-                continue;
-            }
-            pending_blank = true;
-            continue;
-        }
-        if pending_blank && trimmed.trim() != "}" {
-            out.push('\n');
-        }
-        pending_blank = false;
-        started = true;
-        blank_run = 0;
-        out.push_str(trimmed);
-        out.push('\n');
-    }
-    while out.ends_with('\n') {
-        out.pop();
-    }
-    ensure_trailing_newline(&out)
-}
-
 pub(super) fn ensure_trailing_newline(input: &str) -> String {
     format!("{}\n", input.trim_end())
 }
