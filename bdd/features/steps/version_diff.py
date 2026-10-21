@@ -16,7 +16,7 @@ def diff_command(source, from_version, to_version):
         "-p",
         "xidlc",
         "--features",
-        "cli,fmt",
+        "cli",
         "--",
         "version",
         "diff",

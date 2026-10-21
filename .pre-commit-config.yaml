@@ -15,7 +15,7 @@ repos:
         name: xidlc fmt
         language: system
         files: ^(xidlc-examples/api/|golang/xidlc-examples/api/|xidlc/src/jsonrpc/|xidl-typeobject/idl/).+\.idl$
-        entry: cargo run -p xidlc --features cli,fmt -- fmt --inplace --lang idl
+        entry: cargo run -p xidlc --features cli -- fmt --inplace --lang idl
       - id: rustfmt
         name: rustfmt
         language: system

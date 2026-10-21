@@ -17,7 +17,7 @@ def generate_unsigned(context):
         "-p",
         "xidlc",
         "--features",
-        "cli,fmt",
+        "cli",
         "--",
         "gen",
         "-o",
