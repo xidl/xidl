@@ -5,7 +5,10 @@ mod indent;
 #[cfg(test)]
 mod tests;
 
-use crate::{diagnostic::DiagnosticRunner, error::IdlcResult};
+use crate::{
+    diagnostic::DiagnosticRunner,
+    error::{IdlcError, IdlcResult},
+};
 use std::collections::HashMap;
 
 use self::helpers::{build_gap, collect_tokens, ensure_trailing_newline};
@@ -67,15 +70,11 @@ pub fn format_idl_source_with_name(source: &str, filename: &str) -> IdlcResult<S
     .map(|output| ensure_trailing_newline(&output))
 }
 
-#[cfg(feature = "fmt-rust")]
+/// Parses generated Rust source and re-prints it with canonical formatting.
 pub fn format_rust_source(source: &str) -> IdlcResult<String> {
-    let syntax_tree = syn::parse_file(source).expect("internal error: invalid rust source!!");
+    let syntax_tree = syn::parse_file(source)
+        .map_err(|err| IdlcError::Fmt(format!("invalid rust source: {err}")))?;
     Ok(prettyplease::unparse(&syntax_tree))
-}
-
-#[cfg(not(feature = "fmt-rust"))]
-pub fn format_rust_source(source: &str) -> IdlcResult<String> {
-    Ok(source.to_string())
 }
 
 fn push_action(actions: &mut HashMap<usize, Vec<InsertKind>>, pos: usize, kind: InsertKind) {

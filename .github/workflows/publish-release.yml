@@ -127,7 +127,7 @@ jobs:
           zip: windows
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.ref_type == 'tag' && github.ref || 'refs/tags/nightly' }}
-          features: fmt,cli
+          features: cli
 
   publish-npm:
     name: Publish npm packages

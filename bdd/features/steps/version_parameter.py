@@ -60,7 +60,7 @@ def version_generate(context):
             "-p",
             "xidlc",
             "--features",
-            "cli,fmt",
+            "cli",
             "--",
             "gen",
             "-o",

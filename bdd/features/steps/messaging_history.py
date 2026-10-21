@@ -41,7 +41,7 @@ def messaging_corpus(context):
     context.messaging_work = Path(tempfile.mkdtemp(prefix="xidl-messaging-"))
     context.add_cleanup(shutil.rmtree, context.messaging_work)
     result = subprocess.run(
-        ["cargo", "build", "-p", "xidlc", "--features", "cli,fmt"],
+        ["cargo", "build", "-p", "xidlc", "--features", "cli"],
         capture_output=True,
         text=True,
         timeout=180,

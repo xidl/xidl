@@ -5,7 +5,7 @@ cd "$(dirname "$0")/.."
 probe_dir=$(mktemp -d)
 trap 'rm -rf "$probe_dir"' EXIT
 mkdir -p "$probe_dir/src"
-cargo run --locked -p xidlc --features cli,fmt -- gen --out-dir "$probe_dir/src" \
+cargo run --locked -p xidlc --features cli -- gen --out-dir "$probe_dir/src" \
   rust-axum --server xidlc/tests/shared/http_security_inheritance.idl
 printf 'pub mod http_security_inheritance;\n' > "$probe_dir/src/lib.rs"
 python3 - "$PWD/crates/xidl-rust-axum" "$probe_dir/Cargo.toml" <<'PYTHON'

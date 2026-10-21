@@ -17,7 +17,7 @@ init:
 
 # Test Rust
 test-rust: init
-    XIDLC_VERSION={{xidlc_snapshot_version}} XIDLC_GIT_HASH={{xidlc_snapshot_hash}} cargo test --all -F transport-all -F fmt
+    XIDLC_VERSION={{xidlc_snapshot_version}} XIDLC_GIT_HASH={{xidlc_snapshot_hash}} cargo test --all -F transport-all
     # Exercise the xidl-build CLI backend; `--all` unification enables `bundle`.
     cargo test -p xidl-build
 
@@ -83,7 +83,7 @@ fmt-jinja:
 
 # Build xtypes
 build-xtypes:
-    cargo r -p xidlc -F cli -F fmt -- gen --out-dir ./xidl-typeobject/src/ rust ./xidl-typeobject/idl/dds_xtypes_typeobject.idl
+    cargo r -p xidlc -F cli -- gen --out-dir ./xidl-typeobject/src/ rust ./xidl-typeobject/idl/dds_xtypes_typeobject.idl
 
 # Download release binaries into the npm platform packages
 npm-fetch-binaries:

@@ -19,7 +19,7 @@ def compiler():
                 "-p",
                 "xidlc",
                 "--features",
-                "cli,fmt",
+                "cli",
                 "--message-format=json",
             ],
             capture_output=True,
