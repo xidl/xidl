@@ -79,7 +79,7 @@ test-xidl-jsonrpc-coverage:
 
 # Format Jinja templates
 fmt-jinja:
-    cargo r -p xidlc -F cli -F fmt -- fmt -l jinja $(find xidlc -type f -name '*.j2' | sort) -i
+    python3 scripts/fmt_jinja.py -i $(find xidlc -type f -name '*.j2' | sort)
 
 # Build xtypes
 build-xtypes:

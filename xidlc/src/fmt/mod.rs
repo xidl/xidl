@@ -2,14 +2,13 @@ mod actions;
 mod formatter;
 mod helpers;
 mod indent;
-mod jinja;
 #[cfg(test)]
 mod tests;
 
 use crate::{diagnostic::DiagnosticRunner, error::IdlcResult};
 use std::collections::HashMap;
 
-use self::helpers::{build_gap, collect_tokens, ensure_trailing_newline, normalize_blank_lines};
+use self::helpers::{build_gap, collect_tokens, ensure_trailing_newline};
 
 const IDL_QUERY: &str = include_str!("queries/idl.scm");
 
@@ -77,16 +76,6 @@ pub fn format_rust_source(source: &str) -> IdlcResult<String> {
 #[cfg(not(feature = "fmt-rust"))]
 pub fn format_rust_source(source: &str) -> IdlcResult<String> {
     Ok(source.to_string())
-}
-
-pub fn format_jinja_source(source: &str) -> IdlcResult<String> {
-    if jinja::should_skip_jinja_format(source) {
-        return Ok(source.to_string());
-    }
-
-    Ok(normalize_blank_lines(&jinja::normalize_jinja_indentation(
-        source,
-    )))
 }
 
 fn push_action(actions: &mut HashMap<usize, Vec<InsertKind>>, pos: usize, kind: InsertKind) {
