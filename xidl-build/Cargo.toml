@@ -35,4 +35,4 @@ gen-openapi = ["xidlc?/gen-openapi"]
 gen-openrpc = ["xidlc?/gen-openrpc"]
 
 [dependencies]
-xidlc = { version = "0.105.1", path = "../xidlc", default-features = false, optional = true }
+xidlc = { version = "0.105.2", path = "../xidlc", default-features = false, optional = true }

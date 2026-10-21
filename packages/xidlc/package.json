@@ -21,16 +21,16 @@
   "license": "Apache-2.0",
   "name": "xidlc",
   "optionalDependencies": {
-    "xidlc-darwin-arm64": "0.105.1",
-    "xidlc-darwin-x64": "0.105.1",
-    "xidlc-linux-arm64": "0.105.1",
-    "xidlc-linux-x64": "0.105.1",
-    "xidlc-win32-arm64": "0.105.1",
-    "xidlc-win32-x64": "0.105.1"
+    "xidlc-darwin-arm64": "0.105.2",
+    "xidlc-darwin-x64": "0.105.2",
+    "xidlc-linux-arm64": "0.105.2",
+    "xidlc-linux-x64": "0.105.2",
+    "xidlc-win32-arm64": "0.105.2",
+    "xidlc-win32-x64": "0.105.2"
   },
   "repository": {
     "url": "https://github.com/xidl/xidl"
   },
   "type": "module",
-  "version": "0.105.1"
+  "version": "0.105.2"
 }
