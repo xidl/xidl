@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.105.1](https://github.com/xidl/xidl/compare/v0.105.0...v0.105.1) (2026-10-21)
+
+
+### Bug Fixes
+
+* **parser:** flatten inherited struct fields across targets ([de63308](https://github.com/xidl/xidl/commit/de633089118833109218d3d8b46dbe56356b8487))
+
 ## [0.105.0](https://github.com/xidl/xidl/compare/v0.104.0...v0.105.0) (2026-10-19)
 
 
