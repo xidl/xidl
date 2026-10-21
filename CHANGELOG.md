@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.105.2](https://github.com/xidl/xidl/compare/v0.105.1...v0.105.2) (2026-10-21)
+
+
+### Bug Fixes
+
+* **xidlc:** clean typescript template whitespace ([8713c23](https://github.com/xidl/xidl/commit/8713c230e82aea639e222f9c1b86a5bb7a16505e))
+* **xidlc:** format go spec imports ([7abc5a1](https://github.com/xidl/xidl/commit/7abc5a17f74b99f72f1d42512a6de57189b11fa2))
+
 ## [0.105.1](https://github.com/xidl/xidl/compare/v0.105.0...v0.105.1) (2026-10-21)
 
 
