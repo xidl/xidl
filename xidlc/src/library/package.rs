@@ -2,7 +2,7 @@ use super::command::{CommandRunner, argument};
 use super::error::LibraryError;
 use super::source::PackageSource;
 use std::path::{Path, PathBuf};
-use xidl_parser::manifest::Dependency;
+use xidl_parser::manifest::{Dependency, Revision};
 
 /// Directory of the shared cache, relative to the xidl home.
 pub const PACKAGE_DIR: &str = "pkg";
@@ -55,9 +55,27 @@ impl PackageStore {
     /// Returns [`LibraryError::Source`] when the dependency's `src` cannot be
     /// interpreted, and [`LibraryError::CacheRoot`] when no cache home is known.
     pub fn cache_dir(&self, name: &str, dependency: &Dependency) -> Result<PathBuf, LibraryError> {
+        let Some((src, revision)) = dependency.git() else {
+            return Err(LibraryError::Source {
+                name: name.to_string(),
+                src: dependency.path().unwrap_or("<unknown path>").to_string(),
+                reason: "path dependencies are mounted directly and have no package cache"
+                    .to_string(),
+            });
+        };
+        self.git_cache_dir(name, src, revision)
+    }
+
+    /// Cache directory for an already validated Git source and revision.
+    fn git_cache_dir(
+        &self,
+        name: &str,
+        src: &str,
+        revision: &Revision,
+    ) -> Result<PathBuf, LibraryError> {
         let root = self.root()?;
-        let source = PackageSource::parse(name, dependency.src())?;
-        let version = version_segment(dependency.revision().as_str());
+        let source = PackageSource::parse(name, src)?;
+        let version = version_segment(revision.as_str());
         Ok(root.join(source.host()).join(format!("{name}-{version}")))
     }
 
@@ -68,7 +86,14 @@ impl PackageStore {
     /// Returns [`LibraryError::Fetch`] when the repository cannot be cloned, and
     /// names the dependency and its source in the message.
     pub fn ensure(&self, name: &str, dependency: &Dependency) -> Result<PathBuf, LibraryError> {
-        let cache_dir = self.cache_dir(name, dependency)?;
+        let Some((src, revision)) = dependency.git() else {
+            return Err(LibraryError::Source {
+                name: name.to_string(),
+                src: dependency.path().unwrap_or("<unknown path>").to_string(),
+                reason: "path dependencies are mounted directly and are not fetched".to_string(),
+            });
+        };
+        let cache_dir = self.git_cache_dir(name, src, revision)?;
         if !self.fetcher.is_current(dependency, &cache_dir) {
             if cache_dir.exists() {
                 std::fs::remove_dir_all(&cache_dir).map_err(|source| LibraryError::Io {
@@ -86,12 +111,12 @@ impl PackageStore {
                 .fetch(name, dependency, &cache_dir)
                 .map_err(|err| LibraryError::Fetch {
                     name: name.to_string(),
-                    src: dependency.src().to_string(),
+                    src: src.to_string(),
                     reason: err.to_string(),
                 })?;
         }
 
-        let source = PackageSource::parse(name, dependency.src())?;
+        let source = PackageSource::parse(name, src)?;
         Ok(match source.subdir() {
             Some(subdir) => cache_dir.join(subdir),
             None => cache_dir,
@@ -168,9 +193,16 @@ impl PackageFetcher for GitPackageFetcher {
         dependency: &Dependency,
         destination: &Path,
     ) -> Result<(), LibraryError> {
-        let source = PackageSource::parse(name, dependency.src())?;
+        let Some((src, revision)) = dependency.git() else {
+            return Err(LibraryError::Source {
+                name: name.to_string(),
+                src: dependency.path().unwrap_or("<unknown path>").to_string(),
+                reason: "GitPackageFetcher only accepts Git dependencies".to_string(),
+            });
+        };
+        let source = PackageSource::parse(name, src)?;
         let dest = argument(destination);
-        let revision = dependency.revision().as_str();
+        let revision = revision.as_str();
 
         Self::git(vec![
             "init".to_string(),
@@ -224,7 +256,10 @@ impl PackageFetcher for GitPackageFetcher {
     }
 
     fn is_current(&self, dependency: &Dependency, destination: &Path) -> bool {
+        let Some((_, revision)) = dependency.git() else {
+            return false;
+        };
         std::fs::read_to_string(destination.join(REVISION_MARKER))
-            .is_ok_and(|revision| revision.trim() == dependency.revision().as_str())
+            .is_ok_and(|current| current.trim() == revision.as_str())
     }
 }

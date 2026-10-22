@@ -30,6 +30,7 @@ compiler = ">=0.100"
 [dependencies]
 "timestamp" = { src = "github.com/xidl/timestamp", tag = "v1.2.3" }
 "other" = { src = "github.com/xidl/xidl/xidl-std", rev = "9f0dabc" }
+"local-timestamp" = { path = "../timestamp" }
 ```
 
 | Key | Meaning |
@@ -56,13 +57,14 @@ files at all is an error rather than an empty compiler run.
 
 ## Dependencies
 
-Every `[dependencies]` entry needs a `src` plus exactly one revision key:
+Every `[dependencies]` entry declares exactly one of `src` or `path`:
 
 | Key | Meaning |
 | --- | --- |
-| `src` | Source of the library, such as `github.com/xidl/xidl/xidl-std`, its `https://` form, or a local path. |
-| `tag` | Release tag to fetch, such as `v1.2.3`. |
-| `rev` | Immutable commit hash to fetch. |
+| `src` | Git source of the library, such as `github.com/xidl/xidl/xidl-std` or its `https://` form. Git dependencies also need exactly one revision key. |
+| `path` | Local library directory, resolved relative to the manifest directory. Path dependencies do not use a revision. |
+| `tag` | Git release tag to fetch, such as `v1.2.3`. |
+| `rev` | Git commit hash to fetch. |
 
 Packages are fetched with `git`, preferring a sparse checkout so a `src` that
 points inside a repository only materializes the package subtree. A fetched
@@ -73,7 +75,20 @@ package lands in the shared cache:
 ```
 
 `<version>` is the declared `tag`, or the `rev` when a commit is pinned, and
-`<host>` is derived from `src` (`local` for filesystem paths).
+`<host>` is derived from `src`.
+
+A `path` dependency mounts the resolved directory directly and bypasses the
+package cache. This supports editable sibling libraries during local
+development:
+
+```toml
+[dependencies]
+"timestamp" = { path = "../timestamp" }
+```
+
+The path may be relative or absolute. A relative path starts at the directory
+containing the declaring `xidl.toml`, so the manifest can be consumed from any
+working directory.
 
 ### Consuming a Dependency
 

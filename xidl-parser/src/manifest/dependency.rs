@@ -17,29 +17,81 @@ impl Revision {
     }
 }
 
-/// One `[dependencies]` entry: where a library comes from and its revision.
+/// Where a dependency library comes from.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum DependencySource {
+    /// A Git package pinned to a tag or commit.
+    Git {
+        /// Repository or repository subdirectory source.
+        src: String,
+        /// Revision fetched from the repository.
+        revision: Revision,
+    },
+    /// A local library resolved relative to the manifest directory.
+    Path {
+        /// Filesystem path as written in the manifest.
+        path: String,
+    },
+}
+
+/// One `[dependencies]` entry.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Dependency {
-    src: String,
-    revision: Revision,
+    source: DependencySource,
 }
 
 impl Dependency {
-    /// Creates a dependency from an already validated source and revision.
+    /// Creates a Git dependency from an already validated source and revision.
     pub fn new(src: impl Into<String>, revision: Revision) -> Self {
         Self {
-            src: src.into(),
-            revision,
+            source: DependencySource::Git {
+                src: src.into(),
+                revision,
+            },
         }
     }
 
-    /// Declared source, for example `github.com/xidl/xidl/xidl-std`.
-    pub fn src(&self) -> &str {
-        &self.src
+    /// Creates a local dependency from an already validated path.
+    pub fn from_path(path: impl Into<String>) -> Self {
+        Self {
+            source: DependencySource::Path { path: path.into() },
+        }
     }
 
-    /// Revision the dependency is pinned to.
-    pub fn revision(&self) -> &Revision {
-        &self.revision
+    /// Declared dependency source.
+    pub fn source(&self) -> &DependencySource {
+        &self.source
+    }
+
+    /// Declared Git source, when this is a Git dependency.
+    pub fn src(&self) -> Option<&str> {
+        match &self.source {
+            DependencySource::Git { src, .. } => Some(src),
+            DependencySource::Path { .. } => None,
+        }
+    }
+
+    /// Pinned Git revision, when this is a Git dependency.
+    pub fn revision(&self) -> Option<&Revision> {
+        match &self.source {
+            DependencySource::Git { revision, .. } => Some(revision),
+            DependencySource::Path { .. } => None,
+        }
+    }
+
+    /// Declared local path, when this is a path dependency.
+    pub fn path(&self) -> Option<&str> {
+        match &self.source {
+            DependencySource::Git { .. } => None,
+            DependencySource::Path { path } => Some(path),
+        }
+    }
+
+    /// Git source and revision, when this is a Git dependency.
+    pub fn git(&self) -> Option<(&str, &Revision)> {
+        match &self.source {
+            DependencySource::Git { src, revision } => Some((src, revision)),
+            DependencySource::Path { .. } => None,
+        }
     }
 }

@@ -55,19 +55,26 @@ impl PackageFetcher for FakeFetcher {
         dependency: &xidl_parser::manifest::Dependency,
         destination: &Path,
     ) -> Result<(), LibraryError> {
+        let Some((src, revision)) = dependency.git() else {
+            return Err(LibraryError::Source {
+                name: name.to_string(),
+                src: dependency.path().unwrap_or("<unknown path>").to_string(),
+                reason: "fixture fetcher only accepts Git dependencies".to_string(),
+            });
+        };
         self.fetched
             .borrow_mut()
-            .push(format!("{name}@{}", dependency.revision().as_str()));
+            .push(format!("{name}@{}", revision.as_str()));
         fs::create_dir_all(destination).map_err(|source| LibraryError::Io {
             path: destination.to_path_buf(),
             source,
         })?;
-        let source = PackageSource::parse(name, dependency.src())?;
+        let source = PackageSource::parse(name, src)?;
         let root = match source.subdir() {
             Some(subdir) => destination.join(subdir),
             None => destination.to_path_buf(),
         };
-        write(&root.join(".fetched"), dependency.revision().as_str());
+        write(&root.join(".fetched"), revision.as_str());
         Ok(())
     }
 
@@ -76,8 +83,11 @@ impl PackageFetcher for FakeFetcher {
         dependency: &xidl_parser::manifest::Dependency,
         destination: &Path,
     ) -> bool {
+        let Some((_, revision)) = dependency.git() else {
+            return false;
+        };
         let marker = destination.join(".fetched");
-        fs::read_to_string(marker).is_ok_and(|rev| rev == dependency.revision().as_str())
+        fs::read_to_string(marker).is_ok_and(|current| current == revision.as_str())
     }
 }
 

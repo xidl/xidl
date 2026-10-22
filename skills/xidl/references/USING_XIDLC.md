@@ -76,6 +76,7 @@ compiler = ">=0.100"
 
 [dependencies]
 "timestamp" = { src = "github.com/xidl/timestamp", tag = "v1.2.3" }
+"local-timestamp" = { path = "../timestamp" }
 ```
 
 - Inputs default to the `*.idl` files beside the manifest; `files` and `exclude`
@@ -83,6 +84,8 @@ compiler = ">=0.100"
 - Dependencies are fetched with `git` into `~/.xidl/pkg/<host>/<name>-<version>`
   and mounted by name, so contracts consume them with
   `#include "timestamp/lib.idl"`.
+- A `path` dependency mounts a local directory relative to the manifest and
+  bypasses the package cache, which keeps editable sibling libraries in sync.
 - `compiler` is a version range; when the running `xidlc` is outside it, the
   newest matching release is installed into `~/.xidl/toolchain/<version>/` and
   used instead.

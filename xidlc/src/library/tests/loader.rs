@@ -76,6 +76,70 @@ fn loader_expands_libraries_and_passes_plain_files_through() {
 }
 
 #[test]
+fn loader_mounts_path_dependencies_relative_to_the_manifest() {
+    let dir = temp_dir("loader-path");
+    let dependency = dir.join("timestamp");
+    write(
+        &dependency.join("xidl.toml"),
+        "name = \"timestamp\"\nversion = \"1.0.0\"\n",
+    );
+    write(
+        &dependency.join("lib.idl"),
+        "struct Stamp { int32 value; };\n",
+    );
+    write(
+        &dir.join("project/xidl.toml"),
+        "name = \"project\"\nversion = \"1.0.0\"\n\n[dependencies]\n\
+         \"timestamp\" = { path = \"../timestamp\" }\n",
+    );
+    write(
+        &dir.join("project/contract.idl"),
+        "struct Contract { int32 value; };\n",
+    );
+
+    let fetcher = std::rc::Rc::new(FakeFetcher::default());
+    let store = PackageStore::with_root(dir.join("pkgs"), Box::new(SharedFetcher(fetcher.clone())));
+    let loader = LibraryLoader::with_packages(store);
+    let resolved = loader.resolve(&[dir.join("project")]).unwrap();
+
+    assert_eq!(
+        resolved.mounts().get("timestamp"),
+        Some(&dependency.canonicalize().unwrap())
+    );
+    assert_eq!(
+        fetcher.fetch_count(),
+        0,
+        "path dependencies are not fetched"
+    );
+    cleanup(dir);
+}
+
+#[test]
+fn loader_reports_a_missing_path_dependency() {
+    let dir = temp_dir("loader-path-missing");
+    write(
+        &dir.join("project/xidl.toml"),
+        "name = \"project\"\nversion = \"1.0.0\"\n\n[dependencies]\n\
+         \"timestamp\" = { path = \"../missing\" }\n",
+    );
+    write(
+        &dir.join("project/contract.idl"),
+        "struct Contract { int32 value; };\n",
+    );
+
+    let loader = LibraryLoader::with_packages(PackageStore::with_root(
+        dir.join("pkgs"),
+        Box::new(FakeFetcher::default()),
+    ));
+    let err = loader.resolve(&[dir.join("project")]).unwrap_err();
+
+    assert!(matches!(err, LibraryError::PathDependency { .. }));
+    assert!(err.to_string().contains("timestamp"), "{err}");
+    assert!(err.to_string().contains("missing"), "{err}");
+    cleanup(dir);
+}
+
+#[test]
 fn loader_deduplicates_repeated_arguments() {
     let dir = temp_dir("loader-dedup");
     write(&dir.join("extra.idl"), "struct Extra { int32 v; };\n");

@@ -178,7 +178,11 @@ impl LibraryLoader {
                 if mounts.contains_key(name) {
                     continue;
                 }
-                mounts.insert(name.clone(), self.packages.ensure(name, dependency)?);
+                let mount = match dependency.path() {
+                    Some(path) => loaded.resolve_path_dependency(name, path)?,
+                    None => self.packages.ensure(name, dependency)?,
+                };
+                mounts.insert(name.clone(), mount);
             }
             manifests.push(loaded);
         }

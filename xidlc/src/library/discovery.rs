@@ -63,6 +63,30 @@ impl LoadedManifest {
         &self.manifest
     }
 
+    /// Resolves a path dependency relative to this manifest's directory.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`LibraryError::PathDependency`] when the target cannot be
+    /// canonicalized or is not a directory.
+    pub fn resolve_path_dependency(&self, name: &str, path: &str) -> Result<PathBuf, LibraryError> {
+        let declared = self.dir.join(path);
+        let resolved =
+            std::fs::canonicalize(&declared).map_err(|source| LibraryError::PathDependency {
+                name: name.to_string(),
+                path: declared.clone(),
+                reason: source.to_string(),
+            })?;
+        if !resolved.is_dir() {
+            return Err(LibraryError::PathDependency {
+                name: name.to_string(),
+                path: resolved,
+                reason: "path dependency must point to a directory".to_string(),
+            });
+        }
+        Ok(resolved)
+    }
+
     /// The IDL files this library contributes to the compiler run.
     ///
     /// # Errors

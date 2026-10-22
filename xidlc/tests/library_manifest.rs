@@ -130,6 +130,60 @@ fn manifest_expands_inputs_and_mounts_a_dependency() {
 }
 
 #[test]
+fn manifest_mounts_a_path_dependency_without_git() {
+    let root = temp_dir();
+    let dependency = root.join("timestamp");
+    let project = root.join("project");
+    let packages = root.join("cache");
+
+    write(
+        &dependency.join("xidl.toml"),
+        "name = \"timestamp\"\nversion = \"1.0.0\"\n",
+    );
+    write(
+        &dependency.join("lib.idl"),
+        "struct Stamp { int32 value; };\n",
+    );
+    write(
+        &project.join("xidl.toml"),
+        "name = \"project\"\nversion = \"1.0.0\"\n\n[dependencies]\n\
+         \"timestamp\" = { path = \"../timestamp\" }\n",
+    );
+    write(
+        &project.join("contract.idl"),
+        "#include \"timestamp/lib.idl\"\nstruct Contract { Stamp stamp; };\n",
+    );
+
+    let loader = LibraryLoader::with_packages(PackageStore::with_root(
+        packages.clone(),
+        Box::new(GitPackageFetcher),
+    ));
+    let resolved = loader.resolve(&[project]).expect("resolve library");
+    let mount = resolved
+        .mounts()
+        .get("timestamp")
+        .expect("path dependency mounted");
+
+    assert_eq!(mount, &dependency.canonicalize().expect("canonical path"));
+    assert!(
+        !packages.exists(),
+        "path dependencies bypass the package cache"
+    );
+
+    let props = HashMap::from([(MOUNT_PROPERTY.to_string(), resolved.mount_property())]);
+    let mut generator = Generator::new("hir".to_string());
+    let file = resolved.files().first().expect("contract input");
+    let source = fs::read_to_string(file).expect("read input");
+    let artifacts = generator
+        .generate_from_idl(&source, file, props)
+        .expect("generate hir");
+    let content = artifacts.first().expect("hir artifact").content();
+
+    assert!(content.contains("Stamp"), "{content}");
+    fs::remove_dir_all(root).expect("remove fixture");
+}
+
+#[test]
 fn manifest_requires_the_declared_compiler_range() {
     let root = temp_dir();
     let project = root.join("project");
