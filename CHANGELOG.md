@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.106.0](https://github.com/xidl/xidl/compare/v0.105.2...v0.106.0) (2026-10-22)
+
+
+### Features
+
+* **manifest:** support path dependencies ([78e6b4e](https://github.com/xidl/xidl/commit/78e6b4e261ceb77804dbf584787a00aba90f35f9)), closes [#376](https://github.com/xidl/xidl/issues/376)
+
 ## [0.105.2](https://github.com/xidl/xidl/compare/v0.105.1...v0.105.2) (2026-10-21)
 
 
