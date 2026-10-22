@@ -1,4 +1,4 @@
-use super::{Manifest, ManifestError, Revision};
+use super::{DependencySource, Manifest, ManifestError, Revision};
 use semver::{Version, VersionReq};
 use std::error::Error;
 use std::path::Path;
@@ -50,12 +50,25 @@ compiler = ">=0.100"
     );
 
     let timestamp = &manifest.dependencies()["timestamp"];
-    assert_eq!(timestamp.src(), "github.com/x/timestamp");
-    assert_eq!(timestamp.revision(), &Revision::Tag("v1.2.3".to_string()));
+    assert_eq!(timestamp.src(), Some("github.com/x/timestamp"));
+    assert_eq!(
+        timestamp.revision(),
+        Some(&Revision::Tag("v1.2.3".to_string()))
+    );
+    assert_eq!(timestamp.path(), None);
+    assert_eq!(
+        timestamp
+            .git()
+            .map(|(src, revision)| (src, revision.as_str())),
+        Some(("github.com/x/timestamp", "v1.2.3"))
+    );
 
     let other = &manifest.dependencies()["other"];
-    assert_eq!(other.src(), "https://github.com/x/other");
-    assert_eq!(other.revision(), &Revision::Rev("9f0dabc".to_string()));
+    assert_eq!(other.src(), Some("https://github.com/x/other"));
+    assert_eq!(
+        other.revision(),
+        Some(&Revision::Rev("9f0dabc".to_string()))
+    );
 }
 
 #[test]
@@ -66,6 +79,26 @@ fn parses_minimal_manifest() {
     assert!(manifest.exclude().is_empty());
     assert!(manifest.compiler().is_none());
     assert!(manifest.dependencies().is_empty());
+}
+
+#[test]
+fn parses_path_dependency() {
+    let manifest = parse(
+        "name = \"project\"\nversion = \"1.0.0\"\n\n[dependencies]\n\
+         \"timestamp\" = { path = \"../timestamp\" }\n",
+    );
+
+    let timestamp = &manifest.dependencies()["timestamp"];
+    assert_eq!(timestamp.path(), Some("../timestamp"));
+    assert_eq!(
+        timestamp.source(),
+        &DependencySource::Path {
+            path: "../timestamp".to_string(),
+        }
+    );
+    assert!(timestamp.src().is_none());
+    assert!(timestamp.revision().is_none());
+    assert!(timestamp.git().is_none());
 }
 
 #[test]
@@ -99,6 +132,51 @@ fn rejects_dependency_without_revision() {
         "name = \"a\"\nversion = \"1.0.0\"\n\n[dependencies]\n\"b\" = { src = \"github.com/x/b\" }\n",
     );
     assert_eq!(invalid_field(&error), "dependencies.b");
+}
+
+#[test]
+fn rejects_dependency_with_both_source_and_path() {
+    let error = parse_err(
+        "name = \"a\"\nversion = \"1.0.0\"\n\n[dependencies]\n\
+         \"b\" = { src = \"github.com/x/b\", path = \"../b\", tag = \"v1\" }\n",
+    );
+    assert_eq!(invalid_field(&error), "dependencies.b");
+    assert!(
+        error.to_string().contains("both `src` and `path`"),
+        "{error}"
+    );
+}
+
+#[test]
+fn rejects_path_dependency_with_revision() {
+    let error = parse_err(
+        "name = \"a\"\nversion = \"1.0.0\"\n\n[dependencies]\n\
+         \"b\" = { path = \"../b\", rev = \"abc\" }\n",
+    );
+    assert_eq!(invalid_field(&error), "dependencies.b");
+    assert!(
+        error.to_string().contains("cannot declare `rev` or `tag`"),
+        "{error}"
+    );
+}
+
+#[test]
+fn rejects_blank_path_dependency() {
+    let error = parse_err(
+        "name = \"a\"\nversion = \"1.0.0\"\n\n[dependencies]\n\
+         \"b\" = { path = \"  \" }\n",
+    );
+    assert_eq!(invalid_field(&error), "dependencies.b.path");
+}
+
+#[test]
+fn rejects_dependency_without_source_or_path() {
+    let error = parse_err("name = \"a\"\nversion = \"1.0.0\"\n\n[dependencies]\n\"b\" = { }\n");
+    assert_eq!(invalid_field(&error), "dependencies.b");
+    assert!(
+        error.to_string().contains("exactly one of `src` or `path`"),
+        "{error}"
+    );
 }
 
 #[test]

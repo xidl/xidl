@@ -32,6 +32,15 @@ pub enum LibraryError {
         /// Why the fetch failed.
         reason: String,
     },
+    /// A local dependency path could not be used as a mount.
+    PathDependency {
+        /// Dependency name.
+        name: String,
+        /// Resolved path named by the dependency.
+        path: PathBuf,
+        /// Why the path was rejected.
+        reason: String,
+    },
     /// An external command required for resolution failed.
     Command {
         /// Program that was executed.
@@ -76,6 +85,11 @@ impl fmt::Display for LibraryError {
                     "failed to fetch dependency `{name}` from `{src}`: {reason}"
                 )
             }
+            Self::PathDependency { name, path, reason } => write!(
+                f,
+                "invalid path dependency `{name}` at {}: {reason}",
+                path.display()
+            ),
             Self::Command {
                 program,
                 args,
@@ -110,6 +124,7 @@ impl Error for LibraryError {
             Self::Io { source, .. } => Some(source),
             Self::Source { .. }
             | Self::Fetch { .. }
+            | Self::PathDependency { .. }
             | Self::Command { .. }
             | Self::Toolchain { .. }
             | Self::CacheRoot

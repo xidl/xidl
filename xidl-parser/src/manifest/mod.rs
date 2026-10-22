@@ -15,7 +15,7 @@ mod tests;
 use std::collections::BTreeMap;
 use std::path::Path;
 
-pub use dependency::{Dependency, Revision};
+pub use dependency::{Dependency, DependencySource, Revision};
 pub use error::ManifestError;
 use semver::{Version, VersionReq};
 

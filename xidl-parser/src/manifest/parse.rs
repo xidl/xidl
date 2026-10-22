@@ -24,7 +24,10 @@ struct RawManifest {
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct RawDependency {
-    src: String,
+    #[serde(default)]
+    src: Option<String>,
+    #[serde(default)]
+    path: Option<String>,
     #[serde(default)]
     rev: Option<String>,
     #[serde(default)]
@@ -68,33 +71,55 @@ fn parse_dependency(
     raw: RawDependency,
 ) -> Result<Dependency, ManifestError> {
     let base = format!("dependencies.{name}");
-    required_text(path, &format!("{base}.src"), &raw.src)?;
-
-    let revision = match (raw.rev, raw.tag) {
-        (Some(rev), None) => {
-            required_text(path, &format!("{base}.rev"), &rev)?;
-            Revision::Rev(rev)
-        }
-        (None, Some(tag)) => {
-            required_text(path, &format!("{base}.tag"), &tag)?;
-            Revision::Tag(tag)
-        }
-        (Some(_), Some(_)) => {
-            return Err(ManifestError::InvalidField {
-                path: path.to_path_buf(),
-                field: base,
-                reason: "declares both `rev` and `tag`; keep exactly one".to_string(),
-            });
-        }
-        (None, None) => {
-            return Err(ManifestError::InvalidField {
-                path: path.to_path_buf(),
-                field: base,
-                reason: "needs either `rev` or `tag` to pin a revision".to_string(),
-            });
-        }
+    let invalid = |field: &str, reason: &str| ManifestError::InvalidField {
+        path: path.to_path_buf(),
+        field: field.to_string(),
+        reason: reason.to_string(),
     };
-    Ok(Dependency::new(raw.src, revision))
+
+    match (raw.src, raw.path) {
+        (Some(_), Some(_)) => Err(invalid(
+            &base,
+            "declares both `src` and `path`; keep exactly one",
+        )),
+        (Some(src), None) => {
+            required_text(path, &format!("{base}.src"), &src)?;
+            let revision = match (raw.rev, raw.tag) {
+                (Some(rev), None) => {
+                    required_text(path, &format!("{base}.rev"), &rev)?;
+                    Revision::Rev(rev)
+                }
+                (None, Some(tag)) => {
+                    required_text(path, &format!("{base}.tag"), &tag)?;
+                    Revision::Tag(tag)
+                }
+                (Some(_), Some(_)) => {
+                    return Err(invalid(
+                        &base,
+                        "declares both `rev` and `tag`; keep exactly one",
+                    ));
+                }
+                (None, None) => {
+                    return Err(invalid(
+                        &base,
+                        "needs either `rev` or `tag` to pin a revision",
+                    ));
+                }
+            };
+            Ok(Dependency::new(src, revision))
+        }
+        (None, Some(path_dependency)) => {
+            required_text(path, &format!("{base}.path"), &path_dependency)?;
+            if raw.rev.is_some() || raw.tag.is_some() {
+                return Err(invalid(
+                    &base,
+                    "`path` dependencies cannot declare `rev` or `tag`",
+                ));
+            }
+            Ok(Dependency::from_path(path_dependency))
+        }
+        (None, None) => Err(invalid(&base, "needs exactly one of `src` or `path`")),
+    }
 }
 
 /// Parses and validates manifest text into a [`Manifest`].

@@ -31,6 +31,23 @@ fn package_cache_path_sanitizes_commit_hashes() {
 }
 
 #[test]
+fn package_cache_rejects_path_dependencies() {
+    let root = temp_dir("cache-path-dependency");
+    let store = PackageStore::with_root(root.clone(), Box::new(FakeFetcher::default()));
+    let dependency = xidl_parser::manifest::Dependency::from_path("../timestamp");
+
+    let err = store.cache_dir("timestamp", &dependency).unwrap_err();
+
+    assert!(matches!(err, LibraryError::Source { .. }));
+    assert!(err.to_string().contains("mounted directly"), "{err}");
+
+    let err = store.ensure("timestamp", &dependency).unwrap_err();
+    assert!(matches!(err, LibraryError::Source { .. }));
+    assert!(err.to_string().contains("mounted directly"), "{err}");
+    cleanup(root);
+}
+
+#[test]
 fn package_ensure_fetches_once_and_reuses_the_cache() {
     let root = temp_dir("ensure");
     let fetcher = Rc::new(FakeFetcher::default());
