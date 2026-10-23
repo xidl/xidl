@@ -10,12 +10,21 @@ mod gen {
 use gen::{v1, v2, version_adapters::*};
 
 struct Hooks;
+/// Storage keeps the retired colour while v1 is served; readers resolve it per instance.
+struct Storage;
+impl StoredValues for Storage {
+    fn item_color(&self, source: &v2::Item) -> Option<String> {
+        (source.name == "rare").then(|| "teal".to_string())
+    }
+    /// Never stored: the hook derives the retired reference from the current one.
+    fn item_ref_v_1(&self, _: &v2::Item) -> Option<String> { None }
+}
 impl VersionAdapters for Hooks {
     fn item_upcast_from_v_1(&self, source: &v1::Item) -> VersionedResult<ItemUpcastFromV1Decision> {
         Ok(ItemUpcastFromV1Decision { owner: "ops".into(), note: None, ref_v2: source.ref_v1.clone(), color: IGNORED, ref_v1: IGNORED })
     }
-    fn item_downcast_to_v_1(&self, source: &v2::Item) -> VersionedResult<ItemDowncastToV1Decision> {
-        Ok(ItemDowncastToV1Decision { color: None, ref_v1: source.ref_v2.clone() })
+    fn item_downcast_to_v_1(&self, source: &v2::Item, stored: &dyn StoredValues) -> VersionedResult<ItemDowncastToV1Decision> {
+        Ok(ItemDowncastToV1Decision { color: stored.item_color(source), ref_v1: source.ref_v2.clone() })
     }
     fn state_downcast_to_v_1(&self, _: &StateDowncastToV1Changes) -> VersionedResult<v1::State> {
         Err(UnsupportedProjection { version: "1.0".into(), direction: Direction::Downcast, type_path: "State".into(), reason: "archived has no v1 representation".into() })
@@ -28,9 +37,13 @@ impl VersionAdapters for Hooks {
     }
 }
 
-async fn head_get(input: ItemsGetRequestV2, _: VersionContext) -> Result<v2::Item, v2::ItemsGetError> {
-    if input.id == "locked" { return Err(v2::ItemsGetError::Locked(v2::Locked { owner: "ops".into() })); }
-    Ok(v2::Item { ref_v2: format!("ref-{}", input.id), name: input.id, owner: "ops".into(), note: Some("head note".into()) })
+async fn head_get(input: ItemsGetRequestV2, _: VersionContext) -> HeadOutcome<v2::Item, v2::ItemsGetError, Storage> {
+    let outcome = if input.id == "locked" {
+        Err(v2::ItemsGetError::Locked(v2::Locked { owner: "ops".into() }))
+    } else {
+        Ok(v2::Item { ref_v2: format!("ref-{}", input.id), name: input.id, owner: "ops".into(), note: Some("head note".into()) })
+    };
+    HeadOutcome { outcome, stored: Storage }
 }
 async fn head_create(input: ItemsCreateRequestV2, _: VersionContext) -> Result<v2::State, xidl_rust_axum::Error> {
     Ok(if input.item.ref_v2 == "special" { v2::State::archived } else { v2::State::draft })

@@ -22,6 +22,9 @@ export type ProjectionOutcome<T, Head> =
 export interface FrameworkError { kind: "Framework"; error: unknown }
 export const IGNORED = "xidl.ignored";
 export type Ignored = typeof IGNORED;
+/** A downcast decision leaves a removed optional member absent only by saying so. */
+export const OMIT = "xidl.omit";
+export type Omitted = typeof OMIT;
 const ok = <T>(value: T): VersionedResult<T> => ({ ok: true, value });
 
 function mapSequence<S, T>(source: S[], convert: (value: S) => VersionedResult<T>): VersionedResult<T[]> {
@@ -51,9 +54,24 @@ function mapOptional<S, T>(source: S | undefined, convert: (value: S) => Version
 /** Hooks are required application decisions. Keep them pure and deterministic. */
 export interface VersionAdapters {
     {% for hook in hooks %}
-        {{ hook.name }}(source: {{ m.render_type(hook.input) }}): VersionedResult<{{ m.render_type(hook.output) }}>;
+        {{ hook.name }}(source: {{ m.render_type(hook.input) }}{% if hook.stored %}, stored: Pick<StoredValues, {% for reader in hook.stored %}{{ reader | tojson }}{% if not loop.last %} | {% endif %}{% endfor %}>{% endif %}): VersionedResult<{{ m.render_type(hook.output) }}>;
     {% endfor %}
 }
+{% if readers %}
+    /** Members older versions still read that Head no longer carries, resolved per Head instance by the application. */
+    export interface StoredValues {
+        {% for reader in readers %}
+            /** wire `{{ reader.wire }}`, last served by {{ reader.version }} */
+            {{ reader.name }}(source: {{ m.render_type(reader.input) }}): {{ m.render_type(reader.output) }};
+        {% endfor %}
+    }
+    /** Wire names each served version still reads from storage, by type; Head reads nothing. */
+    export const NEEDS = {
+        {% for need in needs %}
+            {{ need.key | tojson }}: { {% for entry in need.entries %}{{ entry[0] | tojson }}: [{% for wire in entry[1] %}{{ wire | tojson }}{% if not loop.last %}, {% endif %}{% endfor %}]{% if not loop.last %}, {% endif %}{% endfor %} },
+        {% endfor %}
+    } as const;
+{% endif %}
 {% for decision in decisions %}
     export interface {{ decision.name }} {
         {% for field in decision.fields %}
@@ -64,7 +82,7 @@ export interface VersionAdapters {
 
 {% macro convert(value, source) -%}
     {%- if value.kind == "Identity" -%}ok({{ source }})
-    {%- elif value.kind == "Named" -%}{{ value.data }}({{ source }}, adapters)
+    {%- elif value.kind == "Named" -%}{{ value.data.name }}({{ source }}{% if value.data.stored %}, stored{% endif %}, adapters)
     {%- elif value.kind == "Sequence" -%}mapSequence({{ source }}, (item) => {{ convert(value.data, "item") }})
     {%- elif value.kind == "Map" -%}mapRecord({{ source }}, (item) => {{ convert(value.data, "item") }})
     {%- elif value.kind == "Optional" -%}mapOptional({{ source }}, (item) => {{ convert(value.data, "item") }})
@@ -72,7 +90,7 @@ export interface VersionAdapters {
 {%- endmacro %}
 
 {% for c in conversions %}
-    export function {{ c.name }}(source: {{ m.render_type(c.source) }}, adapters: VersionAdapters): VersionedResult<{{ m.render_type(c.target) }}> {
+    export function {{ c.name }}(source: {{ m.render_type(c.source) }}{% if c.stored %}, stored: StoredValues{% endif %}, adapters: VersionAdapters): VersionedResult<{{ m.render_type(c.target) }}> {
         {% if c.kind == "hook" %}
             return adapters.{{ c.hook }}(source);
         {% elif c.kind == "alias" %}
@@ -104,7 +122,7 @@ export interface VersionAdapters {
             {% endif %}
         {% else %}
             {% if c.hook %}
-                const decision = adapters.{{ c.hook }}(source);
+                const decision = adapters.{{ c.hook }}(source{% if c.hook_stored %}, stored{% endif %});
                 if (!decision.ok) return decision;
             {% endif %}
             {% for copy in c.copies %}
@@ -120,7 +138,9 @@ export interface VersionAdapters {
                     {% endif %}
                 {% endfor %}
                 {% for field in c.assignments %}
-                    {% if field.optional %}
+                    {% if field.omittable %}
+                        ...(decision.value[{{ field.source | tojson }}] === OMIT ? {} : { [{{ field.target | tojson }}]: decision.value[{{ field.source | tojson }}] }),
+                    {% elif field.optional %}
                         ...(decision.value[{{ field.source | tojson }}] === undefined ? {} : { [{{ field.target | tojson }}]: decision.value[{{ field.source | tojson }}] }),
                     {% else %}
                         [{{ field.target | tojson }}]: decision.value[{{ field.source | tojson }}],
@@ -132,20 +152,20 @@ export interface VersionAdapters {
 {% endfor %}
 
 {% for op in operations %}
-    function downcastStep{{ op.prefix }}ResultTo{{ op.from }}(value: {{ m.render_type(op.result_source) }}, adapters: VersionAdapters): VersionedResult<{{ m.render_type(op.result_target) }}> {
-        const projected = {{ op.result_call }}({% if op.result_source_direct %}{ return: value }{% elif op.result_source.kind == "Void" %}{}{% else %}value{% endif %}, adapters);
+    function downcastStep{{ op.prefix }}ResultTo{{ op.from }}(value: {{ m.render_type(op.result_source) }}{% if op.stored %}, stored: StoredValues{% endif %}, adapters: VersionAdapters): VersionedResult<{{ m.render_type(op.result_target) }}> {
+        const projected = {{ op.result_call.name }}({% if op.result_source_direct %}{ return: value }{% elif op.result_source.kind == "Void" %}{}{% else %}value{% endif %}{% if op.result_call.stored %}, stored{% endif %}, adapters);
         if (!projected.ok) return projected;
         return ok({% if op.result_target_direct %}projected.value.return{% elif op.result_target.kind == "Void" %}undefined{% else %}projected.value{% endif %});
     }
     export type {{ op.prefix }}ErrorFrom{{ op.from }} = {% for class in op.errors_source %}errors.{{ class }} | {% endfor %}FrameworkError;
     export type {{ op.prefix }}ErrorTo{{ op.from }} = {% for class in op.errors_target %}errors.{{ class }} | {% endfor %}FrameworkError;
-    function downcastStep{{ op.prefix }}ErrorTo{{ op.from }}(head: {{ op.prefix }}ErrorFrom{{ op.from }}, adapters: VersionAdapters): VersionedResult<{{ op.prefix }}ErrorTo{{ op.from }}> {
+    function downcastStep{{ op.prefix }}ErrorTo{{ op.from }}(head: {{ op.prefix }}ErrorFrom{{ op.from }}{% if op.stored %}, stored: StoredValues{% endif %}, adapters: VersionAdapters): VersionedResult<{{ op.prefix }}ErrorTo{{ op.from }}> {
         {% for arm in op.error_arms %}
             if (head instanceof errors.{{ arm.class }}) {
                 {% if arm.hook %}
                     return adapters.{{ arm.hook }}(head);
                 {% else %}
-                    const projected = {{ arm.call }}(head, adapters);
+                    const projected = {{ arm.call.name }}(head{% if arm.call.stored %}, stored{% endif %}, adapters);
                     if (!projected.ok) return projected;
                     return ok(new errors.{{ arm.target_class }}(projected.value));
                 {% endif %}

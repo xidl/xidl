@@ -71,7 +71,7 @@ impl AdapterRenderer<'_> {
                     .iter()
                     .map(|key| self.error_class(key, &head.version.id))
                     .collect::<IdlcResult<Vec<_>>>()?;
-                let steps = self.plan.steps[index..]
+                let steps: Vec<super::context::Operation> = self.plan.steps[index..]
                     .iter()
                     .map(|step| {
                         file.operations
@@ -89,6 +89,7 @@ impl AdapterRenderer<'_> {
                     })
                     .collect::<IdlcResult<_>>()?;
                 let from = version.version.id.to_case(Case::Pascal);
+                let stored = steps.iter().any(|step| step.stored);
                 let schema =
                     wire.request(&version.version.id, &operation.inputs, request.clone())?;
                 let dispatcher = dispatchers
@@ -101,12 +102,14 @@ impl AdapterRenderer<'_> {
                         versions: Vec::new(),
                         results: Vec::new(),
                         errors: Vec::new(),
+                        stored: false,
                     });
                 dispatcher
                     .versions
                     .push((version.version.id.clone(), from.clone()));
                 dispatcher.results.push(result.clone());
                 dispatcher.errors.extend(errors.iter().cloned());
+                dispatcher.stored |= stored;
                 file.endpoints.push(Endpoint {
                     prefix,
                     from,
@@ -121,6 +124,7 @@ impl AdapterRenderer<'_> {
                     errors,
                     head_errors,
                     steps,
+                    stored,
                 });
             }
         }

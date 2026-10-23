@@ -3,6 +3,7 @@
 mod conversions;
 mod endpoints;
 mod operations;
+mod stored;
 mod unions;
 mod wire;
 
@@ -92,6 +93,7 @@ impl<'a> AdapterRenderer<'a> {
                 self.operation(operation, (&old, &new), &mut file)?;
             }
         }
+        self.thread_stored(&mut file);
         self.endpoints(&mut file)?;
         self.wire(&mut file)?;
         for conversion in &file.conversions {
@@ -127,13 +129,14 @@ impl<'a> AdapterRenderer<'a> {
                 .map(|item| &item.id)
                 .collect::<Vec<_>>(),
             file.hooks.iter().map(|item| &item.name).collect(),
+            file.readers.iter().map(|item| &item.name).collect(),
         ] {
             let mut unique = BTreeSet::new();
             for name in names {
                 if !unique.insert(name) {
                     return Err(Layout::error(
                         name,
-                        "generated variant or hook name is ambiguous",
+                        "generated variant, hook, or stored value reader name is ambiguous",
                     ));
                 }
             }

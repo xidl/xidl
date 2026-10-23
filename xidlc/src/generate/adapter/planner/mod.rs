@@ -72,7 +72,67 @@ impl<'a> AdapterPlanner<'a> {
                 })
             })
             .collect::<IdlcResult<_>>()?;
-        Ok(AdapterPlan { versions, steps })
+        let needs = Self::needs(&steps, &self.map.versions);
+        Ok(AdapterPlan {
+            versions,
+            steps,
+            needs,
+        })
+    }
+
+    /// A step's downcast assignments are exactly the members it removes from a
+    /// type or an operation response, so needs summarize validated plans.
+    fn needs(
+        steps: &[StepPlan],
+        versions: &[MapVersion],
+    ) -> BTreeMap<String, Vec<(String, Vec<String>)>> {
+        let per_step = steps
+            .iter()
+            .map(|step| {
+                let mut wires: BTreeMap<&str, BTreeSet<&str>> = BTreeMap::new();
+                let types = step.types.iter().filter_map(|plan| match &plan.downcast {
+                    Some(TypeConversion::Struct(conversion)) => {
+                        Some((plan.key.as_str(), &conversion.assignments))
+                    }
+                    _ => None,
+                });
+                let operations = step
+                    .operations
+                    .iter()
+                    .map(|plan| (plan.key.as_str(), &plan.downcast.assignments));
+                for (key, members) in types.chain(operations) {
+                    if members.is_empty() {
+                        continue;
+                    }
+                    wires
+                        .entry(key)
+                        .or_default()
+                        .extend(members.iter().map(|member| member.wire.as_str()));
+                }
+                wires
+            })
+            .collect::<Vec<_>>();
+        let keys = per_step
+            .iter()
+            .flat_map(|wires| wires.keys().copied())
+            .collect::<BTreeSet<_>>();
+        keys.into_iter()
+            .map(|key| {
+                let entries = (0..versions.len())
+                    .rev()
+                    .map(|index| {
+                        let names = per_step[index..]
+                            .iter()
+                            .filter_map(|wires| wires.get(key))
+                            .flatten()
+                            .map(|wire| wire.to_string())
+                            .collect::<BTreeSet<_>>();
+                        (versions[index].value.clone(), names.into_iter().collect())
+                    })
+                    .collect();
+                (key.to_string(), entries)
+            })
+            .collect()
     }
 
     fn error(&self, reason: &str) -> IdlcError {
