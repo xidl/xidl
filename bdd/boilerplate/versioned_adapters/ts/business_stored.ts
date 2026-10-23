@@ -57,7 +57,9 @@ export async function runStoredJourney(
   // An old client sending the retired member must see it acknowledged, not forwarded.
   const v2Head = take(
     a.decodeAndUpcastDepotShipFromV2(
-      { parcel: { ...wireParcel, carrier: 'postal', handling_note: 'ignored' } },
+      {
+        parcel: { ...wireParcel, carrier: 'postal', handling_note: 'ignored' },
+      },
       hooks,
     ),
   ).parcel;
