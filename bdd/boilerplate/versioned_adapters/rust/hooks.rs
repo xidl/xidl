@@ -7,11 +7,12 @@ pub struct Hooks {
     pub calls: AtomicUsize,
     pub errors: AtomicUsize,
     pub reject_downcast: bool,
+    pub reject_patch: bool,
 }
 
 /// Storage keeps what Head no longer carries while older versions still read it.
 /// Readers resolve identity from the Head instance; the chain never touches storage.
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct Storage {
     pub handling_notes: BTreeMap<String, String>,
     pub traces: BTreeMap<String, String>,
@@ -72,6 +73,13 @@ impl VersionAdapters for Hooks {
         if source.tracking == "reject-v2" { return Err(refusal("2026-04", Direction::Upcast, "Parcel")); }
         Ok(ParcelUpcastFromV2Decision { inspected: None, audit: "checked".into(), handling_note: IGNORED })
     }
+    fn parcel_patch_upcast_from_v_2(&self, source: &v2::ParcelPatch, _current: &v3::Parcel) -> VersionedResult<ParcelPatchUpcastFromV2Decision> {
+        if self.reject_patch { return Err(refusal("2026-04", Direction::Upcast, "ParcelPatch")); }
+        Ok(ParcelPatchUpcastFromV2Decision {
+            handling_note: IGNORED,
+            stored: DepotUpdateStored { handling_note: source.handling_note.clone() },
+        })
+    }
     fn state_downcast_to_v_1(&self, _: &StateDowncastToV1Changes) -> VersionedResult<v1::State> {
         Err(refusal("2026-01", Direction::Downcast, "State"))
     }
@@ -90,5 +98,17 @@ impl VersionAdapters for Hooks {
     fn depot_get_denied_error_downcast_to_v_2(&self, source: &v3::Denied) -> VersionedResult<v2::DepotGetError> {
         self.errors.fetch_add(1, Ordering::SeqCst);
         Ok(v2::DepotGetError::Busy(v2::Busy { reason: source.reason.clone() }))
+    }
+    fn depot_update_busy_error_downcast_to_v_1(&self, source: &v2::Busy) -> VersionedResult<v1::DepotUpdateError> {
+        self.errors.fetch_add(1, Ordering::SeqCst);
+        Ok(v1::DepotUpdateError::NotFound(v1::NotFound { id: source.reason.clone() }))
+    }
+    fn depot_update_framework_error_downcast_to_v_2(&self, source: &v3::Framework) -> VersionedResult<v2::DepotUpdateError> {
+        self.errors.fetch_add(1, Ordering::SeqCst);
+        Ok(v2::DepotUpdateError::Busy(v2::Busy { reason: source.reason.clone() }))
+    }
+    fn depot_update_denied_error_downcast_to_v_2(&self, source: &v3::Denied) -> VersionedResult<v2::DepotUpdateError> {
+        self.errors.fetch_add(1, Ordering::SeqCst);
+        Ok(v2::DepotUpdateError::Busy(v2::Busy { reason: source.reason.clone() }))
     }
 }
