@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { runHttpJourney } from './business_http';
 import { runStoredJourney } from './business_stored';
+import { runUpdateJourney } from './business_update';
 import * as a from './versioned_adapters_business.adapters';
 import * as errors from './versioned_adapters_business.errors';
 
@@ -60,6 +61,18 @@ const hooks: a.VersionAdapters = {
       ? refuse('2026-04', 'Depot.trace')
       : ok({ trace_id: traceId });
   },
+  depotUpdateBusyErrorDowncastToV1: source => {
+    exceptionHooks++;
+    return ok(new errors.v1$NotFound({ id: source.reason }));
+  },
+  depotUpdateDeniedErrorDowncastToV2: source => {
+    exceptionHooks++;
+    return ok(new errors.v2$Busy({ reason: source.reason }));
+  },
+  depotUpdateFrameworkErrorDowncastToV2: source => {
+    exceptionHooks++;
+    return ok(new errors.v2$Busy({ reason: source.reason }));
+  },
   optionalChangeDowncastToV1: (source, stored) =>
     ok({ note: stored.optionalChangeNote(source) ?? a.OMIT }),
   optionalChangeUpcastFromV1: source =>
@@ -67,6 +80,11 @@ const hooks: a.VersionAdapters = {
   parcelDowncastToV1: source => ok({ legacy: source.tracking }),
   parcelDowncastToV2: (source, stored) =>
     ok({ handling_note: stored.parcelHandlingNote(source) ?? a.OMIT }),
+  parcelPatchUpcastFromV2: source =>
+    ok({
+      handling_note: a.IGNORED,
+      stored: { handling_note: source.handling_note },
+    }),
   parcelUpcastFromV1: source => {
     hookCalls++;
     return ok({
@@ -363,4 +381,12 @@ const headNode = take(
 assert.equal(Object.hasOwn(headNode, 'children'), false);
 
 await runStoredJourney(hooks, storedValues, head, wireParcel);
-await runHttpJourney(hooks, storedValues, wireParcel, head, () => hookCalls);
+await runHttpJourney(
+  hooks,
+  storedValues,
+  storage.handlingNotes,
+  wireParcel,
+  head,
+  () => hookCalls,
+);
+await runUpdateJourney(hooks, storedValues, storage.handlingNotes, head);
