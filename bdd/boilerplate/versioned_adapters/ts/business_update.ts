@@ -44,7 +44,7 @@ export async function runUpdateJourney(
     if (request.patch.note !== undefined) {
       current = { ...current, note: request.patch.note };
     }
-    return { ok: true, value: current, stored: storedValues };
+    return { ok: true, stored: storedValues, value: current };
   };
   const refusePatch: a.VersionAdapters = {
     ...hooks,
@@ -63,7 +63,7 @@ export async function runUpdateJourney(
   // downcast response reads the persisted value back through the same storage.
   const written = await a.dispatchDepotUpdate(
     'v2',
-    { id: 'p1', patch: { note: 'fragile-two', handling_note: 'keep cold' } },
+    { id: 'p1', patch: { handling_note: 'keep cold', note: 'fragile-two' } },
     current,
     handler,
     hooks,
@@ -85,7 +85,7 @@ export async function runUpdateJourney(
     'v2',
     {
       id: 'p1',
-      patch: { note: before.note, handling_note: before.handling_note },
+      patch: { handling_note: before.handling_note, note: before.note },
     },
     current,
     handler,
@@ -109,8 +109,8 @@ export async function runUpdateJourney(
       writes++;
       return {
         ok: true,
-        value: { ...current, id: request.id },
         stored: storedValues,
+        value: { ...current, id: request.id },
       };
     },
     hooks,
@@ -121,7 +121,7 @@ export async function runUpdateJourney(
   // A refusal before the handler must not repeat or commit any write.
   const refused = await a.dispatchDepotUpdate(
     'v2',
-    { id: 'p1', patch: { note: 'never', handling_note: 'lost' } },
+    { id: 'p1', patch: { handling_note: 'lost', note: 'never' } },
     current,
     handler,
     refusePatch,
@@ -132,8 +132,16 @@ export async function runUpdateJourney(
 
   // Wire validation still rules the request envelope before any hook runs.
   for (const [version, raw, why] of [
-    ['v3', { id: 'p1', patch: { handling_note: 'gone' } }, 'v3 no longer declares the member'],
-    ['v2', { id: 'p1', patch: { carrier: 'postal' } }, 'ParcelPatch never declared a carrier'],
+    [
+      'v3',
+      { id: 'p1', patch: { handling_note: 'gone' } },
+      'v3 no longer declares the member',
+    ],
+    [
+      'v2',
+      { id: 'p1', patch: { carrier: 'postal' } },
+      'ParcelPatch never declared a carrier',
+    ],
     ['v1', { patch: { note: 'x' } }, 'the id envelope is validated too'],
   ] as const) {
     const result = await a.dispatchDepotUpdate(
@@ -162,5 +170,7 @@ export async function runUpdateJourney(
   );
   assert(plain.ok);
   assert.equal(plain.stored.handling_note, undefined);
-  console.log('PASS: update round trip persists and reads back retired members');
+  console.log(
+    'PASS: update round trip persists and reads back retired members',
+  );
 }
