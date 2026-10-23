@@ -70,13 +70,8 @@ def prepare_application(context, script, boilerplate_name="versioned_adapters"):
     shutil.copy(boilerplate / "tsconfig.json", output)
     shutil.copy(boilerplate / script, output)
     companions = {
-<<<<<<< HEAD
-        "business.ts": ["business_http.ts", "business_stored.ts"],
-        "chain.ts": ["chain_http.ts", "chain_app.ts"],
-=======
         "business.ts": ["business_http.ts", "business_stored.ts", "business_update.ts"],
-        "chain.ts": ["chain_http.ts"],
->>>>>>> 46ba5e6f (test(versioning): cover the update round trip in both languages)
+        "chain.ts": ["chain_http.ts", "chain_app.ts"],
     }
     for name in companions.get(script, []):
         shutil.copy(boilerplate / name, output)
