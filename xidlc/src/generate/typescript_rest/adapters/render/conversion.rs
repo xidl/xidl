@@ -146,7 +146,8 @@ impl AdapterRenderer<'_> {
         for member in &plan.assignments {
             let key = ts_prop_name(&member.name);
             keys.insert(member.name.clone());
-            let optional = member.value.as_ref().is_some_and(Names::optional);
+            let defaulted = !downward && member.value.as_ref().is_some_and(|value| value.defaulted);
+            let optional = member.value.as_ref().is_some_and(Names::optional) && !defaulted;
             let ty = input.target.member_type(member)?;
             if downward {
                 let reader = Names::reader(input.key, &member.name);

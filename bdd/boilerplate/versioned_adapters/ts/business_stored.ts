@@ -45,6 +45,14 @@ export async function runStoredJourney(
     ),
     false,
   );
+  // A defaulted addition keeps the value older callers implied; the Head
+  // default never silently applies to them.
+  assert.equal(
+    head.signature_required,
+    false,
+    'older callers keep the value they implied, never the new default',
+  );
+
   // A renamed member travels mechanically: no hook implements it, no storage
   // reads it, and the Head contract rejects the earlier wire name.
   assert.equal(

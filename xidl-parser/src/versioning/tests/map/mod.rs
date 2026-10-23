@@ -12,6 +12,27 @@ fn version_map_snapshot_contains_only_adjacent_direct_facts() {
 }
 
 #[test]
+fn member_descriptors_record_declared_defaults() {
+    let source = r#"
+        @version enum Versions { v1, v2 };
+        struct Request {
+            string to;
+            @added(Versions::v2) @optional @default(false) boolean fallback;
+            @added(Versions::v2) @default(3) long retries;
+            @added(Versions::v2) @optional string note;
+        };
+    "#;
+    let (spec, record) = analyze(source);
+    let map = crate::versioning::map::from_spec(&spec, &record, "defaults.idl").expect("map");
+    let value = serde_json::to_value(map).expect("serializable map");
+    let members = &value["steps"][0]["types"]["Request"]["members"];
+    assert_eq!(members["fallback"]["to"]["default"], "false");
+    assert_eq!(members["fallback"]["to"]["optional"], true);
+    assert_eq!(members["retries"]["to"]["default"], "3");
+    assert!(members["note"]["to"].get("default").is_none());
+}
+
+#[test]
 fn version_map_rejects_unversioned_contracts_at_the_call_boundary() {
     let spec = parse("struct Item { string id; };");
     assert!(
