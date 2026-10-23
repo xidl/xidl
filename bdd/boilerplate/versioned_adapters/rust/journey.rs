@@ -96,6 +96,94 @@ pub async fn run() {
             assert_eq!(value.legacy, "TRACK-1"); assert_eq!(value.handling_note.as_deref(), Some("fragile"));
         }, _ => panic!("dispatch must thread stored values through every adjacent step"),
     }
+    // The update round trip: a patch retiring a request member on Head must
+    // still let older callers persist it, and writes must read back unchanged.
+    let update_notes = std::sync::Mutex::new(BTreeMap::from([
+        ("p1".to_string(), "fragile".to_string()),
+    ]));
+    let update_writes = AtomicUsize::new(0);
+    let resource = std::sync::Mutex::new(head.clone());
+    async fn refused_handler(
+        _: DepotUpdateRequestV3, _: VersionContext, _: DepotUpdateStored,
+    ) -> HeadOutcome<v3::Parcel, v3::DepotUpdateError, Storage> {
+        unreachable!("validation refusals must never reach the handler")
+    }
+    match dispatch_depot_update(Version::V2, json!({"id":"p1","patch":{"note":"fragile-two","handling_note":"keep cold"}}), head.clone(), |request, context, stored| {
+        assert_eq!(context.original_version, Version::V2);
+        assert_eq!(stored.handling_note.as_deref(), Some("keep cold"), "the retired patch member must reach the handler");
+        let patched = {
+            let mut current = resource.lock().unwrap();
+            current.note = request.patch.note.clone();
+            current.clone()
+        };
+        update_notes.lock().unwrap().insert(request.id.clone(), stored.handling_note.clone().unwrap());
+        update_writes.fetch_add(1, Ordering::SeqCst);
+        let stored = Storage { handling_notes: update_notes.lock().unwrap().clone(), traces: BTreeMap::new() };
+        async move { HeadOutcome { outcome: Ok::<_, v3::DepotUpdateError>(patched), stored } }
+    }, &hooks).await.unwrap() {
+        ProjectionOutcome::Projected(DepotUpdateOutcome::V2(Ok(parcel))) => {
+            assert_eq!(parcel.handling_note.as_deref(), Some("keep cold"), "the persisted member must read back through the response chain");
+            assert_eq!(parcel.note.as_deref(), Some("fragile-two"));
+        }, _ => panic!("the v2 update must project"),
+    }
+    assert_eq!(update_writes.load(Ordering::SeqCst), 1);
+    // Read then an unchanged write: patching with exactly the served values
+    // projects to the identical v2 view.
+    let before = match downcast_parcel(Version::V2, resource.lock().unwrap().clone(), &storage, &hooks).unwrap() {
+        ParcelProjection::V2(value) => value,
+        _ => panic!("the shared resource must project to v2"),
+    };
+    let unchanged = dispatch_depot_update(Version::V2, json!({"id":"p1","patch":{"note":before.note,"handling_note":before.handling_note}}), head.clone(), |request, _, stored| {
+        let patched = {
+            let mut current = resource.lock().unwrap();
+            current.note = request.patch.note.clone();
+            current.clone()
+        };
+        update_notes.lock().unwrap().insert(request.id.clone(), stored.handling_note.unwrap_or_default());
+        update_writes.fetch_add(1, Ordering::SeqCst);
+        let stored = Storage { handling_notes: update_notes.lock().unwrap().clone(), traces: BTreeMap::new() };
+        async move { HeadOutcome { outcome: Ok::<_, v3::DepotUpdateError>(patched), stored } }
+    }, &hooks).await.unwrap();
+    match unchanged {
+        ProjectionOutcome::Projected(DepotUpdateOutcome::V2(Ok(parcel))) => {
+            assert_eq!(parcel.note, before.note);
+            assert_eq!(parcel.handling_note, before.handling_note);
+        }, _ => panic!("an unchanged write must project identically"),
+    }
+    assert_eq!(update_writes.load(Ordering::SeqCst), 2);
+    // The Head arm carries an empty bag: no step between a v3 request and
+    // Head ever holds a retired member, so there is nothing to persist.
+    match dispatch_depot_update(Version::V3, json!({"id":"p1","patch":{}}), head.clone(), |_, context, stored| {
+        assert_eq!(context.original_version, Version::V3);
+        assert!(stored.handling_note.is_none(), "Head callers must carry an empty bag");
+        update_writes.fetch_add(1, Ordering::SeqCst);
+        let patched = resource.lock().unwrap().clone();
+        let stored = Storage { handling_notes: update_notes.lock().unwrap().clone(), traces: BTreeMap::new() };
+        async move { HeadOutcome { outcome: Ok::<_, v3::DepotUpdateError>(patched), stored } }
+    }, &hooks).await.unwrap() {
+        ProjectionOutcome::Projected(DepotUpdateOutcome::V3(Ok(_))) => {},
+        _ => panic!("the Head update must dispatch"),
+    }
+    assert_eq!(update_writes.load(Ordering::SeqCst), 3);
+    // A business refusal before the handler commits nothing.
+    let refusing = Hooks { reject_patch: true, ..Hooks::default() };
+    assert!(matches!(
+        dispatch_depot_update(Version::V2, json!({"id":"p1","patch":{"handling_note":"lost"}}), head.clone(), refused_handler, &refusing).await,
+        Err(AdaptationError::Unsupported(_))
+    ));
+    assert_eq!(update_writes.load(Ordering::SeqCst), 3);
+    // Wire validation still rules the envelope before any hook or handler.
+    for (version, wire) in [
+        (Version::V3, json!({"id":"p1","patch":{"handling_note":"gone"}})),
+        (Version::V2, json!({"id":"p1","patch":{"carrier":"postal"}})),
+        (Version::V1, json!({"patch":{"note":"x"}})),
+    ] {
+        assert!(matches!(
+            dispatch_depot_update(version, wire, head.clone(), refused_handler, &hooks).await,
+            Err(AdaptationError::Validation(_))
+        ), "{version:?} must reject the invalid update envelope");
+    }
+    assert_eq!(update_writes.load(Ordering::SeqCst), 3);
     http_journey().await;
 }
 
