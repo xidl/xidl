@@ -71,12 +71,14 @@ impl<'a> AdapterPlanner<'a> {
                     surface,
                 })
             })
-            .collect::<IdlcResult<_>>()?;
+            .collect::<IdlcResult<Vec<VersionPlan>>>()?;
         let needs = Self::needs(&steps, &self.map.versions);
+        let updates = crate::generate::adapter::updates::plan(&steps, &versions)?;
         Ok(AdapterPlan {
             versions,
             steps,
             needs,
+            updates,
         })
     }
 

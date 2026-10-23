@@ -25,6 +25,13 @@ struct Parcel {
     Address fixed[2];
 };
 
+struct ParcelPatch {
+    @optional string note;
+    // Retired together with Parcel.handling_note: the patch that removes it on
+    // Head must still let v1 and v2 clients persist it through the update flow.
+    @removed(Versions::v3) @optional string handling_note;
+};
+
 struct Contact {
     @flatten Address address;
     @flatten map<string, string> tags;
@@ -61,6 +68,7 @@ union Choice switch(long) {
 
 interface Depot {
     @post(path = "/parcels") State ship(@body Parcel parcel);
+    @patch(path = "/parcels/{id}") Parcel update(@path string id, @body ParcelPatch patch) raises(NotFound, Busy, Framework, Denied);
     @get(path = "/parcels/{id}") Parcel get(@path string id) raises(NotFound, Busy, Framework, Denied);
     @post(path = "/contacts") Contact contact(@body Contact contact);
     @post(path = "/extra") Extra extra(@body Extra extra);

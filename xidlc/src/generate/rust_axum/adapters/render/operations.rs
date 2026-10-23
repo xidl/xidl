@@ -94,11 +94,13 @@ impl AdapterRenderer<'_> {
 
     pub(super) fn operation(
         &self,
+        index: usize,
         plan: &OperationPlan,
-        names: (&Names<'_>, &Names<'_>),
+        names: (&Names<'_>, &Names<'_>, &UpdateMarks<'_>),
         file: &mut FileContext,
     ) -> IdlcResult<()> {
-        let (old, new) = names;
+        let (old, new, marks) = names;
+        let mark = marks.envelope(&plan.key);
         let prefix = Self::prefix(&plan.source);
         let source_request = self.request_type(&plan.source, old.version);
         let target_request = self.request_type(&plan.target, new.version);
@@ -114,6 +116,7 @@ impl AdapterRenderer<'_> {
                 target_type: target_request.clone(),
                 source_shape: Shape::Struct,
                 target_shape: Shape::Struct,
+                update: Some(mark.clone()),
             },
             file,
         )?;
@@ -131,6 +134,7 @@ impl AdapterRenderer<'_> {
                 target_type: target_response.clone(),
                 source_shape,
                 target_shape,
+                update: None,
             },
             file,
         )?;
@@ -149,6 +153,8 @@ impl AdapterRenderer<'_> {
                     call: Some(Call {
                         name: old.function(key),
                         stored: false,
+                        current: false,
+                        pair: false,
                     }),
                     hook: None,
                 });
@@ -159,6 +165,7 @@ impl AdapterRenderer<'_> {
                     source: new.named(key),
                     target: target_error.clone(),
                     stored: false,
+                    current: None,
                 });
                 arms.push(ErrorArm {
                     source: variant,
@@ -168,7 +175,9 @@ impl AdapterRenderer<'_> {
                 });
             }
         }
+        let _ = index;
         file.operations.push(Operation {
+            current: mark.current,
             prefix: format!(
                 "{}_from_{}",
                 prefix.to_case(Case::Snake),
