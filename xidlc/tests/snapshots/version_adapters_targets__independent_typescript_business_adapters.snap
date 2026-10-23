@@ -26,6 +26,9 @@ export type ProjectionOutcome<T, Head> =
 export interface FrameworkError { kind: "Framework"; error: unknown }
 export const IGNORED = "xidl.ignored";
 export type Ignored = typeof IGNORED;
+/** A downcast decision leaves a removed optional member absent only by saying so. */
+export const OMIT = "xidl.omit";
+export type Omitted = typeof OMIT;
 const ok = <T>(value: T): VersionedResult<T> => ({ ok: true, value });
 
 function mapSequence<S, T>(source: S[], convert: (value: S) => VersionedResult<T>): VersionedResult<T[]> {
@@ -507,6 +510,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["fixed"]: z.unknown().optional(),
         
+            ["handling_note"]: z.unknown().optional(),
+        
             ["id"]: z.unknown().optional(),
         
             ["reference"]: z.unknown().optional(),
@@ -527,6 +532,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["legacy"]: wire["reference"],
         
+            ["handling_note"]: wire["handling_note"],
+        
             ["address"]: wire["address"],
         
             ["stops"]: wire["stops"],
@@ -541,6 +548,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
             ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
             ["legacy"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
+        
+            ["handling_note"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
         
             ["address"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType0Schema),
         
@@ -558,6 +567,10 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             
                 ["legacy"]: value["legacy"],
+            
+        
+            
+                ...(value["handling_note"] === undefined ? {} : { ["handling_note"]: value["handling_note"] }),
             
         
             
@@ -640,7 +653,34 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest18Schema: z.ZodType<ifaceTypes.v2.DepotBindingsRequest> = z.lazy(() =>
+    const wireRequest18Schema: z.ZodType<ifaceTypes.v1.DepotTraceRequest> = z.lazy(() =>
+    
+        z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
+        
+            ["id"]: z.unknown().optional(),
+        
+    }).strict()
+    
+    .transform((wire): Record<string, unknown> => ({
+        
+            ["id"]: wire["id"],
+        
+    }))
+    .pipe(z.object({
+        
+            ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+        
+    })).transform((value) => ({
+        
+            
+                ["id"]: value["id"],
+            
+        
+    })))
+    
+    );
+
+    const wireRequest19Schema: z.ZodType<ifaceTypes.v2.DepotBindingsRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -677,7 +717,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest19Schema: z.ZodType<ifaceTypes.v2.DepotBlobRequest> = z.lazy(() =>
+    const wireRequest20Schema: z.ZodType<ifaceTypes.v2.DepotBlobRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -758,7 +798,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest20Schema: z.ZodType<ifaceTypes.v2.DepotChooseRequest> = z.lazy(() =>
+    const wireRequest21Schema: z.ZodType<ifaceTypes.v2.DepotChooseRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -859,7 +899,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest22Schema: z.ZodType<ifaceTypes.v2.DepotContactRequest> = z.lazy(() =>
+    const wireRequest23Schema: z.ZodType<ifaceTypes.v2.DepotContactRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -927,7 +967,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest25Schema: z.ZodType<ifaceTypes.v2.DepotExtraRequest> = z.lazy(() =>
+    const wireRequest26Schema: z.ZodType<ifaceTypes.v2.DepotExtraRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -954,7 +994,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest27Schema: z.ZodType<ifaceTypes.v2.DepotGetRequest> = z.lazy(() =>
+    const wireRequest28Schema: z.ZodType<ifaceTypes.v2.DepotGetRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1018,7 +1058,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest28Schema: z.ZodType<ifaceTypes.v2.DepotInspectRequest> = z.lazy(() =>
+    const wireRequest29Schema: z.ZodType<ifaceTypes.v2.DepotInspectRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1072,7 +1112,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest30Schema: z.ZodType<ifaceTypes.v2.DepotOptionalChangeRequest> = z.lazy(() =>
+    const wireRequest31Schema: z.ZodType<ifaceTypes.v2.DepotOptionalChangeRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1111,6 +1151,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["fixed"]: z.unknown().optional(),
         
+            ["handling_note"]: z.unknown().optional(),
+        
             ["id"]: z.unknown().optional(),
         
             ["note"]: z.unknown().optional(),
@@ -1137,6 +1179,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["note"]: wire["note"],
         
+            ["handling_note"]: wire["handling_note"],
+        
             ["address"]: wire["address"],
         
             ["stops"]: wire["stops"],
@@ -1155,6 +1199,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
             ["carrier"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
             ["note"]: z.string().nullish().transform((value) => value ?? undefined),
+        
+            ["handling_note"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
         
             ["address"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType9Schema),
         
@@ -1183,6 +1229,10 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
             
         
             
+                ...(value["handling_note"] === undefined ? {} : { ["handling_note"]: value["handling_note"] }),
+            
+        
+            
                 ["address"]: value["address"],
             
         
@@ -1202,7 +1252,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest32Schema: z.ZodType<ifaceTypes.v2.DepotShipRequest> = z.lazy(() =>
+    const wireRequest33Schema: z.ZodType<ifaceTypes.v2.DepotShipRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1235,7 +1285,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest34Schema: z.ZodType<ifaceTypes.v2.DepotStateRequest> = z.lazy(() =>
+    const wireRequest35Schema: z.ZodType<ifaceTypes.v2.DepotStateRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1262,7 +1312,34 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest36Schema: z.ZodType<ifaceTypes.v3.DepotBindingsRequest> = z.lazy(() =>
+    const wireRequest37Schema: z.ZodType<ifaceTypes.v2.DepotTraceRequest> = z.lazy(() =>
+    
+        z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
+        
+            ["id"]: z.unknown().optional(),
+        
+    }).strict()
+    
+    .transform((wire): Record<string, unknown> => ({
+        
+            ["id"]: wire["id"],
+        
+    }))
+    .pipe(z.object({
+        
+            ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+        
+    })).transform((value) => ({
+        
+            
+                ["id"]: value["id"],
+            
+        
+    })))
+    
+    );
+
+    const wireRequest38Schema: z.ZodType<ifaceTypes.v3.DepotBindingsRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1299,7 +1376,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest37Schema: z.ZodType<ifaceTypes.v3.DepotBlobRequest> = z.lazy(() =>
+    const wireRequest39Schema: z.ZodType<ifaceTypes.v3.DepotBlobRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1380,7 +1457,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest38Schema: z.ZodType<ifaceTypes.v3.DepotChooseRequest> = z.lazy(() =>
+    const wireRequest40Schema: z.ZodType<ifaceTypes.v3.DepotChooseRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1481,7 +1558,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest40Schema: z.ZodType<ifaceTypes.v3.DepotContactRequest> = z.lazy(() =>
+    const wireRequest42Schema: z.ZodType<ifaceTypes.v3.DepotContactRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1553,7 +1630,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest43Schema: z.ZodType<ifaceTypes.v3.DepotExtraRequest> = z.lazy(() =>
+    const wireRequest45Schema: z.ZodType<ifaceTypes.v3.DepotExtraRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1580,7 +1657,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest45Schema: z.ZodType<ifaceTypes.v3.DepotGetRequest> = z.lazy(() =>
+    const wireRequest47Schema: z.ZodType<ifaceTypes.v3.DepotGetRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1607,7 +1684,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest46Schema: z.ZodType<{  }> = z.lazy(() =>
+    const wireRequest48Schema: z.ZodType<{  }> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1661,7 +1738,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest47Schema: z.ZodType<ifaceTypes.v3.DepotInspectRequest> = z.lazy(() =>
+    const wireRequest49Schema: z.ZodType<ifaceTypes.v3.DepotInspectRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1715,7 +1792,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest49Schema: z.ZodType<ifaceTypes.v3.DepotOptionalChangeRequest> = z.lazy(() =>
+    const wireRequest51Schema: z.ZodType<ifaceTypes.v3.DepotOptionalChangeRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1767,6 +1844,12 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
             ["stops"]: z.unknown().optional(),
         
     }).strict()
+    
+        .superRefine((wire, context) => {
+            for (const key of ["handling_note"]) {
+                if (Object.hasOwn(wire, key)) context.addIssue({ code: "custom", path: [key], message: "field is not available in served version" });
+            }
+        })
     
     .transform((wire): Record<string, unknown> => ({
         
@@ -1859,7 +1942,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest51Schema: z.ZodType<ifaceTypes.v3.DepotShipRequest> = z.lazy(() =>
+    const wireRequest53Schema: z.ZodType<ifaceTypes.v3.DepotShipRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1892,7 +1975,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest53Schema: z.ZodType<ifaceTypes.v3.DepotStateRequest> = z.lazy(() =>
+    const wireRequest55Schema: z.ZodType<ifaceTypes.v3.DepotStateRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1919,6 +2002,33 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
+    const wireRequest57Schema: z.ZodType<ifaceTypes.v3.DepotTraceRequest> = z.lazy(() =>
+    
+        z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
+        
+            ["id"]: z.unknown().optional(),
+        
+    }).strict()
+    
+    .transform((wire): Record<string, unknown> => ({
+        
+            ["id"]: wire["id"],
+        
+    }))
+    .pipe(z.object({
+        
+            ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+        
+    })).transform((value) => ({
+        
+            
+                ["id"]: value["id"],
+            
+        
+    })))
+    
+    );
+
 
 /** Hooks are required application decisions. Keep them pure and deterministic. */
 export interface VersionAdapters {
@@ -1927,11 +2037,11 @@ export interface VersionAdapters {
     
         optionalChangeUpcastFromV1(source: types.v1.OptionalChange): VersionedResult<OptionalChangeUpcastDecisionFromV1>;
     
-        optionalChangeDowncastToV1(source: types.v2.OptionalChange): VersionedResult<OptionalChangeDowncastDecisionToV1>;
+        optionalChangeDowncastToV1(source: types.v2.OptionalChange, stored: Pick<StoredValues, "optionalChangeNote">): VersionedResult<OptionalChangeDowncastDecisionToV1>;
     
         parcelUpcastFromV1(source: types.v1.Parcel): VersionedResult<ParcelUpcastDecisionFromV1>;
     
-        parcelDowncastToV1(source: types.v2.Parcel): VersionedResult<ParcelDowncastDecisionToV1>;
+        parcelDowncastToV1(source: types.v2.Parcel, stored: Pick<StoredValues, "parcelLegacy">): VersionedResult<ParcelDowncastDecisionToV1>;
     
         stateDowncastToV1(source: "shipping"): VersionedResult<types.v1.State>;
     
@@ -1939,13 +2049,45 @@ export interface VersionAdapters {
     
         parcelUpcastFromV2(source: types.v2.Parcel): VersionedResult<ParcelUpcastDecisionFromV2>;
     
+        parcelDowncastToV2(source: types.v3.Parcel, stored: Pick<StoredValues, "parcelHandlingNote">): VersionedResult<ParcelDowncastDecisionToV2>;
+    
         stateDowncastToV2(source: "delivered"): VersionedResult<types.v2.State>;
     
         depotGetFrameworkErrorDowncastToV2(source: errors.Framework): VersionedResult<errors.v2$NotFound | errors.v2$Busy | FrameworkError>;
     
         depotGetDeniedErrorDowncastToV2(source: errors.Denied): VersionedResult<errors.v2$NotFound | errors.v2$Busy | FrameworkError>;
     
+        depotTraceResponseDowncastToV2(source: { "return": string }, stored: Pick<StoredValues, "depotTraceResponseTraceId">): VersionedResult<DepotTraceResponseDowncastDecisionToV2>;
+    
 }
+
+    /** Members older versions still read that Head no longer carries, resolved per Head instance by the application. */
+    export interface StoredValues {
+        
+            /** wire `note`, last served by v1 */
+            optionalChangeNote(source: types.v2.OptionalChange): string | undefined;
+        
+            /** wire `reference`, last served by v1 */
+            parcelLegacy(source: types.v2.Parcel): string | undefined;
+        
+            /** wire `handling_note`, last served by v2 */
+            parcelHandlingNote(source: types.v3.Parcel): string | undefined;
+        
+            /** wire `trace_id`, last served by v2 */
+            depotTraceResponseTraceId(source: { "return": string }): string | undefined;
+        
+    }
+    /** Wire names each served version still reads from storage, by type; Head reads nothing. */
+    export const NEEDS = {
+        
+            "Depot.trace": { "2026-07": [], "2026-04": ["trace_id"], "2026-01": ["trace_id"] },
+        
+            "OptionalChange": { "2026-07": [], "2026-04": [], "2026-01": ["note"] },
+        
+            "Parcel": { "2026-07": [], "2026-04": ["handling_note"], "2026-01": ["handling_note", "reference"] },
+        
+    } as const;
+
 
     export interface OptionalChangeUpcastDecisionFromV1 {
         
@@ -1957,7 +2099,7 @@ export interface VersionAdapters {
 
     export interface OptionalChangeDowncastDecisionToV1 {
         
-            note?: string;
+            note: string | Omitted;
         
     }
 
@@ -1981,7 +2123,23 @@ export interface VersionAdapters {
 
     export interface ParcelUpcastDecisionFromV2 {
         
+            inspected?: string;
+        
             audit: string;
+        
+            handling_note: Ignored;
+        
+    }
+
+    export interface ParcelDowncastDecisionToV2 {
+        
+            handling_note: string | Omitted;
+        
+    }
+
+    export interface DepotTraceResponseDowncastDecisionToV2 {
+        
+            trace_id: string;
         
     }
 
@@ -2242,10 +2400,10 @@ export interface VersionAdapters {
         
     }
 
-    export function downcastOptionalChangeToV1(source: types.v2.OptionalChange, adapters: VersionAdapters): VersionedResult<types.v1.OptionalChange> {
+    export function downcastOptionalChangeToV1(source: types.v2.OptionalChange, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.OptionalChange> {
         
             
-                const decision = adapters.optionalChangeDowncastToV1(source);
+                const decision = adapters.optionalChangeDowncastToV1(source, stored);
                 if (!decision.ok) return decision;
             
             
@@ -2253,7 +2411,7 @@ export interface VersionAdapters {
                 
                 
                     
-                        ...(decision.value["note"] === undefined ? {} : { ["note"]: decision.value["note"] }),
+                        ...(decision.value["note"] === OMIT ? {} : { ["note"]: decision.value["note"] }),
                     
                 
             });
@@ -2270,17 +2428,20 @@ export interface VersionAdapters {
                 const converted0 = ok(source["id"]);
                 if (!converted0.ok) return converted0;
             
-                const converted1 = upcastAddressFromV1(source["address"], adapters);
+                const converted1 = mapOptional(source["handling_note"], (item) => ok(item));
                 if (!converted1.ok) return converted1;
             
-                const converted2 = mapSequence(source["stops"], (item) => upcastAddressFromV1(item, adapters));
+                const converted2 = upcastAddressFromV1(source["address"], adapters);
                 if (!converted2.ok) return converted2;
             
-                const converted3 = mapRecord(source["by_tag"], (item) => upcastAddressFromV1(item, adapters));
+                const converted3 = mapSequence(source["stops"], (item) => upcastAddressFromV1(item, adapters));
                 if (!converted3.ok) return converted3;
             
-                const converted4 = mapSequence(source["fixed"], (item) => upcastAddressFromV1(item, adapters));
+                const converted4 = mapRecord(source["by_tag"], (item) => upcastAddressFromV1(item, adapters));
                 if (!converted4.ok) return converted4;
+            
+                const converted5 = mapSequence(source["fixed"], (item) => upcastAddressFromV1(item, adapters));
+                if (!converted5.ok) return converted5;
             
             return ok({
                 
@@ -2289,19 +2450,23 @@ export interface VersionAdapters {
                     
                 
                     
-                        ["address"]: converted1.value,
+                        ...(converted1.value === undefined ? {} : { ["handling_note"]: converted1.value }),
                     
                 
                     
-                        ["stops"]: converted2.value,
+                        ["address"]: converted2.value,
                     
                 
                     
-                        ["by_tag"]: converted3.value,
+                        ["stops"]: converted3.value,
                     
                 
                     
-                        ["fixed"]: converted4.value,
+                        ["by_tag"]: converted4.value,
+                    
+                
+                    
+                        ["fixed"]: converted5.value,
                     
                 
                 
@@ -2321,27 +2486,30 @@ export interface VersionAdapters {
         
     }
 
-    export function downcastParcelToV1(source: types.v2.Parcel, adapters: VersionAdapters): VersionedResult<types.v1.Parcel> {
+    export function downcastParcelToV1(source: types.v2.Parcel, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Parcel> {
         
             
-                const decision = adapters.parcelDowncastToV1(source);
+                const decision = adapters.parcelDowncastToV1(source, stored);
                 if (!decision.ok) return decision;
             
             
                 const converted0 = ok(source["id"]);
                 if (!converted0.ok) return converted0;
             
-                const converted1 = downcastAddressToV1(source["address"], adapters);
+                const converted1 = mapOptional(source["handling_note"], (item) => ok(item));
                 if (!converted1.ok) return converted1;
             
-                const converted2 = mapSequence(source["stops"], (item) => downcastAddressToV1(item, adapters));
+                const converted2 = downcastAddressToV1(source["address"], adapters);
                 if (!converted2.ok) return converted2;
             
-                const converted3 = mapRecord(source["by_tag"], (item) => downcastAddressToV1(item, adapters));
+                const converted3 = mapSequence(source["stops"], (item) => downcastAddressToV1(item, adapters));
                 if (!converted3.ok) return converted3;
             
-                const converted4 = mapSequence(source["fixed"], (item) => downcastAddressToV1(item, adapters));
+                const converted4 = mapRecord(source["by_tag"], (item) => downcastAddressToV1(item, adapters));
                 if (!converted4.ok) return converted4;
+            
+                const converted5 = mapSequence(source["fixed"], (item) => downcastAddressToV1(item, adapters));
+                if (!converted5.ok) return converted5;
             
             return ok({
                 
@@ -2350,19 +2518,23 @@ export interface VersionAdapters {
                     
                 
                     
-                        ["address"]: converted1.value,
+                        ...(converted1.value === undefined ? {} : { ["handling_note"]: converted1.value }),
                     
                 
                     
-                        ["stops"]: converted2.value,
+                        ["address"]: converted2.value,
                     
                 
                     
-                        ["by_tag"]: converted3.value,
+                        ["stops"]: converted3.value,
                     
                 
                     
-                        ["fixed"]: converted4.value,
+                        ["by_tag"]: converted4.value,
+                    
+                
+                    
+                        ["fixed"]: converted5.value,
                     
                 
                 
@@ -2605,11 +2777,11 @@ export interface VersionAdapters {
         
     }
 
-    export function downcastDepotGetResponseToV1(source: { "return": types.v2.Parcel }, adapters: VersionAdapters): VersionedResult<{ "return": types.v1.Parcel }> {
+    export function downcastDepotGetResponseToV1(source: { "return": types.v2.Parcel }, stored: StoredValues, adapters: VersionAdapters): VersionedResult<{ "return": types.v1.Parcel }> {
         
             
             
-                const converted0 = downcastParcelToV1(source["return"], adapters);
+                const converted0 = downcastParcelToV1(source["return"], stored, adapters);
                 if (!converted0.ok) return converted0;
             
             return ok({
@@ -2677,11 +2849,11 @@ export interface VersionAdapters {
         
     }
 
-    export function downcastDepotOptionalChangeResponseToV1(source: { "return": types.v2.OptionalChange }, adapters: VersionAdapters): VersionedResult<{ "return": types.v1.OptionalChange }> {
+    export function downcastDepotOptionalChangeResponseToV1(source: { "return": types.v2.OptionalChange }, stored: StoredValues, adapters: VersionAdapters): VersionedResult<{ "return": types.v1.OptionalChange }> {
         
             
             
-                const converted0 = downcastOptionalChangeToV1(source["return"], adapters);
+                const converted0 = downcastOptionalChangeToV1(source["return"], stored, adapters);
                 if (!converted0.ok) return converted0;
             
             return ok({
@@ -2760,6 +2932,49 @@ export interface VersionAdapters {
                 
                     
                         ["return"]: converted0.value,
+                    
+                
+                
+            });
+        
+    }
+
+    export function upcastDepotTraceRequestFromV1(source: ifaceTypes.v1.DepotTraceRequest, adapters: VersionAdapters): VersionedResult<ifaceTypes.v2.DepotTraceRequest> {
+        
+            
+            
+                const converted0 = ok(source["id"]);
+                if (!converted0.ok) return converted0;
+            
+            return ok({
+                
+                    
+                        ["id"]: converted0.value,
+                    
+                
+                
+            });
+        
+    }
+
+    export function downcastDepotTraceResponseToV1(source: { "return": string, trace_id: string }, adapters: VersionAdapters): VersionedResult<{ "return": string, trace_id: string }> {
+        
+            
+            
+                const converted0 = ok(source["return"]);
+                if (!converted0.ok) return converted0;
+            
+                const converted1 = ok(source["trace_id"]);
+                if (!converted1.ok) return converted1;
+            
+            return ok({
+                
+                    
+                        ["return"]: converted0.value,
+                    
+                
+                    
+                        ["trace_id"]: converted1.value,
                     
                 
                 
@@ -3136,6 +3351,10 @@ export interface VersionAdapters {
                 
                 
                     
+                        ...(decision.value["inspected"] === undefined ? {} : { ["inspected"]: decision.value["inspected"] }),
+                    
+                
+                    
                         ["audit"]: decision.value["audit"],
                     
                 
@@ -3143,8 +3362,11 @@ export interface VersionAdapters {
         
     }
 
-    export function downcastParcelToV2(source: types.v3.Parcel, adapters: VersionAdapters): VersionedResult<types.v2.Parcel> {
+    export function downcastParcelToV2(source: types.v3.Parcel, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v2.Parcel> {
         
+            
+                const decision = adapters.parcelDowncastToV2(source, stored);
+                if (!decision.ok) return decision;
             
             
                 const converted0 = ok(source["id"]);
@@ -3205,6 +3427,10 @@ export interface VersionAdapters {
                         ["fixed"]: converted7.value,
                     
                 
+                
+                    
+                        ...(decision.value["handling_note"] === OMIT ? {} : { ["handling_note"]: decision.value["handling_note"] }),
+                    
                 
             });
         
@@ -3445,11 +3671,11 @@ export interface VersionAdapters {
         
     }
 
-    export function downcastDepotGetResponseToV2(source: { "return": types.v3.Parcel }, adapters: VersionAdapters): VersionedResult<{ "return": types.v2.Parcel }> {
+    export function downcastDepotGetResponseToV2(source: { "return": types.v3.Parcel }, stored: StoredValues, adapters: VersionAdapters): VersionedResult<{ "return": types.v2.Parcel }> {
         
             
             
-                const converted0 = downcastParcelToV2(source["return"], adapters);
+                const converted0 = downcastParcelToV2(source["return"], stored, adapters);
                 if (!converted0.ok) return converted0;
             
             return ok({
@@ -3607,6 +3833,49 @@ export interface VersionAdapters {
         
     }
 
+    export function upcastDepotTraceRequestFromV2(source: ifaceTypes.v2.DepotTraceRequest, adapters: VersionAdapters): VersionedResult<ifaceTypes.v3.DepotTraceRequest> {
+        
+            
+            
+                const converted0 = ok(source["id"]);
+                if (!converted0.ok) return converted0;
+            
+            return ok({
+                
+                    
+                        ["id"]: converted0.value,
+                    
+                
+                
+            });
+        
+    }
+
+    export function downcastDepotTraceResponseToV2(source: { "return": string }, stored: StoredValues, adapters: VersionAdapters): VersionedResult<{ "return": string, trace_id: string }> {
+        
+            
+                const decision = adapters.depotTraceResponseDowncastToV2(source, stored);
+                if (!decision.ok) return decision;
+            
+            
+                const converted0 = ok(source["return"]);
+                if (!converted0.ok) return converted0;
+            
+            return ok({
+                
+                    
+                        ["return"]: converted0.value,
+                    
+                
+                
+                    
+                        ["trace_id"]: decision.value["trace_id"],
+                    
+                
+            });
+        
+    }
+
 
 
     function downcastStepDepotBindingsResultToV1(value: string, adapters: VersionAdapters): VersionedResult<string> {
@@ -3669,14 +3938,14 @@ export interface VersionAdapters {
         return ok(head);
     }
 
-    function downcastStepDepotGetResultToV1(value: types.v2.Parcel, adapters: VersionAdapters): VersionedResult<types.v1.Parcel> {
-        const projected = downcastDepotGetResponseToV1({ return: value }, adapters);
+    function downcastStepDepotGetResultToV1(value: types.v2.Parcel, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Parcel> {
+        const projected = downcastDepotGetResponseToV1({ return: value }, stored, adapters);
         if (!projected.ok) return projected;
         return ok(projected.value.return);
     }
     export type DepotGetErrorFromV1 = errors.v2$NotFound | errors.v2$Busy | FrameworkError;
     export type DepotGetErrorToV1 = errors.v1$NotFound | FrameworkError;
-    function downcastStepDepotGetErrorToV1(head: DepotGetErrorFromV1, adapters: VersionAdapters): VersionedResult<DepotGetErrorToV1> {
+    function downcastStepDepotGetErrorToV1(head: DepotGetErrorFromV1, stored: StoredValues, adapters: VersionAdapters): VersionedResult<DepotGetErrorToV1> {
         
             if (head instanceof errors.v2$NotFound) {
                 
@@ -3707,14 +3976,14 @@ export interface VersionAdapters {
         return ok(head);
     }
 
-    function downcastStepDepotOptionalChangeResultToV1(value: types.v2.OptionalChange, adapters: VersionAdapters): VersionedResult<types.v1.OptionalChange> {
-        const projected = downcastDepotOptionalChangeResponseToV1({ return: value }, adapters);
+    function downcastStepDepotOptionalChangeResultToV1(value: types.v2.OptionalChange, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.OptionalChange> {
+        const projected = downcastDepotOptionalChangeResponseToV1({ return: value }, stored, adapters);
         if (!projected.ok) return projected;
         return ok(projected.value.return);
     }
     export type DepotOptionalChangeErrorFromV1 = FrameworkError;
     export type DepotOptionalChangeErrorToV1 = FrameworkError;
-    function downcastStepDepotOptionalChangeErrorToV1(head: DepotOptionalChangeErrorFromV1, adapters: VersionAdapters): VersionedResult<DepotOptionalChangeErrorToV1> {
+    function downcastStepDepotOptionalChangeErrorToV1(head: DepotOptionalChangeErrorFromV1, stored: StoredValues, adapters: VersionAdapters): VersionedResult<DepotOptionalChangeErrorToV1> {
         
         return ok(head);
     }
@@ -3739,6 +4008,26 @@ export interface VersionAdapters {
     export type DepotStateErrorFromV1 = FrameworkError;
     export type DepotStateErrorToV1 = FrameworkError;
     function downcastStepDepotStateErrorToV1(head: DepotStateErrorFromV1, adapters: VersionAdapters): VersionedResult<DepotStateErrorToV1> {
+        
+        return ok(head);
+    }
+
+    function downcastStepDepotTraceResultToV1(value: { "return": string, trace_id: string }, adapters: VersionAdapters): VersionedResult<{ "return": string, trace_id: string }> {
+        const projected = downcastDepotTraceResponseToV1(value, adapters);
+        if (!projected.ok) return projected;
+        return ok(projected.value);
+    }
+    export type DepotTraceErrorFromV1 = errors.v2$NotFound | FrameworkError;
+    export type DepotTraceErrorToV1 = errors.v1$NotFound | FrameworkError;
+    function downcastStepDepotTraceErrorToV1(head: DepotTraceErrorFromV1, adapters: VersionAdapters): VersionedResult<DepotTraceErrorToV1> {
+        
+            if (head instanceof errors.v2$NotFound) {
+                
+                    const projected = downcastNotFoundToV1(head, adapters);
+                    if (!projected.ok) return projected;
+                    return ok(new errors.v1$NotFound(projected.value));
+                
+            }
         
         return ok(head);
     }
@@ -3803,14 +4092,14 @@ export interface VersionAdapters {
         return ok(head);
     }
 
-    function downcastStepDepotGetResultToV2(value: types.v3.Parcel, adapters: VersionAdapters): VersionedResult<types.v2.Parcel> {
-        const projected = downcastDepotGetResponseToV2({ return: value }, adapters);
+    function downcastStepDepotGetResultToV2(value: types.v3.Parcel, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v2.Parcel> {
+        const projected = downcastDepotGetResponseToV2({ return: value }, stored, adapters);
         if (!projected.ok) return projected;
         return ok(projected.value.return);
     }
     export type DepotGetErrorFromV2 = errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError;
     export type DepotGetErrorToV2 = errors.v2$NotFound | errors.v2$Busy | FrameworkError;
-    function downcastStepDepotGetErrorToV2(head: DepotGetErrorFromV2, adapters: VersionAdapters): VersionedResult<DepotGetErrorToV2> {
+    function downcastStepDepotGetErrorToV2(head: DepotGetErrorFromV2, stored: StoredValues, adapters: VersionAdapters): VersionedResult<DepotGetErrorToV2> {
         
             if (head instanceof errors.v3$NotFound) {
                 
@@ -3891,6 +4180,26 @@ export interface VersionAdapters {
         return ok(head);
     }
 
+    function downcastStepDepotTraceResultToV2(value: string, stored: StoredValues, adapters: VersionAdapters): VersionedResult<{ "return": string, trace_id: string }> {
+        const projected = downcastDepotTraceResponseToV2({ return: value }, stored, adapters);
+        if (!projected.ok) return projected;
+        return ok(projected.value);
+    }
+    export type DepotTraceErrorFromV2 = errors.v3$NotFound | FrameworkError;
+    export type DepotTraceErrorToV2 = errors.v2$NotFound | FrameworkError;
+    function downcastStepDepotTraceErrorToV2(head: DepotTraceErrorFromV2, stored: StoredValues, adapters: VersionAdapters): VersionedResult<DepotTraceErrorToV2> {
+        
+            if (head instanceof errors.v3$NotFound) {
+                
+                    const projected = downcastNotFoundToV2(head, adapters);
+                    if (!projected.ok) return projected;
+                    return ok(new errors.v2$NotFound(projected.value));
+                
+            }
+        
+        return ok(head);
+    }
+
 
 /** The application has already resolved this version; no routing is performed here. */
 export interface VersionContext { originalVersion: string; originalVersionId: string }
@@ -3947,6 +4256,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotBindingsErrorToV1(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotBindingsFromV1(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotBindingsRequest, context: VersionContext) => Promise<OperationOutcome<string, FrameworkError>>,
@@ -4000,6 +4310,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotBlobErrorToV1(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotBlobFromV1(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotBlobRequest, context: VersionContext) => Promise<OperationOutcome<number, FrameworkError>>,
@@ -4053,6 +4364,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotChooseErrorToV1(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotChooseFromV1(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotChooseRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Choice, FrameworkError>>,
@@ -4106,6 +4418,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotContactErrorToV1(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotContactFromV1(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotContactRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Contact, FrameworkError>>,
@@ -4159,6 +4472,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotExtraErrorToV1(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotExtraFromV1(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotExtraRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Extra, FrameworkError>>,
@@ -4183,44 +4497,45 @@ export type DispatchOutcome<T, Head> =
         
         return step1;
     }
-    export function downcastDepotGetResultToV1(head: types.v3.Parcel, adapters: VersionAdapters): VersionedResult<types.v1.Parcel> {
+    export function downcastDepotGetResultToV1(head: types.v3.Parcel, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Parcel> {
         
-            const step0 = downcastStepDepotGetResultToV2(head, adapters);
+            const step0 = downcastStepDepotGetResultToV2(head, stored, adapters);
             if (!step0.ok) return step0;
         
-            const step1 = downcastStepDepotGetResultToV1(step0.value, adapters);
+            const step1 = downcastStepDepotGetResultToV1(step0.value, stored, adapters);
             if (!step1.ok) return step1;
         
         return step1;
     }
-    export function downcastDepotGetErrorToV1(head: errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError, adapters: VersionAdapters): VersionedResult<errors.v1$NotFound | FrameworkError> {
+    export function downcastDepotGetErrorToV1(head: errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError, stored: StoredValues, adapters: VersionAdapters): VersionedResult<errors.v1$NotFound | FrameworkError> {
         
-            const step0 = downcastStepDepotGetErrorToV2(head, adapters);
+            const step0 = downcastStepDepotGetErrorToV2(head, stored, adapters);
             if (!step0.ok) return step0;
         
-            const step1 = downcastStepDepotGetErrorToV1(step0.value, adapters);
+            const step1 = downcastStepDepotGetErrorToV1(step0.value, stored, adapters);
             if (!step1.ok) return step1;
         
         return step1;
     }
     /** Failed projection retains the original Head outcome, including typed errors. */
-    export function downcastDepotGetOutcomeToV1(head: OperationOutcome<types.v3.Parcel, errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError>, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<types.v1.Parcel, errors.v1$NotFound | FrameworkError>, OperationOutcome<types.v3.Parcel, errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError>> {
+    export function downcastDepotGetOutcomeToV1(head: OperationOutcome<types.v3.Parcel, errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError>, stored: StoredValues, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<types.v1.Parcel, errors.v1$NotFound | FrameworkError>, OperationOutcome<types.v3.Parcel, errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError>> {
         if (head.ok) {
-            const result = downcastDepotGetResultToV1(head.value, adapters);
+            const result = downcastDepotGetResultToV1(head.value, stored, adapters);
             return result.ok ? { projected: true, value: { ok: true, value: result.value } } : { projected: false, head, error: result.error };
         }
-        const result = downcastDepotGetErrorToV1(head.error, adapters);
+        const result = downcastDepotGetErrorToV1(head.error, stored, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    /** The Head handler returns the stored values its outcome still needs for this version. */
     export async function dispatchDepotGetFromV1(
     raw: unknown,
-    handler: (request: ifaceTypes.v3.DepotGetRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Parcel, errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError>>,
+    handler: (request: ifaceTypes.v3.DepotGetRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Parcel, errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError> & { stored: StoredValues }>,
     adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v1.Parcel, errors.v1$NotFound | FrameworkError>, OperationOutcome<types.v3.Parcel, errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError>>> {
         const request = decodeAndUpcastDepotGetFromV1(raw, adapters);
         if (!request.ok) return { dispatched: false, error: request.error };
         const head = await handler(request.value, { originalVersion: "2026-01", originalVersionId: "v1" });
-        return { dispatched: true, ...downcastDepotGetOutcomeToV1(head, adapters) };
+        return { dispatched: true, ...downcastDepotGetOutcomeToV1(head, head.stored, adapters) };
     }
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
@@ -4265,6 +4580,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotInspectErrorToV1(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotInspectFromV1(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotInspectRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Node, FrameworkError>>,
@@ -4289,44 +4605,45 @@ export type DispatchOutcome<T, Head> =
         
         return step1;
     }
-    export function downcastDepotOptionalChangeResultToV1(head: types.v3.OptionalChange, adapters: VersionAdapters): VersionedResult<types.v1.OptionalChange> {
+    export function downcastDepotOptionalChangeResultToV1(head: types.v3.OptionalChange, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.OptionalChange> {
         
             const step0 = downcastStepDepotOptionalChangeResultToV2(head, adapters);
             if (!step0.ok) return step0;
         
-            const step1 = downcastStepDepotOptionalChangeResultToV1(step0.value, adapters);
+            const step1 = downcastStepDepotOptionalChangeResultToV1(step0.value, stored, adapters);
             if (!step1.ok) return step1;
         
         return step1;
     }
-    export function downcastDepotOptionalChangeErrorToV1(head: FrameworkError, adapters: VersionAdapters): VersionedResult<FrameworkError> {
+    export function downcastDepotOptionalChangeErrorToV1(head: FrameworkError, stored: StoredValues, adapters: VersionAdapters): VersionedResult<FrameworkError> {
         
             const step0 = downcastStepDepotOptionalChangeErrorToV2(head, adapters);
             if (!step0.ok) return step0;
         
-            const step1 = downcastStepDepotOptionalChangeErrorToV1(step0.value, adapters);
+            const step1 = downcastStepDepotOptionalChangeErrorToV1(step0.value, stored, adapters);
             if (!step1.ok) return step1;
         
         return step1;
     }
     /** Failed projection retains the original Head outcome, including typed errors. */
-    export function downcastDepotOptionalChangeOutcomeToV1(head: OperationOutcome<types.v3.OptionalChange, FrameworkError>, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<types.v1.OptionalChange, FrameworkError>, OperationOutcome<types.v3.OptionalChange, FrameworkError>> {
+    export function downcastDepotOptionalChangeOutcomeToV1(head: OperationOutcome<types.v3.OptionalChange, FrameworkError>, stored: StoredValues, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<types.v1.OptionalChange, FrameworkError>, OperationOutcome<types.v3.OptionalChange, FrameworkError>> {
         if (head.ok) {
-            const result = downcastDepotOptionalChangeResultToV1(head.value, adapters);
+            const result = downcastDepotOptionalChangeResultToV1(head.value, stored, adapters);
             return result.ok ? { projected: true, value: { ok: true, value: result.value } } : { projected: false, head, error: result.error };
         }
-        const result = downcastDepotOptionalChangeErrorToV1(head.error, adapters);
+        const result = downcastDepotOptionalChangeErrorToV1(head.error, stored, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    /** The Head handler returns the stored values its outcome still needs for this version. */
     export async function dispatchDepotOptionalChangeFromV1(
     raw: unknown,
-    handler: (request: ifaceTypes.v3.DepotOptionalChangeRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.OptionalChange, FrameworkError>>,
+    handler: (request: ifaceTypes.v3.DepotOptionalChangeRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.OptionalChange, FrameworkError> & { stored: StoredValues }>,
     adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v1.OptionalChange, FrameworkError>, OperationOutcome<types.v3.OptionalChange, FrameworkError>>> {
         const request = decodeAndUpcastDepotOptionalChangeFromV1(raw, adapters);
         if (!request.ok) return { dispatched: false, error: request.error };
         const head = await handler(request.value, { originalVersion: "2026-01", originalVersionId: "v1" });
-        return { dispatched: true, ...downcastDepotOptionalChangeOutcomeToV1(head, adapters) };
+        return { dispatched: true, ...downcastDepotOptionalChangeOutcomeToV1(head, head.stored, adapters) };
     }
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
@@ -4371,6 +4688,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotShipErrorToV1(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotShipFromV1(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotShipRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.State, FrameworkError>>,
@@ -4424,6 +4742,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotStateErrorToV1(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotStateFromV1(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotStateRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.State, FrameworkError>>,
@@ -4436,8 +4755,62 @@ export type DispatchOutcome<T, Head> =
     }
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
-    export function decodeAndUpcastDepotBindingsFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotBindingsRequest> {
+    export function decodeAndUpcastDepotTraceFromV1(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotTraceRequest> {
         const parsed = wireRequest18Schema.safeParse(raw);
+        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-01", operation: "Depot.trace", issues: parsed.error.issues } };
+        
+            const step0 = upcastDepotTraceRequestFromV1(parsed.data, adapters);
+            if (!step0.ok) return step0;
+        
+            const step1 = upcastDepotTraceRequestFromV2(step0.value, adapters);
+            if (!step1.ok) return step1;
+        
+        return step1;
+    }
+    export function downcastDepotTraceResultToV1(head: string, stored: StoredValues, adapters: VersionAdapters): VersionedResult<{ "return": string, trace_id: string }> {
+        
+            const step0 = downcastStepDepotTraceResultToV2(head, stored, adapters);
+            if (!step0.ok) return step0;
+        
+            const step1 = downcastStepDepotTraceResultToV1(step0.value, adapters);
+            if (!step1.ok) return step1;
+        
+        return step1;
+    }
+    export function downcastDepotTraceErrorToV1(head: errors.v3$NotFound | FrameworkError, stored: StoredValues, adapters: VersionAdapters): VersionedResult<errors.v1$NotFound | FrameworkError> {
+        
+            const step0 = downcastStepDepotTraceErrorToV2(head, stored, adapters);
+            if (!step0.ok) return step0;
+        
+            const step1 = downcastStepDepotTraceErrorToV1(step0.value, adapters);
+            if (!step1.ok) return step1;
+        
+        return step1;
+    }
+    /** Failed projection retains the original Head outcome, including typed errors. */
+    export function downcastDepotTraceOutcomeToV1(head: OperationOutcome<string, errors.v3$NotFound | FrameworkError>, stored: StoredValues, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<{ "return": string, trace_id: string }, errors.v1$NotFound | FrameworkError>, OperationOutcome<string, errors.v3$NotFound | FrameworkError>> {
+        if (head.ok) {
+            const result = downcastDepotTraceResultToV1(head.value, stored, adapters);
+            return result.ok ? { projected: true, value: { ok: true, value: result.value } } : { projected: false, head, error: result.error };
+        }
+        const result = downcastDepotTraceErrorToV1(head.error, stored, adapters);
+        return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
+    }
+    /** The Head handler returns the stored values its outcome still needs for this version. */
+    export async function dispatchDepotTraceFromV1(
+    raw: unknown,
+    handler: (request: ifaceTypes.v3.DepotTraceRequest, context: VersionContext) => Promise<OperationOutcome<string, errors.v3$NotFound | FrameworkError> & { stored: StoredValues }>,
+    adapters: VersionAdapters,
+    ): Promise<DispatchOutcome<OperationOutcome<{ "return": string, trace_id: string }, errors.v1$NotFound | FrameworkError>, OperationOutcome<string, errors.v3$NotFound | FrameworkError>>> {
+        const request = decodeAndUpcastDepotTraceFromV1(raw, adapters);
+        if (!request.ok) return { dispatched: false, error: request.error };
+        const head = await handler(request.value, { originalVersion: "2026-01", originalVersionId: "v1" });
+        return { dispatched: true, ...downcastDepotTraceOutcomeToV1(head, head.stored, adapters) };
+    }
+
+    /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
+    export function decodeAndUpcastDepotBindingsFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotBindingsRequest> {
+        const parsed = wireRequest19Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.bindings", issues: parsed.error.issues } };
         
             const step0 = upcastDepotBindingsRequestFromV2(parsed.data, adapters);
@@ -4468,6 +4841,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotBindingsErrorToV2(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotBindingsFromV2(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotBindingsRequest, context: VersionContext) => Promise<OperationOutcome<string, FrameworkError>>,
@@ -4481,7 +4855,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotBlobFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotBlobRequest> {
-        const parsed = wireRequest19Schema.safeParse(raw);
+        const parsed = wireRequest20Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.blob", issues: parsed.error.issues } };
         
             const step0 = upcastDepotBlobRequestFromV2(parsed.data, adapters);
@@ -4512,6 +4886,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotBlobErrorToV2(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotBlobFromV2(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotBlobRequest, context: VersionContext) => Promise<OperationOutcome<number, FrameworkError>>,
@@ -4525,7 +4900,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotChooseFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotChooseRequest> {
-        const parsed = wireRequest20Schema.safeParse(raw);
+        const parsed = wireRequest21Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.choose", issues: parsed.error.issues } };
         
             const step0 = upcastDepotChooseRequestFromV2(parsed.data, adapters);
@@ -4556,6 +4931,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotChooseErrorToV2(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotChooseFromV2(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotChooseRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Choice, FrameworkError>>,
@@ -4569,7 +4945,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotContactFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotContactRequest> {
-        const parsed = wireRequest22Schema.safeParse(raw);
+        const parsed = wireRequest23Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.contact", issues: parsed.error.issues } };
         
             const step0 = upcastDepotContactRequestFromV2(parsed.data, adapters);
@@ -4600,6 +4976,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotContactErrorToV2(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotContactFromV2(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotContactRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Contact, FrameworkError>>,
@@ -4613,7 +4990,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotExtraFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotExtraRequest> {
-        const parsed = wireRequest25Schema.safeParse(raw);
+        const parsed = wireRequest26Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.extra", issues: parsed.error.issues } };
         
             const step0 = upcastDepotExtraRequestFromV2(parsed.data, adapters);
@@ -4644,6 +5021,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotExtraErrorToV2(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotExtraFromV2(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotExtraRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Extra, FrameworkError>>,
@@ -4657,7 +5035,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotGetFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotGetRequest> {
-        const parsed = wireRequest27Schema.safeParse(raw);
+        const parsed = wireRequest28Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.get", issues: parsed.error.issues } };
         
             const step0 = upcastDepotGetRequestFromV2(parsed.data, adapters);
@@ -4665,43 +5043,44 @@ export type DispatchOutcome<T, Head> =
         
         return step0;
     }
-    export function downcastDepotGetResultToV2(head: types.v3.Parcel, adapters: VersionAdapters): VersionedResult<types.v2.Parcel> {
+    export function downcastDepotGetResultToV2(head: types.v3.Parcel, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v2.Parcel> {
         
-            const step0 = downcastStepDepotGetResultToV2(head, adapters);
+            const step0 = downcastStepDepotGetResultToV2(head, stored, adapters);
             if (!step0.ok) return step0;
         
         return step0;
     }
-    export function downcastDepotGetErrorToV2(head: errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError, adapters: VersionAdapters): VersionedResult<errors.v2$NotFound | errors.v2$Busy | FrameworkError> {
+    export function downcastDepotGetErrorToV2(head: errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError, stored: StoredValues, adapters: VersionAdapters): VersionedResult<errors.v2$NotFound | errors.v2$Busy | FrameworkError> {
         
-            const step0 = downcastStepDepotGetErrorToV2(head, adapters);
+            const step0 = downcastStepDepotGetErrorToV2(head, stored, adapters);
             if (!step0.ok) return step0;
         
         return step0;
     }
     /** Failed projection retains the original Head outcome, including typed errors. */
-    export function downcastDepotGetOutcomeToV2(head: OperationOutcome<types.v3.Parcel, errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError>, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<types.v2.Parcel, errors.v2$NotFound | errors.v2$Busy | FrameworkError>, OperationOutcome<types.v3.Parcel, errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError>> {
+    export function downcastDepotGetOutcomeToV2(head: OperationOutcome<types.v3.Parcel, errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError>, stored: StoredValues, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<types.v2.Parcel, errors.v2$NotFound | errors.v2$Busy | FrameworkError>, OperationOutcome<types.v3.Parcel, errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError>> {
         if (head.ok) {
-            const result = downcastDepotGetResultToV2(head.value, adapters);
+            const result = downcastDepotGetResultToV2(head.value, stored, adapters);
             return result.ok ? { projected: true, value: { ok: true, value: result.value } } : { projected: false, head, error: result.error };
         }
-        const result = downcastDepotGetErrorToV2(head.error, adapters);
+        const result = downcastDepotGetErrorToV2(head.error, stored, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    /** The Head handler returns the stored values its outcome still needs for this version. */
     export async function dispatchDepotGetFromV2(
     raw: unknown,
-    handler: (request: ifaceTypes.v3.DepotGetRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Parcel, errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError>>,
+    handler: (request: ifaceTypes.v3.DepotGetRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Parcel, errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError> & { stored: StoredValues }>,
     adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v2.Parcel, errors.v2$NotFound | errors.v2$Busy | FrameworkError>, OperationOutcome<types.v3.Parcel, errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError>>> {
         const request = decodeAndUpcastDepotGetFromV2(raw, adapters);
         if (!request.ok) return { dispatched: false, error: request.error };
         const head = await handler(request.value, { originalVersion: "2026-04", originalVersionId: "v2" });
-        return { dispatched: true, ...downcastDepotGetOutcomeToV2(head, adapters) };
+        return { dispatched: true, ...downcastDepotGetOutcomeToV2(head, head.stored, adapters) };
     }
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotInspectFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotInspectRequest> {
-        const parsed = wireRequest28Schema.safeParse(raw);
+        const parsed = wireRequest29Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.inspect", issues: parsed.error.issues } };
         
             const step0 = upcastDepotInspectRequestFromV2(parsed.data, adapters);
@@ -4732,6 +5111,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotInspectErrorToV2(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotInspectFromV2(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotInspectRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Node, FrameworkError>>,
@@ -4745,7 +5125,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotOptionalChangeFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotOptionalChangeRequest> {
-        const parsed = wireRequest30Schema.safeParse(raw);
+        const parsed = wireRequest31Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.optional_change", issues: parsed.error.issues } };
         
             const step0 = upcastDepotOptionalChangeRequestFromV2(parsed.data, adapters);
@@ -4776,6 +5156,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotOptionalChangeErrorToV2(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotOptionalChangeFromV2(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotOptionalChangeRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.OptionalChange, FrameworkError>>,
@@ -4789,7 +5170,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotShipFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotShipRequest> {
-        const parsed = wireRequest32Schema.safeParse(raw);
+        const parsed = wireRequest33Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.ship", issues: parsed.error.issues } };
         
             const step0 = upcastDepotShipRequestFromV2(parsed.data, adapters);
@@ -4820,6 +5201,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotShipErrorToV2(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotShipFromV2(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotShipRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.State, FrameworkError>>,
@@ -4833,7 +5215,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotStateFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotStateRequest> {
-        const parsed = wireRequest34Schema.safeParse(raw);
+        const parsed = wireRequest35Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.state", issues: parsed.error.issues } };
         
             const step0 = upcastDepotStateRequestFromV2(parsed.data, adapters);
@@ -4864,6 +5246,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotStateErrorToV2(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotStateFromV2(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotStateRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.State, FrameworkError>>,
@@ -4876,8 +5259,53 @@ export type DispatchOutcome<T, Head> =
     }
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
+    export function decodeAndUpcastDepotTraceFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotTraceRequest> {
+        const parsed = wireRequest37Schema.safeParse(raw);
+        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.trace", issues: parsed.error.issues } };
+        
+            const step0 = upcastDepotTraceRequestFromV2(parsed.data, adapters);
+            if (!step0.ok) return step0;
+        
+        return step0;
+    }
+    export function downcastDepotTraceResultToV2(head: string, stored: StoredValues, adapters: VersionAdapters): VersionedResult<{ "return": string, trace_id: string }> {
+        
+            const step0 = downcastStepDepotTraceResultToV2(head, stored, adapters);
+            if (!step0.ok) return step0;
+        
+        return step0;
+    }
+    export function downcastDepotTraceErrorToV2(head: errors.v3$NotFound | FrameworkError, stored: StoredValues, adapters: VersionAdapters): VersionedResult<errors.v2$NotFound | FrameworkError> {
+        
+            const step0 = downcastStepDepotTraceErrorToV2(head, stored, adapters);
+            if (!step0.ok) return step0;
+        
+        return step0;
+    }
+    /** Failed projection retains the original Head outcome, including typed errors. */
+    export function downcastDepotTraceOutcomeToV2(head: OperationOutcome<string, errors.v3$NotFound | FrameworkError>, stored: StoredValues, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<{ "return": string, trace_id: string }, errors.v2$NotFound | FrameworkError>, OperationOutcome<string, errors.v3$NotFound | FrameworkError>> {
+        if (head.ok) {
+            const result = downcastDepotTraceResultToV2(head.value, stored, adapters);
+            return result.ok ? { projected: true, value: { ok: true, value: result.value } } : { projected: false, head, error: result.error };
+        }
+        const result = downcastDepotTraceErrorToV2(head.error, stored, adapters);
+        return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
+    }
+    /** The Head handler returns the stored values its outcome still needs for this version. */
+    export async function dispatchDepotTraceFromV2(
+    raw: unknown,
+    handler: (request: ifaceTypes.v3.DepotTraceRequest, context: VersionContext) => Promise<OperationOutcome<string, errors.v3$NotFound | FrameworkError> & { stored: StoredValues }>,
+    adapters: VersionAdapters,
+    ): Promise<DispatchOutcome<OperationOutcome<{ "return": string, trace_id: string }, errors.v2$NotFound | FrameworkError>, OperationOutcome<string, errors.v3$NotFound | FrameworkError>>> {
+        const request = decodeAndUpcastDepotTraceFromV2(raw, adapters);
+        if (!request.ok) return { dispatched: false, error: request.error };
+        const head = await handler(request.value, { originalVersion: "2026-04", originalVersionId: "v2" });
+        return { dispatched: true, ...downcastDepotTraceOutcomeToV2(head, head.stored, adapters) };
+    }
+
+    /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotBindingsFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotBindingsRequest> {
-        const parsed = wireRequest36Schema.safeParse(raw);
+        const parsed = wireRequest38Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.bindings", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -4899,6 +5327,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotBindingsErrorToV3(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotBindingsFromV3(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotBindingsRequest, context: VersionContext) => Promise<OperationOutcome<string, FrameworkError>>,
@@ -4912,7 +5341,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotBlobFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotBlobRequest> {
-        const parsed = wireRequest37Schema.safeParse(raw);
+        const parsed = wireRequest39Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.blob", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -4934,6 +5363,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotBlobErrorToV3(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotBlobFromV3(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotBlobRequest, context: VersionContext) => Promise<OperationOutcome<number, FrameworkError>>,
@@ -4947,7 +5377,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotChooseFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotChooseRequest> {
-        const parsed = wireRequest38Schema.safeParse(raw);
+        const parsed = wireRequest40Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.choose", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -4969,6 +5399,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotChooseErrorToV3(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotChooseFromV3(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotChooseRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Choice, FrameworkError>>,
@@ -4982,7 +5413,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotContactFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotContactRequest> {
-        const parsed = wireRequest40Schema.safeParse(raw);
+        const parsed = wireRequest42Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.contact", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -5004,6 +5435,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotContactErrorToV3(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotContactFromV3(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotContactRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Contact, FrameworkError>>,
@@ -5017,7 +5449,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotExtraFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotExtraRequest> {
-        const parsed = wireRequest43Schema.safeParse(raw);
+        const parsed = wireRequest45Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.extra", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -5039,6 +5471,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotExtraErrorToV3(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotExtraFromV3(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotExtraRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Extra, FrameworkError>>,
@@ -5052,7 +5485,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotGetFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotGetRequest> {
-        const parsed = wireRequest45Schema.safeParse(raw);
+        const parsed = wireRequest47Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.get", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -5074,6 +5507,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotGetErrorToV3(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotGetFromV3(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotGetRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Parcel, errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError>>,
@@ -5087,7 +5521,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotHeadOnlyFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<{  }> {
-        const parsed = wireRequest46Schema.safeParse(raw);
+        const parsed = wireRequest48Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.head_only", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -5109,6 +5543,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotHeadOnlyErrorToV3(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotHeadOnlyFromV3(
     raw: unknown,
     handler: (request: {  }, context: VersionContext) => Promise<OperationOutcome<string, FrameworkError>>,
@@ -5122,7 +5557,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotInspectFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotInspectRequest> {
-        const parsed = wireRequest47Schema.safeParse(raw);
+        const parsed = wireRequest49Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.inspect", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -5144,6 +5579,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotInspectErrorToV3(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotInspectFromV3(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotInspectRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Node, FrameworkError>>,
@@ -5157,7 +5593,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotOptionalChangeFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotOptionalChangeRequest> {
-        const parsed = wireRequest49Schema.safeParse(raw);
+        const parsed = wireRequest51Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.optional_change", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -5179,6 +5615,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotOptionalChangeErrorToV3(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotOptionalChangeFromV3(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotOptionalChangeRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.OptionalChange, FrameworkError>>,
@@ -5192,7 +5629,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotShipFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotShipRequest> {
-        const parsed = wireRequest51Schema.safeParse(raw);
+        const parsed = wireRequest53Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.ship", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -5214,6 +5651,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotShipErrorToV3(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotShipFromV3(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotShipRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.State, FrameworkError>>,
@@ -5227,7 +5665,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotStateFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotStateRequest> {
-        const parsed = wireRequest53Schema.safeParse(raw);
+        const parsed = wireRequest55Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.state", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -5249,6 +5687,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastDepotStateErrorToV3(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchDepotStateFromV3(
     raw: unknown,
     handler: (request: ifaceTypes.v3.DepotStateRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.State, FrameworkError>>,
@@ -5258,6 +5697,42 @@ export type DispatchOutcome<T, Head> =
         if (!request.ok) return { dispatched: false, error: request.error };
         const head = await handler(request.value, { originalVersion: "2026-07", originalVersionId: "v3" });
         return { dispatched: true, ...downcastDepotStateOutcomeToV3(head, adapters) };
+    }
+
+    /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
+    export function decodeAndUpcastDepotTraceFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotTraceRequest> {
+        const parsed = wireRequest57Schema.safeParse(raw);
+        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.trace", issues: parsed.error.issues } };
+        
+        return ok(parsed.data);
+    }
+    export function downcastDepotTraceResultToV3(head: string, adapters: VersionAdapters): VersionedResult<string> {
+        
+        return ok(head);
+    }
+    export function downcastDepotTraceErrorToV3(head: errors.v3$NotFound | FrameworkError, adapters: VersionAdapters): VersionedResult<errors.v3$NotFound | FrameworkError> {
+        
+        return ok(head);
+    }
+    /** Failed projection retains the original Head outcome, including typed errors. */
+    export function downcastDepotTraceOutcomeToV3(head: OperationOutcome<string, errors.v3$NotFound | FrameworkError>, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<string, errors.v3$NotFound | FrameworkError>, OperationOutcome<string, errors.v3$NotFound | FrameworkError>> {
+        if (head.ok) {
+            const result = downcastDepotTraceResultToV3(head.value, adapters);
+            return result.ok ? { projected: true, value: { ok: true, value: result.value } } : { projected: false, head, error: result.error };
+        }
+        const result = downcastDepotTraceErrorToV3(head.error, adapters);
+        return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
+    }
+    
+    export async function dispatchDepotTraceFromV3(
+    raw: unknown,
+    handler: (request: ifaceTypes.v3.DepotTraceRequest, context: VersionContext) => Promise<OperationOutcome<string, errors.v3$NotFound | FrameworkError>>,
+    adapters: VersionAdapters,
+    ): Promise<DispatchOutcome<OperationOutcome<string, errors.v3$NotFound | FrameworkError>, OperationOutcome<string, errors.v3$NotFound | FrameworkError>>> {
+        const request = decodeAndUpcastDepotTraceFromV3(raw, adapters);
+        if (!request.ok) return { dispatched: false, error: request.error };
+        const head = await handler(request.value, { originalVersion: "2026-07", originalVersionId: "v3" });
+        return { dispatched: true, ...downcastDepotTraceOutcomeToV3(head, adapters) };
     }
 
 
@@ -5356,7 +5831,7 @@ export type DispatchOutcome<T, Head> =
     export async function dispatchDepotGet(
     version: "v1" | "v2" | "v3",
     raw: unknown,
-    handler: (request: ifaceTypes.v3.DepotGetRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Parcel, errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError>>,
+    handler: (request: ifaceTypes.v3.DepotGetRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Parcel, errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError> & { stored: StoredValues }>,
     adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v1.Parcel | types.v2.Parcel | types.v3.Parcel, errors.Denied | errors.Framework | errors.v1$NotFound | errors.v2$Busy | errors.v2$NotFound | errors.v3$Busy | errors.v3$NotFound | FrameworkError>, OperationOutcome<types.v3.Parcel, errors.v3$NotFound | errors.v3$Busy | errors.Framework | errors.Denied | FrameworkError>>> {
         switch (version) {
@@ -5406,7 +5881,7 @@ export type DispatchOutcome<T, Head> =
     export async function dispatchDepotOptionalChange(
     version: "v1" | "v2" | "v3",
     raw: unknown,
-    handler: (request: ifaceTypes.v3.DepotOptionalChangeRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.OptionalChange, FrameworkError>>,
+    handler: (request: ifaceTypes.v3.DepotOptionalChangeRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.OptionalChange, FrameworkError> & { stored: StoredValues }>,
     adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v1.OptionalChange | types.v2.OptionalChange | types.v3.OptionalChange, FrameworkError>, OperationOutcome<types.v3.OptionalChange, FrameworkError>>> {
         switch (version) {
@@ -5456,8 +5931,27 @@ export type DispatchOutcome<T, Head> =
         }
     }
 
+    /** Compose one request using an already resolved version identifier. */
+    export async function dispatchDepotTrace(
+    version: "v1" | "v2" | "v3",
+    raw: unknown,
+    handler: (request: ifaceTypes.v3.DepotTraceRequest, context: VersionContext) => Promise<OperationOutcome<string, errors.v3$NotFound | FrameworkError> & { stored: StoredValues }>,
+    adapters: VersionAdapters,
+    ): Promise<DispatchOutcome<OperationOutcome<{ "return": string, trace_id: string } | { "return": string, trace_id: string } | string, errors.v1$NotFound | errors.v2$NotFound | errors.v3$NotFound | FrameworkError>, OperationOutcome<string, errors.v3$NotFound | FrameworkError>>> {
+        switch (version) {
+            
+                case "v1": return dispatchDepotTraceFromV1(raw, handler, adapters);
+            
+                case "v2": return dispatchDepotTraceFromV2(raw, handler, adapters);
+            
+                case "v3": return dispatchDepotTraceFromV3(raw, handler, adapters);
+            
+        }
+    }
 
 
+
+    
     
         export function downcastAddress(version: "v1", head: types.v3.Address, adapters: VersionAdapters): VersionedResult<types.v1.Address>;
     
@@ -5497,6 +5991,7 @@ export type DispatchOutcome<T, Head> =
     }
 
     
+    
         export function downcastBusy(version: "v2", head: types.v3.Busy, adapters: VersionAdapters): VersionedResult<types.v2.Busy>;
     
         export function downcastBusy(version: "v3", head: types.v3.Busy, adapters: VersionAdapters): VersionedResult<types.v3.Busy>;
@@ -5521,6 +6016,7 @@ export type DispatchOutcome<T, Head> =
         }
     }
 
+    
     
         export function downcastChoice(version: "v1", head: types.v3.Choice, adapters: VersionAdapters): VersionedResult<types.v1.Choice>;
     
@@ -5560,6 +6056,7 @@ export type DispatchOutcome<T, Head> =
     }
 
     
+    
         export function downcastContact(version: "v1", head: types.v3.Contact, adapters: VersionAdapters): VersionedResult<types.v1.Contact>;
     
         export function downcastContact(version: "v2", head: types.v3.Contact, adapters: VersionAdapters): VersionedResult<types.v2.Contact>;
@@ -5598,6 +6095,7 @@ export type DispatchOutcome<T, Head> =
     }
 
     
+    
         export function downcastDenied(version: "v3", head: types.v3.Denied, adapters: VersionAdapters): VersionedResult<types.v3.Denied>;
     
     export function downcastDenied(version: "v3", head: types.v3.Denied, adapters: VersionAdapters): VersionedResult<types.v3.Denied>;
@@ -5612,6 +6110,7 @@ export type DispatchOutcome<T, Head> =
         }
     }
 
+    
     
         export function downcastExtra(version: "v1", head: types.v3.Extra, adapters: VersionAdapters): VersionedResult<types.v1.Extra>;
     
@@ -5651,6 +6150,7 @@ export type DispatchOutcome<T, Head> =
     }
 
     
+    
         export function downcastFramework(version: "v3", head: types.v3.Framework, adapters: VersionAdapters): VersionedResult<types.v3.Framework>;
     
     export function downcastFramework(version: "v3", head: types.v3.Framework, adapters: VersionAdapters): VersionedResult<types.v3.Framework>;
@@ -5665,6 +6165,7 @@ export type DispatchOutcome<T, Head> =
         }
     }
 
+    
     
         export function downcastNode(version: "v1", head: types.v3.Node, adapters: VersionAdapters): VersionedResult<types.v1.Node>;
     
@@ -5704,6 +6205,7 @@ export type DispatchOutcome<T, Head> =
     }
 
     
+    
         export function downcastNotFound(version: "v1", head: types.v3.NotFound, adapters: VersionAdapters): VersionedResult<types.v1.NotFound>;
     
         export function downcastNotFound(version: "v2", head: types.v3.NotFound, adapters: VersionAdapters): VersionedResult<types.v2.NotFound>;
@@ -5742,14 +6244,15 @@ export type DispatchOutcome<T, Head> =
     }
 
     
-        export function downcastOptionalChange(version: "v1", head: types.v3.OptionalChange, adapters: VersionAdapters): VersionedResult<types.v1.OptionalChange>;
     
-        export function downcastOptionalChange(version: "v2", head: types.v3.OptionalChange, adapters: VersionAdapters): VersionedResult<types.v2.OptionalChange>;
+        export function downcastOptionalChange(version: "v1", head: types.v3.OptionalChange, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.OptionalChange>;
     
-        export function downcastOptionalChange(version: "v3", head: types.v3.OptionalChange, adapters: VersionAdapters): VersionedResult<types.v3.OptionalChange>;
+        export function downcastOptionalChange(version: "v2", head: types.v3.OptionalChange, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v2.OptionalChange>;
     
-    export function downcastOptionalChange(version: "v1" | "v2" | "v3", head: types.v3.OptionalChange, adapters: VersionAdapters): VersionedResult<types.v1.OptionalChange | types.v2.OptionalChange | types.v3.OptionalChange>;
-    export function downcastOptionalChange(version: "v1" | "v2" | "v3", head: types.v3.OptionalChange, adapters: VersionAdapters): VersionedResult<types.v1.OptionalChange | types.v2.OptionalChange | types.v3.OptionalChange> {
+        export function downcastOptionalChange(version: "v3", head: types.v3.OptionalChange, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v3.OptionalChange>;
+    
+    export function downcastOptionalChange(version: "v1" | "v2" | "v3", head: types.v3.OptionalChange, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.OptionalChange | types.v2.OptionalChange | types.v3.OptionalChange>;
+    export function downcastOptionalChange(version: "v1" | "v2" | "v3", head: types.v3.OptionalChange, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.OptionalChange | types.v2.OptionalChange | types.v3.OptionalChange> {
         switch (version) {
             
                 case "v1": {
@@ -5757,7 +6260,7 @@ export type DispatchOutcome<T, Head> =
                         const step0 = downcastOptionalChangeToV2(head, adapters);
                         if (!step0.ok) return step0;
                     
-                        const step1 = downcastOptionalChangeToV1(step0.value, adapters);
+                        const step1 = downcastOptionalChangeToV1(step0.value, stored, adapters);
                         if (!step1.ok) return step1;
                     
                     return step1;
@@ -5780,22 +6283,23 @@ export type DispatchOutcome<T, Head> =
     }
 
     
-        export function downcastParcel(version: "v1", head: types.v3.Parcel, adapters: VersionAdapters): VersionedResult<types.v1.Parcel>;
     
-        export function downcastParcel(version: "v2", head: types.v3.Parcel, adapters: VersionAdapters): VersionedResult<types.v2.Parcel>;
+        export function downcastParcel(version: "v1", head: types.v3.Parcel, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Parcel>;
     
-        export function downcastParcel(version: "v3", head: types.v3.Parcel, adapters: VersionAdapters): VersionedResult<types.v3.Parcel>;
+        export function downcastParcel(version: "v2", head: types.v3.Parcel, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v2.Parcel>;
     
-    export function downcastParcel(version: "v1" | "v2" | "v3", head: types.v3.Parcel, adapters: VersionAdapters): VersionedResult<types.v1.Parcel | types.v2.Parcel | types.v3.Parcel>;
-    export function downcastParcel(version: "v1" | "v2" | "v3", head: types.v3.Parcel, adapters: VersionAdapters): VersionedResult<types.v1.Parcel | types.v2.Parcel | types.v3.Parcel> {
+        export function downcastParcel(version: "v3", head: types.v3.Parcel, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v3.Parcel>;
+    
+    export function downcastParcel(version: "v1" | "v2" | "v3", head: types.v3.Parcel, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Parcel | types.v2.Parcel | types.v3.Parcel>;
+    export function downcastParcel(version: "v1" | "v2" | "v3", head: types.v3.Parcel, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Parcel | types.v2.Parcel | types.v3.Parcel> {
         switch (version) {
             
                 case "v1": {
                     
-                        const step0 = downcastParcelToV2(head, adapters);
+                        const step0 = downcastParcelToV2(head, stored, adapters);
                         if (!step0.ok) return step0;
                     
-                        const step1 = downcastParcelToV1(step0.value, adapters);
+                        const step1 = downcastParcelToV1(step0.value, stored, adapters);
                         if (!step1.ok) return step1;
                     
                     return step1;
@@ -5803,7 +6307,7 @@ export type DispatchOutcome<T, Head> =
             
                 case "v2": {
                     
-                        const step0 = downcastParcelToV2(head, adapters);
+                        const step0 = downcastParcelToV2(head, stored, adapters);
                         if (!step0.ok) return step0;
                     
                     return step0;
@@ -5817,6 +6321,7 @@ export type DispatchOutcome<T, Head> =
         }
     }
 
+    
     
         export function downcastState(version: "v1", head: types.v3.State, adapters: VersionAdapters): VersionedResult<types.v1.State>;
     

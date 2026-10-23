@@ -1,14 +1,14 @@
 {% for operation in operations %}
     /// Downgrade the complete operation error vocabulary for one adjacent step.
     pub fn downcast_{{ operation.prefix | replace("_from_", "_error_to_") }}(
-    source: &{{ operation.source_error }}, adapters: &dyn VersionAdapters,
+    source: &{{ operation.source_error }}, {% if operation.stored %}stored: &dyn StoredValues, {% endif %}adapters: &dyn VersionAdapters,
     ) -> VersionedResult<{{ operation.target_error }}> {
         {% if operation.source_typed_error %}
             match source {
                 {% for arm in operation.arms %}
                     {{ operation.source_error }}::{{ arm.source }}(value) => {
                         {% if arm.hook %}adapters.{{ arm.hook }}(value)
-                    {% else %}{{ arm.call }}(value, adapters).map({{ operation.target_error }}::{{ arm.target }}){% endif %}
+                    {% else %}{{ arm.call.name }}(value, {% if arm.call.stored %}stored, {% endif %}adapters).map({{ operation.target_error }}::{{ arm.target }}){% endif %}
                     },
                 {% endfor %}
                 {{ operation.source_error }}::Framework(error) => Ok({% if operation.target_typed_error %}{{ operation.target_error }}::Framework({% endif %}error.clone(){% if operation.target_typed_error %}){% endif %}),

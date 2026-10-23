@@ -146,7 +146,10 @@ impl AdapterRenderer<'_> {
                 arms.push(ErrorArm {
                     source: variant,
                     target: Some(target_variants[index].clone()),
-                    call: Some(old.function(key)),
+                    call: Some(Call {
+                        name: old.function(key),
+                        stored: false,
+                    }),
                     hook: None,
                 });
             } else {
@@ -155,6 +158,7 @@ impl AdapterRenderer<'_> {
                     name: hook.clone(),
                     source: new.named(key),
                     target: target_error.clone(),
+                    stored: false,
                 });
                 arms.push(ErrorArm {
                     source: variant,
@@ -175,6 +179,7 @@ impl AdapterRenderer<'_> {
             arms,
             source_typed_error: !plan.target.raises.is_empty(),
             target_typed_error: !plan.source.raises.is_empty(),
+            stored: false,
         });
         Ok(())
     }

@@ -70,7 +70,8 @@ def prepare_application(context, script):
     shutil.copy(boilerplate / "tsconfig.json", output)
     shutil.copy(boilerplate / script, output)
     if script == "business.ts":
-        shutil.copy(boilerplate / "business_http.ts", output)
+        for name in ["business_http.ts", "business_stored.ts"]:
+            shutil.copy(boilerplate / name, output)
     run(["pnpm", "install", "--ignore-scripts", "--no-frozen-lockfile"], cwd=output)
     run(["pnpm", "exec", "tsc", "--noEmit"], cwd=output)
     return output
@@ -86,16 +87,10 @@ def existing_hurl_contracts(context):
     assert "PASS: unchanged" in result.stdout
 
 
-@then("the three-version TypeScript application enforces wire and business boundaries")
-def real_business_journey(context):
-    output = prepare_application(context, "business.ts")
-    result = run(["pnpm", "exec", "tsx", "business.ts"], cwd=output)
-    assert "PASS: three-version" in result.stdout
-    missing_hook = output / "missing-hook.ts"
-    missing_hook.write_text(
-        'import type { VersionAdapters } from "./versioned_adapters_business.adapters";\n'
-        "export const hooks: VersionAdapters = {};\n"
-    )
+def expect_tsc_failure(output, name, content, needle, reason):
+    """Compile a deliberately incomplete module and require a typed error."""
+    path = output / name
+    path.write_text(content)
     try:
         result = subprocess.run(
             ["pnpm", "exec", "tsc", "--noEmit"],
@@ -103,10 +98,44 @@ def real_business_journey(context):
             capture_output=True,
             text=True,
         )
-        assert result.returncode != 0, "missing business decisions must fail tsc"
-        assert "parcelUpcastFromV1" in result.stdout + result.stderr
+        assert result.returncode != 0, reason
+        assert needle in result.stdout + result.stderr, result.stdout + result.stderr
     finally:
-        missing_hook.unlink()
+        path.unlink()
+
+
+@then("the three-version TypeScript application enforces wire and business boundaries")
+def real_business_journey(context):
+    output = prepare_application(context, "business.ts")
+    result = run(["pnpm", "exec", "tsx", "business.ts"], cwd=output)
+    assert "PASS: three-version" in result.stdout
+    adapters = "./versioned_adapters_business.adapters"
+    expect_tsc_failure(
+        output,
+        "missing-hook.ts",
+        f'import type {{ VersionAdapters }} from "{adapters}";\n'
+        "export const hooks: VersionAdapters = {};\n",
+        "parcelUpcastFromV1",
+        "missing business decisions must fail tsc",
+    )
+    expect_tsc_failure(
+        output,
+        "missing-reader.ts",
+        f'import type {{ StoredValues }} from "{adapters}";\n'
+        "export const stored: StoredValues = {};\n",
+        "parcelHandlingNote",
+        "every retired member needs a stored value reader",
+    )
+    expect_tsc_failure(
+        output,
+        "silent-drop.ts",
+        f'import type {{ VersionAdapters }} from "{adapters}";\n'
+        "export const partial: Pick<VersionAdapters, 'parcelDowncastToV2'> = {\n"
+        "  parcelDowncastToV2: () => ({ ok: true, value: {} }),\n"
+        "};\n",
+        "handling_note",
+        "a retired optional member cannot be dropped silently",
+    )
 
 
 @then("the single-version TypeScript application validates before dispatch")
@@ -144,36 +173,59 @@ def rust_frozen_http_contracts(context):
     assert "PASS: unchanged Hurl" in result.stdout
 
 
+def expect_cargo_check_failure(output, path, content, needle, reason):
+    """Write a deliberately incomplete source file and require a typed compile error."""
+    original = path.read_text()
+    path.write_text(content)
+    try:
+        result = subprocess.run(
+            ["cargo", "check", "--quiet"], cwd=output, capture_output=True, text=True
+        )
+        assert result.returncode != 0, reason
+        assert needle in result.stderr, result.stderr
+    finally:
+        path.write_text(original)
+
+
 @then("the three-version Rust application enforces wire and business boundaries")
 def rust_business_journey(context):
     output = prepare_rust_application(context, "main.rs")
     result = run(["cargo", "run", "--quiet"], cwd=output)
     assert "PASS: Rust three-version" in result.stdout
     main = output / "src/main.rs"
-    original = main.read_text()
-    main.write_text(
-        original
-        + "\nstruct Missing;\nimpl gen::version_adapters::VersionAdapters for Missing {}\n"
-    )
-    try:
-        result = subprocess.run(
-            ["cargo", "check", "--quiet"], cwd=output, capture_output=True, text=True
-        )
-        assert result.returncode != 0, "missing business hooks must fail cargo check"
-        assert "parcel_upcast_from_v_1" in result.stderr
-    finally:
-        main.write_text(original)
     hooks = output / "src/hooks.rs"
-    original = hooks.read_text()
-    hooks.write_text(original.replace("legacy: IGNORED,", ""))
-    try:
-        result = subprocess.run(
-            ["cargo", "check", "--quiet"], cwd=output, capture_output=True, text=True
-        )
-        assert result.returncode != 0, "discarded request members require IGNORED"
-        assert "missing field `legacy`" in result.stderr
-    finally:
-        hooks.write_text(original)
+    expect_cargo_check_failure(
+        output,
+        main,
+        main.read_text()
+        + "\nstruct Missing;\nimpl gen::version_adapters::VersionAdapters for Missing {}\n",
+        "parcel_upcast_from_v_1",
+        "missing business hooks must fail cargo check",
+    )
+    expect_cargo_check_failure(
+        output,
+        hooks,
+        hooks.read_text().replace("legacy: IGNORED,", ""),
+        "missing field `legacy`",
+        "discarded request members require IGNORED",
+    )
+    expect_cargo_check_failure(
+        output,
+        main,
+        main.read_text()
+        + "\nstruct Forgetful;\nimpl gen::version_adapters::StoredValues for Forgetful {}\n",
+        "parcel_handling_note",
+        "every retired member needs a stored value reader",
+    )
+    expect_cargo_check_failure(
+        output,
+        hooks,
+        hooks.read_text().replace(
+            "handling_note: stored.parcel_handling_note(source)", ""
+        ),
+        "missing field `handling_note`",
+        "a retired optional member cannot be dropped silently",
+    )
 
 
 @then("the single-version Rust application validates before dispatch")

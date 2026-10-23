@@ -166,7 +166,7 @@ fn ordinary_targets_match_the_master_artifacts_byte_for_byte() {
                 .collect::<std::collections::BTreeMap<_, _>>();
             assert_eq!(
                 generated, expected,
-                "{target} artifacts for {fixture} differ from master d98bc37a"
+                "{target} artifacts for {fixture} differ from the pinned baseline"
             );
         }
     }

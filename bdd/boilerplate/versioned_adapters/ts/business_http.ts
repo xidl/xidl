@@ -7,6 +7,7 @@ import * as clients from './versioned_adapters_business.client';
 
 export async function runHttpJourney(
   hooks: a.VersionAdapters,
+  storedValues: a.StoredValues,
   wireParcel: Record<string, unknown>,
   head: types.v3.Parcel,
   getHookCalls: () => number,
@@ -172,7 +173,7 @@ export async function runHttpJourney(
     const client = new clients.v1.DepotClient(`${base}/v1`, {
       headers: { 'idempotency-key': 'client' },
     });
-    const v1Result = a.downcastParcel('v1', head, hooks);
+    const v1Result = a.downcastParcel('v1', head, storedValues, hooks);
     assert(v1Result.ok);
     const v1Parcel = v1Result.value;
     assert.equal(

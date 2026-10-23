@@ -12,7 +12,7 @@ struct Item {
     @added(ApiVersions::v2) string owner;
     /** Optional since v2: stays absent on the way up. */
     @added(ApiVersions::v2) @optional string note;
-    /** Optional until v2: omitted on the way down without a decision. */
+    /** Optional until v2: the downcast decision reads it from storage or omits it explicitly. */
     @removed(ApiVersions::v2) @optional string color;
     /** Retired wire name of the reference. */
     @removed(ApiVersions::v2) @rename("ref") string ref_v1;
