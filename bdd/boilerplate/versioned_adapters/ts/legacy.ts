@@ -9,8 +9,16 @@ import * as errors from './versioned_adapters.errors';
 import * as schemas from './versioned_adapters.zod';
 
 const ok = <T>(value: T): a.VersionedResult<T> => ({ ok: true, value });
+// Storage keeps the retired colour while v1 is served; readers resolve it per instance.
+const colors = new Map<string, string>([['rare', 'teal']]);
+const storedValues: a.StoredValues = {
+  itemColor: source => colors.get(source.name),
+  // Never stored: the hook derives the retired reference from the current one.
+  itemRefV1: () => undefined,
+};
 const hooks: a.VersionAdapters = {
-  itemDowncastToV1: source => ok({ ref_v1: source.ref_v2 }),
+  itemDowncastToV1: (source, stored) =>
+    ok({ color: stored.itemColor(source) ?? a.OMIT, ref_v1: source.ref_v2 }),
   itemsCreateRequestUpcastFromV1: () => ok({ actor: 'adapter' }),
   itemsGetLockedErrorDowncastToV1: source =>
     ok(new errors.v1$NotFound({ id: source.owner })),
@@ -33,9 +41,14 @@ const hooks: a.VersionAdapters = {
 };
 const headGet: Parameters<typeof a.dispatchItemsGet>[2] = async ({ id }) =>
   id === 'locked'
-    ? { error: new errors.Locked({ owner: 'ops' }), ok: false }
+    ? {
+        error: new errors.Locked({ owner: 'ops' }),
+        ok: false,
+        stored: storedValues,
+      }
     : {
         ok: true,
+        stored: storedValues,
         value: {
           name: id,
           note: 'head note',

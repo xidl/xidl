@@ -2,6 +2,7 @@
 
 use crate::generate::typescript::definition::contexts::TsType;
 use serde::Serialize;
+use std::collections::BTreeSet;
 
 #[derive(Serialize)]
 pub(super) struct FileContext {
@@ -9,6 +10,8 @@ pub(super) struct FileContext {
     pub has_errors: bool,
     pub decisions: Vec<Decision>,
     pub hooks: Vec<Hook>,
+    pub readers: Vec<Reader>,
+    pub needs: Vec<Needs>,
     pub conversions: Vec<Conversion>,
     pub operations: Vec<Operation>,
     pub endpoints: Vec<Endpoint>,
@@ -30,11 +33,31 @@ pub(super) struct Decision {
     pub fields: Vec<Field>,
 }
 
+/// A hook may read only the stored values its own step removed.
 #[derive(Serialize)]
 pub(super) struct Hook {
     pub name: String,
     pub input: TsType,
     pub output: TsType,
+    pub stored: Vec<String>,
+}
+
+/// One stored-value accessor per removed member, keyed by the Head-side
+/// instance that owns it; the application resolves identity itself.
+#[derive(Serialize)]
+pub(super) struct Reader {
+    pub name: String,
+    pub input: TsType,
+    pub output: TsType,
+    pub wire: String,
+    pub version: String,
+}
+
+/// Wire names one served version still reads, newest version first.
+#[derive(Serialize)]
+pub(super) struct Needs {
+    pub key: String,
+    pub entries: Vec<(String, Vec<String>)>,
 }
 
 #[derive(Serialize)]
@@ -45,14 +68,44 @@ pub(super) struct Copy {
     pub optional: bool,
 }
 
+#[derive(Serialize, Clone)]
+pub(super) struct Call {
+    pub name: String,
+    pub stored: bool,
+}
+
 #[derive(Serialize)]
 #[serde(tag = "kind", content = "data")]
 pub(super) enum Value {
     Identity,
-    Named(String),
+    Named(Call),
     Sequence(Box<Self>),
     Map(Box<Self>),
     Optional(Box<Self>),
+}
+
+impl Value {
+    /// Mark named conversions that thread stored values.
+    pub(super) fn annotate(&mut self, stored: &BTreeSet<String>) {
+        match self {
+            Self::Named(call) => call.stored = stored.contains(&call.name),
+            Self::Sequence(value) | Self::Map(value) | Self::Optional(value) => {
+                value.annotate(stored);
+            }
+            Self::Identity => {}
+        }
+    }
+
+    /// Whether this value calls any of the named conversions.
+    pub(super) fn references(&self, names: &BTreeSet<String>) -> bool {
+        match self {
+            Self::Named(call) => names.contains(&call.name),
+            Self::Sequence(value) | Self::Map(value) | Self::Optional(value) => {
+                value.references(names)
+            }
+            Self::Identity => false,
+        }
+    }
 }
 
 #[derive(Serialize)]
@@ -60,6 +113,7 @@ pub(super) struct Assignment {
     pub source: String,
     pub target: String,
     pub optional: bool,
+    pub omittable: bool,
 }
 
 #[derive(Serialize)]
@@ -69,9 +123,12 @@ pub(super) struct Conversion {
     pub source: TsType,
     pub target: TsType,
     pub hook: Option<String>,
+    /// The hook reads stored values of this step.
+    pub hook_stored: bool,
+    /// The function threads stored values to its hook or to a callee.
+    pub stored: bool,
     pub copies: Vec<Copy>,
     pub assignments: Vec<Assignment>,
-    pub absent_keys: Vec<String>,
     pub shared_values: Vec<String>,
     pub value: Option<Value>,
 }
@@ -80,7 +137,7 @@ pub(super) struct Conversion {
 pub(super) struct ErrorArm {
     pub class: String,
     pub target_class: Option<String>,
-    pub call: Option<String>,
+    pub call: Option<Call>,
     pub hook: Option<String>,
 }
 
@@ -96,12 +153,13 @@ pub(super) struct Operation {
     pub request_call: String,
     pub result_source: TsType,
     pub result_target: TsType,
-    pub result_call: Option<String>,
+    pub result_call: Option<Call>,
     pub result_source_direct: bool,
     pub result_target_direct: bool,
     pub errors_source: Vec<String>,
     pub errors_target: Vec<String>,
     pub error_arms: Vec<ErrorArm>,
+    pub stored: bool,
 }
 
 #[derive(Serialize)]
@@ -119,6 +177,7 @@ pub(super) struct Endpoint {
     pub errors: Vec<String>,
     pub head_errors: Vec<String>,
     pub steps: Vec<Operation>,
+    pub stored: bool,
 }
 
 #[derive(Serialize)]
@@ -130,6 +189,7 @@ pub(super) struct Dispatcher {
     pub versions: Vec<(String, String)>,
     pub results: Vec<TsType>,
     pub errors: Vec<String>,
+    pub stored: bool,
 }
 
 #[derive(Serialize)]
@@ -137,11 +197,12 @@ pub(super) struct TypeDispatcher {
     pub name: String,
     pub head: TsType,
     pub variants: Vec<TypeVariant>,
+    pub stored: bool,
 }
 
 #[derive(Serialize)]
 pub(super) struct TypeVariant {
     pub version: String,
     pub output: TsType,
-    pub calls: Vec<String>,
+    pub calls: Vec<Call>,
 }

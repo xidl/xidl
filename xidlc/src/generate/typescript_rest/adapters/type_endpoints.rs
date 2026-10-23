@@ -1,6 +1,6 @@
 //! Expose complete downcast chains for continuously reachable result types.
 
-use super::context::{FileContext, TypeDispatcher, TypeVariant};
+use super::context::{Call, FileContext, TypeDispatcher, TypeVariant};
 use super::names::Names;
 use super::render::AdapterRenderer;
 use crate::error::IdlcResult;
@@ -21,6 +21,12 @@ impl AdapterRenderer<'_> {
             .map(|ty| ty.key.clone())
             .collect::<BTreeSet<_>>();
         reachable.extend(self.plan.head_downcast_types()?);
+        let stored = file
+            .conversions
+            .iter()
+            .filter(|conversion| conversion.stored)
+            .map(|conversion| conversion.name.clone())
+            .collect::<BTreeSet<_>>();
         let head_keys = head.surface.types.keys().cloned().collect();
         let head_names = Names {
             keys: &head_keys,
@@ -57,13 +63,17 @@ impl AdapterRenderer<'_> {
                     .iter()
                     .rev()
                     .map(|step| {
-                        Names {
+                        let name = Names {
                             keys: &keys,
                             version: &step.from.id,
                             from: &step.from.id,
                             upward: false,
                         }
-                        .function(&key)
+                        .function(&key);
+                        Call {
+                            stored: stored.contains(&name),
+                            name,
+                        }
                     })
                     .collect();
                 variants.push(TypeVariant {
@@ -72,10 +82,14 @@ impl AdapterRenderer<'_> {
                     calls,
                 });
             }
+            let threads = variants
+                .iter()
+                .any(|variant: &TypeVariant| variant.calls.iter().any(|call| call.stored));
             file.type_dispatchers.push(TypeDispatcher {
                 name: format!("downcast{}", key.replace("::", "_").to_case(Case::Pascal)),
                 head: head_names.named(&key),
                 variants,
+                stored: threads,
             });
         }
         Ok(())

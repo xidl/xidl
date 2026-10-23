@@ -22,6 +22,8 @@ impl AdapterRenderer<'_> {
             target: input.target_type.clone(),
             kind: "struct",
             hook: None,
+            hook_stored: false,
+            stored: false,
             copies: Vec::new(),
             assignments: Vec::new(),
             absences: Vec::new(),
@@ -46,6 +48,7 @@ impl AdapterRenderer<'_> {
                     name: input.target.hook(input.key),
                     source: input.source_type,
                     target: input.target_type,
+                    stored: false,
                 });
                 file.conversions.push(output);
                 return Ok(());
@@ -102,6 +105,8 @@ impl AdapterRenderer<'_> {
         Ok(())
     }
 
+    /// Upcast additions stay optional decisions; downcast removals are always
+    /// decided from stored values or an explicit `None`, never dropped.
     fn decision(
         &self,
         plan: &ConversionPlan,
@@ -112,14 +117,30 @@ impl AdapterRenderer<'_> {
         if plan.assignments.is_empty() && plan.ignored.is_empty() {
             return Ok(());
         }
+        let downward = !input.target.upward;
         let mut fields = Vec::new();
         let mut keys = BTreeSet::new();
         for member in &plan.assignments {
             let name = rust_ident(&member.name);
             keys.insert(name.clone());
+            let ty = self.field_type(member, input.target, input.declaration)?;
+            if downward {
+                let optional = member.value.as_ref().is_some_and(|value| value.optional);
+                file.readers.push(Reader {
+                    name: Names::reader(input.key, &member.name),
+                    source: input.source_type.clone(),
+                    output: if optional {
+                        ty.clone()
+                    } else {
+                        format!("Option<{ty}>")
+                    },
+                    wire: member.wire.clone(),
+                    version: input.target.version.into(),
+                });
+            }
             fields.push(Field {
                 name: name.clone(),
-                ty: self.field_type(member, input.target, input.declaration)?,
+                ty,
             });
             output.assignments.push(name);
         }
@@ -147,10 +168,13 @@ impl AdapterRenderer<'_> {
             name: decision.clone(),
             fields,
         });
+        output.hook_stored = downward && !plan.assignments.is_empty();
+        output.stored = output.hook_stored;
         file.hooks.push(Hook {
             name: name.clone(),
             source: input.source_type.clone(),
             target: decision,
+            stored: output.hook_stored,
         });
         output.hook = Some(name);
         Ok(())
@@ -182,6 +206,7 @@ impl AdapterRenderer<'_> {
                 name: name.clone(),
                 source: output.changed_type.clone(),
                 target: input.target_type.clone(),
+                stored: false,
             });
             output.hook = Some(name);
         }

@@ -1,6 +1,6 @@
 {% macro value(plan, source) -%}
     {%- if plan.kind == "Identity" -%}Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone({{ source }}))
-    {%- elif plan.kind == "Named" -%}{{ plan.data }}({{ source }}, adapters)
+    {%- elif plan.kind == "Named" -%}{{ plan.data.name }}({{ source }}{% if plan.data.stored %}, stored{% endif %}, adapters)
     {%- elif plan.kind == "Sequence" -%}map_sequence({{ source }}, |item| {{ value(plan.data, "item") }})
     {%- elif plan.kind == "Array" -%}map_array({{ source }}, |item| {{ value(plan.data, "item") }}, refusal)
     {%- elif plan.kind == "Map" -%}map_record({{ source }}, |key| {{ value(plan.data.key, "key") }}, |item| {{ value(plan.data.value, "item") }}, refusal)
@@ -16,7 +16,7 @@
             }
         {% endif %}
         /// Projects one adjacent declaration by borrowing its source value.
-        pub fn {{ conversion.name }}(source: &{{ conversion.source }}, adapters: &dyn VersionAdapters) -> VersionedResult<{{ conversion.target }}> {
+        pub fn {{ conversion.name }}(source: &{{ conversion.source }}{% if conversion.stored %}, stored: &dyn StoredValues{% endif %}, adapters: &dyn VersionAdapters) -> VersionedResult<{{ conversion.target }}> {
             let refusal = |reason: &str| UnsupportedProjection {
                 version: {{ conversion.version | tojson }}.into(), direction: Direction::{% if conversion.upward %}Upcast{% else %}Downcast{% endif %},
                 type_path: {{ conversion.type_path | tojson }}.into(), reason: reason.into(),
@@ -50,7 +50,7 @@
                             Err(refusal("union tag is not declared in source version"))
                         {% endif %}
                     {% else %}
-                        {% if conversion.hook %}let decision = adapters.{{ conversion.hook }}(source)?;{% endif %}
+                        {% if conversion.hook %}let decision = adapters.{{ conversion.hook }}(source{% if conversion.hook_stored %}, stored{% endif %})?;{% endif %}
                             {% for copy in conversion.copies %}
                                 let projected_{{ loop.index0 }} = {{ value(copy.value, "source" if conversion.source_shape == "direct" else "&source." ~ copy.source) }}?;
                             {% endfor %}
