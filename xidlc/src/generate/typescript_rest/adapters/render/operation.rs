@@ -5,12 +5,14 @@ use super::*;
 impl AdapterRenderer<'_> {
     pub(super) fn operation(
         &self,
+        index: usize,
         step: &StepPlan,
         plan: &OperationPlan,
-        names: (&Names<'_>, &Names<'_>),
+        names: (&Names<'_>, &Names<'_>, &Names<'_>),
+        marks: &UpdateMarks<'_>,
         file: &mut FileContext,
     ) -> IdlcResult<()> {
-        let (old, new) = names;
+        let (old, new, head) = names;
         let source = &plan.source;
         let target = &plan.target;
         let interface = source.interface.split("::").last().ok_or_else(|| {
@@ -37,6 +39,9 @@ impl AdapterRenderer<'_> {
         } else {
             new.operation_type(&target.interface, &target.name, "Request")
         };
+        let mark = marks.envelope(&plan.key);
+        let envelope_current = mark.current;
+        let stored_type = mark.stored_type.clone();
         self.conversion(
             &TypeConversion::Struct(plan.upcast.clone()),
             ConversionInput {
@@ -45,6 +50,7 @@ impl AdapterRenderer<'_> {
                 source: old,
                 source_type: request_source.clone(),
                 target_type: request_target.clone(),
+                update: Some(mark.clone()),
             },
             file,
         )?;
@@ -57,6 +63,7 @@ impl AdapterRenderer<'_> {
                 source: new,
                 source_type: self.object_type(&target.outputs, new)?,
                 target_type: self.object_type(&source.outputs, old)?,
+                update: None,
             },
             file,
         )?;
@@ -91,6 +98,8 @@ impl AdapterRenderer<'_> {
                     call: Some(Call {
                         name: old.function(key),
                         stored: false,
+                        current: false,
+                        pair: false,
                     }),
                     hook: None,
                 });
@@ -108,6 +117,7 @@ impl AdapterRenderer<'_> {
                     input: TsType::ScopedName(format!("errors.{class}")),
                     output,
                     stored: Vec::new(),
+                    current: None,
                 });
                 error_arms.push(ErrorArm {
                     class,
@@ -117,20 +127,29 @@ impl AdapterRenderer<'_> {
                 });
             }
         }
+        let _ = index;
         file.operations.push(Operation {
-            prefix: function_prefix,
+            current: envelope_current,
+            prefix: function_prefix.clone(),
             from: step.from.id.to_case(Case::Pascal),
             version: step.from.value.clone(),
             type_path: plan.key.clone(),
             request_source,
             request_target,
             schema,
-            request_call: new.function(&request_key),
+            request_call: Call {
+                name: new.function(&request_key),
+                stored: false,
+                current: envelope_current,
+                pair: mark.pair,
+            },
             result_source: result_type(&target.outputs, new)?,
             result_target: result_type(&source.outputs, old)?,
             result_call: Some(Call {
                 name: old.function(&response_key),
                 stored: false,
+                current: false,
+                pair: false,
             }),
             errors_source,
             errors_target,
@@ -138,7 +157,9 @@ impl AdapterRenderer<'_> {
             result_source_direct: target.outputs.len() == 1 && target.outputs[0].name == "return",
             result_target_direct: source.outputs.len() == 1 && source.outputs[0].name == "return",
             stored: false,
+            stored_type,
         });
+        let _ = head;
         Ok(())
     }
 }

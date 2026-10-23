@@ -11,6 +11,7 @@ impl AdapterRenderer<'_> {
     ) -> IdlcResult<()> {
         let key = input.key;
         let target = input.target;
+        let mark = input.update.clone().unwrap_or_default();
         let mut context = Conversion {
             name: target.function(key),
             kind: "struct",
@@ -19,6 +20,12 @@ impl AdapterRenderer<'_> {
             hook: None,
             hook_stored: false,
             stored: false,
+            current: mark.current,
+            current_type: mark.head.clone(),
+            hook_current: false,
+            pair: mark.pair,
+            stored_type: mark.stored_type.clone(),
+            stored_field: false,
             copies: Vec::new(),
             assignments: Vec::new(),
             shared_values: Vec::new(),
@@ -33,6 +40,7 @@ impl AdapterRenderer<'_> {
                     input: input.source_type,
                     output: input.target_type,
                     stored: Vec::new(),
+                    current: None,
                 });
                 context.hook = Some(hook);
                 file.conversions.push(context);
@@ -72,6 +80,7 @@ impl AdapterRenderer<'_> {
                     ),
                     output: input.target_type,
                     stored: Vec::new(),
+                    current: None,
                 });
                 context.hook = Some(name);
             }
@@ -104,11 +113,12 @@ impl AdapterRenderer<'_> {
                         input: TsType::Union(variants),
                         output: input.target_type.clone(),
                         stored: Vec::new(),
+                        current: None,
                     });
                     context.hook = Some(hook);
                 }
             } else {
-                self.decision(plan, &input, &mut context, file)?;
+                self.decision(plan, &input, &mark, &mut context, file)?;
             }
         }
         file.conversions.push(context);
@@ -116,11 +126,13 @@ impl AdapterRenderer<'_> {
     }
 
     /// Upcast additions stay optional decisions; downcast removals are always
-    /// decided from stored values or an explicit `OMIT`, never dropped.
+    /// decided from stored values or an explicit `OMIT`, never dropped. Update
+    /// upcasts also receive the Head resource and persist paired members.
     fn decision(
         &self,
         plan: &ConversionPlan,
         input: &ConversionInput<'_>,
+        mark: &UpdateMark,
         context: &mut Conversion,
         file: &mut FileContext,
     ) -> IdlcResult<()> {
@@ -182,6 +194,24 @@ impl AdapterRenderer<'_> {
                 optional: false,
             });
         }
+        if let Some(bag) = mark
+            .stored_type
+            .as_ref()
+            .filter(|_| !mark.paired.is_empty())
+        {
+            if !keys.insert("stored".into()) {
+                return Err(IdlcError::rpc(format!(
+                    "typescript adapters {}: a member named stored collides with the persisted bag",
+                    input.key
+                )));
+            }
+            fields.push(Field {
+                key: "stored".into(),
+                ty: TsType::ScopedName(bag.clone()),
+                optional: false,
+            });
+            context.stored_field = true;
+        }
         let decision = input.target.decision(input.key);
         let hook = input.target.hook(input.key);
         file.decisions.push(Decision {
@@ -190,11 +220,13 @@ impl AdapterRenderer<'_> {
         });
         context.hook_stored = !readers.is_empty();
         context.stored = context.hook_stored;
+        context.hook_current = mark.current;
         file.hooks.push(Hook {
             name: hook.clone(),
             input: input.source_type.clone(),
             output: TsType::ScopedName(decision),
             stored: readers,
+            current: mark.head.clone().filter(|_| mark.current),
         });
         context.hook = Some(hook);
         Ok(())
@@ -207,4 +239,5 @@ pub(super) struct ConversionInput<'a> {
     pub(super) source: &'a Names<'a>,
     pub(super) source_type: TsType,
     pub(super) target_type: TsType,
+    pub(super) update: Option<UpdateMark>,
 }
