@@ -63,7 +63,7 @@ impl AdapterRenderer<'_> {
                     .iter()
                     .rev()
                     .map(|step| {
-                        let name = Names {
+                        let call_name = Names {
                             keys: &keys,
                             version: &step.from.id,
                             from: &step.from.id,
@@ -71,8 +71,10 @@ impl AdapterRenderer<'_> {
                         }
                         .function(&key);
                         Call {
-                            stored: stored.contains(&name),
-                            name,
+                            name: call_name.clone(),
+                            stored: stored.contains(&call_name),
+                            current: false,
+                            pair: false,
                         }
                     })
                     .collect();

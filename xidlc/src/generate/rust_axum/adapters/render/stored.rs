@@ -43,6 +43,24 @@ impl AdapterRenderer<'_> {
                 value.annotate(&stored);
             }
         }
+        let marked = file
+            .conversions
+            .iter()
+            .map(|conversion| {
+                (
+                    conversion.name.clone(),
+                    (conversion.current, conversion.pair),
+                )
+            })
+            .collect::<std::collections::BTreeMap<_, _>>();
+        for conversion in &mut file.conversions {
+            for copy in &mut conversion.copies {
+                copy.value.mark_calls(&marked);
+            }
+            if let Some(value) = &mut conversion.value {
+                value.mark_calls(&marked);
+            }
+        }
         for operation in &mut file.operations {
             for arm in &mut operation.arms {
                 if let Some(call) = &mut arm.call {

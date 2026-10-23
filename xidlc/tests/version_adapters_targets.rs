@@ -140,6 +140,56 @@ fn generated_symbols_reject_normalized_versions_scopes_and_cross_category_collis
 }
 
 #[test]
+fn update_request_conversions_must_stay_operation_disjoint() {
+    let source = r#"
+        @version enum V { v1, v2 };
+        struct Item { @removed(V::v2) @optional string note; };
+        struct ItemPatch { @removed(V::v2) @optional string note; };
+        interface Store {
+            @patch(path = "/a") Item first(@body ItemPatch patch);
+            @patch(path = "/b") Item second(@body ItemPatch patch);
+        };"#;
+    let error = render_error(source, "shared.idl");
+    assert!(error.contains("share the request conversion"), "{error}");
+    assert!(error.contains("ItemPatch"), "{error}");
+}
+
+#[test]
+fn update_current_never_reaches_paired_conversions_through_wrappers() {
+    let source = r#"
+        @version enum V { v1, v2 };
+        struct Item { @removed(V::v2) @optional string note; };
+        struct Patch { @optional sequence<Item> items; };
+        interface Store { @patch(path = "/a") Item update(@body Patch patch); };"#;
+    let error = render_error(source, "wrapped.idl");
+    assert!(
+        error.contains("through a sequence, map, or optional member"),
+        "{error}"
+    );
+}
+
+#[test]
+fn update_current_never_routes_through_alias_conversions() {
+    let source = r#"
+        @version enum V { v1, v2 };
+        struct Item { @removed(V::v2) @optional string note; };
+        typedef Item PatchItem;
+        interface Store { @patch(path = "/a") Item update(@body PatchItem patch); };"#;
+    let error = render_error(source, "alias.idl");
+    assert!(error.contains("routes current through"), "{error}");
+    assert!(error.contains("alias"), "{error}");
+}
+
+/// Render one source with the adapter target and return its generation error.
+fn render_error(source: &str, name: &str) -> String {
+    xidlc::driver::Generator::new("typescript-rest-adapters".into())
+        .generate_from_idl(source, Path::new(name), HashMap::new())
+        .err()
+        .expect("invalid update contract must fail generation")
+        .to_string()
+}
+
+#[test]
 fn ordinary_targets_match_the_master_artifacts_byte_for_byte() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR"));
     let mut targets = vec!["typescript-rest"];

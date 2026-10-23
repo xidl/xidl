@@ -1,5 +1,6 @@
 ---
 source: xidlc/tests/version_adapters_targets.rs
+assertion_line: 48
 expression: "&files[0].1"
 ---
 
@@ -217,6 +218,7 @@ export interface VersionAdapters {
 
 
 
+
     export function upcastItemFromV1(source: types.v1.Item, adapters: VersionAdapters): VersionedResult<types.v2.Item> {
         
             
@@ -227,10 +229,7 @@ export interface VersionAdapters {
             return ok({
                 
                 
-                    
                         ["value"]: decision.value["value"],
-                    
-                
             });
         
     }
@@ -245,10 +244,7 @@ export interface VersionAdapters {
             return ok({
                 
                 
-                    
                         ["value"]: decision.value["value"],
-                    
-                
             });
         
     }
@@ -262,10 +258,7 @@ export interface VersionAdapters {
             
             return ok({
                 
-                    
                         ["item"]: converted0.value,
-                    
-                
                 
             });
         
@@ -280,10 +273,7 @@ export interface VersionAdapters {
             
             return ok({
                 
-                    
                         ["return"]: converted0.value,
-                    
-                
                 
             });
         
