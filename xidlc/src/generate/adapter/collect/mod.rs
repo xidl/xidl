@@ -118,6 +118,7 @@ impl SurfaceCollector {
                             scope: scope.to_vec(),
                             declarator: declarator.clone(),
                             optional: false,
+                            defaulted: false,
                             representation: ValueRepresentation::Model,
                         }),
                         hir::TypedefType::ConstrTypeDcl(_) => {
@@ -225,6 +226,7 @@ impl SurfaceCollector {
                                 scope: scope.to_vec(),
                                 declarator: case.element.value.clone(),
                                 optional: false,
+                                defaulted: false,
                                 representation: ValueRepresentation::Model,
                             }),
                         }
@@ -282,6 +284,7 @@ impl SurfaceCollector {
                         scope: scope.to_vec(),
                         declarator: declarator.clone(),
                         optional: member.is_optional(),
+                        defaulted: member.default_value().is_some(),
                         representation: ValueRepresentation::Model,
                     }),
                 }

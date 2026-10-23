@@ -12,6 +12,7 @@ pub async fn run() {
         traces: BTreeMap::from([("p1".to_string(), "trace-1".to_string())]),
     };
     let head = decode_and_upcast_depot_ship(Version::V1, json!({"parcel":parcel()}), &hooks).unwrap().parcel;
+    assert_eq!(head.signature_required, Some(false), "older callers keep the value they implied, never the new default");
     let bad_hooks = Hooks { reject_downcast: true, ..Hooks::default() };
     // The generated ordinary composite response has no Clone implementation.
     let outcome = v3::DepotExchangeResponse { r#return: head.clone(), parcel: head.clone(), etag: "original-etag".into() };

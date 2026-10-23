@@ -10,12 +10,13 @@ mod tests;
 
 pub use location::{HttpParameterLocation, VersionParameter};
 
+#[cfg(test)]
+use convert::apply_rename_rule;
+pub(crate) use convert::render_annotation_const_expr;
 pub use convert::{
     annotation_id_value, annotation_name, annotation_params, effective_wire_name,
     expand_annotations, field_rename, is_skipped, normalize_annotation_params, rename_all,
 };
-#[cfg(test)]
-use convert::{apply_rename_rule, render_annotation_const_expr};
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Annotation {
     Id {

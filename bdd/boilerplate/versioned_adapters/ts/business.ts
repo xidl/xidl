@@ -94,7 +94,13 @@ const hooks: a.VersionAdapters = {
       tracking: source.legacy,
     });
   },
-  parcelUpcastFromV2: () => ok({ audit: 'checked', handling_note: a.IGNORED }),
+  parcelUpcastFromV2: () =>
+    ok({
+      audit: 'checked',
+      handling_note: a.IGNORED,
+      // v2 callers never asked for a signature: the implied value, not the default.
+      signature_required: false,
+    }),
   stateDowncastToV1: () => refuse('2026-01', 'State'),
   stateDowncastToV2: () => ok('shipping' as const),
 };
