@@ -1,5 +1,6 @@
 ---
 source: xidlc/tests/version_adapters_targets.rs
+assertion_line: 32
 expression: "&files[0].1"
 ---
 
@@ -100,6 +101,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
 export interface VersionAdapters {
     
 }
+
 
 
 
