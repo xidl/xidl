@@ -88,7 +88,10 @@ impl AdapterRenderer<'_> {
                 error_arms.push(ErrorArm {
                     class,
                     target_class: Some(self.error_class(key, &step.from.id)?),
-                    call: Some(old.function(key)),
+                    call: Some(Call {
+                        name: old.function(key),
+                        stored: false,
+                    }),
                     hook: None,
                 });
             } else {
@@ -104,6 +107,7 @@ impl AdapterRenderer<'_> {
                     name: hook.clone(),
                     input: TsType::ScopedName(format!("errors.{class}")),
                     output,
+                    stored: Vec::new(),
                 });
                 error_arms.push(ErrorArm {
                     class,
@@ -124,12 +128,16 @@ impl AdapterRenderer<'_> {
             request_call: new.function(&request_key),
             result_source: result_type(&target.outputs, new)?,
             result_target: result_type(&source.outputs, old)?,
-            result_call: Some(old.function(&response_key)),
+            result_call: Some(Call {
+                name: old.function(&response_key),
+                stored: false,
+            }),
             errors_source,
             errors_target,
             error_arms,
             result_source_direct: target.outputs.len() == 1 && target.outputs[0].name == "return",
             result_target_direct: source.outputs.len() == 1 && source.outputs[0].name == "return",
+            stored: false,
         });
         Ok(())
     }

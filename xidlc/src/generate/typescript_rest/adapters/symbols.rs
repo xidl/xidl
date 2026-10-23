@@ -61,6 +61,15 @@ impl FileContext {
                 )));
             }
         }
+        let mut readers = BTreeSet::new();
+        for reader in &self.readers {
+            if !readers.insert(&reader.name) {
+                return Err(IdlcError::rpc(format!(
+                    "typescript adapters for {}: stored value reader {} is ambiguous",
+                    self.file_stem, reader.name
+                )));
+            }
+        }
         Ok(())
     }
 }

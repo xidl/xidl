@@ -123,6 +123,11 @@ pub(crate) struct StepPlan {
 pub(crate) struct AdapterPlan {
     pub versions: Vec<VersionPlan>,
     pub steps: Vec<StepPlan>,
+    /// Per type or operation key, the wire names each served version still
+    /// reads from storage, newest version first; Head maps to an empty list.
+    /// Derived from `@added` / `@removed` alone: a version reads every member
+    /// removed by the adjacent steps at or after its own position.
+    pub needs: BTreeMap<String, Vec<(String, Vec<String>)>>,
 }
 
 /// Complete surfaces also preserve Head and contracts with a single version.
