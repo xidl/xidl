@@ -70,7 +70,7 @@ def prepare_application(context, script):
     shutil.copy(boilerplate / "tsconfig.json", output)
     shutil.copy(boilerplate / script, output)
     if script == "business.ts":
-        for name in ["business_http.ts", "business_stored.ts"]:
+        for name in ["business_http.ts", "business_stored.ts", "business_update.ts"]:
             shutil.copy(boilerplate / name, output)
     run(["pnpm", "install", "--ignore-scripts", "--no-frozen-lockfile"], cwd=output)
     run(["pnpm", "exec", "tsc", "--noEmit"], cwd=output)
@@ -135,6 +135,38 @@ def real_business_journey(context):
         "};\n",
         "handling_note",
         "a retired optional member cannot be dropped silently",
+    )
+    expect_tsc_failure(
+        output,
+        "missing-persist.ts",
+        f'import type {{ VersionAdapters }} from "{adapters}";\n'
+        "import type * as types from './versioned_adapters_business';\n"
+        "export const patch: Pick<VersionAdapters, 'parcelPatchUpcastFromV2'> = {\n"
+        "  parcelPatchUpcastFromV2: (source: types.v2.ParcelPatch) =>\n"
+        "    ({ ok: true, value: { handling_note: 'xidl.ignored' as const } }),\n"
+        "};\n",
+        "stored",
+        "a paired patch decision must return the members its handler persists",
+    )
+    expect_tsc_failure(
+        output,
+        "handler-without-stored.ts",
+        f'import * as a from "{adapters}";\n'
+        "import type * as types from './versioned_adapters_business';\n"
+        "export async function broken(\n"
+        "  current: types.v3.Parcel,\n"
+        "  adapters: a.VersionAdapters,\n"
+        ") {\n"
+        "  return a.dispatchDepotUpdate(\n"
+        "    'v2',\n"
+        "    { id: 'p1', patch: {} },\n"
+        "    current,\n"
+        "    async () => ({ ok: true as const, value: current }),\n"
+        "    adapters,\n"
+        "  );\n"
+        "}\n",
+        "stored",
+        "an update handler must return the stored values its outcome still reads",
     )
 
 
@@ -225,6 +257,38 @@ def rust_business_journey(context):
         ),
         "missing field `handling_note`",
         "a retired optional member cannot be dropped silently",
+    )
+    expect_cargo_check_failure(
+        output,
+        hooks,
+        hooks.read_text().replace(
+            "stored: DepotUpdateStored { handling_note: source.handling_note.clone() },",
+            "",
+        ),
+        "missing field `stored`",
+        "a paired patch decision must return the members its handler persists",
+    )
+    expect_cargo_check_failure(
+        output,
+        hooks,
+        hooks.read_text().replace(
+            "fn parcel_patch_upcast_from_v_2(&self, source: &v2::ParcelPatch, _current: &v3::Parcel)",
+            "fn parcel_patch_upcast_from_v_2(&self, source: &v2::ParcelPatch, _current: &v2::Parcel)",
+        ),
+        "v3::Parcel",
+        "the paired patch hook receives the Head return type as current",
+    )
+    journey = output / "src/journey.rs"
+    expect_cargo_check_failure(
+        output,
+        journey,
+        journey.read_text()
+        + "\nasync fn forgetful(current: crate::gen::v3::Parcel) {\n"
+        "    let _ = dispatch_depot_update(Version::V2, serde_json::json!({}), current,\n"
+        "        |_, _| async { unreachable!() }, &crate::hooks::Hooks::default()).await;\n"
+        "}\n",
+        "takes 3 arguments",
+        "an update handler must accept the persisted-member bag",
     )
 
 
