@@ -24,6 +24,13 @@
         /// The acknowledgement hooks return for an intentionally retired member.
         pub const IGNORED: Ignored = Ignored { _private: () };
 
+        {% if has_updates %}
+            /// An upcast value together with the members its handler persists.
+            pub struct Upcast<T, S> {
+                pub value: T,
+                pub stored: S,
+            }
+        {% endif %}
         /// A version resolved by the application before calling an adapter.
         #[derive(Debug, Clone, Copy, PartialEq, Eq)]
         pub enum Version { {% for version in versions %}{{ version.id }},{% endfor %} }
@@ -50,7 +57,7 @@
         /// Hooks remain synchronous, pure, deterministic, and mandatory.
         pub trait VersionAdapters {
             {% for hook in hooks %}
-                fn {{ hook.name }}(&self, source: &{{ hook.source }}{% if hook.stored %}, stored: &dyn StoredValues{% endif %}) -> VersionedResult<{{ hook.target }}>;
+                fn {{ hook.name }}(&self, source: &{{ hook.source }}{% if hook.current %}, current: &{{ hook.current }}{% endif %}{% if hook.stored %}, stored: &dyn StoredValues{% endif %}) -> VersionedResult<{{ hook.target }}>;
             {% endfor %}
         }
         {% if readers %}
@@ -79,6 +86,19 @@
                 {% for field in decision.fields %}pub {{ field.name }}: {{ field.ty }},{% endfor %}
                 }
             {% endfor %}
+            {% for bag in update_stored %}
+                /// Members the update handler persists for this request chain.
+                #[derive(Debug, Clone, Default)]
+                pub struct {{ bag.name }} {
+                    {% for field in bag.fields %}pub {{ field.name }}: Option<{{ field.ty }}>,{% endfor %}
+                }
+                impl {{ bag.name }} {
+                    /// Combine the persisted members collected along the request chain.
+                    fn merge(self, other: Self) -> Self {
+                        Self { {% for field in bag.fields %}{{ field.name }}: self.{{ field.name }}.or(other.{{ field.name }}), {% endfor %} }
+                    }
+                }
+                {% endfor %}
             {% for request in requests %}
                 /// Public model parameters for one served version's operation.
                 pub struct {{ request.name }} {

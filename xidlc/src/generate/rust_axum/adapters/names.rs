@@ -54,6 +54,16 @@ impl Names<'_> {
         format!("{}_{member}", key.replace("::", "_")).to_case(Case::Snake)
     }
 
+    /// Persisted-member bag of one update operation, named by the operation.
+    pub(crate) fn stored_type(key: &str) -> String {
+        format!(
+            "{}Stored",
+            key.replace("::", "_")
+                .replace('.', "_")
+                .to_case(Case::Pascal)
+        )
+    }
+
     pub(super) fn value_type(&self, value: &TypeUse, recursive: bool) -> IdlcResult<String> {
         let mut ty = value.ty.clone();
         self.normalize(&mut ty, &value.scope)?;
@@ -85,6 +95,8 @@ impl Names<'_> {
             ValuePlan::Named(key) => Value::Named(Call {
                 name: self.function(key),
                 stored: false,
+                current: false,
+                pair: false,
             }),
             ValuePlan::Sequence(value) => Value::Sequence(Box::new(self.value(value))),
             ValuePlan::Map { key, value } => Value::Map {

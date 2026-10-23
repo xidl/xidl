@@ -54,6 +54,16 @@ impl Names<'_> {
         format!("{}_{member}", key.replace("::", "_")).to_case(Case::Camel)
     }
 
+    /// Persisted-member bag of one update operation, named by the operation.
+    pub fn stored_type(key: &str) -> String {
+        format!(
+            "{}Stored",
+            key.replace("::", "_")
+                .replace('.', "_")
+                .to_case(Case::Pascal)
+        )
+    }
+
     pub fn named(&self, key: &str) -> TsType {
         let path = std::iter::once(self.version.to_string())
             .chain(key.split("::").map(str::to_string))
@@ -107,6 +117,8 @@ impl Names<'_> {
             ValuePlan::Named(key) => Value::Named(Call {
                 name: self.function(key),
                 stored: false,
+                current: false,
+                pair: false,
             }),
             ValuePlan::Sequence(value) | ValuePlan::Array(value) => {
                 Value::Sequence(Box::new(self.value(value)?))
