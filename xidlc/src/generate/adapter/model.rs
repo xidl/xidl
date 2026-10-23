@@ -1,5 +1,6 @@
 //! Typed surfaces and decisions shared by adapter renderers.
 
+use crate::generate::adapter::Updates;
 use std::collections::BTreeMap;
 use xidl_parser::hir;
 use xidl_parser::rest_hir::HttpOperation;
@@ -128,6 +129,9 @@ pub(crate) struct AdapterPlan {
     /// Derived from `@added` / `@removed` alone: a version reads every member
     /// removed by the adjacent steps at or after its own position.
     pub needs: BTreeMap<String, Vec<(String, Vec<String>)>>,
+    /// Update operations whose request upcast receives the Head resource and
+    /// hands paired retired members back to the handler.
+    pub updates: Updates,
 }
 
 /// Complete surfaces also preserve Head and contracts with a single version.

@@ -2,16 +2,18 @@
 
 use crate::generate::typescript::definition::contexts::TsType;
 use serde::Serialize;
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Serialize)]
 pub(super) struct FileContext {
     pub file_stem: String,
     pub has_errors: bool,
+    pub has_updates: bool,
     pub decisions: Vec<Decision>,
     pub hooks: Vec<Hook>,
     pub readers: Vec<Reader>,
     pub needs: Vec<Needs>,
+    pub update_stored: Vec<StoredBag>,
     pub conversions: Vec<Conversion>,
     pub operations: Vec<Operation>,
     pub endpoints: Vec<Endpoint>,
@@ -33,13 +35,22 @@ pub(super) struct Decision {
     pub fields: Vec<Field>,
 }
 
-/// A hook may read only the stored values its own step removed.
+/// A hook may read only the stored values its own step removed, and an
+/// update hook may also merge against the Head resource it receives.
 #[derive(Serialize)]
 pub(super) struct Hook {
     pub name: String,
     pub input: TsType,
     pub output: TsType,
     pub stored: Vec<String>,
+    pub current: Option<TsType>,
+}
+
+/// Members one update operation's handler persists, named by its request chain.
+#[derive(Serialize)]
+pub(super) struct StoredBag {
+    pub name: String,
+    pub fields: Vec<Field>,
 }
 
 /// One stored-value accessor per removed member, keyed by the Head-side
@@ -72,6 +83,8 @@ pub(super) struct Copy {
 pub(super) struct Call {
     pub name: String,
     pub stored: bool,
+    pub current: bool,
+    pub pair: bool,
 }
 
 #[derive(Serialize)]
@@ -91,6 +104,22 @@ impl Value {
             Self::Named(call) => call.stored = stored.contains(&call.name),
             Self::Sequence(value) | Self::Map(value) | Self::Optional(value) => {
                 value.annotate(stored);
+            }
+            Self::Identity => {}
+        }
+    }
+
+    /// Copy the call shape of each named conversion into this value.
+    pub(super) fn mark_calls(&mut self, marked: &BTreeMap<String, (bool, bool)>) {
+        match self {
+            Self::Named(call) => {
+                if let Some((current, pair)) = marked.get(&call.name) {
+                    call.current = *current;
+                    call.pair = *pair;
+                }
+            }
+            Self::Sequence(value) | Self::Map(value) | Self::Optional(value) => {
+                value.mark_calls(marked);
             }
             Self::Identity => {}
         }
@@ -127,6 +156,16 @@ pub(super) struct Conversion {
     pub hook_stored: bool,
     /// The function threads stored values to its hook or to a callee.
     pub stored: bool,
+    /// The function receives the Head resource of its update operation.
+    pub current: bool,
+    pub current_type: Option<TsType>,
+    /// The hook merges against the Head resource.
+    pub hook_current: bool,
+    /// The function returns `UpcastValue<T, S>` and accumulates the bag.
+    pub pair: bool,
+    pub stored_type: Option<String>,
+    /// The hook decision carries the operation's stored bag.
+    pub stored_field: bool,
     pub copies: Vec<Copy>,
     pub assignments: Vec<Assignment>,
     pub shared_values: Vec<String>,
@@ -143,6 +182,7 @@ pub(super) struct ErrorArm {
 
 #[derive(Serialize, Clone)]
 pub(super) struct Operation {
+    pub current: bool,
     pub prefix: String,
     pub from: String,
     pub version: String,
@@ -150,7 +190,7 @@ pub(super) struct Operation {
     pub request_source: TsType,
     pub request_target: TsType,
     pub schema: Option<String>,
-    pub request_call: String,
+    pub request_call: Call,
     pub result_source: TsType,
     pub result_target: TsType,
     pub result_call: Option<Call>,
@@ -160,10 +200,13 @@ pub(super) struct Operation {
     pub errors_target: Vec<String>,
     pub error_arms: Vec<ErrorArm>,
     pub stored: bool,
+    pub stored_type: Option<String>,
 }
 
 #[derive(Serialize)]
 pub(super) struct Endpoint {
+    pub current: bool,
+    pub current_type: Option<TsType>,
     pub prefix: String,
     pub from: String,
     pub id: String,
@@ -178,17 +221,29 @@ pub(super) struct Endpoint {
     pub head_errors: Vec<String>,
     pub steps: Vec<Operation>,
     pub stored: bool,
+    pub stored_type: Option<String>,
 }
 
 #[derive(Serialize)]
 pub(super) struct Dispatcher {
+    pub current: bool,
+    pub current_type: Option<TsType>,
     pub prefix: String,
     pub head_request: TsType,
     pub head_result: TsType,
     pub head_errors: Vec<String>,
-    pub versions: Vec<(String, String)>,
+    pub versions: Vec<DispatcherVersion>,
     pub results: Vec<TsType>,
     pub errors: Vec<String>,
+    pub stored: bool,
+    pub stored_type: Option<String>,
+}
+
+#[derive(Serialize)]
+pub(super) struct DispatcherVersion {
+    pub id: String,
+    pub pascal: String,
+    pub current: bool,
     pub stored: bool,
 }
 

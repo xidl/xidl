@@ -8,6 +8,16 @@ impl AdapterRenderer<'_> {
             return Ok(());
         };
         let stored = Self::stored_conversions(file);
+        let shapes = file
+            .conversions
+            .iter()
+            .map(|conversion| {
+                (
+                    conversion.name.clone(),
+                    (conversion.current, conversion.pair),
+                )
+            })
+            .collect::<std::collections::BTreeMap<_, _>>();
         let stored_operations = file
             .operations
             .iter()
@@ -44,6 +54,20 @@ impl AdapterRenderer<'_> {
                     ));
                 }
                 let prefix = Self::prefix(operation);
+                let mark = self
+                    .plan
+                    .updates
+                    .operations
+                    .get(key)
+                    .map(|update| head_names.named(&update.return_key));
+                let update = self.plan.updates.operations.contains_key(key);
+                let stored_type = self
+                    .plan
+                    .updates
+                    .operations
+                    .get(key)
+                    .filter(|update| !update.stored.is_empty())
+                    .map(|_| crate::generate::rust_axum::adapters::names::Names::stored_type(key));
                 let mut upcast = Vec::new();
                 let mut downcast = Vec::new();
                 let mut downcast_error = Vec::new();
@@ -55,7 +79,14 @@ impl AdapterRenderer<'_> {
                         types: &step.target_types,
                         layout: &self.layout,
                     };
-                    upcast.push(new.function(&format!("{prefix}Request")));
+                    let request = new.function(&format!("{prefix}Request"));
+                    let (current, pair) = shapes.get(&request).copied().unwrap_or_default();
+                    upcast.push(Call {
+                        name: request,
+                        stored: false,
+                        current,
+                        pair,
+                    });
                 }
                 for step in self.plan.steps[index..].iter().rev() {
                     let old = Names {
@@ -69,6 +100,8 @@ impl AdapterRenderer<'_> {
                     downcast.push(Call {
                         stored: stored.contains(&response),
                         name: response,
+                        current: false,
+                        pair: false,
                     });
                     let error = format!(
                         "{}_error_to_{}",
@@ -78,6 +111,8 @@ impl AdapterRenderer<'_> {
                     downcast_error.push(Call {
                         stored: stored_operations.contains(&error),
                         name: format!("downcast_{error}"),
+                        current: false,
+                        pair: false,
                     });
                 }
                 let threads = downcast
@@ -85,6 +120,8 @@ impl AdapterRenderer<'_> {
                     .chain(&downcast_error)
                     .any(|call: &Call| call.stored);
                 file.endpoints.push(Endpoint {
+                    current: update && !upcast.is_empty(),
+                    current_type: mark.clone(),
                     prefix: format!(
                         "{}_from_{}",
                         prefix.to_case(Case::Snake),
@@ -102,6 +139,7 @@ impl AdapterRenderer<'_> {
                     downcast_error,
                     parameters: Vec::new(),
                     stored: threads,
+                    stored_type: stored_type.clone(),
                 });
             }
         }
@@ -135,6 +173,12 @@ impl AdapterRenderer<'_> {
             .filter(|endpoint| endpoint.stored)
             .map(|endpoint| endpoint.prefix.clone())
             .collect::<BTreeSet<_>>();
+        let current_endpoints = file
+            .endpoints
+            .iter()
+            .filter(|endpoint| endpoint.current)
+            .map(|endpoint| endpoint.prefix.clone())
+            .collect::<BTreeSet<_>>();
         for (key, operation) in &head.surface.operations {
             let prefix = Self::prefix(operation);
             let mut variants = Vec::new();
@@ -157,6 +201,7 @@ impl AdapterRenderer<'_> {
                 variants.push(DispatchVariant {
                     id: version.version.id.to_case(Case::Pascal),
                     stored: stored_endpoints.contains(&variant_prefix),
+                    current: current_endpoints.contains(&variant_prefix),
                     prefix: variant_prefix,
                     response: self.response_type(served, &names)?.0,
                     error: self.error_type(served, &names),
@@ -165,6 +210,7 @@ impl AdapterRenderer<'_> {
             let threads = variants
                 .iter()
                 .any(|variant: &DispatchVariant| variant.stored);
+            let update = self.plan.updates.operations.get(key);
             file.dispatches.push(Dispatch {
                 prefix: prefix.to_case(Case::Snake),
                 outcome: format!("{prefix}Outcome"),
@@ -174,6 +220,11 @@ impl AdapterRenderer<'_> {
                 exhaustive: variants.len() == self.plan.versions.len(),
                 variants,
                 stored: threads,
+                stored_type: update
+                    .filter(|update| !update.stored.is_empty())
+                    .map(|_| crate::generate::rust_axum::adapters::names::Names::stored_type(key)),
+                current: update.is_some(),
+                current_type: update.map(|update| names.named(&update.return_key)),
             });
         }
         Ok(())
@@ -231,7 +282,7 @@ impl AdapterRenderer<'_> {
                     .iter()
                     .rev()
                     .map(|step| {
-                        let name = Names {
+                        let call_name = Names {
                             version: &step.from.id,
                             step_from: &step.from.id,
                             upward: false,
@@ -240,8 +291,10 @@ impl AdapterRenderer<'_> {
                         }
                         .function(&key);
                         Call {
-                            stored: stored.contains(&name),
-                            name,
+                            stored: stored.contains(&call_name),
+                            name: call_name,
+                            current: false,
+                            pair: false,
                         }
                     })
                     .collect();

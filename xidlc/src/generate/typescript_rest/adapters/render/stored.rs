@@ -1,6 +1,7 @@
 //! Thread stored values through every conversion that reaches a removed member.
 
 use super::*;
+use std::collections::BTreeMap;
 
 impl AdapterRenderer<'_> {
     /// A conversion threads stored values when its own hook reads them or when
@@ -43,7 +44,26 @@ impl AdapterRenderer<'_> {
                 value.annotate(&stored);
             }
         }
+        let marked = file
+            .conversions
+            .iter()
+            .map(|conversion| {
+                (
+                    conversion.name.clone(),
+                    (conversion.current, conversion.pair),
+                )
+            })
+            .collect::<BTreeMap<_, _>>();
+        for conversion in &mut file.conversions {
+            for copy in &mut conversion.copies {
+                copy.value.mark_calls(&marked);
+            }
+        }
         for operation in &mut file.operations {
+            if let Some((current, pair)) = marked.get(&operation.request_call.name) {
+                operation.request_call.current = *current;
+                operation.request_call.pair = *pair;
+            }
             if let Some(call) = &mut operation.result_call {
                 call.stored = stored.contains(&call.name);
             }
