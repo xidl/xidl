@@ -146,6 +146,17 @@ def real_business_journey(context):
     )
     expect_tsc_failure(
         output,
+        "implied-default.ts",
+        f'import type {{ VersionAdapters }} from "{adapters}";\n'
+        "export const partial: Pick<VersionAdapters, 'parcelUpcastFromV2'> = {\n"
+        "  parcelUpcastFromV2: () =>\n"
+        "    ({ ok: true, value: { audit: 'checked', handling_note: 'xidl.ignored' as const } }),\n"
+        "};\n",
+        "signature_required",
+        "a defaulted addition needs the value older versions implied",
+    )
+    expect_tsc_failure(
+        output,
         "missing-persist.ts",
         f'import type {{ VersionAdapters }} from "{adapters}";\n'
         "import type * as types from './versioned_adapters_business';\n"
@@ -270,6 +281,13 @@ def rust_business_journey(context):
         ),
         "missing field `handling_note`",
         "a retired optional member cannot be dropped silently",
+    )
+    expect_cargo_check_failure(
+        output,
+        hooks,
+        hooks.read_text().replace(", signature_required: false", ""),
+        "missing field `signature_required`",
+        "a defaulted addition needs the value older versions implied",
     )
     expect_cargo_check_failure(
         output,

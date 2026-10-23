@@ -245,6 +245,7 @@ pub mod version_adapters {
     pub struct ParcelUpcastFromV2Decision {
         pub inspected: Option<String>,
         pub audit: String,
+        pub signature_required: bool,
         pub handling_note: Ignored,
     }
     /// Explicit business assignments and discarded-value acknowledgements.
@@ -2421,6 +2422,7 @@ pub mod version_adapters {
             fixed: projected_8,
             inspected: decision.inspected,
             audit: decision.audit,
+            signature_required: Some(decision.signature_required),
         })
     }
     /// Projects one adjacent declaration by borrowing its source value.
@@ -3941,6 +3943,7 @@ pub mod version_adapters {
             "courier_remark",
             "inspected",
             "note",
+            "signature_required",
         ];
         for key in object.keys() {
             if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
@@ -4480,7 +4483,12 @@ pub mod version_adapters {
             "reference",
             "stops",
         ];
-        let forbidden: &[&str] = &["audit", "courier_remark", "inspected"];
+        let forbidden: &[&str] = &[
+            "audit",
+            "courier_remark",
+            "inspected",
+            "signature_required",
+        ];
         for key in object.keys() {
             if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
                 return Err(format!("field {key} is not declared in served version"));
@@ -5053,6 +5061,7 @@ pub mod version_adapters {
             "inspected",
             "note",
             "reference",
+            "signature_required",
             "stops",
         ];
         let forbidden: &[&str] = &["courier_note", "handling_note"];
@@ -5105,27 +5114,37 @@ pub mod version_adapters {
             })?;
         let value_5: String = ::serde_json::from_value::<String>((raw_5).clone())
             .map_err(|error| error.to_string())?;
-        let raw_6 = object.get("courier_remark").unwrap_or(&::serde_json::Value::Null);
-        let value_6: Option<String> = if (raw_6).is_null() {
+        let raw_6 = object
+            .get("signature_required")
+            .unwrap_or(&::serde_json::Value::Null);
+        let value_6: Option<bool> = if (raw_6).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_6).clone())
+            ::serde_json::from_value::<bool>((raw_6).clone())
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
-        let raw_7 = object
+        let raw_7 = object.get("courier_remark").unwrap_or(&::serde_json::Value::Null);
+        let value_7: Option<String> = if (raw_7).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_7).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        let raw_8 = object
             .get("address")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "address").to_string()
             })?;
-        let value_7: v3::Address = decode_wire_v_3_address(raw_7)?;
-        let raw_8 = object
+        let value_8: v3::Address = decode_wire_v_3_address(raw_8)?;
+        let raw_9 = object
             .get("stops")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "stops").to_string()
             })?;
-        let value_8: Vec<v3::Address> = (|| {
-            let array = (raw_8)
+        let value_9: Vec<v3::Address> = (|| {
+            let array = (raw_9)
                 .as_array()
                 .ok_or_else(|| "expected an array".to_string())?;
             let values = array
@@ -5134,13 +5153,13 @@ pub mod version_adapters {
                 .collect::<Result<Vec<_>, String>>()?;
             Ok::<_, String>(values)
         })()?;
-        let raw_9 = object
+        let raw_10 = object
             .get("by_tag")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "by_tag").to_string()
             })?;
-        let value_9: ::std::collections::BTreeMap<String, v3::Address> = (|| {
-            let object = (raw_9)
+        let value_10: ::std::collections::BTreeMap<String, v3::Address> = (|| {
+            let object = (raw_10)
                 .as_object()
                 .ok_or_else(|| "expected a map".to_string())?;
             let mut decoded = ::std::collections::BTreeMap::new();
@@ -5165,13 +5184,13 @@ pub mod version_adapters {
             }
             Ok::<_, String>(decoded)
         })()?;
-        let raw_10 = object
+        let raw_11 = object
             .get("fixed")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "fixed").to_string()
             })?;
-        let value_10: [i32; 2] = (|| {
-            let array = (raw_10)
+        let value_11: [i32; 2] = (|| {
+            let array = (raw_11)
                 .as_array()
                 .ok_or_else(|| "expected an array".to_string())?;
             if array.len() != (2) as usize {
@@ -5195,11 +5214,12 @@ pub mod version_adapters {
             note: value_3,
             inspected: value_4,
             audit: value_5,
-            courier_remark: value_6,
-            address: value_7,
-            stops: value_8,
-            by_tag: value_9,
-            fixed: value_10,
+            signature_required: value_6,
+            courier_remark: value_7,
+            address: value_8,
+            stops: value_9,
+            by_tag: value_10,
+            fixed: value_11,
         })
     }
     fn decode_wire_v_3_parcel_patch(

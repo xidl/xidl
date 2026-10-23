@@ -140,6 +140,109 @@ fn generated_symbols_reject_normalized_versions_scopes_and_cross_category_collis
 }
 
 #[test]
+fn replaces_links_copy_mechanically_without_decisions_or_storage() {
+    let source = r#"
+        @version enum V { v1, v2 };
+        struct Message {
+            string id;
+            @removed(V::v2) string text;
+            @added(V::v2) @replaces(text) string body;
+            @removed(V::v2) @optional string subject;
+        };
+        interface Messages {
+            @get(path = "/messages/{id}") Message get(@path string id);
+            @post(path = "/messages") Message send(@body Message message);
+        };"#;
+    let files = render(source, "renamed.idl");
+    let adapters = &files[0].1;
+    assert!(
+        adapters.contains("\"body\"]: converted1.value"),
+        "the upcast copies the earlier value into the successor: {}",
+        adapters
+    );
+    assert!(
+        adapters.contains("\"text\"]: converted1.value"),
+        "the downcast restores the earlier wire name: {}",
+        adapters
+    );
+    assert!(
+        !adapters.contains("MessageUpcastFromV1Decision"),
+        "a rename needs no decision: {adapters}"
+    );
+    assert!(
+        adapters.contains("\"Message\": { \"v2\": [], \"v1\": [\"subject\"] }"),
+        "storage needs cover only the retired member: {adapters}"
+    );
+    assert!(
+        !adapters.contains("messageText"),
+        "a renamed member is not a storage candidate: {adapters}"
+    );
+}
+
+#[test]
+fn defaulted_additions_require_the_implied_value_in_the_upcast_decision() {
+    let source = r#"
+        @version enum V { v1, v2 };
+        struct SendMessageRequest {
+            string to;
+            @added(V::v2) @optional @default(false) boolean fallback_to_sms;
+            @added(V::v2) @optional string note;
+        };
+        struct Message { string id; };
+        interface Messages {
+            @post(path = "/messages") Message send(@body SendMessageRequest request);
+        };"#;
+    let files = render(source, "defaults.idl");
+    let adapters = &files[0].1;
+    assert!(
+        adapters.contains("fallback_to_sms: boolean;"),
+        "a defaulted addition is a required decision: {adapters}"
+    );
+    assert!(
+        !adapters.contains("fallback_to_sms?:"),
+        "the decision must not fall back to the new default: {adapters}"
+    );
+    assert!(
+        !adapters.contains("note?: string;"),
+        "an optional addition without a default stays absent: {adapters}"
+    );
+    assert!(
+        adapters.contains("[\"fallback_to_sms\"]: decision.value[\"fallback_to_sms\"]"),
+        "the conversion assigns the stated value: {adapters}"
+    );
+    // A removed member keeps deciding through OMIT, never through an implied
+    // value: the defaulted rendering belongs to upcast additions only.
+    let removals = render(
+        r#"
+        @version enum V { v1, v2 };
+        struct SendMessageRequest {
+            string to;
+            @removed(V::v2) @optional @default(false) boolean legacy_flag;
+        };
+        struct Message { string id; };
+        interface Messages {
+            @post(path = "/messages") Message send(@body SendMessageRequest request);
+            @get(path = "/messages/{id}") SendMessageRequest get(@path string id);
+        };"#,
+        "removals.idl",
+    );
+    let adapters = &removals[0].1;
+    assert!(
+        adapters.contains("legacy_flag: boolean | Omitted"),
+        "the downcast decision keeps the OMIT escape hatch: {adapters}"
+    );
+    assert!(
+        adapters.contains(
+            "sendMessageRequestLegacyFlag(source: types.v2.SendMessageRequest): boolean | undefined;"
+        ),
+        "the stored reader keeps its absent case for a defaulted removal: {adapters}"
+    );
+    assert!(
+        !adapters.contains("legacy_flag: boolean;"),
+        "a removed member never states an implied value: {adapters}"
+    );
+}
+
 fn update_request_conversions_must_stay_operation_disjoint() {
     let source = r#"
         @version enum V { v1, v2 };

@@ -113,9 +113,13 @@ impl MemberClassifier<'_> {
         }
         for target in changed_target {
             // Downcast removed members always decide: storage or OMIT keeps the
-            // old contract readable. Upcast additions stay optional when legal.
+            // old contract readable. Upcast additions stay optional when legal,
+            // except a declared default: the Head handler would otherwise apply
+            // the new default to every old request, so the author states the
+            // value each older version implied.
             let optional = target.value.as_ref().is_some_and(|value| value.optional);
-            if !upward || !optional || replacement {
+            let defaulted = target.value.as_ref().is_some_and(|value| value.defaulted);
+            if !upward || !optional || replacement || defaulted {
                 covered.insert(target.key.clone());
                 plan.assignments.push(target.clone());
             }
