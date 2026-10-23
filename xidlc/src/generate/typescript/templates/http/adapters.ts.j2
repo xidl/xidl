@@ -15,6 +15,10 @@ export interface UnsupportedProjection {
     reason: string;
 }
 export type VersionedResult<T> = { ok: true; value: T } | { ok: false; error: UnsupportedProjection };
+{%- if has_updates %}
+    /** An upcast value together with the members its handler persists. */
+    export type UpcastValue<T, S> = { value: T; stored: S };
+{% endif %}
 /** A refusal retains the exact business outcome; callers must not repeat side effects. */
 export type ProjectionOutcome<T, Head> =
 | { projected: true; value: T }
@@ -54,7 +58,7 @@ function mapOptional<S, T>(source: S | undefined, convert: (value: S) => Version
 /** Hooks are required application decisions. Keep them pure and deterministic. */
 export interface VersionAdapters {
     {% for hook in hooks %}
-        {{ hook.name }}(source: {{ m.render_type(hook.input) }}{% if hook.stored %}, stored: Pick<StoredValues, {% for reader in hook.stored %}{{ reader | tojson }}{% if not loop.last %} | {% endif %}{% endfor %}>{% endif %}): VersionedResult<{{ m.render_type(hook.output) }}>;
+        {{ hook.name }}(source: {{ m.render_type(hook.input) }}{% if hook.current %}, current: {{ m.render_type(hook.current) }}{% endif %}{% if hook.stored %}, stored: Pick<StoredValues, {% for reader in hook.stored %}{{ reader | tojson }}{% if not loop.last %} | {% endif %}{% endfor %}>{% endif %}): VersionedResult<{{ m.render_type(hook.output) }}>;
     {% endfor %}
 }
 {% if readers %}
@@ -79,10 +83,18 @@ export interface VersionAdapters {
         {% endfor %}
     }
 {% endfor %}
+{% for bag in update_stored %}
+    /** Members the update handler persists for this request chain. */
+    export interface {{ bag.name }} {
+        {% for field in bag.fields %}
+            {{ field.key }}?: {{ m.render_type(field.ty) }};
+        {% endfor %}
+    }
+{% endfor %}
 
 {% macro convert(value, source) -%}
     {%- if value.kind == "Identity" -%}ok({{ source }})
-    {%- elif value.kind == "Named" -%}{{ value.data.name }}({{ source }}{% if value.data.stored %}, stored{% endif %}, adapters)
+    {%- elif value.kind == "Named" -%}{{ value.data.name }}({{ source }}{% if value.data.current %}, current{% endif %}{% if value.data.stored %}, stored{% endif %}, adapters)
     {%- elif value.kind == "Sequence" -%}mapSequence({{ source }}, (item) => {{ convert(value.data, "item") }})
     {%- elif value.kind == "Map" -%}mapRecord({{ source }}, (item) => {{ convert(value.data, "item") }})
     {%- elif value.kind == "Optional" -%}mapOptional({{ source }}, (item) => {{ convert(value.data, "item") }})
@@ -90,7 +102,7 @@ export interface VersionAdapters {
 {%- endmacro %}
 
 {% for c in conversions %}
-    export function {{ c.name }}(source: {{ m.render_type(c.source) }}{% if c.stored %}, stored: StoredValues{% endif %}, adapters: VersionAdapters): VersionedResult<{{ m.render_type(c.target) }}> {
+    export function {{ c.name }}(source: {{ m.render_type(c.source) }}{% if c.current %}, current: {{ m.render_type(c.current_type) }}{% endif %}{% if c.stored %}, stored: StoredValues{% endif %}, adapters: VersionAdapters): {% if c.pair %}VersionedResult<UpcastValue<{{ m.render_type(c.target) }}, {{ c.stored_type }}>>{% else %}VersionedResult<{{ m.render_type(c.target) }}>{% endif %} {
         {% if c.kind == "hook" %}
             return adapters.{{ c.hook }}(source);
         {% elif c.kind == "alias" %}
@@ -122,31 +134,65 @@ export interface VersionAdapters {
             {% endif %}
         {% else %}
             {% if c.hook %}
-                const decision = adapters.{{ c.hook }}(source{% if c.hook_stored %}, stored{% endif %});
+                const decision = adapters.{{ c.hook }}(source{% if c.hook_current %}, current{% endif %}{% if c.hook_stored %}, stored{% endif %});
                 if (!decision.ok) return decision;
             {% endif %}
             {% for copy in c.copies %}
                 const converted{{ loop.index0 }} = {{ convert(copy.value, "source[" ~ (copy.source | tojson) ~ "]") }};
                 if (!converted{{ loop.index0 }}.ok) return converted{{ loop.index0 }};
             {% endfor %}
+            {%- if c.pair %}
+                return ok({
+                    value: {
+                        {% for copy in c.copies %}
+                            {% set unwrapped = ".value.value" if copy.value.kind == "Named" and copy.value.data.pair else ".value" %}
+                            {% if copy.optional %}
+                                ...(converted{{ loop.index0 }}{{ unwrapped }} === undefined ? {} : { [{{ copy.target | tojson }}]: converted{{ loop.index0 }}{{ unwrapped }} }),
+                            {% else %}
+                                [{{ copy.target | tojson }}]: converted{{ loop.index0 }}{{ unwrapped }},
+                            {% endif %}
+                        {% endfor %}
+                        {% for field in c.assignments %}
+                            {% if field.omittable %}
+                                ...(decision.value[{{ field.source | tojson }}] === OMIT ? {} : { [{{ field.target | tojson }}]: decision.value[{{ field.source | tojson }}] }),
+                            {% elif field.optional %}
+                                ...(decision.value[{{ field.source | tojson }}] === undefined ? {} : { [{{ field.target | tojson }}]: decision.value[{{ field.source | tojson }}] }),
+                            {% else %}
+                                [{{ field.target | tojson }}]: decision.value[{{ field.source | tojson }}],
+                            {% endif %}
+                        {% endfor %}
+                    },
+                    stored: {
+                        {% for copy in c.copies %}
+                            {% if copy.value.kind == "Named" and copy.value.data.pair %}
+                                ...converted{{ loop.index0 }}.value.stored,
+                            {% endif %}
+                        {% endfor %}
+                        {% if c.stored_field %}
+                            ...decision.value.stored,
+                        {% endif %}
+                    },
+                });
+            {%- else %}
             return ok({
                 {% for copy in c.copies %}
-                    {% if copy.optional %}
+                    {%- if copy.optional %}
                         ...(converted{{ loop.index0 }}.value === undefined ? {} : { [{{ copy.target | tojson }}]: converted{{ loop.index0 }}.value }),
-                    {% else %}
+                    {%- else %}
                         [{{ copy.target | tojson }}]: converted{{ loop.index0 }}.value,
-                    {% endif %}
-                {% endfor %}
+                    {%- endif %}
+                {%- endfor %}
                 {% for field in c.assignments %}
-                    {% if field.omittable %}
+                    {%- if field.omittable %}
                         ...(decision.value[{{ field.source | tojson }}] === OMIT ? {} : { [{{ field.target | tojson }}]: decision.value[{{ field.source | tojson }}] }),
-                    {% elif field.optional %}
+                    {%- elif field.optional %}
                         ...(decision.value[{{ field.source | tojson }}] === undefined ? {} : { [{{ field.target | tojson }}]: decision.value[{{ field.source | tojson }}] }),
-                    {% else %}
+                    {%- else %}
                         [{{ field.target | tojson }}]: decision.value[{{ field.source | tojson }}],
-                    {% endif %}
-                {% endfor %}
+                    {%- endif %}
+                {%- endfor %}
             });
+            {%- endif %}
         {% endif %}
     }
 {% endfor %}

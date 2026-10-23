@@ -16,6 +16,7 @@ impl AdapterRenderer<'_> {
             self.layout
                 .validate(&format!("{}::{key}", input.target.version))?;
         }
+        let mark = input.update.clone().unwrap_or_default();
         let mut output = Conversion {
             name: input.target.function(input.key),
             source: input.source_type.clone(),
@@ -24,6 +25,12 @@ impl AdapterRenderer<'_> {
             hook: None,
             hook_stored: false,
             stored: false,
+            current: mark.current,
+            current_type: mark.head.clone(),
+            hook_current: false,
+            pair: mark.pair,
+            stored_type: mark.stored_type.clone(),
+            stored_field: false,
             copies: Vec::new(),
             assignments: Vec::new(),
             absences: Vec::new(),
@@ -49,6 +56,7 @@ impl AdapterRenderer<'_> {
                     source: input.source_type,
                     target: input.target_type,
                     stored: false,
+                    current: None,
                 });
                 file.conversions.push(output);
                 return Ok(());
@@ -99,7 +107,7 @@ impl AdapterRenderer<'_> {
                 .iter()
                 .map(|member| rust_ident(&member.name))
                 .collect();
-            self.decision(members, &input, &mut output, file)?;
+            self.decision(members, &input, &mark, &mut output, file)?;
         }
         file.conversions.push(output);
         Ok(())
@@ -111,6 +119,7 @@ impl AdapterRenderer<'_> {
         &self,
         plan: &ConversionPlan,
         input: &ConversionInput<'_>,
+        mark: &UpdateMark,
         output: &mut Conversion,
         file: &mut FileContext,
     ) -> IdlcResult<()> {
@@ -162,6 +171,23 @@ impl AdapterRenderer<'_> {
                 ty: "Ignored".into(),
             });
         }
+        if let Some(bag) = mark
+            .stored_type
+            .as_ref()
+            .filter(|_| !mark.paired.is_empty())
+        {
+            if !keys.insert("stored".into()) {
+                return Err(Layout::error(
+                    input.key,
+                    "a member named stored collides with the persisted bag",
+                ));
+            }
+            fields.push(Field {
+                name: "stored".into(),
+                ty: bag.clone(),
+            });
+            output.stored_field = true;
+        }
         let decision = input.target.decision(input.key);
         let name = input.target.hook(input.key);
         file.decisions.push(Decision {
@@ -170,11 +196,13 @@ impl AdapterRenderer<'_> {
         });
         output.hook_stored = downward && !plan.assignments.is_empty();
         output.stored = output.hook_stored;
+        output.hook_current = mark.current;
         file.hooks.push(Hook {
             name: name.clone(),
             source: input.source_type.clone(),
             target: decision,
             stored: output.hook_stored,
+            current: mark.head.clone().filter(|_| mark.current),
         });
         output.hook = Some(name);
         Ok(())
@@ -207,6 +235,7 @@ impl AdapterRenderer<'_> {
                 source: output.changed_type.clone(),
                 target: input.target_type.clone(),
                 stored: false,
+                current: None,
             });
             output.hook = Some(name);
         }
