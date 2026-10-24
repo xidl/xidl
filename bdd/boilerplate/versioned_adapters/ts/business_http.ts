@@ -219,6 +219,29 @@ export async function runHttpJourney(
       400,
       'the Head contract no longer declares the retired patch member',
     );
+    // The oldest release patches through the same flow: its retired member
+    // persists, reads straight back, and an empty patch carries an empty bag
+    // while the response still serves the stored value from storage. The note
+    // predates v1's contract, so a v1 patch neither sends nor reads back one.
+    const v1Wrote = await patch('v1', 'p1', { handling_note: 'v1-cold' });
+    assert.equal(v1Wrote.status, 200);
+    const v1Served = await v1Wrote.json();
+    assert.equal(v1Served.handling_note, 'v1-cold');
+    assert.equal(handlingNotes.get('p1'), 'v1-cold');
+    const emptyPatch = await patch('v1', 'p1', {});
+    assert.equal(emptyPatch.status, 200);
+    const emptyServed = await emptyPatch.json();
+    assert.equal(emptyServed.handling_note, 'v1-cold');
+    assert.equal(
+      Object.hasOwn(emptyServed, 'note'),
+      false,
+      'a v1 response never invents the note it does not declare',
+    );
+    assert.equal(
+      handlingNotes.get('p1'),
+      'v1-cold',
+      'an empty patch carries no retired fact and rewrites nothing',
+    );
     console.log(
       'PASS: three-version wire validation, typed hooks, full error downgrade, HTTP SDK, idempotent committed outcomes',
     );
