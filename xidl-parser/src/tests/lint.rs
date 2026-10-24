@@ -7,7 +7,7 @@ fn annotation_diagnostics_are_source_located_and_stable() {
 @version enum V { v1, v2 };
 struct Item {
     @remvoed(V::v2) string legacy;
-    @photon_audit string id;
+    @relay_audit string id;
 };
 @optional interface Items {
     @gett(path = "/items") Item get_item();
@@ -79,7 +79,7 @@ fn argument_errors_preserve_duplicates_types_and_raw_boundaries() {
 
 #[test]
 fn extended_annotations_report_once_and_passthroughs_remain_opaque() {
-    let source = r#"//@photon_audit
+    let source = r#"//@relay_audit
 struct Item {
     //@remvoed(V::v2)
     string old;
@@ -88,7 +88,7 @@ struct Item {
 "#;
     let diagnostics = lint(&parser_text(source).unwrap());
     assert_eq!(diagnostics.len(), 2, "{diagnostics:?}");
-    assert_eq!(&source[diagnostics[0].span.clone()], "//@photon_audit");
+    assert_eq!(&source[diagnostics[0].span.clone()], "//@relay_audit");
     assert_eq!(&source[diagnostics[1].span.clone()], "//@remvoed(V::v2)");
 }
 
@@ -100,7 +100,7 @@ module Api {
     @version struct Invalid { string value; };
     interface I {
         struct Nested { @gett string x; };
-        @http(404) exception Missing { @photon_audit string reason; };
+        @http(404) exception Missing { @relay_audit string reason; };
         void f(@optional @get string id);
     };
     union Result switch(long) { case 1: @optional @post string value; };
@@ -132,9 +132,9 @@ fn normalization_preserves_unicode_comments_strings_and_scoped_names() {
 #[test]
 fn extended_raw_arguments_do_not_absorb_adjacent_annotations() {
     for annotations in [
-        r#"//@id(11) @photon_audit(data=["x"])"#,
-        r#"//@rename("new") @photon_audit(data=["x"])"#,
-        r#"//@rename("new[0]") @id(11) @photon_audit(data=["x"])"#,
+        r#"//@id(11) @relay_audit(data=["x"])"#,
+        r#"//@rename("new") @relay_audit(data=["x"])"#,
+        r#"//@rename("new[0]") @id(11) @relay_audit(data=["x"])"#,
     ] {
         let source = format!("struct S {{ long a; {annotations}\n short b; }};");
         let diagnostics = lint(&parser_text(&source).unwrap());
@@ -142,7 +142,7 @@ fn extended_raw_arguments_do_not_absorb_adjacent_annotations() {
         assert_eq!(diagnostics[0].code, DiagnosticCode::UnknownAnnotation);
         assert_eq!(
             &source[diagnostics[0].span.clone()],
-            r#"@photon_audit(data=["x"])"#
+            r#"@relay_audit(data=["x"])"#
         );
     }
 }
@@ -163,23 +163,23 @@ fn editor_diagnostics_cover_nested_and_forward_declarations_without_resolving_in
     let source = r#"
 #include "editor-may-not-have-this.idl"
 #define ENABLED 1
-@photon_audit native Handle;
+@relay_audit native Handle;
 const long LIMIT = 4;
-@photon_audit struct Forward;
-@photon_audit union Future;
-@photon_audit bitset Bits { bitfield<1> enabled; };
-@photon_audit bitmask Flags { @photon_audit Read, Write };
-@photon_audit typedef long Count;
-@photon_audit typedef struct Inline { @photon_audit long id; } Alias;
-union Choice switch(long) { case 1: struct Nested { @photon_audit string id; } item; };
-@photon_audit interface Service;
-@photon_audit interface Empty {};
+@relay_audit struct Forward;
+@relay_audit union Future;
+@relay_audit bitset Bits { bitfield<1> enabled; };
+@relay_audit bitmask Flags { @relay_audit Read, Write };
+@relay_audit typedef long Count;
+@relay_audit typedef struct Inline { @relay_audit long id; } Alias;
+union Choice switch(long) { case 1: struct Nested { @relay_audit string id; } item; };
+@relay_audit interface Service;
+@relay_audit interface Empty {};
 interface Api {
     const long COUNT = 4;
-    @photon_audit attribute string label;
+    @relay_audit attribute string label;
 };
 module Generic<typename T> {
-    @photon_audit struct Item { T value; };
+    @relay_audit struct Item { T value; };
 };
 "#;
     let ast = parser_text(source).unwrap();
@@ -190,14 +190,14 @@ module Generic<typename T> {
             .map(|diagnostic| diagnostic.span.start)
             .collect::<Vec<_>>(),
         source
-            .match_indices("@photon_audit")
+            .match_indices("@relay_audit")
             .map(|(start, _)| start)
             .collect::<Vec<_>>(),
     );
     for diagnostic in diagnostics {
         assert_eq!(diagnostic.code.as_str(), "unknown-annotation");
         assert_eq!(diagnostic.severity, Severity::Warning);
-        assert_eq!(&source[diagnostic.span], "@photon_audit");
+        assert_eq!(&source[diagnostic.span], "@relay_audit");
     }
     for (source, code) in [
         ("@optional interface I {};", "misplaced-annotation"),
