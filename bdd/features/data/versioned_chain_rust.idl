@@ -1,0 +1,39 @@
+#pragma xidlc package booking_chain_rust
+
+@version(in = "header", name = "X-Booking-Version")
+enum ApiVersion {
+    @rename("2026-06-01") v2026_06_01,
+    @rename("2026-10-01") v2026_10_01,
+    @rename("2027-01-01") v2027_01_01,
+};
+
+struct AgendaEntry {
+    string title;
+    long minutes;
+};
+
+struct Booking {
+    string id;
+    string title;
+    // The oldest release packs the plan into one text block; later releases
+    // unpack it into timed entries. The unpacking is not invertible.
+    @removed(ApiVersion::v2026_10_01) string agenda;
+    @added(ApiVersion::v2026_10_01) sequence<AgendaEntry> items;
+    // The attendee roster still feeds the two older releases; Head dropped it.
+    @removed(ApiVersion::v2027_01_01) sequence<string> roster;
+    // The organizer kept the role, the source name moved. Mechanical.
+    @removed(ApiVersion::v2027_01_01) @optional string owner;
+    @added(ApiVersion::v2027_01_01) @replaces(owner) @optional string organizer;
+    // Bookings became lockable; older callers state the implied value.
+    @added(ApiVersion::v2026_10_01) @optional @default(false) boolean locked;
+};
+
+@http(404) exception NotFound { string id; };
+
+interface Scheduler {
+    @post(path = "/bookings")
+    Booking book(@body Booking booking);
+
+    @get(path = "/bookings/{id}")
+    Booking get(@path string id) raises(NotFound);
+};

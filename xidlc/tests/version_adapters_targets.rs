@@ -24,6 +24,15 @@ fn independent_typescript_target_snapshots_wire_validation_and_business_decision
 }
 
 #[test]
+fn chain_target_snapshots_the_retirement_surface_of_the_booking_corpus() {
+    let source = include_str!("../../bdd/features/data/versioned_chain.idl");
+    let files = render(source, "chain.idl");
+    assert_eq!(files, render(source, "chain.idl"));
+    assert_eq!(files.len(), 1);
+    insta::assert_snapshot!("independent_typescript_chain_adapters", &files[0].1);
+}
+
+#[test]
 fn single_version_target_has_valid_identity_entries_without_adjacent_conversions() {
     let files = render(
         "@version enum V { only }; @http(400) exception Invalid { string reason; }; interface Store { @post(path=\"/items\") string save(@body string value) raises(Invalid); };",
