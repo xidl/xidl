@@ -2,7 +2,7 @@ use super::format_idl_source;
 
 #[test]
 fn idl_formatter_preserves_passthrough_names_arrays_and_quoted_brackets() {
-    let source = r#"@rust-derive(Debug) @photon_audit(data=["x", "y"])
+    let source = r#"@rust-derive(Debug) @relay_audit(data=["x", "y"])
         struct Item { @rename("a\\b[0]") string id; };"#;
     let formatted = format_idl_source(source).expect("format valid annotations");
     assert!(formatted.contains("@rust-derive(Debug)"), "{formatted}");

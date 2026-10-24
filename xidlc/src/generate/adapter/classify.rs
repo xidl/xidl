@@ -92,8 +92,10 @@ impl MemberClassifier<'_> {
             plan.ignored = changed_source.into_iter().cloned().collect();
         }
         for target in changed_target {
+            // Downcast removed members always decide: storage or OMIT keeps the
+            // old contract readable. Upcast additions stay optional when legal.
             let optional = target.value.as_ref().is_some_and(|value| value.optional);
-            if !optional || replacement {
+            if !upward || !optional || replacement {
                 covered.insert(target.key.clone());
                 plan.assignments.push(target.clone());
             }

@@ -50,9 +50,29 @@
         /// Hooks remain synchronous, pure, deterministic, and mandatory.
         pub trait VersionAdapters {
             {% for hook in hooks %}
-                fn {{ hook.name }}(&self, source: &{{ hook.source }}) -> VersionedResult<{{ hook.target }}>;
+                fn {{ hook.name }}(&self, source: &{{ hook.source }}{% if hook.stored %}, stored: &dyn StoredValues{% endif %}) -> VersionedResult<{{ hook.target }}>;
             {% endfor %}
         }
+        {% if readers %}
+            /// Members older versions still read that Head no longer carries, resolved by the application from the source instance of the downcast step that retires them.
+            pub trait StoredValues {
+                {% for reader in readers %}
+                    /// wire `{{ reader.wire }}`, last served by {{ reader.version }}
+                    fn {{ reader.name }}(&self, source: &{{ reader.source }}) -> {{ reader.output }};
+                {% endfor %}
+            }
+            /// Wire names each served version still reads from storage, by type; Head reads nothing.
+            pub const NEEDS: &[(&str, &[(&str, &[&str])])] = &[
+                {% for need in needs %}
+                    ({{ need.key | tojson }}, &[{% for entry in need.entries %}({{ entry[0] | tojson }}, &[{% for wire in entry[1] %}{{ wire | tojson }}, {% endfor %}]), {% endfor %}]),
+                {% endfor %}
+            ];
+            /// A Head outcome together with the stored values its downcast still reads.
+            pub struct HeadOutcome<T, E, S> {
+                pub outcome: Result<T, E>,
+                pub stored: S,
+            }
+        {% endif %}
         {% for decision in decisions %}
             /// Explicit business assignments and discarded-value acknowledgements.
             pub struct {{ decision.name }} {

@@ -1,4 +1,4 @@
-# Photon messaging regression corpus
+# Relay messaging regression corpus
 
 Source: user-supplied `xidl-versioned-fixture.zip`, SHA-256
 `bd4a8f1c8315b9c1f2f346b59b4e8fa01101519c5b8b24f4c17790abac8f5fe6`.

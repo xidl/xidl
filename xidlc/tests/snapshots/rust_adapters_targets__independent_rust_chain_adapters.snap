@@ -1,0 +1,1751 @@
+---
+source: xidlc/tests/rust_adapters_targets.rs
+expression: "&files[0].1"
+---
+/// Pure version projections. The application owns routing and side effects.
+#[allow(unused_imports, unused_variables, non_snake_case, non_camel_case_types)]
+pub mod version_adapters {
+    use super::{v2026_06_01, v2026_10_01, v2027_01_01};
+    /// Direction of an unsupported projection.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum Direction {
+        Upcast,
+        Downcast,
+    }
+    /// The application renders a refusal using its own frozen error vocabulary.
+    #[derive(Debug, Clone)]
+    pub struct UnsupportedProjection {
+        pub version: String,
+        pub direction: Direction,
+        pub type_path: String,
+        pub reason: String,
+    }
+    /// A projection either succeeds or requires an unsupported business choice.
+    pub type VersionedResult<T> = Result<T, UnsupportedProjection>;
+    /// Explicit acknowledgement that a source value is intentionally discarded.
+    #[derive(Debug, Clone, Copy)]
+    pub struct Ignored {
+        _private: (),
+    }
+    /// The acknowledgement hooks return for an intentionally retired member.
+    pub const IGNORED: Ignored = Ignored { _private: () };
+    /// A version resolved by the application before calling an adapter.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum Version {
+        V20260601,
+        V20261001,
+        V20270101,
+    }
+    impl Version {
+        /// Original contract identifier.
+        pub fn id(self) -> &'static str {
+            match self {
+                Self::V20260601 => "v2026_06_01",
+                Self::V20261001 => "v2026_10_01",
+                Self::V20270101 => "v2027_01_01",
+            }
+        }
+        /// Original contract version value.
+        pub fn value(self) -> &'static str {
+            match self {
+                Self::V20260601 => "2026-06-01",
+                Self::V20261001 => "2026-10-01",
+                Self::V20270101 => "2027-01-01",
+            }
+        }
+    }
+    /// Context for application business policy; adapters do not select versions.
+    #[derive(Debug, Clone, Copy)]
+    pub struct VersionContext {
+        pub original_version: Version,
+    }
+    /// A failed response projection retains the original committed Head outcome.
+    pub enum ProjectionOutcome<T, H> {
+        Projected(T),
+        Unsupported { head: H, error: UnsupportedProjection },
+    }
+    /// Invalid served-version wire data is distinct from a business refusal.
+    #[derive(Debug)]
+    pub enum AdaptationError {
+        Validation(String),
+        Unsupported(UnsupportedProjection),
+    }
+    impl From<UnsupportedProjection> for AdaptationError {
+        fn from(value: UnsupportedProjection) -> Self {
+            Self::Unsupported(value)
+        }
+    }
+    /// Hooks remain synchronous, pure, deterministic, and mandatory.
+    pub trait VersionAdapters {
+        fn booking_upcast_from_v_2026_06_01(
+            &self,
+            source: &v2026_06_01::Booking,
+        ) -> VersionedResult<BookingUpcastFromV20260601Decision>;
+        fn booking_downcast_to_v_2026_06_01(
+            &self,
+            source: &v2026_10_01::Booking,
+            stored: &dyn StoredValues,
+        ) -> VersionedResult<BookingDowncastToV20260601Decision>;
+        fn booking_upcast_from_v_2026_10_01(
+            &self,
+            source: &v2026_10_01::Booking,
+        ) -> VersionedResult<BookingUpcastFromV20261001Decision>;
+        fn booking_downcast_to_v_2026_10_01(
+            &self,
+            source: &v2027_01_01::Booking,
+            stored: &dyn StoredValues,
+        ) -> VersionedResult<BookingDowncastToV20261001Decision>;
+    }
+    /// Members older versions still read that Head no longer carries, resolved by the application from the source instance of the downcast step that retires them.
+    pub trait StoredValues {
+        /// wire `agenda`, last served by v2026_06_01
+        fn booking_agenda(&self, source: &v2026_10_01::Booking) -> Option<String>;
+        /// wire `roster`, last served by v2026_10_01
+        fn booking_roster(&self, source: &v2027_01_01::Booking) -> Option<Vec<String>>;
+    }
+    /// Wire names each served version still reads from storage, by type; Head reads nothing.
+    pub const NEEDS: &[(&str, &[(&str, &[&str])])] = &[
+        (
+            "Booking",
+            &[
+                ("2027-01-01", &[]),
+                ("2026-10-01", &["roster"]),
+                ("2026-06-01", &["agenda", "roster"]),
+            ],
+        ),
+    ];
+    /// A Head outcome together with the stored values its downcast still reads.
+    pub struct HeadOutcome<T, E, S> {
+        pub outcome: Result<T, E>,
+        pub stored: S,
+    }
+    /// Explicit business assignments and discarded-value acknowledgements.
+    pub struct BookingUpcastFromV20260601Decision {
+        pub items: Vec<v2026_10_01::AgendaEntry>,
+        pub agenda: Ignored,
+    }
+    /// Explicit business assignments and discarded-value acknowledgements.
+    pub struct BookingDowncastToV20260601Decision {
+        pub agenda: String,
+    }
+    /// Explicit business assignments and discarded-value acknowledgements.
+    pub struct BookingUpcastFromV20261001Decision {
+        pub roster: Ignored,
+    }
+    /// Explicit business assignments and discarded-value acknowledgements.
+    pub struct BookingDowncastToV20261001Decision {
+        pub roster: Vec<String>,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct SchedulerBookRequestV20260601 {
+        pub booking: v2026_06_01::Booking,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct SchedulerGetRequestV20260601 {
+        pub id: String,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct SchedulerBookRequestV20261001 {
+        pub booking: v2026_10_01::Booking,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct SchedulerGetRequestV20261001 {
+        pub id: String,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct SchedulerBookRequestV20270101 {
+        pub booking: v2027_01_01::Booking,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct SchedulerGetRequestV20270101 {
+        pub id: String,
+    }
+    fn map_sequence<S, T>(
+        source: &[S],
+        convert: impl Fn(&S) -> VersionedResult<T>,
+    ) -> VersionedResult<Vec<T>> {
+        source.iter().map(convert).collect()
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn booking_upcast_from_v_2026_06_01(
+        source: &v2026_06_01::Booking,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_10_01::Booking> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_06_01".into(),
+            direction: Direction::Upcast,
+            type_path: "Booking".into(),
+            reason: reason.into(),
+        };
+        let decision = adapters.booking_upcast_from_v_2026_06_01(source)?;
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        let projected_1 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.title))?;
+        let projected_2 = map_sequence(
+            &source.roster,
+            |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
+        )?;
+        Ok(v2026_10_01::Booking {
+            id: projected_0,
+            title: projected_1,
+            roster: projected_2,
+            items: decision.items,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn booking_downcast_to_v_2026_06_01(
+        source: &v2026_10_01::Booking,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_06_01::Booking> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_10_01".into(),
+            direction: Direction::Downcast,
+            type_path: "Booking".into(),
+            reason: reason.into(),
+        };
+        let decision = adapters.booking_downcast_to_v_2026_06_01(source, stored)?;
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        let projected_1 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.title))?;
+        let projected_2 = map_sequence(
+            &source.roster,
+            |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
+        )?;
+        Ok(v2026_06_01::Booking {
+            id: projected_0,
+            title: projected_1,
+            roster: projected_2,
+            agenda: decision.agenda,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn not_found_downcast_to_v_2026_06_01(
+        source: &v2026_10_01::NotFound,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_06_01::NotFound> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_10_01".into(),
+            direction: Direction::Downcast,
+            type_path: "NotFound".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        Ok(v2026_06_01::NotFound {
+            id: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn scheduler_book_request_upcast_from_v_2026_06_01(
+        source: &SchedulerBookRequestV20260601,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<SchedulerBookRequestV20261001> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_06_01".into(),
+            direction: Direction::Upcast,
+            type_path: "SchedulerBookRequest".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = booking_upcast_from_v_2026_06_01(&source.booking, adapters)?;
+        Ok(SchedulerBookRequestV20261001 {
+            booking: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn scheduler_book_response_downcast_to_v_2026_06_01(
+        source: &v2026_10_01::Booking,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_06_01::Booking> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_10_01".into(),
+            direction: Direction::Downcast,
+            type_path: "SchedulerBookResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = booking_downcast_to_v_2026_06_01(source, stored, adapters)?;
+        Ok(projected_0)
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn scheduler_get_request_upcast_from_v_2026_06_01(
+        source: &SchedulerGetRequestV20260601,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<SchedulerGetRequestV20261001> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_06_01".into(),
+            direction: Direction::Upcast,
+            type_path: "SchedulerGetRequest".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        Ok(SchedulerGetRequestV20261001 {
+            id: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn scheduler_get_response_downcast_to_v_2026_06_01(
+        source: &v2026_10_01::Booking,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_06_01::Booking> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_10_01".into(),
+            direction: Direction::Downcast,
+            type_path: "SchedulerGetResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = booking_downcast_to_v_2026_06_01(source, stored, adapters)?;
+        Ok(projected_0)
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn agenda_entry_upcast_from_v_2026_10_01(
+        source: &v2026_10_01::AgendaEntry,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2027_01_01::AgendaEntry> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_10_01".into(),
+            direction: Direction::Upcast,
+            type_path: "AgendaEntry".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.title))?;
+        let projected_1 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.minutes))?;
+        Ok(v2027_01_01::AgendaEntry {
+            title: projected_0,
+            minutes: projected_1,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn agenda_entry_downcast_to_v_2026_10_01(
+        source: &v2027_01_01::AgendaEntry,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_10_01::AgendaEntry> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2027_01_01".into(),
+            direction: Direction::Downcast,
+            type_path: "AgendaEntry".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.title))?;
+        let projected_1 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.minutes))?;
+        Ok(v2026_10_01::AgendaEntry {
+            title: projected_0,
+            minutes: projected_1,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn booking_upcast_from_v_2026_10_01(
+        source: &v2026_10_01::Booking,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2027_01_01::Booking> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_10_01".into(),
+            direction: Direction::Upcast,
+            type_path: "Booking".into(),
+            reason: reason.into(),
+        };
+        let decision = adapters.booking_upcast_from_v_2026_10_01(source)?;
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        let projected_1 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.title))?;
+        let projected_2 = map_sequence(
+            &source.items,
+            |item| agenda_entry_upcast_from_v_2026_10_01(item, adapters),
+        )?;
+        Ok(v2027_01_01::Booking {
+            id: projected_0,
+            title: projected_1,
+            items: projected_2,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn booking_downcast_to_v_2026_10_01(
+        source: &v2027_01_01::Booking,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_10_01::Booking> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2027_01_01".into(),
+            direction: Direction::Downcast,
+            type_path: "Booking".into(),
+            reason: reason.into(),
+        };
+        let decision = adapters.booking_downcast_to_v_2026_10_01(source, stored)?;
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        let projected_1 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.title))?;
+        let projected_2 = map_sequence(
+            &source.items,
+            |item| agenda_entry_downcast_to_v_2026_10_01(item, adapters),
+        )?;
+        Ok(v2026_10_01::Booking {
+            id: projected_0,
+            title: projected_1,
+            items: projected_2,
+            roster: decision.roster,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn not_found_downcast_to_v_2026_10_01(
+        source: &v2027_01_01::NotFound,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_10_01::NotFound> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2027_01_01".into(),
+            direction: Direction::Downcast,
+            type_path: "NotFound".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        Ok(v2026_10_01::NotFound {
+            id: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn scheduler_book_request_upcast_from_v_2026_10_01(
+        source: &SchedulerBookRequestV20261001,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<SchedulerBookRequestV20270101> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_10_01".into(),
+            direction: Direction::Upcast,
+            type_path: "SchedulerBookRequest".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = booking_upcast_from_v_2026_10_01(&source.booking, adapters)?;
+        Ok(SchedulerBookRequestV20270101 {
+            booking: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn scheduler_book_response_downcast_to_v_2026_10_01(
+        source: &v2027_01_01::Booking,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_10_01::Booking> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2027_01_01".into(),
+            direction: Direction::Downcast,
+            type_path: "SchedulerBookResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = booking_downcast_to_v_2026_10_01(source, stored, adapters)?;
+        Ok(projected_0)
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn scheduler_get_request_upcast_from_v_2026_10_01(
+        source: &SchedulerGetRequestV20261001,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<SchedulerGetRequestV20270101> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_10_01".into(),
+            direction: Direction::Upcast,
+            type_path: "SchedulerGetRequest".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        Ok(SchedulerGetRequestV20270101 {
+            id: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn scheduler_get_response_downcast_to_v_2026_10_01(
+        source: &v2027_01_01::Booking,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_10_01::Booking> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2027_01_01".into(),
+            direction: Direction::Downcast,
+            type_path: "SchedulerGetResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = booking_downcast_to_v_2026_10_01(source, stored, adapters)?;
+        Ok(projected_0)
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_scheduler_book_error_to_v_2026_06_01(
+        source: &::xidl_rust_axum::Error,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<::xidl_rust_axum::Error> {
+        Ok(source.clone())
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_scheduler_get_error_to_v_2026_06_01(
+        source: &v2026_10_01::SchedulerGetError,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_06_01::SchedulerGetError> {
+        match source {
+            v2026_10_01::SchedulerGetError::NotFound(value) => {
+                not_found_downcast_to_v_2026_06_01(value, adapters)
+                    .map(v2026_06_01::SchedulerGetError::NotFound)
+            }
+            v2026_10_01::SchedulerGetError::Framework(error) => {
+                Ok(v2026_06_01::SchedulerGetError::Framework(error.clone()))
+            }
+        }
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_scheduler_book_error_to_v_2026_10_01(
+        source: &::xidl_rust_axum::Error,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<::xidl_rust_axum::Error> {
+        Ok(source.clone())
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_scheduler_get_error_to_v_2026_10_01(
+        source: &v2027_01_01::SchedulerGetError,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_10_01::SchedulerGetError> {
+        match source {
+            v2027_01_01::SchedulerGetError::NotFound(value) => {
+                not_found_downcast_to_v_2026_10_01(value, adapters)
+                    .map(v2026_10_01::SchedulerGetError::NotFound)
+            }
+            v2027_01_01::SchedulerGetError::Framework(error) => {
+                Ok(v2026_10_01::SchedulerGetError::Framework(error.clone()))
+            }
+        }
+    }
+    fn decode_wire_v_2026_06_01_booking(
+        wire: &::serde_json::Value,
+    ) -> Result<v2026_06_01::Booking, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &["agenda", "id", "roster", "title"];
+        let forbidden: &[&str] = &["items"];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object
+            .get("id")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "id").to_string()
+            })?;
+        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_1 = object
+            .get("title")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "title").to_string()
+            })?;
+        let value_1: String = ::serde_json::from_value::<String>((raw_1).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_2 = object
+            .get("agenda")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "agenda").to_string()
+            })?;
+        let value_2: String = ::serde_json::from_value::<String>((raw_2).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_3 = object
+            .get("roster")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "roster").to_string()
+            })?;
+        let value_3: Vec<String> = (|| {
+            let array = (raw_3)
+                .as_array()
+                .ok_or_else(|| "expected an array".to_string())?;
+            let values = array
+                .iter()
+                .map(|item| {
+                    ::serde_json::from_value::<String>((item).clone())
+                        .map_err(|error| error.to_string())
+                })
+                .collect::<Result<Vec<_>, String>>()?;
+            Ok::<_, String>(values)
+        })()?;
+        Ok(v2026_06_01::Booking {
+            id: value_0,
+            title: value_1,
+            agenda: value_2,
+            roster: value_3,
+        })
+    }
+    fn decode_wire_v_2026_10_01_booking(
+        wire: &::serde_json::Value,
+    ) -> Result<v2026_10_01::Booking, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &["id", "items", "roster", "title"];
+        let forbidden: &[&str] = &["agenda"];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object
+            .get("id")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "id").to_string()
+            })?;
+        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_1 = object
+            .get("title")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "title").to_string()
+            })?;
+        let value_1: String = ::serde_json::from_value::<String>((raw_1).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_2 = object
+            .get("items")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "items").to_string()
+            })?;
+        let value_2: Vec<v2026_10_01::AgendaEntry> = (|| {
+            let array = (raw_2)
+                .as_array()
+                .ok_or_else(|| "expected an array".to_string())?;
+            let values = array
+                .iter()
+                .map(|item| decode_wire_v_2026_10_01_agenda_entry(item))
+                .collect::<Result<Vec<_>, String>>()?;
+            Ok::<_, String>(values)
+        })()?;
+        let raw_3 = object
+            .get("roster")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "roster").to_string()
+            })?;
+        let value_3: Vec<String> = (|| {
+            let array = (raw_3)
+                .as_array()
+                .ok_or_else(|| "expected an array".to_string())?;
+            let values = array
+                .iter()
+                .map(|item| {
+                    ::serde_json::from_value::<String>((item).clone())
+                        .map_err(|error| error.to_string())
+                })
+                .collect::<Result<Vec<_>, String>>()?;
+            Ok::<_, String>(values)
+        })()?;
+        Ok(v2026_10_01::Booking {
+            id: value_0,
+            title: value_1,
+            items: value_2,
+            roster: value_3,
+        })
+    }
+    fn decode_wire_v_2026_10_01_agenda_entry(
+        wire: &::serde_json::Value,
+    ) -> Result<v2026_10_01::AgendaEntry, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &["minutes", "title"];
+        let forbidden: &[&str] = &[];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object
+            .get("title")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "title").to_string()
+            })?;
+        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_1 = object
+            .get("minutes")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "minutes").to_string()
+            })?;
+        let value_1: i32 = ::serde_json::from_value::<i32>((raw_1).clone())
+            .map_err(|error| error.to_string())?;
+        Ok(v2026_10_01::AgendaEntry {
+            title: value_0,
+            minutes: value_1,
+        })
+    }
+    fn decode_wire_v_2027_01_01_booking(
+        wire: &::serde_json::Value,
+    ) -> Result<v2027_01_01::Booking, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &["id", "items", "title"];
+        let forbidden: &[&str] = &["agenda", "roster"];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object
+            .get("id")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "id").to_string()
+            })?;
+        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_1 = object
+            .get("title")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "title").to_string()
+            })?;
+        let value_1: String = ::serde_json::from_value::<String>((raw_1).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_2 = object
+            .get("items")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "items").to_string()
+            })?;
+        let value_2: Vec<v2027_01_01::AgendaEntry> = (|| {
+            let array = (raw_2)
+                .as_array()
+                .ok_or_else(|| "expected an array".to_string())?;
+            let values = array
+                .iter()
+                .map(|item| decode_wire_v_2027_01_01_agenda_entry(item))
+                .collect::<Result<Vec<_>, String>>()?;
+            Ok::<_, String>(values)
+        })()?;
+        Ok(v2027_01_01::Booking {
+            id: value_0,
+            title: value_1,
+            items: value_2,
+        })
+    }
+    fn decode_wire_v_2027_01_01_agenda_entry(
+        wire: &::serde_json::Value,
+    ) -> Result<v2027_01_01::AgendaEntry, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &["minutes", "title"];
+        let forbidden: &[&str] = &[];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object
+            .get("title")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "title").to_string()
+            })?;
+        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_1 = object
+            .get("minutes")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "minutes").to_string()
+            })?;
+        let value_1: i32 = ::serde_json::from_value::<i32>((raw_1).clone())
+            .map_err(|error| error.to_string())?;
+        Ok(v2027_01_01::AgendaEntry {
+            title: value_0,
+            minutes: value_1,
+        })
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_scheduler_book_from_v_2026_06_01(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<SchedulerBookRequestV20270101, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["booking"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("booking")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "booking").into(),
+            ))?;
+        let value_0: v2026_06_01::Booking = decode_wire_v_2026_06_01_booking(&raw_0)
+            .map_err(AdaptationError::Validation)?;
+        let source = SchedulerBookRequestV20260601 {
+            booking: value_0,
+        };
+        let source = scheduler_book_request_upcast_from_v_2026_06_01(&source, adapters)?;
+        let source = scheduler_book_request_upcast_from_v_2026_10_01(&source, adapters)?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_scheduler_book_from_v_2026_06_01_outcome(
+        head: Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<v2026_06_01::Booking, ::xidl_rust_axum::Error>,
+        Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
+    > {
+        match &head {
+            Ok(source) => {
+                let source = match scheduler_book_response_downcast_to_v_2026_10_01(
+                    source,
+                    stored,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                let source = match scheduler_book_response_downcast_to_v_2026_06_01(
+                    &source,
+                    stored,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_scheduler_book_error_to_v_2026_10_01(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                let source = match downcast_scheduler_book_error_to_v_2026_06_01(
+                    &source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
+    pub async fn dispatch_scheduler_book_from_v_2026_06_01<F, Fut, S>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<v2026_06_01::Booking, ::xidl_rust_axum::Error>,
+            Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(SchedulerBookRequestV20270101, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<v2027_01_01::Booking, ::xidl_rust_axum::Error, S>,
+        >,
+        S: StoredValues,
+    {
+        let input = decode_and_upcast_scheduler_book_from_v_2026_06_01(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V20260601,
+                },
+            )
+            .await;
+        Ok(
+            downcast_scheduler_book_from_v_2026_06_01_outcome(
+                head.outcome,
+                &head.stored,
+                adapters,
+            ),
+        )
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_scheduler_get_from_v_2026_06_01(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<SchedulerGetRequestV20270101, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["id"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("id")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "id").into(),
+            ))?;
+        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+            .map_err(|error| error.to_string())
+            .map_err(AdaptationError::Validation)?;
+        let source = SchedulerGetRequestV20260601 {
+            id: value_0,
+        };
+        let source = scheduler_get_request_upcast_from_v_2026_06_01(&source, adapters)?;
+        let source = scheduler_get_request_upcast_from_v_2026_10_01(&source, adapters)?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_scheduler_get_from_v_2026_06_01_outcome(
+        head: Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<v2026_06_01::Booking, v2026_06_01::SchedulerGetError>,
+        Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
+    > {
+        match &head {
+            Ok(source) => {
+                let source = match scheduler_get_response_downcast_to_v_2026_10_01(
+                    source,
+                    stored,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                let source = match scheduler_get_response_downcast_to_v_2026_06_01(
+                    &source,
+                    stored,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_scheduler_get_error_to_v_2026_10_01(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                let source = match downcast_scheduler_get_error_to_v_2026_06_01(
+                    &source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
+    pub async fn dispatch_scheduler_get_from_v_2026_06_01<F, Fut, S>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<v2026_06_01::Booking, v2026_06_01::SchedulerGetError>,
+            Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(SchedulerGetRequestV20270101, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<v2027_01_01::Booking, v2027_01_01::SchedulerGetError, S>,
+        >,
+        S: StoredValues,
+    {
+        let input = decode_and_upcast_scheduler_get_from_v_2026_06_01(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V20260601,
+                },
+            )
+            .await;
+        Ok(
+            downcast_scheduler_get_from_v_2026_06_01_outcome(
+                head.outcome,
+                &head.stored,
+                adapters,
+            ),
+        )
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_scheduler_book_from_v_2026_10_01(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<SchedulerBookRequestV20270101, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["booking"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("booking")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "booking").into(),
+            ))?;
+        let value_0: v2026_10_01::Booking = decode_wire_v_2026_10_01_booking(&raw_0)
+            .map_err(AdaptationError::Validation)?;
+        let source = SchedulerBookRequestV20261001 {
+            booking: value_0,
+        };
+        let source = scheduler_book_request_upcast_from_v_2026_10_01(&source, adapters)?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_scheduler_book_from_v_2026_10_01_outcome(
+        head: Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<v2026_10_01::Booking, ::xidl_rust_axum::Error>,
+        Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
+    > {
+        match &head {
+            Ok(source) => {
+                let source = match scheduler_book_response_downcast_to_v_2026_10_01(
+                    source,
+                    stored,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_scheduler_book_error_to_v_2026_10_01(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
+    pub async fn dispatch_scheduler_book_from_v_2026_10_01<F, Fut, S>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<v2026_10_01::Booking, ::xidl_rust_axum::Error>,
+            Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(SchedulerBookRequestV20270101, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<v2027_01_01::Booking, ::xidl_rust_axum::Error, S>,
+        >,
+        S: StoredValues,
+    {
+        let input = decode_and_upcast_scheduler_book_from_v_2026_10_01(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V20261001,
+                },
+            )
+            .await;
+        Ok(
+            downcast_scheduler_book_from_v_2026_10_01_outcome(
+                head.outcome,
+                &head.stored,
+                adapters,
+            ),
+        )
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_scheduler_get_from_v_2026_10_01(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<SchedulerGetRequestV20270101, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["id"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("id")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "id").into(),
+            ))?;
+        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+            .map_err(|error| error.to_string())
+            .map_err(AdaptationError::Validation)?;
+        let source = SchedulerGetRequestV20261001 {
+            id: value_0,
+        };
+        let source = scheduler_get_request_upcast_from_v_2026_10_01(&source, adapters)?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_scheduler_get_from_v_2026_10_01_outcome(
+        head: Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<v2026_10_01::Booking, v2026_10_01::SchedulerGetError>,
+        Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
+    > {
+        match &head {
+            Ok(source) => {
+                let source = match scheduler_get_response_downcast_to_v_2026_10_01(
+                    source,
+                    stored,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_scheduler_get_error_to_v_2026_10_01(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
+    pub async fn dispatch_scheduler_get_from_v_2026_10_01<F, Fut, S>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<v2026_10_01::Booking, v2026_10_01::SchedulerGetError>,
+            Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(SchedulerGetRequestV20270101, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<v2027_01_01::Booking, v2027_01_01::SchedulerGetError, S>,
+        >,
+        S: StoredValues,
+    {
+        let input = decode_and_upcast_scheduler_get_from_v_2026_10_01(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V20261001,
+                },
+            )
+            .await;
+        Ok(
+            downcast_scheduler_get_from_v_2026_10_01_outcome(
+                head.outcome,
+                &head.stored,
+                adapters,
+            ),
+        )
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_scheduler_book_from_v_2027_01_01(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<SchedulerBookRequestV20270101, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["booking"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("booking")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "booking").into(),
+            ))?;
+        let value_0: v2027_01_01::Booking = decode_wire_v_2027_01_01_booking(&raw_0)
+            .map_err(AdaptationError::Validation)?;
+        let source = SchedulerBookRequestV20270101 {
+            booking: value_0,
+        };
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_scheduler_book_from_v_2027_01_01_outcome(
+        head: Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
+        Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
+    > {
+        ProjectionOutcome::Projected(head)
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_scheduler_book_from_v_2027_01_01<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
+            Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(SchedulerBookRequestV20270101, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
+        >,
+    {
+        let input = decode_and_upcast_scheduler_book_from_v_2027_01_01(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V20270101,
+                },
+            )
+            .await;
+        Ok(downcast_scheduler_book_from_v_2027_01_01_outcome(head, adapters))
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_scheduler_get_from_v_2027_01_01(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<SchedulerGetRequestV20270101, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["id"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("id")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "id").into(),
+            ))?;
+        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+            .map_err(|error| error.to_string())
+            .map_err(AdaptationError::Validation)?;
+        let source = SchedulerGetRequestV20270101 {
+            id: value_0,
+        };
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_scheduler_get_from_v_2027_01_01_outcome(
+        head: Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
+        Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
+    > {
+        ProjectionOutcome::Projected(head)
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_scheduler_get_from_v_2027_01_01<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
+            Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(SchedulerGetRequestV20270101, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
+        >,
+    {
+        let input = decode_and_upcast_scheduler_get_from_v_2027_01_01(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V20270101,
+                },
+            )
+            .await;
+        Ok(downcast_scheduler_get_from_v_2027_01_01_outcome(head, adapters))
+    }
+    /// The caller-selected version's projected model type.
+    pub enum AgendaEntryProjection {
+        V20261001(v2026_10_01::AgendaEntry),
+        V20270101(v2027_01_01::AgendaEntry),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_agenda_entry(
+        version: Version,
+        head: v2027_01_01::AgendaEntry,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<AgendaEntryProjection> {
+        match version {
+            Version::V20261001 => {
+                let source = agenda_entry_downcast_to_v_2026_10_01(&head, adapters)?;
+                Ok(AgendaEntryProjection::V20261001(source))
+            }
+            Version::V20270101 => {
+                let source = head;
+                Ok(AgendaEntryProjection::V20270101(source))
+            }
+            _ => {
+                Err(UnsupportedProjection {
+                    version: version.value().into(),
+                    direction: Direction::Downcast,
+                    type_path: "AgendaEntryProjection".into(),
+                    reason: "type is not reachable in selected version".into(),
+                })
+            }
+        }
+    }
+    /// The caller-selected version's projected model type.
+    pub enum BookingProjection {
+        V20260601(v2026_06_01::Booking),
+        V20261001(v2026_10_01::Booking),
+        V20270101(v2027_01_01::Booking),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_booking(
+        version: Version,
+        head: v2027_01_01::Booking,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<BookingProjection> {
+        match version {
+            Version::V20260601 => {
+                let source = booking_downcast_to_v_2026_10_01(&head, stored, adapters)?;
+                let source = booking_downcast_to_v_2026_06_01(
+                    &source,
+                    stored,
+                    adapters,
+                )?;
+                Ok(BookingProjection::V20260601(source))
+            }
+            Version::V20261001 => {
+                let source = booking_downcast_to_v_2026_10_01(&head, stored, adapters)?;
+                Ok(BookingProjection::V20261001(source))
+            }
+            Version::V20270101 => {
+                let source = head;
+                Ok(BookingProjection::V20270101(source))
+            }
+        }
+    }
+    /// The caller-selected version's projected model type.
+    pub enum NotFoundProjection {
+        V20260601(v2026_06_01::NotFound),
+        V20261001(v2026_10_01::NotFound),
+        V20270101(v2027_01_01::NotFound),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_not_found(
+        version: Version,
+        head: v2027_01_01::NotFound,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<NotFoundProjection> {
+        match version {
+            Version::V20260601 => {
+                let source = not_found_downcast_to_v_2026_10_01(&head, adapters)?;
+                let source = not_found_downcast_to_v_2026_06_01(&source, adapters)?;
+                Ok(NotFoundProjection::V20260601(source))
+            }
+            Version::V20261001 => {
+                let source = not_found_downcast_to_v_2026_10_01(&head, adapters)?;
+                Ok(NotFoundProjection::V20261001(source))
+            }
+            Version::V20270101 => {
+                let source = head;
+                Ok(NotFoundProjection::V20270101(source))
+            }
+        }
+    }
+    /// Outcome in the caller's explicitly selected contract version.
+    pub enum SchedulerBookOutcome {
+        V20260601(Result<v2026_06_01::Booking, ::xidl_rust_axum::Error>),
+        V20261001(Result<v2026_10_01::Booking, ::xidl_rust_axum::Error>),
+        V20270101(Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>),
+    }
+    /// Decode a request using an application-resolved version before any hook.
+    pub fn decode_and_upcast_scheduler_book(
+        version: Version,
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<SchedulerBookRequestV20270101, AdaptationError> {
+        match version {
+            Version::V20260601 => {
+                decode_and_upcast_scheduler_book_from_v_2026_06_01(wire, adapters)
+            }
+            Version::V20261001 => {
+                decode_and_upcast_scheduler_book_from_v_2026_10_01(wire, adapters)
+            }
+            Version::V20270101 => {
+                decode_and_upcast_scheduler_book_from_v_2027_01_01(wire, adapters)
+            }
+        }
+    }
+    /// Retain the original owned Head outcome when any projection refuses.
+    pub fn downcast_scheduler_book_outcome(
+        version: Version,
+        head: Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        SchedulerBookOutcome,
+        Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
+    > {
+        match version {
+            Version::V20260601 => {
+                match downcast_scheduler_book_from_v_2026_06_01_outcome(
+                    head,
+                    stored,
+                    adapters,
+                ) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            SchedulerBookOutcome::V20260601(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V20261001 => {
+                match downcast_scheduler_book_from_v_2026_10_01_outcome(
+                    head,
+                    stored,
+                    adapters,
+                ) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            SchedulerBookOutcome::V20261001(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V20270101 => {
+                match downcast_scheduler_book_from_v_2027_01_01_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            SchedulerBookOutcome::V20270101(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /// Execute a Head handler once; it returns the stored values older versions still read.
+    pub async fn dispatch_scheduler_book<F, Fut, S>(
+        version: Version,
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            SchedulerBookOutcome,
+            Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(SchedulerBookRequestV20270101, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<v2027_01_01::Booking, ::xidl_rust_axum::Error, S>,
+        >,
+        S: StoredValues,
+    {
+        let input = decode_and_upcast_scheduler_book(version, wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: version,
+                },
+            )
+            .await;
+        Ok(
+            downcast_scheduler_book_outcome(
+                version,
+                head.outcome,
+                &head.stored,
+                adapters,
+            ),
+        )
+    }
+    /// Outcome in the caller's explicitly selected contract version.
+    pub enum SchedulerGetOutcome {
+        V20260601(Result<v2026_06_01::Booking, v2026_06_01::SchedulerGetError>),
+        V20261001(Result<v2026_10_01::Booking, v2026_10_01::SchedulerGetError>),
+        V20270101(Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>),
+    }
+    /// Decode a request using an application-resolved version before any hook.
+    pub fn decode_and_upcast_scheduler_get(
+        version: Version,
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<SchedulerGetRequestV20270101, AdaptationError> {
+        match version {
+            Version::V20260601 => {
+                decode_and_upcast_scheduler_get_from_v_2026_06_01(wire, adapters)
+            }
+            Version::V20261001 => {
+                decode_and_upcast_scheduler_get_from_v_2026_10_01(wire, adapters)
+            }
+            Version::V20270101 => {
+                decode_and_upcast_scheduler_get_from_v_2027_01_01(wire, adapters)
+            }
+        }
+    }
+    /// Retain the original owned Head outcome when any projection refuses.
+    pub fn downcast_scheduler_get_outcome(
+        version: Version,
+        head: Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        SchedulerGetOutcome,
+        Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
+    > {
+        match version {
+            Version::V20260601 => {
+                match downcast_scheduler_get_from_v_2026_06_01_outcome(
+                    head,
+                    stored,
+                    adapters,
+                ) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            SchedulerGetOutcome::V20260601(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V20261001 => {
+                match downcast_scheduler_get_from_v_2026_10_01_outcome(
+                    head,
+                    stored,
+                    adapters,
+                ) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            SchedulerGetOutcome::V20261001(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V20270101 => {
+                match downcast_scheduler_get_from_v_2027_01_01_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            SchedulerGetOutcome::V20270101(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /// Execute a Head handler once; it returns the stored values older versions still read.
+    pub async fn dispatch_scheduler_get<F, Fut, S>(
+        version: Version,
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            SchedulerGetOutcome,
+            Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(SchedulerGetRequestV20270101, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<v2027_01_01::Booking, v2027_01_01::SchedulerGetError, S>,
+        >,
+        S: StoredValues,
+    {
+        let input = decode_and_upcast_scheduler_get(version, wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: version,
+                },
+            )
+            .await;
+        Ok(downcast_scheduler_get_outcome(version, head.outcome, &head.stored, adapters))
+    }
+}

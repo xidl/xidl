@@ -49,6 +49,11 @@ impl Names<'_> {
         }
     }
 
+    /// Stored-value accessor for one removed member of a type or response.
+    pub fn reader(key: &str, member: &str) -> String {
+        format!("{}_{member}", key.replace("::", "_")).to_case(Case::Camel)
+    }
+
     pub fn named(&self, key: &str) -> TsType {
         let path = std::iter::once(self.version.to_string())
             .chain(key.split("::").map(str::to_string))
@@ -96,10 +101,13 @@ impl Names<'_> {
     }
 
     pub fn value(&self, value: &ValuePlan) -> IdlcResult<super::context::Value> {
-        use super::context::Value;
+        use super::context::{Call, Value};
         Ok(match value {
             ValuePlan::Identity => Value::Identity,
-            ValuePlan::Named(key) => Value::Named(self.function(key)),
+            ValuePlan::Named(key) => Value::Named(Call {
+                name: self.function(key),
+                stored: false,
+            }),
             ValuePlan::Sequence(value) | ValuePlan::Array(value) => {
                 Value::Sequence(Box::new(self.value(value)?))
             }

@@ -2,6 +2,7 @@
 
 mod conversion;
 mod operation;
+mod stored;
 
 use super::context::*;
 use super::names::Names;
@@ -35,6 +36,8 @@ impl<'a> AdapterRenderer<'a> {
             has_errors: false,
             decisions: Vec::new(),
             hooks: Vec::new(),
+            readers: Vec::new(),
+            needs: Vec::new(),
             conversions: Vec::new(),
             operations: Vec::new(),
             wire_definitions: Vec::new(),
@@ -78,6 +81,7 @@ impl<'a> AdapterRenderer<'a> {
                 self.operation(step, operation, (&old, &new), &mut file)?;
             }
         }
+        self.thread_stored(&mut file);
         self.endpoints(&mut file)?;
         self.type_endpoints(&mut file)?;
         file.has_errors = file

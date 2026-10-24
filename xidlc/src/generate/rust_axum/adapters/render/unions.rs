@@ -54,6 +54,7 @@ impl AdapterRenderer<'_> {
                 name: name.clone(),
                 source: format!("{}<'_>", output.changed_type),
                 target: input.target_type.clone(),
+                stored: false,
             });
             output.hook = Some(name);
         }

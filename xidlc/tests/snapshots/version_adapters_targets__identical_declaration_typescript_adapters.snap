@@ -24,6 +24,9 @@ export type ProjectionOutcome<T, Head> =
 export interface FrameworkError { kind: "Framework"; error: unknown }
 export const IGNORED = "xidl.ignored";
 export type Ignored = typeof IGNORED;
+/** A downcast decision leaves a removed optional member absent only by saying so. */
+export const OMIT = "xidl.omit";
+export type Omitted = typeof OMIT;
 const ok = <T>(value: T): VersionedResult<T> => ({ ok: true, value });
 
 function mapSequence<S, T>(source: S[], convert: (value: S) => VersionedResult<T>): VersionedResult<T[]> {
@@ -177,9 +180,24 @@ export interface VersionAdapters {
     
         itemUpcastFromV1(source: types.v1.Item): VersionedResult<ItemUpcastDecisionFromV1>;
     
-        itemDowncastToV1(source: types.v2.Item): VersionedResult<ItemDowncastDecisionToV1>;
+        itemDowncastToV1(source: types.v2.Item, stored: Pick<StoredValues, "itemValue">): VersionedResult<ItemDowncastDecisionToV1>;
     
 }
+
+    /** Members older versions still read that Head no longer carries, resolved by the application from the source instance of the downcast step that retires them. */
+    export interface StoredValues {
+        
+            /** wire `value`, last served by v1 */
+            itemValue(source: types.v2.Item): string | undefined;
+        
+    }
+    /** Wire names each served version still reads from storage, by type; Head reads nothing. */
+    export const NEEDS = {
+        
+            "Item": { "v2": [], "v1": ["value"] },
+        
+    } as const;
+
 
     export interface ItemUpcastDecisionFromV1 {
         
@@ -217,10 +235,10 @@ export interface VersionAdapters {
         
     }
 
-    export function downcastItemToV1(source: types.v2.Item, adapters: VersionAdapters): VersionedResult<types.v1.Item> {
+    export function downcastItemToV1(source: types.v2.Item, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Item> {
         
             
-                const decision = adapters.itemDowncastToV1(source);
+                const decision = adapters.itemDowncastToV1(source, stored);
                 if (!decision.ok) return decision;
             
             
@@ -253,11 +271,11 @@ export interface VersionAdapters {
         
     }
 
-    export function downcastStoreSaveResponseToV1(source: { "return": types.v2.Item }, adapters: VersionAdapters): VersionedResult<{ "return": types.v1.Item }> {
+    export function downcastStoreSaveResponseToV1(source: { "return": types.v2.Item }, stored: StoredValues, adapters: VersionAdapters): VersionedResult<{ "return": types.v1.Item }> {
         
             
             
-                const converted0 = downcastItemToV1(source["return"], adapters);
+                const converted0 = downcastItemToV1(source["return"], stored, adapters);
                 if (!converted0.ok) return converted0;
             
             return ok({
@@ -273,14 +291,14 @@ export interface VersionAdapters {
 
 
 
-    function downcastStepStoreSaveResultToV1(value: types.v2.Item, adapters: VersionAdapters): VersionedResult<types.v1.Item> {
-        const projected = downcastStoreSaveResponseToV1({ return: value }, adapters);
+    function downcastStepStoreSaveResultToV1(value: types.v2.Item, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Item> {
+        const projected = downcastStoreSaveResponseToV1({ return: value }, stored, adapters);
         if (!projected.ok) return projected;
         return ok(projected.value.return);
     }
     export type StoreSaveErrorFromV1 = FrameworkError;
     export type StoreSaveErrorToV1 = FrameworkError;
-    function downcastStepStoreSaveErrorToV1(head: StoreSaveErrorFromV1, adapters: VersionAdapters): VersionedResult<StoreSaveErrorToV1> {
+    function downcastStepStoreSaveErrorToV1(head: StoreSaveErrorFromV1, stored: StoredValues, adapters: VersionAdapters): VersionedResult<StoreSaveErrorToV1> {
         
         return ok(head);
     }
@@ -309,38 +327,39 @@ export type DispatchOutcome<T, Head> =
         
         return step0;
     }
-    export function downcastStoreSaveResultToV1(head: types.v2.Item, adapters: VersionAdapters): VersionedResult<types.v1.Item> {
+    export function downcastStoreSaveResultToV1(head: types.v2.Item, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Item> {
         
-            const step0 = downcastStepStoreSaveResultToV1(head, adapters);
+            const step0 = downcastStepStoreSaveResultToV1(head, stored, adapters);
             if (!step0.ok) return step0;
         
         return step0;
     }
-    export function downcastStoreSaveErrorToV1(head: FrameworkError, adapters: VersionAdapters): VersionedResult<FrameworkError> {
+    export function downcastStoreSaveErrorToV1(head: FrameworkError, stored: StoredValues, adapters: VersionAdapters): VersionedResult<FrameworkError> {
         
-            const step0 = downcastStepStoreSaveErrorToV1(head, adapters);
+            const step0 = downcastStepStoreSaveErrorToV1(head, stored, adapters);
             if (!step0.ok) return step0;
         
         return step0;
     }
     /** Failed projection retains the original Head outcome, including typed errors. */
-    export function downcastStoreSaveOutcomeToV1(head: OperationOutcome<types.v2.Item, FrameworkError>, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<types.v1.Item, FrameworkError>, OperationOutcome<types.v2.Item, FrameworkError>> {
+    export function downcastStoreSaveOutcomeToV1(head: OperationOutcome<types.v2.Item, FrameworkError>, stored: StoredValues, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<types.v1.Item, FrameworkError>, OperationOutcome<types.v2.Item, FrameworkError>> {
         if (head.ok) {
-            const result = downcastStoreSaveResultToV1(head.value, adapters);
+            const result = downcastStoreSaveResultToV1(head.value, stored, adapters);
             return result.ok ? { projected: true, value: { ok: true, value: result.value } } : { projected: false, head, error: result.error };
         }
-        const result = downcastStoreSaveErrorToV1(head.error, adapters);
+        const result = downcastStoreSaveErrorToV1(head.error, stored, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    /** The Head handler returns the stored values its outcome still needs for this version. */
     export async function dispatchStoreSaveFromV1(
     raw: unknown,
-    handler: (request: ifaceTypes.v2.StoreSaveRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Item, FrameworkError>>,
+    handler: (request: ifaceTypes.v2.StoreSaveRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Item, FrameworkError> & { stored: StoredValues }>,
     adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v1.Item, FrameworkError>, OperationOutcome<types.v2.Item, FrameworkError>>> {
         const request = decodeAndUpcastStoreSaveFromV1(raw, adapters);
         if (!request.ok) return { dispatched: false, error: request.error };
         const head = await handler(request.value, { originalVersion: "v1", originalVersionId: "v1" });
-        return { dispatched: true, ...downcastStoreSaveOutcomeToV1(head, adapters) };
+        return { dispatched: true, ...downcastStoreSaveOutcomeToV1(head, head.stored, adapters) };
     }
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
@@ -367,6 +386,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastStoreSaveErrorToV2(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchStoreSaveFromV2(
     raw: unknown,
     handler: (request: ifaceTypes.v2.StoreSaveRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Item, FrameworkError>>,
@@ -384,7 +404,7 @@ export type DispatchOutcome<T, Head> =
     export async function dispatchStoreSave(
     version: "v1" | "v2",
     raw: unknown,
-    handler: (request: ifaceTypes.v2.StoreSaveRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Item, FrameworkError>>,
+    handler: (request: ifaceTypes.v2.StoreSaveRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Item, FrameworkError> & { stored: StoredValues }>,
     adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v1.Item | types.v2.Item, FrameworkError>, OperationOutcome<types.v2.Item, FrameworkError>>> {
         switch (version) {
@@ -399,17 +419,18 @@ export type DispatchOutcome<T, Head> =
 
 
     
-        export function downcastItem(version: "v1", head: types.v2.Item, adapters: VersionAdapters): VersionedResult<types.v1.Item>;
     
-        export function downcastItem(version: "v2", head: types.v2.Item, adapters: VersionAdapters): VersionedResult<types.v2.Item>;
+        export function downcastItem(version: "v1", head: types.v2.Item, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Item>;
     
-    export function downcastItem(version: "v1" | "v2", head: types.v2.Item, adapters: VersionAdapters): VersionedResult<types.v1.Item | types.v2.Item>;
-    export function downcastItem(version: "v1" | "v2", head: types.v2.Item, adapters: VersionAdapters): VersionedResult<types.v1.Item | types.v2.Item> {
+        export function downcastItem(version: "v2", head: types.v2.Item, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v2.Item>;
+    
+    export function downcastItem(version: "v1" | "v2", head: types.v2.Item, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Item | types.v2.Item>;
+    export function downcastItem(version: "v1" | "v2", head: types.v2.Item, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Item | types.v2.Item> {
         switch (version) {
             
                 case "v1": {
                     
-                        const step0 = downcastItemToV1(head, adapters);
+                        const step0 = downcastItemToV1(head, stored, adapters);
                         if (!step0.ok) return step0;
                     
                     return step0;

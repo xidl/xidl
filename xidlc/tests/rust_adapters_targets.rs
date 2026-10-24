@@ -22,6 +22,15 @@ fn rust_target_snapshots_recursive_wire_models_and_full_operation_chains() {
 }
 
 #[test]
+fn rust_chain_target_snapshots_storage_backed_retirement() {
+    let source = include_str!("../../bdd/features/data/versioned_chain_rust.idl");
+    let files = render(source);
+    assert_eq!(files, render(source));
+    assert_eq!(files.len(), 1);
+    insta::assert_snapshot!("independent_rust_chain_adapters", &files[0].1);
+}
+
+#[test]
 fn single_version_rust_target_keeps_typed_decoding_and_owned_identity_outcomes() {
     let files = render(
         r#"@version enum V { only };
