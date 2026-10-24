@@ -127,6 +127,8 @@ pub(crate) fn render_attr_operation_from_http(
         name: rust_ident(&http_op.meta.name),
         raw_name: http_op.meta.name.clone(),
         rust_attrs,
+        deprecated_param_notes: Vec::new(),
+        raises_deprecated: false,
         deprecated: deprecated.deprecated,
         deprecated_since: deprecated.since,
         deprecated_after: deprecated.after,

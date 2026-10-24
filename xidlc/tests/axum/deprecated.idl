@@ -1,0 +1,67 @@
+#pragma xidlc package Deprecation Matrix
+#pragma xidlc version v1
+
+@deprecated(since = "2026-07-01")
+module legacy {
+    struct Message {
+        string id;
+        @deprecated string subject;
+    };
+    enum Channel { sms, @deprecated mms };
+    @deprecated(after = "2027-01-01")
+    union Payload switch (long) {
+        case 1: string text;
+        case 2: Message media;
+    };
+    @http(410)
+    @deprecated
+    exception Gone {
+        string reason;
+    };
+    @no_security
+    interface Messages {
+        @get(path = "/messages/{id}")
+        Message get(@path string id, @deprecated @query @optional string fields) raises(Gone);
+    };
+};
+
+module current {
+    struct Envelope {
+        @deprecated @optional legacy::Channel fallback;
+        legacy::Message message;
+        @deprecated(since = "2026-01-01", after = "2026-12-31") int32 attempts;
+    };
+    enum Kind { @deprecated(since = "2026-03-01") plain, rich };
+    @no_security
+    interface Mail {
+        @post(path = "/mail")
+        Envelope send(@body Envelope envelope);
+        @get(path = "/mail/{id}")
+        Envelope fetch(@path string id, @deprecated @header @rename("X-Trace") @optional string trace);
+        @deprecated readonly attribute Kind kind;
+    };
+};
+
+module parts {
+    @deprecated(since = "2026-05-01")
+    module nested {
+        struct Deep { string id; };
+    };
+};
+
+module parts {
+    struct Sibling { nested::Deep deep; };
+};
+
+module scope {
+    @deprecated(since = "2026-04-01")
+    module inner {
+        struct Marked { string id; };
+    };
+};
+
+module scope {
+    module inner {
+        struct Quiet { string id; };
+    };
+};

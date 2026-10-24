@@ -22,6 +22,7 @@ fn widget_struct() -> StructDcl {
                 default: None,
                 field_id: None,
                 recursive: false,
+                references_deprecated: false,
             },
             Member {
                 annotations: vec![],
@@ -32,6 +33,7 @@ fn widget_struct() -> StructDcl {
                 default: None,
                 field_id: None,
                 recursive: false,
+                references_deprecated: false,
             },
         ],
     }
@@ -132,6 +134,7 @@ fn inherited_base_is_a_flattened_transport_field() {
         default: None,
         field_id: None,
         recursive: false,
+        references_deprecated: false,
     }];
     child.parent = vec![ScopedName {
         name: vec!["demo".to_string(), "Widget".to_string()],

@@ -71,6 +71,7 @@ struct ErrorsExceptionFieldContext {
 #[derive(Serialize)]
 struct ModuleContext {
     ident: String,
+    doc: Vec<String>,
     blocks: Vec<String>,
 }
 
@@ -239,14 +240,17 @@ fn render_defs(
                 if !body.is_empty() {
                     let ident =
                         crate::generate::typescript::definition::names::ts_ident(&module.ident);
-                    out.types
-                        .push(render_module(renderer, &ident, &body.types.join("\n"))?);
-                    out.zod
-                        .push(render_module(renderer, &ident, &body.zod.join("\n"))?);
-                    out.client
-                        .push(render_module(renderer, &ident, &body.client.join("\n"))?);
-                    out.server
-                        .push(render_module(renderer, &ident, &body.server.join("\n"))?);
+                    let doc =
+                        crate::generate::typescript::definition::ts_doc_lines(&module.annotations)?;
+                    let module = ModuleBlock {
+                        renderer,
+                        ident: &ident,
+                        doc: &doc,
+                    };
+                    out.types.push(module.render(&body.types.join("\n"))?);
+                    out.zod.push(module.render(&body.zod.join("\n"))?);
+                    out.client.push(module.render(&body.client.join("\n"))?);
+                    out.server.push(module.render(&body.server.join("\n"))?);
                 }
             }
             hir::Definition::InterfaceDcl(interface) => {
@@ -263,14 +267,24 @@ fn render_defs(
     Ok(out)
 }
 
-fn render_module(renderer: &TypescriptRenderer, ident: &str, body: &str) -> IdlcResult<String> {
-    renderer.render_template(
-        "http/module.ts.j2",
-        &ModuleContext {
-            ident: ident.to_string(),
-            blocks: vec![crate::generate::typescript::definition::names::indent_block(body, 1)],
-        },
-    )
+/// One namespace block of the HTTP output, rendered once per file kind.
+struct ModuleBlock<'a> {
+    renderer: &'a TypescriptRenderer,
+    ident: &'a str,
+    doc: &'a [String],
+}
+
+impl ModuleBlock<'_> {
+    fn render(&self, body: &str) -> IdlcResult<String> {
+        self.renderer.render_template(
+            "http/module.ts.j2",
+            &ModuleContext {
+                ident: self.ident.to_string(),
+                doc: self.doc.to_vec(),
+                blocks: vec![crate::generate::typescript::definition::names::indent_block(body, 1)],
+            },
+        )
+    }
 }
 
 struct ZodImportCollector;

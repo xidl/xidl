@@ -39,25 +39,16 @@ fn deprecation_marks_api_operations_without_time_based_removal() {
 }
 
 #[test]
-fn deprecation_rejects_module_member_and_parameter_placement_in_lint() {
-    for (source, site) in [
-        ("@deprecated module M { interface I {}; };", "Module"),
-        ("struct S { @deprecated string value; };", "Member"),
-        (
-            "interface I { void read(@deprecated string value); };",
-            "Parameter",
-        ),
+fn deprecation_is_accepted_on_modules_types_members_enumerators_and_parameters() {
+    for source in [
+        "@deprecated module M { interface I {}; };",
+        "@deprecated struct S { @deprecated string value; };",
+        "@deprecated union U switch (long) { case 1: long a; };",
+        "@deprecated enum E { @deprecated a, b };",
+        "@http(410) @deprecated exception E { @deprecated string reason; };",
+        "interface I { void read(@deprecated string value); };",
     ] {
         let diagnostics = lint::lint(&parser_text(source).unwrap());
-        assert_eq!(diagnostics.len(), 1, "{site}: {diagnostics:?}");
-        assert_eq!(
-            diagnostics[0].code,
-            lint::DiagnosticCode::MisplacedAnnotation
-        );
-        assert_eq!(diagnostics[0].severity, lint::Severity::Error);
-        assert_eq!(
-            diagnostics[0].message,
-            format!("@deprecated is not allowed on {site}")
-        );
+        assert!(diagnostics.is_empty(), "{source}: {diagnostics:?}");
     }
 }

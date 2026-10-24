@@ -20,11 +20,23 @@ pub trait HttpCorsService {
     async fn get_user(&self, id: String) -> ::xidl_rust_axum::Result<String>;
     async fn create_user(&self, name: String) -> ::xidl_rust_axum::Result<()>;
 }
-#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
+#[allow(
+    non_snake_case,
+    non_camel_case_types,
+    non_upper_case_globals,
+    unused_imports,
+    deprecated
+)]
 pub(super) mod __xidl_in_HttpCorsService {
     use super::*;
 }
-#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
+#[allow(
+    non_snake_case,
+    non_camel_case_types,
+    non_upper_case_globals,
+    unused_imports,
+    deprecated
+)]
 pub(super) mod __xidl_out_HttpCorsService {
     use super::*;
 }

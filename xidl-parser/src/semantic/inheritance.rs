@@ -180,6 +180,7 @@ fn wire_named_members(member: &Member, container: &[Annotation]) -> Vec<Member> 
                 default: member.default.clone(),
                 field_id: member.field_id,
                 recursive: member.recursive,
+                references_deprecated: member.references_deprecated,
             }
         })
         .collect()

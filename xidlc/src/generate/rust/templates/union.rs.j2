@@ -12,6 +12,8 @@ pub struct {{ ident }} {
     data: {{ ident }}Data,
 }
 
+{% if deprecated %}#[allow(deprecated)]
+{% endif %}
 {% if derive and derive | length > 0 %}
     #[derive({{ derive | join(", ") }})]
 {% endif %}
@@ -27,6 +29,8 @@ union {{ ident }}Data {
     {%- endfor %}
 }
 
+{% if deprecated %}#[allow(deprecated)]
+{% endif %}
 impl Drop for {{ ident }} {
     #[allow(unreachable_patterns)]
     fn drop(&mut self) {
@@ -54,6 +58,8 @@ impl Drop for {{ ident }} {
 }
 
 {% if manual_derives and "Clone" in manual_derives %}
+    {% if deprecated %}    #[allow(deprecated)]
+    {% endif %}
     impl Clone for {{ ident }} {
         #[allow(clippy::clone_on_copy)]
         #[allow(unreachable_patterns)]
@@ -79,6 +85,8 @@ impl Drop for {{ ident }} {
 {% endif %}
 
 {% if manual_derives and "Debug" in manual_derives %}
+    {% if deprecated %}    #[allow(deprecated)]
+    {% endif %}
     impl core::fmt::Debug for {{ ident }} {
         #[allow(unreachable_patterns)]
         fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -106,6 +114,8 @@ impl Drop for {{ ident }} {
 {% endif %}
 
 {% if manual_derives and "PartialEq" in manual_derives %}
+    {% if deprecated %}    #[allow(deprecated)]
+    {% endif %}
     impl PartialEq for {{ ident }} {
         #[allow(unreachable_patterns)]
         fn eq(&self, other: &Self) -> bool {
@@ -132,6 +142,8 @@ impl Drop for {{ ident }} {
     }
 {% endif %}
 
+{% if deprecated %}#[allow(deprecated)]
+{% endif %}
 impl {{ ident }} {
     {% for member in members %}
         {%- for line in member.doc %}
@@ -185,6 +197,8 @@ impl {{ ident }} {
 }
 
 {% if default_case %}
+    {% if deprecated %}    #[allow(deprecated)]
+    {% endif %}
     impl Default for {{ ident }} {
         fn default() -> Self {
             Self {
@@ -235,6 +249,8 @@ impl {{ ident }} {
     {% endfor %}
     }
 
+    {% if deprecated %}    #[allow(deprecated)]
+    {% endif %}
     impl serde::Serialize for {{ ident }} {
         #[allow(unreachable_patterns)]
         fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
@@ -269,6 +285,8 @@ impl {{ ident }} {
         data: ::serde_json::Value,
     }
 
+    {% if deprecated %}    #[allow(deprecated)]
+    {% endif %}
     impl<'de> serde::Deserialize<'de> for {{ ident }} {
         fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
         where

@@ -1,4 +1,5 @@
 use super::scope::SchemaScope;
+use crate::error::IdlcError;
 use crate::error::IdlcResult;
 use crate::generate::openapi::naming::declarator_name;
 use crate::generate::utils::{doc_lines_from_annotations, has_annotation};
@@ -7,9 +8,9 @@ use crate::openapi::request_body::RequestBody;
 use crate::openapi::schema::{
     AllOf, ArrayBuilder, KnownFormat, ObjectBuilder, OneOf, Schema, SchemaFormat, Type,
 };
-use crate::openapi::{Content, Ref, RefOr, Required};
+use crate::openapi::{Content, Deprecated, Ref, RefOr, Required};
 use xidl_parser::hir;
-use xidl_parser::rest_hir::semantics::DeprecatedInfo;
+use xidl_parser::rest_hir::semantics::{DeprecatedInfo, deprecated_info};
 
 pub(crate) fn request_body_schema(schema: RefOr<Schema>, content_type: &str) -> RequestBody {
     let mut request_body = RequestBody::new();
@@ -83,17 +84,61 @@ pub(crate) fn apply_deprecation_note(
     if description.is_some() {
         return description;
     }
+    deprecated.map(DeprecatedInfo::note)
+}
+
+/// The `@deprecated` declared on a schema-bearing declaration, as an
+/// OpenAPI-facing error when its arguments are malformed.
+pub(crate) fn schema_deprecation(
+    annotations: &[hir::Annotation],
+) -> IdlcResult<Option<DeprecatedInfo>> {
+    deprecated_info(annotations).map_err(|reason| IdlcError::rpc(format!("@deprecated: {reason}")))
+}
+
+/// Flags an inline schema `deprecated: true`, adding the note as its
+/// description when the declaration carries no documentation. `$ref`
+/// schemas stay untouched: their target component carries its own flag.
+pub(crate) fn apply_deprecation(
+    schema: RefOr<Schema>,
+    deprecated: Option<&DeprecatedInfo>,
+) -> RefOr<Schema> {
     let Some(info) = deprecated else {
-        return description;
+        return schema;
     };
-    let mut note = String::from("Deprecated.");
-    match (&info.since, &info.after) {
-        (Some(since), Some(after)) => note.push_str(&format!(" Since {since}. After {after}.")),
-        (Some(since), None) => note.push_str(&format!(" Since {since}.")),
-        (None, Some(after)) => note.push_str(&format!(" After {after}.")),
-        (None, None) => {}
+    let note = info.note();
+    match schema {
+        RefOr::T(mut schema) => {
+            match &mut schema {
+                Schema::Object(object) => {
+                    object.deprecated = Some(Deprecated::True);
+                    object.description.get_or_insert(note);
+                }
+                Schema::Array(array) => {
+                    array.deprecated = Some(Deprecated::True);
+                    array.description.get_or_insert(note);
+                }
+                Schema::OneOf(one_of) => {
+                    one_of.deprecated = Some(Deprecated::True);
+                    one_of.description.get_or_insert(note);
+                }
+                Schema::AllOf(all_of) => {
+                    all_of.deprecated = Some(Deprecated::True);
+                    all_of.description.get_or_insert(note);
+                }
+                _ => {}
+            }
+            RefOr::T(schema)
+        }
+        RefOr::Ref(reference) => {
+            // OpenAPI keeps annotation keywords beside `$ref`, so the flag
+            // travels in a single-arm `allOf` wrapper.
+            let mut combined = AllOf::new();
+            combined.items.push(RefOr::Ref(reference));
+            combined.deprecated = Some(Deprecated::True);
+            combined.description.get_or_insert(note);
+            RefOr::T(Schema::from(combined))
+        }
     }
-    Some(note)
 }
 
 fn integer_schema(value: &hir::IntegerType) -> RefOr<Schema> {
@@ -156,15 +201,19 @@ impl SchemaScope<'_> {
             }
             let optional = member.is_optional();
             let doc = doc_text(&member.annotations);
+            let deprecated = schema_deprecation(&member.annotations)?;
             for decl in &member.ident {
                 let name = hir::effective_wire_name(
                     &declarator_name(decl),
                     &member.annotations,
                     container_annotations,
                 );
-                let schema = apply_schema_description(
-                    self.schema_for_decl(&member.ty, decl)?,
-                    doc.as_deref(),
+                let schema = apply_deprecation(
+                    apply_schema_description(
+                        self.schema_for_decl(&member.ty, decl)?,
+                        doc.as_deref(),
+                    ),
+                    deprecated.as_ref(),
                 );
                 if has_annotation(&member.annotations, "flatten") {
                     flattened.push(schema);

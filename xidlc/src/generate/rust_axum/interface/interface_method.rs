@@ -282,6 +282,8 @@ pub(crate) fn render_op_from_http(
         deprecated_since: deprecated.since,
         deprecated_after: deprecated.after,
         deprecated_note: deprecated.note,
+        deprecated_param_notes: params.deprecated_param_notes.clone(),
+        raises_deprecated: raises.iter().any(|raise| raise.deprecated),
         params: params_list,
         param_names: params.param_names,
         server_params,

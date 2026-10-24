@@ -84,7 +84,7 @@ impl<'a> MergedAxumSpecBuilder<'a> {
         for name in order {
             let modules = grouped.remove(&name).unwrap_or_default();
             let mut inner_defs = Vec::new();
-            for module in modules {
+            for module in &modules {
                 for def in &module.definition {
                     inner_defs.push(def);
                 }
@@ -92,11 +92,22 @@ impl<'a> MergedAxumSpecBuilder<'a> {
             let mut next_path = module_path.to_vec();
             next_path.push(name.clone());
             let definitions = self.render_body(&inner_defs, &next_path)?;
+            let mut attrs = Vec::new();
+            for module in &modules {
+                if let Some(attr) =
+                    crate::generate::rust::util::rust_deprecated_attr(&[&module.annotations])?
+                {
+                    attrs.push(attr);
+                    attrs.push("allow(deprecated)".to_string());
+                    break;
+                }
+            }
             let rendered = self.axum_renderer.render_template(
                 "module.rs.j2",
                 &serde_json::json!({
                     "ident": crate::generate::rust::util::rust_ident(&name),
                     "definitions": &definitions,
+                    "attrs": &attrs,
                 }),
             )?;
             out.push(rendered);

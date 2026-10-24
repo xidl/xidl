@@ -101,6 +101,9 @@ pub struct HttpException {
     pub headers: Vec<HttpExceptionMember>,
     pub cookies: Vec<HttpExceptionMember>,
     pub body: Vec<HttpExceptionField>,
+    /// The exception's own or enclosing module's `@deprecated`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub deprecated: Option<super::semantics::DeprecatedInfo>,
 }
 
 /// A `@header`/`@cookie` annotated member of an exception.
@@ -176,6 +179,9 @@ pub struct HttpSignatureParam {
     pub is_optional: bool,
     pub is_flatten: bool,
     pub annotations: Vec<HttpSignatureParamAnnotation>,
+    /// The parameter's own `@deprecated`, when declared on it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub deprecated: Option<super::semantics::DeprecatedInfo>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

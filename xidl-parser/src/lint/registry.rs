@@ -135,6 +135,10 @@ const TYPES: &[Site] = &[
 ];
 const FIELDS: &[Site] = &[Member, UnionMember, Parameter];
 const SECURITY: &[Site] = &[Interface, Operation, Attribute];
+const DEPRECATABLE: &[Site] = &[
+    Module, Struct, Union, Enum, Exception, Member, Enumerator, Interface, Operation, Parameter,
+    Attribute,
+];
 const LIFECYCLE: &[Site] = &[
     Module,
     Struct,
@@ -228,7 +232,7 @@ annotations! {
     BidiStream, "bidi_stream", &[Operation], Marker;
     StreamCodec, "stream_codec", &[Operation], OptionalString(&[]);
     Upgrade, "upgrade", &[Operation], Named { required: &["protocol"], optional: &["codec", "subprotocol", "heartbeat", "max_message"] };
-    Deprecated, "deprecated", SECURITY, Deprecated;
+    Deprecated, "deprecated", DEPRECATABLE, Deprecated;
     Cors, "cors", &[Interface, Operation], Cors;
 }
 

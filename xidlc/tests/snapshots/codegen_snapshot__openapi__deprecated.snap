@@ -1,0 +1,417 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+openapi_deprecated.json
+===============
+{
+  "components": {
+    "schemas": {
+      "Error": {
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "msg"
+        ],
+        "type": "object"
+      },
+      "current.Envelope": {
+        "properties": {
+          "attempts": {
+            "deprecated": true,
+            "description": "Deprecated. Since 2026-01-01T00:00:00Z. After 2026-12-31T23:59:59Z.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "fallback": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/legacy.Channel"
+              }
+            ],
+            "deprecated": true,
+            "description": "Deprecated."
+          },
+          "message": {
+            "$ref": "#/components/schemas/legacy.Message"
+          }
+        },
+        "required": [
+          "message",
+          "attempts"
+        ],
+        "type": "object"
+      },
+      "current.Kind": {
+        "description": "`plain` is deprecated since 2026-03-01T00:00:00Z.",
+        "enum": [
+          "plain",
+          "rich"
+        ],
+        "type": "string"
+      },
+      "legacy.Channel": {
+        "deprecated": true,
+        "description": "Deprecated. Since 2026-07-01T00:00:00Z.\n`mms` is deprecated.",
+        "enum": [
+          "sms",
+          "mms"
+        ],
+        "type": "string"
+      },
+      "legacy.Gone": {
+        "deprecated": true,
+        "description": "Deprecated.",
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
+      "legacy.Message": {
+        "deprecated": true,
+        "description": "Deprecated. Since 2026-07-01T00:00:00Z.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "subject": {
+            "deprecated": true,
+            "description": "Deprecated.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "subject"
+        ],
+        "type": "object"
+      },
+      "legacy.Payload": {
+        "deprecated": true,
+        "description": "Deprecated. After 2027-01-01T23:59:59Z.",
+        "oneOf": [
+          {
+            "properties": {
+              "text": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "text"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "media": {
+                "$ref": "#/components/schemas/legacy.Message"
+              }
+            },
+            "required": [
+              "media"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "parts.Sibling": {
+        "properties": {
+          "deep": {
+            "$ref": "#/components/schemas/parts.nested.Deep"
+          }
+        },
+        "required": [
+          "deep"
+        ],
+        "type": "object"
+      },
+      "parts.nested.Deep": {
+        "deprecated": true,
+        "description": "Deprecated. Since 2026-05-01T00:00:00Z.",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "scope.inner.Marked": {
+        "deprecated": true,
+        "description": "Deprecated. Since 2026-04-01T00:00:00Z.",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "scope.inner.Quiet": {
+        "deprecated": true,
+        "description": "Deprecated. Since 2026-04-01T00:00:00Z.",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Deprecation Matrix",
+    "version": "v1"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/attribute/kind": {
+      "get": {
+        "deprecated": true,
+        "description": "Deprecated.",
+        "operationId": "current.Mail.get_attribute_kind",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/current.Kind"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [],
+        "tags": [
+          "Mail"
+        ]
+      }
+    },
+    "/mail": {
+      "post": {
+        "operationId": "current.Mail.send",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/current.Envelope"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/current.Envelope"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [],
+        "tags": [
+          "Mail"
+        ]
+      }
+    },
+    "/mail/{id}": {
+      "get": {
+        "operationId": "current.Mail.fetch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "description": "Deprecated.",
+            "in": "header",
+            "name": "X-Trace",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/current.Envelope"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [],
+        "tags": [
+          "Mail"
+        ]
+      }
+    },
+    "/messages/{id}": {
+      "get": {
+        "deprecated": true,
+        "description": "Deprecated. Since 2026-07-01T00:00:00Z.",
+        "operationId": "legacy.Messages.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "description": "Deprecated.",
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/legacy.Message"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/legacy.Gone"
+                }
+              }
+            },
+            "description": "Error: Gone"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [],
+        "tags": [
+          "Messages"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Mail"
+    },
+    {
+      "name": "Messages"
+    }
+  ]
+}

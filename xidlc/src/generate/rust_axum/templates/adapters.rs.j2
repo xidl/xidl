@@ -1,6 +1,6 @@
 {% filter rustfmt %}
     /// Pure version projections. The application owns routing and side effects.
-    #[allow(unused_imports, unused_variables, non_snake_case, non_camel_case_types)]
+    #[allow(unused_imports, unused_variables, non_snake_case, non_camel_case_types, deprecated)]
     pub mod version_adapters {
         use super::{ {% for version in versions %}{{ version.module }}{% if not loop.last %}, {% endif %}{% endfor %} };
 

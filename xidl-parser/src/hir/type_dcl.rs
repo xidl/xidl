@@ -9,11 +9,32 @@ pub enum TypeDcl {
     NativeDcl(NativeDcl),
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct TypedefDcl {
     pub annotations: Vec<Annotation>,
     pub ty: TypedefType,
     pub decl: Vec<Declarator>,
+    /// The aliased type names a `@deprecated` declaration. Populated by
+    /// semantic analysis so generated references can silence rustc's
+    /// `deprecated` lint.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub references_deprecated: bool,
+}
+
+impl std::fmt::Debug for TypedefDcl {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut debug = f.debug_struct("TypedefDcl");
+        debug
+            .field("annotations", &self.annotations)
+            .field("ty", &self.ty)
+            .field("decl", &self.decl);
+        // Aliases that reach no deprecated declaration keep the historical
+        // debug shape so stored snapshots describe only flagged aliases.
+        if self.references_deprecated {
+            debug.field("references_deprecated", &true);
+        }
+        debug.finish()
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -104,6 +125,7 @@ impl From<crate::typed_ast::TypedefDcl> for TypedefDcl {
             annotations: vec![],
             ty,
             decl,
+            references_deprecated: false,
         }
     }
 }

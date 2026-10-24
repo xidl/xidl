@@ -1,6 +1,6 @@
 use super::HttpParamKind;
 use super::model::{HttpException, HttpExceptionField, HttpExceptionMember, HttpExceptionRef};
-use super::semantics::{SourceBinding, normalize_annotation_params};
+use super::semantics::{SourceBinding, effective_deprecated, normalize_annotation_params};
 use crate::error::{ParseError, ParserResult};
 use crate::hir;
 use std::collections::HashSet;
@@ -91,6 +91,9 @@ impl HttpException {
                 except.ident
             )));
         }
+        let deprecated = effective_deprecated(&[&except.annotations]).map_err(|reason| {
+            ParseError::Message(format!("exception '{}': {reason}", except.ident))
+        })?;
         Ok(Self {
             module_path: module_path.to_vec(),
             ident: except.ident.clone(),
@@ -98,6 +101,7 @@ impl HttpException {
             headers,
             cookies,
             body,
+            deprecated,
         })
     }
 

@@ -51,8 +51,7 @@ pub(crate) fn render_typedef_with_config(
             for decl in &def.decl {
                 let base = rust_type(ty);
                 let mut typedef = typedef_json(&base, decl);
-                typedef["rust_attrs"] =
-                    json!(rust_passthrough_attrs_from_annotations(&def.annotations));
+                typedef["rust_attrs"] = json!(typedef_attrs(def));
                 let ctx = renderer.enrich_ctx(typedef, &doc);
                 out.extend(renderer.render_source_template("typedef.rs.j2", &ctx)?);
             }
@@ -75,12 +74,20 @@ pub(crate) fn render_typedef_with_config(
             let base = rust_scoped_name(&constr_type_scoped_name(constr));
             for decl in &def.decl {
                 let mut typedef = typedef_json(&base, decl);
-                typedef["rust_attrs"] =
-                    json!(rust_passthrough_attrs_from_annotations(&def.annotations));
+                typedef["rust_attrs"] = json!(typedef_attrs(def));
                 let ctx = renderer.enrich_ctx(typedef, &doc);
                 out.extend(renderer.render_source_template("typedef.rs.j2", &ctx)?);
             }
         }
     }
     Ok(out)
+}
+
+/// Passthrough attributes plus the alias's `deprecated` reference flag.
+fn typedef_attrs(def: &hir::TypedefDcl) -> Vec<String> {
+    let mut attrs = rust_passthrough_attrs_from_annotations(&def.annotations);
+    if def.references_deprecated {
+        attrs.push("allow(deprecated)".to_string());
+    }
+    attrs
 }

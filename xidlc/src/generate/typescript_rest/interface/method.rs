@@ -85,7 +85,7 @@ impl MethodModel {
                         xidl_parser::rest_hir::HttpSignatureParamAnnotation::Optional
                     )
                 }),
-                doc: Vec::new(),
+                doc: p.deprecated.iter().map(|info| info.tag()).collect(),
             })
             .collect::<Vec<_>>();
 

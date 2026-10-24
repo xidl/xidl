@@ -3,11 +3,11 @@ use convert_case::{Case, Casing};
 
 use super::mapping;
 use super::route::{attribute_path, default_path, operation_id, readonly_attr_names};
+use super::semantics::effective_deprecated;
 use super::semantics::{
     DeprecatedInfo, HttpSecurityProfile, HttpStreamCodec, HttpStreamConfig, HttpStreamKind,
     effective_cors, effective_security_with_origin, has_annotation, validate_http_annotations,
 };
-use super::validate::effective_deprecated;
 use super::{
     HttpMethod, HttpOperation, HttpOperationMeta, HttpOperationSignature, HttpOperationSource,
     HttpParam, HttpParamKind, HttpRoute, HttpSignatureParam, HttpSignatureParamAnnotation,
@@ -183,6 +183,7 @@ fn attribute_set_operation(
             is_optional: false,
             is_flatten: false,
             annotations: vec![HttpSignatureParamAnnotation::Body],
+            deprecated: None,
         }],
         return_type: None,
     };
@@ -329,7 +330,7 @@ pub(super) fn project_attribute_group(
         )));
     }
     let cors = effective_cors(interface_annotations, &[]).map_err(ParseError::Message)?;
-    let deprecated = effective_deprecated(interface_annotations, &attr.annotations)
+    let deprecated = effective_deprecated(&[&attr.annotations, interface_annotations])
         .map_err(ParseError::Message)?;
     let security = effective_security_with_origin(interface_annotations, &attr.annotations)
         .map_err(ParseError::Message)?;

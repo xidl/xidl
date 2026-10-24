@@ -4,7 +4,8 @@ use xidl_parser::hir::HttpParameterLocation;
 use xidl_parser::rest_hir::{
     HttpMethod as RestHirMethod, HttpOperation,
     semantics::{
-        HttpCorsProfile, HttpSecurityOrigin, HttpSecurityProfile, HttpSecurityRequirement,
+        DeprecatedInfo, HttpCorsProfile, HttpSecurityOrigin, HttpSecurityProfile,
+        HttpSecurityRequirement,
     },
 };
 
@@ -25,16 +26,7 @@ pub(crate) fn deprecated_context_from_http(http_op: &HttpOperation) -> Deprecate
     let deprecated = info.as_ref().map(|value| value.deprecated).unwrap_or(false);
     let since = info.as_ref().and_then(|value| value.since.clone());
     let after = info.as_ref().and_then(|value| value.after.clone());
-    let note = info.as_ref().map(|value| {
-        let mut note = String::from("Deprecated.");
-        if let Some(since) = &value.since {
-            note.push_str(&format!(" Since {since}."));
-        }
-        if let Some(after) = &value.after {
-            note.push_str(&format!(" After {after}."));
-        }
-        note
-    });
+    let note = info.map(DeprecatedInfo::note);
     DeprecatedContext {
         deprecated,
         since,

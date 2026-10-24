@@ -8,7 +8,7 @@ use crate::error::IdlcResult;
 use crate::openapi::path::{HttpMethod as OpenApiHttpMethod, Parameter, ParameterIn};
 use crate::openapi::request_body::RequestBody;
 use crate::openapi::schema::{ObjectBuilder, Schema, Type};
-use crate::openapi::{RefOr, security::SecurityRequirement};
+use crate::openapi::{Deprecated, RefOr, security::SecurityRequirement};
 use xidl_parser::rest_hir::{
     HttpException, HttpOperation, HttpRequestBodyShape, HttpResponseBodyShape,
     semantics::{HttpSecurityRequirement, HttpStreamCodec, HttpStreamKind},
@@ -67,42 +67,34 @@ pub(crate) fn render_http_operation(
     validate_stream_contract(op);
 
     let mut parameters = Vec::new();
-
-    for binding in &op.http.request.path {
-        parameters.push(parameter_schema(
-            ParameterIn::Path,
-            &binding.wire_name,
-            scope.schema_for_type(&binding.ty)?,
-            true,
-            None,
-        ));
-    }
-    for binding in &op.http.request.query {
-        parameters.push(parameter_schema(
-            ParameterIn::Query,
-            &binding.wire_name,
-            scope.schema_for_type(&binding.ty)?,
-            !binding.optional,
-            None,
-        ));
-    }
-    for binding in &op.http.request.header {
-        parameters.push(parameter_schema(
-            ParameterIn::Header,
-            &binding.wire_name,
-            scope.schema_for_type(&binding.ty)?,
-            !binding.optional,
-            None,
-        ));
-    }
-    for binding in &op.http.request.cookie {
-        parameters.push(parameter_schema(
-            ParameterIn::Cookie,
-            &binding.wire_name,
-            scope.schema_for_type(&binding.ty)?,
-            !binding.optional,
-            None,
-        ));
+    let request = &op.http.request;
+    let bindings = [
+        (ParameterIn::Path, &request.path),
+        (ParameterIn::Query, &request.query),
+        (ParameterIn::Header, &request.header),
+        (ParameterIn::Cookie, &request.cookie),
+    ];
+    for (location, bound) in bindings {
+        for binding in bound {
+            let deprecated = op
+                .signature
+                .params
+                .iter()
+                .find(|param| param.name == binding.source_param)
+                .and_then(|param| param.deprecated.as_ref());
+            let required = location == ParameterIn::Path || !binding.optional;
+            let mut parameter = parameter_schema(
+                location.clone(),
+                &binding.wire_name,
+                scope.schema_for_type(&binding.ty)?,
+                required,
+                apply_deprecation_note(None, deprecated),
+            );
+            if deprecated.is_some() {
+                parameter.deprecated = Some(Deprecated::True);
+            }
+            parameters.push(parameter);
+        }
     }
 
     let request_schema = match &op.http.request.body.shape {

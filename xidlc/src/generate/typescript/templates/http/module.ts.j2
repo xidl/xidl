@@ -1,2 +1,4 @@
-{% for block in blocks %}{{ "export namespace " ~ ident ~ " {\n" }}{{ block }}
+{%- if doc and doc | length > 0 -%}
+    {{ "/**\n * " ~ (doc | join("\n * ")) ~ "\n */\n" }}
+{%- endif %}{% for block in blocks %}{{ "export namespace " ~ ident ~ " {\n" }}{{ block }}
 {% endfor %}}
