@@ -525,7 +525,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }).strict()
     
         .superRefine((wire, context) => {
-            for (const key of ["audit","carrier","inspected","note"]) {
+            for (const key of ["audit","carrier","courier_note","courier_remark","inspected","note"]) {
                 if (Object.hasOwn(wire, key)) context.addIssue({ code: "custom", path: [key], message: "field is not available in served version" });
             }
         })
@@ -1227,6 +1227,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["carrier"]: z.unknown().optional(),
         
+            ["courier_note"]: z.unknown().optional(),
+        
             ["fixed"]: z.unknown().optional(),
         
             ["handling_note"]: z.unknown().optional(),
@@ -1242,7 +1244,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }).strict()
     
         .superRefine((wire, context) => {
-            for (const key of ["audit","inspected"]) {
+            for (const key of ["audit","courier_remark","inspected"]) {
                 if (Object.hasOwn(wire, key)) context.addIssue({ code: "custom", path: [key], message: "field is not available in served version" });
             }
         })
@@ -1258,6 +1260,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
             ["note"]: wire["note"],
         
             ["handling_note"]: wire["handling_note"],
+        
+            ["courier_note"]: wire["courier_note"],
         
             ["address"]: wire["address"],
         
@@ -1279,6 +1283,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
             ["note"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
         
             ["handling_note"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
+        
+            ["courier_note"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
         
             ["address"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType10Schema),
         
@@ -1308,6 +1314,10 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             
                 ...(value["handling_note"] === undefined ? {} : { ["handling_note"]: value["handling_note"] }),
+            
+        
+            
+                ...(value["courier_note"] === undefined ? {} : { ["courier_note"]: value["courier_note"] }),
             
         
             
@@ -1983,6 +1993,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["carrier"]: z.unknown().optional(),
         
+            ["courier_remark"]: z.unknown().optional(),
+        
             ["fixed"]: z.unknown().optional(),
         
             ["id"]: z.unknown().optional(),
@@ -1998,7 +2010,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }).strict()
     
         .superRefine((wire, context) => {
-            for (const key of ["handling_note"]) {
+            for (const key of ["courier_note","handling_note"]) {
                 if (Object.hasOwn(wire, key)) context.addIssue({ code: "custom", path: [key], message: "field is not available in served version" });
             }
         })
@@ -2016,6 +2028,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
             ["inspected"]: wire["inspected"],
         
             ["audit"]: wire["audit"],
+        
+            ["courier_remark"]: wire["courier_remark"],
         
             ["address"]: wire["address"],
         
@@ -2039,6 +2053,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
             ["inspected"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
         
             ["audit"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+        
+            ["courier_remark"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
         
             ["address"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType21Schema),
         
@@ -2072,6 +2088,10 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             
                 ["audit"]: value["audit"],
+            
+        
+            
+                ...(value["courier_remark"] === undefined ? {} : { ["courier_remark"]: value["courier_remark"] }),
             
         
             
@@ -2340,6 +2360,8 @@ export interface VersionAdapters {
             carrier: string;
         
             note?: string;
+        
+            courier_note?: string;
         
             legacy: Ignored;
         
@@ -2650,6 +2672,7 @@ export interface VersionAdapters {
                         ["tracking"]: decision.value["tracking"],
                         ["carrier"]: decision.value["carrier"],
                         ...(decision.value["note"] === undefined ? {} : { ["note"]: decision.value["note"] }),
+                        ...(decision.value["courier_note"] === undefined ? {} : { ["courier_note"]: decision.value["courier_note"] }),
             });
         
     }
@@ -3377,17 +3400,20 @@ export interface VersionAdapters {
                 const converted3 = mapOptional(source["note"], (item) => ok(item));
                 if (!converted3.ok) return converted3;
             
-                const converted4 = upcastAddressFromV2(source["address"], adapters);
+                const converted4 = mapOptional(source["courier_note"], (item) => ok(item));
                 if (!converted4.ok) return converted4;
             
-                const converted5 = mapSequence(source["stops"], (item) => upcastAddressFromV2(item, adapters));
+                const converted5 = upcastAddressFromV2(source["address"], adapters);
                 if (!converted5.ok) return converted5;
             
-                const converted6 = mapRecord(source["by_tag"], (item) => upcastAddressFromV2(item, adapters));
+                const converted6 = mapSequence(source["stops"], (item) => upcastAddressFromV2(item, adapters));
                 if (!converted6.ok) return converted6;
             
-                const converted7 = mapSequence(source["fixed"], (item) => upcastAddressFromV2(item, adapters));
+                const converted7 = mapRecord(source["by_tag"], (item) => upcastAddressFromV2(item, adapters));
                 if (!converted7.ok) return converted7;
+            
+                const converted8 = mapSequence(source["fixed"], (item) => upcastAddressFromV2(item, adapters));
+                if (!converted8.ok) return converted8;
             
             return ok({
                 
@@ -3395,10 +3421,11 @@ export interface VersionAdapters {
                         ["tracking"]: converted1.value,
                         ["carrier"]: converted2.value,
                         ...(converted3.value === undefined ? {} : { ["note"]: converted3.value }),
-                        ["address"]: converted4.value,
-                        ["stops"]: converted5.value,
-                        ["by_tag"]: converted6.value,
-                        ["fixed"]: converted7.value,
+                        ...(converted4.value === undefined ? {} : { ["courier_remark"]: converted4.value }),
+                        ["address"]: converted5.value,
+                        ["stops"]: converted6.value,
+                        ["by_tag"]: converted7.value,
+                        ["fixed"]: converted8.value,
                 
                         ...(decision.value["inspected"] === undefined ? {} : { ["inspected"]: decision.value["inspected"] }),
                         ["audit"]: decision.value["audit"],
@@ -3425,17 +3452,20 @@ export interface VersionAdapters {
                 const converted3 = mapOptional(source["note"], (item) => ok(item));
                 if (!converted3.ok) return converted3;
             
-                const converted4 = downcastAddressToV2(source["address"], adapters);
+                const converted4 = mapOptional(source["courier_remark"], (item) => ok(item));
                 if (!converted4.ok) return converted4;
             
-                const converted5 = mapSequence(source["stops"], (item) => downcastAddressToV2(item, adapters));
+                const converted5 = downcastAddressToV2(source["address"], adapters);
                 if (!converted5.ok) return converted5;
             
-                const converted6 = mapRecord(source["by_tag"], (item) => downcastAddressToV2(item, adapters));
+                const converted6 = mapSequence(source["stops"], (item) => downcastAddressToV2(item, adapters));
                 if (!converted6.ok) return converted6;
             
-                const converted7 = mapSequence(source["fixed"], (item) => downcastAddressToV2(item, adapters));
+                const converted7 = mapRecord(source["by_tag"], (item) => downcastAddressToV2(item, adapters));
                 if (!converted7.ok) return converted7;
+            
+                const converted8 = mapSequence(source["fixed"], (item) => downcastAddressToV2(item, adapters));
+                if (!converted8.ok) return converted8;
             
             return ok({
                 
@@ -3443,10 +3473,11 @@ export interface VersionAdapters {
                         ["tracking"]: converted1.value,
                         ["carrier"]: converted2.value,
                         ...(converted3.value === undefined ? {} : { ["note"]: converted3.value }),
-                        ["address"]: converted4.value,
-                        ["stops"]: converted5.value,
-                        ["by_tag"]: converted6.value,
-                        ["fixed"]: converted7.value,
+                        ...(converted4.value === undefined ? {} : { ["courier_note"]: converted4.value }),
+                        ["address"]: converted5.value,
+                        ["stops"]: converted6.value,
+                        ["by_tag"]: converted7.value,
+                        ["fixed"]: converted8.value,
                 
                         ...(decision.value["handling_note"] === OMIT ? {} : { ["handling_note"]: decision.value["handling_note"] }),
             });

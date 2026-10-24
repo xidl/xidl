@@ -180,7 +180,7 @@ fn renamed_from_diagnostic_recommends_supported_contracts_on_every_http_target()
                 "{target}: {error}"
             );
             assert!(
-                error.contains("@added/@removed declarations"),
+                error.contains("@replaces(earlier) on the added member"),
                 "{target}: {error}"
             );
             assert!(!error.contains("yet"), "{target}: {error}");

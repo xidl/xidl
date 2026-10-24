@@ -135,6 +135,7 @@ impl VersioningRecord {
             timeline: &timeline,
         };
         validator.walk(&spec.0, "", lifecycle::Availability::full())?;
+        lifecycle::validate_replaces(&spec.0, &timeline)?;
         claims::check(spec, Some(&timeline))?;
         Ok(Some(VersioningRecord {
             timeline,

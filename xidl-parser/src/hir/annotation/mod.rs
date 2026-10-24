@@ -145,6 +145,13 @@ pub enum Annotation {
     Removed {
         version: ScopedName,
     },
+    /// The `@replaces(earlier)` lifecycle annotation: this declaration takes
+    /// over from the earlier member of the same declaration, which `@removed`
+    /// retires. Both declarations stay as written; the annotation records the
+    /// link for the version map and the version adapters.
+    Replaces {
+        name: String,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

@@ -200,6 +200,21 @@ impl AnnotationDefinition {
                 crate::rest_hir::semantics::deprecated_info(&[annotation.clone().into()])
                     .map(|_| ())
             }
+            ArgumentShape::Replaces => match &annotation.params {
+                Some(ast::AnnotationParams::Params(params))
+                    if matches!(params.as_slice(),
+                    [ast::AnnotationApplParam::Positional(expr)] if matches!(
+                        hir::ConstExpr::from(expr.clone()),
+                        hir::ConstExpr::ScopedName(_)
+                            | hir::ConstExpr::Literal(hir::Literal::StringLiteral(_))
+                    )) =>
+                {
+                    Ok(())
+                }
+                _ => Err(
+                    "requires the earlier member name, for example `@replaces(text)`".to_string(),
+                ),
+            },
             ArgumentShape::Lifecycle => match &annotation.params {
                 Some(ast::AnnotationParams::Params(params))
                     if matches!(params.as_slice(),

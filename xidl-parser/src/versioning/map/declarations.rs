@@ -18,6 +18,7 @@ struct Declaration {
     parameter: Option<ParamDcl>,
     availability: Availability,
     wire_name: String,
+    replaces: Option<String>,
 }
 
 struct DeclarationQuery<'a> {
@@ -96,21 +97,27 @@ impl<'a> SourceDeclarations<'a> {
                     "bitset" => SiteKind::Bitfield,
                     _ => SiteKind::Member,
                 };
-                let id = self
-                    .identity(
-                        DeclarationQuery {
-                            path: &path,
-                            kind,
-                            wire_name: Some(wire_name),
-                            parameter_binding: None,
-                        },
-                        version,
-                    )?
-                    .token();
+                let query = DeclarationQuery {
+                    path: &path,
+                    kind,
+                    wire_name: Some(wire_name),
+                    parameter_binding: None,
+                };
+                let id = self.identity(query, version)?.token();
                 member.insert("declaration_id".into(), Value::String(id));
+                if let Some(earlier) = self.replaces(&path) {
+                    member.insert("replaces".into(), Value::String(earlier));
+                }
             }
         }
         Ok(())
+    }
+
+    /// The earlier member name a declaration at `path` takes over from.
+    fn replaces(&self, path: &str) -> Option<String> {
+        self.declarations
+            .get(path)
+            .and_then(|declarations| declarations.iter().find_map(|d| d.replaces.clone()))
     }
 
     /// Attaches operation and request/response parameter identities.
@@ -370,6 +377,7 @@ impl VersionVisitor for SourceDeclarations<'_> {
                     SiteKind::Bitfield => name.into(),
                     _ => effective_wire_name(name, site.annotations, annotations),
                 };
+                let replaces = crate::versioning::lifecycle::replaces_name(site.annotations);
                 self.declarations
                     .entry(path)
                     .or_default()
@@ -379,6 +387,7 @@ impl VersionVisitor for SourceDeclarations<'_> {
                         parameter: site.parameter.cloned(),
                         availability: own,
                         wire_name,
+                        replaces,
                     });
             }
         }

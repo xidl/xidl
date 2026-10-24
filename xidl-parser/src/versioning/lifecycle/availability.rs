@@ -7,9 +7,11 @@ use crate::hir::{Annotation, Enumerator, ScopedName};
 use crate::lint::AnnotationKind;
 
 /// Rejected versioning annotations, rather than promises of future syntax.
-pub(super) const UNSUPPORTED_ANNOTATIONS: [&str; 7] = [
+pub(super) const UNSUPPORTED_ANNOTATIONS: [&str; 9] = [
     "versioned",
     "renamedfrom",
+    "renamefrom",
+    "renamed_from",
     "madeoptional",
     "maderequired",
     "typechangedfrom",
@@ -202,6 +204,16 @@ pub(crate) fn availability(
             // Discovery validates the parameter and reports misuse; the
             // availability walk only needs to ignore it.
             Annotation::VersionParameter(_) => {}
+            // The link changes no interval and belongs to a member only; the
+            // replaces pass checks it against the timeline and the siblings.
+            Annotation::Replaces { .. } if site.kind == SiteKind::Member => {}
+            Annotation::Replaces { .. } => {
+                return Err(VersioningError::UnsupportedVersionTarget {
+                    annotation: "@replaces".to_string(),
+                    target: format!("{} ({})", site.path, site.kind.describe()),
+                }
+                .into());
+            }
             other => {
                 let Some(name) = raw_versioning_name(other) else {
                     continue;
@@ -212,6 +224,12 @@ pub(crate) fn availability(
                 ) {
                     return Err(VersioningError::MalformedVersionReference {
                         annotation: format!("@{name}"),
+                        decl: site.path.clone(),
+                    }
+                    .into());
+                }
+                if AnnotationKind::from_name(name.as_str()) == Some(AnnotationKind::Replaces) {
+                    return Err(VersioningError::MalformedReplaces {
                         decl: site.path.clone(),
                     }
                     .into());
@@ -316,7 +334,8 @@ pub(crate) fn is_versioning_annotation(annotation: &Annotation) -> bool {
         Annotation::Version
         | Annotation::VersionParameter(_)
         | Annotation::Added { .. }
-        | Annotation::Removed { .. } => true,
+        | Annotation::Removed { .. }
+        | Annotation::Replaces { .. } => true,
         other => raw_versioning_name(other).is_some_and(|name| {
             AnnotationKind::from_name(&name).is_some_and(AnnotationKind::is_lifecycle)
         }),
