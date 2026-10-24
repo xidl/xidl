@@ -24,6 +24,7 @@ pub fn head() -> v2027_01_01::Booking {
         title: "Kickoff".into(),
         items: vec![v2027_01_01::AgendaEntry { title: "Kickoff".into(), minutes: 60 }],
         organizer: Some("user-9".into()),
+        locked: Some(true),
     }
 }
 
@@ -43,6 +44,7 @@ pub fn assert_conversions(hooks: &Hooks, storage: &Storage) {
     };
     assert_eq!(value.roster, vec!["user-1".to_string(), "user-2".to_string()]);
     assert_eq!(value.owner.as_deref(), Some("user-9"));
+    assert_eq!(value.locked, Some(true));
     assert_eq!(hooks.down_to_v2.load(Ordering::SeqCst), 1, "only the roster decision ran");
     assert_eq!(hooks.up_from_v1.load(Ordering::SeqCst) + hooks.up_from_v2.load(Ordering::SeqCst), 0);
 
@@ -74,8 +76,8 @@ pub fn assert_conversions(hooks: &Hooks, storage: &Storage) {
     };
     assert_eq!(missing.type_path, "Booking.agenda");
 
-    // The oldest caller upgrades: the retired agenda is acknowledged, never
-    // forwarded, and the unpacked entries come from the application's decision.
+    // The oldest caller upgrades: the implied locked value is stated, the
+    // retired agenda is acknowledged, and owner arrives at Head as organizer.
     let v1 = v2026_06_01::Booking {
         id: "b1".into(),
         title: "Kickoff".into(),
@@ -88,10 +90,12 @@ pub fn assert_conversions(hooks: &Hooks, storage: &Storage) {
     assert_eq!(to_v2.items.len(), 1);
     assert_eq!(to_v2.items[0].title, "Kickoff");
     assert_eq!(to_v2.items[0].minutes, 60);
+    assert_eq!(to_v2.locked, Some(false), "the hook states the implied value");
     assert_eq!(to_v2.owner.as_deref(), Some("user-9"));
     assert_eq!(to_v2.roster, vec!["user-1".to_string(), "user-2".to_string()]);
     let to_head = booking_upcast_from_v_2026_10_01(&to_v2, hooks).unwrap();
     assert_eq!(to_head.organizer.as_deref(), Some("user-9"));
+    assert_eq!(to_head.locked, Some(false));
 
     // An ambiguous text block is refused, not guessed: the sample encoding
     // cannot represent a title that contains the separator.

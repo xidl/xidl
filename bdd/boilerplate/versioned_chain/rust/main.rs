@@ -24,5 +24,5 @@ fn main() {
     };
     assert!(invalid, "validation precedes every hook");
     assert_eq!(hooks.up_from_v1.load(std::sync::atomic::Ordering::SeqCst), 2);
-    println!("PASS: booking chain keeps storage facts and pure conversions");
+    println!("PASS: booking chain keeps storage facts, pure conversions and implied defaults");
 }

@@ -68,6 +68,7 @@ const hooks: a.VersionAdapters = {
     return ok({
       agenda: a.IGNORED,
       items: [{ minutes: Number(minutes), title }],
+      locked: false,
     });
   },
   bookingUpcastFromV20261001: () => {
@@ -79,6 +80,7 @@ const hooks: a.VersionAdapters = {
 const HEAD: types.v2027_01_01.Booking = {
   id: 'b1',
   items: [{ minutes: 60, title: 'Kickoff' }],
+  locked: true,
   organizer: 'user-9',
   title: 'Kickoff',
 };
@@ -101,6 +103,7 @@ const toV2 = a.downcastBooking('v2026_10_01', HEAD, stored, hooks);
 assert(toV2.ok, JSON.stringify(toV2));
 assert.deepEqual(toV2.value.roster, ['user-1', 'user-2']);
 assert.equal(toV2.value.owner, 'user-9');
+assert.equal(toV2.value.locked, true);
 assert.deepEqual(toV2.value.items, HEAD.items);
 assert.equal(calls.downToV2, 1, 'only the roster decision ran');
 
@@ -143,8 +146,8 @@ const missingAgenda = a.downcastBooking(
 assert(!missingAgenda.ok);
 assert.equal(missingAgenda.error.typePath, 'Booking.agenda');
 
-// The oldest caller upgrades: the retired agenda is acknowledged, never
-// forwarded, and the unpacked entries come from the application's decision.
+// The oldest caller upgrades: the implied locked value is stated, never
+// defaulted silently, and the retired agenda is acknowledged, not forwarded.
 const v1Booking: types.v2026_06_01.Booking = {
   agenda: 'Kickoff;60',
   id: 'b1',
@@ -156,6 +159,7 @@ const upToV2 = a.upcastBookingFromV20260601(v1Booking, hooks);
 assert(upToV2.ok, JSON.stringify(upToV2));
 assert.equal(calls.upFromV1, 1);
 assert.deepEqual(upToV2.value.items, [{ minutes: 60, title: 'Kickoff' }]);
+assert.equal(upToV2.value.locked, false, 'the hook states the implied value');
 assert.equal(upToV2.value.owner, 'user-9');
 assert.deepEqual(upToV2.value.roster, ['user-1', 'user-2']);
 
