@@ -1,6 +1,5 @@
 ---
 source: xidl-parser/src/tests/lint.rs
-assertion_line: 27
 expression: "serde_json::to_string_pretty(&diagnostics).unwrap()"
 ---
 [
@@ -19,17 +18,17 @@ expression: "serde_json::to_string_pretty(&diagnostics).unwrap()"
     "severity": "warning",
     "span": {
       "start": 96,
-      "end": 109
+      "end": 108
     },
-    "message": "unknown annotation `@photon_audit`",
+    "message": "unknown annotation `@relay_audit`",
     "suggestion": null
   },
   {
     "code": "misplaced-annotation",
     "severity": "error",
     "span": {
-      "start": 124,
-      "end": 133
+      "start": 123,
+      "end": 132
     },
     "message": "@optional is not allowed on Interface",
     "suggestion": null
@@ -38,8 +37,8 @@ expression: "serde_json::to_string_pretty(&diagnostics).unwrap()"
     "code": "misspelled-annotation",
     "severity": "error",
     "span": {
-      "start": 156,
-      "end": 178
+      "start": 155,
+      "end": 177
     },
     "message": "unknown annotation `@gett`",
     "suggestion": "get"
@@ -48,8 +47,8 @@ expression: "serde_json::to_string_pretty(&diagnostics).unwrap()"
     "code": "bad-annotation-args",
     "severity": "error",
     "span": {
-      "start": 200,
-      "end": 235
+      "start": 199,
+      "end": 234
     },
     "message": "@api_key: `in` must be header, query or cookie",
     "suggestion": null

@@ -113,7 +113,7 @@ fn imported_units_are_validated_and_their_binding_is_preserved() {
 fn passthrough_annotations_ignore_trivia_and_preserve_quoted_values() {
     let original = format!(
         r#"{HISTORY}
-        @rust-derive(Debug) @photon_audit(data=["x", "y"])
+        @rust-derive(Debug) @relay_audit(data=["x", "y"])
         struct Item {{ @rename("a\\b[0]") string id; @added(Versions::v2) string note; }};"#
     );
     let (_, first) = contract(&original);

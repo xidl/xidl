@@ -1,4 +1,4 @@
-module Photon {
+module Relay {
     struct UserRef { string id; };
     struct Participant : UserRef { string role; };
     enum ReactionKind { LIKE, LOVE };

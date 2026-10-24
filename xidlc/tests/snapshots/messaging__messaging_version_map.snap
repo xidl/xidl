@@ -4,7 +4,7 @@ expression: "all[0].content()"
 ---
 {
   "format": 2,
-  "contract": "photon_messaging.idl",
+  "contract": "relay_messaging.idl",
   "versions": [
     {
       "id": "v2026_03",
@@ -32,11 +32,11 @@ expression: "all[0].content()"
       "from": "v2026_03",
       "to": "v2026_05",
       "types": {
-        "Photon::Attachment": {
+        "Relay::Attachment": {
           "change": "added",
           "kind": "struct"
         },
-        "Photon::AttachmentId": {
+        "Relay::AttachmentId": {
           "change": "added",
           "kind": "typedef",
           "details": {
@@ -49,7 +49,7 @@ expression: "all[0].content()"
             "type": "string"
           }
         },
-        "Photon::Content": {
+        "Relay::Content": {
           "change": "changed",
           "kind": "union",
           "details": {
@@ -83,7 +83,7 @@ expression: "all[0].content()"
             }
           }
         },
-        "Photon::Message": {
+        "Relay::Message": {
           "change": "changed",
           "kind": "struct",
           "from": {
@@ -122,7 +122,7 @@ expression: "all[0].content()"
             }
           }
         },
-        "Photon::MessageStatus": {
+        "Relay::MessageStatus": {
           "change": "changed",
           "kind": "enum",
           "from": {
@@ -157,7 +157,7 @@ expression: "all[0].content()"
         }
       },
       "operations": {
-        "Photon::Messages.edit": {
+        "Relay::Messages.edit": {
           "change": "added",
           "to": {
             "declaration_id": "d75",
@@ -181,7 +181,7 @@ expression: "all[0].content()"
               }
             },
             "raises": [
-              "Photon::NotFound"
+              "Relay::NotFound"
             ],
             "request": {
               "body": {
@@ -262,7 +262,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Messages.get": {
+        "Relay::Messages.get": {
           "change": "changed",
           "from": {
             "declaration_id": "d66",
@@ -278,7 +278,7 @@ expression: "all[0].content()"
               }
             },
             "raises": [
-              "Photon::NotFound"
+              "Relay::NotFound"
             ],
             "request": {
               "body": {
@@ -367,7 +367,7 @@ expression: "all[0].content()"
               }
             },
             "raises": [
-              "Photon::NotFound"
+              "Relay::NotFound"
             ],
             "request": {
               "body": {
@@ -451,7 +451,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Messages.legacy_send": {
+        "Relay::Messages.legacy_send": {
           "change": "changed",
           "from": {
             "declaration_id": "d82",
@@ -612,7 +612,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Users.unread": {
+        "Relay::Users.unread": {
           "change": "added",
           "to": {
             "declaration_id": "d134",
@@ -710,7 +710,7 @@ expression: "all[0].content()"
       "from": "v2026_05",
       "to": "v2026_07",
       "types": {
-        "Photon::Capability": {
+        "Relay::Capability": {
           "change": "changed",
           "kind": "bitmask",
           "from": {
@@ -730,7 +730,7 @@ expression: "all[0].content()"
             }
           }
         },
-        "Photon::Content": {
+        "Relay::Content": {
           "change": "changed",
           "kind": "union",
           "details": {
@@ -781,11 +781,11 @@ expression: "all[0].content()"
             }
           }
         },
-        "Photon::LegacyEnvelope": {
+        "Relay::LegacyEnvelope": {
           "change": "removed",
           "kind": "struct"
         },
-        "Photon::Message": {
+        "Relay::Message": {
           "change": "changed",
           "kind": "struct",
           "from": {
@@ -815,19 +815,19 @@ expression: "all[0].content()"
             }
           }
         },
-        "Photon::MessagePage": {
+        "Relay::MessagePage": {
           "change": "added",
           "kind": "struct"
         },
-        "Photon::PollContent": {
+        "Relay::PollContent": {
           "change": "added",
           "kind": "struct"
         },
-        "Photon::RateLimited": {
+        "Relay::RateLimited": {
           "change": "added",
           "kind": "exception"
         },
-        "Photon::Space": {
+        "Relay::Space": {
           "change": "changed",
           "kind": "struct",
           "from": {
@@ -857,7 +857,7 @@ expression: "all[0].content()"
             }
           }
         },
-        "Photon::TextContent": {
+        "Relay::TextContent": {
           "change": "changed",
           "kind": "struct",
           "from": {
@@ -878,15 +878,15 @@ expression: "all[0].content()"
             }
           }
         },
-        "Photon::UploadChunk": {
+        "Relay::UploadChunk": {
           "change": "added",
           "kind": "struct"
         },
-        "Photon::UploadSummary": {
+        "Relay::UploadSummary": {
           "change": "added",
           "kind": "struct"
         },
-        "Photon::UserRef": {
+        "Relay::UserRef": {
           "change": "changed",
           "kind": "struct",
           "from": {
@@ -907,17 +907,17 @@ expression: "all[0].content()"
             }
           }
         },
-        "Photon::WebhookDestination": {
+        "Relay::WebhookDestination": {
           "change": "added",
           "kind": "struct"
         },
-        "Photon::WebhookDestinationInput": {
+        "Relay::WebhookDestinationInput": {
           "change": "added",
           "kind": "struct"
         }
       },
       "operations": {
-        "Photon::Media.upload": {
+        "Relay::Media.upload": {
           "change": "added",
           "to": {
             "declaration_id": "d149",
@@ -999,7 +999,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Messages.legacy_send": {
+        "Relay::Messages.legacy_send": {
           "change": "removed",
           "from": {
             "declaration_id": "d84",
@@ -1081,7 +1081,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Messages.list": {
+        "Relay::Messages.list": {
           "change": "changed",
           "from": {
             "declaration_id": "d60",
@@ -1286,7 +1286,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Messages.send": {
+        "Relay::Messages.send": {
           "change": "changed",
           "from": {
             "declaration_id": "d69",
@@ -1492,7 +1492,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Users.get": {
+        "Relay::Users.get": {
           "change": "changed",
           "from": {
             "declaration_id": "d130",
@@ -1508,7 +1508,7 @@ expression: "all[0].content()"
               }
             },
             "raises": [
-              "Photon::NotFound"
+              "Relay::NotFound"
             ],
             "request": {
               "body": {
@@ -1589,8 +1589,8 @@ expression: "all[0].content()"
               }
             },
             "raises": [
-              "Photon::NotFound",
-              "Photon::RateLimited"
+              "Relay::NotFound",
+              "Relay::RateLimited"
             ],
             "request": {
               "body": {
@@ -1665,7 +1665,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Users.get_attribute_region": {
+        "Relay::Users.get_attribute_region": {
           "change": "added",
           "to": {
             "declaration_id": "d148",
@@ -1721,7 +1721,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Users.list": {
+        "Relay::Users.list": {
           "change": "changed",
           "from": {
             "declaration_id": "d141",
@@ -1905,7 +1905,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Webhooks.create": {
+        "Relay::Webhooks.create": {
           "change": "added",
           "to": {
             "declaration_id": "d99",
@@ -1993,11 +1993,11 @@ expression: "all[0].content()"
       "from": "v2026_07",
       "to": "v2026_09",
       "types": {
-        "Photon::Admin::Quota": {
+        "Relay::Admin::Quota": {
           "change": "removed",
           "kind": "struct"
         },
-        "Photon::Attachment": {
+        "Relay::Attachment": {
           "change": "changed",
           "kind": "struct",
           "from": {
@@ -2018,11 +2018,11 @@ expression: "all[0].content()"
             }
           }
         },
-        "Photon::Conflict": {
+        "Relay::Conflict": {
           "change": "added",
           "kind": "exception"
         },
-        "Photon::Message": {
+        "Relay::Message": {
           "change": "changed",
           "kind": "struct",
           "from": {
@@ -2049,7 +2049,7 @@ expression: "all[0].content()"
             }
           }
         },
-        "Photon::MessageStatus": {
+        "Relay::MessageStatus": {
           "change": "changed",
           "kind": "enum",
           "from": {
@@ -2077,7 +2077,7 @@ expression: "all[0].content()"
             }
           }
         },
-        "Photon::Participant": {
+        "Relay::Participant": {
           "change": "changed",
           "kind": "struct",
           "from": {
@@ -2098,7 +2098,7 @@ expression: "all[0].content()"
             }
           }
         },
-        "Photon::Reaction": {
+        "Relay::Reaction": {
           "change": "changed",
           "kind": "union",
           "details": {
@@ -2136,7 +2136,7 @@ expression: "all[0].content()"
             }
           }
         },
-        "Photon::ReactionKind": {
+        "Relay::ReactionKind": {
           "change": "changed",
           "kind": "enum",
           "from": {
@@ -2156,7 +2156,7 @@ expression: "all[0].content()"
             }
           }
         },
-        "Photon::Space": {
+        "Relay::Space": {
           "change": "changed",
           "kind": "struct",
           "from": {
@@ -2183,20 +2183,20 @@ expression: "all[0].content()"
             }
           }
         },
-        "Photon::Transcript": {
+        "Relay::Transcript": {
           "change": "added",
           "kind": "union",
           "details": {
             "switch_type": "ContentType"
           }
         },
-        "Photon::TranscriptJson": {
+        "Relay::TranscriptJson": {
           "change": "added",
           "kind": "struct"
         }
       },
       "operations": {
-        "Photon::Admin::Quotas.get": {
+        "Relay::Admin::Quotas.get": {
           "change": "removed",
           "from": {
             "declaration_id": "d128",
@@ -2207,7 +2207,7 @@ expression: "all[0].content()"
                 "location": "path",
                 "name": "space_id",
                 "optional": false,
-                "type": "Photon::SpaceId",
+                "type": "Relay::SpaceId",
                 "wire_name": "space_id"
               }
             },
@@ -2229,7 +2229,7 @@ expression: "all[0].content()"
                     "ScopedName": {
                       "is_root": false,
                       "name": [
-                        "Photon",
+                        "Relay",
                         "SpaceId"
                       ]
                     }
@@ -2282,7 +2282,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Media.transcript": {
+        "Relay::Media.transcript": {
           "change": "added",
           "to": {
             "declaration_id": "d154",
@@ -2353,7 +2353,7 @@ expression: "all[0].content()"
                       "is_root": true,
                       "name": [
                         "v2026_09",
-                        "Photon",
+                        "Relay",
                         "TranscriptJson"
                       ]
                     }
@@ -2382,7 +2382,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Messages.archive": {
+        "Relay::Messages.archive": {
           "change": "added",
           "to": {
             "declaration_id": "d93",
@@ -2398,8 +2398,8 @@ expression: "all[0].content()"
               }
             },
             "raises": [
-              "Photon::NotFound",
-              "Photon::Conflict"
+              "Relay::NotFound",
+              "Relay::Conflict"
             ],
             "request": {
               "body": {
@@ -2456,7 +2456,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Messages.edit": {
+        "Relay::Messages.edit": {
           "change": "changed",
           "from": {
             "declaration_id": "d75",
@@ -2480,7 +2480,7 @@ expression: "all[0].content()"
               }
             },
             "raises": [
-              "Photon::NotFound"
+              "Relay::NotFound"
             ],
             "request": {
               "body": {
@@ -2590,8 +2590,8 @@ expression: "all[0].content()"
               }
             },
             "raises": [
-              "Photon::NotFound",
-              "Photon::Conflict"
+              "Relay::NotFound",
+              "Relay::Conflict"
             ],
             "request": {
               "body": {
@@ -2683,7 +2683,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Messages.find": {
+        "Relay::Messages.find": {
           "change": "removed",
           "from": {
             "declaration_id": "d86",
@@ -2768,7 +2768,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Messages.list": {
+        "Relay::Messages.list": {
           "change": "changed",
           "from": {
             "declaration_id": "d62",
@@ -2987,7 +2987,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Messages.remove": {
+        "Relay::Messages.remove": {
           "change": "removed",
           "from": {
             "declaration_id": "d91",
@@ -3003,8 +3003,8 @@ expression: "all[0].content()"
               }
             },
             "raises": [
-              "Photon::NotFound",
-              "Photon::Gone"
+              "Relay::NotFound",
+              "Relay::Gone"
             ],
             "request": {
               "body": {
@@ -3061,7 +3061,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Messages.search": {
+        "Relay::Messages.search": {
           "change": "added",
           "to": {
             "declaration_id": "d88",
@@ -3159,7 +3159,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Messages.watch": {
+        "Relay::Messages.watch": {
           "change": "added",
           "to": {
             "declaration_id": "d95",
@@ -3246,7 +3246,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Users.block": {
+        "Relay::Users.block": {
           "change": "changed",
           "from": {
             "declaration_id": "d144",
@@ -3330,7 +3330,7 @@ expression: "all[0].content()"
               }
             },
             "raises": [
-              "Photon::RateLimited"
+              "Relay::RateLimited"
             ],
             "request": {
               "body": {
@@ -3387,7 +3387,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Users.list": {
+        "Relay::Users.list": {
           "change": "changed",
           "from": {
             "declaration_id": "d141",
@@ -3569,7 +3569,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Users.unread": {
+        "Relay::Users.unread": {
           "change": "changed",
           "from": {
             "declaration_id": "d134",
@@ -3784,7 +3784,7 @@ expression: "all[0].content()"
           "change": "added",
           "kind": "struct"
         },
-        "Photon::Capability": {
+        "Relay::Capability": {
           "change": "changed",
           "kind": "bitmask",
           "from": {
@@ -3804,11 +3804,11 @@ expression: "all[0].content()"
             }
           }
         },
-        "Photon::Gone": {
+        "Relay::Gone": {
           "change": "removed",
           "kind": "exception"
         },
-        "Photon::Message": {
+        "Relay::Message": {
           "change": "changed",
           "kind": "struct",
           "from": {
@@ -3829,7 +3829,7 @@ expression: "all[0].content()"
             }
           }
         },
-        "Photon::Space": {
+        "Relay::Space": {
           "change": "changed",
           "kind": "struct",
           "from": {
@@ -3856,7 +3856,7 @@ expression: "all[0].content()"
             }
           }
         },
-        "Photon::Transcript": {
+        "Relay::Transcript": {
           "change": "changed",
           "kind": "union",
           "details": {
@@ -3894,7 +3894,7 @@ expression: "all[0].content()"
             }
           }
         },
-        "Photon::UploadSummary": {
+        "Relay::UploadSummary": {
           "change": "changed",
           "kind": "struct",
           "from": {
@@ -3915,7 +3915,7 @@ expression: "all[0].content()"
             }
           }
         },
-        "Photon::WebhookDestinationInput": {
+        "Relay::WebhookDestinationInput": {
           "change": "changed",
           "kind": "struct",
           "from": {
@@ -4018,7 +4018,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::LegacyPolling.poll": {
+        "Relay::LegacyPolling.poll": {
           "change": "removed",
           "from": {
             "declaration_id": "d103",
@@ -4034,7 +4034,7 @@ expression: "all[0].content()"
               }
             },
             "raises": [
-              "Photon::Gone"
+              "Relay::Gone"
             ],
             "request": {
               "body": {
@@ -4105,7 +4105,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Media.realtime": {
+        "Relay::Media.realtime": {
           "change": "added",
           "to": {
             "declaration_id": "d156",
@@ -4172,11 +4172,11 @@ expression: "all[0].content()"
               "kind": null
             },
             "upgrade_mode": "Raw",
-            "upgrade_protocol": "photon-realtime",
+            "upgrade_protocol": "relay-realtime",
             "websocket": null
           }
         },
-        "Photon::Media.transcript": {
+        "Relay::Media.transcript": {
           "change": "changed",
           "from": {
             "declaration_id": "d154",
@@ -4247,7 +4247,7 @@ expression: "all[0].content()"
                       "is_root": true,
                       "name": [
                         "v2026_09",
-                        "Photon",
+                        "Relay",
                         "TranscriptJson"
                       ]
                     }
@@ -4344,7 +4344,7 @@ expression: "all[0].content()"
                       "is_root": true,
                       "name": [
                         "v2026_11",
-                        "Photon",
+                        "Relay",
                         "TranscriptJson"
                       ]
                     }
@@ -4382,7 +4382,7 @@ expression: "all[0].content()"
             "websocket": null
           }
         },
-        "Photon::Webhooks.delete_destination": {
+        "Relay::Webhooks.delete_destination": {
           "change": "added",
           "to": {
             "declaration_id": "d101",
@@ -4398,7 +4398,7 @@ expression: "all[0].content()"
               }
             },
             "raises": [
-              "Photon::NotFound"
+              "Relay::NotFound"
             ],
             "request": {
               "body": {
