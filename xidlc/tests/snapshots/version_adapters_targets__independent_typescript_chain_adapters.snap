@@ -545,6 +545,7 @@ export interface VersionAdapters {
 
 
 
+
     export function upcastBookingFromV20260601(source: types.v2026_06_01.Booking, adapters: VersionAdapters): VersionedResult<types.v2026_10_01.Booking> {
         
             
@@ -563,23 +564,11 @@ export interface VersionAdapters {
             
             return ok({
                 
-                    
                         ["id"]: converted0.value,
-                    
-                
-                    
                         ["title"]: converted1.value,
-                    
-                
-                    
                         ["roster"]: converted2.value,
-                    
                 
-                
-                    
                         ["items"]: decision.value["items"],
-                    
-                
             });
         
     }
@@ -602,23 +591,11 @@ export interface VersionAdapters {
             
             return ok({
                 
-                    
                         ["id"]: converted0.value,
-                    
-                
-                    
                         ["title"]: converted1.value,
-                    
-                
-                    
                         ["roster"]: converted2.value,
-                    
                 
-                
-                    
                         ["agenda"]: decision.value["agenda"],
-                    
-                
             });
         
     }
@@ -632,10 +609,7 @@ export interface VersionAdapters {
             
             return ok({
                 
-                    
                         ["id"]: converted0.value,
-                    
-                
                 
             });
         
@@ -650,10 +624,7 @@ export interface VersionAdapters {
             
             return ok({
                 
-                    
                         ["booking"]: converted0.value,
-                    
-                
                 
             });
         
@@ -668,10 +639,7 @@ export interface VersionAdapters {
             
             return ok({
                 
-                    
                         ["return"]: converted0.value,
-                    
-                
                 
             });
         
@@ -686,10 +654,7 @@ export interface VersionAdapters {
             
             return ok({
                 
-                    
                         ["id"]: converted0.value,
-                    
-                
                 
             });
         
@@ -704,10 +669,7 @@ export interface VersionAdapters {
             
             return ok({
                 
-                    
                         ["return"]: converted0.value,
-                    
-                
                 
             });
         
@@ -725,14 +687,8 @@ export interface VersionAdapters {
             
             return ok({
                 
-                    
                         ["title"]: converted0.value,
-                    
-                
-                    
                         ["minutes"]: converted1.value,
-                    
-                
                 
             });
         
@@ -750,14 +706,8 @@ export interface VersionAdapters {
             
             return ok({
                 
-                    
                         ["title"]: converted0.value,
-                    
-                
-                    
                         ["minutes"]: converted1.value,
-                    
-                
                 
             });
         
@@ -781,18 +731,9 @@ export interface VersionAdapters {
             
             return ok({
                 
-                    
                         ["id"]: converted0.value,
-                    
-                
-                    
                         ["title"]: converted1.value,
-                    
-                
-                    
                         ["items"]: converted2.value,
-                    
-                
                 
             });
         
@@ -816,23 +757,11 @@ export interface VersionAdapters {
             
             return ok({
                 
-                    
                         ["id"]: converted0.value,
-                    
-                
-                    
                         ["title"]: converted1.value,
-                    
-                
-                    
                         ["items"]: converted2.value,
-                    
                 
-                
-                    
                         ["roster"]: decision.value["roster"],
-                    
-                
             });
         
     }
@@ -846,10 +775,7 @@ export interface VersionAdapters {
             
             return ok({
                 
-                    
                         ["id"]: converted0.value,
-                    
-                
                 
             });
         
@@ -864,10 +790,7 @@ export interface VersionAdapters {
             
             return ok({
                 
-                    
                         ["booking"]: converted0.value,
-                    
-                
                 
             });
         
@@ -882,10 +805,7 @@ export interface VersionAdapters {
             
             return ok({
                 
-                    
                         ["return"]: converted0.value,
-                    
-                
                 
             });
         
@@ -900,10 +820,7 @@ export interface VersionAdapters {
             
             return ok({
                 
-                    
                         ["id"]: converted0.value,
-                    
-                
                 
             });
         
@@ -918,10 +835,7 @@ export interface VersionAdapters {
             
             return ok({
                 
-                    
                         ["return"]: converted0.value,
-                    
-                
                 
             });
         
