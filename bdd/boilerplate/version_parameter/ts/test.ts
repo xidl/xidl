@@ -10,9 +10,13 @@ import {
 } from './version_parameter.errors.js';
 import { v1 as serverV1, v2 as serverV2 } from './version_parameter.server.js';
 
-const location = process.env.VERSION_LOCATION!;
-const name = process.env.VERSION_NAME!;
-const value = process.env.VERSION_VALUE!;
+function fail(reason: string): never {
+  throw new Error(reason);
+}
+
+const location = process.env.VERSION_LOCATION ?? '';
+const name = process.env.VERSION_NAME ?? '';
+const value = process.env.VERSION_VALUE ?? '';
 
 async function within<T>(stage: string, operation: Promise<T>): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -50,13 +54,15 @@ function headersOf(req: IncomingMessage): Headers {
 function observe(req: IncomingMessage): Observed {
   return {
     headers: headersOf(req),
-    url: new URL(req.url!, `http://${req.headers.host}`),
+    url: new URL(req.url ?? '/', `http://${req.headers.host}`),
   };
 }
 function version(observed: Observed, expected: string | undefined) {
   let values: string[];
   if (location === 'header')
-    values = observed.headers.has(name) ? [observed.headers.get(name)!] : [];
+    values = observed.headers.has(name)
+      ? [observed.headers.get(name) ?? '']
+      : [];
   else if (location === 'query')
     values = observed.url.searchParams.getAll(name);
   else
@@ -132,7 +138,7 @@ for (const [clientModule, serverModule, Conflict, expected] of [
           async scalar(session) {
             const message = await within('scalar server input', session.read());
             assert.ok(message);
-            await session.write(message.text + ':scalar');
+            await session.write(`${message.text}:scalar`);
           },
         },
         { wrapWsBidiServer },
@@ -205,26 +211,26 @@ for (const [clientModule, serverModule, Conflict, expected] of [
     assert.equal(clientModule.HealthClient.API_VERSION, expected);
     for (let i = 0; i < 2; i++) {
       assert.equal((await client._get(7, 'a +/%', 'dark')).id, '7');
-      const observed = requests.shift()!;
+      const observed = requests.shift() ?? fail('missing queued observation');
       version(observed, expected);
       assert.equal(observed.url.searchParams.get('search'), 'a +/%');
-      assert.match(observed.headers.get('Cookie')!, /session=kept/);
-      assert.match(observed.headers.get('Cookie')!, /theme=dark/);
-      assert.match(observed.headers.get('Cookie')!, /Theme=case-kept/);
+      assert.match(observed.headers.get('Cookie') ?? '', /session=kept/);
+      assert.match(observed.headers.get('Cookie') ?? '', /theme=dark/);
+      assert.match(observed.headers.get('Cookie') ?? '', /Theme=case-kept/);
     }
     await client.remove(7);
-    version(requests.shift()!, expected);
+    version(requests.shift() ?? fail('missing queued observation'), expected);
     await assert.rejects(client.fail(1), Conflict);
-    version(requests.shift()!, expected);
+    version(requests.shift() ?? fail('missing queued observation'), expected);
     await assert.rejects(client.fail(2));
-    version(requests.shift()!, expected);
+    version(requests.shift() ?? fail('missing queued observation'), expected);
     assert.equal(
       await new clientModule.HealthClient(base, { fetch: timedFetch }).health(),
       'healthy',
     );
-    version(requests.shift()!, expected);
+    version(requests.shift() ?? fail('missing queued observation'), expected);
 
-    const wsBase = new URL(base.replace('http:', 'ws:') + '/');
+    const wsBase = new URL(`${base.replace('http:', 'ws:')}/`);
     wsBase.searchParams.set('room', 'team +/%');
     if (location === 'query') {
       wsBase.searchParams.append(name, 'old');
@@ -244,7 +250,7 @@ for (const [clientModule, serverModule, Conflict, expected] of [
         headers: { Cookie: cookie, 'X-Trace': 'kept', 'X-Version': 'old' },
       }),
     );
-    version(handshakes.shift()!, expected);
+    version(handshakes.shift() ?? fail('missing queued observation'), expected);
     assert.ok(upgraded);
     responseVersion(upgraded, expected);
     await session.send({ text: 'hello' });
@@ -260,7 +266,7 @@ for (const [clientModule, serverModule, Conflict, expected] of [
       'browser handshake',
       clientModule.open_chatSession(wsBase.toString()),
     );
-    const observed = handshakes.shift()!;
+    const observed = handshakes.shift() ?? fail('missing queued observation');
     version(observed, location === 'query' ? expected : undefined);
     assert.equal(observed.url.searchParams.get('room'), 'team +/%');
     assert.equal(observed.headers.get('X-Trace'), null);
@@ -310,7 +316,10 @@ for (const [clientModule, serverModule, Conflict, expected] of [
     );
     assert.equal(await within('source server close', source.recv()), null);
     for (let i = 0; i < 4; i++)
-      version(handshakes.shift()!, location === 'query' ? expected : undefined);
+      version(
+        handshakes.shift() ?? fail('missing queued observation'),
+        location === 'query' ? expected : undefined,
+      );
 
     for (const requested of [
       undefined,

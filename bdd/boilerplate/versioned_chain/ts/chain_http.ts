@@ -54,12 +54,17 @@ export async function runChainHttpJourney(): Promise<void> {
     assert.equal(oldestView.agenda, 'Kickoff;60');
     assert.equal(oldestView.owner, 'user-9');
     assert.equal(state.writes, 1);
-    // Head reads the same booking: the stored agenda unpacked by the hook
-    // and owner under its Head name.
+    // Head reads the same booking: the stored agenda unpacked by the hook,
+    // the implied locked value, and owner under its Head name.
     const asHead = (await (
       await get(undefined, 'b1')
     ).json()) as types.v2027_01_01.Booking;
     assert.deepEqual(asHead.items, [{ minutes: 60, title: 'Kickoff' }]);
+    assert.equal(
+      asHead.locked,
+      false,
+      'the upcast hook stated the implied value',
+    );
     assert.equal(asHead.organizer, 'user-9');
 
     // Negotiation: a mid-patch date resolves to the newest release not later
@@ -88,6 +93,7 @@ export async function runChainHttpJourney(): Promise<void> {
       {
         id: 'b1',
         items: [{ minutes: 60, title: 'Kickoff' }],
+        locked: false,
         organizer: 'user-9',
         title: 'Kickoff',
       },
@@ -111,6 +117,7 @@ export async function runChainHttpJourney(): Promise<void> {
       {
         id: 'b1',
         items: [{ minutes: 30, title: 'Changed' }],
+        locked: false,
         organizer: 'user-9',
         title: 'Changed',
       },
@@ -128,6 +135,7 @@ export async function runChainHttpJourney(): Promise<void> {
       {
         id: 'b-blank-head',
         items: [{ minutes: 0, title: '   ' }],
+        locked: false,
         title: '   ',
       },
       'blank-head',
@@ -205,6 +213,29 @@ export async function runChainHttpJourney(): Promise<void> {
     const headView = await headRead.json();
     assert.equal(headView.agenda, undefined);
     assert.equal(headView.organizer, 'user-9');
+
+    // A current-release caller that omits the lockable flag keeps it absent:
+    // @default states what older callers implied, it is never applied to
+    // callers that already own the field.
+    const unlocked = await post(
+      '2026-10-01',
+      {
+        id: 'b-unlocked',
+        items: [{ minutes: 5, title: 'Open' }],
+        roster: [],
+        title: 'Open',
+      },
+      'unlocked',
+    );
+    assert.equal(unlocked.status, 200);
+    assert.equal(Object.hasOwn(await unlocked.json(), 'locked'), false);
+    assert.equal(
+      Object.hasOwn(
+        await (await get('2026-10-01', 'b-unlocked')).json(),
+        'locked',
+      ),
+      false,
+    );
 
     console.log(
       'PASS: booking chain negotiates releases, fingerprints across releases and switches behaviour by date',

@@ -41,6 +41,13 @@ pub(super) struct Hook {
     pub current: Option<String>,
 }
 
+/// One hook decision field, and whether the model side wraps it in `Some`.
+#[derive(Serialize)]
+pub(super) struct Assignment {
+    pub name: String,
+    pub wrap: bool,
+}
+
 /// Members one update operation's handler persists, named by its request chain.
 #[derive(Serialize)]
 pub(super) struct StoredBag {
@@ -100,7 +107,7 @@ pub(super) struct Conversion {
     /// The hook decision carries the operation's stored bag.
     pub stored_field: bool,
     pub copies: Vec<Copy>,
-    pub assignments: Vec<String>,
+    pub assignments: Vec<Assignment>,
     pub absences: Vec<String>,
     pub variants: Vec<String>,
     pub changed: Vec<ChangedVariant>,

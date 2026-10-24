@@ -94,7 +94,13 @@ const hooks: a.VersionAdapters = {
       tracking: source.legacy,
     });
   },
-  parcelUpcastFromV2: () => ok({ audit: 'checked', handling_note: a.IGNORED }),
+  parcelUpcastFromV2: () =>
+    ok({
+      audit: 'checked',
+      handling_note: a.IGNORED,
+      // v2 callers never asked for a signature: the implied value, not the default.
+      signature_required: false,
+    }),
   stateDowncastToV1: () => refuse('2026-01', 'State'),
   stateDowncastToV2: () => ok('shipping' as const),
 };
@@ -339,13 +345,8 @@ const headOnly = await a.dispatchDepotHeadOnly(
   },
   hooks,
 );
-assert.equal(
-  headOnly.dispatched &&
-    headOnly.projected &&
-    headOnly.value.ok &&
-    headOnly.value.value,
-  'head',
-);
+assert(headOnly.dispatched && headOnly.projected && headOnly.value.ok);
+assert.equal(headOnly.value.value, 'head');
 
 const optionalHead = take(
   a.decodeAndUpcastDepotOptionalChangeFromV1(
@@ -371,9 +372,12 @@ assert.equal(
   }).ok,
   false,
 );
-for (const version of ['V1', 'V2', 'V3'] as const) {
-  const decode = a[`decodeAndUpcastDepotOptionalChangeFrom${version}`];
-  const absent = take(decode({ value: {} }, hooks)).value;
+for (const decoder of [
+  a.decodeAndUpcastDepotOptionalChangeFromV1,
+  a.decodeAndUpcastDepotOptionalChangeFromV2,
+  a.decodeAndUpcastDepotOptionalChangeFromV3,
+]) {
+  const absent = take(decoder({ value: {} }, hooks)).value;
   assert.equal(Object.hasOwn(absent, 'note'), false);
 }
 const headNode = take(

@@ -70,18 +70,18 @@
                                             {% set unwrapped = ".value" if copy.value.kind == "Named" and copy.value.data.pair else "" %}
                                             {{ copy.target }}: projected_{{ loop.index0 }}{{ unwrapped }},
                                         {% endfor %}
-                                        {% for assignment in conversion.assignments %}{{ assignment }}: decision.{{ assignment }},{% endfor %}
+                                        {% for assignment in conversion.assignments %}{{ assignment.name }}: {% if assignment.wrap %}Some(decision.{{ assignment.name }}){% else %}decision.{{ assignment.name }}{% endif %},{% endfor %}
                                     },
                                     stored: {{ ns.stored }},
                                 })
                             {% elif conversion.target_shape == "unit" %}
                                 Ok(())
                             {% elif conversion.target_shape == "direct" %}
-                                {% if conversion.copies %}Ok(projected_0){% elif conversion.assignments %}Ok(decision.{{ conversion.assignments[0] }}){% else %}Ok(None){% endif %}
+                                {% if conversion.copies %}Ok(projected_0){% elif conversion.assignments %}Ok({% if conversion.assignments[0].wrap %}Some(decision.{{ conversion.assignments[0].name }}){% else %}decision.{{ conversion.assignments[0].name }}{% endif %}){% else %}Ok(None){% endif %}
                                 {% else %}
                                     Ok({{ conversion.target }} {
                                         {% for copy in conversion.copies %}{{ copy.target }}: projected_{{ loop.index0 }},{% endfor %}
-                                            {% for assignment in conversion.assignments %}{{ assignment }}: decision.{{ assignment }},{% endfor %}
+                                            {% for assignment in conversion.assignments %}{{ assignment.name }}: {% if assignment.wrap %}Some(decision.{{ assignment.name }}){% else %}decision.{{ assignment.name }}{% endif %},{% endfor %}
                                                 {% for absent in conversion.absences %}{{ absent }}: None,{% endfor %}
                                                 })
                                             {% endif %}
