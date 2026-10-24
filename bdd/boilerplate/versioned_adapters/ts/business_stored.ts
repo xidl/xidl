@@ -45,6 +45,40 @@ export async function runStoredJourney(
     ),
     false,
   );
+  // A renamed member travels mechanically: no hook implements it, no storage
+  // reads it, and the Head contract rejects the earlier wire name.
+  assert.equal(
+    JSON.stringify(a.NEEDS.Parcel).includes('courier_note'),
+    false,
+    'a rename is not a storage candidate',
+  );
+  const renamedHead = take(
+    a.decodeAndUpcastDepotShipFromV2(
+      {
+        parcel: {
+          ...wireParcel,
+          carrier: 'postal',
+          courier_note: 'leave at desk',
+        },
+      },
+      hooks,
+    ),
+  ).parcel;
+  assert.equal(renamedHead.courier_remark, 'leave at desk');
+  assert.equal(Object.hasOwn(renamedHead, 'courier_note'), false);
+  assert.equal(
+    take(a.downcastParcel('v2', renamedHead, storedValues, hooks)).courier_note,
+    'leave at desk',
+  );
+  assert.equal(
+    a.decodeAndUpcastDepotShipFromV3(
+      { parcel: { ...wireParcel, audit: 'checked', courier_note: 'older' } },
+      hooks,
+    ).ok,
+    false,
+    'the Head contract no longer declares the earlier wire name',
+  );
+
   // Storage without the row leaves the member absent: OMIT, never a fabricated value.
   const unknownHead = { ...head, id: 'unknown' };
   assert.equal(

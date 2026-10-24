@@ -133,6 +133,7 @@ server operation metadata exposes `response.fixedHeaders` for that entry point.
 | --- | --- |
 | `@added(Versions::vN)` | the declaration exists from that version onward |
 | `@removed(Versions::vN)` | the declaration is removed at that version |
+| `@replaces(earlier)` | this struct or exception member takes over from `earlier`, which `@removed` retires |
 
 Both can appear on modules, type declarations (structs, unions, enums,
 exceptions, typedefs, bitsets, bitmasks), struct/union members, enumerators,
@@ -166,11 +167,10 @@ support. Use `@rename("wire_name")` to select a serialized name; it does not
 describe a rename at a particular version. Changes between versions use the
 disjoint declarations described below.
 
-### Renames and other changes in phase 1
+### Renames and other changes
 
-Phase 1 implements `@added` and `@removed` only. A rename or a shape change is
-written as a **new member with a disjoint interval**; `@rename` keeps the wire
-name stable when needed:
+A shape change is written as a **new member with a disjoint interval**;
+`@rename` keeps the wire name stable when needed:
 
 ```idl
 struct Pet {
@@ -183,6 +183,27 @@ struct Pet {
     int32 age2_;
 };
 ```
+
+A pure rename — same type, same optionality, only the name moves at one
+version — can link its two declarations with `@replaces`. Both members stay
+as written; the annotation only records the link:
+
+```idl
+struct Message {
+    @removed(Versions::v3) string text;
+    @added(Versions::v3) @replaces(text) string body;
+};
+```
+
+The version map carries the link as `replaces` on the added member, and the
+optional version adapters use it to copy the value mechanically in both
+directions: no decision hook implements the rename, and the earlier name
+never becomes a storage candidate. Without the annotation a remove/add pair
+is indistinguishable from a deliberate replacement — that is deliberate,
+because only the author knows whether a same-shaped pair replaced semantics.
+A merge or split (`first_name`/`last_name` into `full_name`) is a product
+decision, not a link: write the members and let the decision hooks or stored
+values answer for the old names.
 
 ## Generated output
 

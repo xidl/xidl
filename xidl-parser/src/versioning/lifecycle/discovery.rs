@@ -55,6 +55,7 @@ impl VersionVisitor for DiscoverVisitor {
                 }
                 Annotation::Added { .. } => lifecycle.push("@added".to_string()),
                 Annotation::Removed { .. } => lifecycle.push("@removed".to_string()),
+                Annotation::Replaces { .. } => lifecycle.push("@replaces".to_string()),
                 other => {
                     // A malformed `@version(...)` stays a raw application; treat
                     // it as the marker so its arguments are reported.

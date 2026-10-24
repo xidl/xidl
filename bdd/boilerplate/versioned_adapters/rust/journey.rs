@@ -46,6 +46,30 @@ pub async fn run() {
         ParcelProjection::V2(value) => assert_eq!(value.handling_note.as_deref(), Some("fragile")),
         _ => panic!("v2 still declares the retired member"),
     }
+    // A renamed member travels mechanically: no hook implements it, no storage
+    // reads it, and the Head contract rejects the earlier wire name.
+    assert!(!NEEDS.iter().any(|(key, needs)| {
+        *key == "Parcel" && needs.iter().any(|(_, names)| names.contains(&"courier_note"))
+    }));
+    let mut renamed_wire = parcel();
+    renamed_wire["carrier"] = json!("postal");
+    renamed_wire["courier_note"] = json!("leave at desk");
+    let renamed = decode_and_upcast_depot_ship(Version::V2, json!({"parcel": renamed_wire.clone()}), &hooks)
+        .unwrap()
+        .parcel;
+    assert_eq!(renamed.courier_remark.as_deref(), Some("leave at desk"));
+    let renamed_view = match downcast_parcel(Version::V2, renamed, &storage, &hooks).unwrap() {
+        ParcelProjection::V2(value) => value.courier_note,
+        _ => panic!("the renamed member projects back to v2"),
+    };
+    assert_eq!(renamed_view.as_deref(), Some("leave at desk"));
+    let mut retired_wire = parcel();
+    retired_wire["audit"] = json!("checked");
+    retired_wire["courier_note"] = json!("older");
+    assert!(matches!(
+        decode_and_upcast_depot_ship(Version::V3, json!({"parcel": retired_wire}), &hooks),
+        Err(AdaptationError::Validation(_))
+    ));
     let unknown = v3::Parcel { id: "unknown".into(), ..head.clone() };
     match downcast_parcel(Version::V2, unknown, &storage, &hooks).unwrap() {
         ParcelProjection::V2(value) => assert_eq!(value.handling_note, None, "storage without the row omits the member"),

@@ -100,7 +100,8 @@ impl VersionAdapters for Hooks {
     fn parcel_upcast_from_v_1(&self, source: &v1::Parcel) -> VersionedResult<ParcelUpcastFromV1Decision> {
         self.calls.fetch_add(1, Ordering::SeqCst);
         Ok(ParcelUpcastFromV1Decision {
-            tracking: source.legacy.clone(), carrier: "postal".into(), note: None, legacy: IGNORED,
+            tracking: source.legacy.clone(), carrier: "postal".into(), note: None,
+            courier_note: None, legacy: IGNORED,
         })
     }
     fn parcel_downcast_to_v_1(&self, source: &v2::Parcel, _: &dyn StoredValues) -> VersionedResult<ParcelDowncastToV1Decision> {

@@ -225,6 +225,7 @@ pub mod version_adapters {
         pub tracking: String,
         pub carrier: String,
         pub note: Option<String>,
+        pub courier_note: Option<String>,
         pub legacy: Ignored,
     }
     /// Explicit business assignments and discarded-value acknowledgements.
@@ -1048,6 +1049,7 @@ pub mod version_adapters {
             tracking: decision.tracking,
             carrier: decision.carrier,
             note: decision.note,
+            courier_note: decision.courier_note,
         })
     }
     /// Projects one adjacent declaration by borrowing its source value.
@@ -2384,20 +2386,24 @@ pub mod version_adapters {
             .as_ref()
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
-        let projected_4 = address_upcast_from_v_2(&source.address, adapters)?;
-        let projected_5 = map_sequence(
+        let projected_4 = (&source.courier_note)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
+        let projected_5 = address_upcast_from_v_2(&source.address, adapters)?;
+        let projected_6 = map_sequence(
             &source.stops,
             |item| address_upcast_from_v_2(item, adapters),
             "Parcel.stops",
         )?;
-        let projected_6 = map_record(
+        let projected_7 = map_record(
             &source.by_tag,
             |key| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(key)),
             |item| address_upcast_from_v_2(item, adapters),
             refusal,
             "Parcel.by_tag",
         )?;
-        let projected_7 = map_array(
+        let projected_8 = map_array(
             &source.fixed,
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
             refusal,
@@ -2408,10 +2414,11 @@ pub mod version_adapters {
             tracking: projected_1,
             carrier: projected_2,
             note: projected_3,
-            address: projected_4,
-            stops: projected_5,
-            by_tag: projected_6,
-            fixed: projected_7,
+            courier_remark: projected_4,
+            address: projected_5,
+            stops: projected_6,
+            by_tag: projected_7,
+            fixed: projected_8,
             inspected: decision.inspected,
             audit: decision.audit,
         })
@@ -2445,20 +2452,24 @@ pub mod version_adapters {
             .as_ref()
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
-        let projected_4 = address_downcast_to_v_2(&source.address, stored, adapters)?;
-        let projected_5 = map_sequence(
+        let projected_4 = (&source.courier_remark)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
+        let projected_5 = address_downcast_to_v_2(&source.address, stored, adapters)?;
+        let projected_6 = map_sequence(
             &source.stops,
             |item| address_downcast_to_v_2(item, stored, adapters),
             "Parcel.stops",
         )?;
-        let projected_6 = map_record(
+        let projected_7 = map_record(
             &source.by_tag,
             |key| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(key)),
             |item| address_downcast_to_v_2(item, stored, adapters),
             refusal,
             "Parcel.by_tag",
         )?;
-        let projected_7 = map_array(
+        let projected_8 = map_array(
             &source.fixed,
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
             refusal,
@@ -2469,10 +2480,11 @@ pub mod version_adapters {
             tracking: projected_1,
             carrier: projected_2,
             note: projected_3,
-            address: projected_4,
-            stops: projected_5,
-            by_tag: projected_6,
-            fixed: projected_7,
+            courier_note: projected_4,
+            address: projected_5,
+            stops: projected_6,
+            by_tag: projected_7,
+            fixed: projected_8,
             handling_note: decision.handling_note,
         })
     }
@@ -3922,7 +3934,14 @@ pub mod version_adapters {
             "reference",
             "stops",
         ];
-        let forbidden: &[&str] = &["audit", "carrier", "inspected", "note"];
+        let forbidden: &[&str] = &[
+            "audit",
+            "carrier",
+            "courier_note",
+            "courier_remark",
+            "inspected",
+            "note",
+        ];
         for key in object.keys() {
             if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
                 return Err(format!("field {key} is not declared in served version"));
@@ -4453,6 +4472,7 @@ pub mod version_adapters {
             "address",
             "by_tag",
             "carrier",
+            "courier_note",
             "fixed",
             "handling_note",
             "id",
@@ -4460,7 +4480,7 @@ pub mod version_adapters {
             "reference",
             "stops",
         ];
-        let forbidden: &[&str] = &["audit", "inspected"];
+        let forbidden: &[&str] = &["audit", "courier_remark", "inspected"];
         for key in object.keys() {
             if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
                 return Err(format!("field {key} is not declared in served version"));
@@ -4503,19 +4523,27 @@ pub mod version_adapters {
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
-        let raw_5 = object
+        let raw_5 = object.get("courier_note").unwrap_or(&::serde_json::Value::Null);
+        let value_5: Option<String> = if (raw_5).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_5).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        let raw_6 = object
             .get("address")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "address").to_string()
             })?;
-        let value_5: v2::Address = decode_wire_v_2_address(raw_5)?;
-        let raw_6 = object
+        let value_6: v2::Address = decode_wire_v_2_address(raw_6)?;
+        let raw_7 = object
             .get("stops")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "stops").to_string()
             })?;
-        let value_6: Vec<v2::Address> = (|| {
-            let array = (raw_6)
+        let value_7: Vec<v2::Address> = (|| {
+            let array = (raw_7)
                 .as_array()
                 .ok_or_else(|| "expected an array".to_string())?;
             let values = array
@@ -4524,13 +4552,13 @@ pub mod version_adapters {
                 .collect::<Result<Vec<_>, String>>()?;
             Ok::<_, String>(values)
         })()?;
-        let raw_7 = object
+        let raw_8 = object
             .get("by_tag")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "by_tag").to_string()
             })?;
-        let value_7: ::std::collections::BTreeMap<String, v2::Address> = (|| {
-            let object = (raw_7)
+        let value_8: ::std::collections::BTreeMap<String, v2::Address> = (|| {
+            let object = (raw_8)
                 .as_object()
                 .ok_or_else(|| "expected a map".to_string())?;
             let mut decoded = ::std::collections::BTreeMap::new();
@@ -4555,13 +4583,13 @@ pub mod version_adapters {
             }
             Ok::<_, String>(decoded)
         })()?;
-        let raw_8 = object
+        let raw_9 = object
             .get("fixed")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "fixed").to_string()
             })?;
-        let value_8: [i32; 2] = (|| {
-            let array = (raw_8)
+        let value_9: [i32; 2] = (|| {
+            let array = (raw_9)
                 .as_array()
                 .ok_or_else(|| "expected an array".to_string())?;
             if array.len() != (2) as usize {
@@ -4584,10 +4612,11 @@ pub mod version_adapters {
             carrier: value_2,
             note: value_3,
             handling_note: value_4,
-            address: value_5,
-            stops: value_6,
-            by_tag: value_7,
-            fixed: value_8,
+            courier_note: value_5,
+            address: value_6,
+            stops: value_7,
+            by_tag: value_8,
+            fixed: value_9,
         })
     }
     fn decode_wire_v_2_parcel_patch(
@@ -5018,6 +5047,7 @@ pub mod version_adapters {
             "audit",
             "by_tag",
             "carrier",
+            "courier_remark",
             "fixed",
             "id",
             "inspected",
@@ -5025,7 +5055,7 @@ pub mod version_adapters {
             "reference",
             "stops",
         ];
-        let forbidden: &[&str] = &["handling_note"];
+        let forbidden: &[&str] = &["courier_note", "handling_note"];
         for key in object.keys() {
             if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
                 return Err(format!("field {key} is not declared in served version"));
@@ -5075,19 +5105,27 @@ pub mod version_adapters {
             })?;
         let value_5: String = ::serde_json::from_value::<String>((raw_5).clone())
             .map_err(|error| error.to_string())?;
-        let raw_6 = object
+        let raw_6 = object.get("courier_remark").unwrap_or(&::serde_json::Value::Null);
+        let value_6: Option<String> = if (raw_6).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_6).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        let raw_7 = object
             .get("address")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "address").to_string()
             })?;
-        let value_6: v3::Address = decode_wire_v_3_address(raw_6)?;
-        let raw_7 = object
+        let value_7: v3::Address = decode_wire_v_3_address(raw_7)?;
+        let raw_8 = object
             .get("stops")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "stops").to_string()
             })?;
-        let value_7: Vec<v3::Address> = (|| {
-            let array = (raw_7)
+        let value_8: Vec<v3::Address> = (|| {
+            let array = (raw_8)
                 .as_array()
                 .ok_or_else(|| "expected an array".to_string())?;
             let values = array
@@ -5096,13 +5134,13 @@ pub mod version_adapters {
                 .collect::<Result<Vec<_>, String>>()?;
             Ok::<_, String>(values)
         })()?;
-        let raw_8 = object
+        let raw_9 = object
             .get("by_tag")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "by_tag").to_string()
             })?;
-        let value_8: ::std::collections::BTreeMap<String, v3::Address> = (|| {
-            let object = (raw_8)
+        let value_9: ::std::collections::BTreeMap<String, v3::Address> = (|| {
+            let object = (raw_9)
                 .as_object()
                 .ok_or_else(|| "expected a map".to_string())?;
             let mut decoded = ::std::collections::BTreeMap::new();
@@ -5127,13 +5165,13 @@ pub mod version_adapters {
             }
             Ok::<_, String>(decoded)
         })()?;
-        let raw_9 = object
+        let raw_10 = object
             .get("fixed")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "fixed").to_string()
             })?;
-        let value_9: [i32; 2] = (|| {
-            let array = (raw_9)
+        let value_10: [i32; 2] = (|| {
+            let array = (raw_10)
                 .as_array()
                 .ok_or_else(|| "expected an array".to_string())?;
             if array.len() != (2) as usize {
@@ -5157,10 +5195,11 @@ pub mod version_adapters {
             note: value_3,
             inspected: value_4,
             audit: value_5,
-            address: value_6,
-            stops: value_7,
-            by_tag: value_8,
-            fixed: value_9,
+            courier_remark: value_6,
+            address: value_7,
+            stops: value_8,
+            by_tag: value_9,
+            fixed: value_10,
         })
     }
     fn decode_wire_v_3_parcel_patch(
