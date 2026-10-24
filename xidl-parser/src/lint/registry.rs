@@ -54,6 +54,8 @@ pub enum ArgumentShape {
     OptionalString(&'static [&'static str]),
     /// A single scoped version member reference.
     Lifecycle,
+    /// One earlier member name, as accepted by `@replaces`.
+    Replaces,
     /// A version marker, or `in` and `name` together.
     Version,
     /// Required `in` and `name` arguments.
@@ -203,6 +205,7 @@ annotations! {
     Version, "version", &[Enum], Version;
     Added, "added", LIFECYCLE, Lifecycle;
     Removed, "removed", LIFECYCLE, Lifecycle;
+    Replaces, "replaces", &[Site::Member], Replaces;
     Http, "http", &[Exception, Union], Http;
     Get, "get", &[Operation], OptionalString(&["path"]);
     Post, "post", &[Operation], OptionalString(&["path"]);
@@ -240,6 +243,9 @@ impl AnnotationKind {
 
     /// Whether projection removes this annotation after evaluating the timeline.
     pub fn is_lifecycle(self) -> bool {
-        matches!(self, Self::Version | Self::Added | Self::Removed)
+        matches!(
+            self,
+            Self::Version | Self::Added | Self::Removed | Self::Replaces
+        )
     }
 }

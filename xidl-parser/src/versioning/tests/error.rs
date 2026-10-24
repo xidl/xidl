@@ -13,10 +13,7 @@ fn rejected_renames_offer_wire_names_without_promising_versioned_aliases() {
             message.contains("is not supported; use @rename(\"wire_name\")"),
             "{message}"
         );
-        assert!(
-            message.contains("@added/@removed declarations"),
-            "{message}"
-        );
+        assert!(message.contains("@replaces(earlier)"), "{message}");
         assert!(!message.contains("yet"), "{message}");
         assert!(!message.contains("phase"), "{message}");
     }

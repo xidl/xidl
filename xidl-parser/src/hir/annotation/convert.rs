@@ -197,6 +197,31 @@ impl From<crate::typed_ast::AnnotationAppl> for Annotation {
                         return Self::VersionParameter(parameter);
                     }
                 }
+                Some(AnnotationKind::Replaces) => {
+                    // One earlier member name: a bare identifier or a quoted
+                    // string, resolved inside the same declaration.
+                    let earlier = match params.as_ref() {
+                        Some(AnnotationParams::ConstExpr(expr)) => Some(expr),
+                        Some(AnnotationParams::Positional(positional)) => positional.first(),
+                        _ => None,
+                    };
+                    if let Some(earlier) = earlier {
+                        let name = match earlier {
+                            ConstExpr::ScopedName(name)
+                                if name.name.len() == 1 && !name.is_root =>
+                            {
+                                Some(name.name[0].clone())
+                            }
+                            ConstExpr::Literal(Literal::StringLiteral(value)) => {
+                                Some(trim_annotation_quotes(value).unwrap_or_else(|| value.clone()))
+                            }
+                            _ => None,
+                        };
+                        if let Some(name) = name {
+                            return Self::Replaces { name };
+                        }
+                    }
+                }
                 Some(AnnotationKind::Added | AnnotationKind::Removed) => {
                     if let Some(AnnotationParams::ConstExpr(ConstExpr::ScopedName(version))) =
                         params.as_ref()

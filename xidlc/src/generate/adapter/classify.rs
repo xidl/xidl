@@ -33,7 +33,14 @@ impl MemberClassifier<'_> {
         let upward = self.direction == Direction::Upcast;
         let paired = |source: &Member, target: &Member| {
             if source.key != target.key {
-                return false;
+                // A `@replaces` link pairs the retirement with its successor,
+                // so the value copies mechanically in both directions.
+                let (earlier, later) = if upward {
+                    (source, target)
+                } else {
+                    (target, source)
+                };
+                return self.replaces(later) == Some(earlier.name.as_str());
             }
             match self.facts.get(&source.key) {
                 None => true,
@@ -70,7 +77,20 @@ impl MemberClassifier<'_> {
         let mut covered = BTreeSet::new();
         for source in self.source {
             if let Some(target) = self.target.iter().find(|target| paired(source, target)) {
-                if source.name != target.name || !Self::same_shape(source, target)? {
+                let linked = source.key != target.key;
+                if !Self::same_shape(source, target)? {
+                    if linked {
+                        return Err(IdlcError::rpc(format!(
+                            "version adapters {}: {} and {} are linked by replaces but differ in shape; a rename cannot also reshape",
+                            self.context, source.key, target.key
+                        )));
+                    }
+                    return Err(IdlcError::rpc(format!(
+                        "version adapters {}: version_map omitted the change to {}",
+                        self.context, source.key
+                    )));
+                }
+                if !linked && source.name != target.name {
                     return Err(IdlcError::rpc(format!(
                         "version adapters {}: version_map omitted the change to {}",
                         self.context, source.key
@@ -113,6 +133,16 @@ impl MemberClassifier<'_> {
             plan.absences.push(target.clone());
         }
         Ok(plan)
+    }
+
+    /// The earlier member name the later member takes over from, as the
+    /// version map recorded it.
+    fn replaces(&self, later: &Member) -> Option<&str> {
+        self.facts
+            .get(&later.key)
+            .and_then(|change| change.to.as_ref())
+            .and_then(|to| to.get("replaces"))
+            .and_then(serde_json::Value::as_str)
     }
 
     pub(super) fn same_shape(source: &Member, target: &Member) -> IdlcResult<bool> {
