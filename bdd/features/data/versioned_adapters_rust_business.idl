@@ -17,10 +17,19 @@ struct Parcel {
     @added(Versions::v2) @optional string note;
     @added(Versions::v3) @optional string inspected;
     @added(Versions::v3) string audit;
+    // Retired without a successor: v1 and v2 clients still read it, so storage keeps it.
+    @removed(Versions::v3) @optional string handling_note;
     Address address;
     sequence<Address> stops;
     map<string, Address> by_tag;
     long fixed[2];
+};
+
+struct ParcelPatch {
+    @optional string note;
+    // Retired together with Parcel.handling_note: the patch that removes it on
+    // Head must still let v1 and v2 clients persist it through the update flow.
+    @removed(Versions::v3) @optional string handling_note;
 };
 
 struct Contact {
@@ -81,6 +90,7 @@ interface Depot {
     @post(path = "/exchange") Parcel exchange(@body inout Parcel parcel, @header out string etag);
 
     @post(path = "/parcels") State ship(@body Parcel parcel) raises(CannotRepresent);
+    @patch(path = "/parcels/{id}") Parcel update(@path string id, @body ParcelPatch patch) raises(NotFound, Busy, Framework, Denied, CannotRepresent);
     @get(path = "/parcels/{id}") Parcel get(@path string id) raises(NotFound, Busy, Framework, Denied, StateIndex);
     @post(path = "/contacts") Contact contact(@body Contact contact);
     @post(path = "/extra") Extra extra(@body Extra extra);
@@ -91,4 +101,7 @@ interface Depot {
     @post(path = "/blobs") long blob(@body sequence<octet> data);
     @get(path = "/bindings") string bindings(@query @rename("x") string q, @header @rename("x") string h);
     @added(Versions::v3) @get(path = "/head") string head_only();
+    // The response header retires in v3: served versions still read it from storage.
+    @get(path = "/trace/{id}")
+    string trace(@path string id, @removed(Versions::v3) @header out string trace_id) raises(NotFound);
 };

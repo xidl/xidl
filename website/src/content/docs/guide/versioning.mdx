@@ -330,6 +330,30 @@ Head, short-circuiting on refusal. Handlers receive both the original version id
 and its declared display value. Typed exceptions downgrade through every step;
 framework errors preserve their identity.
 
+A member an older version declares and Head removed is always an explicit
+decision, derived from `@added` / `@removed` alone. On the way up the hook
+acknowledges the value with `IGNORED`. On the way down the decision requires the
+member: read it from storage through the generated `StoredValues` interface, or
+write `OMIT` to leave it absent — a key can no longer disappear silently. A
+required retired member has no `OMIT` escape: the decision needs a value, and a
+hook that cannot supply one refuses with `UnsupportedProjection`.
+
+Each reader is a pure accessor for one retired member, named after its type or
+response (`parcelHandlingNote`, `depotTraceResponseTraceId`). The reader
+receives the newer-side instance that owns the member — for an operation
+response, that is the response value. The application resolves identity itself:
+a reader can only recover a per-instance value when the instance carries
+something addressable (an id, a natural key); otherwise the reader returns
+`undefined` and the decision omits or refuses. The chain stays pure and never
+touches storage. `NEEDS` lists, per served version and per type or operation
+key, the wire names to preload; Head reads nothing. Because readers are
+synchronous, batch reads follow a two-phase shape: preload the rows for
+`NEEDS[version]` in the handler, then return readers that close over them —
+one batch per request, whatever the response size. Dispatch handlers return
+`{ stored }` beside their outcome so the whole downcast chain receives the same
+readers. Serving Head through the aggregate `dispatch` entry still expects a
+`stored` value; the per-version entries keep the exact signatures.
+
 `downcast<Interface><Operation>OutcomeTo<Version>` preserves the original Head
 outcome when conversion fails. A write may already have committed: the application
 owns idempotency, recording that outcome and rendering its declared refusal
@@ -371,8 +395,56 @@ that result directly. `downcast_<type>` consumes its Head model so its identity
 branch also avoids a whole-value clone. Asynchronous dispatch accepts thread-safe
 hooks and can be awaited inside an Axum handler; it never retries the handler.
 
+Retired members follow the same explicit-decision rule as TypeScript: an upcast
+acknowledges them with `IGNORED`, and a downcast decision requires the field —
+an optional retired member reads the generated `StoredValues` trait or writes
+`None` explicitly, a required one needs a value or a refusal. Every retired
+member needs one reader method, so a member retired too early shows up as a
+missing method, not as lost data. `NEEDS` lists the wire names each served
+version still reads; Head reads nothing. Dispatch handlers return
+`HeadOutcome { outcome, stored }` so the chain receives the readers.
+
 In addition to the shared phase-one limits, Rust rejects skipped physical model
 fields or cases and ordinary unions with multiple or default discriminator
 labels. Their public model constructors do not expose a lossless construction
 contract. Ordinary `rust-axum` output remains byte-identical when generating
 adapters separately.
+
+### Update adapters
+
+A `@patch` or `@put` operation whose Head declaration returns one named struct
+takes part in the update flow when one adjacent step removes the same wire
+member from both its request payload and its return type. The retirement is
+then a replacement of a writable value, not a loss: the step's upcast
+conversions return the persisted member to the application instead of
+acknowledging it.
+
+Such conversions return an `Upcast` value that pairs the projected request
+with a `stored` bag holding every paired member collected along the chain.
+The bag is named after the operation (for example `DepotUpdateStored`) and
+merges across steps, so a multi-step chain hands the handler one complete
+bag. The decision hook of a paired conversion receives `current`, the Head
+return-type instance the application is about to patch, and its decision
+records both the acknowledgement (`IGNORED`) and the values to persist:
+
+```ts
+parcelPatchUpcastFromV2: (source, current) =>
+  ok({
+    handling_note: IGNORED,
+    stored: { handling_note: source.handling_note },
+  }),
+```
+
+`decodeAndUpcast<Operation>` and `dispatch<Operation>` accept `current` as an
+explicit parameter; the update handler receives it together with the context
+and the bag, persists the bag members with its own storage, and returns the
+Head outcome together with the stored values its response downcast still
+reads. Because the request member and the return member share one wire name,
+a value written by an old caller reads back identically: write-then-read and
+read-then-unchanged-write are golden properties of the generated chain.
+
+The selection stays strict. Request chains must be operation-disjoint; two
+update operations may not share one request conversion. `current` never
+routes through alias or union conversions, and never reaches a paired
+conversion hidden inside a sequence, map, or optional member. Every one of
+these shapes is a generation error naming the offending declaration.

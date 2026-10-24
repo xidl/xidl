@@ -3,17 +3,20 @@
 mod conversions;
 mod endpoints;
 mod operations;
+mod stored;
 mod unions;
+mod update;
 mod wire;
 
 use super::context::*;
 use super::layout::{Declaration, Layout};
 use super::names::Names;
 use crate::error::IdlcResult;
-use crate::generate::adapter::{AdapterPlan, Member, TypeConversion};
+use crate::generate::adapter::{AdapterPlan, Member, StepUpdates, TypeConversion};
 use crate::generate::rust::util::rust_ident;
 use convert_case::{Case, Casing};
 use std::collections::BTreeSet;
+use update::{UpdateMark, UpdateMarks};
 use xidl_parser::rest_hir::RestHirDocument;
 
 pub(super) struct AdapterRenderer<'a> {
@@ -32,7 +35,10 @@ impl<'a> AdapterRenderer<'a> {
     }
 
     pub(super) fn context(&self) -> IdlcResult<FileContext> {
-        let mut file = FileContext::default();
+        let mut file = FileContext {
+            has_updates: !self.plan.updates.operations.is_empty(),
+            ..FileContext::default()
+        };
         for version in &self.plan.versions {
             file.versions.push(Version {
                 id: version.version.id.to_case(Case::Pascal),
@@ -51,7 +57,8 @@ impl<'a> AdapterRenderer<'a> {
                 file.requests.push(self.request(operation, &names)?);
             }
         }
-        for step in &self.plan.steps {
+        let head_names = self.head_names();
+        for (index, step) in self.plan.steps.iter().enumerate() {
             let old = Names {
                 version: &step.from.id,
                 step_from: &step.from.id,
@@ -66,10 +73,16 @@ impl<'a> AdapterRenderer<'a> {
                 types: &step.target_types,
                 layout: &self.layout,
             };
+            let marks = UpdateMarks::new(
+                &self.plan.updates.steps[index],
+                &self.plan.updates,
+                &head_names,
+            );
             for ty in &step.types {
-                for (conversion, source, target) in
-                    [(&ty.upcast, &old, &new), (&ty.downcast, &new, &old)]
-                {
+                for (conversion, source, target, upward) in [
+                    (&ty.upcast, &old, &new, true),
+                    (&ty.downcast, &new, &old, false),
+                ] {
                     if let Some(conversion) = conversion {
                         self.conversion(
                             conversion,
@@ -82,6 +95,7 @@ impl<'a> AdapterRenderer<'a> {
                                 target_type: target.named(&ty.key),
                                 source_shape: Shape::Struct,
                                 target_shape: Shape::Struct,
+                                update: upward.then(|| marks.of(&ty.key)),
                             },
                             &mut file,
                         )?;
@@ -89,8 +103,18 @@ impl<'a> AdapterRenderer<'a> {
                 }
             }
             for operation in &step.operations {
-                self.operation(operation, (&old, &new), &mut file)?;
+                self.operation(index, operation, (&old, &new, &marks), &mut file)?;
             }
+        }
+        self.thread_stored(&mut file);
+        let empty_step = StepUpdates::default();
+        let head_names = self.head_names();
+        let all_marks = UpdateMarks::new(&empty_step, &self.plan.updates, &head_names);
+        for key in self.plan.updates.operations.keys() {
+            let Some(bag) = all_marks.bag(self, key)? else {
+                continue;
+            };
+            file.update_stored.push(bag);
         }
         self.endpoints(&mut file)?;
         self.wire(&mut file)?;
@@ -127,18 +151,40 @@ impl<'a> AdapterRenderer<'a> {
                 .map(|item| &item.id)
                 .collect::<Vec<_>>(),
             file.hooks.iter().map(|item| &item.name).collect(),
+            file.readers.iter().map(|item| &item.name).collect(),
         ] {
             let mut unique = BTreeSet::new();
             for name in names {
                 if !unique.insert(name) {
                     return Err(Layout::error(
                         name,
-                        "generated variant or hook name is ambiguous",
+                        "generated variant, hook, or stored value reader name is ambiguous",
                     ));
                 }
             }
         }
         Ok(file)
+    }
+
+    /// Names of the Head surface, for update `current` and bag types.
+    fn head_names(&self) -> Names<'_> {
+        let head = self.plan.versions.last().expect("timeline is non-empty");
+        Names {
+            version: &head.version.id,
+            step_from: &head.version.id,
+            upward: false,
+            types: &head.surface.types,
+            layout: &self.layout,
+        }
+    }
+
+    /// The member's type without its optionality, for stored bag fields.
+    pub(super) fn bare_field_type(&self, member: &Member, names: &Names<'_>) -> IdlcResult<String> {
+        let mut stripped = member.clone();
+        if let Some(value) = &mut stripped.value {
+            value.optional = false;
+        }
+        self.field_type(&stripped, names, None)
     }
 
     fn field_type(
@@ -170,4 +216,5 @@ struct ConversionInput<'a> {
     target_type: String,
     source_shape: Shape,
     target_shape: Shape,
+    update: Option<UpdateMark>,
 }

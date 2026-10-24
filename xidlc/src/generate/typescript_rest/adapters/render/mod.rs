@@ -2,12 +2,15 @@
 
 mod conversion;
 mod operation;
+mod stored;
+mod update;
 
 use super::context::*;
 use super::names::Names;
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::adapter::{
-    AdapterPlan, ConversionPlan, Member, OperationPlan, StepPlan, TypeConversion,
+    AdapterPlan, ConversionPlan, Member, OperationPlan, StepPlan, StepUpdates, TypeConversion,
+    Updates,
 };
 use crate::generate::typescript::definition::contexts::{FieldTypeContext, TsType};
 use crate::generate::typescript::definition::names::{
@@ -17,6 +20,7 @@ use crate::generate::typescript_rest::model::TsRaisesContext;
 use conversion::ConversionInput;
 use convert_case::{Case, Casing};
 use std::collections::BTreeSet;
+use update::{UpdateMark, UpdateMarks};
 use xidl_parser::rest_hir::RestHirDocument;
 
 pub(super) struct AdapterRenderer<'a> {
@@ -33,8 +37,12 @@ impl<'a> AdapterRenderer<'a> {
         let mut file = FileContext {
             file_stem: stem.into(),
             has_errors: false,
+            has_updates: !self.plan.updates.operations.is_empty(),
             decisions: Vec::new(),
             hooks: Vec::new(),
+            readers: Vec::new(),
+            needs: Vec::new(),
+            update_stored: Vec::new(),
             conversions: Vec::new(),
             operations: Vec::new(),
             wire_definitions: Vec::new(),
@@ -42,7 +50,19 @@ impl<'a> AdapterRenderer<'a> {
             dispatchers: Vec::new(),
             type_dispatchers: Vec::new(),
         };
-        for step in &self.plan.steps {
+        let head = self
+            .plan
+            .versions
+            .last()
+            .ok_or_else(|| IdlcError::rpc("typescript adapters: version timeline is empty"))?;
+        let head_keys = head.surface.types.keys().cloned().collect::<BTreeSet<_>>();
+        let head = Names {
+            keys: &head_keys,
+            version: &head.version.id,
+            from: &head.version.id,
+            upward: false,
+        };
+        for (index, step) in self.plan.steps.iter().enumerate() {
             let old_keys = step.source_types.keys().cloned().collect::<BTreeSet<_>>();
             let new_keys = step.target_types.keys().cloned().collect::<BTreeSet<_>>();
             let old = Names {
@@ -57,10 +77,13 @@ impl<'a> AdapterRenderer<'a> {
                 from: &step.from.id,
                 upward: true,
             };
+            let marks =
+                UpdateMarks::new(&self.plan.updates.steps[index], &self.plan.updates, &head);
             for ty in &step.types {
-                for (conversion, source, target) in
-                    [(&ty.upcast, &old, &new), (&ty.downcast, &new, &old)]
-                {
+                for (conversion, source, target, upward) in [
+                    (&ty.upcast, &old, &new, true),
+                    (&ty.downcast, &new, &old, false),
+                ] {
                     let Some(conversion) = conversion else {
                         continue;
                     };
@@ -70,13 +93,30 @@ impl<'a> AdapterRenderer<'a> {
                         source,
                         source_type: source.named(&ty.key),
                         target_type: target.named(&ty.key),
+                        update: upward.then(|| marks.of(&ty.key)),
                     };
                     self.conversion(conversion, request, &mut file)?;
                 }
             }
             for operation in &step.operations {
-                self.operation(step, operation, (&old, &new), &mut file)?;
+                self.operation(
+                    index,
+                    step,
+                    operation,
+                    (&old, &new, &head),
+                    &marks,
+                    &mut file,
+                )?;
             }
+        }
+        self.thread_stored(&mut file);
+        let empty_step = StepUpdates::default();
+        let all_marks = UpdateMarks::new(&empty_step, &self.plan.updates, &head);
+        for key in self.plan.updates.operations.keys() {
+            let Some(bag) = all_marks.bag(key)? else {
+                continue;
+            };
+            file.update_stored.push(bag);
         }
         self.endpoints(&mut file)?;
         self.type_endpoints(&mut file)?;

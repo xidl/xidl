@@ -16,12 +16,21 @@ impl AdapterRenderer<'_> {
             self.layout
                 .validate(&format!("{}::{key}", input.target.version))?;
         }
+        let mark = input.update.clone().unwrap_or_default();
         let mut output = Conversion {
             name: input.target.function(input.key),
             source: input.source_type.clone(),
             target: input.target_type.clone(),
             kind: "struct",
             hook: None,
+            hook_stored: false,
+            stored: false,
+            current: mark.current,
+            current_type: mark.head.clone(),
+            hook_current: false,
+            pair: mark.pair,
+            stored_type: mark.stored_type.clone(),
+            stored_field: false,
             copies: Vec::new(),
             assignments: Vec::new(),
             absences: Vec::new(),
@@ -46,6 +55,8 @@ impl AdapterRenderer<'_> {
                     name: input.target.hook(input.key),
                     source: input.source_type,
                     target: input.target_type,
+                    stored: false,
+                    current: None,
                 });
                 file.conversions.push(output);
                 return Ok(());
@@ -96,30 +107,49 @@ impl AdapterRenderer<'_> {
                 .iter()
                 .map(|member| rust_ident(&member.name))
                 .collect();
-            self.decision(members, &input, &mut output, file)?;
+            self.decision(members, &input, &mark, &mut output, file)?;
         }
         file.conversions.push(output);
         Ok(())
     }
 
+    /// Upcast additions stay optional decisions; downcast removals are always
+    /// decided from stored values or an explicit `None`, never dropped.
     fn decision(
         &self,
         plan: &ConversionPlan,
         input: &ConversionInput<'_>,
+        mark: &UpdateMark,
         output: &mut Conversion,
         file: &mut FileContext,
     ) -> IdlcResult<()> {
         if plan.assignments.is_empty() && plan.ignored.is_empty() {
             return Ok(());
         }
+        let downward = !input.target.upward;
         let mut fields = Vec::new();
         let mut keys = BTreeSet::new();
         for member in &plan.assignments {
             let name = rust_ident(&member.name);
             keys.insert(name.clone());
+            let ty = self.field_type(member, input.target, input.declaration)?;
+            if downward {
+                let optional = member.value.as_ref().is_some_and(|value| value.optional);
+                file.readers.push(Reader {
+                    name: Names::reader(input.key, &member.name),
+                    source: input.source_type.clone(),
+                    output: if optional {
+                        ty.clone()
+                    } else {
+                        format!("Option<{ty}>")
+                    },
+                    wire: member.wire.clone(),
+                    version: input.target.version.into(),
+                });
+            }
             fields.push(Field {
                 name: name.clone(),
-                ty: self.field_type(member, input.target, input.declaration)?,
+                ty,
             });
             output.assignments.push(name);
         }
@@ -141,16 +171,38 @@ impl AdapterRenderer<'_> {
                 ty: "Ignored".into(),
             });
         }
+        if let Some(bag) = mark
+            .stored_type
+            .as_ref()
+            .filter(|_| !mark.paired.is_empty())
+        {
+            if !keys.insert("stored".into()) {
+                return Err(Layout::error(
+                    input.key,
+                    "a member named stored collides with the persisted bag",
+                ));
+            }
+            fields.push(Field {
+                name: "stored".into(),
+                ty: bag.clone(),
+            });
+            output.stored_field = true;
+        }
         let decision = input.target.decision(input.key);
         let name = input.target.hook(input.key);
         file.decisions.push(Decision {
             name: decision.clone(),
             fields,
         });
+        output.hook_stored = downward && !plan.assignments.is_empty();
+        output.stored = output.hook_stored;
+        output.hook_current = mark.current;
         file.hooks.push(Hook {
             name: name.clone(),
             source: input.source_type.clone(),
             target: decision,
+            stored: output.hook_stored,
+            current: mark.head.clone().filter(|_| mark.current),
         });
         output.hook = Some(name);
         Ok(())
@@ -182,6 +234,8 @@ impl AdapterRenderer<'_> {
                 name: name.clone(),
                 source: output.changed_type.clone(),
                 target: input.target_type.clone(),
+                stored: false,
+                current: None,
             });
             output.hook = Some(name);
         }

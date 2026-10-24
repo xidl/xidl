@@ -7,6 +7,8 @@ import * as clients from './versioned_adapters_business.client';
 
 export async function runHttpJourney(
   hooks: a.VersionAdapters,
+  storedValues: a.StoredValues,
+  handlingNotes: Map<string, string>,
   wireParcel: Record<string, unknown>,
   head: types.v3.Parcel,
   getHookCalls: () => number,
@@ -21,21 +23,37 @@ export async function runHttpJourney(
     }
   >();
   const contexts: a.VersionContext[] = [];
+  // One shared update state: patches apply to this instance across requests.
+  const updateState = {
+    current: head,
+    handlingNotes,
+    hooks,
+    storedValues,
+  };
   const server = createServer(async (request, response) => {
     try {
       const url = new URL(request.url ?? '/', 'http://localhost');
-      const [version, operation] = url.pathname.slice(1).split('/');
+      const [version, operation, id] = url.pathname.slice(1).split('/');
       if (version !== 'v1' && version !== 'v2' && version !== 'v3') {
         response.writeHead(404).end();
         return;
       }
-      if (operation !== 'parcels' || request.method !== 'POST') {
+      if (operation !== 'parcels') {
         response.writeHead(404).end();
         return;
       }
       const chunks: Uint8Array[] = [];
       for await (const chunk of request) chunks.push(chunk);
-      const parcel: unknown = JSON.parse(Buffer.concat(chunks).toString());
+      const body: unknown = JSON.parse(Buffer.concat(chunks).toString());
+      if (request.method === 'PATCH') {
+        await patchParcel(version, String(id), body, response, updateState);
+        return;
+      }
+      if (request.method !== 'POST') {
+        response.writeHead(404).end();
+        return;
+      }
+      const parcel = body;
       const key = `${version}:${request.headers['idempotency-key']}`;
       let conflict = false;
       const result = await a.dispatchDepotShip(
@@ -172,13 +190,57 @@ export async function runHttpJourney(
     const client = new clients.v1.DepotClient(`${base}/v1`, {
       headers: { 'idempotency-key': 'client' },
     });
-    const v1Result = a.downcastParcel('v1', head, hooks);
+    const v1Result = a.downcastParcel('v1', head, storedValues, hooks);
     assert(v1Result.ok);
     const v1Parcel = v1Result.value;
     assert.equal(
       await client.ship(v1Parcel),
       'pending',
       'a generated SDK must round-trip over HTTP',
+    );
+    // The PATCH route persists the retired member and reads it straight back.
+    const patch = (version: string, id: string, body: unknown) =>
+      fetch(`${base}/${version}/parcels/${id}`, {
+        body: JSON.stringify(body),
+        headers: { 'content-type': 'application/json' },
+        method: 'PATCH',
+      });
+    const wrote = await patch('v2', 'p1', {
+      handling_note: 'http-cold',
+      note: 'http-note',
+    });
+    assert.equal(wrote.status, 200);
+    const served = await wrote.json();
+    assert.equal(served.handling_note, 'http-cold');
+    assert.equal(served.note, 'http-note');
+    assert.equal(handlingNotes.get('p1'), 'http-cold');
+    assert.equal(
+      (await patch('v3', 'p1', { handling_note: 'gone' })).status,
+      400,
+      'the Head contract no longer declares the retired patch member',
+    );
+    // The oldest release patches through the same flow: its retired member
+    // persists, reads straight back, and an empty patch carries an empty bag
+    // while the response still serves the stored value from storage. The note
+    // predates v1's contract, so a v1 patch neither sends nor reads back one.
+    const v1Wrote = await patch('v1', 'p1', { handling_note: 'v1-cold' });
+    assert.equal(v1Wrote.status, 200);
+    const v1Served = await v1Wrote.json();
+    assert.equal(v1Served.handling_note, 'v1-cold');
+    assert.equal(handlingNotes.get('p1'), 'v1-cold');
+    const emptyPatch = await patch('v1', 'p1', {});
+    assert.equal(emptyPatch.status, 200);
+    const emptyServed = await emptyPatch.json();
+    assert.equal(emptyServed.handling_note, 'v1-cold');
+    assert.equal(
+      Object.hasOwn(emptyServed, 'note'),
+      false,
+      'a v1 response never invents the note it does not declare',
+    );
+    assert.equal(
+      handlingNotes.get('p1'),
+      'v1-cold',
+      'an empty patch carries no retired fact and rewrites nothing',
     );
     console.log(
       'PASS: three-version wire validation, typed hooks, full error downgrade, HTTP SDK, idempotent committed outcomes',
@@ -189,4 +251,43 @@ export async function runHttpJourney(
       server.close(error => (error ? reject(error) : resolve())),
     );
   }
+}
+
+async function patchParcel(
+  version: 'v1' | 'v2' | 'v3',
+  id: string,
+  body: unknown,
+  response: import('node:http').ServerResponse,
+  state: {
+    current: types.v3.Parcel;
+    handlingNotes: Map<string, string>;
+    storedValues: a.StoredValues;
+    hooks: a.VersionAdapters;
+  },
+): Promise<void> {
+  const result = await a.dispatchDepotUpdate(
+    version,
+    { id, patch: body },
+    state.current,
+    async (request, _context, stored) => {
+      if (stored.handling_note !== undefined) {
+        state.handlingNotes.set(request.id, stored.handling_note);
+      }
+      if (request.patch.note !== undefined) {
+        state.current = { ...state.current, note: request.patch.note };
+      }
+      return { ok: true, stored: state.storedValues, value: state.current };
+    },
+    state.hooks,
+  );
+  response.setHeader('content-type', 'application/json');
+  if (!result.dispatched) {
+    response.writeHead(400).end(JSON.stringify(result.error));
+    return;
+  }
+  if (!result.projected || !result.value.ok) {
+    response.writeHead(422).end(JSON.stringify(result));
+    return;
+  }
+  response.writeHead(200).end(JSON.stringify(result.value.value));
 }

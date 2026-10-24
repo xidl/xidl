@@ -7,6 +7,23 @@ impl AdapterRenderer<'_> {
         let Some(head) = self.plan.versions.last() else {
             return Ok(());
         };
+        let stored = Self::stored_conversions(file);
+        let shapes = file
+            .conversions
+            .iter()
+            .map(|conversion| {
+                (
+                    conversion.name.clone(),
+                    (conversion.current, conversion.pair),
+                )
+            })
+            .collect::<std::collections::BTreeMap<_, _>>();
+        let stored_operations = file
+            .operations
+            .iter()
+            .filter(|operation| operation.stored)
+            .map(|operation| operation.prefix.replace("_from_", "_error_to_"))
+            .collect::<BTreeSet<_>>();
         let head_names = Names {
             version: &head.version.id,
             step_from: &head.version.id,
@@ -37,6 +54,20 @@ impl AdapterRenderer<'_> {
                     ));
                 }
                 let prefix = Self::prefix(operation);
+                let mark = self
+                    .plan
+                    .updates
+                    .operations
+                    .get(key)
+                    .map(|update| head_names.named(&update.return_key));
+                let update = self.plan.updates.operations.contains_key(key);
+                let stored_type = self
+                    .plan
+                    .updates
+                    .operations
+                    .get(key)
+                    .filter(|update| !update.stored.is_empty())
+                    .map(|_| crate::generate::rust_axum::adapters::names::Names::stored_type(key));
                 let mut upcast = Vec::new();
                 let mut downcast = Vec::new();
                 let mut downcast_error = Vec::new();
@@ -48,7 +79,14 @@ impl AdapterRenderer<'_> {
                         types: &step.target_types,
                         layout: &self.layout,
                     };
-                    upcast.push(new.function(&format!("{prefix}Request")));
+                    let request = new.function(&format!("{prefix}Request"));
+                    let (current, pair) = shapes.get(&request).copied().unwrap_or_default();
+                    upcast.push(Call {
+                        name: request,
+                        stored: false,
+                        current,
+                        pair,
+                    });
                 }
                 for step in self.plan.steps[index..].iter().rev() {
                     let old = Names {
@@ -58,14 +96,32 @@ impl AdapterRenderer<'_> {
                         types: &step.source_types,
                         layout: &self.layout,
                     };
-                    downcast.push(old.function(&format!("{prefix}Response")));
-                    downcast_error.push(format!(
-                        "downcast_{}_error_to_{}",
+                    let response = old.function(&format!("{prefix}Response"));
+                    downcast.push(Call {
+                        stored: stored.contains(&response),
+                        name: response,
+                        current: false,
+                        pair: false,
+                    });
+                    let error = format!(
+                        "{}_error_to_{}",
                         prefix.to_case(Case::Snake),
                         step.from.id.to_case(Case::Snake)
-                    ));
+                    );
+                    downcast_error.push(Call {
+                        stored: stored_operations.contains(&error),
+                        name: format!("downcast_{error}"),
+                        current: false,
+                        pair: false,
+                    });
                 }
+                let threads = downcast
+                    .iter()
+                    .chain(&downcast_error)
+                    .any(|call: &Call| call.stored);
                 file.endpoints.push(Endpoint {
+                    current: update && !upcast.is_empty(),
+                    current_type: mark.clone(),
                     prefix: format!(
                         "{}_from_{}",
                         prefix.to_case(Case::Snake),
@@ -82,11 +138,22 @@ impl AdapterRenderer<'_> {
                     downcast,
                     downcast_error,
                     parameters: Vec::new(),
+                    stored: threads,
+                    stored_type: stored_type.clone(),
                 });
             }
         }
         self.dispatches(file)?;
         self.type_endpoints(file)
+    }
+
+    /// Names of conversions that take the stored-values parameter.
+    fn stored_conversions(file: &FileContext) -> BTreeSet<String> {
+        file.conversions
+            .iter()
+            .filter(|conversion| conversion.stored)
+            .map(|conversion| conversion.name.clone())
+            .collect()
     }
 
     fn dispatches(&self, file: &mut FileContext) -> IdlcResult<()> {
@@ -100,6 +167,18 @@ impl AdapterRenderer<'_> {
             types: &head.surface.types,
             layout: &self.layout,
         };
+        let stored_endpoints = file
+            .endpoints
+            .iter()
+            .filter(|endpoint| endpoint.stored)
+            .map(|endpoint| endpoint.prefix.clone())
+            .collect::<BTreeSet<_>>();
+        let current_endpoints = file
+            .endpoints
+            .iter()
+            .filter(|endpoint| endpoint.current)
+            .map(|endpoint| endpoint.prefix.clone())
+            .collect::<BTreeSet<_>>();
         for (key, operation) in &head.surface.operations {
             let prefix = Self::prefix(operation);
             let mut variants = Vec::new();
@@ -114,17 +193,24 @@ impl AdapterRenderer<'_> {
                     types: &version.surface.types,
                     layout: &self.layout,
                 };
+                let variant_prefix = format!(
+                    "{}_from_{}",
+                    prefix.to_case(Case::Snake),
+                    version.version.id.to_case(Case::Snake)
+                );
                 variants.push(DispatchVariant {
                     id: version.version.id.to_case(Case::Pascal),
-                    prefix: format!(
-                        "{}_from_{}",
-                        prefix.to_case(Case::Snake),
-                        version.version.id.to_case(Case::Snake)
-                    ),
+                    stored: stored_endpoints.contains(&variant_prefix),
+                    current: current_endpoints.contains(&variant_prefix),
+                    prefix: variant_prefix,
                     response: self.response_type(served, &names)?.0,
                     error: self.error_type(served, &names),
                 });
             }
+            let threads = variants
+                .iter()
+                .any(|variant: &DispatchVariant| variant.stored);
+            let update = self.plan.updates.operations.get(key);
             file.dispatches.push(Dispatch {
                 prefix: prefix.to_case(Case::Snake),
                 outcome: format!("{prefix}Outcome"),
@@ -133,6 +219,12 @@ impl AdapterRenderer<'_> {
                 error: self.error_type(operation, &names),
                 exhaustive: variants.len() == self.plan.versions.len(),
                 variants,
+                stored: threads,
+                stored_type: update
+                    .filter(|update| !update.stored.is_empty())
+                    .map(|_| crate::generate::rust_axum::adapters::names::Names::stored_type(key)),
+                current: update.is_some(),
+                current_type: update.map(|update| names.named(&update.return_key)),
             });
         }
         Ok(())
@@ -142,6 +234,7 @@ impl AdapterRenderer<'_> {
         let Some(head) = self.plan.versions.last() else {
             return Ok(());
         };
+        let stored = Self::stored_conversions(file);
         let mut reachable = self.plan.head_downcast_types()?;
         reachable.extend(
             self.plan
@@ -189,14 +282,20 @@ impl AdapterRenderer<'_> {
                     .iter()
                     .rev()
                     .map(|step| {
-                        Names {
+                        let call_name = Names {
                             version: &step.from.id,
                             step_from: &step.from.id,
                             upward: false,
                             types: &step.source_types,
                             layout: &self.layout,
                         }
-                        .function(&key)
+                        .function(&key);
+                        Call {
+                            stored: stored.contains(&call_name),
+                            name: call_name,
+                            current: false,
+                            pair: false,
+                        }
                     })
                     .collect();
                 variants.push(TypeVariant {
@@ -205,12 +304,16 @@ impl AdapterRenderer<'_> {
                     calls,
                 });
             }
+            let threads = variants
+                .iter()
+                .any(|variant: &TypeVariant| variant.calls.iter().any(|call| call.stored));
             file.types.push(TypeEndpoint {
                 name: format!("{}Projection", key.replace("::", "_").to_case(Case::Pascal)),
                 function: format!("downcast_{}", key.replace("::", "_").to_case(Case::Snake)),
                 head: head_names.named(&key),
                 exhaustive: variants.len() == self.plan.versions.len(),
                 variants,
+                stored: threads,
             });
         }
         Ok(())

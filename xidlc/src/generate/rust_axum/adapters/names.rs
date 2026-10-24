@@ -1,6 +1,6 @@
 //! Resolve model names with the ordinary generator's identifier and type rules.
 
-use super::context::Value;
+use super::context::{Call, Value};
 use super::layout::Layout;
 use crate::error::IdlcResult;
 use crate::generate::adapter::{TypeShape, TypeUse, ValuePlan};
@@ -49,6 +49,21 @@ impl Names<'_> {
         self.function(key)
     }
 
+    /// Stored-value accessor for one removed member of a type or response.
+    pub(super) fn reader(key: &str, member: &str) -> String {
+        format!("{}_{member}", key.replace("::", "_")).to_case(Case::Snake)
+    }
+
+    /// Persisted-member bag of one update operation, named by the operation.
+    pub(crate) fn stored_type(key: &str) -> String {
+        format!(
+            "{}Stored",
+            key.replace("::", "_")
+                .replace('.', "_")
+                .to_case(Case::Pascal)
+        )
+    }
+
     pub(super) fn value_type(&self, value: &TypeUse, recursive: bool) -> IdlcResult<String> {
         let mut ty = value.ty.clone();
         self.normalize(&mut ty, &value.scope)?;
@@ -77,7 +92,12 @@ impl Names<'_> {
     pub(super) fn value(&self, plan: &ValuePlan) -> Value {
         match plan {
             ValuePlan::Identity => Value::Identity,
-            ValuePlan::Named(key) => Value::Named(self.function(key)),
+            ValuePlan::Named(key) => Value::Named(Call {
+                name: self.function(key),
+                stored: false,
+                current: false,
+                pair: false,
+            }),
             ValuePlan::Sequence(value) => Value::Sequence(Box::new(self.value(value))),
             ValuePlan::Map { key, value } => Value::Map {
                 key: Box::new(self.value(key)),

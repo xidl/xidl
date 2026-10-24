@@ -119,7 +119,7 @@ fn escaped_annotation_and_pragma_values_preserve_lexical_text() {
 fn opaque_arguments_preserve_tokens_and_strings_but_ignore_trivia() {
     let spec = lower(
         r#"@rust-derive(Debug /* derive */, Clone)
-        @photon_audit(data = [ "x\"[0]", 'y', "中文 😀", "a\\b" ], expr = a + +b)
+        @relay_audit(data = [ "x\"[0]", 'y', "中文 😀", "a\\b" ], expr = a + +b)
         struct Item { string id; };"#,
     );
     assert_semantic_roundtrip(&spec);
@@ -162,7 +162,7 @@ fn version_diff_fixture_preserves_every_version_and_effective_field_id() {
 #[test]
 fn five_version_messaging_contract_preserves_semantics_and_printing_is_idempotent() {
     let spec = lower(include_str!(
-        "../../../../../bdd/features/data/photon_messaging/photon_messaging.idl"
+        "../../../../../bdd/features/data/relay_messaging/relay_messaging.idl"
     ));
     let record = crate::versioning::VersioningRecord::analyze(&spec)
         .unwrap()

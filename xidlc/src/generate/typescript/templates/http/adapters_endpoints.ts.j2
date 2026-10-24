@@ -16,77 +16,87 @@ export type DispatchOutcome<T, Head> =
 
 {% for endpoint in endpoints %}
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
-    export function decodeAndUpcast{{ endpoint.prefix }}From{{ endpoint.from }}(raw: unknown, adapters: VersionAdapters): DecodeResult<{{ m.render_type(endpoint.head_request) }}> {
+    export function decodeAndUpcast{{ endpoint.prefix }}From{{ endpoint.from }}(raw: unknown{% if endpoint.current %}, current: {{ m.render_type(endpoint.current_type) }}{% endif %}, adapters: VersionAdapters): {% if endpoint.stored_type %}{ ok: true; value: {{ m.render_type(endpoint.head_request) }}; stored: {{ endpoint.stored_type }} } | { ok: false; error: ValidationError | UnsupportedProjection }{% else %}DecodeResult<{{ m.render_type(endpoint.head_request) }}>{% endif %} {
         const parsed = {{ endpoint.schema }}.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: {{ endpoint.version | tojson }}, operation: {{ endpoint.type_path | tojson }}, issues: parsed.error.issues } };
         {% for step in endpoint.steps %}
-            const step{{ loop.index0 }} = {{ step.request_call }}({% if loop.first %}parsed.data{% else %}step{{ loop.index0 - 1 }}.value{% endif %}, adapters);
+            {%- set prev_pair = endpoint.steps[loop.index0 - 1].request_call.pair if loop.index0 > 0 else false %}
+            const step{{ loop.index0 }} = {{ step.request_call.name }}({% if loop.first %}parsed.data{% else %}step{{ loop.index0 - 1 }}.value{% if prev_pair %}.value{% endif %}{% endif %}{% if step.request_call.current %}, current{% endif %}, adapters);
             if (!step{{ loop.index0 }}.ok) return step{{ loop.index0 }};
         {% endfor %}
-        return {% if endpoint.steps %}step{{ endpoint.steps | length - 1 }}{% else %}ok(parsed.data){% endif %};
+        {%- if endpoint.stored_type %}
+            {% set last = endpoint.steps | length - 1 %}
+            {% set last_pair = endpoint.steps[last].request_call.pair %}
+            return { ok: true, value: step{{ last }}.value{% if last_pair %}.value{% endif %}, stored: { {% for step in endpoint.steps %}{% if step.request_call.pair %}...step{{ loop.index0 }}.value.stored, {% endif %}{% endfor %}} };
+        {%- else %}
+        return {{ ("step" ~ (endpoint.steps | length - 1)) if endpoint.steps else "ok(parsed.data)" }};
+        {%- endif %}
     }
-    export function downcast{{ endpoint.prefix }}ResultTo{{ endpoint.from }}(head: {{ m.render_type(endpoint.head_result) }}, adapters: VersionAdapters): VersionedResult<{{ m.render_type(endpoint.result) }}> {
+    export function downcast{{ endpoint.prefix }}ResultTo{{ endpoint.from }}(head: {{ m.render_type(endpoint.head_result) }}{% if endpoint.stored %}, stored: StoredValues{% endif %}, adapters: VersionAdapters): VersionedResult<{{ m.render_type(endpoint.result) }}> {
         {% for step in endpoint.steps | reverse %}
-            const step{{ loop.index0 }} = downcastStep{{ step.prefix }}ResultTo{{ step.from }}({% if loop.first %}head{% else %}step{{ loop.index0 - 1 }}.value{% endif %}, adapters);
+            const step{{ loop.index0 }} = downcastStep{{ step.prefix }}ResultTo{{ step.from }}({% if loop.first %}head{% else %}step{{ loop.index0 - 1 }}.value{% endif %}{% if step.stored %}, stored{% endif %}, adapters);
             if (!step{{ loop.index0 }}.ok) return step{{ loop.index0 }};
         {% endfor %}
         return {% if endpoint.steps %}step{{ endpoint.steps | length - 1 }}{% else %}ok(head){% endif %};
     }
-    export function downcast{{ endpoint.prefix }}ErrorTo{{ endpoint.from }}(head: {{ errors_type(endpoint.head_errors) }}, adapters: VersionAdapters): VersionedResult<{{ errors_type(endpoint.errors) }}> {
+    export function downcast{{ endpoint.prefix }}ErrorTo{{ endpoint.from }}(head: {{ errors_type(endpoint.head_errors) }}{% if endpoint.stored %}, stored: StoredValues{% endif %}, adapters: VersionAdapters): VersionedResult<{{ errors_type(endpoint.errors) }}> {
         {% for step in endpoint.steps | reverse %}
-            const step{{ loop.index0 }} = downcastStep{{ step.prefix }}ErrorTo{{ step.from }}({% if loop.first %}head{% else %}step{{ loop.index0 - 1 }}.value{% endif %}, adapters);
+            const step{{ loop.index0 }} = downcastStep{{ step.prefix }}ErrorTo{{ step.from }}({% if loop.first %}head{% else %}step{{ loop.index0 - 1 }}.value{% endif %}{% if step.stored %}, stored{% endif %}, adapters);
             if (!step{{ loop.index0 }}.ok) return step{{ loop.index0 }};
         {% endfor %}
         return {% if endpoint.steps %}step{{ endpoint.steps | length - 1 }}{% else %}ok(head){% endif %};
     }
     /** Failed projection retains the original Head outcome, including typed errors. */
-    export function downcast{{ endpoint.prefix }}OutcomeTo{{ endpoint.from }}(head: {{ outcome(endpoint.head_result, endpoint.head_errors) }}, adapters: VersionAdapters): ProjectionOutcome<{{ outcome(endpoint.result, endpoint.errors) }}, {{ outcome(endpoint.head_result, endpoint.head_errors) }}> {
+    export function downcast{{ endpoint.prefix }}OutcomeTo{{ endpoint.from }}(head: {{ outcome(endpoint.head_result, endpoint.head_errors) }}{% if endpoint.stored %}, stored: StoredValues{% endif %}, adapters: VersionAdapters): ProjectionOutcome<{{ outcome(endpoint.result, endpoint.errors) }}, {{ outcome(endpoint.head_result, endpoint.head_errors) }}> {
         if (head.ok) {
-            const result = downcast{{ endpoint.prefix }}ResultTo{{ endpoint.from }}(head.value, adapters);
+            const result = downcast{{ endpoint.prefix }}ResultTo{{ endpoint.from }}(head.value{% if endpoint.stored %}, stored{% endif %}, adapters);
             return result.ok ? { projected: true, value: { ok: true, value: result.value } } : { projected: false, head, error: result.error };
         }
-        const result = downcast{{ endpoint.prefix }}ErrorTo{{ endpoint.from }}(head.error, adapters);
+        const result = downcast{{ endpoint.prefix }}ErrorTo{{ endpoint.from }}(head.error{% if endpoint.stored %}, stored{% endif %}, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    {% if endpoint.stored %}/** The Head handler returns the stored values its outcome still needs for this version. */{% endif %}
     export async function dispatch{{ endpoint.prefix }}From{{ endpoint.from }}(
-    raw: unknown,
-    handler: (request: {{ m.render_type(endpoint.head_request) }}, context: VersionContext) => Promise<{{ outcome(endpoint.head_result, endpoint.head_errors) }}>,
+    raw: unknown{% if endpoint.current %}, current: {{ m.render_type(endpoint.current_type) }}{% endif %},
+    handler: (request: {{ m.render_type(endpoint.head_request) }}, context: VersionContext{% if endpoint.stored_type %}, stored: {{ endpoint.stored_type }}{% endif %}) => Promise<{{ outcome(endpoint.head_result, endpoint.head_errors) }}{% if endpoint.stored %} & { stored: StoredValues }{% endif %}>,
     adapters: VersionAdapters,
     ): Promise<DispatchOutcome<{{ outcome(endpoint.result, endpoint.errors) }}, {{ outcome(endpoint.head_result, endpoint.head_errors) }}>> {
-        const request = decodeAndUpcast{{ endpoint.prefix }}From{{ endpoint.from }}(raw, adapters);
+        const request = decodeAndUpcast{{ endpoint.prefix }}From{{ endpoint.from }}(raw{% if endpoint.current %}, current{% endif %}, adapters);
         if (!request.ok) return { dispatched: false, error: request.error };
-        const head = await handler(request.value, { originalVersion: {{ endpoint.version | tojson }}, originalVersionId: {{ endpoint.id | tojson }} });
-        return { dispatched: true, ...downcast{{ endpoint.prefix }}OutcomeTo{{ endpoint.from }}(head, adapters) };
+        const head = await handler(request.value, { originalVersion: {{ endpoint.version | tojson }}, originalVersionId: {{ endpoint.id | tojson }} }{% if endpoint.stored_type %}, request.stored{% endif %});
+        return { dispatched: true, ...downcast{{ endpoint.prefix }}OutcomeTo{{ endpoint.from }}(head{% if endpoint.stored %}, head.stored{% endif %}, adapters) };
     }
 {% endfor %}
 
 {% for dispatcher in dispatchers %}
     /** Compose one request using an already resolved version identifier. */
     export async function dispatch{{ dispatcher.prefix }}(
-    version: {% for version in dispatcher.versions %}{{ version[0] | tojson }}{% if not loop.last %} | {% endif %}{% endfor %},
-    raw: unknown,
-    handler: (request: {{ m.render_type(dispatcher.head_request) }}, context: VersionContext) => Promise<{{ outcome(dispatcher.head_result, dispatcher.head_errors) }}>,
+    version: {% for version in dispatcher.versions %}{{ version.id | tojson }}{% if not loop.last %} | {% endif %}{% endfor %},
+    raw: unknown{% if dispatcher.current %}, current: {{ m.render_type(dispatcher.current_type) }}{% endif %},
+    handler: (request: {{ m.render_type(dispatcher.head_request) }}, context: VersionContext{% if dispatcher.stored_type %}, stored: {{ dispatcher.stored_type }}{% endif %}) => Promise<{{ outcome(dispatcher.head_result, dispatcher.head_errors) }}{% if dispatcher.stored %} & { stored: StoredValues }{% endif %}>,
     adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<{% for result in dispatcher.results %}{{ m.render_type(result) }}{% if not loop.last %} | {% endif %}{% endfor %}, {{ errors_type(dispatcher.errors) }}>, {{ outcome(dispatcher.head_result, dispatcher.head_errors) }}>> {
         switch (version) {
             {% for version in dispatcher.versions %}
-                case {{ version[0] | tojson }}: return dispatch{{ dispatcher.prefix }}From{{ version[1] }}(raw, handler, adapters);
+                {%- set bridged = dispatcher.stored_type and not version.stored %}
+                case {{ version.id | tojson }}: return dispatch{{ dispatcher.prefix }}From{{ version.pascal }}(raw{% if version.current %}, current{% endif %}, {% if bridged %}(request, context) => handler(request, context, {}){% else %}handler{% endif %}, adapters);
             {% endfor %}
         }
     }
 {% endfor %}
 
 {% for dispatcher in type_dispatchers %}
+    {% set stored_param = ", stored: StoredValues" if dispatcher.stored else "" %}
     {% for variant in dispatcher.variants %}
-        export function {{ dispatcher.name }}(version: {{ variant.version | tojson }}, head: {{ m.render_type(dispatcher.head) }}, adapters: VersionAdapters): VersionedResult<{{ m.render_type(variant.output) }}>;
+        export function {{ dispatcher.name }}(version: {{ variant.version | tojson }}, head: {{ m.render_type(dispatcher.head) }}{{ stored_param }}, adapters: VersionAdapters): VersionedResult<{{ m.render_type(variant.output) }}>;
     {% endfor %}
-    export function {{ dispatcher.name }}(version: {% for variant in dispatcher.variants %}{{ variant.version | tojson }}{% if not loop.last %} | {% endif %}{% endfor %}, head: {{ m.render_type(dispatcher.head) }}, adapters: VersionAdapters): VersionedResult<{% for variant in dispatcher.variants %}{{ m.render_type(variant.output) }}{% if not loop.last %} | {% endif %}{% endfor %}>;
-    export function {{ dispatcher.name }}(version: {% for variant in dispatcher.variants %}{{ variant.version | tojson }}{% if not loop.last %} | {% endif %}{% endfor %}, head: {{ m.render_type(dispatcher.head) }}, adapters: VersionAdapters): VersionedResult<{% for variant in dispatcher.variants %}{{ m.render_type(variant.output) }}{% if not loop.last %} | {% endif %}{% endfor %}> {
+    export function {{ dispatcher.name }}(version: {% for variant in dispatcher.variants %}{{ variant.version | tojson }}{% if not loop.last %} | {% endif %}{% endfor %}, head: {{ m.render_type(dispatcher.head) }}{{ stored_param }}, adapters: VersionAdapters): VersionedResult<{% for variant in dispatcher.variants %}{{ m.render_type(variant.output) }}{% if not loop.last %} | {% endif %}{% endfor %}>;
+    export function {{ dispatcher.name }}(version: {% for variant in dispatcher.variants %}{{ variant.version | tojson }}{% if not loop.last %} | {% endif %}{% endfor %}, head: {{ m.render_type(dispatcher.head) }}{{ stored_param }}, adapters: VersionAdapters): VersionedResult<{% for variant in dispatcher.variants %}{{ m.render_type(variant.output) }}{% if not loop.last %} | {% endif %}{% endfor %}> {
         switch (version) {
             {% for variant in dispatcher.variants %}
                 case {{ variant.version | tojson }}: {
                     {% for call in variant.calls %}
-                        const step{{ loop.index0 }} = {{ call }}({% if loop.first %}head{% else %}step{{ loop.index0 - 1 }}.value{% endif %}, adapters);
+                        const step{{ loop.index0 }} = {{ call.name }}({% if loop.first %}head{% else %}step{{ loop.index0 - 1 }}.value{% endif %}{% if call.stored %}, stored{% endif %}, adapters);
                         if (!step{{ loop.index0 }}.ok) return step{{ loop.index0 }};
                     {% endfor %}
                     return {% if variant.calls %}step{{ variant.calls | length - 1 }}{% else %}ok(head){% endif %};

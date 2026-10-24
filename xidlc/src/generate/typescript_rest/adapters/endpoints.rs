@@ -1,6 +1,6 @@
 //! Assemble resolved-version entry points that compose the adjacent conversions.
 
-use super::context::{Dispatcher, Endpoint, FileContext};
+use super::context::{Dispatcher, DispatcherVersion, Endpoint, FileContext};
 use super::names::Names;
 use super::render::AdapterRenderer;
 use super::wire::WireDecoderBuilder;
@@ -71,7 +71,7 @@ impl AdapterRenderer<'_> {
                     .iter()
                     .map(|key| self.error_class(key, &head.version.id))
                     .collect::<IdlcResult<Vec<_>>>()?;
-                let steps = self.plan.steps[index..]
+                let steps: Vec<super::context::Operation> = self.plan.steps[index..]
                     .iter()
                     .map(|step| {
                         file.operations
@@ -89,6 +89,18 @@ impl AdapterRenderer<'_> {
                     })
                     .collect::<IdlcResult<_>>()?;
                 let from = version.version.id.to_case(Case::Pascal);
+                let stored = steps.iter().any(|step| step.stored);
+                let current = steps.iter().any(|step| step.current);
+                let current_type = current
+                    .then(|| {
+                        self.plan
+                            .updates
+                            .operations
+                            .get(key)
+                            .map(|update| head_names.named(&update.return_key))
+                    })
+                    .flatten();
+                let stored_type = steps.iter().find_map(|step| step.stored_type.clone());
                 let schema =
                     wire.request(&version.version.id, &operation.inputs, request.clone())?;
                 let dispatcher = dispatchers
@@ -101,12 +113,23 @@ impl AdapterRenderer<'_> {
                         versions: Vec::new(),
                         results: Vec::new(),
                         errors: Vec::new(),
+                        stored: false,
+                        stored_type: None,
+                        current: false,
+                        current_type: None,
                     });
-                dispatcher
-                    .versions
-                    .push((version.version.id.clone(), from.clone()));
+                dispatcher.versions.push(DispatcherVersion {
+                    id: version.version.id.clone(),
+                    pascal: from.clone(),
+                    current,
+                    stored: stored_type.is_some(),
+                });
+                dispatcher.current_type = dispatcher.current_type.take().or(current_type.clone());
                 dispatcher.results.push(result.clone());
                 dispatcher.errors.extend(errors.iter().cloned());
+                dispatcher.stored |= stored;
+                dispatcher.current |= current;
+                dispatcher.stored_type = dispatcher.stored_type.take().or(stored_type.clone());
                 file.endpoints.push(Endpoint {
                     prefix,
                     from,
@@ -121,6 +144,10 @@ impl AdapterRenderer<'_> {
                     errors,
                     head_errors,
                     steps,
+                    stored,
+                    stored_type,
+                    current,
+                    current_type,
                 });
             }
         }

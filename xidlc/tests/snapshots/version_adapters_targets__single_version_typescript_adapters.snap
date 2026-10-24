@@ -1,5 +1,6 @@
 ---
 source: xidlc/tests/version_adapters_targets.rs
+assertion_line: 32
 expression: "&files[0].1"
 ---
 
@@ -26,6 +27,9 @@ export type ProjectionOutcome<T, Head> =
 export interface FrameworkError { kind: "Framework"; error: unknown }
 export const IGNORED = "xidl.ignored";
 export type Ignored = typeof IGNORED;
+/** A downcast decision leaves a removed optional member absent only by saying so. */
+export const OMIT = "xidl.omit";
+export type Omitted = typeof OMIT;
 const ok = <T>(value: T): VersionedResult<T> => ({ ok: true, value });
 
 function mapSequence<S, T>(source: S[], convert: (value: S) => VersionedResult<T>): VersionedResult<T[]> {
@@ -105,6 +109,8 @@ export interface VersionAdapters {
 
 
 
+
+
 /** The application has already resolved this version; no routing is performed here. */
 export interface VersionContext { originalVersion: string; originalVersionId: string }
 export interface ValidationError { kind: "Validation"; version: string; operation: string; issues: z.core.$ZodIssue[] }
@@ -142,6 +148,7 @@ export type DispatchOutcome<T, Head> =
         const result = downcastStoreSaveErrorToOnly(head.error, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     export async function dispatchStoreSaveFromOnly(
     raw: unknown,
     handler: (request: ifaceTypes.only.StoreSaveRequest, context: VersionContext) => Promise<OperationOutcome<string, errors.Invalid | FrameworkError>>,
@@ -171,6 +178,7 @@ export type DispatchOutcome<T, Head> =
 
 
 
+    
     
         export function downcastInvalid(version: "only", head: types.only.Invalid, adapters: VersionAdapters): VersionedResult<types.only.Invalid>;
     

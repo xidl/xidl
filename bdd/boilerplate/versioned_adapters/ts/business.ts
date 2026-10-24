@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import { runHttpJourney } from './business_http';
+import { runStoredJourney } from './business_stored';
+import { runUpdateJourney } from './business_update';
 import * as a from './versioned_adapters_business.adapters';
 import * as errors from './versioned_adapters_business.errors';
 
@@ -24,6 +26,21 @@ const refuse = (
 });
 let hookCalls = 0;
 let exceptionHooks = 0;
+// Storage keeps what Head no longer carries while older versions still read it.
+// Readers resolve identity from the Head instance; the chain never touches storage.
+const storage = {
+  handlingNotes: new Map<string, string>([['p1', 'fragile']]),
+  optionalNotes: new Map<string, string>([['kept', 'kept']]),
+  traces: new Map<string, string>([['p1', 'trace-1']]),
+};
+const storedValues: a.StoredValues = {
+  // The trace header left the Head response; storage keeps it per traced id.
+  depotTraceResponseTraceId: ({ return: id }) => storage.traces.get(id),
+  optionalChangeNote: source => storage.optionalNotes.get(source.note ?? ''),
+  parcelHandlingNote: source => storage.handlingNotes.get(source.id),
+  // Never stored: the hook derives the retired reference from the tracking number.
+  parcelLegacy: () => undefined,
+};
 const hooks: a.VersionAdapters = {
   choiceDowncastToV1: source => ok({ text: String(source.count) }),
   depotGetBusyErrorDowncastToV1: source => {
@@ -38,10 +55,36 @@ const hooks: a.VersionAdapters = {
     exceptionHooks++;
     return ok(new errors.v2$Busy({ reason: source.reason }));
   },
-  optionalChangeDowncastToV1: source => ok({ note: source.note }),
+  depotTraceResponseDowncastToV2: (source, stored) => {
+    const traceId = stored.depotTraceResponseTraceId(source);
+    return traceId === undefined
+      ? refuse('2026-04', 'Depot.trace')
+      : ok({ trace_id: traceId });
+  },
+  depotUpdateBusyErrorDowncastToV1: source => {
+    exceptionHooks++;
+    return ok(new errors.v1$NotFound({ id: source.reason }));
+  },
+  depotUpdateDeniedErrorDowncastToV2: source => {
+    exceptionHooks++;
+    return ok(new errors.v2$Busy({ reason: source.reason }));
+  },
+  depotUpdateFrameworkErrorDowncastToV2: source => {
+    exceptionHooks++;
+    return ok(new errors.v2$Busy({ reason: source.reason }));
+  },
+  optionalChangeDowncastToV1: (source, stored) =>
+    ok({ note: stored.optionalChangeNote(source) ?? a.OMIT }),
   optionalChangeUpcastFromV1: source =>
     ok({ ignored$note: a.IGNORED, note: source.note }),
   parcelDowncastToV1: source => ok({ legacy: source.tracking }),
+  parcelDowncastToV2: (source, stored) =>
+    ok({ handling_note: stored.parcelHandlingNote(source) ?? a.OMIT }),
+  parcelPatchUpcastFromV2: source =>
+    ok({
+      handling_note: a.IGNORED,
+      stored: { handling_note: source.handling_note },
+    }),
   parcelUpcastFromV1: source => {
     hookCalls++;
     return ok({
@@ -50,7 +93,7 @@ const hooks: a.VersionAdapters = {
       tracking: source.legacy,
     });
   },
-  parcelUpcastFromV2: () => ok({ audit: 'checked' }),
+  parcelUpcastFromV2: () => ok({ audit: 'checked', handling_note: a.IGNORED }),
   stateDowncastToV1: () => refuse('2026-01', 'State'),
   stateDowncastToV2: () => ok('shipping' as const),
 };
@@ -75,7 +118,9 @@ assert.equal(Object.hasOwn(head, 'inspected'), false);
 assert.equal(Object.hasOwn(head.address, 'zone'), false);
 assert.equal(Object.hasOwn(head, 'reference'), false);
 const resolvedVersion: 'v1' | 'v2' = process.env.TEST_V2 ? 'v2' : 'v1';
-const projected = take(a.downcastParcel(resolvedVersion, head, hooks));
+const projected = take(
+  a.downcastParcel(resolvedVersion, head, storedValues, hooks),
+);
 assert.equal(projected.id, 'p1');
 
 // Each invalid wire value must stop before any hook or business side effect.
@@ -200,11 +245,15 @@ const framework: a.FrameworkError = {
   error: new Error('transport'),
   kind: 'Framework',
 };
-assert.equal(take(a.downcastDepotGetErrorToV1(framework, hooks)), framework);
+assert.equal(
+  take(a.downcastDepotGetErrorToV1(framework, storedValues, hooks)),
+  framework,
+);
 assert.equal(exceptionHooks, 0);
 const businessError = take(
   a.downcastDepotGetErrorToV1(
     new errors.Framework({ reason: 'locked' }),
+    storedValues,
     hooks,
   ),
 );
@@ -212,7 +261,11 @@ assert(businessError instanceof errors.v1$NotFound);
 assert.equal(businessError.id, 'locked');
 assert.equal(exceptionHooks, 2);
 const denied = take(
-  a.downcastDepotGetErrorToV1(new errors.Denied({ reason: 'denied' }), hooks),
+  a.downcastDepotGetErrorToV1(
+    new errors.Denied({ reason: 'denied' }),
+    storedValues,
+    hooks,
+  ),
 );
 assert(denied instanceof errors.v1$NotFound);
 assert.equal(
@@ -225,7 +278,7 @@ const typedHead = {
   error: new errors.Denied({ reason: 'original denial' }),
   ok: false as const,
 };
-const typedRefusal = a.downcastDepotGetOutcomeToV1(typedHead, {
+const typedRefusal = a.downcastDepotGetOutcomeToV1(typedHead, storedValues, {
   ...hooks,
   depotGetBusyErrorDowncastToV1: () => refuse('2026-01', 'Depot.get'),
 });
@@ -299,11 +352,19 @@ const optionalHead = take(
     hooks,
   ),
 ).value;
-assert.deepEqual(take(a.downcastOptionalChange('v1', optionalHead, hooks)), {
-  note: 'kept',
-});
+assert.deepEqual(
+  take(a.downcastOptionalChange('v1', optionalHead, storedValues, hooks)),
+  { note: 'kept' },
+);
+// The same instance with nothing in storage omits the member instead of inventing one.
+assert.deepEqual(
+  take(
+    a.downcastOptionalChange('v1', { note: 'unknown' }, storedValues, hooks),
+  ),
+  {},
+);
 assert.equal(
-  a.downcastOptionalChange('v1', optionalHead, {
+  a.downcastOptionalChange('v1', optionalHead, storedValues, {
     ...hooks,
     optionalChangeDowncastToV1: () => refuse('2026-01', 'OptionalChange'),
   }).ok,
@@ -319,4 +380,13 @@ const headNode = take(
 ).node;
 assert.equal(Object.hasOwn(headNode, 'children'), false);
 
-await runHttpJourney(hooks, wireParcel, head, () => hookCalls);
+await runStoredJourney(hooks, storedValues, head, wireParcel);
+await runHttpJourney(
+  hooks,
+  storedValues,
+  storage.handlingNotes,
+  wireParcel,
+  head,
+  () => hookCalls,
+);
+await runUpdateJourney(hooks, storedValues, storage.handlingNotes, head);

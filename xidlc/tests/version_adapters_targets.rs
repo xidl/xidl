@@ -24,6 +24,15 @@ fn independent_typescript_target_snapshots_wire_validation_and_business_decision
 }
 
 #[test]
+fn chain_target_snapshots_the_retirement_surface_of_the_booking_corpus() {
+    let source = include_str!("../../bdd/features/data/versioned_chain.idl");
+    let files = render(source, "chain.idl");
+    assert_eq!(files, render(source, "chain.idl"));
+    assert_eq!(files.len(), 1);
+    insta::assert_snapshot!("independent_typescript_chain_adapters", &files[0].1);
+}
+
+#[test]
 fn single_version_target_has_valid_identity_entries_without_adjacent_conversions() {
     let files = render(
         "@version enum V { only }; @http(400) exception Invalid { string reason; }; interface Store { @post(path=\"/items\") string save(@body string value) raises(Invalid); };",
@@ -131,6 +140,56 @@ fn generated_symbols_reject_normalized_versions_scopes_and_cross_category_collis
 }
 
 #[test]
+fn update_request_conversions_must_stay_operation_disjoint() {
+    let source = r#"
+        @version enum V { v1, v2 };
+        struct Item { @removed(V::v2) @optional string note; };
+        struct ItemPatch { @removed(V::v2) @optional string note; };
+        interface Store {
+            @patch(path = "/a") Item first(@body ItemPatch patch);
+            @patch(path = "/b") Item second(@body ItemPatch patch);
+        };"#;
+    let error = render_error(source, "shared.idl");
+    assert!(error.contains("share the request conversion"), "{error}");
+    assert!(error.contains("ItemPatch"), "{error}");
+}
+
+#[test]
+fn update_current_never_reaches_paired_conversions_through_wrappers() {
+    let source = r#"
+        @version enum V { v1, v2 };
+        struct Item { @removed(V::v2) @optional string note; };
+        struct Patch { @optional sequence<Item> items; };
+        interface Store { @patch(path = "/a") Item update(@body Patch patch); };"#;
+    let error = render_error(source, "wrapped.idl");
+    assert!(
+        error.contains("through a sequence, map, or optional member"),
+        "{error}"
+    );
+}
+
+#[test]
+fn update_current_never_routes_through_alias_conversions() {
+    let source = r#"
+        @version enum V { v1, v2 };
+        struct Item { @removed(V::v2) @optional string note; };
+        typedef Item PatchItem;
+        interface Store { @patch(path = "/a") Item update(@body PatchItem patch); };"#;
+    let error = render_error(source, "alias.idl");
+    assert!(error.contains("routes current through"), "{error}");
+    assert!(error.contains("alias"), "{error}");
+}
+
+/// Render one source with the adapter target and return its generation error.
+fn render_error(source: &str, name: &str) -> String {
+    xidlc::driver::Generator::new("typescript-rest-adapters".into())
+        .generate_from_idl(source, Path::new(name), HashMap::new())
+        .err()
+        .expect("invalid update contract must fail generation")
+        .to_string()
+}
+
+#[test]
 fn ordinary_targets_match_the_master_artifacts_byte_for_byte() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR"));
     let mut targets = vec!["typescript-rest"];
@@ -166,7 +225,7 @@ fn ordinary_targets_match_the_master_artifacts_byte_for_byte() {
                 .collect::<std::collections::BTreeMap<_, _>>();
             assert_eq!(
                 generated, expected,
-                "{target} artifacts for {fixture} differ from master d98bc37a"
+                "{target} artifacts for {fixture} differ from the pinned baseline"
             );
         }
     }

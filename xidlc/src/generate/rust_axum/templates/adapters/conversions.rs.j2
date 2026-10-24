@@ -1,6 +1,6 @@
 {% macro value(plan, source) -%}
     {%- if plan.kind == "Identity" -%}Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone({{ source }}))
-    {%- elif plan.kind == "Named" -%}{{ plan.data }}({{ source }}, adapters)
+    {%- elif plan.kind == "Named" -%}{{ plan.data.name }}({{ source }}{% if plan.data.current %}, current{% endif %}{% if plan.data.stored %}, stored{% endif %}, adapters)
     {%- elif plan.kind == "Sequence" -%}map_sequence({{ source }}, |item| {{ value(plan.data, "item") }})
     {%- elif plan.kind == "Array" -%}map_array({{ source }}, |item| {{ value(plan.data, "item") }}, refusal)
     {%- elif plan.kind == "Map" -%}map_record({{ source }}, |key| {{ value(plan.data.key, "key") }}, |item| {{ value(plan.data.value, "item") }}, refusal)
@@ -16,7 +16,7 @@
             }
         {% endif %}
         /// Projects one adjacent declaration by borrowing its source value.
-        pub fn {{ conversion.name }}(source: &{{ conversion.source }}, adapters: &dyn VersionAdapters) -> VersionedResult<{{ conversion.target }}> {
+        pub fn {{ conversion.name }}(source: &{{ conversion.source }}{% if conversion.current %}, current: &{{ conversion.current_type }}{% endif %}{% if conversion.stored %}, stored: &dyn StoredValues{% endif %}, adapters: &dyn VersionAdapters) -> VersionedResult<{% if conversion.pair %}Upcast<{{ conversion.target }}, {{ conversion.stored_type }}>{% else %}{{ conversion.target }}{% endif %}> {
             let refusal = |reason: &str| UnsupportedProjection {
                 version: {{ conversion.version | tojson }}.into(), direction: Direction::{% if conversion.upward %}Upcast{% else %}Downcast{% endif %},
                 type_path: {{ conversion.type_path | tojson }}.into(), reason: reason.into(),
@@ -50,11 +50,31 @@
                             Err(refusal("union tag is not declared in source version"))
                         {% endif %}
                     {% else %}
-                        {% if conversion.hook %}let decision = adapters.{{ conversion.hook }}(source)?;{% endif %}
+                        {% if conversion.hook %}let decision = adapters.{{ conversion.hook }}(source{% if conversion.hook_current %}, current{% endif %}{% if conversion.hook_stored %}, stored{% endif %})?;{% endif %}
                             {% for copy in conversion.copies %}
                                 let projected_{{ loop.index0 }} = {{ value(copy.value, "source" if conversion.source_shape == "direct" else "&source." ~ copy.source) }}?;
                             {% endfor %}
-                            {% if conversion.target_shape == "unit" %}
+                            {% if conversion.pair %}
+                                {% set ns = namespace(stored = conversion.stored_type ~ "::default()") %}
+                                {% for copy in conversion.copies %}
+                                    {% if copy.value.kind == "Named" and copy.value.data.pair %}
+                                        {% set ns.stored = ns.stored ~ ".merge(projected_" ~ loop.index0 ~ ".stored)" %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% if conversion.stored_field %}
+                                    {% set ns.stored = ns.stored ~ ".merge(decision.stored)" %}
+                                {% endif %}
+                                Ok(Upcast {
+                                    value: {{ conversion.target }} {
+                                        {% for copy in conversion.copies %}
+                                            {% set unwrapped = ".value" if copy.value.kind == "Named" and copy.value.data.pair else "" %}
+                                            {{ copy.target }}: projected_{{ loop.index0 }}{{ unwrapped }},
+                                        {% endfor %}
+                                        {% for assignment in conversion.assignments %}{{ assignment }}: decision.{{ assignment }},{% endfor %}
+                                    },
+                                    stored: {{ ns.stored }},
+                                })
+                            {% elif conversion.target_shape == "unit" %}
                                 Ok(())
                             {% elif conversion.target_shape == "direct" %}
                                 {% if conversion.copies %}Ok(projected_0){% elif conversion.assignments %}Ok(decision.{{ conversion.assignments[0] }}){% else %}Ok(None){% endif %}
