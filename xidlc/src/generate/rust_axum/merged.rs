@@ -1,5 +1,5 @@
 use crate::error::IdlcResult;
-use crate::generate::rust::{RustRender, RustRenderer};
+use crate::generate::rust::{DefinitionRenderContext, RustRenderer};
 use crate::generate::rust_axum::interface::render_interface_with_path;
 use crate::generate::rust_axum::transport::TypeRegistry;
 use crate::generate::rust_axum::{RustAxumRenderOutput, RustAxumRenderer};
@@ -136,7 +136,8 @@ impl<'a> MergedAxumSpecBuilder<'a> {
     ) -> IdlcResult<RustAxumRenderOutput> {
         let mut def = def.clone();
         super::scope::TypeScope::new(&self.registry, module_path).lower_definition(&mut def);
-        let output = def.render(&self.rust_renderer)?;
+        let output = DefinitionRenderContext::at(&self.rust_renderer, module_path)
+            .render_definition(&def)?;
         Ok(RustAxumRenderOutput {
             source: output.source,
         })

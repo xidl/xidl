@@ -1,0 +1,22 @@
+enum Kind {
+    Text,
+    Number,
+    Flag,
+};
+const Kind FLAG = Kind::Flag;
+typedef Kind Discriminant;
+
+// Enumerator labels spelled bare and through the enum qualify as `Kind::…`;
+// the constant label stays the constant.
+union Labels switch (Kind) {
+    case Text: string text;
+    case Kind::Number: int64 number;
+    case FLAG: boolean flag;
+};
+
+// A typedef alias of the enum still qualifies labels with the enum itself.
+union Aliased switch (Discriminant) {
+    case Text: string text;
+    case Number: int64 number;
+    default: boolean other;
+};

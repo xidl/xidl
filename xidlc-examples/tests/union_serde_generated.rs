@@ -1,6 +1,8 @@
 use serde_json::json;
 use std::collections::BTreeMap;
-use xidlc_examples::union_serde::{BoolTagValue, CharTagValue, IntTagValue, Tag, UnionValue};
+use xidlc_examples::union_serde::{
+    BareTagValue, BoolTagValue, CharTagValue, IntTagValue, Tag, UnionValue,
+};
 
 #[test]
 fn generated_union_serializes_with_string_tag() {
@@ -114,4 +116,60 @@ fn generated_char_tag_union_uses_default_tag_string() {
     .expect("deserialize char default case");
     assert_eq!(decoded.tag(), &'\0');
     assert_eq!(decoded.as_other(), "fallback");
+}
+
+#[test]
+fn generated_bare_label_union_constructs_each_case_under_its_own_tag() {
+    let first = BareTagValue::new_first("one".to_string());
+    assert_eq!(first.tag(), &Tag::V1);
+    assert!(first.is_first() && !first.is_second() && !first.is_third());
+    assert_eq!(first.as_first(), "one");
+
+    let second = BareTagValue::new_second(2);
+    assert_eq!(second.tag(), &Tag::V2);
+    assert!(second.is_second() && !second.is_first() && !second.is_third());
+    assert_eq!(second.as_second(), &2);
+
+    let third = BareTagValue::new_third(true);
+    assert_eq!(third.tag(), &Tag::V3);
+    assert!(third.is_third() && !third.is_first() && !third.is_second());
+    assert_eq!(third.as_third(), &true);
+}
+
+#[test]
+fn generated_bare_label_union_roundtrips_every_case_through_serde() {
+    for (value, tag, data) in [
+        (
+            BareTagValue::new_first("one".to_string()),
+            "V1",
+            json!("one"),
+        ),
+        (BareTagValue::new_second(2), "V2", json!(2)),
+        (BareTagValue::new_third(true), "V3", json!(true)),
+    ] {
+        let encoded = serde_json::to_value(&value).expect("serialize bare label case");
+        assert_eq!(encoded, json!({"tag": tag, "data": data}));
+        let decoded: BareTagValue =
+            serde_json::from_value(encoded).expect("deserialize bare label case");
+        assert_eq!(decoded.tag(), value.tag());
+        assert_eq!(decoded, value);
+    }
+}
+
+#[test]
+fn generated_bare_label_union_clone_and_eq_follow_the_tag() {
+    let second = BareTagValue::new_second(7);
+    let cloned = second.clone();
+    assert_eq!(cloned.tag(), &Tag::V2);
+    assert_eq!(cloned.as_second(), &7);
+    assert_eq!(cloned, second);
+    assert_ne!(cloned, BareTagValue::new_second(8));
+    assert_ne!(cloned, BareTagValue::new_first("7".to_string()));
+}
+
+#[test]
+#[should_panic(expected = "assertion failed: self.is_first()")]
+fn generated_bare_label_union_accessor_rejects_another_case() {
+    let second = BareTagValue::new_second(2);
+    let _ = second.as_first();
 }

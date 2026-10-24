@@ -236,6 +236,7 @@ expression: "&snapshots[0]"
                 "switch_type_spec": {
                   "IntegerType": "I32"
                 },
+                "switch_enum": null,
                 "case": [
                   {
                     "label": [

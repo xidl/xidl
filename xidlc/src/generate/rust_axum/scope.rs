@@ -1,6 +1,6 @@
 use super::transport::TypeRegistry;
-use crate::generate::rust::util::{rust_ident, rust_scoped_name};
-use crate::generate::utils::scope::resolve_canonical;
+use crate::generate::rust::util::rust_scoped_name;
+use crate::generate::utils::scope::{relative_path, resolve_canonical};
 use xidl_parser::hir;
 
 /// IDL lookup scope and Rust output scope for one rendering site.
@@ -35,21 +35,8 @@ impl<'a> TypeScope<'a> {
 
     pub(crate) fn render(self, name: &hir::ScopedName) -> String {
         self.resolve(name)
-            .map(|key| Self::relative_path(self.output, &key))
+            .map(|key| relative_path(self.output, &key))
             .unwrap_or_else(|| rust_scoped_name(name))
-    }
-
-    pub(crate) fn relative_path(output: &[String], canonical: &str) -> String {
-        let target = canonical.split("::").collect::<Vec<_>>();
-        let common = output
-            .iter()
-            .zip(&target[..target.len() - 1])
-            .take_while(|(a, b)| a.as_str() == **b)
-            .count();
-        std::iter::repeat_n("super".to_string(), output.len() - common)
-            .chain(target[common..].iter().map(|part| rust_ident(part)))
-            .collect::<Vec<_>>()
-            .join("::")
     }
 
     /// Lower a public declaration before handing it to the plain Rust renderer.
@@ -160,7 +147,7 @@ impl<'a> TypeScope<'a> {
 
     fn lower_name(self, name: &mut hir::ScopedName) {
         if let Some(canonical) = self.resolve(name) {
-            name.name = Self::relative_path(self.output, &canonical)
+            name.name = relative_path(self.output, &canonical)
                 .split("::")
                 .map(|part| part.strip_prefix("r#").unwrap_or(part).to_string())
                 .collect();

@@ -11,6 +11,36 @@
     }
   ],
   "paths": {
+    "/attribute/bare_sample": {
+      "get": {
+        "tags": [
+          "UnionSerdeService"
+        ],
+        "operationId": "UnionSerdeService.get_attribute_bare_sample",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BareTagValue"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/attribute/bool_sample": {
       "get": {
         "tags": [
@@ -134,6 +164,45 @@
   },
   "components": {
     "schemas": {
+      "BareTagValue": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "first"
+            ],
+            "properties": {
+              "first": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "second"
+            ],
+            "properties": {
+              "second": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "third"
+            ],
+            "properties": {
+              "third": {
+                "type": "boolean"
+              }
+            }
+          }
+        ],
+        "description": "Labels spelled as bare enumerators, which must still resolve to `Tag`."
+      },
       "BoolTagValue": {
         "oneOf": [
           {

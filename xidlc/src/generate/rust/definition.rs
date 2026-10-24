@@ -18,15 +18,7 @@ impl RustRender for hir::ModuleDcl {
 
 impl RustRender for hir::Definition {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
-        match self {
-            hir::Definition::ModuleDcl(module) => module.render(renderer),
-            hir::Definition::ConstrTypeDcl(constr) => constr.render(renderer),
-            hir::Definition::TypeDcl(type_dcl) => type_dcl.render(renderer),
-            hir::Definition::ConstDcl(const_dcl) => const_dcl.render(renderer),
-            hir::Definition::ExceptDcl(except_dcl) => except_dcl.render(renderer),
-            hir::Definition::InterfaceDcl(interface) => interface.render(renderer),
-            hir::Definition::Pragma(_) => Ok(RustRenderOutput::empty()),
-        }
+        DefinitionRenderContext::root(renderer).render_definition(self)
     }
 }
 
@@ -37,16 +29,23 @@ pub(crate) fn render_module_body(
     DefinitionRenderContext::root(renderer).render_module_body(defs)
 }
 
-struct DefinitionRenderContext<'a> {
+/// Renders definitions while tracking the module they are declared in, so
+/// renderers that resolve paths see the module the output lands in.
+pub(crate) struct DefinitionRenderContext<'a> {
     renderer: &'a RustRenderer,
     module_path: Vec<String>,
 }
 
 impl<'a> DefinitionRenderContext<'a> {
     fn root(renderer: &'a RustRenderer) -> Self {
+        Self::at(renderer, &[])
+    }
+
+    /// A context for definitions rendered inside `module_path`.
+    pub(crate) fn at(renderer: &'a RustRenderer, module_path: &[String]) -> Self {
         Self {
             renderer,
-            module_path: Vec::new(),
+            module_path: module_path.to_vec(),
         }
     }
 
@@ -91,12 +90,15 @@ impl<'a> DefinitionRenderContext<'a> {
         }
     }
 
-    fn render_definition(&mut self, def: &hir::Definition) -> IdlcResult<RustRenderOutput> {
+    pub(crate) fn render_definition(&self, def: &hir::Definition) -> IdlcResult<RustRenderOutput> {
         match def {
             hir::Definition::Pragma(_) => Ok(RustRenderOutput::empty()),
+            hir::Definition::ModuleDcl(module) => module.render(self.renderer),
             hir::Definition::ConstrTypeDcl(constr) => self.render_constr(constr),
             hir::Definition::TypeDcl(type_dcl) => self.render_type_dcl(type_dcl),
-            _ => def.render(self.renderer),
+            hir::Definition::ConstDcl(const_dcl) => const_dcl.render(self.renderer),
+            hir::Definition::ExceptDcl(except_dcl) => except_dcl.render(self.renderer),
+            hir::Definition::InterfaceDcl(interface) => interface.render(self.renderer),
         }
     }
 

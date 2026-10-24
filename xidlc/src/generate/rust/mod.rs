@@ -13,6 +13,7 @@ mod type_dcl;
 mod union_def;
 pub(crate) mod util;
 
+pub(crate) use definition::DefinitionRenderContext;
 pub use render::{RustRender, RustRenderOutput, RustRenderer};
 
 use crate::error::IdlcResult;

@@ -11,6 +11,7 @@ use crate::error::IdlcResult;
 use crate::generate::rust::util::{
     array_type, declarator_dims, declarator_name, is_skipped_from_annotations, rust_ident,
 };
+use crate::generate::utils::scope::relative_path;
 use std::collections::BTreeSet;
 use xidl_parser::hir;
 
@@ -128,7 +129,7 @@ fn render_struct(
     Ok(TransportItemContext {
         kind: "struct".to_string(),
         transport_ident: transport_ident(canonical),
-        public_path: TypeScope::relative_path(scope.output, canonical),
+        public_path: relative_path(scope.output, canonical),
         has_skipped_members: def
             .member
             .iter()
@@ -146,10 +147,7 @@ fn render_enum(
     TransportItemContext {
         kind: "enum".to_string(),
         transport_ident: transport_ident(canonical),
-        public_path: format!(
-            "super::{}",
-            TypeScope::relative_path(module_path, canonical)
-        ),
+        public_path: format!("super::{}", relative_path(module_path, canonical)),
         has_skipped_members: false,
         fields: Vec::new(),
         variants: def
