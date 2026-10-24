@@ -43,6 +43,7 @@ export async function runChainHttpJourney(): Promise<void> {
     const v1Body = {
       agenda: 'Kickoff;60',
       id: 'b1',
+      owner: 'user-9',
       roster: ['user-1'],
       title: 'Kickoff',
     };
@@ -51,12 +52,15 @@ export async function runChainHttpJourney(): Promise<void> {
     assert.equal(oldest.headers.get('x-booking-version'), '2026-06-01');
     const oldestView = await oldest.json();
     assert.equal(oldestView.agenda, 'Kickoff;60');
+    assert.equal(oldestView.owner, 'user-9');
     assert.equal(state.writes, 1);
-    // Head reads the same booking: the stored agenda unpacked by the hook.
+    // Head reads the same booking: the stored agenda unpacked by the hook
+    // and owner under its Head name.
     const asHead = (await (
       await get(undefined, 'b1')
     ).json()) as types.v2027_01_01.Booking;
     assert.deepEqual(asHead.items, [{ minutes: 60, title: 'Kickoff' }]);
+    assert.equal(asHead.organizer, 'user-9');
 
     // Negotiation: a mid-patch date resolves to the newest release not later
     // than it; earlier or malformed headers are a 400, never a guess.
@@ -84,6 +88,7 @@ export async function runChainHttpJourney(): Promise<void> {
       {
         id: 'b1',
         items: [{ minutes: 60, title: 'Kickoff' }],
+        organizer: 'user-9',
         title: 'Kickoff',
       },
       'kickoff',
@@ -106,6 +111,7 @@ export async function runChainHttpJourney(): Promise<void> {
       {
         id: 'b1',
         items: [{ minutes: 30, title: 'Changed' }],
+        organizer: 'user-9',
         title: 'Changed',
       },
       'kickoff',
@@ -136,6 +142,7 @@ export async function runChainHttpJourney(): Promise<void> {
     const v1View = await v1Read.json();
     assert.equal(v1View.agenda, 'Kickoff;60');
     assert.deepEqual(v1View.roster, ['user-1']);
+    assert.equal(v1View.owner, 'user-9');
     assert.equal(Object.hasOwn(v1View, 'items'), false);
 
     // A booking created at Head never had an agenda fact; the oldest release
@@ -197,6 +204,7 @@ export async function runChainHttpJourney(): Promise<void> {
     const headRead = await get(undefined, 'b1');
     const headView = await headRead.json();
     assert.equal(headView.agenda, undefined);
+    assert.equal(headView.organizer, 'user-9');
 
     console.log(
       'PASS: booking chain negotiates releases, fingerprints across releases and switches behaviour by date',

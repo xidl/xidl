@@ -89,6 +89,7 @@ const hooks: a.VersionAdapters = {
     hookCalls++;
     return ok({
       carrier: 'postal',
+      courier_note: undefined,
       legacy: a.IGNORED,
       tracking: source.legacy,
     });

@@ -121,6 +121,7 @@ impl IdlPrinter {
             Annotation::Removed { version } => {
                 format!("@removed({})", Self::render_scoped(version))
             }
+            Annotation::Replaces { name } => format!("@replaces({})", Self::quote(name)),
         }
     }
 

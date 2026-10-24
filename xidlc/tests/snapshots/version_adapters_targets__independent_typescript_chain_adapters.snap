@@ -76,6 +76,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["id"]: z.unknown().optional(),
         
+            ["owner"]: z.unknown().optional(),
+        
             ["roster"]: z.unknown().optional(),
         
             ["title"]: z.unknown().optional(),
@@ -83,7 +85,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }).strict()
     
         .superRefine((wire, context) => {
-            for (const key of ["items"]) {
+            for (const key of ["items","organizer"]) {
                 if (Object.hasOwn(wire, key)) context.addIssue({ code: "custom", path: [key], message: "field is not available in served version" });
             }
         })
@@ -98,6 +100,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["roster"]: wire["roster"],
         
+            ["owner"]: wire["owner"],
+        
     }))
     .pipe(z.object({
         
@@ -108,6 +112,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
             ["agenda"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
         
             ["roster"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(z.coerce.string())),
+        
+            ["owner"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
         
     })).transform((value) => ({
         
@@ -125,6 +131,10 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             
                 ["roster"]: value["roster"],
+            
+        
+            
+                ...(value["owner"] === undefined ? {} : { ["owner"]: value["owner"] }),
             
         
     })))
@@ -230,6 +240,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["items"]: z.unknown().optional(),
         
+            ["owner"]: z.unknown().optional(),
+        
             ["roster"]: z.unknown().optional(),
         
             ["title"]: z.unknown().optional(),
@@ -237,7 +249,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }).strict()
     
         .superRefine((wire, context) => {
-            for (const key of ["agenda"]) {
+            for (const key of ["agenda","organizer"]) {
                 if (Object.hasOwn(wire, key)) context.addIssue({ code: "custom", path: [key], message: "field is not available in served version" });
             }
         })
@@ -252,6 +264,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["roster"]: wire["roster"],
         
+            ["owner"]: wire["owner"],
+        
     }))
     .pipe(z.object({
         
@@ -262,6 +276,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
             ["items"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(wireType4Schema)),
         
             ["roster"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(z.coerce.string())),
+        
+            ["owner"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
         
     })).transform((value) => ({
         
@@ -279,6 +295,10 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             
                 ["roster"]: value["roster"],
+            
+        
+            
+                ...(value["owner"] === undefined ? {} : { ["owner"]: value["owner"] }),
             
         
     })))
@@ -384,12 +404,14 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["items"]: z.unknown().optional(),
         
+            ["organizer"]: z.unknown().optional(),
+        
             ["title"]: z.unknown().optional(),
         
     }).strict()
     
         .superRefine((wire, context) => {
-            for (const key of ["agenda","roster"]) {
+            for (const key of ["agenda","owner","roster"]) {
                 if (Object.hasOwn(wire, key)) context.addIssue({ code: "custom", path: [key], message: "field is not available in served version" });
             }
         })
@@ -402,6 +424,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["items"]: wire["items"],
         
+            ["organizer"]: wire["organizer"],
+        
     }))
     .pipe(z.object({
         
@@ -410,6 +434,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
             ["title"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
         
             ["items"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(wireType8Schema)),
+        
+            ["organizer"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
         
     })).transform((value) => ({
         
@@ -423,6 +449,10 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             
                 ["items"]: value["items"],
+            
+        
+            
+                ...(value["organizer"] === undefined ? {} : { ["organizer"]: value["organizer"] }),
             
         
     })))
@@ -562,11 +592,15 @@ export interface VersionAdapters {
                 const converted2 = mapSequence(source["roster"], (item) => ok(item));
                 if (!converted2.ok) return converted2;
             
+                const converted3 = mapOptional(source["owner"], (item) => ok(item));
+                if (!converted3.ok) return converted3;
+            
             return ok({
                 
                         ["id"]: converted0.value,
                         ["title"]: converted1.value,
                         ["roster"]: converted2.value,
+                        ...(converted3.value === undefined ? {} : { ["owner"]: converted3.value }),
                 
                         ["items"]: decision.value["items"],
             });
@@ -589,11 +623,15 @@ export interface VersionAdapters {
                 const converted2 = mapSequence(source["roster"], (item) => ok(item));
                 if (!converted2.ok) return converted2;
             
+                const converted3 = mapOptional(source["owner"], (item) => ok(item));
+                if (!converted3.ok) return converted3;
+            
             return ok({
                 
                         ["id"]: converted0.value,
                         ["title"]: converted1.value,
                         ["roster"]: converted2.value,
+                        ...(converted3.value === undefined ? {} : { ["owner"]: converted3.value }),
                 
                         ["agenda"]: decision.value["agenda"],
             });
@@ -729,11 +767,15 @@ export interface VersionAdapters {
                 const converted2 = mapSequence(source["items"], (item) => upcastAgendaEntryFromV20261001(item, adapters));
                 if (!converted2.ok) return converted2;
             
+                const converted3 = mapOptional(source["owner"], (item) => ok(item));
+                if (!converted3.ok) return converted3;
+            
             return ok({
                 
                         ["id"]: converted0.value,
                         ["title"]: converted1.value,
                         ["items"]: converted2.value,
+                        ...(converted3.value === undefined ? {} : { ["organizer"]: converted3.value }),
                 
             });
         
@@ -755,11 +797,15 @@ export interface VersionAdapters {
                 const converted2 = mapSequence(source["items"], (item) => downcastAgendaEntryToV20261001(item, adapters));
                 if (!converted2.ok) return converted2;
             
+                const converted3 = mapOptional(source["organizer"], (item) => ok(item));
+                if (!converted3.ok) return converted3;
+            
             return ok({
                 
                         ["id"]: converted0.value,
                         ["title"]: converted1.value,
                         ["items"]: converted2.value,
+                        ...(converted3.value === undefined ? {} : { ["owner"]: converted3.value }),
                 
                         ["roster"]: decision.value["roster"],
             });

@@ -22,6 +22,10 @@ pub enum VersioningError {
     MalformedVersionReference { annotation: String, decl: String },
     /// A raw version marker failed to lower into a valid typed annotation.
     MalformedVersionMarker { decl: String },
+    /// `@replaces` does not carry one earlier member name.
+    MalformedReplaces { decl: String },
+    /// `@replaces` names a link the declaration's own lifecycle cannot hold.
+    InvalidReplaces { decl: String, reason: String },
     /// A version parameter violates its argument or wire-location contract.
     MalformedVersionParameter { decl: String, reason: String },
     /// A version timeline declares more than one version marker or parameter.
@@ -127,6 +131,13 @@ impl fmt::Display for VersioningError {
                     "xidl versioning: @version on {decl} must be bare or declare in=... and name=..."
                 )
             }
+            Self::MalformedReplaces { decl } => write!(
+                f,
+                "xidl versioning: @replaces on {decl} requires the earlier member name, like @replaces(text)"
+            ),
+            Self::InvalidReplaces { decl, reason } => {
+                write!(f, "xidl versioning: @replaces on {decl}: {reason}")
+            }
             Self::MalformedVersionParameter { decl, reason } => {
                 write!(f, "xidl versioning: @version on {decl}: {reason}")
             }
@@ -145,10 +156,14 @@ impl fmt::Display for VersioningError {
             ),
             Self::UnsupportedVersionAnnotation { name, decl } => {
                 write!(f, "xidl versioning: {name} on {decl} is not supported; ")?;
-                if name.eq_ignore_ascii_case("@renamedFrom") {
+                if name.eq_ignore_ascii_case("@renamedFrom")
+                    || name.eq_ignore_ascii_case("@renameFrom")
+                    || name.eq_ignore_ascii_case("@renamed_from")
+                    || name.eq_ignore_ascii_case("@rename_from")
+                {
                     write!(
                         f,
-                        "use @rename(\"wire_name\") for the serialized name; use @added/@removed declarations for changes between versions"
+                        "use @rename(\"wire_name\") for the serialized name; write a rename as @removed and @added with @replaces(earlier) on the added member"
                     )
                 } else {
                     write!(
