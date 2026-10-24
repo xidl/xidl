@@ -96,4 +96,43 @@ export async function runStoredJourney(
   );
   assert(servedHead.dispatched && servedHead.projected && servedHead.value.ok);
   assert.equal(Object.hasOwn(servedHead.value.value, 'handling_note'), false);
+
+  // The retired response header answers callers whose contract still declares
+  // it, straight from storage; Head never carries it, and a trace with no
+  // stored header cannot be served to 2026-04 at all.
+  const trace = async () => ({
+    ok: true as const,
+    stored: storedValues,
+    value: 'p1',
+  });
+  const tracedV2 = await a.dispatchDepotTraceFromV2({ id: 'p1' }, trace, hooks);
+  assert(tracedV2.dispatched && tracedV2.projected && tracedV2.value.ok);
+  assert.deepEqual(tracedV2.value.value, {
+    return: 'p1',
+    trace_id: 'trace-1',
+  });
+  const tracedHead = await a.dispatchDepotTraceFromV3(
+    { id: 'p1' },
+    trace,
+    hooks,
+  );
+  assert(tracedHead.dispatched && tracedHead.projected && tracedHead.value.ok);
+  // Head declared no retired header, so its outcome is the bare return value.
+  assert.equal(tracedHead.value.value, 'p1');
+  const untracedV2 = await a.dispatchDepotTraceFromV2(
+    { id: 'never-traced' },
+    async () => ({
+      ok: true as const,
+      stored: storedValues,
+      value: 'never-traced',
+    }),
+    hooks,
+  );
+  assert(untracedV2.dispatched);
+  assert.equal(untracedV2.projected, false);
+  assert.equal(
+    (untracedV2.head as { ok: true; value: string }).value,
+    'never-traced',
+    'the refusal retains the committed Head outcome',
+  );
 }
