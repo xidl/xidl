@@ -46,6 +46,7 @@ fn head() -> v2026_07_01::Profile {
             v2026_07_01::Note { text: "vip".into() },
         ],
         read_at: Some("2026-06-02T08:00:00.000Z".into()),
+        tier: "premium".into(),
         title: "founder".into(),
         to: v2026_07_01::Route {
             handle: "anna@example.test".into(),
@@ -99,6 +100,8 @@ pub fn assert_transforms() {
     assert_eq!(to_head.display_name, "Ann Lee");
     assert_eq!(to_head.notes.len(), 1);
     assert_eq!(to_head.read_at, None);
+    // E12: the decision states the tier; no default exists for it.
+    assert_eq!(to_head.tier, "standard");
 
     // E2 + E8 downward: the route reads back as the stored recipient.
     let storage = storage_for_oldest();

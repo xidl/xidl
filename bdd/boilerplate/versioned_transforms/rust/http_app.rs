@@ -7,6 +7,9 @@ use crate::gen::version_adapters::{
     DirectoryProfileRequestV20260701, DirectoryPublishOutcome, DirectoryPublishRequestV20260701,
     HeadOutcome, ProjectionOutcome, UnsupportedProjection, Version, VersionContext,
 };
+use crate::routes;
+
+use crate::gen::v2026_01_01;
 use crate::gen::v2026_04_01;
 use crate::gen::v2026_07_01;
 use crate::hooks::Storage;
@@ -20,7 +23,7 @@ use axum::{
 };
 use serde_json::{json, Value};
 use std::{
-    collections::{BTreeMap, HashMap},
+    collections::{BTreeMap, BTreeSet, HashMap},
     sync::{
         atomic::{AtomicUsize, Ordering},
         Arc, Mutex,
@@ -42,10 +45,12 @@ pub struct Facts {
 pub struct AppState {
     pub rows: Mutex<BTreeMap<String, Facts>>,
     pub ledger: Mutex<BTreeMap<String, v2026_07_01::Profile>>,
+    /// Profiles the application sealed: Head raises the refinement for them.
+    pub sealed: Mutex<BTreeSet<String>>,
     pub writes: AtomicUsize,
 }
 
-fn is_calendar_date(value: &str) -> bool {
+pub(crate) fn is_calendar_date(value: &str) -> bool {
     let bytes = value.as_bytes();
     if bytes.len() != 10 || bytes[4] != b'-' || bytes[7] != b'-' {
         return false;
@@ -69,7 +74,7 @@ fn is_calendar_date(value: &str) -> bool {
     day <= days[(month - 1) as usize]
 }
 
-fn resolve_version(header: Option<&str>) -> Option<Version> {
+pub(crate) fn resolve_version(header: Option<&str>) -> Option<Version> {
     let Some(header) = header else {
         return Some(Version::V20260701);
     };
@@ -87,11 +92,11 @@ fn resolve_version(header: Option<&str>) -> Option<Version> {
     }
 }
 
-fn header<'a>(headers: &'a HeaderMap, name: &str) -> Option<&'a str> {
+pub(crate) fn header<'a>(headers: &'a HeaderMap, name: &str) -> Option<&'a str> {
     headers.get(name).and_then(|value| value.to_str().ok())
 }
 
-fn echo(mut response: Response, version: Option<Version>) -> Response {
+pub(crate) fn echo(mut response: Response, version: Option<Version>) -> Response {
     let label = match version {
         Some(Version::V20260101) => "2026-01-01",
         Some(Version::V20260401) => "2026-04-01",
@@ -105,14 +110,14 @@ fn echo(mut response: Response, version: Option<Version>) -> Response {
     response
 }
 
-fn reason(status: StatusCode, body: &str, version: Option<Version>) -> Response {
+pub(crate) fn reason(status: StatusCode, body: &str, version: Option<Version>) -> Response {
     echo(
         (status, Json(json!({ "reason": body }))).into_response(),
         version,
     )
 }
 
-fn storage_for(app: &AppState) -> Storage {
+pub(crate) fn storage_for(app: &AppState) -> Storage {
     let rows = app.rows.lock().unwrap();
     let mut storage = Storage::default();
     for (id, facts) in rows.iter() {
@@ -139,7 +144,7 @@ fn storage_for(app: &AppState) -> Storage {
 }
 
 /// The application stores its own wire facts; only committed facts land.
-fn remember_facts(app: &AppState, id: &str, raw: &Value) {
+pub(crate) fn remember_facts(app: &AppState, id: &str, raw: &Value) {
     let mut rows = app.rows.lock().unwrap();
     let previous = rows.get(id).cloned().unwrap_or_default();
     let created_at = match raw.get("created_at") {
@@ -198,193 +203,10 @@ fn remember_facts(app: &AppState, id: &str, raw: &Value) {
     );
 }
 
-async fn publish(
-    State(app): State<Arc<AppState>>,
-    headers: HeaderMap,
-    body: Bytes,
-) -> Response {
-    let raw_header = header(&headers, "x-transform-version");
-    let Some(version) = resolve_version(raw_header) else {
-        return echo(
-            (
-                StatusCode::BAD_REQUEST,
-                Json(json!({ "reason": "unsupported X-Transform-Version" })),
-            )
-                .into_response(),
-            None,
-        );
-    };
-    let raw: Value = match serde_json::from_slice(&body) {
-        Ok(raw) => raw,
-        Err(_) => return reason(StatusCode::BAD_REQUEST, "malformed JSON body", Some(version)),
-    };
-    let hooks = crate::hooks::Hooks::default();
-    let state = app.clone();
-    let facts = raw.clone();
-    let result = dispatch_directory_publish(
-        version,
-        json!({ "profile": raw }),
-        move |input: DirectoryPublishRequestV20260701, context: VersionContext| {
-            let state = state.clone();
-            let facts = facts.clone();
-            async move {
-                let mut profile = input.profile;
-                let previous = state.ledger.lock().unwrap().get(&profile.id).cloned();
-                let facts_before = state.rows.lock().unwrap().get(&profile.id).cloned();
-                let old_caller = context.original_version != Version::V20260701;
-                // E3 write rule: a caller restating the stored name pair keeps
-                // the custom display; a caller changing the names gets the
-                // mechanical merge the hook computed.
-                if old_caller {
-                    if let Some(facts_before) = facts_before {
-                        let same_names = facts.get("first_name").and_then(Value::as_str)
-                            == facts_before.first_name.as_deref()
-                            && facts.get("last_name").and_then(Value::as_str)
-                                == facts_before.last_name.as_deref();
-                        if same_names {
-                            if let Some(previous) = &previous {
-                                profile.display_name = previous.display_name.clone();
-                            }
-                        }
-                    }
-                }
-                // E7 write rule: only older callers write through the narrow
-                // view; a stated note replaces the visible head and keeps the
-                // entries it cannot see, an omitted note changes nothing.
-                profile.notes = if !old_caller {
-                    profile.notes
-                } else if profile.notes.is_empty() {
-                    previous.iter().flat_map(|p| p.notes.clone()).collect()
-                } else {
-                    let mut notes = vec![profile.notes[0].clone()];
-                    if let Some(previous) = &previous {
-                        notes.extend(previous.notes.iter().skip(1).cloned());
-                    }
-                    notes
-                };
-                remember_facts(&state, &profile.id, &facts);
-                state.writes.fetch_add(1, Ordering::SeqCst);
-                state.ledger.lock().unwrap().insert(profile.id.clone(), profile.clone());
-                // The stored snapshot is taken after the commit: the response
-                // projection reads exactly what this command landed.
-                let stored = storage_for(&state);
-                HeadOutcome {
-                    outcome: Ok(profile),
-                    stored,
-                }
-            }
-        },
-        &hooks,
-    )
-    .await;
-    match result {
-        Err(AdaptationError::Validation(error))
-        | Err(AdaptationError::Unsupported(UnsupportedProjection { reason: error, .. })) => {
-            reason(StatusCode::BAD_REQUEST, &error, Some(version))
-        }
-        Ok(ProjectionOutcome::Unsupported { error, .. }) => {
-            reason(StatusCode::UNPROCESSABLE_ENTITY, &error.reason, Some(version))
-        }
-        Ok(ProjectionOutcome::Projected(outcome)) => published_response(outcome, version),
-    }
-}
-
-fn published_response(outcome: DirectoryPublishOutcome, version: Version) -> Response {
-    let (value, error) = match outcome {
-        DirectoryPublishOutcome::V20260101(result) => match result {
-            Ok(value) => (Some(json!(value)), None),
-            Err(error) => (None, Some(error)),
-        },
-        DirectoryPublishOutcome::V20260401(result) => match result {
-            Ok(value) => (Some(json!(value)), None),
-            Err(error) => (None, Some(error)),
-        },
-        DirectoryPublishOutcome::V20260701(result) => match result {
-            Ok(value) => (Some(json!(value)), None),
-            Err(error) => (None, Some(error)),
-        },
-    };
-    match (value, error) {
-        (Some(value), _) => echo((StatusCode::OK, Json(value)).into_response(), Some(version)),
-        (None, Some(error)) => {
-            let status = StatusCode::from_u16(error.code).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR);
-            reason(status, &error.message, Some(version))
-        }
-        (None, None) => reason(StatusCode::INTERNAL_SERVER_ERROR, "unreachable", Some(version)),
-    }
-}
-
-async fn profile(
-    State(app): State<Arc<AppState>>,
-    headers: HeaderMap,
-    Query(params): Query<HashMap<String, String>>,
-) -> Response {
-    let raw_header = header(&headers, "x-transform-version");
-    let echoed = resolve_version(raw_header);
-    let Some(version) = echoed else {
-        return echo(
-            (
-                StatusCode::BAD_REQUEST,
-                Json(json!({ "reason": "unsupported X-Transform-Version" })),
-            )
-                .into_response(),
-            None,
-        );
-    };
-    let id = params.get("id").cloned().unwrap_or_default();
-    let hooks = crate::hooks::Hooks::default();
-    let stored = storage_for(&app);
-    let state = app.clone();
-    let result = dispatch_directory_profile(
-        version,
-        json!({ "id": id }),
-        move |request: DirectoryProfileRequestV20260701, _context: VersionContext| {
-            let state = state.clone();
-            let stored = stored.clone();
-            async move {
-                let head = state.ledger.lock().unwrap().get(&request.id).cloned();
-                HeadOutcome {
-                    outcome: match head {
-                        Some(profile) => Ok(profile),
-                        None => Err(v2026_07_01::DirectoryProfileError::Missing(
-                            v2026_07_01::Missing { id: request.id },
-                        )),
-                    },
-                    stored,
-                }
-            }
-        },
-        &hooks,
-    )
-    .await;
-    match result {
-        Err(AdaptationError::Validation(error))
-        | Err(AdaptationError::Unsupported(UnsupportedProjection { reason: error, .. })) => {
-            reason(StatusCode::BAD_REQUEST, &error, echoed)
-        }
-        Ok(ProjectionOutcome::Unsupported { error, .. }) => {
-            reason(StatusCode::UNPROCESSABLE_ENTITY, &error.reason, echoed)
-        }
-        Ok(ProjectionOutcome::Projected(DirectoryProfileOutcome::V20260101(Ok(value)))) => {
-            echo((StatusCode::OK, Json(json!(value))).into_response(), echoed)
-        }
-        Ok(ProjectionOutcome::Projected(DirectoryProfileOutcome::V20260401(Ok(value)))) => {
-            echo((StatusCode::OK, Json(json!(value))).into_response(), echoed)
-        }
-        Ok(ProjectionOutcome::Projected(DirectoryProfileOutcome::V20260701(Ok(value)))) => {
-            echo((StatusCode::OK, Json(json!(value))).into_response(), echoed)
-        }
-        Ok(ProjectionOutcome::Projected(DirectoryProfileOutcome::V20260101(Err(_))))
-        | Ok(ProjectionOutcome::Projected(DirectoryProfileOutcome::V20260401(Err(_))))
-        | Ok(ProjectionOutcome::Projected(DirectoryProfileOutcome::V20260701(Err(_)))) => {
-            reason(StatusCode::NOT_FOUND, "no such profile", echoed)
-        }
-    }
-}
-
 /// The application router: real HTTP over the generated dispatchers.
 pub fn directory_router(app: Arc<AppState>) -> Router {
     Router::new()
-        .route("/profiles", post(publish).get(profile))
+        .route("/profiles", post(routes::publish).get(routes::profile))
+        .route("/roster", axum::routing::get(routes::roster))
         .with_state(app)
 }

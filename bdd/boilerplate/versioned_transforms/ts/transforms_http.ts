@@ -7,6 +7,7 @@ export async function runTransformsHttpJourney(): Promise<void> {
   const state: DirectoryState = {
     ledger: new Map(),
     rows: new Map(),
+    sealed: new Set(),
     writes: 0,
   };
   const server = createDirectoryApp(state);
@@ -24,6 +25,11 @@ export async function runTransformsHttpJourney(): Promise<void> {
       });
     const get = (version: string | undefined, id: string) =>
       fetch(`${base}/profiles?id=${id}`, {
+        headers:
+          version === undefined ? {} : { 'x-transform-version': version },
+      });
+    const roster = (version: string | undefined) =>
+      fetch(`${base}/roster`, {
         headers:
           version === undefined ? {} : { 'x-transform-version': version },
       });
@@ -64,6 +70,11 @@ export async function runTransformsHttpJourney(): Promise<void> {
       'the upcast stated the old behaviour',
     );
     assert.deepEqual(headView.to, { handle: 'anna@example.test' });
+    assert.equal(
+      headView.tier,
+      'standard',
+      'the upcast states the tier; no default exists for it',
+    );
     assert.equal(headView.created_at_utc, '2023-11-14T22:13:20.000Z');
     assert.deepEqual(headView.notes, [{ text: 'prefers email' }]);
     assert.equal(Object.hasOwn(headView, 'status'), false);
@@ -121,6 +132,7 @@ export async function runTransformsHttpJourney(): Promise<void> {
       id: 'p2',
       notes: [{ text: 'morning person' }, { text: 'vip' }],
       read_at: '2026-06-02T08:00:00.000Z',
+      tier: 'premium',
       title: 'engineer',
       to: { handle: 'lee@example.test', protocol: 'chat' },
     });
@@ -211,6 +223,38 @@ export async function runTransformsHttpJourney(): Promise<void> {
       { text: 'call first' },
     );
 
+    // E10: the refinement raised at Head reaches the middle release through
+    // the downgrade decision, keeping the committed status instead of being
+    // translated into a missing profile.
+    state.sealed.add('p1');
+    const sealedV2 = await get('2026-04-01', 'p1');
+    assert.equal(sealedV2.status, 409);
+    assert.match(
+      ((await sealedV2.json()) as { reason: string }).reason,
+      /sealed/,
+    );
+    const sealedHead = await get(undefined, 'p1');
+    assert.equal(sealedHead.status, 409);
+    state.sealed.delete('p1');
+
+    // E9: one roster read projects every element with its own facts.
+    const rosterV2 = (await (
+      await roster('2026-04-01')
+    ).json()) as types.v2026_04_01.Profile[];
+    assert.equal(rosterV2.length, 2);
+    const rosterById = new Map(rosterV2.map(p => [p.id, p]));
+    assert.equal(rosterById.get('p1')?.status, 'sent');
+    assert.equal(rosterById.get('p1')?.note?.text, 'prefers email');
+    assert.equal(rosterById.get('p2')?.note?.text, 'call first');
+    assert.equal(rosterById.get('p2')?.created_at, 1_770_000_000);
+    const rosterV1 = (await (
+      await roster('2026-01-01')
+    ).json()) as types.v2026_01_01.Profile[];
+    assert.deepEqual(rosterV1.map(p => p.recipient).sort(), [
+      'anna@example.test',
+      'lee@example.test',
+    ]);
+
     // A profile that only ever existed at Head cannot serve the pieces it
     // never had: the display name cannot be split, so the read refuses.
     await post(undefined, {
@@ -218,10 +262,29 @@ export async function runTransformsHttpJourney(): Promise<void> {
       display_name: 'Solo',
       id: 'p3',
       notes: [],
+      tier: 'standard',
       title: 'ghost',
       to: { handle: 'ghost@example.test' },
     });
     assert.equal((await get('2026-04-01', 'p3')).status, 422);
+
+    // One element without its stored facts refuses the whole read: the list
+    // cannot be served partially without inventing the missing pieces.
+    await post(undefined, {
+      created_at_utc: '2026-06-01T10:00:00.000Z',
+      display_name: 'Head Born',
+      id: 'p5',
+      notes: [],
+      tier: 'premium',
+      title: 'newest',
+      to: { handle: 'new@example.test' },
+    });
+    const brokenRoster = await roster('2026-04-01');
+    assert.equal(brokenRoster.status, 422);
+    assert.match(
+      ((await brokenRoster.json()) as { reason: string }).reason,
+      /display name/,
+    );
 
     console.log(
       'PASS: transform shapes negotiate, project, refuse and round-trip over HTTP',

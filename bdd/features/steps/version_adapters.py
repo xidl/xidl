@@ -77,7 +77,11 @@ def prepare_application(context, script, boilerplate_name="versioned_adapters"):
             "business_update.ts",
         ],
         "chain.ts": ["chain_http.ts", "chain_app.ts"],
-        "transforms.ts": ["transforms_http.ts", "transforms_app.ts"],
+        "transforms.ts": [
+            "transforms_http.ts",
+            "transforms_app.ts",
+            "transforms_hooks.ts",
+        ],
     }
     for name in companions.get(script, []):
         shutil.copy(boilerplate / name, output)
@@ -215,7 +219,13 @@ def prepare_rust_application(context, script, boilerplate_name="versioned_adapte
             "main.rs": ["hooks.rs", "chain.rs", "http.rs", "http_app.rs"]
         },
         "versioned_transforms": {
-            "main.rs": ["hooks.rs", "transforms.rs", "http.rs", "http_app.rs"]
+            "main.rs": [
+                "hooks.rs",
+                "transforms.rs",
+                "http.rs",
+                "http_app.rs",
+                "routes.rs",
+            ]
         },
     }
     for name in companions.get(boilerplate_name, {}).get(script, []):

@@ -113,6 +113,9 @@ impl VersionAdapters for Hooks {
                 })
                 .collect(),
             read_at: None,
+            // E12: a required member arrives at Head; the decision states the
+            // application's rule for callers who cannot name the member yet.
+            tier: "standard".into(),
             created_at: IGNORED,
             first_name: IGNORED,
             last_name: IGNORED,
@@ -166,6 +169,18 @@ impl VersionAdapters for Hooks {
             note: stored.profile_note(source),
             status,
         })
+    }
+
+    /// E10: the oldest contracts cannot name the refinement, so the downgrade
+    /// keeps the committed status on the runtime channel instead of
+    /// translating a sealed profile into a missing one.
+    fn directory_profile_sealed_error_downcast_to_v_2026_04_01(
+        &self,
+        source: &v2026_07_01::Sealed,
+    ) -> VersionedResult<v2026_04_01::DirectoryProfileError> {
+        Ok(v2026_04_01::DirectoryProfileError::Framework(
+            xidl_rust_axum::Error::new(409, format!("profile {} is sealed", source.id)),
+        ))
     }
 
     /// E4: the newest value simply has no image one release earlier.

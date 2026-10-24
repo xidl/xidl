@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { hooks } from './transforms_app';
+import { hooks } from './transforms_hooks';
 import { runTransformsHttpJourney } from './transforms_http';
 import type * as types from './versioned_transforms';
 import * as a from './versioned_transforms.adapters';
@@ -124,6 +124,7 @@ const head: types.v2026_07_01.Profile = {
   id: 'p1',
   notes: [{ text: 'prefers email' }, { text: 'vip' }],
   read_at: '2026-06-02T08:00:00.000Z',
+  tier: 'premium',
   title: 'founder',
   to: { handle: 'anna@example.test', protocol: 'chat' },
 };

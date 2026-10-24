@@ -99,6 +99,10 @@ pub mod version_adapters {
             &self,
             source: &RouteProtocolDowncastToV20260401Changes,
         ) -> VersionedResult<v2026_04_01::RouteProtocol>;
+        fn directory_profile_sealed_error_downcast_to_v_2026_04_01(
+            &self,
+            source: &v2026_07_01::Sealed,
+        ) -> VersionedResult<v2026_04_01::DirectoryProfileError>;
     }
     /// Members older versions still read that Head no longer carries, resolved by the application from the source instance of the downcast step that retires them.
     pub trait StoredValues {
@@ -163,6 +167,7 @@ pub mod version_adapters {
         pub display_name: String,
         pub notes: Vec<v2026_07_01::Note>,
         pub read_at: Option<String>,
+        pub tier: String,
         pub created_at: Ignored,
         pub first_name: Ignored,
         pub last_name: Ignored,
@@ -186,6 +191,8 @@ pub mod version_adapters {
         pub profile: v2026_01_01::Profile,
     }
     /// Public model parameters for one served version's operation.
+    pub struct DirectoryRosterRequestV20260101 {}
+    /// Public model parameters for one served version's operation.
     pub struct DirectoryProfileRequestV20260401 {
         pub id: String,
     }
@@ -194,12 +201,22 @@ pub mod version_adapters {
         pub profile: v2026_04_01::Profile,
     }
     /// Public model parameters for one served version's operation.
+    pub struct DirectoryRosterRequestV20260401 {}
+    /// Public model parameters for one served version's operation.
     pub struct DirectoryProfileRequestV20260701 {
         pub id: String,
     }
     /// Public model parameters for one served version's operation.
     pub struct DirectoryPublishRequestV20260701 {
         pub profile: v2026_07_01::Profile,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct DirectoryRosterRequestV20260701 {}
+    fn map_sequence<S, T>(
+        source: &[S],
+        convert: impl Fn(&S) -> VersionedResult<T>,
+    ) -> VersionedResult<Vec<T>> {
+        source.iter().map(convert).collect()
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn missing_downcast_to_v_2026_01_01(
@@ -428,6 +445,37 @@ pub mod version_adapters {
         Ok(projected_0)
     }
     /// Projects one adjacent declaration by borrowing its source value.
+    pub fn directory_roster_request_upcast_from_v_2026_01_01(
+        source: &DirectoryRosterRequestV20260101,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<DirectoryRosterRequestV20260401> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_01_01".into(),
+            direction: Direction::Upcast,
+            type_path: "DirectoryRosterRequest".into(),
+            reason: reason.into(),
+        };
+        Ok(DirectoryRosterRequestV20260401 {})
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn directory_roster_response_downcast_to_v_2026_01_01(
+        source: &Vec<v2026_04_01::Profile>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<Vec<v2026_01_01::Profile>> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_04_01".into(),
+            direction: Direction::Downcast,
+            type_path: "DirectoryRosterResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = map_sequence(
+            source,
+            |item| profile_downcast_to_v_2026_01_01(item, stored, adapters),
+        )?;
+        Ok(projected_0)
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
     pub fn missing_downcast_to_v_2026_04_01(
         source: &v2026_07_01::Missing,
         adapters: &dyn VersionAdapters,
@@ -480,6 +528,7 @@ pub mod version_adapters {
             display_name: decision.display_name,
             notes: decision.notes,
             read_at: decision.read_at,
+            tier: decision.tier,
         })
     }
     /// Projects one adjacent declaration by borrowing its source value.
@@ -675,6 +724,37 @@ pub mod version_adapters {
         let projected_0 = profile_downcast_to_v_2026_04_01(source, stored, adapters)?;
         Ok(projected_0)
     }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn directory_roster_request_upcast_from_v_2026_04_01(
+        source: &DirectoryRosterRequestV20260401,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<DirectoryRosterRequestV20260701> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_04_01".into(),
+            direction: Direction::Upcast,
+            type_path: "DirectoryRosterRequest".into(),
+            reason: reason.into(),
+        };
+        Ok(DirectoryRosterRequestV20260701 {})
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn directory_roster_response_downcast_to_v_2026_04_01(
+        source: &Vec<v2026_07_01::Profile>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<Vec<v2026_04_01::Profile>> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_07_01".into(),
+            direction: Direction::Downcast,
+            type_path: "DirectoryRosterResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = map_sequence(
+            source,
+            |item| profile_downcast_to_v_2026_04_01(item, stored, adapters),
+        )?;
+        Ok(projected_0)
+    }
     /// Downgrade the complete operation error vocabulary for one adjacent step.
     pub fn downcast_directory_profile_error_to_v_2026_01_01(
         source: &v2026_04_01::DirectoryProfileError,
@@ -698,6 +778,13 @@ pub mod version_adapters {
         Ok(source.clone())
     }
     /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_directory_roster_error_to_v_2026_01_01(
+        source: &::xidl_rust_axum::Error,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<::xidl_rust_axum::Error> {
+        Ok(source.clone())
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
     pub fn downcast_directory_profile_error_to_v_2026_04_01(
         source: &v2026_07_01::DirectoryProfileError,
         adapters: &dyn VersionAdapters,
@@ -707,6 +794,9 @@ pub mod version_adapters {
                 missing_downcast_to_v_2026_04_01(value, adapters)
                     .map(v2026_04_01::DirectoryProfileError::Missing)
             }
+            v2026_07_01::DirectoryProfileError::Sealed(value) => {
+                adapters.directory_profile_sealed_error_downcast_to_v_2026_04_01(value)
+            }
             v2026_07_01::DirectoryProfileError::Framework(error) => {
                 Ok(v2026_04_01::DirectoryProfileError::Framework(error.clone()))
             }
@@ -714,6 +804,13 @@ pub mod version_adapters {
     }
     /// Downgrade the complete operation error vocabulary for one adjacent step.
     pub fn downcast_directory_publish_error_to_v_2026_04_01(
+        source: &::xidl_rust_axum::Error,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<::xidl_rust_axum::Error> {
+        Ok(source.clone())
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_directory_roster_error_to_v_2026_04_01(
         source: &::xidl_rust_axum::Error,
         adapters: &dyn VersionAdapters,
     ) -> VersionedResult<::xidl_rust_axum::Error> {
@@ -741,6 +838,7 @@ pub mod version_adapters {
             "fallback",
             "notes",
             "read_at",
+            "tier",
             "to",
         ];
         for key in object.keys() {
@@ -859,6 +957,7 @@ pub mod version_adapters {
             "notes",
             "read_at",
             "recipient",
+            "tier",
         ];
         for key in object.keys() {
             if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
@@ -1010,6 +1109,7 @@ pub mod version_adapters {
             "id",
             "notes",
             "read_at",
+            "tier",
             "title",
             "to",
         ];
@@ -1091,6 +1191,13 @@ pub mod version_adapters {
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
+        let raw_8 = object
+            .get("tier")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "tier").to_string()
+            })?;
+        let value_8: String = ::serde_json::from_value::<String>((raw_8).clone())
+            .map_err(|error| error.to_string())?;
         Ok(v2026_07_01::Profile {
             id: value_0,
             title: value_1,
@@ -1100,6 +1207,7 @@ pub mod version_adapters {
             fallback: value_5,
             to: value_6,
             read_at: value_7,
+            tier: value_8,
         })
     }
     fn decode_wire_v_2026_07_01_note(
@@ -1452,6 +1560,139 @@ pub mod version_adapters {
         )
     }
     /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_directory_roster_from_v_2026_01_01(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<DirectoryRosterRequestV20260701, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &[];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let source = DirectoryRosterRequestV20260101 {};
+        let source = directory_roster_request_upcast_from_v_2026_01_01(
+            &source,
+            adapters,
+        )?;
+        let source = directory_roster_request_upcast_from_v_2026_04_01(
+            &source,
+            adapters,
+        )?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_directory_roster_from_v_2026_01_01_outcome(
+        head: Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<Vec<v2026_01_01::Profile>, ::xidl_rust_axum::Error>,
+        Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+    > {
+        match &head {
+            Ok(source) => {
+                let source = match directory_roster_response_downcast_to_v_2026_04_01(
+                    source,
+                    stored,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                let source = match directory_roster_response_downcast_to_v_2026_01_01(
+                    &source,
+                    stored,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_directory_roster_error_to_v_2026_04_01(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                let source = match downcast_directory_roster_error_to_v_2026_01_01(
+                    &source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
+    pub async fn dispatch_directory_roster_from_v_2026_01_01<F, Fut, R>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<Vec<v2026_01_01::Profile>, ::xidl_rust_axum::Error>,
+            Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(DirectoryRosterRequestV20260701, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error, R>,
+        >,
+        R: StoredValues,
+    {
+        let input = decode_and_upcast_directory_roster_from_v_2026_01_01(
+            wire,
+            adapters,
+        )?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V20260101,
+                },
+            )
+            .await;
+        Ok(
+            downcast_directory_roster_from_v_2026_01_01_outcome(
+                head.outcome,
+                &head.stored,
+                adapters,
+            ),
+        )
+    }
+    /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_directory_profile_from_v_2026_04_01(
         wire: ::serde_json::Value,
         adapters: &dyn VersionAdapters,
@@ -1685,6 +1926,110 @@ pub mod version_adapters {
         )
     }
     /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_directory_roster_from_v_2026_04_01(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<DirectoryRosterRequestV20260701, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &[];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let source = DirectoryRosterRequestV20260401 {};
+        let source = directory_roster_request_upcast_from_v_2026_04_01(
+            &source,
+            adapters,
+        )?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_directory_roster_from_v_2026_04_01_outcome(
+        head: Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<Vec<v2026_04_01::Profile>, ::xidl_rust_axum::Error>,
+        Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+    > {
+        match &head {
+            Ok(source) => {
+                let source = match directory_roster_response_downcast_to_v_2026_04_01(
+                    source,
+                    stored,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_directory_roster_error_to_v_2026_04_01(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
+    pub async fn dispatch_directory_roster_from_v_2026_04_01<F, Fut, R>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<Vec<v2026_04_01::Profile>, ::xidl_rust_axum::Error>,
+            Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(DirectoryRosterRequestV20260701, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error, R>,
+        >,
+        R: StoredValues,
+    {
+        let input = decode_and_upcast_directory_roster_from_v_2026_04_01(
+            wire,
+            adapters,
+        )?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V20260401,
+                },
+            )
+            .await;
+        Ok(
+            downcast_directory_roster_from_v_2026_04_01_outcome(
+                head.outcome,
+                &head.stored,
+                adapters,
+            ),
+        )
+    }
+    /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_directory_profile_from_v_2026_07_01(
         wire: ::serde_json::Value,
         adapters: &dyn VersionAdapters,
@@ -1824,6 +2169,66 @@ pub mod version_adapters {
             )
             .await;
         Ok(downcast_directory_publish_from_v_2026_07_01_outcome(head, adapters))
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_directory_roster_from_v_2026_07_01(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<DirectoryRosterRequestV20260701, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &[];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let source = DirectoryRosterRequestV20260701 {};
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_directory_roster_from_v_2026_07_01_outcome(
+        head: Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+        Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+    > {
+        ProjectionOutcome::Projected(head)
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_directory_roster_from_v_2026_07_01<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+            Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(DirectoryRosterRequestV20260701, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+        >,
+    {
+        let input = decode_and_upcast_directory_roster_from_v_2026_07_01(
+            wire,
+            adapters,
+        )?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V20260701,
+                },
+            )
+            .await;
+        Ok(downcast_directory_roster_from_v_2026_07_01_outcome(head, adapters))
     }
     /// The caller-selected version's projected model type.
     pub enum MissingProjection {
@@ -1966,6 +2371,31 @@ pub mod version_adapters {
                     version: version.value().into(),
                     direction: Direction::Downcast,
                     type_path: "RouteProtocolProjection".into(),
+                    reason: "type is not reachable in selected version".into(),
+                })
+            }
+        }
+    }
+    /// The caller-selected version's projected model type.
+    pub enum SealedProjection {
+        V20260701(v2026_07_01::Sealed),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_sealed(
+        version: Version,
+        head: v2026_07_01::Sealed,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<SealedProjection> {
+        match version {
+            Version::V20260701 => {
+                let source = head;
+                Ok(SealedProjection::V20260701(source))
+            }
+            _ => {
+                Err(UnsupportedProjection {
+                    version: version.value().into(),
+                    direction: Direction::Downcast,
+                    type_path: "SealedProjection".into(),
                     reason: "type is not reachable in selected version".into(),
                 })
             }
@@ -2228,6 +2658,136 @@ pub mod version_adapters {
             .await;
         Ok(
             downcast_directory_publish_outcome(
+                version,
+                head.outcome,
+                &head.stored,
+                adapters,
+            ),
+        )
+    }
+    /// Outcome in the caller's explicitly selected contract version.
+    pub enum DirectoryRosterOutcome {
+        V20260101(Result<Vec<v2026_01_01::Profile>, ::xidl_rust_axum::Error>),
+        V20260401(Result<Vec<v2026_04_01::Profile>, ::xidl_rust_axum::Error>),
+        V20260701(Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>),
+    }
+    /// Decode a request using an application-resolved version before any hook.
+    pub fn decode_and_upcast_directory_roster(
+        version: Version,
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<DirectoryRosterRequestV20260701, AdaptationError> {
+        match version {
+            Version::V20260101 => {
+                decode_and_upcast_directory_roster_from_v_2026_01_01(wire, adapters)
+            }
+            Version::V20260401 => {
+                decode_and_upcast_directory_roster_from_v_2026_04_01(wire, adapters)
+            }
+            Version::V20260701 => {
+                decode_and_upcast_directory_roster_from_v_2026_07_01(wire, adapters)
+            }
+        }
+    }
+    /// Retain the original owned Head outcome when any projection refuses.
+    pub fn downcast_directory_roster_outcome(
+        version: Version,
+        head: Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        DirectoryRosterOutcome,
+        Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+    > {
+        match version {
+            Version::V20260101 => {
+                match downcast_directory_roster_from_v_2026_01_01_outcome(
+                    head,
+                    stored,
+                    adapters,
+                ) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            DirectoryRosterOutcome::V20260101(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V20260401 => {
+                match downcast_directory_roster_from_v_2026_04_01_outcome(
+                    head,
+                    stored,
+                    adapters,
+                ) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            DirectoryRosterOutcome::V20260401(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V20260701 => {
+                match downcast_directory_roster_from_v_2026_07_01_outcome(
+                    head,
+                    adapters,
+                ) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            DirectoryRosterOutcome::V20260701(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /// Execute a Head handler once; it returns the stored values older versions still read.
+    pub async fn dispatch_directory_roster<F, Fut, R>(
+        version: Version,
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            DirectoryRosterOutcome,
+            Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(DirectoryRosterRequestV20260701, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error, R>,
+        >,
+        R: StoredValues,
+    {
+        let input = decode_and_upcast_directory_roster(version, wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: version,
+                },
+            )
+            .await;
+        Ok(
+            downcast_directory_roster_outcome(
                 version,
                 head.outcome,
                 &head.stored,

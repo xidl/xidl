@@ -4,6 +4,7 @@ mod gen {
     include!(concat!(env!("CARGO_MANIFEST_DIR"), "/versioned_transforms_rust.adapters.rs"));
 }
 mod hooks;
+mod routes;
 mod http;
 mod http_app;
 mod transforms;

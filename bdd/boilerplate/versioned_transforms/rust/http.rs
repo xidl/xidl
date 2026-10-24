@@ -41,6 +41,19 @@ pub async fn run_http_journey() {
             request.json(&body).send().await.unwrap()
         }
     };
+    let roster = |version: Option<&str>| {
+        let http = http.clone();
+        let base = base.clone();
+        let version = version.map(str::to_owned);
+        let url = format!("{base}/roster");
+        async move {
+            let mut request = http.get(url);
+            if let Some(version) = version {
+                request = request.header("x-transform-version", version);
+            }
+            request.send().await.unwrap()
+        }
+    };
     let get = |version: Option<&str>, id: &str| {
         let http = http.clone();
         let base = base.clone();
@@ -89,6 +102,7 @@ pub async fn run_http_journey() {
     assert_eq!(head_view["fallback"], json!(true));
     assert_eq!(head_view["to"], json!({ "handle": "anna@example.test" }));
     assert_eq!(head_view["created_at_utc"], json!("2023-11-14T22:13:20.000Z"));
+    assert_eq!(head_view["tier"], json!("standard"));
     assert_eq!(head_view["notes"], json!([{ "text": "prefers email" }]));
     assert!(head_view.get("status").is_none());
 
@@ -155,6 +169,7 @@ pub async fn run_http_journey() {
             "id": "p2",
             "notes": [{ "text": "morning person" }, { "text": "vip" }],
             "read_at": "2026-06-02T08:00:00.000Z",
+            "tier": "premium",
             "title": "engineer",
             "to": { "handle": "lee@example.test", "protocol": "chat" },
         }),
@@ -256,6 +271,45 @@ pub async fn run_http_journey() {
     let v2_note: Value = get(Some("2026-04-01"), "p2").await.json().await.unwrap();
     assert_eq!(v2_note["note"], json!({ "text": "call first" }));
 
+    // E10: the refinement raised at Head reaches the middle release through
+    // the downgrade decision, keeping the committed status instead of being
+    // translated into a missing profile.
+    app.sealed.lock().unwrap().insert("p1".into());
+    let sealed_v2 = get(Some("2026-04-01"), "p1").await;
+    assert_eq!(sealed_v2.status(), StatusCode::CONFLICT);
+    let sealed_head = get(None, "p1").await;
+    assert_eq!(sealed_head.status(), StatusCode::CONFLICT);
+    app.sealed.lock().unwrap().remove("p1");
+
+    // E9: one roster read projects every element with its own facts.
+    let roster_response = roster(Some("2026-04-01")).await;
+    assert_eq!(roster_response.status(), StatusCode::OK);
+    let roster_v2: Value = roster_response.json().await.unwrap();
+    let entries = roster_v2.as_array().unwrap();
+    assert_eq!(entries.len(), 2);
+    let by_id = |id: &str| {
+        entries
+            .iter()
+            .find(|p| p["id"] == json!(id))
+            .cloned()
+            .unwrap()
+    };
+    assert_eq!(by_id("p1")["status"], json!("sent"));
+    assert_eq!(by_id("p1")["note"]["text"], json!("prefers email"));
+    assert_eq!(by_id("p2")["note"]["text"], json!("call first"));
+    assert_eq!(by_id("p2")["created_at"], json!(1_770_000_000i64));
+    let roster_v1_response = roster(Some("2026-01-01")).await;
+    assert_eq!(roster_v1_response.status(), StatusCode::OK);
+    let roster_v1: Value = roster_v1_response.json().await.unwrap();
+    let mut recipients: Vec<String> = roster_v1
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|p| p["recipient"].as_str().unwrap().to_owned())
+        .collect();
+    recipients.sort();
+    assert_eq!(recipients, vec!["anna@example.test", "lee@example.test"]);
+
     // A profile that only ever existed at Head cannot serve the pieces it
     // never had: the display name cannot be split, so the read refuses.
     let ghost = post(
@@ -265,6 +319,7 @@ pub async fn run_http_journey() {
             "display_name": "Solo",
             "id": "p3",
             "notes": [],
+            "tier": "standard",
             "title": "ghost",
             "to": { "handle": "ghost@example.test" },
         }),
@@ -272,6 +327,17 @@ pub async fn run_http_journey() {
     .await;
     assert_eq!(ghost.status(), StatusCode::OK);
     assert_eq!(get(Some("2026-04-01"), "p3").await.status(), StatusCode::UNPROCESSABLE_ENTITY);
+
+    // One element without its stored facts refuses the whole read: the list
+    // cannot be served partially without inventing the missing pieces.
+    let broken = roster(Some("2026-04-01")).await;
+    assert_eq!(broken.status(), StatusCode::UNPROCESSABLE_ENTITY);
+    let body: Value = broken.json().await.unwrap();
+    assert!(
+        body["reason"].as_str().unwrap_or_default().contains("display name"),
+        "{}",
+        body
+    );
 
     let _ = v2026_07_01::RouteProtocol::sms;
     stop.send(()).unwrap();
