@@ -23,7 +23,7 @@ expression: document
         ],
         "type": "object"
       },
-      "v2026_05.Photon.Admin.Quota": {
+      "v2026_05.Relay.Admin.Quota": {
         "properties": {
           "limit": {
             "format": "int32",
@@ -40,10 +40,10 @@ expression: document
         ],
         "type": "object"
       },
-      "v2026_05.Photon.Attachment": {
+      "v2026_05.Relay.Attachment": {
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/v2026_05.Photon.AttachmentId"
+            "$ref": "#/components/schemas/v2026_05.Relay.AttachmentId"
           },
           "mime_type": {
             "type": "string"
@@ -60,18 +60,18 @@ expression: document
         ],
         "type": "object"
       },
-      "v2026_05.Photon.AttachmentId": {
+      "v2026_05.Relay.AttachmentId": {
         "type": "string"
       },
-      "v2026_05.Photon.Capability": {
+      "v2026_05.Relay.Capability": {
         "type": "integer"
       },
-      "v2026_05.Photon.Content": {
+      "v2026_05.Relay.Content": {
         "oneOf": [
           {
             "properties": {
               "text": {
-                "$ref": "#/components/schemas/v2026_05.Photon.TextContent"
+                "$ref": "#/components/schemas/v2026_05.Relay.TextContent"
               }
             },
             "required": [
@@ -82,7 +82,7 @@ expression: document
           {
             "properties": {
               "attachment": {
-                "$ref": "#/components/schemas/v2026_05.Photon.Attachment"
+                "$ref": "#/components/schemas/v2026_05.Relay.Attachment"
               }
             },
             "required": [
@@ -93,7 +93,7 @@ expression: document
           {
             "properties": {
               "legacy": {
-                "$ref": "#/components/schemas/v2026_05.Photon.LegacyEnvelope"
+                "$ref": "#/components/schemas/v2026_05.Relay.LegacyEnvelope"
               }
             },
             "required": [
@@ -103,7 +103,7 @@ expression: document
           }
         ]
       },
-      "v2026_05.Photon.Gone": {
+      "v2026_05.Relay.Gone": {
         "properties": {
           "id": {
             "type": "string"
@@ -114,7 +114,7 @@ expression: document
         ],
         "type": "object"
       },
-      "v2026_05.Photon.LegacyEnvelope": {
+      "v2026_05.Relay.LegacyEnvelope": {
         "properties": {
           "raw": {
             "type": "string"
@@ -125,11 +125,11 @@ expression: document
         ],
         "type": "object"
       },
-      "v2026_05.Photon.Message": {
+      "v2026_05.Relay.Message": {
         "properties": {
           "attachments": {
             "items": {
-              "$ref": "#/components/schemas/v2026_05.Photon.Attachment"
+              "$ref": "#/components/schemas/v2026_05.Relay.Attachment"
             },
             "type": "array"
           },
@@ -147,10 +147,10 @@ expression: document
             "type": "string"
           },
           "space_id": {
-            "$ref": "#/components/schemas/v2026_05.Photon.SpaceId"
+            "$ref": "#/components/schemas/v2026_05.Relay.SpaceId"
           },
           "status": {
-            "$ref": "#/components/schemas/v2026_05.Photon.MessageStatus"
+            "$ref": "#/components/schemas/v2026_05.Relay.MessageStatus"
           }
         },
         "required": [
@@ -163,7 +163,7 @@ expression: document
         ],
         "type": "object"
       },
-      "v2026_05.Photon.MessageStatus": {
+      "v2026_05.Relay.MessageStatus": {
         "enum": [
           "QUEUED",
           "SENT",
@@ -173,7 +173,7 @@ expression: document
         ],
         "type": "string"
       },
-      "v2026_05.Photon.NotFound": {
+      "v2026_05.Relay.NotFound": {
         "properties": {
           "id": {
             "type": "string"
@@ -188,7 +188,7 @@ expression: document
         ],
         "type": "object"
       },
-      "v2026_05.Photon.Participant": {
+      "v2026_05.Relay.Participant": {
         "allOf": [
           {
             "properties": {
@@ -202,11 +202,11 @@ expression: document
             "type": "object"
           },
           {
-            "$ref": "#/components/schemas/v2026_05.Photon.UserRef"
+            "$ref": "#/components/schemas/v2026_05.Relay.UserRef"
           }
         ]
       },
-      "v2026_05.Photon.Reaction": {
+      "v2026_05.Relay.Reaction": {
         "oneOf": [
           {
             "properties": {
@@ -232,20 +232,20 @@ expression: document
           }
         ]
       },
-      "v2026_05.Photon.ReactionKind": {
+      "v2026_05.Relay.ReactionKind": {
         "enum": [
           "LIKE",
           "LOVE"
         ],
         "type": "string"
       },
-      "v2026_05.Photon.Space": {
+      "v2026_05.Relay.Space": {
         "properties": {
           "capabilities": {
-            "$ref": "#/components/schemas/v2026_05.Photon.Capability"
+            "$ref": "#/components/schemas/v2026_05.Relay.Capability"
           },
           "id": {
-            "$ref": "#/components/schemas/v2026_05.Photon.SpaceId"
+            "$ref": "#/components/schemas/v2026_05.Relay.SpaceId"
           },
           "member_count": {
             "format": "int32",
@@ -266,10 +266,10 @@ expression: document
         ],
         "type": "object"
       },
-      "v2026_05.Photon.SpaceId": {
+      "v2026_05.Relay.SpaceId": {
         "type": "string"
       },
-      "v2026_05.Photon.TextContent": {
+      "v2026_05.Relay.TextContent": {
         "properties": {
           "text": {
             "type": "string"
@@ -280,7 +280,7 @@ expression: document
         ],
         "type": "object"
       },
-      "v2026_05.Photon.UserRef": {
+      "v2026_05.Relay.UserRef": {
         "properties": {
           "id": {
             "type": "string"
@@ -300,21 +300,21 @@ expression: document
     }
   },
   "info": {
-    "title": "photon_messaging",
+    "title": "relay_messaging",
     "version": "2026-05"
   },
   "openapi": "3.1.0",
   "paths": {
     "/admin/quotas/{space_id}": {
       "get": {
-        "operationId": "v2026_05.Photon.Admin.Quotas.get",
+        "operationId": "v2026_05.Relay.Admin.Quotas.get",
         "parameters": [
           {
             "in": "path",
             "name": "space_id",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/v2026_05.Photon.SpaceId"
+              "$ref": "#/components/schemas/v2026_05.Relay.SpaceId"
             }
           }
         ],
@@ -323,7 +323,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_05.Photon.Admin.Quota"
+                  "$ref": "#/components/schemas/v2026_05.Relay.Admin.Quota"
                 }
               }
             },
@@ -359,12 +359,12 @@ expression: document
       "post": {
         "deprecated": true,
         "description": "Deprecated. Since 2026-05-01T00:00:00Z. After 2026-07-01T23:59:59Z.",
-        "operationId": "v2026_05.Photon.Messages.legacy_send",
+        "operationId": "v2026_05.Relay.Messages.legacy_send",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/v2026_05.Photon.LegacyEnvelope"
+                "$ref": "#/components/schemas/v2026_05.Relay.LegacyEnvelope"
               }
             }
           }
@@ -374,7 +374,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_05.Photon.Message"
+                  "$ref": "#/components/schemas/v2026_05.Relay.Message"
                 }
               }
             },
@@ -408,7 +408,7 @@ expression: document
     },
     "/messages/search": {
       "get": {
-        "operationId": "v2026_05.Photon.Messages.find",
+        "operationId": "v2026_05.Relay.Messages.find",
         "parameters": [
           {
             "in": "query",
@@ -425,7 +425,7 @@ expression: document
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/v2026_05.Photon.Message"
+                    "$ref": "#/components/schemas/v2026_05.Relay.Message"
                   },
                   "type": "array"
                 }
@@ -461,7 +461,7 @@ expression: document
     },
     "/messages/{id}": {
       "delete": {
-        "operationId": "v2026_05.Photon.Messages.remove",
+        "operationId": "v2026_05.Relay.Messages.remove",
         "parameters": [
           {
             "in": "path",
@@ -490,7 +490,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_05.Photon.NotFound"
+                  "$ref": "#/components/schemas/v2026_05.Relay.NotFound"
                 }
               }
             },
@@ -500,7 +500,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_05.Photon.Gone"
+                  "$ref": "#/components/schemas/v2026_05.Relay.Gone"
                 }
               }
             },
@@ -522,7 +522,7 @@ expression: document
         ]
       },
       "get": {
-        "operationId": "v2026_05.Photon.Messages.get",
+        "operationId": "v2026_05.Relay.Messages.get",
         "parameters": [
           {
             "in": "path",
@@ -549,7 +549,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_05.Photon.Message"
+                  "$ref": "#/components/schemas/v2026_05.Relay.Message"
                 }
               }
             },
@@ -569,7 +569,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_05.Photon.NotFound"
+                  "$ref": "#/components/schemas/v2026_05.Relay.NotFound"
                 }
               }
             },
@@ -591,7 +591,7 @@ expression: document
         ]
       },
       "patch": {
-        "operationId": "v2026_05.Photon.Messages.edit",
+        "operationId": "v2026_05.Relay.Messages.edit",
         "parameters": [
           {
             "in": "path",
@@ -606,7 +606,7 @@ expression: document
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/v2026_05.Photon.TextContent"
+                "$ref": "#/components/schemas/v2026_05.Relay.TextContent"
               }
             }
           }
@@ -616,7 +616,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_05.Photon.Message"
+                  "$ref": "#/components/schemas/v2026_05.Relay.Message"
                 }
               }
             },
@@ -636,7 +636,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_05.Photon.NotFound"
+                  "$ref": "#/components/schemas/v2026_05.Relay.NotFound"
                 }
               }
             },
@@ -660,7 +660,7 @@ expression: document
     },
     "/messages/{id}/reactions": {
       "post": {
-        "operationId": "v2026_05.Photon.Media.react",
+        "operationId": "v2026_05.Relay.Media.react",
         "parameters": [
           {
             "in": "path",
@@ -675,7 +675,7 @@ expression: document
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/v2026_05.Photon.Reaction"
+                "$ref": "#/components/schemas/v2026_05.Relay.Reaction"
               }
             }
           }
@@ -685,7 +685,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_05.Photon.Reaction"
+                  "$ref": "#/components/schemas/v2026_05.Relay.Reaction"
                 }
               }
             },
@@ -719,7 +719,7 @@ expression: document
     },
     "/poll": {
       "get": {
-        "operationId": "v2026_05.Photon.LegacyPolling.poll",
+        "operationId": "v2026_05.Relay.LegacyPolling.poll",
         "parameters": [
           {
             "in": "query",
@@ -736,7 +736,7 @@ expression: document
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/v2026_05.Photon.Message"
+                    "$ref": "#/components/schemas/v2026_05.Relay.Message"
                   },
                   "type": "array"
                 }
@@ -758,7 +758,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_05.Photon.Gone"
+                  "$ref": "#/components/schemas/v2026_05.Relay.Gone"
                 }
               }
             },
@@ -782,14 +782,14 @@ expression: document
     },
     "/spaces/{id}": {
       "get": {
-        "operationId": "v2026_05.Photon.Spaces.get",
+        "operationId": "v2026_05.Relay.Spaces.get",
         "parameters": [
           {
             "in": "path",
             "name": "id",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/v2026_05.Photon.SpaceId"
+              "$ref": "#/components/schemas/v2026_05.Relay.SpaceId"
             }
           }
         ],
@@ -798,7 +798,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_05.Photon.Space"
+                  "$ref": "#/components/schemas/v2026_05.Relay.Space"
                 }
               }
             },
@@ -818,7 +818,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_05.Photon.NotFound"
+                  "$ref": "#/components/schemas/v2026_05.Relay.NotFound"
                 }
               }
             },
@@ -842,14 +842,14 @@ expression: document
     },
     "/spaces/{space_id}/messages": {
       "get": {
-        "operationId": "v2026_05.Photon.Messages.list",
+        "operationId": "v2026_05.Relay.Messages.list",
         "parameters": [
           {
             "in": "path",
             "name": "space_id",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/v2026_05.Photon.SpaceId"
+              "$ref": "#/components/schemas/v2026_05.Relay.SpaceId"
             }
           }
         ],
@@ -859,7 +859,7 @@ expression: document
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/v2026_05.Photon.Message"
+                    "$ref": "#/components/schemas/v2026_05.Relay.Message"
                   },
                   "type": "array"
                 }
@@ -893,14 +893,14 @@ expression: document
         ]
       },
       "post": {
-        "operationId": "v2026_05.Photon.Messages.send",
+        "operationId": "v2026_05.Relay.Messages.send",
         "parameters": [
           {
             "in": "path",
             "name": "space_id",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/v2026_05.Photon.SpaceId"
+              "$ref": "#/components/schemas/v2026_05.Relay.SpaceId"
             }
           }
         ],
@@ -918,7 +918,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_05.Photon.Message"
+                  "$ref": "#/components/schemas/v2026_05.Relay.Message"
                 }
               }
             },
@@ -952,7 +952,7 @@ expression: document
     },
     "/users": {
       "get": {
-        "operationId": "v2026_05.Photon.Users.list",
+        "operationId": "v2026_05.Relay.Users.list",
         "parameters": [
           {
             "in": "cookie",
@@ -969,7 +969,7 @@ expression: document
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/v2026_05.Photon.Participant"
+                    "$ref": "#/components/schemas/v2026_05.Relay.Participant"
                   },
                   "type": "array"
                 }
@@ -1020,7 +1020,7 @@ expression: document
     },
     "/users/{id}": {
       "get": {
-        "operationId": "v2026_05.Photon.Users.get",
+        "operationId": "v2026_05.Relay.Users.get",
         "parameters": [
           {
             "in": "path",
@@ -1036,7 +1036,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_05.Photon.Participant"
+                  "$ref": "#/components/schemas/v2026_05.Relay.Participant"
                 }
               }
             },
@@ -1066,7 +1066,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_05.Photon.NotFound"
+                  "$ref": "#/components/schemas/v2026_05.Relay.NotFound"
                 }
               }
             },
@@ -1095,7 +1095,7 @@ expression: document
     },
     "/users/{id}/block": {
       "post": {
-        "operationId": "v2026_05.Photon.Users.block",
+        "operationId": "v2026_05.Relay.Users.block",
         "parameters": [
           {
             "in": "path",
@@ -1153,7 +1153,7 @@ expression: document
     },
     "/users/{id}/unread": {
       "get": {
-        "operationId": "v2026_05.Photon.Users.unread",
+        "operationId": "v2026_05.Relay.Users.unread",
         "parameters": [
           {
             "in": "path",

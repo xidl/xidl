@@ -23,7 +23,7 @@ expression: document
         ],
         "type": "object"
       },
-      "v2026_03.Photon.Admin.Quota": {
+      "v2026_03.Relay.Admin.Quota": {
         "properties": {
           "limit": {
             "format": "int32",
@@ -40,15 +40,15 @@ expression: document
         ],
         "type": "object"
       },
-      "v2026_03.Photon.Capability": {
+      "v2026_03.Relay.Capability": {
         "type": "integer"
       },
-      "v2026_03.Photon.Content": {
+      "v2026_03.Relay.Content": {
         "oneOf": [
           {
             "properties": {
               "text": {
-                "$ref": "#/components/schemas/v2026_03.Photon.TextContent"
+                "$ref": "#/components/schemas/v2026_03.Relay.TextContent"
               }
             },
             "required": [
@@ -59,7 +59,7 @@ expression: document
           {
             "properties": {
               "legacy": {
-                "$ref": "#/components/schemas/v2026_03.Photon.LegacyEnvelope"
+                "$ref": "#/components/schemas/v2026_03.Relay.LegacyEnvelope"
               }
             },
             "required": [
@@ -69,7 +69,7 @@ expression: document
           }
         ]
       },
-      "v2026_03.Photon.Gone": {
+      "v2026_03.Relay.Gone": {
         "properties": {
           "id": {
             "type": "string"
@@ -80,7 +80,7 @@ expression: document
         ],
         "type": "object"
       },
-      "v2026_03.Photon.LegacyEnvelope": {
+      "v2026_03.Relay.LegacyEnvelope": {
         "properties": {
           "raw": {
             "type": "string"
@@ -91,7 +91,7 @@ expression: document
         ],
         "type": "object"
       },
-      "v2026_03.Photon.Message": {
+      "v2026_03.Relay.Message": {
         "properties": {
           "body": {
             "type": "string"
@@ -107,10 +107,10 @@ expression: document
             "type": "string"
           },
           "space_id": {
-            "$ref": "#/components/schemas/v2026_03.Photon.SpaceId"
+            "$ref": "#/components/schemas/v2026_03.Relay.SpaceId"
           },
           "status": {
-            "$ref": "#/components/schemas/v2026_03.Photon.MessageStatus"
+            "$ref": "#/components/schemas/v2026_03.Relay.MessageStatus"
           }
         },
         "required": [
@@ -122,7 +122,7 @@ expression: document
         ],
         "type": "object"
       },
-      "v2026_03.Photon.MessageStatus": {
+      "v2026_03.Relay.MessageStatus": {
         "enum": [
           "QUEUED",
           "SENT",
@@ -131,7 +131,7 @@ expression: document
         ],
         "type": "string"
       },
-      "v2026_03.Photon.NotFound": {
+      "v2026_03.Relay.NotFound": {
         "properties": {
           "id": {
             "type": "string"
@@ -146,7 +146,7 @@ expression: document
         ],
         "type": "object"
       },
-      "v2026_03.Photon.Participant": {
+      "v2026_03.Relay.Participant": {
         "allOf": [
           {
             "properties": {
@@ -160,11 +160,11 @@ expression: document
             "type": "object"
           },
           {
-            "$ref": "#/components/schemas/v2026_03.Photon.UserRef"
+            "$ref": "#/components/schemas/v2026_03.Relay.UserRef"
           }
         ]
       },
-      "v2026_03.Photon.Reaction": {
+      "v2026_03.Relay.Reaction": {
         "oneOf": [
           {
             "properties": {
@@ -190,20 +190,20 @@ expression: document
           }
         ]
       },
-      "v2026_03.Photon.ReactionKind": {
+      "v2026_03.Relay.ReactionKind": {
         "enum": [
           "LIKE",
           "LOVE"
         ],
         "type": "string"
       },
-      "v2026_03.Photon.Space": {
+      "v2026_03.Relay.Space": {
         "properties": {
           "capabilities": {
-            "$ref": "#/components/schemas/v2026_03.Photon.Capability"
+            "$ref": "#/components/schemas/v2026_03.Relay.Capability"
           },
           "id": {
-            "$ref": "#/components/schemas/v2026_03.Photon.SpaceId"
+            "$ref": "#/components/schemas/v2026_03.Relay.SpaceId"
           },
           "member_count": {
             "format": "int32",
@@ -224,10 +224,10 @@ expression: document
         ],
         "type": "object"
       },
-      "v2026_03.Photon.SpaceId": {
+      "v2026_03.Relay.SpaceId": {
         "type": "string"
       },
-      "v2026_03.Photon.TextContent": {
+      "v2026_03.Relay.TextContent": {
         "properties": {
           "text": {
             "type": "string"
@@ -238,7 +238,7 @@ expression: document
         ],
         "type": "object"
       },
-      "v2026_03.Photon.UserRef": {
+      "v2026_03.Relay.UserRef": {
         "properties": {
           "id": {
             "type": "string"
@@ -258,21 +258,21 @@ expression: document
     }
   },
   "info": {
-    "title": "photon_messaging",
+    "title": "relay_messaging",
     "version": "2026-03"
   },
   "openapi": "3.1.0",
   "paths": {
     "/admin/quotas/{space_id}": {
       "get": {
-        "operationId": "v2026_03.Photon.Admin.Quotas.get",
+        "operationId": "v2026_03.Relay.Admin.Quotas.get",
         "parameters": [
           {
             "in": "path",
             "name": "space_id",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/v2026_03.Photon.SpaceId"
+              "$ref": "#/components/schemas/v2026_03.Relay.SpaceId"
             }
           }
         ],
@@ -281,7 +281,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_03.Photon.Admin.Quota"
+                  "$ref": "#/components/schemas/v2026_03.Relay.Admin.Quota"
                 }
               }
             },
@@ -315,12 +315,12 @@ expression: document
     },
     "/messages/legacy": {
       "post": {
-        "operationId": "v2026_03.Photon.Messages.legacy_send",
+        "operationId": "v2026_03.Relay.Messages.legacy_send",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/v2026_03.Photon.LegacyEnvelope"
+                "$ref": "#/components/schemas/v2026_03.Relay.LegacyEnvelope"
               }
             }
           }
@@ -330,7 +330,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_03.Photon.Message"
+                  "$ref": "#/components/schemas/v2026_03.Relay.Message"
                 }
               }
             },
@@ -364,7 +364,7 @@ expression: document
     },
     "/messages/search": {
       "get": {
-        "operationId": "v2026_03.Photon.Messages.find",
+        "operationId": "v2026_03.Relay.Messages.find",
         "parameters": [
           {
             "in": "query",
@@ -381,7 +381,7 @@ expression: document
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/v2026_03.Photon.Message"
+                    "$ref": "#/components/schemas/v2026_03.Relay.Message"
                   },
                   "type": "array"
                 }
@@ -417,7 +417,7 @@ expression: document
     },
     "/messages/{id}": {
       "delete": {
-        "operationId": "v2026_03.Photon.Messages.remove",
+        "operationId": "v2026_03.Relay.Messages.remove",
         "parameters": [
           {
             "in": "path",
@@ -446,7 +446,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_03.Photon.NotFound"
+                  "$ref": "#/components/schemas/v2026_03.Relay.NotFound"
                 }
               }
             },
@@ -456,7 +456,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_03.Photon.Gone"
+                  "$ref": "#/components/schemas/v2026_03.Relay.Gone"
                 }
               }
             },
@@ -478,7 +478,7 @@ expression: document
         ]
       },
       "get": {
-        "operationId": "v2026_03.Photon.Messages.get",
+        "operationId": "v2026_03.Relay.Messages.get",
         "parameters": [
           {
             "in": "path",
@@ -494,7 +494,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_03.Photon.Message"
+                  "$ref": "#/components/schemas/v2026_03.Relay.Message"
                 }
               }
             },
@@ -514,7 +514,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_03.Photon.NotFound"
+                  "$ref": "#/components/schemas/v2026_03.Relay.NotFound"
                 }
               }
             },
@@ -538,7 +538,7 @@ expression: document
     },
     "/messages/{id}/reactions": {
       "post": {
-        "operationId": "v2026_03.Photon.Media.react",
+        "operationId": "v2026_03.Relay.Media.react",
         "parameters": [
           {
             "in": "path",
@@ -553,7 +553,7 @@ expression: document
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/v2026_03.Photon.Reaction"
+                "$ref": "#/components/schemas/v2026_03.Relay.Reaction"
               }
             }
           }
@@ -563,7 +563,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_03.Photon.Reaction"
+                  "$ref": "#/components/schemas/v2026_03.Relay.Reaction"
                 }
               }
             },
@@ -597,7 +597,7 @@ expression: document
     },
     "/poll": {
       "get": {
-        "operationId": "v2026_03.Photon.LegacyPolling.poll",
+        "operationId": "v2026_03.Relay.LegacyPolling.poll",
         "parameters": [
           {
             "in": "query",
@@ -614,7 +614,7 @@ expression: document
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/v2026_03.Photon.Message"
+                    "$ref": "#/components/schemas/v2026_03.Relay.Message"
                   },
                   "type": "array"
                 }
@@ -636,7 +636,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_03.Photon.Gone"
+                  "$ref": "#/components/schemas/v2026_03.Relay.Gone"
                 }
               }
             },
@@ -660,14 +660,14 @@ expression: document
     },
     "/spaces/{id}": {
       "get": {
-        "operationId": "v2026_03.Photon.Spaces.get",
+        "operationId": "v2026_03.Relay.Spaces.get",
         "parameters": [
           {
             "in": "path",
             "name": "id",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/v2026_03.Photon.SpaceId"
+              "$ref": "#/components/schemas/v2026_03.Relay.SpaceId"
             }
           }
         ],
@@ -676,7 +676,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_03.Photon.Space"
+                  "$ref": "#/components/schemas/v2026_03.Relay.Space"
                 }
               }
             },
@@ -696,7 +696,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_03.Photon.NotFound"
+                  "$ref": "#/components/schemas/v2026_03.Relay.NotFound"
                 }
               }
             },
@@ -720,14 +720,14 @@ expression: document
     },
     "/spaces/{space_id}/messages": {
       "get": {
-        "operationId": "v2026_03.Photon.Messages.list",
+        "operationId": "v2026_03.Relay.Messages.list",
         "parameters": [
           {
             "in": "path",
             "name": "space_id",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/v2026_03.Photon.SpaceId"
+              "$ref": "#/components/schemas/v2026_03.Relay.SpaceId"
             }
           }
         ],
@@ -737,7 +737,7 @@ expression: document
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/v2026_03.Photon.Message"
+                    "$ref": "#/components/schemas/v2026_03.Relay.Message"
                   },
                   "type": "array"
                 }
@@ -771,14 +771,14 @@ expression: document
         ]
       },
       "post": {
-        "operationId": "v2026_03.Photon.Messages.send",
+        "operationId": "v2026_03.Relay.Messages.send",
         "parameters": [
           {
             "in": "path",
             "name": "space_id",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/v2026_03.Photon.SpaceId"
+              "$ref": "#/components/schemas/v2026_03.Relay.SpaceId"
             }
           }
         ],
@@ -796,7 +796,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_03.Photon.Message"
+                  "$ref": "#/components/schemas/v2026_03.Relay.Message"
                 }
               }
             },
@@ -830,7 +830,7 @@ expression: document
     },
     "/users": {
       "get": {
-        "operationId": "v2026_03.Photon.Users.list",
+        "operationId": "v2026_03.Relay.Users.list",
         "parameters": [
           {
             "in": "cookie",
@@ -847,7 +847,7 @@ expression: document
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/v2026_03.Photon.Participant"
+                    "$ref": "#/components/schemas/v2026_03.Relay.Participant"
                   },
                   "type": "array"
                 }
@@ -898,7 +898,7 @@ expression: document
     },
     "/users/{id}": {
       "get": {
-        "operationId": "v2026_03.Photon.Users.get",
+        "operationId": "v2026_03.Relay.Users.get",
         "parameters": [
           {
             "in": "path",
@@ -914,7 +914,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_03.Photon.Participant"
+                  "$ref": "#/components/schemas/v2026_03.Relay.Participant"
                 }
               }
             },
@@ -944,7 +944,7 @@ expression: document
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/v2026_03.Photon.NotFound"
+                  "$ref": "#/components/schemas/v2026_03.Relay.NotFound"
                 }
               }
             },
@@ -973,7 +973,7 @@ expression: document
     },
     "/users/{id}/block": {
       "post": {
-        "operationId": "v2026_03.Photon.Users.block",
+        "operationId": "v2026_03.Relay.Users.block",
         "parameters": [
           {
             "in": "path",
