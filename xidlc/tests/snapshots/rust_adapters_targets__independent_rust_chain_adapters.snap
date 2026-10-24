@@ -96,7 +96,7 @@ pub mod version_adapters {
             stored: &dyn StoredValues,
         ) -> VersionedResult<BookingDowncastToV20261001Decision>;
     }
-    /// Members older versions still read that Head no longer carries, resolved per Head instance by the application.
+    /// Members older versions still read that Head no longer carries, resolved by the application from the source instance of the downcast step that retires them.
     pub trait StoredValues {
         /// wire `agenda`, last served by v2026_06_01
         fn booking_agenda(&self, source: &v2026_10_01::Booking) -> Option<String>;

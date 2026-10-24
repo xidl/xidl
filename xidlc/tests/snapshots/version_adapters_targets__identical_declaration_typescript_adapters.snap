@@ -184,7 +184,7 @@ export interface VersionAdapters {
     
 }
 
-    /** Members older versions still read that Head no longer carries, resolved per Head instance by the application. */
+    /** Members older versions still read that Head no longer carries, resolved by the application from the source instance of the downcast step that retires them. */
     export interface StoredValues {
         
             /** wire `value`, last served by v1 */
