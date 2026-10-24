@@ -105,6 +105,7 @@ export const hooks: a.VersionAdapters = {
       value: {
         agenda: a.IGNORED,
         items: [{ minutes: duration, title }],
+        locked: false,
       },
     };
   },

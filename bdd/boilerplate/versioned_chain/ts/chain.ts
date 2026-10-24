@@ -229,7 +229,7 @@ assert.equal(
 );
 
 console.log(
-  'PASS: booking chain keeps storage facts, pure conversions and mechanical renames',
+  'PASS: booking chain keeps storage facts, pure conversions and implied defaults',
 );
 
 await runChainHttpJourney();
