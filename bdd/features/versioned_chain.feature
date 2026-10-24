@@ -1,3 +1,4 @@
+@bdd_rest-versioning
 Feature: versioned booking chain
   A three-release booking contract exercising the walkthrough's chain shape:
   an uninvertible packaging change, a retired attendee roster served from
