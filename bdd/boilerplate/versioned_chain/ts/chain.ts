@@ -197,7 +197,7 @@ assert.equal('kind' in invalid.error && invalid.error.kind, 'Validation');
 assert.equal(calls.upFromV1, 2, 'validation precedes every hook');
 
 console.log(
-  'PASS: booking chain keeps storage facts, pure conversions and mechanical renames',
+  'PASS: booking chain keeps storage facts, pure conversions and implied defaults',
 );
 
 await runChainHttpJourney();
