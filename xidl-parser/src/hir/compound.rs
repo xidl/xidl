@@ -38,7 +38,37 @@ pub struct UnionDef {
     pub annotations: Vec<Annotation>,
     pub ident: String,
     pub switch_type_spec: SwitchTypeSpec,
+    /// The declared enum this union switches on, resolved through typedef
+    /// aliases by the semantic pass. `None` for primitive switch types and
+    /// references that name no declared enum.
+    pub switch_enum: Option<SwitchEnum>,
     pub case: Vec<Case>,
+}
+
+/// A union's switch enum as the semantic pass resolved it: the enum's
+/// declaration path and its enumerator identifiers, so generators can tell
+/// enumerator case labels apart from constants and qualify them.
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+pub struct SwitchEnum {
+    pub path: Vec<String>,
+    pub enumerators: Vec<String>,
+}
+
+impl SwitchEnum {
+    /// The enumerator a case label denotes, if any: a bare enumerator name,
+    /// or a path whose final two segments are this enum's identifier and one
+    /// of its enumerators. A path through any other declaration names a
+    /// constant, not an enumerator.
+    pub fn enumerator_named<'a>(&'a self, label: &'a ScopedName) -> Option<&'a str> {
+        let [parents @ .., last] = label.name.as_slice() else {
+            return None;
+        };
+        let through_enum = match parents.last() {
+            None => true,
+            Some(parent) => Some(parent) == self.path.last(),
+        };
+        (through_enum && self.enumerators.contains(last)).then_some(last.as_str())
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -186,6 +216,7 @@ impl From<crate::typed_ast::UnionDef> for UnionDef {
             annotations: vec![],
             ident: value.ident.0,
             switch_type_spec: value.switch_type_spec.into(),
+            switch_enum: None,
             case: cases,
         }
     }

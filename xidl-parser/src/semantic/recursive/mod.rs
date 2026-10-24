@@ -3,4 +3,5 @@ mod paths;
 mod schemas;
 
 pub(crate) use members::annotate_recursive_members;
+pub(crate) use paths::resolve_in;
 pub use schemas::recursive_schema_types;

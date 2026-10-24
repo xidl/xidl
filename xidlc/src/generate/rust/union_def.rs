@@ -1,9 +1,8 @@
-use super::util::{http_union_case_ident, union_serde_tag_string};
+use super::util::{http_union_case_ident, union_case_label, union_serde_tag_string};
 use crate::error::IdlcResult;
 use crate::generate::rust::util::{
-    constr_type_scoped_name, declarator_name, render_const, rust_derive_info_with_extra,
-    rust_ident, rust_passthrough_attrs_from_annotations, rust_scoped_name, rust_switch_type,
-    type_with_decl,
+    constr_type_scoped_name, declarator_name, rust_derive_info_with_extra, rust_ident,
+    rust_passthrough_attrs_from_annotations, rust_scoped_name, rust_switch_type, type_with_decl,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
@@ -119,7 +118,9 @@ pub(crate) fn render_union_with_config(
                 .label
                 .iter()
                 .map(|label| match label {
-                    hir::CaseLabel::Value(expr) => render_const(expr),
+                    hir::CaseLabel::Value(expr) => {
+                        union_case_label(expr, def.switch_enum.as_ref(), module_path)
+                    }
                     hir::CaseLabel::Default => "default".to_string(),
                 })
                 .collect::<Vec<_>>();

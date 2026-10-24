@@ -89,6 +89,7 @@ Specification(
                         switch_type_spec: IntegerType(
                             I32,
                         ),
+                        switch_enum: None,
                         case: [
                             Case {
                                 label: [

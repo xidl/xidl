@@ -218,7 +218,7 @@ impl<'a> RenderEnv<'a> {
             .chain(std::iter::once(ident))
             .collect::<Vec<_>>()
             .join("::");
-        super::super::scope::TypeScope::relative_path(self.module_path, &canonical)
+        crate::generate::utils::scope::relative_path(self.module_path, &canonical)
     }
 
     pub(crate) fn new(

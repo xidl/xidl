@@ -17,6 +17,15 @@ union UnionValue switch (Tag) {
     case Tag::V3:
         map<string, string> case3;
 };
+/// Labels spelled as bare enumerators, which must still resolve to `Tag`.
+union BareTagValue switch (Tag) {
+    case V1:
+        string first;
+    case V2:
+        int32 second;
+    case V3:
+        boolean third;
+};
 
 union IntTagValue switch (long) {
     case 1:
@@ -47,6 +56,7 @@ union CharTagValue switch (char) {
 
 interface UnionSerdeService {
     readonly attribute UnionValue sample;
+    readonly attribute BareTagValue bare_sample;
     readonly attribute IntTagValue int_sample;
     readonly attribute BoolTagValue bool_sample;
     readonly attribute CharTagValue char_sample;
