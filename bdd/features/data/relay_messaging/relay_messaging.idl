@@ -1,8 +1,8 @@
-// Versioned-API stress fixture: 5 lifecycle versions, Photon-style messaging API.
+// Versioned-API stress fixture: 5 lifecycle versions, multi-release messaging API.
 // Target compiler: xidlc 0.104.0 (phase-1 versioning: @version / @added / @removed only).
 // Every change below carries a tag (F = field, T = type, M = method, A = annotation)
 // that the expectation document refers to.
-#pragma xidlc package photon_messaging
+#pragma xidlc package relay_messaging
 
 @version
 enum ApiVersion {
@@ -13,7 +13,7 @@ enum ApiVersion {
     @rename("2026-11") v2026_11,
 };
 
-module Photon {
+module Relay {
 
     // ---------------------------------------------------------------- types
 
@@ -291,7 +291,7 @@ module Photon {
         struct Quota { long limit; long used; };
         interface Quotas {
             @get(path = "/admin/quotas/{space_id}")
-            Quota get(@path ::Photon::SpaceId space_id);
+            Quota get(@path ::Relay::SpaceId space_id);
         };
     };
 
@@ -328,7 +328,7 @@ module Photon {
         void block(@path string id);
 
         @added(ApiVersion::v2026_09)
-        @api_key(in = "header", name = "X-Photon-Key")
+        @api_key(in = "header", name = "X-Relay-Key")
         @post(path = "/users/{id}/block")
         void block(@path string id) raises(RateLimited);
 
@@ -355,7 +355,7 @@ module Photon {
 
         // M20 WebSocket upgrade added in the last version
         @added(ApiVersion::v2026_11)
-        @upgrade(protocol = "photon-realtime")
+        @upgrade(protocol = "relay-realtime")
         @path("/realtime{?token}")
         void realtime(@query @rename("token") string token);
     };
