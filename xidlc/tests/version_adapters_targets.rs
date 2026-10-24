@@ -234,6 +234,7 @@ fn defaulted_additions_require_the_implied_value_in_the_upcast_decision() {
     );
 }
 
+#[test]
 fn update_request_conversions_must_stay_operation_disjoint() {
     let source = r#"
         @version enum V { v1, v2 };
