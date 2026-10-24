@@ -125,7 +125,7 @@ def generation_and_correction(context):
 def warning_policy(context):
     directory = Path(context.temp_dir)
     plugin = directory / "plugin.idl"
-    plugin.write_text("//@photon_audit\nstruct Audit { string id; };\n")
+    plugin.write_text("//@relay_audit\nstruct Audit { string id; };\n")
     result = subprocess.run(
         [compiler(), "lint", str(plugin)], capture_output=True, text=True
     )

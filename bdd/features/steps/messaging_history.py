@@ -34,10 +34,10 @@ def generate(context, source, output, target="openapi", version=None):
     return files
 
 
-@given("the five-version Photon messaging corpus")
+@given("the five-version Relay messaging corpus")
 def messaging_corpus(context):
-    context.messaging_corpus = Path.cwd() / "bdd/features/data/photon_messaging"
-    context.messaging_source = context.messaging_corpus / "photon_messaging.idl"
+    context.messaging_corpus = Path.cwd() / "bdd/features/data/relay_messaging"
+    context.messaging_source = context.messaging_corpus / "relay_messaging.idl"
     context.messaging_work = Path(tempfile.mkdtemp(prefix="xidl-messaging-"))
     context.add_cleanup(shutil.rmtree, context.messaging_work)
     result = subprocess.run(
@@ -60,7 +60,7 @@ def generate_history(context):
     )
     assert context.messaging_history == repeated
     assert set(repeated) == {
-        f"openapi_photon_messaging.{version}.json" for version in VERSIONS
+        f"openapi_relay_messaging.{version}.json" for version in VERSIONS
     }
 
 
@@ -73,7 +73,7 @@ def selected_history(context):
             context.messaging_work / version,
             version=version,
         )
-        name = f"openapi_photon_messaging.{version}.json"
+        name = f"openapi_relay_messaging.{version}.json"
         assert selected == {name: context.messaging_history[name]}
 
     original = generate(
@@ -94,13 +94,13 @@ def selected_history(context):
         VERSIONS[-1],
     )
     assert original == changed
-    encoded = original["photon_messaging.version-map.json"]
+    encoded = original["relay_messaging.version-map.json"]
     document = json.loads(encoded)
     assert encoded == (json.dumps(document, indent=2) + "\n").encode()
     assert len(document["steps"]) == 4
-    replacement = document["steps"][0]["operations"]["Photon::Messages.legacy_send"]
+    replacement = document["steps"][0]["operations"]["Relay::Messages.legacy_send"]
     assert replacement["from"]["declaration_id"] != replacement["to"]["declaration_id"]
-    assert "Photon::Participant" not in document["steps"][1]["types"]
+    assert "Relay::Participant" not in document["steps"][1]["types"]
 
 
 @then("canonical diffs preserve the messaging lifecycle boundaries")
@@ -115,8 +115,8 @@ def history_diff(context):
         context, "version", "diff", "2026-07", "2026-09", context.messaging_source
     )
     assert changed.returncode == 1, changed.stderr
-    assert "--- photon_messaging.idl @ v2026_07 (2026-07)" in changed.stdout
-    assert "+++ photon_messaging.idl @ v2026_09 (2026-09)" in changed.stdout
+    assert "--- relay_messaging.idl @ v2026_07 (2026-07)" in changed.stdout
+    assert "+++ relay_messaging.idl @ v2026_09 (2026-09)" in changed.stdout
     assert "Idempotency-Key" in changed.stdout
     assert (
         "created_at_epoch" in changed.stdout and "created_at_rfc3339" in changed.stdout
@@ -136,7 +136,7 @@ def historical_edit(context):
     changed = generate(context, altered, context.messaging_work / "altered")
     assert set(changed) == set(context.messaging_history)
     for version in VERSIONS:
-        name = f"openapi_photon_messaging.{version}.json"
+        name = f"openapi_relay_messaging.{version}.json"
         before = hashlib.sha256(context.messaging_history[name]).digest()
         after = hashlib.sha256(changed[name]).digest()
         assert (before == after) == (version == "v2026_03"), version
@@ -197,7 +197,7 @@ def negative_history(context):
     assert len(positive) == 1
     document = json.loads(next(iter(positive.values())))
     assert set(document["paths"]) == {"/r", "/p"}
-    assert len(document["components"]["schemas"]["Photon.Reaction"]["oneOf"]) == 2
+    assert len(document["components"]["schemas"]["Relay.Reaction"]["oneOf"]) == 2
 
 
 @then("unknown release selections fail without producing artifacts")
