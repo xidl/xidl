@@ -204,6 +204,26 @@ assert(!invalid.ok);
 assert.equal('kind' in invalid.error && invalid.error.kind, 'Validation');
 assert.equal(calls.upFromV1, 2, 'validation precedes every hook');
 
+// An absent optional predecessor stays absent: the rename copies what is
+// there and invents nothing when the caller omitted it.
+const ownerless = a.upcastBookingFromV20260601(
+  { ...v1Booking, owner: undefined },
+  hooks,
+);
+assert(ownerless.ok, JSON.stringify(ownerless));
+assert.equal(
+  ownerless.value.owner,
+  undefined,
+  'the rename carries absence, never a fabricated owner',
+);
+const ownerlessHead = a.upcastBookingFromV20261001(ownerless.value, hooks);
+assert(ownerlessHead.ok, JSON.stringify(ownerlessHead));
+assert.equal(
+  ownerlessHead.value.organizer,
+  undefined,
+  'Head sees no organizer when no owner was ever named',
+);
+
 console.log(
   'PASS: booking chain keeps storage facts, pure conversions and mechanical renames',
 );

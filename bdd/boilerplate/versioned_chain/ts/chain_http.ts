@@ -142,6 +142,7 @@ export async function runChainHttpJourney(): Promise<void> {
       {
         id: 'b1',
         items: [{ minutes: 60, title: 'Kickoff' }],
+        owner: 'user-9',
         roster: ['ignored-by-the-chain'],
         title: 'Kickoff',
       },

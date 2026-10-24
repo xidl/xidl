@@ -93,6 +93,20 @@ pub fn assert_conversions(hooks: &Hooks, storage: &Storage) {
     let to_head = booking_upcast_from_v_2026_10_01(&to_v2, hooks).unwrap();
     assert_eq!(to_head.organizer.as_deref(), Some("user-9"));
 
+    // An absent optional predecessor stays absent: the rename copies what is
+    // there and invents nothing when the caller omitted it.
+    let ownerless = v2026_06_01::Booking { owner: None, ..v1.clone() };
+    let ownerless_v2 = booking_upcast_from_v_2026_06_01(&ownerless, hooks).unwrap();
+    assert_eq!(
+        ownerless_v2.owner, None,
+        "the rename carries absence, never a fabricated owner"
+    );
+    let ownerless_head = booking_upcast_from_v_2026_10_01(&ownerless_v2, hooks).unwrap();
+    assert_eq!(
+        ownerless_head.organizer, None,
+        "Head sees no organizer when no owner was ever named"
+    );
+
     // An ambiguous text block is refused, not guessed: the sample encoding
     // cannot represent a title that contains the separator.
     let ambiguous = v2026_06_01::Booking { id: "b-amb".into(), agenda: "A;B;45".into(), ..v1.clone() };
