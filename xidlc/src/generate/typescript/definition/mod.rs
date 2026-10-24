@@ -1,4 +1,5 @@
 mod annotations;
+pub(crate) use annotations::ts_doc_lines;
 mod attr;
 pub(crate) mod contexts;
 mod http;

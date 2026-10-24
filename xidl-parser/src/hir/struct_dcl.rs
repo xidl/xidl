@@ -37,7 +37,7 @@ impl fmt::Debug for StructDcl {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Member {
     pub annotations: Vec<Annotation>,
     pub ty: TypeSpec,
@@ -45,6 +45,30 @@ pub struct Member {
     pub default: Option<Default>,
     pub field_id: Option<u32>,
     pub recursive: bool,
+    /// The member's type names a `@deprecated` declaration. Populated by
+    /// semantic analysis so generated references can silence rustc's
+    /// `deprecated` lint.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub references_deprecated: bool,
+}
+
+impl fmt::Debug for Member {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut debug = f.debug_struct("Member");
+        debug
+            .field("annotations", &self.annotations)
+            .field("ty", &self.ty)
+            .field("ident", &self.ident)
+            .field("default", &self.default)
+            .field("field_id", &self.field_id)
+            .field("recursive", &self.recursive);
+        // Members that reach no deprecated declaration keep the historical
+        // debug shape so stored snapshots describe only flagged members.
+        if self.references_deprecated {
+            debug.field("references_deprecated", &true);
+        }
+        debug.finish()
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -109,6 +133,7 @@ impl From<crate::typed_ast::Member> for Member {
             default: value.default.map(Into::into),
             field_id,
             recursive: false,
+            references_deprecated: false,
         }
     }
 }

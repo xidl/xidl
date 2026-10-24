@@ -42,7 +42,7 @@ T: {{ ident }} + Send + Sync + 'static,
     {% endif %}
 
     {% for method in methods %}
-        #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion, unused_mut, unreachable_code, clippy::let_unit_value, unused_variables)]
+        #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion, unused_mut, unreachable_code, clippy::let_unit_value, unused_variables{% if method.deprecated %}, deprecated{% endif %})]
         async fn {{ method.name }}(
         ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,

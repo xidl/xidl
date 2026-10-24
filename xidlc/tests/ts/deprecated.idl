@@ -1,0 +1,46 @@
+@deprecated(since = "2026-07-01")
+module legacy {
+    struct Message {
+        string id;
+        @deprecated string subject;
+    };
+    enum Channel { sms, @deprecated mms };
+    @deprecated(after = "2027-01-01")
+    exception Gone {
+        string reason;
+        @deprecated string replacement;
+    };
+    @deprecated(after = "2027-01-01")
+    union Payload switch (long) {
+        case 1: string text;
+        case 2: Message media;
+    };
+    struct Envelope {
+        Message message;
+        @deprecated @optional Channel fallback;
+    };
+};
+
+module parts {
+    @deprecated(since = "2026-05-01")
+    module nested {
+        struct Deep { string id; };
+    };
+};
+
+module parts {
+    struct Sibling { nested::Deep deep; };
+};
+
+module scope {
+    @deprecated(since = "2026-04-01")
+    module inner {
+        struct Marked { string id; };
+    };
+};
+
+module scope {
+    module inner {
+        struct Quiet { string id; };
+    };
+};

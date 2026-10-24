@@ -154,9 +154,13 @@ RESTful can mark methods as deprecated in three ways:
 
 They can be placed on:
 
+- Modules
+- Structs, unions, enums and exceptions
+- Members and enumerators
 - Interfaces
 - Methods
 - Attributes
+- Parameters
 
 Practical recommendations:
 
@@ -164,7 +168,9 @@ Practical recommendations:
 - To express "deprecated starting from a certain date": use `@deprecated("...")`
 - To express both the deprecation time and the planned removal window: use `@deprecated(since = "...", after = "...")`
 
-Interface-level `@deprecated` will be inherited by its methods and attributes; when a method-level declaration is present, the more specific method-level one takes precedence.
+Inheritance follows the nearest declaration: a module's `@deprecated` applies to every declaration inside it, an interface's to its methods and attributes, and when a more specific declaration carries its own `@deprecated`, that one takes precedence.
+
+Each target renders the deprecation in its native form: OpenAPI sets `deprecated: true` on the component, property or parameter schema (deprecated enumerators become a description note, since OpenAPI has no per-value flag), TypeScript emits JSDoc `@deprecated` on the namespace, type, field or parameter, and Rust emits `#[deprecated]` on the module, type, field or variant. Generated mechanical code silences rustc's own `deprecated` lint, so the warnings stay where they belong: in the code of the consumer that still touches a deprecated declaration.
 
 ## Optional Parameters
 

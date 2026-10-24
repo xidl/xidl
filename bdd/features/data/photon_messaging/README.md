@@ -21,12 +21,15 @@ specification. In particular:
 - Bare `@version` declares no transport location or default header.
 - Version maps retain declaration replacements, including `legacy_send`, and
   contain only direct facts; inherited/reference changes are not propagated.
-- `lint` and `gen` remain independent. N12/N15 are lint errors.
+- `lint` and `gen` remain independent. N12 is a lint error.
 - `@deprecated` describes a generated API surface: it is valid on interfaces,
-  operations and attributes, can carry `since`/`after` metadata, and is not a
-  struct or exception member annotation. N15 is the member placement error; the
-  owning compiler tests cover valid uses and show that deprecation does not
-  remove routes, even with a past `after` timestamp.
+  operations and attributes, can carry `since`/`after` metadata, and — since the
+  site widening of [#369](https://github.com/xidl/xidl/issues/369) — also on
+  modules, types, members, enumerators and parameters. The archived report
+  recorded N15 as the member placement error; that rejection is obsolete, and
+  the scenario now asserts the generated property schema carries
+  `deprecated: true`. Deprecation does not remove routes, even with a past
+  `after` timestamp.
 - Correcting the v2026_09 `Idempotency-Key` binding changes that version's old
   digest; the new regression snapshot records the correction, while this
   historical lock remains unchanged.

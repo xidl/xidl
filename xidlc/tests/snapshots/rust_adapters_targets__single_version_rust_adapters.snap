@@ -1,9 +1,16 @@
 ---
 source: xidlc/tests/rust_adapters_targets.rs
+assertion_line: 32
 expression: "&files[0].1"
 ---
 /// Pure version projections. The application owns routing and side effects.
-#[allow(unused_imports, unused_variables, non_snake_case, non_camel_case_types)]
+#[allow(
+    unused_imports,
+    unused_variables,
+    non_snake_case,
+    non_camel_case_types,
+    deprecated
+)]
 pub mod version_adapters {
     use super::only;
     /// Direction of an unsupported projection.

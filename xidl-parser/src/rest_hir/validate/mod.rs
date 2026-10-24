@@ -2,8 +2,8 @@ use crate::hir;
 use std::collections::{HashMap, HashSet};
 
 use super::semantics::{
-    DeprecatedInfo, HttpStreamCodec, HttpStreamKind, annotation_name, annotation_params,
-    deprecated_info, normalize_annotation_params,
+    HttpStreamCodec, HttpStreamKind, annotation_name, annotation_params,
+    normalize_annotation_params,
 };
 use super::{HttpMethod, HttpParam, HttpParamKind, HttpRoute, RestHirResult};
 
@@ -37,19 +37,6 @@ pub(super) fn param_direction(attr: Option<&hir::ParamAttribute>) -> HttpParamDi
         Some("inout") => HttpParamDirection::InOut,
         _ => HttpParamDirection::In,
     }
-}
-
-pub(super) fn effective_deprecated(
-    interface_annotations: &[hir::Annotation],
-    item_annotations: &[hir::Annotation],
-) -> Result<Option<DeprecatedInfo>, String> {
-    deprecated_info(item_annotations).and_then(|value| {
-        if value.is_some() {
-            Ok(value)
-        } else {
-            deprecated_info(interface_annotations)
-        }
-    })
 }
 
 pub(super) fn effective_basic_auth_realm(

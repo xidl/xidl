@@ -61,7 +61,13 @@ pub trait HttpScopeMatrixService {
     )]
     async fn deprecated_window(&self, id: String) -> ::xidl_rust_axum::Result<String>;
 }
-#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
+#[allow(
+    non_snake_case,
+    non_camel_case_types,
+    non_upper_case_globals,
+    unused_imports,
+    deprecated
+)]
 pub(super) mod __xidl_in_HttpScopeMatrixService {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
@@ -92,7 +98,13 @@ pub(super) mod __xidl_in_HttpScopeMatrixService {
         }
     }
 }
-#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
+#[allow(
+    non_snake_case,
+    non_camel_case_types,
+    non_upper_case_globals,
+    unused_imports,
+    deprecated
+)]
 pub(super) mod __xidl_out_HttpScopeMatrixService {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
@@ -608,7 +620,8 @@ where
         unused_mut,
         unreachable_code,
         clippy::let_unit_value,
-        unused_variables
+        unused_variables,
+        deprecated
     )]
     async fn get_attribute_inherited_attr(
         ::xidl_rust_axum::axum::extract::State(
@@ -676,7 +689,8 @@ where
         unused_mut,
         unreachable_code,
         clippy::let_unit_value,
-        unused_variables
+        unused_variables,
+        deprecated
     )]
     async fn get_attribute_bare_attr(
         ::xidl_rust_axum::axum::extract::State(
@@ -733,7 +747,8 @@ where
         unused_mut,
         unreachable_code,
         clippy::let_unit_value,
-        unused_variables
+        unused_variables,
+        deprecated
     )]
     async fn default_scope(
         ::xidl_rust_axum::axum::extract::State(
@@ -804,7 +819,8 @@ where
         unused_mut,
         unreachable_code,
         clippy::let_unit_value,
-        unused_variables
+        unused_variables,
+        deprecated
     )]
     async fn override_consumes_only(
         ::xidl_rust_axum::axum::extract::State(
@@ -877,7 +893,8 @@ where
         unused_mut,
         unreachable_code,
         clippy::let_unit_value,
-        unused_variables
+        unused_variables,
+        deprecated
     )]
     async fn override_produces_only(
         ::xidl_rust_axum::axum::extract::State(
@@ -951,7 +968,8 @@ where
         unused_mut,
         unreachable_code,
         clippy::let_unit_value,
-        unused_variables
+        unused_variables,
+        deprecated
     )]
     async fn override_both_media(
         ::xidl_rust_axum::axum::extract::State(
@@ -1026,7 +1044,8 @@ where
         unused_mut,
         unreachable_code,
         clippy::let_unit_value,
-        unused_variables
+        unused_variables,
+        deprecated
     )]
     async fn deprecated_plain(
         ::xidl_rust_axum::axum::extract::State(
@@ -1086,7 +1105,8 @@ where
         unused_mut,
         unreachable_code,
         clippy::let_unit_value,
-        unused_variables
+        unused_variables,
+        deprecated
     )]
     async fn deprecated_since_only(
         ::xidl_rust_axum::axum::extract::State(
@@ -1157,7 +1177,8 @@ where
         unused_mut,
         unreachable_code,
         clippy::let_unit_value,
-        unused_variables
+        unused_variables,
+        deprecated
     )]
     async fn deprecated_window(
         ::xidl_rust_axum::axum::extract::State(
@@ -1743,11 +1764,23 @@ pub trait HttpSecurityMatrixService {
     ) -> ::xidl_rust_axum::Result<String>;
     async fn public_ping(&self) -> ::xidl_rust_axum::Result<String>;
 }
-#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
+#[allow(
+    non_snake_case,
+    non_camel_case_types,
+    non_upper_case_globals,
+    unused_imports,
+    deprecated
+)]
 pub(super) mod __xidl_in_HttpSecurityMatrixService {
     use super::*;
 }
-#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports)]
+#[allow(
+    non_snake_case,
+    non_camel_case_types,
+    non_upper_case_globals,
+    unused_imports,
+    deprecated
+)]
 pub(super) mod __xidl_out_HttpSecurityMatrixService {
     use super::*;
 }

@@ -1,7 +1,7 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::util::{
-    declarator_name, rust_derive_info_with_extra, rust_passthrough_attrs_from_annotations,
-    type_with_decl,
+    declarator_name, rust_deprecated_attr, rust_derive_info_with_extra,
+    rust_passthrough_attrs_from_annotations, type_with_decl,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
@@ -11,12 +11,27 @@ use xidl_parser::rest_hir::semantics::has_annotation;
 
 impl RustRender for hir::ExceptDcl {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
+        // Like structs: the whole exception silences the lint when its
+        // members reach deprecated declarations, so field type paths and
+        // derive expansions stay quiet while consumers stay warned.
+        let allow_deprecated = self
+            .member
+            .iter()
+            .any(|member| member.references_deprecated)
+            || rust_deprecated_attr(&[&self.annotations])?.is_some();
+        let deprecated = self
+            .member
+            .iter()
+            .map(|member| rust_deprecated_attr(&[&member.annotations]))
+            .collect::<IdlcResult<Vec<_>>>()?;
         let members = self
             .member
             .iter()
-            .flat_map(|member| {
+            .zip(deprecated)
+            .flat_map(|(member, deprecated)| {
                 let doc = doc_lines_from_annotations(&member.annotations);
-                let rust_attrs = rust_passthrough_attrs_from_annotations(&member.annotations);
+                let mut rust_attrs = rust_passthrough_attrs_from_annotations(&member.annotations);
+                rust_attrs.extend(deprecated);
                 // `@header`/`@cookie` members travel outside the body, so the
                 // serialized error body excludes them; generated client/server
                 // code moves the values through real headers instead.
@@ -47,13 +62,18 @@ impl RustRender for hir::ExceptDcl {
             })
             .collect::<Vec<_>>();
         let derive = rust_derive_info_with_extra(&self.annotations, &self.annotations);
+        let mut rust_attrs = rust_passthrough_attrs_from_annotations(&self.annotations);
+        if allow_deprecated {
+            rust_attrs.push("allow(deprecated)".to_string());
+        }
+        rust_attrs.extend(rust_deprecated_attr(&[&self.annotations])?);
         let ctx = renderer.enrich_ctx(
             renderer.with_ident(
                 json!({
                     "members": members,
                     "derive": derive.all,
                     "enable_serde_attrs": derive.enable_serde_attrs(),
-                    "rust_attrs": rust_passthrough_attrs_from_annotations(&self.annotations),
+                    "rust_attrs": rust_attrs,
                 }),
                 &self.ident,
             ),

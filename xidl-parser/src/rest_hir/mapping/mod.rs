@@ -25,6 +25,8 @@ pub fn build_operation_signature(op: &hir::OpDcl) -> Result<HttpOperationSignatu
                 HttpParamDirection::InOut => HttpSignatureParamDirection::InOut,
             };
 
+            let deprecated = super::semantics::deprecated_info(&param.annotations)
+                .map_err(|reason| format!("parameter '{}': {reason}", param.declarator.0))?;
             Ok(HttpSignatureParam {
                 name: param.declarator.0.clone(),
                 ty: param.ty.clone(),
@@ -32,6 +34,7 @@ pub fn build_operation_signature(op: &hir::OpDcl) -> Result<HttpOperationSignatu
                 is_optional: super::semantics::has_optional_annotation(&param.annotations),
                 is_flatten: super::semantics::has_annotation(&param.annotations, "flatten"),
                 annotations: get_signature_annotations(param)?,
+                deprecated,
             })
         })
         .collect::<RestHirResult<_>>()?;

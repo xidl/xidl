@@ -31,6 +31,10 @@ pub(crate) struct MethodContext {
     pub(crate) deprecated_since: Option<String>,
     pub(crate) deprecated_after: Option<String>,
     pub(crate) deprecated_note: Option<String>,
+    /// Doc bullets naming this method's `@deprecated` parameters.
+    pub(crate) deprecated_param_notes: Vec<String>,
+    /// Any `raises(...)` exception of this method is deprecated.
+    pub(crate) raises_deprecated: bool,
     pub(crate) params: Vec<String>,
     pub(crate) param_names: Vec<String>,
     pub(crate) server_params: Vec<String>,
@@ -130,6 +134,8 @@ pub(crate) struct RaisesContext {
     pub(crate) cookies: Vec<ExceptionMemberContext>,
     /// Whether the exception declares body members (non-`@header`/`@cookie`).
     pub(crate) has_body: bool,
+    /// The raised exception is deprecated.
+    pub(crate) deprecated: bool,
 }
 
 /// A `@header`/`@cookie` member of an exception, for wire read/write.

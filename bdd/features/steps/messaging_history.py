@@ -179,6 +179,17 @@ def negative_history(context):
                         "schema": {"type": "string"},
                     }
                 ]
+        elif expected["expect"] == "deprecated-property":
+            files = generate(context, source, output)
+            assert len(files) == len(VERSIONS)
+            for filename, encoded in files.items():
+                version = filename.rsplit(".", 2)[-2]
+                document = json.loads(encoded)
+                schema_name = expected["schema"].format(version=version)
+                prop = document["components"]["schemas"][schema_name]["properties"][
+                    expected["property"]
+                ]
+                assert prop["deprecated"] is True, (name, prop)
         elif expected["expect"] == "errors-by-version":
             files = generate(context, source, output)
             assert len(files) == len(expected["value"])

@@ -402,6 +402,10 @@ builder! {
         #[serde(skip_serializing_if = "Option::is_none")]
         pub description: Option<String>,
 
+        /// Changes the [`OneOf`] deprecated status.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub deprecated: Option<Deprecated>,
+
         /// Default value which is provided when user has not provided the input in Swagger UI.
         #[serde(skip_serializing_if = "Option::is_none")]
         pub default: Option<Value>,
@@ -462,6 +466,7 @@ impl Default for OneOf {
             schema_type: SchemaType::AnyValue,
             title: Default::default(),
             description: Default::default(),
+            deprecated: Default::default(),
             default: Default::default(),
             example: Default::default(),
             examples: Default::default(),
@@ -500,6 +505,11 @@ impl OneOfBuilder {
     /// Add or change default value for the object which is provided when user has not provided the input in Swagger UI.
     pub fn default(mut self, default: Option<Value>) -> Self {
         set_value!(self default default)
+    }
+
+    /// Add or change deprecated status for [`OneOf`].
+    pub fn deprecated(mut self, deprecated: Option<Deprecated>) -> Self {
+        set_value!(self deprecated deprecated)
     }
 
     /// Add or change example shown in UI of the value for richer documentation.
@@ -579,6 +589,10 @@ builder! {
         #[serde(skip_serializing_if = "Option::is_none")]
         pub description: Option<String>,
 
+        /// Changes the [`AllOf`] deprecated status.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub deprecated: Option<Deprecated>,
+
         /// Default value which is provided when user has not provided the input in Swagger UI.
         #[serde(skip_serializing_if = "Option::is_none")]
         pub default: Option<Value>,
@@ -639,6 +653,7 @@ impl Default for AllOf {
             schema_type: SchemaType::AnyValue,
             title: Default::default(),
             description: Default::default(),
+            deprecated: Default::default(),
             default: Default::default(),
             example: Default::default(),
             examples: Default::default(),
@@ -677,6 +692,11 @@ impl AllOfBuilder {
     /// Add or change default value for the object which is provided when user has not provided the input in Swagger UI.
     pub fn default(mut self, default: Option<Value>) -> Self {
         set_value!(self default default)
+    }
+
+    /// Add or change deprecated status for [`AllOf`].
+    pub fn deprecated(mut self, deprecated: Option<Deprecated>) -> Self {
+        set_value!(self deprecated deprecated)
     }
 
     /// Add or change example shown in UI of the value for richer documentation.

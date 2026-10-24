@@ -1,7 +1,7 @@
+use super::annotations::{ts_deprecation, ts_doc_lines};
 use crate::error::IdlcResult;
 use crate::generate::typescript::TypescriptRenderer;
 use crate::generate::typescript::definition::contexts::TsRenderCtx;
-use crate::generate::utils::doc_lines_from_annotations;
 use xidl_parser::hir;
 
 use super::contexts::{
@@ -42,7 +42,7 @@ pub(crate) fn render_exception(
 ) -> IdlcResult<TsRenderOutput> {
     render_struct(
         &hir::StructDcl {
-            annotations: Vec::new(),
+            annotations: except.annotations.clone(),
             ident: except.ident.clone(),
             parent: Vec::new(),
             member: except.member.clone(),
@@ -91,7 +91,7 @@ fn render_typedefs(
             &TypedefTypeContext {
                 name: name.clone(),
                 type_expr,
-                doc: doc_lines_from_annotations(&typedef.annotations),
+                doc: ts_doc_lines(&typedef.annotations)?,
             },
         )?);
         let schema_expr = match &typedef.ty {
@@ -138,18 +138,18 @@ fn render_struct(
                 .collect(),
         )
     };
-    let fields = struct_fields(&def.member, &def.annotations, module_path);
+    let fields = struct_fields(&def.member, &def.annotations, module_path)?;
     let wire_fields = struct_fields(
         &def.members().cloned().collect::<Vec<_>>(),
         &def.annotations,
         module_path,
-    );
+    )?;
     let types = ctx.renderer.render_template(
         "struct.d.ts.j2",
         &StructTypeContext {
             ident: ident.clone(),
             extends,
-            doc: doc_lines_from_annotations(&def.annotations),
+            doc: ts_doc_lines(&def.annotations)?,
             fields: fields
                 .iter()
                 .map(|field| FieldTypeContext {
@@ -189,18 +189,24 @@ fn render_struct(
 
 fn render_enum(def: &hir::EnumDcl, renderer: &TypescriptRenderer) -> IdlcResult<TsRenderOutput> {
     let ident = ts_ident(&def.ident);
-    let members = def
-        .member
-        .iter()
-        .map(|value| hir::effective_wire_name(&value.ident, &value.annotations, &def.annotations))
-        .collect::<Vec<_>>();
+    // String-literal unions have no per-value JSDoc slot, so deprecated
+    // enumerators are recorded on the type.
+    let mut enum_doc = ts_doc_lines(&def.annotations)?;
+    let mut members = Vec::new();
+    for value in &def.member {
+        let wire = hir::effective_wire_name(&value.ident, &value.annotations, &def.annotations);
+        if let Some(info) = ts_deprecation(&value.annotations)? {
+            enum_doc.push(info.enumerator_note(&wire));
+        }
+        members.push(wire);
+    }
     Ok(TsRenderOutput {
         types: vec![renderer.render_template(
             "enum.d.ts.j2",
             &EnumTypeContext {
                 ident: ident.clone(),
                 members,
-                doc: doc_lines_from_annotations(&def.annotations),
+                doc: enum_doc,
             },
         )?],
         zod: vec![
@@ -272,7 +278,7 @@ fn render_union(
             &UnionTypeContext {
                 ident: ident.clone(),
                 variants,
-                doc: doc_lines_from_annotations(&def.annotations),
+                doc: ts_doc_lines(&def.annotations)?,
             },
         )?],
         zod: vec![ctx.renderer.render_template(

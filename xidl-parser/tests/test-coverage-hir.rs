@@ -171,6 +171,7 @@ fn hir_struct_and_type_dcl_cover_optional_and_inline_typedef_paths() {
         )),
         field_id: None,
         recursive: false,
+        references_deprecated: false,
     };
     assert!(scoped_optional.is_optional());
     assert_eq!(

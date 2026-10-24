@@ -53,13 +53,37 @@ pub enum CaseLabel {
     Default,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ElementSpec {
     pub annotations: Vec<Annotation>,
     pub ty: ElementSpecTy,
     pub value: Declarator,
     pub field_id: Option<u32>,
     pub recursive: bool,
+    /// The element's type names a `@deprecated` declaration. Populated by
+    /// semantic analysis so generated references can silence rustc's
+    /// `deprecated` lint.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub references_deprecated: bool,
+}
+
+impl std::fmt::Debug for ElementSpec {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut debug = f.debug_struct("ElementSpec");
+        debug
+            .field("annotations", &self.annotations)
+            .field("ty", &self.ty)
+            .field("value", &self.value)
+            .field("field_id", &self.field_id)
+            .field("recursive", &self.recursive);
+        // Union cases that reach no deprecated declaration keep the
+        // historical debug shape so stored snapshots describe only flagged
+        // cases.
+        if self.references_deprecated {
+            debug.field("references_deprecated", &true);
+        }
+        debug.finish()
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -218,6 +242,7 @@ impl From<crate::typed_ast::ElementSpec> for ElementSpec {
             ty: value.ty.into(),
             value: value.value.into(),
             recursive: false,
+            references_deprecated: false,
         }
     }
 }

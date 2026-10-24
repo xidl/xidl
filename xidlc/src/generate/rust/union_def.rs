@@ -1,9 +1,9 @@
 use super::util::{http_union_case_ident, union_serde_tag_string};
 use crate::error::IdlcResult;
 use crate::generate::rust::util::{
-    constr_type_scoped_name, declarator_name, render_const, rust_derive_info_with_extra,
-    rust_ident, rust_passthrough_attrs_from_annotations, rust_scoped_name, rust_switch_type,
-    type_with_decl,
+    constr_type_scoped_name, declarator_name, render_const, rust_deprecated_attr,
+    rust_derive_info_with_extra, rust_ident, rust_passthrough_attrs_from_annotations,
+    rust_scoped_name, rust_switch_type, type_with_decl,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
@@ -59,7 +59,7 @@ fn render_http_union(def: &hir::UnionDef, renderer: &RustRenderer) -> IdlcResult
         renderer.with_ident(
             json!({
                 "cases": cases,
-                "rust_attrs": rust_passthrough_attrs_from_annotations(&def.annotations),
+                "rust_attrs": rust_attrs_from(def)?,
             }),
             &def.ident,
         ),
@@ -78,11 +78,15 @@ pub(crate) fn render_union_with_config(
     }
     let mut fields = Vec::new();
     let mut seen = BTreeSet::new();
+    let mut any_references = false;
     for case in &def.case {
         let name = crate::generate::rust::util::rust_ident(&declarator_name(&case.element.value));
         if seen.insert(name.clone()) {
             let doc = doc_lines_from_annotations(&case.element.annotations);
             let rust_attrs = rust_passthrough_attrs_from_annotations(&case.element.annotations);
+            if case.element.references_deprecated {
+                any_references = true;
+            }
             fields.push((
                 name,
                 &case.element.ty,
@@ -94,6 +98,7 @@ pub(crate) fn render_union_with_config(
         }
     }
 
+    let allow_deprecated = any_references || rust_deprecated_attr(&[&def.annotations])?.is_some();
     let members = fields
         .into_iter()
         .map(|(name, ty, decl, doc, rust_attrs, recursive)| {
@@ -239,10 +244,18 @@ pub(crate) fn render_union_with_config(
             "has_serde_deserialize": derive.has_serde_deserialize,
             "derive": auto_derives,
             "manual_derives": manual_derives,
-            "rust_attrs": rust_passthrough_attrs_from_annotations(&def.annotations),
+            "rust_attrs": rust_attrs_from(def)?,
+            "deprecated": allow_deprecated,
         }),
         &doc_lines_from_annotations(&def.annotations),
         module_path,
     );
     renderer.render_source_template("union.rs.j2", &ctx)
+}
+
+/// Passthrough attributes plus the `deprecated` attribute when declared.
+fn rust_attrs_from(def: &hir::UnionDef) -> IdlcResult<Vec<String>> {
+    let mut attrs = rust_passthrough_attrs_from_annotations(&def.annotations);
+    attrs.extend(rust_deprecated_attr(&[&def.annotations])?);
+    Ok(attrs)
 }

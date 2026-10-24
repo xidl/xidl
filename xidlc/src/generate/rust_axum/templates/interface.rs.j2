@@ -12,6 +12,14 @@
     #[async_trait::async_trait]
     pub trait {{ ident }} {
         {% for method in methods %}
+            {% if method.deprecated_param_notes | length > 0 %}
+                ///
+                /// # Deprecated parameters
+                ///
+                {% for note in method.deprecated_param_notes %}
+                    /// {{ note }}
+                {% endfor %}
+            {% endif %}
             {% if method.rust_attrs and method.rust_attrs | length > 0 %}
                 {% for attr in method.rust_attrs %}
                     #[{{ attr }}]
@@ -39,7 +47,8 @@
             #[derive(Debug)]
             pub enum {{ method.error_ty }} {
                 {% for ex in method.raises %}
-                    {{ ex.variant }}({{ ex.ty }}),
+                    {% if ex.deprecated %}#[allow(deprecated)]
+                    {% endif %}{{ ex.variant }}({{ ex.ty }}),
                 {% endfor %}
                 Framework(xidl_rust_axum::Error),
             }
