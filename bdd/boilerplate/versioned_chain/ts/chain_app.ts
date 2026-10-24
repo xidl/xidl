@@ -10,16 +10,29 @@ export const VERSION_IDS = {
 } as const;
 export type VersionId = (typeof VERSION_IDS)[keyof typeof VERSION_IDS];
 
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** A calendar-real date, not merely a matching shape: 2026-02-30 is not one. */
+const isCalendarDate = (value: string): boolean => {
+  if (!ISO_DATE.test(value)) return false;
+  const parsed = Date.parse(`${value}T00:00:00Z`);
+  return (
+    !Number.isNaN(parsed) &&
+    new Date(parsed).toISOString().slice(0, 10) === value
+  );
+};
+
 /**
  * Runtime base one: the application resolves the version header. An absent
  * header serves Head; a date resolves to the newest served release not later
- * than it; anything earlier or malformed is a 400, never a guess.
+ * than it; anything earlier, malformed or calendar-impossible is a 400, never
+ * a guess.
  */
 export const resolveVersion = (
   header: string | undefined,
 ): VersionId | undefined => {
   if (header === undefined) return VERSION_IDS['2027-01-01'];
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(header)) return undefined;
+  if (!isCalendarDate(header)) return undefined;
   const served = SERVED_DATES.find(date => date <= header);
   return served === undefined ? undefined : VERSION_IDS[served];
 };
@@ -60,9 +73,23 @@ export const hooks: a.VersionAdapters = {
       : { ok: true, value: { roster } };
   },
   bookingUpcastFromV20260601: source => {
-    const [title, minutes] = source.agenda.split(';');
+    // One separator only: the rest after the first ';' is the whole duration,
+    // so 'A;B;45' and 'Kickoff;60;extra' are undecodable, never guessed.
+    const separator = source.agenda.indexOf(';');
+    const title = source.agenda.slice(0, Math.max(separator, 0));
+    const minutes =
+      separator === -1 ? undefined : source.agenda.slice(separator + 1);
     // A lossy or ambiguous text block is a refusal, never a silent guess.
-    if (title === undefined || !/^\d+$/.test(minutes ?? '')) {
+    // The duration must fit the contract's integer range: every language
+    // refuses the same agenda encodings.
+    const duration = minutes === undefined ? Number.NaN : Number(minutes);
+    if (
+      separator === -1 ||
+      minutes === undefined ||
+      !/^\d+$/.test(minutes) ||
+      !Number.isSafeInteger(duration) ||
+      duration > 0x7fffffff
+    ) {
       return {
         error: {
           direction: 'upcast' as const,
@@ -77,7 +104,7 @@ export const hooks: a.VersionAdapters = {
       ok: true,
       value: {
         agenda: a.IGNORED,
-        items: [{ minutes: Number(minutes), title }],
+        items: [{ minutes: duration, title }],
       },
     };
   },
@@ -153,11 +180,13 @@ export function createBookingApp(state: BookingAppState) {
         );
         response.setHeader('content-type', 'application/json');
         if (!result.dispatched) {
-          response.writeHead(400).end();
+          response.writeHead(400).end(JSON.stringify(result.error));
           return;
         }
         if (!result.projected) {
-          response.writeHead(422).end();
+          response
+            .writeHead(422)
+            .end(JSON.stringify({ reason: result.error.reason }));
           return;
         }
         if (!result.value.ok) {
@@ -174,38 +203,55 @@ export function createBookingApp(state: BookingAppState) {
 
       const chunks: Uint8Array[] = [];
       for await (const chunk of request) chunks.push(chunk);
-      const raw: unknown = JSON.parse(Buffer.concat(chunks).toString());
+      let raw: unknown;
+      try {
+        raw = JSON.parse(Buffer.concat(chunks).toString());
+      } catch {
+        response
+          .writeHead(400)
+          .end(JSON.stringify({ reason: 'malformed JSON body' }));
+        return;
+      }
+      const keyHeader = request.headers['idempotency-key'];
+      if (keyHeader === undefined) {
+        response
+          .writeHead(400)
+          .end(
+            JSON.stringify({ reason: 'idempotency-key header is required' }),
+          );
+        return;
+      }
+      const key = String(keyHeader);
       // The application reads its own wire: facts older releases still read go
       // to storage straight from the raw request, and only ever move forward —
       // a release whose contract dropped a fact leaves the stored one alone.
-      const booking = raw as {
-        id?: string;
-        agenda?: string;
-        roster?: string[];
+      // The facts land when the command commits; refused requests change
+      // nothing at all.
+      const rememberFacts = () => {
+        const booking = raw as {
+          id?: unknown;
+          agenda?: unknown;
+          roster?: unknown;
+        };
+        const id = String(booking.id ?? '');
+        const previous = state.rows.get(id);
+        state.rows.set(id, {
+          agenda:
+            booking.agenda !== undefined && typeof booking.agenda === 'string'
+              ? booking.agenda
+              : previous?.agenda,
+          roster:
+            booking.roster !== undefined && Array.isArray(booking.roster)
+              ? booking.roster.map(String)
+              : previous?.roster,
+        });
       };
-      const previous = state.rows.get(booking.id ?? '');
-      state.rows.set(booking.id ?? '', {
-        agenda:
-          booking.agenda !== undefined ? booking.agenda : previous?.agenda,
-        roster:
-          booking.roster !== undefined ? booking.roster : previous?.roster,
-      });
-      const key = String(request.headers['idempotency-key']);
       const result = await a.dispatchSchedulerBook(
         version,
         { booking: raw },
         async (input, _context) => {
-          // The behaviour switch fires on the resolved version, not the caller's.
-          if (
-            isOn('rejectBlankTitle', resolvedDate ?? '') &&
-            input.booking.title.trim() === ''
-          ) {
-            return {
-              error: { error: 'blank title', kind: 'Framework' as const },
-              ok: false as const,
-              stored,
-            };
-          }
+          // A replay answers before any behaviour gate: the original decision
+          // stands regardless of when the retry arrives.
           const fingerprint = JSON.stringify(input);
           const cached = state.ledger.get(key);
           if (cached) {
@@ -220,7 +266,19 @@ export function createBookingApp(state: BookingAppState) {
                   stored,
                 };
           }
+          // The behaviour switch fires on the resolved version, not the caller's.
+          if (
+            isOn('rejectBlankTitle', resolvedDate ?? '') &&
+            input.booking.title.trim() === ''
+          ) {
+            return {
+              error: { error: 'blank title', kind: 'Framework' as const },
+              ok: false as const,
+              stored,
+            };
+          }
           state.writes++;
+          rememberFacts();
           state.ledger.set(key, { fingerprint, outcome: input.booking });
           state.ledger.set(`head:${input.booking.id}`, {
             fingerprint,
@@ -248,7 +306,7 @@ export function createBookingApp(state: BookingAppState) {
           ? String((result.value.error as { error: unknown }).error)
           : 'refused';
         response
-          .writeHead(reason.includes('conflict') ? 409 : 422)
+          .writeHead(reason === 'idempotency key conflict' ? 409 : 422)
           .end(JSON.stringify({ reason }));
         return;
       }

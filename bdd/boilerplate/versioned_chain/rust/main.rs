@@ -5,6 +5,8 @@ mod gen {
 }
 mod chain;
 mod hooks;
+mod http;
+mod http_app;
 
 use crate::gen::version_adapters::Version;
 
