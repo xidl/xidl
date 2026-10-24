@@ -53,8 +53,20 @@ const hooks: a.VersionAdapters = {
   // states what the Head contract expects; the retired agenda is acknowledged.
   bookingUpcastFromV20260601: source => {
     calls.upFromV1++;
-    const [title, minutes] = source.agenda.split(';');
-    if (title === undefined || !/^\d+$/.test(minutes ?? '')) {
+    const separator = source.agenda.indexOf(';');
+    const title = source.agenda.slice(0, Math.max(separator, 0));
+    const minutes =
+      separator === -1 ? undefined : source.agenda.slice(separator + 1);
+    // The duration must fit the contract's integer range: every language
+    // refuses the same agenda encodings.
+    const duration = minutes === undefined ? Number.NaN : Number(minutes);
+    if (
+      separator === -1 ||
+      minutes === undefined ||
+      !/^\d+$/.test(minutes) ||
+      !Number.isSafeInteger(duration) ||
+      duration > 0x7fffffff
+    ) {
       return {
         error: {
           direction: 'upcast' as const,
@@ -67,7 +79,7 @@ const hooks: a.VersionAdapters = {
     }
     return ok({
       agenda: a.IGNORED,
-      items: [{ minutes: Number(minutes), title }],
+      items: [{ minutes: duration, title }],
     });
   },
   bookingUpcastFromV20261001: () => {

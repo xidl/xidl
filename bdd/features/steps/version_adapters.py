@@ -162,7 +162,9 @@ def prepare_rust_application(context, script, boilerplate_name="versioned_adapte
     shutil.copy(boilerplate / script, output / "src/main.rs")
     companions = {
         "versioned_adapters": {"main.rs": ["hooks.rs", "journey.rs", "wire.rs"]},
-        "versioned_chain": {"main.rs": ["hooks.rs", "chain.rs"]},
+        "versioned_chain": {
+            "main.rs": ["hooks.rs", "chain.rs", "http.rs", "http_app.rs"]
+        },
     }
     for name in companions.get(boilerplate_name, {}).get(script, []):
         shutil.copy(boilerplate / name, output / "src" / name)

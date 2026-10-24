@@ -134,7 +134,7 @@ pub mod version_adapters {
             stored: &dyn StoredValues,
         ) -> VersionedResult<DepotTraceResponseDowncastToV2Decision>;
     }
-    /// Members older versions still read that Head no longer carries, resolved per Head instance by the application.
+    /// Members older versions still read that Head no longer carries, resolved by the application from the source instance of the downcast step that retires them.
     pub trait StoredValues {
         /// wire `note`, last served by v1
         fn optional_change_note(&self, source: &v2::OptionalChange) -> Option<String>;
