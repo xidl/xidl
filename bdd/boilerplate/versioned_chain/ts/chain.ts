@@ -91,6 +91,7 @@ const hooks: a.VersionAdapters = {
 const HEAD: types.v2027_01_01.Booking = {
   id: 'b1',
   items: [{ minutes: 60, title: 'Kickoff' }],
+  organizer: 'user-9',
   title: 'Kickoff',
 };
 
@@ -106,10 +107,12 @@ assert.deepEqual(a.NEEDS, {
 agendaTexts.set('b1', 'Kickoff;60');
 rosters.set('b1', ['user-1', 'user-2']);
 
-// Head -> 2026-10-01: the roster returns from storage.
+// Head -> 2026-10-01: the roster returns from storage; organizer keeps the
+// role under its older source name with no decision anywhere.
 const toV2 = a.downcastBooking('v2026_10_01', HEAD, stored, hooks);
 assert(toV2.ok, JSON.stringify(toV2));
 assert.deepEqual(toV2.value.roster, ['user-1', 'user-2']);
+assert.equal(toV2.value.owner, 'user-9');
 assert.deepEqual(toV2.value.items, HEAD.items);
 assert.equal(calls.downToV2, 1, 'only the roster decision ran');
 
@@ -122,6 +125,7 @@ assert.equal(
   'the oldest release reads the stored agenda',
 );
 assert.deepEqual(toV1.value.roster, ['user-1', 'user-2']);
+assert.equal(toV1.value.owner, 'user-9');
 assert.equal(calls.downToV1, 1);
 assert.equal(
   calls.upFromV1 + calls.upFromV2,
@@ -156,6 +160,7 @@ assert.equal(missingAgenda.error.typePath, 'Booking.agenda');
 const v1Booking: types.v2026_06_01.Booking = {
   agenda: 'Kickoff;60',
   id: 'b1',
+  owner: 'user-9',
   roster: ['user-1', 'user-2'],
   title: 'Kickoff',
 };
@@ -163,6 +168,7 @@ const upToV2 = a.upcastBookingFromV20260601(v1Booking, hooks);
 assert(upToV2.ok, JSON.stringify(upToV2));
 assert.equal(calls.upFromV1, 1);
 assert.deepEqual(upToV2.value.items, [{ minutes: 60, title: 'Kickoff' }]);
+assert.equal(upToV2.value.owner, 'user-9');
 assert.deepEqual(upToV2.value.roster, ['user-1', 'user-2']);
 
 // Write-then-read is a fixed point: the oldest wire shape survives the trip
@@ -170,6 +176,7 @@ assert.deepEqual(upToV2.value.roster, ['user-1', 'user-2']);
 const toHead = a.upcastBookingFromV20261001(upToV2.value, hooks);
 assert(toHead.ok, JSON.stringify(toHead));
 assert.equal(calls.upFromV2, 1);
+assert.equal(toHead.value.organizer, 'user-9');
 const roundTrip = a.downcastBooking('v2026_06_01', toHead.value, stored, hooks);
 assert(roundTrip.ok, JSON.stringify(roundTrip));
 assert.deepEqual(roundTrip.value, v1Booking);
