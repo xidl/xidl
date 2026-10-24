@@ -17,6 +17,7 @@ pub struct RustRenderOutput {
 #[derive(Serialize)]
 struct RustModuleTemplate<'a> {
     ident: String,
+    attrs: &'a [String],
     definitions: &'a [String],
 }
 
@@ -115,11 +116,17 @@ impl RustRenderer {
             .map(|rendered| RustRenderOutput::default().push_source(rendered))
     }
 
-    pub fn render_module(&self, ident: &str, definitions: &[String]) -> IdlcResult<String> {
+    pub fn render_module(
+        &self,
+        ident: &str,
+        definitions: &[String],
+        attrs: &[String],
+    ) -> IdlcResult<String> {
         self.render_template(
             "module.rs.j2",
             &RustModuleTemplate {
                 ident: crate::generate::rust::util::rust_ident(ident),
+                attrs,
                 definitions,
             },
         )

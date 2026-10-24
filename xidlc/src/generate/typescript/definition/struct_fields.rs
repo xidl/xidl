@@ -1,5 +1,6 @@
+use super::annotations::ts_doc_lines;
+use crate::error::IdlcResult;
 use crate::generate::typescript::definition::annotations::has_annotation;
-use crate::generate::utils::doc_lines_from_annotations;
 use xidl_parser::hir;
 
 use super::contexts::{TsType, XjsonMeta, ZodSchema};
@@ -11,13 +12,13 @@ pub(crate) fn struct_fields(
     members: &[hir::Member],
     container_annotations: &[hir::Annotation],
     module_path: &[String],
-) -> Vec<FieldDecl> {
+) -> IdlcResult<Vec<FieldDecl>> {
     let mut fields = Vec::new();
     for member in members {
         if hir::is_skipped(&member.annotations) {
             continue;
         }
-        let doc = doc_lines_from_annotations(&member.annotations);
+        let doc = ts_doc_lines(&member.annotations)?;
         for decl in &member.ident {
             let raw_name = declarator_name(decl);
             let wire_name =
@@ -56,7 +57,7 @@ pub(crate) fn struct_fields(
             });
         }
     }
-    fields
+    Ok(fields)
 }
 
 pub(crate) struct FieldDecl {

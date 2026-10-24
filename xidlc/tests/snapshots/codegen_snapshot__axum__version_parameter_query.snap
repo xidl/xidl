@@ -121,7 +121,8 @@ pub mod v1 {
             non_snake_case,
             non_camel_case_types,
             non_upper_case_globals,
-            unused_imports
+            unused_imports,
+            deprecated
         )]
         pub(super) mod __xidl_in_Store {
             use super::*;
@@ -146,7 +147,8 @@ pub mod v1 {
             non_snake_case,
             non_camel_case_types,
             non_upper_case_globals,
-            unused_imports
+            unused_imports,
+            deprecated
         )]
         pub(super) mod __xidl_out_Store {
             use super::*;
@@ -990,7 +992,8 @@ pub mod v1 {
             non_snake_case,
             non_camel_case_types,
             non_upper_case_globals,
-            unused_imports
+            unused_imports,
+            deprecated
         )]
         pub(super) mod __xidl_in_Health {
             use super::*;
@@ -999,7 +1002,8 @@ pub mod v1 {
             non_snake_case,
             non_camel_case_types,
             non_upper_case_globals,
-            unused_imports
+            unused_imports,
+            deprecated
         )]
         pub(super) mod __xidl_out_Health {
             use super::*;
@@ -1224,7 +1228,8 @@ pub mod v1 {
             non_snake_case,
             non_camel_case_types,
             non_upper_case_globals,
-            unused_imports
+            unused_imports,
+            deprecated
         )]
         pub(super) mod __xidl_in_DuplexShapes {
             use super::*;
@@ -1249,7 +1254,8 @@ pub mod v1 {
             non_snake_case,
             non_camel_case_types,
             non_upper_case_globals,
-            unused_imports
+            unused_imports,
+            deprecated
         )]
         pub(super) mod __xidl_out_DuplexShapes {
             use super::*;
@@ -1843,7 +1849,8 @@ pub mod v2 {
             non_snake_case,
             non_camel_case_types,
             non_upper_case_globals,
-            unused_imports
+            unused_imports,
+            deprecated
         )]
         pub(super) mod __xidl_in_Store {
             use super::*;
@@ -1868,7 +1875,8 @@ pub mod v2 {
             non_snake_case,
             non_camel_case_types,
             non_upper_case_globals,
-            unused_imports
+            unused_imports,
+            deprecated
         )]
         pub(super) mod __xidl_out_Store {
             use super::*;
@@ -2712,7 +2720,8 @@ pub mod v2 {
             non_snake_case,
             non_camel_case_types,
             non_upper_case_globals,
-            unused_imports
+            unused_imports,
+            deprecated
         )]
         pub(super) mod __xidl_in_Health {
             use super::*;
@@ -2721,7 +2730,8 @@ pub mod v2 {
             non_snake_case,
             non_camel_case_types,
             non_upper_case_globals,
-            unused_imports
+            unused_imports,
+            deprecated
         )]
         pub(super) mod __xidl_out_Health {
             use super::*;
@@ -2946,7 +2956,8 @@ pub mod v2 {
             non_snake_case,
             non_camel_case_types,
             non_upper_case_globals,
-            unused_imports
+            unused_imports,
+            deprecated
         )]
         pub(super) mod __xidl_in_DuplexShapes {
             use super::*;
@@ -2971,7 +2982,8 @@ pub mod v2 {
             non_snake_case,
             non_camel_case_types,
             non_upper_case_globals,
-            unused_imports
+            unused_imports,
+            deprecated
         )]
         pub(super) mod __xidl_out_DuplexShapes {
             use super::*;

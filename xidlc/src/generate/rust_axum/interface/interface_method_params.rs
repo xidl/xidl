@@ -20,6 +20,8 @@ use xidl_parser::rest_hir::{
 pub(crate) struct MethodParams {
     pub(crate) params: Vec<String>,
     pub(crate) param_names: Vec<String>,
+    /// Doc bullets for parameters that carry `@deprecated`.
+    pub(crate) deprecated_param_notes: Vec<String>,
     pub(crate) server_params: Vec<String>,
     pub(crate) server_param_names: Vec<String>,
     pub(crate) path_params: Vec<ParamContext>,
@@ -77,6 +79,11 @@ pub(crate) fn collect_method_params(
             params.param_names.push(name.clone());
             params.server_params.push(format!("{name}: {ty}"));
             params.server_param_names.push(name.clone());
+            if let Some(info) = &p.deprecated {
+                params
+                    .deprecated_param_notes
+                    .push(format!("- `{name}`: {}", info.note()));
+            }
 
             let serde_name = if matches!(source_enum, ParamSource::Body) {
                 if wire_name.is_empty() {

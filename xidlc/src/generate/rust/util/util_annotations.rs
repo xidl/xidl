@@ -1,4 +1,20 @@
+use crate::error::{IdlcError, IdlcResult};
 use xidl_parser::hir;
+use xidl_parser::rest_hir::semantics::effective_deprecated;
+
+/// Attribute opener shared by the noted `deprecated` form.
+const DEPRECATED_ATTR: &str = "deprecated(note = ";
+
+/// The `deprecated` attribute body for a declaration, when it or an enclosing
+/// level declares `@deprecated`. Levels run from the declaration outward.
+pub fn rust_deprecated_attr(levels: &[&[hir::Annotation]]) -> IdlcResult<Option<String>> {
+    let info = effective_deprecated(levels)
+        .map_err(|reason| IdlcError::rpc(format!("@deprecated: {reason}")))?;
+    Ok(info.map(|info| match info.note().as_str() {
+        "Deprecated." => "deprecated".to_string(),
+        note => format!("{DEPRECATED_ATTR}{note:?})"),
+    }))
+}
 
 pub fn rust_passthrough_attrs_from_annotations(annotations: &[hir::Annotation]) -> Vec<String> {
     let mut out = Vec::new();

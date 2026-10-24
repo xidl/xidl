@@ -1,5 +1,6 @@
-These complete artifact manifests were generated from unmodified master
-`d98bc37a` with `XIDLC_VERSION=0.0.1 XIDLC_GIT_HASH=snapshot` and both client
+These complete artifact manifests were regenerated from the branch that widened
+`@deprecated` sites (#369), which adds `deprecated` to the generated transport
+allow lists, with `XIDLC_VERSION=0.0.1 XIDLC_GIT_HASH=snapshot` and both client
 and server generation enabled. The tests compare paths and contents byte for
 byte; adapter generation is never involved in producing the baseline.
 

@@ -1,3 +1,4 @@
+use super::super::semantics::{deprecated_info, effective_deprecated};
 use super::*;
 use crate::hir::{Annotation, AnnotationParams, ParamAttribute, TypeSpec};
 
@@ -50,7 +51,7 @@ fn deprecated_and_basic_auth_resolution_prefers_item_annotations() {
         Some("item")
     );
     assert_eq!(
-        effective_deprecated(&interface, &item)
+        effective_deprecated(&[&item, &interface])
             .unwrap()
             .and_then(|info| info.since),
         deprecated_info(&item).unwrap().and_then(|info| info.since)

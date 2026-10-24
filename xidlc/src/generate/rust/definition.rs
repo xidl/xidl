@@ -3,6 +3,7 @@ use crate::generate::rust::bitset_dcl::render_bitset_with_config;
 use crate::generate::rust::struct_dcl::render_struct_with_config;
 use crate::generate::rust::type_dcl::render_typedef_with_config;
 use crate::generate::rust::union_def::render_union_with_config;
+use crate::generate::rust::util::rust_deprecated_attr;
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use std::collections::HashMap;
 use xidl_parser::hir;
@@ -11,7 +12,13 @@ impl RustRender for hir::ModuleDcl {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
         let defs = self.definition.iter().collect::<Vec<_>>();
         let definitions = render_module_body(&defs, renderer)?;
-        let rendered = renderer.render_module(&self.ident, &definitions)?;
+        let mut attrs = rust_deprecated_attr(&[&self.annotations])?
+            .into_iter()
+            .collect::<Vec<_>>();
+        if !attrs.is_empty() {
+            attrs.push("allow(deprecated)".to_string());
+        }
+        let rendered = renderer.render_module(&self.ident, &definitions, &attrs)?;
         Ok(RustRenderOutput::default().push_source(rendered))
     }
 }
@@ -40,11 +47,14 @@ pub(crate) fn render_module_body(
 struct DefinitionRenderContext<'a> {
     renderer: &'a RustRenderer,
     module_path: Vec<String>,
+    /// Deprecated attributes of merged module blocks, by module name.
+    module_attrs: HashMap<String, Vec<String>>,
 }
 
 impl<'a> DefinitionRenderContext<'a> {
     fn root(renderer: &'a RustRenderer) -> Self {
         Self {
+            module_attrs: HashMap::new(),
             renderer,
             module_path: Vec::new(),
         }
@@ -53,18 +63,26 @@ impl<'a> DefinitionRenderContext<'a> {
     fn render_module_body(&mut self, defs: &[&hir::Definition]) -> IdlcResult<Vec<String>> {
         let mut out = Vec::new();
         let mut module_order = Vec::new();
-        let mut module_map: HashMap<String, Vec<Vec<String>>> = HashMap::new();
+        // Reopened modules merge into one block, and their definitions are
+        // rendered together so nested reopened modules merge as well.
+        let mut module_defs: HashMap<String, Vec<&hir::Definition>> = HashMap::new();
 
         for def in defs {
             match def {
                 hir::Definition::Pragma(_) => {}
                 hir::Definition::ModuleDcl(module) => {
-                    let entry = module_map.entry(module.ident.clone()).or_insert_with(|| {
-                        module_order.push(module.ident.clone());
-                        Vec::new()
-                    });
-                    let defs = module.definition.iter().collect::<Vec<_>>();
-                    entry.push(self.for_module(&module.ident).render_module_body(&defs)?);
+                    module_defs
+                        .entry(module.ident.clone())
+                        .or_insert_with(|| {
+                            module_order.push(module.ident.clone());
+                            Vec::new()
+                        })
+                        .extend(module.definition.iter());
+                    if let Some(attr) = rust_deprecated_attr(&[&module.annotations])? {
+                        self.module_attrs
+                            .entry(module.ident.clone())
+                            .or_insert_with(|| vec![attr, "allow(deprecated)".to_string()]);
+                    }
                 }
                 other => {
                     let rendered = self.render_definition(other)?;
@@ -74,9 +92,10 @@ impl<'a> DefinitionRenderContext<'a> {
         }
 
         for name in module_order {
-            let modules = module_map.remove(&name).unwrap_or_default();
-            let definitions = modules.into_iter().flatten().collect::<Vec<_>>();
-            out.push(self.renderer.render_module(&name, &definitions)?);
+            let defs = module_defs.remove(&name).unwrap_or_default();
+            let definitions = self.for_module(&name).render_module_body(&defs)?;
+            let attrs = self.module_attrs.remove(&name).unwrap_or_default();
+            out.push(self.renderer.render_module(&name, &definitions, &attrs)?);
         }
 
         Ok(out)
@@ -88,6 +107,7 @@ impl<'a> DefinitionRenderContext<'a> {
         Self {
             renderer: self.renderer,
             module_path,
+            module_attrs: HashMap::new(),
         }
     }
 

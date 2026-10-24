@@ -1,7 +1,9 @@
 use super::builder::{build_error_schema, build_operation};
 use super::naming::{declarator_name, openapi_method_name, scoped_name};
 use super::operation::{MethodInfo, render_http_operation};
-use super::schema::{apply_schema_description, doc_text, parameter_schema};
+use super::schema::{
+    apply_deprecation, apply_schema_description, doc_text, parameter_schema, schema_deprecation,
+};
 use super::scope::SchemaScope;
 use super::security::register_security_schemes;
 use super::stream::{OpenApiStreamPatch, request_stream_content_type, stream_patch_item_schema};
@@ -13,7 +15,10 @@ use crate::openapi::server::Server;
 use std::collections::{BTreeMap, BTreeSet};
 use std::mem;
 use xidl_parser::hir;
-use xidl_parser::rest_hir::{RestHirDocument, semantics::has_annotation};
+use xidl_parser::rest_hir::{
+    RestHirDocument,
+    semantics::{DeprecatedInfo, has_annotation},
+};
 
 #[derive(Default)]
 pub(crate) struct OpenApiContext {
@@ -120,57 +125,48 @@ impl OpenApiContext {
                 let own =
                     scope.schema_for_struct_with_annotations(&def.member, &def.annotations)?;
                 let schema = scope.with_base_schemas(own, &def.parent)?;
-                let schema =
-                    apply_schema_description(schema, doc_text(&def.annotations).as_deref());
-                self.schemas.insert(name, schema);
+                self.insert_component(name, schema, &def.annotations, None)?;
             }
             hir::ConstrTypeDcl::EnumDcl(def) => {
                 let name = scoped_name(scope.module_path, &def.ident);
-                let values = def
-                    .member
-                    .iter()
-                    .map(|v| {
-                        serde_json::Value::String(hir::effective_wire_name(
-                            &v.ident,
-                            &v.annotations,
-                            &def.annotations,
-                        ))
-                    })
-                    .collect::<Vec<_>>();
+                let mut notes = Vec::new();
+                let mut values = Vec::new();
+                for value in &def.member {
+                    let wire = hir::effective_wire_name(
+                        &value.ident,
+                        &value.annotations,
+                        &def.annotations,
+                    );
+                    if let Some(info) = schema_deprecation(&value.annotations)? {
+                        notes.push(info.enumerator_note(&wire));
+                    }
+                    values.push(serde_json::Value::String(wire));
+                }
                 let schema = RefOr::T(Schema::from(
                     ObjectBuilder::new()
                         .schema_type(Type::String)
                         .enum_values(Some(values)),
                 ));
-                let schema =
-                    apply_schema_description(schema, doc_text(&def.annotations).as_deref());
-                self.schemas.insert(name, schema);
+                self.insert_component(name, schema, &def.annotations, Some(notes))?;
             }
             hir::ConstrTypeDcl::UnionDef(def) => {
                 let name = scoped_name(scope.module_path, &def.ident);
-                let schema = apply_schema_description(
-                    scope.schema_for_union(def)?,
-                    doc_text(&def.annotations).as_deref(),
-                );
-                self.schemas.insert(name, schema);
+                let schema = scope.schema_for_union(def)?;
+                self.insert_component(name, schema, &def.annotations, None)?;
             }
             hir::ConstrTypeDcl::BitsetDcl(def) => {
                 let name = scoped_name(scope.module_path, &def.ident);
                 let schema = RefOr::T(Schema::from(
                     ObjectBuilder::new().schema_type(Type::Integer),
                 ));
-                let schema =
-                    apply_schema_description(schema, doc_text(&def.annotations).as_deref());
-                self.schemas.insert(name, schema);
+                self.insert_component(name, schema, &def.annotations, None)?;
             }
             hir::ConstrTypeDcl::BitmaskDcl(def) => {
                 let name = scoped_name(scope.module_path, &def.ident);
                 let schema = RefOr::T(Schema::from(
                     ObjectBuilder::new().schema_type(Type::Integer),
                 ));
-                let schema =
-                    apply_schema_description(schema, doc_text(&def.annotations).as_deref());
-                self.schemas.insert(name, schema);
+                self.insert_component(name, schema, &def.annotations, None)?;
             }
             hir::ConstrTypeDcl::StructForwardDcl(_) | hir::ConstrTypeDcl::UnionForwardDcl(_) => {}
         }
@@ -193,10 +189,30 @@ impl OpenApiContext {
             })
             .cloned()
             .collect();
-        self.schemas.insert(
-            name,
-            scope.schema_for_struct_with_annotations(&body_members, &except.annotations)?,
-        );
+        let schema =
+            scope.schema_for_struct_with_annotations(&body_members, &except.annotations)?;
+        self.insert_component(name, schema, &except.annotations, None)
+    }
+
+    /// Stores a component schema with its documentation, deprecation flag and
+    /// any enumerator deprecation notes appended to the description.
+    fn insert_component(
+        &mut self,
+        name: String,
+        schema: RefOr<Schema>,
+        annotations: &[hir::Annotation],
+        notes: Option<Vec<String>>,
+    ) -> IdlcResult<()> {
+        let deprecated = schema_deprecation(annotations)?;
+        let mut lines = doc_text(annotations).into_iter().collect::<Vec<_>>();
+        if lines.is_empty() {
+            lines.extend(deprecated.as_ref().map(DeprecatedInfo::note));
+        }
+        lines.extend(notes.unwrap_or_default());
+        let description = (!lines.is_empty()).then(|| lines.join("\n"));
+        let schema = apply_schema_description(schema, description.as_deref());
+        let schema = apply_deprecation(schema, deprecated.as_ref());
+        self.schemas.insert(name, schema);
         Ok(())
     }
 

@@ -200,6 +200,7 @@ impl<'a> Projector<'a> {
                 value: case.element.value.clone(),
                 field_id: case.element.field_id,
                 recursive: case.element.recursive,
+                references_deprecated: case.element.references_deprecated,
             };
             touch_declarators(
                 std::slice::from_mut(&mut element.value),

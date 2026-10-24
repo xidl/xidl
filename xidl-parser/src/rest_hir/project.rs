@@ -9,12 +9,12 @@ use super::route::{
     auto_default_method_path, operation_id, parse_route_template, route_from_annotations,
 };
 use super::semantics::{
-    HttpStreamKind, UpgradeMode, classify_upgrade_protocol, effective_cors, effective_media_type,
-    effective_security_with_origin, has_annotation, http_stream_config, parse_upgrade_protocol,
-    parse_websocket_config, validate_http_annotations,
+    HttpStreamKind, UpgradeMode, classify_upgrade_protocol, effective_cors, effective_deprecated,
+    effective_media_type, effective_security_with_origin, has_annotation, http_stream_config,
+    parse_upgrade_protocol, parse_websocket_config, validate_http_annotations,
 };
 use super::validate::{
-    RouteBindingIndex, effective_basic_auth_realm, effective_deprecated, validate_head_constraints,
+    RouteBindingIndex, effective_basic_auth_realm, validate_head_constraints,
     validate_request_shape, validate_route_bindings, validate_stream_method, validate_stream_shape,
     validate_unique_route_bindings, validate_upgrade_constraints, validate_websocket_stream_items,
 };
@@ -317,7 +317,7 @@ fn project_operation(
     let security = effective_security_with_origin(interface_annotations, &op.annotations)
         .map_err(ParseError::Message)?;
     let basic_auth_realm = effective_basic_auth_realm(interface_annotations, &op.annotations);
-    let deprecated = effective_deprecated(interface_annotations, &op.annotations)
+    let deprecated = effective_deprecated(&[&op.annotations, interface_annotations])
         .map_err(ParseError::Message)?;
 
     let return_type = match &op.ty {

@@ -30,6 +30,7 @@ pub(crate) struct ClientFileContext {
 #[derive(Serialize)]
 pub(crate) struct ModuleContext {
     pub(crate) ident: String,
+    pub(crate) doc: Vec<String>,
     pub(crate) blocks: Vec<String>,
 }
 

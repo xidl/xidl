@@ -50,12 +50,19 @@
     "value": "Idempotency-Key"
   },
   "N15_deprecated_on_member": {
-    "contains": "@deprecated is not allowed on Member",
-    "expect": "lint-error",
-    "gap": "G5"
+    "expect": "deprecated-property",
+    "gap": "G5",
+    "property": "a",
+    "schema": "{version}.S"
   },
   "N16_raises_removed_exception": {
     "expect": "errors-by-version",
-    "value": { "v1": ["410"], "v2": ["410"], "v3": [], "v4": [], "v5": [] }
+    "value": {
+      "v1": ["410"],
+      "v2": ["410"],
+      "v3": [],
+      "v4": [],
+      "v5": []
+    }
   }
 }

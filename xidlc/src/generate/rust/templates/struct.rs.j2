@@ -42,5 +42,6 @@ pub struct {{ ident }} {
     {%- endfor %}
 }
 
-impl {{ ident }} {
+{% if deprecated %}#[allow(deprecated)]
+{% endif %}impl {{ ident }} {
 }

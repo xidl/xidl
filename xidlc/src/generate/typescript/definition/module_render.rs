@@ -2,6 +2,7 @@ use crate::error::IdlcResult;
 use crate::generate::typescript::{TsMode, TypescriptRenderOutput, TypescriptRenderer};
 use xidl_parser::hir;
 
+use super::annotations::ts_doc_lines;
 use super::contexts::{ClientFileContext, ModuleContext, TsRenderCtx, TypesFileContext};
 use super::interface_render::render_interface;
 use super::names::{indent_block, ts_ident};
@@ -92,6 +93,7 @@ pub(crate) fn render_module_body(
     let mut out = TsRenderOutput::default();
     let mut module_order = Vec::new();
     let mut module_map = std::collections::HashMap::<String, Vec<TsRenderOutput>>::new();
+    let mut module_docs = std::collections::HashMap::<String, Vec<String>>::new();
 
     for def in defs {
         match def {
@@ -105,6 +107,15 @@ pub(crate) fn render_module_body(
                         Vec::new()
                     });
                     entry.push(body);
+                    let doc = ts_doc_lines(&module.annotations)?;
+                    module_docs
+                        .entry(module.ident.clone())
+                        .and_modify(|existing| {
+                            if existing.is_empty() {
+                                *existing = doc.clone();
+                            }
+                        })
+                        .or_insert(doc);
                 }
             }
             hir::Definition::ConstrTypeDcl(constr) if mode.allows_types() => {
@@ -126,20 +137,24 @@ pub(crate) fn render_module_body(
 
     for name in module_order {
         let body = merge_blocks(&module_map.remove(&name).unwrap_or_default());
+        let doc = module_docs.remove(&name).unwrap_or_default();
         let ident = ts_ident(&name);
         out.types.push(render_module_block(
             ctx.renderer,
             ident.clone(),
+            &doc,
             body.types.join("\n"),
         )?);
         out.zod.push(render_module_block(
             ctx.renderer,
             ident.clone(),
+            &doc,
             body.zod.join("\n"),
         )?);
         out.client.push(render_module_block(
             ctx.renderer,
             ident,
+            &doc,
             body.client.join("\n"),
         )?);
     }
@@ -150,12 +165,14 @@ pub(crate) fn render_module_body(
 fn render_module_block(
     renderer: &TypescriptRenderer,
     ident: String,
+    doc: &[String],
     body: String,
 ) -> IdlcResult<String> {
     renderer.render_template(
         "module.ts.j2",
         &ModuleContext {
             ident,
+            doc: doc.to_vec(),
             blocks: vec![indent_block(&body, 1)],
         },
     )

@@ -1,4 +1,7 @@
 #[allow(non_snake_case)]
+{%- for attr in attrs %}
+#[{{ attr }}]
+{%- endfor %}
 pub mod {{ ident }} {
     {%- for def in definitions %}
         {{- def }}

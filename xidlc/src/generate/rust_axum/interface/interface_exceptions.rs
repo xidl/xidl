@@ -60,6 +60,7 @@ impl RaisesContext {
                 headers: members(&exception.headers),
                 cookies: members(&exception.cookies),
                 has_body: !exception.body.is_empty(),
+                deprecated: exception.deprecated.is_some(),
             });
         }
         Ok(out)

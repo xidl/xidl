@@ -39,6 +39,50 @@ pub struct DeprecatedInfo {
     pub after: Option<String>,
 }
 
+impl DeprecatedInfo {
+    /// The human-readable note every target renders for this deprecation.
+    pub fn note(&self) -> String {
+        match self.detail() {
+            Some(detail) => format!("Deprecated. {detail}"),
+            None => String::from("Deprecated."),
+        }
+    }
+
+    /// The JSDoc tag every TypeScript surface renders for this deprecation.
+    pub fn tag(&self) -> String {
+        match self.detail() {
+            Some(detail) => format!("@deprecated {detail}"),
+            None => String::from("@deprecated"),
+        }
+    }
+
+    /// The description line recording one deprecated enumerator, for targets
+    /// whose enum values carry no per-value deprecation flag.
+    pub fn enumerator_note(&self, wire_name: &str) -> String {
+        let mut note = format!("`{wire_name}` is deprecated");
+        if let Some(since) = &self.since {
+            note.push_str(&format!(" since {since}"));
+        }
+        if let Some(after) = &self.after {
+            note.push_str(&format!(" after {after}"));
+        }
+        note.push('.');
+        note
+    }
+
+    /// The `since`/`after` sentences, when either was declared.
+    fn detail(&self) -> Option<String> {
+        let mut parts = Vec::new();
+        if let Some(since) = &self.since {
+            parts.push(format!("Since {since}."));
+        }
+        if let Some(after) = &self.after {
+            parts.push(format!("After {after}."));
+        }
+        (!parts.is_empty()).then(|| parts.join(" "))
+    }
+}
+
 pub fn deprecated_info(annotations: &[hir::Annotation]) -> Result<Option<DeprecatedInfo>, String> {
     let annotation = annotations.iter().find(|annotation| {
         annotation_name(annotation)
@@ -70,6 +114,20 @@ pub fn deprecated_info(annotations: &[hir::Annotation]) -> Result<Option<Depreca
         since,
         after,
     }))
+}
+
+/// The deprecation that applies to a declaration: its own annotation when
+/// present, else the nearest enclosing one. Levels run from the declaration
+/// outward (member, type, module), so the most specific annotation wins.
+pub fn effective_deprecated(
+    levels: &[&[hir::Annotation]],
+) -> Result<Option<DeprecatedInfo>, String> {
+    for annotations in levels {
+        if let Some(info) = deprecated_info(annotations)? {
+            return Ok(Some(info));
+        }
+    }
+    Ok(None)
 }
 
 pub fn validate_http_annotations(
