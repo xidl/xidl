@@ -889,7 +889,7 @@ pub mod version_adapters {
         }
     }
     /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
-    pub async fn dispatch_scheduler_book_from_v_2026_06_01<F, Fut, S>(
+    pub async fn dispatch_scheduler_book_from_v_2026_06_01<F, Fut, R>(
         wire: ::serde_json::Value,
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
@@ -903,9 +903,9 @@ pub mod version_adapters {
     where
         F: FnOnce(SchedulerBookRequestV20270101, VersionContext) -> Fut,
         Fut: ::std::future::Future<
-            Output = HeadOutcome<v2027_01_01::Booking, ::xidl_rust_axum::Error, S>,
+            Output = HeadOutcome<v2027_01_01::Booking, ::xidl_rust_axum::Error, R>,
         >,
-        S: StoredValues,
+        R: StoredValues,
     {
         let input = decode_and_upcast_scheduler_book_from_v_2026_06_01(wire, adapters)?;
         let head = handler(
@@ -1024,7 +1024,7 @@ pub mod version_adapters {
         }
     }
     /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
-    pub async fn dispatch_scheduler_get_from_v_2026_06_01<F, Fut, S>(
+    pub async fn dispatch_scheduler_get_from_v_2026_06_01<F, Fut, R>(
         wire: ::serde_json::Value,
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
@@ -1038,9 +1038,9 @@ pub mod version_adapters {
     where
         F: FnOnce(SchedulerGetRequestV20270101, VersionContext) -> Fut,
         Fut: ::std::future::Future<
-            Output = HeadOutcome<v2027_01_01::Booking, v2027_01_01::SchedulerGetError, S>,
+            Output = HeadOutcome<v2027_01_01::Booking, v2027_01_01::SchedulerGetError, R>,
         >,
-        S: StoredValues,
+        R: StoredValues,
     {
         let input = decode_and_upcast_scheduler_get_from_v_2026_06_01(wire, adapters)?;
         let head = handler(
@@ -1132,7 +1132,7 @@ pub mod version_adapters {
         }
     }
     /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
-    pub async fn dispatch_scheduler_book_from_v_2026_10_01<F, Fut, S>(
+    pub async fn dispatch_scheduler_book_from_v_2026_10_01<F, Fut, R>(
         wire: ::serde_json::Value,
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
@@ -1146,9 +1146,9 @@ pub mod version_adapters {
     where
         F: FnOnce(SchedulerBookRequestV20270101, VersionContext) -> Fut,
         Fut: ::std::future::Future<
-            Output = HeadOutcome<v2027_01_01::Booking, ::xidl_rust_axum::Error, S>,
+            Output = HeadOutcome<v2027_01_01::Booking, ::xidl_rust_axum::Error, R>,
         >,
-        S: StoredValues,
+        R: StoredValues,
     {
         let input = decode_and_upcast_scheduler_book_from_v_2026_10_01(wire, adapters)?;
         let head = handler(
@@ -1241,7 +1241,7 @@ pub mod version_adapters {
         }
     }
     /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
-    pub async fn dispatch_scheduler_get_from_v_2026_10_01<F, Fut, S>(
+    pub async fn dispatch_scheduler_get_from_v_2026_10_01<F, Fut, R>(
         wire: ::serde_json::Value,
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
@@ -1255,9 +1255,9 @@ pub mod version_adapters {
     where
         F: FnOnce(SchedulerGetRequestV20270101, VersionContext) -> Fut,
         Fut: ::std::future::Future<
-            Output = HeadOutcome<v2027_01_01::Booking, v2027_01_01::SchedulerGetError, S>,
+            Output = HeadOutcome<v2027_01_01::Booking, v2027_01_01::SchedulerGetError, R>,
         >,
-        S: StoredValues,
+        R: StoredValues,
     {
         let input = decode_and_upcast_scheduler_get_from_v_2026_10_01(wire, adapters)?;
         let head = handler(
@@ -1592,7 +1592,7 @@ pub mod version_adapters {
         }
     }
     /// Execute a Head handler once; it returns the stored values older versions still read.
-    pub async fn dispatch_scheduler_book<F, Fut, S>(
+    pub async fn dispatch_scheduler_book<F, Fut, R>(
         version: Version,
         wire: ::serde_json::Value,
         handler: F,
@@ -1607,9 +1607,9 @@ pub mod version_adapters {
     where
         F: FnOnce(SchedulerBookRequestV20270101, VersionContext) -> Fut,
         Fut: ::std::future::Future<
-            Output = HeadOutcome<v2027_01_01::Booking, ::xidl_rust_axum::Error, S>,
+            Output = HeadOutcome<v2027_01_01::Booking, ::xidl_rust_axum::Error, R>,
         >,
-        S: StoredValues,
+        R: StoredValues,
     {
         let input = decode_and_upcast_scheduler_book(version, wire, adapters)?;
         let head = handler(
@@ -1719,7 +1719,7 @@ pub mod version_adapters {
         }
     }
     /// Execute a Head handler once; it returns the stored values older versions still read.
-    pub async fn dispatch_scheduler_get<F, Fut, S>(
+    pub async fn dispatch_scheduler_get<F, Fut, R>(
         version: Version,
         wire: ::serde_json::Value,
         handler: F,
@@ -1734,9 +1734,9 @@ pub mod version_adapters {
     where
         F: FnOnce(SchedulerGetRequestV20270101, VersionContext) -> Fut,
         Fut: ::std::future::Future<
-            Output = HeadOutcome<v2027_01_01::Booking, v2027_01_01::SchedulerGetError, S>,
+            Output = HeadOutcome<v2027_01_01::Booking, v2027_01_01::SchedulerGetError, R>,
         >,
-        S: StoredValues,
+        R: StoredValues,
     {
         let input = decode_and_upcast_scheduler_get(version, wire, adapters)?;
         let head = handler(
