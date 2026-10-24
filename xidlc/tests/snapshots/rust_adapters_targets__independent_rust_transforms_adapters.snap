@@ -1,0 +1,2238 @@
+---
+source: xidlc/tests/rust_adapters_targets.rs
+expression: "&files[0].1"
+---
+/// Pure version projections. The application owns routing and side effects.
+#[allow(unused_imports, unused_variables, non_snake_case, non_camel_case_types)]
+pub mod version_adapters {
+    use super::{v2026_01_01, v2026_04_01, v2026_07_01};
+    /// Direction of an unsupported projection.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum Direction {
+        Upcast,
+        Downcast,
+    }
+    /// The application renders a refusal using its own frozen error vocabulary.
+    #[derive(Debug, Clone)]
+    pub struct UnsupportedProjection {
+        pub version: String,
+        pub direction: Direction,
+        pub type_path: String,
+        pub reason: String,
+    }
+    /// A projection either succeeds or requires an unsupported business choice.
+    pub type VersionedResult<T> = Result<T, UnsupportedProjection>;
+    /// Explicit acknowledgement that a source value is intentionally discarded.
+    #[derive(Debug, Clone, Copy)]
+    pub struct Ignored {
+        _private: (),
+    }
+    /// The acknowledgement hooks return for an intentionally retired member.
+    pub const IGNORED: Ignored = Ignored { _private: () };
+    /// A version resolved by the application before calling an adapter.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum Version {
+        V20260101,
+        V20260401,
+        V20260701,
+    }
+    impl Version {
+        /// Original contract identifier.
+        pub fn id(self) -> &'static str {
+            match self {
+                Self::V20260101 => "v2026_01_01",
+                Self::V20260401 => "v2026_04_01",
+                Self::V20260701 => "v2026_07_01",
+            }
+        }
+        /// Original contract version value.
+        pub fn value(self) -> &'static str {
+            match self {
+                Self::V20260101 => "2026-01-01",
+                Self::V20260401 => "2026-04-01",
+                Self::V20260701 => "2026-07-01",
+            }
+        }
+    }
+    /// Context for application business policy; adapters do not select versions.
+    #[derive(Debug, Clone, Copy)]
+    pub struct VersionContext {
+        pub original_version: Version,
+    }
+    /// A failed response projection retains the original committed Head outcome.
+    pub enum ProjectionOutcome<T, H> {
+        Projected(T),
+        Unsupported { head: H, error: UnsupportedProjection },
+    }
+    /// Invalid served-version wire data is distinct from a business refusal.
+    #[derive(Debug)]
+    pub enum AdaptationError {
+        Validation(String),
+        Unsupported(UnsupportedProjection),
+    }
+    impl From<UnsupportedProjection> for AdaptationError {
+        fn from(value: UnsupportedProjection) -> Self {
+            Self::Unsupported(value)
+        }
+    }
+    /// Hooks remain synchronous, pure, deterministic, and mandatory.
+    pub trait VersionAdapters {
+        fn profile_upcast_from_v_2026_01_01(
+            &self,
+            source: &v2026_01_01::Profile,
+        ) -> VersionedResult<ProfileUpcastFromV20260101Decision>;
+        fn profile_downcast_to_v_2026_01_01(
+            &self,
+            source: &v2026_04_01::Profile,
+            stored: &dyn StoredValues,
+        ) -> VersionedResult<ProfileDowncastToV20260101Decision>;
+        fn profile_upcast_from_v_2026_04_01(
+            &self,
+            source: &v2026_04_01::Profile,
+        ) -> VersionedResult<ProfileUpcastFromV20260401Decision>;
+        fn profile_downcast_to_v_2026_04_01(
+            &self,
+            source: &v2026_07_01::Profile,
+            stored: &dyn StoredValues,
+        ) -> VersionedResult<ProfileDowncastToV20260401Decision>;
+        fn route_protocol_downcast_to_v_2026_04_01(
+            &self,
+            source: &RouteProtocolDowncastToV20260401Changes,
+        ) -> VersionedResult<v2026_04_01::RouteProtocol>;
+    }
+    /// Members older versions still read that Head no longer carries, resolved by the application from the source instance of the downcast step that retires them.
+    pub trait StoredValues {
+        /// wire `recipient`, last served by v2026_01_01
+        fn profile_recipient(&self, source: &v2026_04_01::Profile) -> Option<String>;
+        /// wire `created_at`, last served by v2026_04_01
+        fn profile_created_at(&self, source: &v2026_07_01::Profile) -> Option<i32>;
+        /// wire `first_name`, last served by v2026_04_01
+        fn profile_first_name(&self, source: &v2026_07_01::Profile) -> Option<String>;
+        /// wire `last_name`, last served by v2026_04_01
+        fn profile_last_name(&self, source: &v2026_07_01::Profile) -> Option<String>;
+        /// wire `note`, last served by v2026_04_01
+        fn profile_note(
+            &self,
+            source: &v2026_07_01::Profile,
+        ) -> Option<v2026_04_01::Note>;
+        /// wire `status`, last served by v2026_04_01
+        fn profile_status(&self, source: &v2026_07_01::Profile) -> Option<String>;
+    }
+    /// Wire names each served version still reads from storage, by type; Head reads nothing.
+    pub const NEEDS: &[(&str, &[(&str, &[&str])])] = &[
+        (
+            "Profile",
+            &[
+                ("2026-07-01", &[]),
+                (
+                    "2026-04-01",
+                    &["created_at", "first_name", "last_name", "note", "status"],
+                ),
+                (
+                    "2026-01-01",
+                    &[
+                        "created_at",
+                        "first_name",
+                        "last_name",
+                        "note",
+                        "recipient",
+                        "status",
+                    ],
+                ),
+            ],
+        ),
+    ];
+    /// A Head outcome together with the stored values its downcast still reads.
+    pub struct HeadOutcome<T, E, S> {
+        pub outcome: Result<T, E>,
+        pub stored: S,
+    }
+    /// Explicit business assignments and discarded-value acknowledgements.
+    pub struct ProfileUpcastFromV20260101Decision {
+        pub fallback: bool,
+        pub to: v2026_04_01::Route,
+        pub recipient: Ignored,
+    }
+    /// Explicit business assignments and discarded-value acknowledgements.
+    pub struct ProfileDowncastToV20260101Decision {
+        pub recipient: String,
+    }
+    /// Explicit business assignments and discarded-value acknowledgements.
+    pub struct ProfileUpcastFromV20260401Decision {
+        pub created_at_utc: String,
+        pub display_name: String,
+        pub notes: Vec<v2026_07_01::Note>,
+        pub read_at: Option<String>,
+        pub created_at: Ignored,
+        pub first_name: Ignored,
+        pub last_name: Ignored,
+        pub note: Ignored,
+        pub status: Ignored,
+    }
+    /// Explicit business assignments and discarded-value acknowledgements.
+    pub struct ProfileDowncastToV20260401Decision {
+        pub created_at: i32,
+        pub first_name: String,
+        pub last_name: String,
+        pub note: Option<v2026_04_01::Note>,
+        pub status: String,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct DirectoryProfileRequestV20260101 {
+        pub id: String,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct DirectoryPublishRequestV20260101 {
+        pub profile: v2026_01_01::Profile,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct DirectoryProfileRequestV20260401 {
+        pub id: String,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct DirectoryPublishRequestV20260401 {
+        pub profile: v2026_04_01::Profile,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct DirectoryProfileRequestV20260701 {
+        pub id: String,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct DirectoryPublishRequestV20260701 {
+        pub profile: v2026_07_01::Profile,
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn missing_downcast_to_v_2026_01_01(
+        source: &v2026_04_01::Missing,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_01_01::Missing> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_04_01".into(),
+            direction: Direction::Downcast,
+            type_path: "Missing".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        Ok(v2026_01_01::Missing {
+            id: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn note_upcast_from_v_2026_01_01(
+        source: &v2026_01_01::Note,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_04_01::Note> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_01_01".into(),
+            direction: Direction::Upcast,
+            type_path: "Note".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.text))?;
+        Ok(v2026_04_01::Note {
+            text: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn note_downcast_to_v_2026_01_01(
+        source: &v2026_04_01::Note,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_01_01::Note> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_04_01".into(),
+            direction: Direction::Downcast,
+            type_path: "Note".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.text))?;
+        Ok(v2026_01_01::Note {
+            text: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn profile_upcast_from_v_2026_01_01(
+        source: &v2026_01_01::Profile,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_04_01::Profile> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_01_01".into(),
+            direction: Direction::Upcast,
+            type_path: "Profile".into(),
+            reason: reason.into(),
+        };
+        let decision = adapters.profile_upcast_from_v_2026_01_01(source)?;
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        let projected_1 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.title))?;
+        let projected_2 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.created_at))?;
+        let projected_3 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.first_name))?;
+        let projected_4 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.last_name))?;
+        let projected_5 = (&source.note)
+            .as_ref()
+            .map(|item| note_upcast_from_v_2026_01_01(item, adapters))
+            .transpose()?;
+        let projected_6 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.status))?;
+        Ok(v2026_04_01::Profile {
+            id: projected_0,
+            title: projected_1,
+            created_at: projected_2,
+            first_name: projected_3,
+            last_name: projected_4,
+            note: projected_5,
+            status: projected_6,
+            fallback: Some(decision.fallback),
+            to: decision.to,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn profile_downcast_to_v_2026_01_01(
+        source: &v2026_04_01::Profile,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_01_01::Profile> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_04_01".into(),
+            direction: Direction::Downcast,
+            type_path: "Profile".into(),
+            reason: reason.into(),
+        };
+        let decision = adapters.profile_downcast_to_v_2026_01_01(source, stored)?;
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        let projected_1 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.title))?;
+        let projected_2 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.created_at))?;
+        let projected_3 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.first_name))?;
+        let projected_4 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.last_name))?;
+        let projected_5 = (&source.note)
+            .as_ref()
+            .map(|item| note_downcast_to_v_2026_01_01(item, adapters))
+            .transpose()?;
+        let projected_6 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.status))?;
+        Ok(v2026_01_01::Profile {
+            id: projected_0,
+            title: projected_1,
+            created_at: projected_2,
+            first_name: projected_3,
+            last_name: projected_4,
+            note: projected_5,
+            status: projected_6,
+            recipient: decision.recipient,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn directory_profile_request_upcast_from_v_2026_01_01(
+        source: &DirectoryProfileRequestV20260101,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<DirectoryProfileRequestV20260401> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_01_01".into(),
+            direction: Direction::Upcast,
+            type_path: "DirectoryProfileRequest".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        Ok(DirectoryProfileRequestV20260401 {
+            id: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn directory_profile_response_downcast_to_v_2026_01_01(
+        source: &v2026_04_01::Profile,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_01_01::Profile> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_04_01".into(),
+            direction: Direction::Downcast,
+            type_path: "DirectoryProfileResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = profile_downcast_to_v_2026_01_01(source, stored, adapters)?;
+        Ok(projected_0)
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn directory_publish_request_upcast_from_v_2026_01_01(
+        source: &DirectoryPublishRequestV20260101,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<DirectoryPublishRequestV20260401> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_01_01".into(),
+            direction: Direction::Upcast,
+            type_path: "DirectoryPublishRequest".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = profile_upcast_from_v_2026_01_01(&source.profile, adapters)?;
+        Ok(DirectoryPublishRequestV20260401 {
+            profile: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn directory_publish_response_downcast_to_v_2026_01_01(
+        source: &v2026_04_01::Profile,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_01_01::Profile> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_04_01".into(),
+            direction: Direction::Downcast,
+            type_path: "DirectoryPublishResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = profile_downcast_to_v_2026_01_01(source, stored, adapters)?;
+        Ok(projected_0)
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn missing_downcast_to_v_2026_04_01(
+        source: &v2026_07_01::Missing,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_04_01::Missing> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_07_01".into(),
+            direction: Direction::Downcast,
+            type_path: "Missing".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        Ok(v2026_04_01::Missing {
+            id: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn profile_upcast_from_v_2026_04_01(
+        source: &v2026_04_01::Profile,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_07_01::Profile> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_04_01".into(),
+            direction: Direction::Upcast,
+            type_path: "Profile".into(),
+            reason: reason.into(),
+        };
+        let decision = adapters.profile_upcast_from_v_2026_04_01(source)?;
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        let projected_1 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.title))?;
+        let projected_2 = (&source.fallback)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
+        let projected_3 = route_upcast_from_v_2026_04_01(&source.to, adapters)?;
+        Ok(v2026_07_01::Profile {
+            id: projected_0,
+            title: projected_1,
+            fallback: projected_2,
+            to: projected_3,
+            created_at_utc: decision.created_at_utc,
+            display_name: decision.display_name,
+            notes: decision.notes,
+            read_at: decision.read_at,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn profile_downcast_to_v_2026_04_01(
+        source: &v2026_07_01::Profile,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_04_01::Profile> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_07_01".into(),
+            direction: Direction::Downcast,
+            type_path: "Profile".into(),
+            reason: reason.into(),
+        };
+        let decision = adapters.profile_downcast_to_v_2026_04_01(source, stored)?;
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        let projected_1 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.title))?;
+        let projected_2 = (&source.fallback)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
+        let projected_3 = route_downcast_to_v_2026_04_01(&source.to, adapters)?;
+        Ok(v2026_04_01::Profile {
+            id: projected_0,
+            title: projected_1,
+            fallback: projected_2,
+            to: projected_3,
+            created_at: decision.created_at,
+            first_name: decision.first_name,
+            last_name: decision.last_name,
+            note: decision.note,
+            status: decision.status,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn route_upcast_from_v_2026_04_01(
+        source: &v2026_04_01::Route,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_07_01::Route> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_04_01".into(),
+            direction: Direction::Upcast,
+            type_path: "Route".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.handle))?;
+        let projected_1 = (&source.protocol)
+            .as_ref()
+            .map(|item| route_protocol_upcast_from_v_2026_04_01(item, adapters))
+            .transpose()?;
+        Ok(v2026_07_01::Route {
+            handle: projected_0,
+            protocol: projected_1,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn route_downcast_to_v_2026_04_01(
+        source: &v2026_07_01::Route,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_04_01::Route> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_07_01".into(),
+            direction: Direction::Downcast,
+            type_path: "Route".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.handle))?;
+        let projected_1 = (&source.protocol)
+            .as_ref()
+            .map(|item| route_protocol_downcast_to_v_2026_04_01(item, adapters))
+            .transpose()?;
+        Ok(v2026_04_01::Route {
+            handle: projected_0,
+            protocol: projected_1,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn route_protocol_upcast_from_v_2026_04_01(
+        source: &v2026_04_01::RouteProtocol,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_07_01::RouteProtocol> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_04_01".into(),
+            direction: Direction::Upcast,
+            type_path: "RouteProtocol".into(),
+            reason: reason.into(),
+        };
+        match source {
+            v2026_04_01::RouteProtocol::sms => Ok(v2026_07_01::RouteProtocol::sms),
+            v2026_04_01::RouteProtocol::relay => Ok(v2026_07_01::RouteProtocol::relay),
+        }
+    }
+    /// Only source alternatives requiring an application decision.
+    pub enum RouteProtocolDowncastToV20260401Changes {
+        chat,
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn route_protocol_downcast_to_v_2026_04_01(
+        source: &v2026_07_01::RouteProtocol,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_04_01::RouteProtocol> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_07_01".into(),
+            direction: Direction::Downcast,
+            type_path: "RouteProtocol".into(),
+            reason: reason.into(),
+        };
+        match source {
+            v2026_07_01::RouteProtocol::sms => Ok(v2026_04_01::RouteProtocol::sms),
+            v2026_07_01::RouteProtocol::relay => Ok(v2026_04_01::RouteProtocol::relay),
+            v2026_07_01::RouteProtocol::chat => {
+                adapters
+                    .route_protocol_downcast_to_v_2026_04_01(
+                        &RouteProtocolDowncastToV20260401Changes::chat,
+                    )
+            }
+        }
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn directory_profile_request_upcast_from_v_2026_04_01(
+        source: &DirectoryProfileRequestV20260401,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<DirectoryProfileRequestV20260701> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_04_01".into(),
+            direction: Direction::Upcast,
+            type_path: "DirectoryProfileRequest".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        Ok(DirectoryProfileRequestV20260701 {
+            id: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn directory_profile_response_downcast_to_v_2026_04_01(
+        source: &v2026_07_01::Profile,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_04_01::Profile> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_07_01".into(),
+            direction: Direction::Downcast,
+            type_path: "DirectoryProfileResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = profile_downcast_to_v_2026_04_01(source, stored, adapters)?;
+        Ok(projected_0)
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn directory_publish_request_upcast_from_v_2026_04_01(
+        source: &DirectoryPublishRequestV20260401,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<DirectoryPublishRequestV20260701> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_04_01".into(),
+            direction: Direction::Upcast,
+            type_path: "DirectoryPublishRequest".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = profile_upcast_from_v_2026_04_01(&source.profile, adapters)?;
+        Ok(DirectoryPublishRequestV20260701 {
+            profile: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn directory_publish_response_downcast_to_v_2026_04_01(
+        source: &v2026_07_01::Profile,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_04_01::Profile> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_07_01".into(),
+            direction: Direction::Downcast,
+            type_path: "DirectoryPublishResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = profile_downcast_to_v_2026_04_01(source, stored, adapters)?;
+        Ok(projected_0)
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_directory_profile_error_to_v_2026_01_01(
+        source: &v2026_04_01::DirectoryProfileError,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_01_01::DirectoryProfileError> {
+        match source {
+            v2026_04_01::DirectoryProfileError::Missing(value) => {
+                missing_downcast_to_v_2026_01_01(value, adapters)
+                    .map(v2026_01_01::DirectoryProfileError::Missing)
+            }
+            v2026_04_01::DirectoryProfileError::Framework(error) => {
+                Ok(v2026_01_01::DirectoryProfileError::Framework(error.clone()))
+            }
+        }
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_directory_publish_error_to_v_2026_01_01(
+        source: &::xidl_rust_axum::Error,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<::xidl_rust_axum::Error> {
+        Ok(source.clone())
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_directory_profile_error_to_v_2026_04_01(
+        source: &v2026_07_01::DirectoryProfileError,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_04_01::DirectoryProfileError> {
+        match source {
+            v2026_07_01::DirectoryProfileError::Missing(value) => {
+                missing_downcast_to_v_2026_04_01(value, adapters)
+                    .map(v2026_04_01::DirectoryProfileError::Missing)
+            }
+            v2026_07_01::DirectoryProfileError::Framework(error) => {
+                Ok(v2026_04_01::DirectoryProfileError::Framework(error.clone()))
+            }
+        }
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_directory_publish_error_to_v_2026_04_01(
+        source: &::xidl_rust_axum::Error,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<::xidl_rust_axum::Error> {
+        Ok(source.clone())
+    }
+    fn decode_wire_v_2026_01_01_profile(
+        wire: &::serde_json::Value,
+    ) -> Result<v2026_01_01::Profile, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &[
+            "created_at",
+            "first_name",
+            "id",
+            "last_name",
+            "note",
+            "recipient",
+            "status",
+            "title",
+        ];
+        let forbidden: &[&str] = &[
+            "created_at_utc",
+            "display_name",
+            "fallback",
+            "notes",
+            "read_at",
+            "to",
+        ];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object
+            .get("id")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "id").to_string()
+            })?;
+        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_1 = object
+            .get("title")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "title").to_string()
+            })?;
+        let value_1: String = ::serde_json::from_value::<String>((raw_1).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_2 = object
+            .get("created_at")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "created_at").to_string()
+            })?;
+        let value_2: i32 = ::serde_json::from_value::<i32>((raw_2).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_3 = object
+            .get("first_name")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "first_name").to_string()
+            })?;
+        let value_3: String = ::serde_json::from_value::<String>((raw_3).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_4 = object
+            .get("last_name")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "last_name").to_string()
+            })?;
+        let value_4: String = ::serde_json::from_value::<String>((raw_4).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_5 = object.get("note").unwrap_or(&::serde_json::Value::Null);
+        let value_5: Option<v2026_01_01::Note> = if (raw_5).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            decode_wire_v_2026_01_01_note(raw_5).map(Some)
+        }?;
+        let raw_6 = object
+            .get("recipient")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "recipient").to_string()
+            })?;
+        let value_6: String = ::serde_json::from_value::<String>((raw_6).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_7 = object
+            .get("status")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "status").to_string()
+            })?;
+        let value_7: String = ::serde_json::from_value::<String>((raw_7).clone())
+            .map_err(|error| error.to_string())?;
+        Ok(v2026_01_01::Profile {
+            id: value_0,
+            title: value_1,
+            created_at: value_2,
+            first_name: value_3,
+            last_name: value_4,
+            note: value_5,
+            recipient: value_6,
+            status: value_7,
+        })
+    }
+    fn decode_wire_v_2026_01_01_note(
+        wire: &::serde_json::Value,
+    ) -> Result<v2026_01_01::Note, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &["text"];
+        let forbidden: &[&str] = &[];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object
+            .get("text")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "text").to_string()
+            })?;
+        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+            .map_err(|error| error.to_string())?;
+        Ok(v2026_01_01::Note { text: value_0 })
+    }
+    fn decode_wire_v_2026_04_01_profile(
+        wire: &::serde_json::Value,
+    ) -> Result<v2026_04_01::Profile, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &[
+            "created_at",
+            "fallback",
+            "first_name",
+            "id",
+            "last_name",
+            "note",
+            "status",
+            "title",
+            "to",
+        ];
+        let forbidden: &[&str] = &[
+            "created_at_utc",
+            "display_name",
+            "notes",
+            "read_at",
+            "recipient",
+        ];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object
+            .get("id")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "id").to_string()
+            })?;
+        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_1 = object
+            .get("title")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "title").to_string()
+            })?;
+        let value_1: String = ::serde_json::from_value::<String>((raw_1).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_2 = object
+            .get("created_at")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "created_at").to_string()
+            })?;
+        let value_2: i32 = ::serde_json::from_value::<i32>((raw_2).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_3 = object
+            .get("first_name")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "first_name").to_string()
+            })?;
+        let value_3: String = ::serde_json::from_value::<String>((raw_3).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_4 = object
+            .get("last_name")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "last_name").to_string()
+            })?;
+        let value_4: String = ::serde_json::from_value::<String>((raw_4).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_5 = object.get("note").unwrap_or(&::serde_json::Value::Null);
+        let value_5: Option<v2026_04_01::Note> = if (raw_5).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            decode_wire_v_2026_04_01_note(raw_5).map(Some)
+        }?;
+        let raw_6 = object.get("fallback").unwrap_or(&::serde_json::Value::Null);
+        let value_6: Option<bool> = if (raw_6).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<bool>((raw_6).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        let raw_7 = object
+            .get("to")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "to").to_string()
+            })?;
+        let value_7: v2026_04_01::Route = decode_wire_v_2026_04_01_route(raw_7)?;
+        let raw_8 = object
+            .get("status")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "status").to_string()
+            })?;
+        let value_8: String = ::serde_json::from_value::<String>((raw_8).clone())
+            .map_err(|error| error.to_string())?;
+        Ok(v2026_04_01::Profile {
+            id: value_0,
+            title: value_1,
+            created_at: value_2,
+            first_name: value_3,
+            last_name: value_4,
+            note: value_5,
+            fallback: value_6,
+            to: value_7,
+            status: value_8,
+        })
+    }
+    fn decode_wire_v_2026_04_01_note(
+        wire: &::serde_json::Value,
+    ) -> Result<v2026_04_01::Note, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &["text"];
+        let forbidden: &[&str] = &[];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object
+            .get("text")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "text").to_string()
+            })?;
+        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+            .map_err(|error| error.to_string())?;
+        Ok(v2026_04_01::Note { text: value_0 })
+    }
+    fn decode_wire_v_2026_04_01_route(
+        wire: &::serde_json::Value,
+    ) -> Result<v2026_04_01::Route, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &["handle", "protocol"];
+        let forbidden: &[&str] = &[];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object
+            .get("handle")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "handle").to_string()
+            })?;
+        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_1 = object.get("protocol").unwrap_or(&::serde_json::Value::Null);
+        let value_1: Option<v2026_04_01::RouteProtocol> = if (raw_1).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            decode_wire_v_2026_04_01_route_protocol(raw_1).map(Some)
+        }?;
+        Ok(v2026_04_01::Route {
+            handle: value_0,
+            protocol: value_1,
+        })
+    }
+    fn decode_wire_v_2026_04_01_route_protocol(
+        wire: &::serde_json::Value,
+    ) -> Result<v2026_04_01::RouteProtocol, String> {
+        ::serde_json::from_value(wire.clone()).map_err(|error| error.to_string())
+    }
+    fn decode_wire_v_2026_07_01_profile(
+        wire: &::serde_json::Value,
+    ) -> Result<v2026_07_01::Profile, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &[
+            "created_at_utc",
+            "display_name",
+            "fallback",
+            "id",
+            "notes",
+            "read_at",
+            "title",
+            "to",
+        ];
+        let forbidden: &[&str] = &[
+            "created_at",
+            "first_name",
+            "last_name",
+            "note",
+            "recipient",
+            "status",
+        ];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object
+            .get("id")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "id").to_string()
+            })?;
+        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_1 = object
+            .get("title")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "title").to_string()
+            })?;
+        let value_1: String = ::serde_json::from_value::<String>((raw_1).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_2 = object
+            .get("created_at_utc")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "created_at_utc").to_string()
+            })?;
+        let value_2: String = ::serde_json::from_value::<String>((raw_2).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_3 = object
+            .get("display_name")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "display_name").to_string()
+            })?;
+        let value_3: String = ::serde_json::from_value::<String>((raw_3).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_4 = object
+            .get("notes")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "notes").to_string()
+            })?;
+        let value_4: Vec<v2026_07_01::Note> = (|| {
+            let array = (raw_4)
+                .as_array()
+                .ok_or_else(|| "expected an array".to_string())?;
+            let values = array
+                .iter()
+                .map(|item| decode_wire_v_2026_07_01_note(item))
+                .collect::<Result<Vec<_>, String>>()?;
+            Ok::<_, String>(values)
+        })()?;
+        let raw_5 = object.get("fallback").unwrap_or(&::serde_json::Value::Null);
+        let value_5: Option<bool> = if (raw_5).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<bool>((raw_5).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        let raw_6 = object
+            .get("to")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "to").to_string()
+            })?;
+        let value_6: v2026_07_01::Route = decode_wire_v_2026_07_01_route(raw_6)?;
+        let raw_7 = object.get("read_at").unwrap_or(&::serde_json::Value::Null);
+        let value_7: Option<String> = if (raw_7).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_7).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        Ok(v2026_07_01::Profile {
+            id: value_0,
+            title: value_1,
+            created_at_utc: value_2,
+            display_name: value_3,
+            notes: value_4,
+            fallback: value_5,
+            to: value_6,
+            read_at: value_7,
+        })
+    }
+    fn decode_wire_v_2026_07_01_note(
+        wire: &::serde_json::Value,
+    ) -> Result<v2026_07_01::Note, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &["text"];
+        let forbidden: &[&str] = &[];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object
+            .get("text")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "text").to_string()
+            })?;
+        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+            .map_err(|error| error.to_string())?;
+        Ok(v2026_07_01::Note { text: value_0 })
+    }
+    fn decode_wire_v_2026_07_01_route(
+        wire: &::serde_json::Value,
+    ) -> Result<v2026_07_01::Route, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &["handle", "protocol"];
+        let forbidden: &[&str] = &[];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object
+            .get("handle")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "handle").to_string()
+            })?;
+        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_1 = object.get("protocol").unwrap_or(&::serde_json::Value::Null);
+        let value_1: Option<v2026_07_01::RouteProtocol> = if (raw_1).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            decode_wire_v_2026_07_01_route_protocol(raw_1).map(Some)
+        }?;
+        Ok(v2026_07_01::Route {
+            handle: value_0,
+            protocol: value_1,
+        })
+    }
+    fn decode_wire_v_2026_07_01_route_protocol(
+        wire: &::serde_json::Value,
+    ) -> Result<v2026_07_01::RouteProtocol, String> {
+        ::serde_json::from_value(wire.clone()).map_err(|error| error.to_string())
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_directory_profile_from_v_2026_01_01(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<DirectoryProfileRequestV20260701, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["id"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("id")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "id").into(),
+            ))?;
+        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+            .map_err(|error| error.to_string())
+            .map_err(AdaptationError::Validation)?;
+        let source = DirectoryProfileRequestV20260101 {
+            id: value_0,
+        };
+        let source = directory_profile_request_upcast_from_v_2026_01_01(
+            &source,
+            adapters,
+        )?;
+        let source = directory_profile_request_upcast_from_v_2026_04_01(
+            &source,
+            adapters,
+        )?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_directory_profile_from_v_2026_01_01_outcome(
+        head: Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<v2026_01_01::Profile, v2026_01_01::DirectoryProfileError>,
+        Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+    > {
+        match &head {
+            Ok(source) => {
+                let source = match directory_profile_response_downcast_to_v_2026_04_01(
+                    source,
+                    stored,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                let source = match directory_profile_response_downcast_to_v_2026_01_01(
+                    &source,
+                    stored,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_directory_profile_error_to_v_2026_04_01(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                let source = match downcast_directory_profile_error_to_v_2026_01_01(
+                    &source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
+    pub async fn dispatch_directory_profile_from_v_2026_01_01<F, Fut, R>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<v2026_01_01::Profile, v2026_01_01::DirectoryProfileError>,
+            Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(DirectoryProfileRequestV20260701, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<
+                v2026_07_01::Profile,
+                v2026_07_01::DirectoryProfileError,
+                R,
+            >,
+        >,
+        R: StoredValues,
+    {
+        let input = decode_and_upcast_directory_profile_from_v_2026_01_01(
+            wire,
+            adapters,
+        )?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V20260101,
+                },
+            )
+            .await;
+        Ok(
+            downcast_directory_profile_from_v_2026_01_01_outcome(
+                head.outcome,
+                &head.stored,
+                adapters,
+            ),
+        )
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_directory_publish_from_v_2026_01_01(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<DirectoryPublishRequestV20260701, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["profile"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("profile")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "profile").into(),
+            ))?;
+        let value_0: v2026_01_01::Profile = decode_wire_v_2026_01_01_profile(&raw_0)
+            .map_err(AdaptationError::Validation)?;
+        let source = DirectoryPublishRequestV20260101 {
+            profile: value_0,
+        };
+        let source = directory_publish_request_upcast_from_v_2026_01_01(
+            &source,
+            adapters,
+        )?;
+        let source = directory_publish_request_upcast_from_v_2026_04_01(
+            &source,
+            adapters,
+        )?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_directory_publish_from_v_2026_01_01_outcome(
+        head: Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<v2026_01_01::Profile, ::xidl_rust_axum::Error>,
+        Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+    > {
+        match &head {
+            Ok(source) => {
+                let source = match directory_publish_response_downcast_to_v_2026_04_01(
+                    source,
+                    stored,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                let source = match directory_publish_response_downcast_to_v_2026_01_01(
+                    &source,
+                    stored,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_directory_publish_error_to_v_2026_04_01(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                let source = match downcast_directory_publish_error_to_v_2026_01_01(
+                    &source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
+    pub async fn dispatch_directory_publish_from_v_2026_01_01<F, Fut, R>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<v2026_01_01::Profile, ::xidl_rust_axum::Error>,
+            Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(DirectoryPublishRequestV20260701, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<v2026_07_01::Profile, ::xidl_rust_axum::Error, R>,
+        >,
+        R: StoredValues,
+    {
+        let input = decode_and_upcast_directory_publish_from_v_2026_01_01(
+            wire,
+            adapters,
+        )?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V20260101,
+                },
+            )
+            .await;
+        Ok(
+            downcast_directory_publish_from_v_2026_01_01_outcome(
+                head.outcome,
+                &head.stored,
+                adapters,
+            ),
+        )
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_directory_profile_from_v_2026_04_01(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<DirectoryProfileRequestV20260701, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["id"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("id")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "id").into(),
+            ))?;
+        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+            .map_err(|error| error.to_string())
+            .map_err(AdaptationError::Validation)?;
+        let source = DirectoryProfileRequestV20260401 {
+            id: value_0,
+        };
+        let source = directory_profile_request_upcast_from_v_2026_04_01(
+            &source,
+            adapters,
+        )?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_directory_profile_from_v_2026_04_01_outcome(
+        head: Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<v2026_04_01::Profile, v2026_04_01::DirectoryProfileError>,
+        Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+    > {
+        match &head {
+            Ok(source) => {
+                let source = match directory_profile_response_downcast_to_v_2026_04_01(
+                    source,
+                    stored,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_directory_profile_error_to_v_2026_04_01(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
+    pub async fn dispatch_directory_profile_from_v_2026_04_01<F, Fut, R>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<v2026_04_01::Profile, v2026_04_01::DirectoryProfileError>,
+            Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(DirectoryProfileRequestV20260701, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<
+                v2026_07_01::Profile,
+                v2026_07_01::DirectoryProfileError,
+                R,
+            >,
+        >,
+        R: StoredValues,
+    {
+        let input = decode_and_upcast_directory_profile_from_v_2026_04_01(
+            wire,
+            adapters,
+        )?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V20260401,
+                },
+            )
+            .await;
+        Ok(
+            downcast_directory_profile_from_v_2026_04_01_outcome(
+                head.outcome,
+                &head.stored,
+                adapters,
+            ),
+        )
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_directory_publish_from_v_2026_04_01(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<DirectoryPublishRequestV20260701, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["profile"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("profile")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "profile").into(),
+            ))?;
+        let value_0: v2026_04_01::Profile = decode_wire_v_2026_04_01_profile(&raw_0)
+            .map_err(AdaptationError::Validation)?;
+        let source = DirectoryPublishRequestV20260401 {
+            profile: value_0,
+        };
+        let source = directory_publish_request_upcast_from_v_2026_04_01(
+            &source,
+            adapters,
+        )?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_directory_publish_from_v_2026_04_01_outcome(
+        head: Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<v2026_04_01::Profile, ::xidl_rust_axum::Error>,
+        Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+    > {
+        match &head {
+            Ok(source) => {
+                let source = match directory_publish_response_downcast_to_v_2026_04_01(
+                    source,
+                    stored,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_directory_publish_error_to_v_2026_04_01(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
+    pub async fn dispatch_directory_publish_from_v_2026_04_01<F, Fut, R>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<v2026_04_01::Profile, ::xidl_rust_axum::Error>,
+            Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(DirectoryPublishRequestV20260701, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<v2026_07_01::Profile, ::xidl_rust_axum::Error, R>,
+        >,
+        R: StoredValues,
+    {
+        let input = decode_and_upcast_directory_publish_from_v_2026_04_01(
+            wire,
+            adapters,
+        )?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V20260401,
+                },
+            )
+            .await;
+        Ok(
+            downcast_directory_publish_from_v_2026_04_01_outcome(
+                head.outcome,
+                &head.stored,
+                adapters,
+            ),
+        )
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_directory_profile_from_v_2026_07_01(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<DirectoryProfileRequestV20260701, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["id"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("id")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "id").into(),
+            ))?;
+        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+            .map_err(|error| error.to_string())
+            .map_err(AdaptationError::Validation)?;
+        let source = DirectoryProfileRequestV20260701 {
+            id: value_0,
+        };
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_directory_profile_from_v_2026_07_01_outcome(
+        head: Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+        Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+    > {
+        ProjectionOutcome::Projected(head)
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_directory_profile_from_v_2026_07_01<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+            Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(DirectoryProfileRequestV20260701, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+        >,
+    {
+        let input = decode_and_upcast_directory_profile_from_v_2026_07_01(
+            wire,
+            adapters,
+        )?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V20260701,
+                },
+            )
+            .await;
+        Ok(downcast_directory_profile_from_v_2026_07_01_outcome(head, adapters))
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_directory_publish_from_v_2026_07_01(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<DirectoryPublishRequestV20260701, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["profile"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("profile")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "profile").into(),
+            ))?;
+        let value_0: v2026_07_01::Profile = decode_wire_v_2026_07_01_profile(&raw_0)
+            .map_err(AdaptationError::Validation)?;
+        let source = DirectoryPublishRequestV20260701 {
+            profile: value_0,
+        };
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_directory_publish_from_v_2026_07_01_outcome(
+        head: Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+        Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+    > {
+        ProjectionOutcome::Projected(head)
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_directory_publish_from_v_2026_07_01<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+            Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(DirectoryPublishRequestV20260701, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+        >,
+    {
+        let input = decode_and_upcast_directory_publish_from_v_2026_07_01(
+            wire,
+            adapters,
+        )?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V20260701,
+                },
+            )
+            .await;
+        Ok(downcast_directory_publish_from_v_2026_07_01_outcome(head, adapters))
+    }
+    /// The caller-selected version's projected model type.
+    pub enum MissingProjection {
+        V20260101(v2026_01_01::Missing),
+        V20260401(v2026_04_01::Missing),
+        V20260701(v2026_07_01::Missing),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_missing(
+        version: Version,
+        head: v2026_07_01::Missing,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<MissingProjection> {
+        match version {
+            Version::V20260101 => {
+                let source = missing_downcast_to_v_2026_04_01(&head, adapters)?;
+                let source = missing_downcast_to_v_2026_01_01(&source, adapters)?;
+                Ok(MissingProjection::V20260101(source))
+            }
+            Version::V20260401 => {
+                let source = missing_downcast_to_v_2026_04_01(&head, adapters)?;
+                Ok(MissingProjection::V20260401(source))
+            }
+            Version::V20260701 => {
+                let source = head;
+                Ok(MissingProjection::V20260701(source))
+            }
+        }
+    }
+    /// The caller-selected version's projected model type.
+    pub enum NoteProjection {
+        V20260701(v2026_07_01::Note),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_note(
+        version: Version,
+        head: v2026_07_01::Note,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<NoteProjection> {
+        match version {
+            Version::V20260701 => {
+                let source = head;
+                Ok(NoteProjection::V20260701(source))
+            }
+            _ => {
+                Err(UnsupportedProjection {
+                    version: version.value().into(),
+                    direction: Direction::Downcast,
+                    type_path: "NoteProjection".into(),
+                    reason: "type is not reachable in selected version".into(),
+                })
+            }
+        }
+    }
+    /// The caller-selected version's projected model type.
+    pub enum ProfileProjection {
+        V20260101(v2026_01_01::Profile),
+        V20260401(v2026_04_01::Profile),
+        V20260701(v2026_07_01::Profile),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_profile(
+        version: Version,
+        head: v2026_07_01::Profile,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<ProfileProjection> {
+        match version {
+            Version::V20260101 => {
+                let source = profile_downcast_to_v_2026_04_01(&head, stored, adapters)?;
+                let source = profile_downcast_to_v_2026_01_01(
+                    &source,
+                    stored,
+                    adapters,
+                )?;
+                Ok(ProfileProjection::V20260101(source))
+            }
+            Version::V20260401 => {
+                let source = profile_downcast_to_v_2026_04_01(&head, stored, adapters)?;
+                Ok(ProfileProjection::V20260401(source))
+            }
+            Version::V20260701 => {
+                let source = head;
+                Ok(ProfileProjection::V20260701(source))
+            }
+        }
+    }
+    /// The caller-selected version's projected model type.
+    pub enum RouteProjection {
+        V20260401(v2026_04_01::Route),
+        V20260701(v2026_07_01::Route),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_route(
+        version: Version,
+        head: v2026_07_01::Route,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<RouteProjection> {
+        match version {
+            Version::V20260401 => {
+                let source = route_downcast_to_v_2026_04_01(&head, adapters)?;
+                Ok(RouteProjection::V20260401(source))
+            }
+            Version::V20260701 => {
+                let source = head;
+                Ok(RouteProjection::V20260701(source))
+            }
+            _ => {
+                Err(UnsupportedProjection {
+                    version: version.value().into(),
+                    direction: Direction::Downcast,
+                    type_path: "RouteProjection".into(),
+                    reason: "type is not reachable in selected version".into(),
+                })
+            }
+        }
+    }
+    /// The caller-selected version's projected model type.
+    pub enum RouteProtocolProjection {
+        V20260401(v2026_04_01::RouteProtocol),
+        V20260701(v2026_07_01::RouteProtocol),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_route_protocol(
+        version: Version,
+        head: v2026_07_01::RouteProtocol,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<RouteProtocolProjection> {
+        match version {
+            Version::V20260401 => {
+                let source = route_protocol_downcast_to_v_2026_04_01(&head, adapters)?;
+                Ok(RouteProtocolProjection::V20260401(source))
+            }
+            Version::V20260701 => {
+                let source = head;
+                Ok(RouteProtocolProjection::V20260701(source))
+            }
+            _ => {
+                Err(UnsupportedProjection {
+                    version: version.value().into(),
+                    direction: Direction::Downcast,
+                    type_path: "RouteProtocolProjection".into(),
+                    reason: "type is not reachable in selected version".into(),
+                })
+            }
+        }
+    }
+    /// Outcome in the caller's explicitly selected contract version.
+    pub enum DirectoryProfileOutcome {
+        V20260101(Result<v2026_01_01::Profile, v2026_01_01::DirectoryProfileError>),
+        V20260401(Result<v2026_04_01::Profile, v2026_04_01::DirectoryProfileError>),
+        V20260701(Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>),
+    }
+    /// Decode a request using an application-resolved version before any hook.
+    pub fn decode_and_upcast_directory_profile(
+        version: Version,
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<DirectoryProfileRequestV20260701, AdaptationError> {
+        match version {
+            Version::V20260101 => {
+                decode_and_upcast_directory_profile_from_v_2026_01_01(wire, adapters)
+            }
+            Version::V20260401 => {
+                decode_and_upcast_directory_profile_from_v_2026_04_01(wire, adapters)
+            }
+            Version::V20260701 => {
+                decode_and_upcast_directory_profile_from_v_2026_07_01(wire, adapters)
+            }
+        }
+    }
+    /// Retain the original owned Head outcome when any projection refuses.
+    pub fn downcast_directory_profile_outcome(
+        version: Version,
+        head: Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        DirectoryProfileOutcome,
+        Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+    > {
+        match version {
+            Version::V20260101 => {
+                match downcast_directory_profile_from_v_2026_01_01_outcome(
+                    head,
+                    stored,
+                    adapters,
+                ) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            DirectoryProfileOutcome::V20260101(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V20260401 => {
+                match downcast_directory_profile_from_v_2026_04_01_outcome(
+                    head,
+                    stored,
+                    adapters,
+                ) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            DirectoryProfileOutcome::V20260401(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V20260701 => {
+                match downcast_directory_profile_from_v_2026_07_01_outcome(
+                    head,
+                    adapters,
+                ) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            DirectoryProfileOutcome::V20260701(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /// Execute a Head handler once; it returns the stored values older versions still read.
+    pub async fn dispatch_directory_profile<F, Fut, R>(
+        version: Version,
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            DirectoryProfileOutcome,
+            Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(DirectoryProfileRequestV20260701, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<
+                v2026_07_01::Profile,
+                v2026_07_01::DirectoryProfileError,
+                R,
+            >,
+        >,
+        R: StoredValues,
+    {
+        let input = decode_and_upcast_directory_profile(version, wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: version,
+                },
+            )
+            .await;
+        Ok(
+            downcast_directory_profile_outcome(
+                version,
+                head.outcome,
+                &head.stored,
+                adapters,
+            ),
+        )
+    }
+    /// Outcome in the caller's explicitly selected contract version.
+    pub enum DirectoryPublishOutcome {
+        V20260101(Result<v2026_01_01::Profile, ::xidl_rust_axum::Error>),
+        V20260401(Result<v2026_04_01::Profile, ::xidl_rust_axum::Error>),
+        V20260701(Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>),
+    }
+    /// Decode a request using an application-resolved version before any hook.
+    pub fn decode_and_upcast_directory_publish(
+        version: Version,
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<DirectoryPublishRequestV20260701, AdaptationError> {
+        match version {
+            Version::V20260101 => {
+                decode_and_upcast_directory_publish_from_v_2026_01_01(wire, adapters)
+            }
+            Version::V20260401 => {
+                decode_and_upcast_directory_publish_from_v_2026_04_01(wire, adapters)
+            }
+            Version::V20260701 => {
+                decode_and_upcast_directory_publish_from_v_2026_07_01(wire, adapters)
+            }
+        }
+    }
+    /// Retain the original owned Head outcome when any projection refuses.
+    pub fn downcast_directory_publish_outcome(
+        version: Version,
+        head: Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        DirectoryPublishOutcome,
+        Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+    > {
+        match version {
+            Version::V20260101 => {
+                match downcast_directory_publish_from_v_2026_01_01_outcome(
+                    head,
+                    stored,
+                    adapters,
+                ) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            DirectoryPublishOutcome::V20260101(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V20260401 => {
+                match downcast_directory_publish_from_v_2026_04_01_outcome(
+                    head,
+                    stored,
+                    adapters,
+                ) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            DirectoryPublishOutcome::V20260401(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V20260701 => {
+                match downcast_directory_publish_from_v_2026_07_01_outcome(
+                    head,
+                    adapters,
+                ) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            DirectoryPublishOutcome::V20260701(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /// Execute a Head handler once; it returns the stored values older versions still read.
+    pub async fn dispatch_directory_publish<F, Fut, R>(
+        version: Version,
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            DirectoryPublishOutcome,
+            Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(DirectoryPublishRequestV20260701, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<v2026_07_01::Profile, ::xidl_rust_axum::Error, R>,
+        >,
+        R: StoredValues,
+    {
+        let input = decode_and_upcast_directory_publish(version, wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: version,
+                },
+            )
+            .await;
+        Ok(
+            downcast_directory_publish_outcome(
+                version,
+                head.outcome,
+                &head.stored,
+                adapters,
+            ),
+        )
+    }
+}

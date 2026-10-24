@@ -24,6 +24,17 @@ fn independent_typescript_target_snapshots_wire_validation_and_business_decision
 }
 
 #[test]
+fn transforms_target_snapshots_every_change_shape_of_the_catalogue() {
+    let source = include_str!("../../bdd/features/data/versioned_transforms.idl");
+    let files = render(source, "transforms.idl");
+    assert_eq!(files, render(source, "transforms.idl"));
+    assert_eq!(files.len(), 1);
+    assert!(files[0].1.contains("routeProtocolDowncastToV20260401"));
+    assert!(files[0].1.contains("profileUpcastFromV20260101"));
+    insta::assert_snapshot!("independent_typescript_transforms_adapters", &files[0].1);
+}
+
+#[test]
 fn chain_target_snapshots_the_retirement_surface_of_the_booking_corpus() {
     let source = include_str!("../../bdd/features/data/versioned_chain.idl");
     let files = render(source, "chain.idl");

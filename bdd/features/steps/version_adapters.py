@@ -77,6 +77,7 @@ def prepare_application(context, script, boilerplate_name="versioned_adapters"):
             "business_update.ts",
         ],
         "chain.ts": ["chain_http.ts", "chain_app.ts"],
+        "transforms.ts": ["transforms_http.ts", "transforms_app.ts"],
     }
     for name in companions.get(script, []):
         shutil.copy(boilerplate / name, output)
@@ -213,6 +214,9 @@ def prepare_rust_application(context, script, boilerplate_name="versioned_adapte
         "versioned_chain": {
             "main.rs": ["hooks.rs", "chain.rs", "http.rs", "http_app.rs"]
         },
+        "versioned_transforms": {
+            "main.rs": ["hooks.rs", "transforms.rs", "http.rs", "http_app.rs"]
+        },
     }
     for name in companions.get(boilerplate_name, {}).get(script, []):
         shutil.copy(boilerplate / name, output / "src" / name)
@@ -346,3 +350,21 @@ def rust_versioned_chain_journey(context):
     )
     result = run(["cargo", "run", "--quiet"], cwd=output)
     assert "PASS: booking chain" in result.stdout
+
+
+@then("the versioned transform shapes upcast, downcast and round-trip")
+def versioned_transforms_journey(context):
+    output = prepare_application(
+        context, "transforms.ts", boilerplate_name="versioned_transforms"
+    )
+    result = run(["pnpm", "exec", "tsx", "transforms.ts"], cwd=output)
+    assert "PASS: transform shapes" in result.stdout
+
+
+@then("the Rust versioned transform shapes keep the same promises")
+def rust_versioned_transforms_journey(context):
+    output = prepare_rust_application(
+        context, "main.rs", boilerplate_name="versioned_transforms"
+    )
+    result = run(["cargo", "run", "--quiet"], cwd=output)
+    assert "PASS: transform shapes" in result.stdout
