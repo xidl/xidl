@@ -163,6 +163,24 @@ fn missing_nested_sources_and_mounts_name_the_failed_dependency() {
 }
 
 #[test]
+fn invalid_shared_dimension_fails_before_any_version_is_emitted() {
+    let libraries = Libraries::new();
+    let identity = libraries.path("identity/lib.idl");
+    let source = fs::read_to_string(&identity).expect("shared coordinate constants");
+    fs::write(
+        identity,
+        source.replace("COORDINATE_AXES = 2", "COORDINATE_AXES = 0"),
+    )
+    .expect("invalidate the shared dimension in the editable library");
+    let output = libraries.path("invalid-dimension");
+    let error =
+        libraries.generate_error("rust-axum", &libraries.path("service/xidl.toml"), &output);
+    assert!(error.contains("geo::Coordinates"), "{error}");
+    assert!(error.contains("must be positive"), "{error}");
+    assert_eq!(fs::read_dir(output).expect("output directory").count(), 0);
+}
+
+#[test]
 fn invalid_imported_versions_fail_before_any_unit_is_emitted() {
     let libraries = Libraries::new();
     let reader = libraries.path("readers/old_reader.idl");

@@ -100,7 +100,7 @@ fn interface_local_ancestors_keep_their_declared_type_identity() {
 }
 
 #[test]
-fn inherited_bounds_and_default_expressions_keep_their_declared_constants() {
+fn inherited_array_sizes_resolve_while_other_expressions_keep_their_declared_constants() {
     let spec = parse(
         r#"
         module limits {
@@ -126,6 +126,10 @@ fn inherited_bounds_and_default_expressions_keep_their_declared_constants() {
     );
     let structs = super::collect_structs(&spec.0);
     let inherited = &structs["shipping::Receipt"].inherited;
+    let crate::hir::Declarator::ArrayDeclarator(array) = &inherited[0].ident[0] else {
+        panic!("inherited digits array");
+    };
+    assert_eq!(crate::hir::const_expr_to_i64(&array.len[0].0), Some(8));
     let json = serde_json::to_value(inherited).expect("inherited receipt fields");
     let mut names = Vec::new();
     collect_names(&json, &mut names);
@@ -138,7 +142,7 @@ fn inherited_bounds_and_default_expressions_keep_their_declared_constants() {
     assert_eq!(
         counts,
         std::collections::BTreeMap::from([
-            ("limits::WIDTH".to_string(), 7),
+            ("limits::WIDTH".to_string(), 6),
             ("limits::SCALE".to_string(), 2),
         ])
     );
