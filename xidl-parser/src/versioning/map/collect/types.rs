@@ -6,7 +6,9 @@ use super::render::{
     declarator_facts, declarator_ident, join, render_bitfield_type, render_element_type,
     render_scoped_name, render_switch_type, render_type,
 };
-use crate::hir::{self, Definition, Specification, TypeDcl, effective_wire_name, is_skipped};
+use crate::hir::{
+    self, Definition, Specification, TypeDcl, VisitScopedNames, effective_wire_name, is_skipped,
+};
 use serde_json::Value;
 use std::collections::BTreeMap;
 
@@ -27,12 +29,16 @@ pub(crate) fn collect_types(spec: &Specification) -> BTreeMap<String, TypeSurfac
         }) {
         modules
             .pop()
-            .map(|module| module.definition.as_slice())
-            .unwrap_or(spec.0.as_slice())
+            .map(|module| {
+                let mut definitions = module.definition.clone();
+                definitions.remove_root_namespace(&module.ident);
+                definitions
+            })
+            .unwrap_or_else(|| spec.0.clone())
     } else {
-        spec.0.as_slice()
+        spec.0.clone()
     };
-    collect_definitions(definitions, "", &mut types);
+    collect_definitions(&definitions, "", &mut types);
     types
 }
 

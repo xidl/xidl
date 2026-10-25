@@ -134,11 +134,7 @@ fn struct_conversion<'a>(step: &'a StepPlan, key: &str) -> Option<&'a Conversion
 
 /// Canonical key of a single named-model `return` output, resolved against
 /// the type keys of the version that declares it.
-fn return_key(
-    outputs: &[Member],
-    version: &str,
-    types: &BTreeMap<String, TypeShape>,
-) -> Option<String> {
+fn return_key(outputs: &[Member], types: &BTreeMap<String, TypeShape>) -> Option<String> {
     let [output] = outputs else {
         return None;
     };
@@ -149,12 +145,7 @@ fn return_key(
     let hir::TypeSpec::ScopedName(name) = &value.ty else {
         return None;
     };
-    let mut name = name.clone();
-    if name.name.first().is_some_and(|part| part == version) {
-        name.name.remove(0);
-        name.is_root = true;
-    }
-    let key = resolve_canonical(&value.scope, &name, |key| types.contains_key(key))?;
+    let key = resolve_canonical(&value.scope, name, |key| types.contains_key(key))?;
     matches!(types.get(&key), Some(TypeShape::Struct(_))).then_some(key)
 }
 
@@ -187,7 +178,7 @@ pub(crate) fn plan(steps: &[StepPlan], versions: &[VersionPlan]) -> IdlcResult<U
                 operation.http.meta.method,
                 HttpMethod::Patch | HttpMethod::Put
             )
-            .then(|| return_key(&operation.outputs, &head.version.id, &head.surface.types))
+            .then(|| return_key(&operation.outputs, &head.surface.types))
             .flatten()
         })
     };
@@ -201,7 +192,7 @@ pub(crate) fn plan(steps: &[StepPlan], versions: &[VersionPlan]) -> IdlcResult<U
                 continue;
             };
             let chain = chain(step, &plan.upcast);
-            let removed = return_key(&plan.target.outputs, &step.to.id, &step.target_types)
+            let removed = return_key(&plan.target.outputs, &step.target_types)
                 .map(|key| return_removed(step, &key))
                 .unwrap_or_default();
             let paired_of = |conversion: &ConversionPlan| {

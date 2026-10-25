@@ -4,14 +4,14 @@ use super::super::VersioningError;
 use super::super::lifecycle::{Availability, Site, SiteKind, availability};
 use super::super::paths::{declarators_name, join};
 use super::super::timeline::{VersionDef, VersionId, VersionTimeline};
-use super::references::{Reference, touch_const_expr, touch_const_type, touch_type};
+use super::references::Reference;
 use super::strip_annotations;
 use crate::error::ParserResult;
 use crate::hir::DeclarationNames;
 use crate::hir::{
     Annotation, AttrDclInner, AttrDeclarator, AttrRaisesExpr, ConstDcl, Definition, ExceptDcl,
-    Export, InterfaceDclInner, ModuleDcl, ReadonlyAttrDeclarator, ScopedName, TypeDcl, TypeSpec,
-    TypedefDcl, TypedefType,
+    Export, InterfaceDclInner, ModuleDcl, ReadonlyAttrDeclarator, ScopedName, TypeDcl, TypedefDcl,
+    TypedefType,
 };
 use std::collections::BTreeSet;
 
@@ -22,6 +22,7 @@ pub(super) struct Projector<'a> {
     kept_paths: BTreeSet<String>,
     dropped_paths: BTreeSet<String>,
     pub(super) references: Vec<Reference>,
+    pub(super) declarations: DeclarationNames,
 }
 
 impl<'a> Projector<'a> {
@@ -29,6 +30,7 @@ impl<'a> Projector<'a> {
         timeline: &'a VersionTimeline,
         version: VersionId,
         def: &'a VersionDef,
+        definitions: &[Definition],
     ) -> Self {
         Self {
             timeline,
@@ -37,6 +39,7 @@ impl<'a> Projector<'a> {
             kept_paths: BTreeSet::new(),
             dropped_paths: BTreeSet::new(),
             references: Vec::new(),
+            declarations: DeclarationNames::collect(definitions),
         }
     }
 
@@ -130,13 +133,16 @@ impl<'a> Projector<'a> {
     }
 
     fn prune_names(&self, names: &mut Vec<ScopedName>) {
-        names.retain(|name| !self.reference_unavailable(&name.name));
+        names.retain(|name| !self.reference_unavailable(&name.name, name.is_root));
+        for name in names {
+            self.qualify_root(name);
+        }
     }
 
     /// Reports references to declarations that this projection drops.
     pub(super) fn check_references(&self) -> ParserResult<()> {
         for reference in &self.references {
-            if self.reference_unavailable(&reference.segments) {
+            if self.reference_unavailable(&reference.segments, reference.is_root) {
                 return Err(VersioningError::DanglingReference {
                     decl: reference.decl.clone(),
                     reference: reference.rendered(),
@@ -154,12 +160,13 @@ impl<'a> Projector<'a> {
     /// is only reported when every declaration it could name is gone, which
     /// keeps same-named declarations in other modules from masking a dangling
     /// reference.
-    fn reference_unavailable(&self, segments: &[String]) -> bool {
+    fn reference_unavailable(&self, segments: &[String], is_root: bool) -> bool {
         if segments.is_empty() {
             return false;
         }
         let target = segments.join("::");
-        let matches = |path: &String| path == &target || path.ends_with(&format!("::{target}"));
+        let matches =
+            |path: &String| path == &target || (!is_root && path.ends_with(&format!("::{target}")));
         if self.kept_paths.iter().any(matches) {
             return false;
         }
@@ -298,18 +305,22 @@ impl<'a> Projector<'a> {
         let here = join(path, &names);
         let site = self.site(&here, path, SiteKind::Type, &typedef.annotations);
         let own = availability(&site, parent, self.timeline)?;
+        if !own.contains(self.version) {
+            self.note_dropped_subtree(
+                &Definition::TypeDcl(TypeDcl::TypedefDcl(typedef.clone())),
+                path,
+            );
+            return Ok(None);
+        }
         for declarator in &typedef.decl {
             self.note_declaration(
                 &join(path, &super::super::paths::declarator_name(declarator)),
-                own.contains(self.version),
+                true,
             );
-        }
-        if !own.contains(self.version) {
-            return Ok(None);
         }
         let mut projected = typedef.clone();
         projected.annotations = strip_annotations(&typedef.annotations);
-        super::references::touch_declarators(&mut projected.decl, &mut self.references, &here);
+        self.touch_declarators(&mut projected.decl, &here);
         match &typedef.ty {
             TypedefType::TypeSpec(ty) => {
                 let mut ty = ty.clone();
@@ -317,7 +328,7 @@ impl<'a> Projector<'a> {
                 projected.ty = TypedefType::TypeSpec(ty);
             }
             TypedefType::ConstrTypeDcl(constr) => {
-                projected.ty = match self.constr(constr, own, &here)? {
+                projected.ty = match self.constr(constr, own, path)? {
                     Some(nested) => TypedefType::ConstrTypeDcl(nested),
                     None => return Ok(None),
                 };
@@ -341,8 +352,8 @@ impl<'a> Projector<'a> {
         }
         let mut projected = const_dcl.clone();
         projected.annotations = strip_annotations(&const_dcl.annotations);
-        touch_const_type(&mut projected.ty, &mut self.references, &here);
-        touch_const_expr(&mut projected.value, &mut self.references, &here);
+        self.touch_const_type(&mut projected.ty, &here);
+        self.touch_const_expr(&mut projected.value, &here);
         Ok(Some(projected))
     }
 
@@ -363,9 +374,5 @@ impl<'a> Projector<'a> {
         projected.annotations = strip_annotations(&except.annotations);
         projected.member = self.members(&except.member, own, &here)?;
         Ok(Some(projected))
-    }
-
-    pub(super) fn touch_type(&mut self, ty: &mut TypeSpec, decl: &str) {
-        touch_type(ty, &mut self.references, decl);
     }
 }

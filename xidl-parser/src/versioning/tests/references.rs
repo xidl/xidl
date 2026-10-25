@@ -123,7 +123,7 @@ interface Pets {
 }
 
 #[test]
-fn projection_relativizes_const_values_and_union_labels() {
+fn projection_qualifies_root_const_values_and_union_labels() {
     let (spec, record) = analyze(
         r#"
 @version
@@ -140,10 +140,7 @@ union Paint switch (Color) {
     );
     let versions = project_ids(&record);
     let projected = record.project(&spec, versions[0]).expect("projection");
-    let json = serde_json::to_string(&projected).expect("serialize");
-
-    assert!(
-        !json.contains("\"is_root\":true"),
-        "root references must be relativized: {json}"
-    );
+    let printed = crate::hir::printer::IdlPrinter::render(&projected);
+    assert!(printed.contains("::v1::Color::RED"), "{printed}");
+    assert!(printed.contains("::v1::Color::GREEN"), "{printed}");
 }

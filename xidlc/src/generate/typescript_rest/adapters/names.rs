@@ -142,10 +142,6 @@ impl Names<'_> {
     fn qualify(&self, ty: &mut hir::TypeSpec, scope: &[String]) -> IdlcResult<()> {
         match ty {
             hir::TypeSpec::ScopedName(name) => {
-                if name.name.first().is_some_and(|first| first == self.version) {
-                    name.name.remove(0);
-                    name.is_root = true;
-                }
                 let key = resolve_canonical(scope, name, |key| self.keys.contains(key))
                     .ok_or_else(|| {
                         IdlcError::rpc(format!(

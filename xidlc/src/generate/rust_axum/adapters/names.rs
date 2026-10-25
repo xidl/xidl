@@ -149,12 +149,7 @@ impl Names<'_> {
     }
 
     pub(super) fn resolve(&self, name: &hir::ScopedName, scope: &[String]) -> IdlcResult<String> {
-        let mut name = name.clone();
-        if name.name.first().is_some_and(|part| part == self.version) {
-            name.name.remove(0);
-            name.is_root = true;
-        }
-        resolve_canonical(scope, &name, |key| self.types.contains_key(key))
+        resolve_canonical(scope, name, |key| self.types.contains_key(key))
             .ok_or_else(|| Layout::error(&name.name.join("::"), "cannot resolve public model type"))
     }
 
@@ -165,14 +160,11 @@ impl Names<'_> {
     ) -> IdlcResult<()> {
         match expression {
             hir::ConstExpr::ScopedName(name) => {
-                let mut scope = std::iter::once(self.version.to_string())
+                let scope = std::iter::once(self.version.to_string())
                     .chain(scope.iter().cloned())
                     .collect::<Vec<_>>();
-                if name.is_root && name.name.first().is_none_or(|part| part != self.version) {
+                if name.is_root {
                     name.name.insert(0, self.version.to_string());
-                }
-                if name.name.first().is_some_and(|part| part == self.version) {
-                    scope.clear();
                 }
                 let key =
                     resolve_canonical(&scope, name, |key| self.layout.constants.contains(key))
