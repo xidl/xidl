@@ -401,7 +401,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType4Schema: z.ZodType<types.v1.Node> = z.lazy(() =>
+    const wireType5Schema: z.ZodType<types.v1.Node> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -422,7 +422,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["name"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
         
-            ["children"]: z.array(wireType4Schema).nullish().transform((value) => value ?? undefined),
+            ["children"]: z.array(wireType5Schema).nullish().transform((value) => value ?? undefined),
         
     })).transform((value) => ({
         
@@ -453,7 +453,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["node"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType4Schema),
+            ["node"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType5Schema),
         
     })).transform((value) => ({
         
@@ -465,7 +465,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType6Schema: z.ZodType<types.v1.OptionalChange> = z.lazy(() =>
+    const wireType7Schema: z.ZodType<types.v1.OptionalChange> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -507,7 +507,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["value"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType6Schema),
+            ["value"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType7Schema),
         
     })).transform((value) => ({
         
@@ -519,7 +519,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType7Schema: z.ZodType<types.v1.Parcel> = z.lazy(() =>
+    const wireType8Schema: z.ZodType<types.v1.Parcel> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -612,7 +612,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest14Schema: z.ZodType<ifaceTypes.v1.DepotShipRequest> = z.lazy(() =>
+    const wireRequest14Schema: z.ZodType<ifaceTypes.v1.DepotReceiptRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -627,7 +627,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["parcel"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType7Schema),
+            ["parcel"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType8Schema),
         
     })).transform((value) => ({
         
@@ -639,13 +639,40 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType9Schema: z.ZodType<types.v1.State> = z.lazy(() =>
+    const wireRequest16Schema: z.ZodType<ifaceTypes.v1.DepotShipRequest> = z.lazy(() =>
+    
+        z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
+        
+            ["parcel"]: z.unknown().optional(),
+        
+    }).strict()
+    
+    .transform((wire): Record<string, unknown> => ({
+        
+            ["parcel"]: wire["parcel"],
+        
+    }))
+    .pipe(z.object({
+        
+            ["parcel"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType8Schema),
+        
+    })).transform((value) => ({
+        
+            
+                ["parcel"]: value["parcel"],
+            
+        
+    })))
+    
+    );
+
+    const wireType11Schema: z.ZodType<types.v1.State> = z.lazy(() =>
     
         z.enum(["pending"])
     
     );
 
-    const wireRequest16Schema: z.ZodType<ifaceTypes.v1.DepotStateRequest> = z.lazy(() =>
+    const wireRequest17Schema: z.ZodType<ifaceTypes.v1.DepotStateRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -660,7 +687,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["state"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType9Schema),
+            ["state"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType11Schema),
         
     })).transform((value) => ({
         
@@ -672,7 +699,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest18Schema: z.ZodType<ifaceTypes.v1.DepotTraceRequest> = z.lazy(() =>
+    const wireRequest19Schema: z.ZodType<ifaceTypes.v1.DepotTraceRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -699,7 +726,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType8Schema: z.ZodType<types.v1.ParcelPatch> = z.lazy(() =>
+    const wireType9Schema: z.ZodType<types.v1.ParcelPatch> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -736,7 +763,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest19Schema: z.ZodType<ifaceTypes.v1.DepotUpdateRequest> = z.lazy(() =>
+    const wireRequest20Schema: z.ZodType<ifaceTypes.v1.DepotUpdateRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -757,7 +784,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
         
-            ["patch"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType8Schema),
+            ["patch"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType9Schema),
         
     })).transform((value) => ({
         
@@ -773,7 +800,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest21Schema: z.ZodType<ifaceTypes.v2.DepotBindingsRequest> = z.lazy(() =>
+    const wireRequest22Schema: z.ZodType<ifaceTypes.v2.DepotBindingsRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -810,7 +837,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest22Schema: z.ZodType<ifaceTypes.v2.DepotBlobRequest> = z.lazy(() =>
+    const wireRequest23Schema: z.ZodType<ifaceTypes.v2.DepotBlobRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -837,7 +864,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType12Schema: z.ZodType<types.v2.Choice> = z.lazy(() =>
+    const wireType14Schema: z.ZodType<types.v2.Choice> = z.lazy(() =>
     
         z.union([
         
@@ -891,7 +918,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest23Schema: z.ZodType<ifaceTypes.v2.DepotChooseRequest> = z.lazy(() =>
+    const wireRequest24Schema: z.ZodType<ifaceTypes.v2.DepotChooseRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -906,7 +933,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["choice"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType12Schema),
+            ["choice"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType14Schema),
         
     })).transform((value) => ({
         
@@ -918,7 +945,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType10Schema: z.ZodType<types.v2.Address> = z.lazy(() =>
+    const wireType12Schema: z.ZodType<types.v2.Address> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -961,7 +988,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType13Schema: z.ZodType<types.v2.Contact> = z.lazy(() =>
+    const wireType15Schema: z.ZodType<types.v2.Contact> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -986,7 +1013,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["address"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType10Schema),
+            ["address"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType12Schema),
         
             ["tags"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.unknown().superRefine(rejectPrototypeKey).pipe(z.record(z.string(), z.coerce.string()))),
         
@@ -1004,7 +1031,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest25Schema: z.ZodType<ifaceTypes.v2.DepotContactRequest> = z.lazy(() =>
+    const wireRequest26Schema: z.ZodType<ifaceTypes.v2.DepotContactRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1019,7 +1046,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["contact"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType13Schema),
+            ["contact"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType15Schema),
         
     })).transform((value) => ({
         
@@ -1031,7 +1058,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType14Schema: z.ZodType<types.v2.Extra> = z.lazy(() =>
+    const wireType16Schema: z.ZodType<types.v2.Extra> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1072,7 +1099,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest28Schema: z.ZodType<ifaceTypes.v2.DepotExtraRequest> = z.lazy(() =>
+    const wireRequest29Schema: z.ZodType<ifaceTypes.v2.DepotExtraRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1087,7 +1114,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["extra"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType14Schema),
+            ["extra"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType16Schema),
         
     })).transform((value) => ({
         
@@ -1099,7 +1126,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest30Schema: z.ZodType<ifaceTypes.v2.DepotGetRequest> = z.lazy(() =>
+    const wireRequest31Schema: z.ZodType<ifaceTypes.v2.DepotGetRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1126,7 +1153,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType15Schema: z.ZodType<types.v2.Node> = z.lazy(() =>
+    const wireType18Schema: z.ZodType<types.v2.Node> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1147,7 +1174,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["name"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
         
-            ["children"]: z.array(wireType15Schema).nullish().transform((value) => value ?? undefined),
+            ["children"]: z.array(wireType18Schema).nullish().transform((value) => value ?? undefined),
         
     })).transform((value) => ({
         
@@ -1163,7 +1190,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest31Schema: z.ZodType<ifaceTypes.v2.DepotInspectRequest> = z.lazy(() =>
+    const wireRequest32Schema: z.ZodType<ifaceTypes.v2.DepotInspectRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1178,7 +1205,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["node"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType15Schema),
+            ["node"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType18Schema),
         
     })).transform((value) => ({
         
@@ -1190,7 +1217,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType17Schema: z.ZodType<types.v2.OptionalChange> = z.lazy(() =>
+    const wireType20Schema: z.ZodType<types.v2.OptionalChange> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1217,7 +1244,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest33Schema: z.ZodType<ifaceTypes.v2.DepotOptionalChangeRequest> = z.lazy(() =>
+    const wireRequest34Schema: z.ZodType<ifaceTypes.v2.DepotOptionalChangeRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1232,7 +1259,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["value"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType17Schema),
+            ["value"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType20Schema),
         
     })).transform((value) => ({
         
@@ -1244,7 +1271,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType18Schema: z.ZodType<types.v2.Parcel> = z.lazy(() =>
+    const wireType21Schema: z.ZodType<types.v2.Parcel> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1307,13 +1334,13 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["handling_note"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
         
-            ["address"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType10Schema),
+            ["address"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType12Schema),
         
-            ["stops"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(wireType10Schema)),
+            ["stops"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(wireType12Schema)),
         
-            ["by_tag"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.unknown().superRefine(rejectPrototypeKey).pipe(z.record(z.string(), wireType10Schema))),
+            ["by_tag"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.unknown().superRefine(rejectPrototypeKey).pipe(z.record(z.string(), wireType12Schema))),
         
-            ["fixed"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(wireType10Schema).length(2)),
+            ["fixed"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(wireType12Schema).length(2)),
         
     })).transform((value) => ({
         
@@ -1357,7 +1384,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest35Schema: z.ZodType<ifaceTypes.v2.DepotShipRequest> = z.lazy(() =>
+    const wireRequest36Schema: z.ZodType<ifaceTypes.v2.DepotReceiptRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1372,7 +1399,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["parcel"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType18Schema),
+            ["parcel"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType21Schema),
         
     })).transform((value) => ({
         
@@ -1384,13 +1411,40 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType20Schema: z.ZodType<types.v2.State> = z.lazy(() =>
+    const wireRequest38Schema: z.ZodType<ifaceTypes.v2.DepotShipRequest> = z.lazy(() =>
+    
+        z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
+        
+            ["parcel"]: z.unknown().optional(),
+        
+    }).strict()
+    
+    .transform((wire): Record<string, unknown> => ({
+        
+            ["parcel"]: wire["parcel"],
+        
+    }))
+    .pipe(z.object({
+        
+            ["parcel"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType21Schema),
+        
+    })).transform((value) => ({
+        
+            
+                ["parcel"]: value["parcel"],
+            
+        
+    })))
+    
+    );
+
+    const wireType24Schema: z.ZodType<types.v2.State> = z.lazy(() =>
     
         z.enum(["pending", "shipping"])
     
     );
 
-    const wireRequest37Schema: z.ZodType<ifaceTypes.v2.DepotStateRequest> = z.lazy(() =>
+    const wireRequest39Schema: z.ZodType<ifaceTypes.v2.DepotStateRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1405,7 +1459,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["state"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType20Schema),
+            ["state"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType24Schema),
         
     })).transform((value) => ({
         
@@ -1417,7 +1471,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest39Schema: z.ZodType<ifaceTypes.v2.DepotTraceRequest> = z.lazy(() =>
+    const wireRequest41Schema: z.ZodType<ifaceTypes.v2.DepotTraceRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1444,7 +1498,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType19Schema: z.ZodType<types.v2.ParcelPatch> = z.lazy(() =>
+    const wireType22Schema: z.ZodType<types.v2.ParcelPatch> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1481,7 +1535,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest40Schema: z.ZodType<ifaceTypes.v2.DepotUpdateRequest> = z.lazy(() =>
+    const wireRequest42Schema: z.ZodType<ifaceTypes.v2.DepotUpdateRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1502,7 +1556,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
         
-            ["patch"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType19Schema),
+            ["patch"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType22Schema),
         
     })).transform((value) => ({
         
@@ -1518,7 +1572,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest42Schema: z.ZodType<ifaceTypes.v3.DepotBindingsRequest> = z.lazy(() =>
+    const wireRequest44Schema: z.ZodType<ifaceTypes.v3.DepotBindingsRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1555,7 +1609,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest43Schema: z.ZodType<ifaceTypes.v3.DepotBlobRequest> = z.lazy(() =>
+    const wireRequest45Schema: z.ZodType<ifaceTypes.v3.DepotBlobRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1582,7 +1636,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType23Schema: z.ZodType<types.v3.Choice> = z.lazy(() =>
+    const wireType27Schema: z.ZodType<types.v3.Choice> = z.lazy(() =>
     
         z.union([
         
@@ -1636,7 +1690,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest44Schema: z.ZodType<ifaceTypes.v3.DepotChooseRequest> = z.lazy(() =>
+    const wireRequest46Schema: z.ZodType<ifaceTypes.v3.DepotChooseRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1651,7 +1705,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["choice"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType23Schema),
+            ["choice"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType27Schema),
         
     })).transform((value) => ({
         
@@ -1663,7 +1717,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType21Schema: z.ZodType<types.v3.Address> = z.lazy(() =>
+    const wireType25Schema: z.ZodType<types.v3.Address> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1706,7 +1760,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType24Schema: z.ZodType<types.v3.Contact> = z.lazy(() =>
+    const wireType28Schema: z.ZodType<types.v3.Contact> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1731,7 +1785,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["address"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType21Schema),
+            ["address"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType25Schema),
         
             ["tags"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.unknown().superRefine(rejectPrototypeKey).pipe(z.record(z.string(), z.coerce.string()))),
         
@@ -1749,7 +1803,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest46Schema: z.ZodType<ifaceTypes.v3.DepotContactRequest> = z.lazy(() =>
+    const wireRequest48Schema: z.ZodType<ifaceTypes.v3.DepotContactRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1764,7 +1818,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["contact"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType24Schema),
+            ["contact"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType28Schema),
         
     })).transform((value) => ({
         
@@ -1776,7 +1830,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType26Schema: z.ZodType<types.v3.Extra> = z.lazy(() =>
+    const wireType30Schema: z.ZodType<types.v3.Extra> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1821,7 +1875,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest49Schema: z.ZodType<ifaceTypes.v3.DepotExtraRequest> = z.lazy(() =>
+    const wireRequest51Schema: z.ZodType<ifaceTypes.v3.DepotExtraRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1836,7 +1890,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["extra"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType26Schema),
+            ["extra"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType30Schema),
         
     })).transform((value) => ({
         
@@ -1848,7 +1902,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest51Schema: z.ZodType<ifaceTypes.v3.DepotGetRequest> = z.lazy(() =>
+    const wireRequest53Schema: z.ZodType<ifaceTypes.v3.DepotGetRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1875,7 +1929,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest52Schema: z.ZodType<{  }> = z.lazy(() =>
+    const wireRequest54Schema: z.ZodType<{  }> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1892,7 +1946,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType28Schema: z.ZodType<types.v3.Node> = z.lazy(() =>
+    const wireType33Schema: z.ZodType<types.v3.Node> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1913,7 +1967,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["name"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
         
-            ["children"]: z.array(wireType28Schema).nullish().transform((value) => value ?? undefined),
+            ["children"]: z.array(wireType33Schema).nullish().transform((value) => value ?? undefined),
         
     })).transform((value) => ({
         
@@ -1929,7 +1983,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest53Schema: z.ZodType<ifaceTypes.v3.DepotInspectRequest> = z.lazy(() =>
+    const wireRequest55Schema: z.ZodType<ifaceTypes.v3.DepotInspectRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1944,7 +1998,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["node"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType28Schema),
+            ["node"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType33Schema),
         
     })).transform((value) => ({
         
@@ -1956,7 +2010,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType30Schema: z.ZodType<types.v3.OptionalChange> = z.lazy(() =>
+    const wireType35Schema: z.ZodType<types.v3.OptionalChange> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1983,7 +2037,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest55Schema: z.ZodType<ifaceTypes.v3.DepotOptionalChangeRequest> = z.lazy(() =>
+    const wireRequest57Schema: z.ZodType<ifaceTypes.v3.DepotOptionalChangeRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -1998,7 +2052,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["value"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType30Schema),
+            ["value"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType35Schema),
         
     })).transform((value) => ({
         
@@ -2010,7 +2064,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType31Schema: z.ZodType<types.v3.Parcel> = z.lazy(() =>
+    const wireType36Schema: z.ZodType<types.v3.Parcel> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -2079,13 +2133,13 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["audit"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
         
-            ["address"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType21Schema),
+            ["address"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType25Schema),
         
-            ["stops"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(wireType21Schema)),
+            ["stops"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(wireType25Schema)),
         
-            ["by_tag"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.unknown().superRefine(rejectPrototypeKey).pipe(z.record(z.string(), wireType21Schema))),
+            ["by_tag"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.unknown().superRefine(rejectPrototypeKey).pipe(z.record(z.string(), wireType25Schema))),
         
-            ["fixed"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(wireType21Schema).length(2)),
+            ["fixed"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(wireType25Schema).length(2)),
         
     })).transform((value) => ({
         
@@ -2133,7 +2187,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest57Schema: z.ZodType<ifaceTypes.v3.DepotShipRequest> = z.lazy(() =>
+    const wireRequest59Schema: z.ZodType<ifaceTypes.v3.DepotReceiptRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -2148,7 +2202,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["parcel"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType31Schema),
+            ["parcel"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType36Schema),
         
     })).transform((value) => ({
         
@@ -2160,13 +2214,40 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType33Schema: z.ZodType<types.v3.State> = z.lazy(() =>
+    const wireRequest61Schema: z.ZodType<ifaceTypes.v3.DepotShipRequest> = z.lazy(() =>
+    
+        z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
+        
+            ["parcel"]: z.unknown().optional(),
+        
+    }).strict()
+    
+    .transform((wire): Record<string, unknown> => ({
+        
+            ["parcel"]: wire["parcel"],
+        
+    }))
+    .pipe(z.object({
+        
+            ["parcel"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType36Schema),
+        
+    })).transform((value) => ({
+        
+            
+                ["parcel"]: value["parcel"],
+            
+        
+    })))
+    
+    );
+
+    const wireType39Schema: z.ZodType<types.v3.State> = z.lazy(() =>
     
         z.enum(["pending", "shipping", "delivered"])
     
     );
 
-    const wireRequest59Schema: z.ZodType<ifaceTypes.v3.DepotStateRequest> = z.lazy(() =>
+    const wireRequest62Schema: z.ZodType<ifaceTypes.v3.DepotStateRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -2181,7 +2262,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["state"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType33Schema),
+            ["state"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType39Schema),
         
     })).transform((value) => ({
         
@@ -2193,7 +2274,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest61Schema: z.ZodType<ifaceTypes.v3.DepotTraceRequest> = z.lazy(() =>
+    const wireRequest64Schema: z.ZodType<ifaceTypes.v3.DepotTraceRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -2220,7 +2301,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType32Schema: z.ZodType<types.v3.ParcelPatch> = z.lazy(() =>
+    const wireType37Schema: z.ZodType<types.v3.ParcelPatch> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -2253,7 +2334,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest62Schema: z.ZodType<ifaceTypes.v3.DepotUpdateRequest> = z.lazy(() =>
+    const wireRequest65Schema: z.ZodType<ifaceTypes.v3.DepotUpdateRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -2274,7 +2355,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
         
-            ["patch"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType32Schema),
+            ["patch"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType37Schema),
         
     })).transform((value) => ({
         
@@ -2304,6 +2385,8 @@ export interface VersionAdapters {
     
         parcelDowncastToV1(source: types.v2.Parcel, stored: Pick<StoredValues, "parcelLegacy">): VersionedResult<ParcelDowncastDecisionToV1>;
     
+        signedDowncastToV1(source: types.v2.Signed): VersionedResult<types.v1.Signed>;
+    
         stateDowncastToV1(source: "shipping"): VersionedResult<types.v1.State>;
     
         depotGetBusyErrorDowncastToV1(source: errors.v2$Busy): VersionedResult<errors.v1$NotFound | FrameworkError>;
@@ -2319,6 +2402,8 @@ export interface VersionAdapters {
         parcelDowncastToV2(source: types.v3.Parcel, stored: Pick<StoredValues, "parcelHandlingNote">): VersionedResult<ParcelDowncastDecisionToV2>;
     
         parcelPatchUpcastFromV2(source: types.v2.ParcelPatch, current: types.v3.Parcel): VersionedResult<ParcelPatchUpcastDecisionFromV2>;
+    
+        signedDowncastToV2(source: types.v3.Signed): VersionedResult<types.v2.Signed>;
     
         stateDowncastToV2(source: "delivered"): VersionedResult<types.v2.State>;
     
@@ -2782,6 +2867,12 @@ export interface VersionAdapters {
         
     }
 
+    export function downcastSignedToV1(source: types.v2.Signed, adapters: VersionAdapters): VersionedResult<types.v1.Signed> {
+        
+            return adapters.signedDowncastToV1(source);
+        
+    }
+
     export function upcastStateFromV1(source: types.v1.State, adapters: VersionAdapters): VersionedResult<types.v2.State> {
         
             switch (source) {
@@ -3042,6 +3133,36 @@ export interface VersionAdapters {
             
             
                 const converted0 = downcastOptionalChangeToV1(source["return"], stored, adapters);
+                if (!converted0.ok) return converted0;
+            
+            return ok({
+                
+                        ["return"]: converted0.value,
+                
+            });
+        
+    }
+
+    export function upcastDepotReceiptRequestFromV1(source: ifaceTypes.v1.DepotReceiptRequest, adapters: VersionAdapters): VersionedResult<ifaceTypes.v2.DepotReceiptRequest> {
+        
+            
+            
+                const converted0 = upcastParcelFromV1(source["parcel"], adapters);
+                if (!converted0.ok) return converted0;
+            
+            return ok({
+                
+                        ["parcel"]: converted0.value,
+                
+            });
+        
+    }
+
+    export function downcastDepotReceiptResponseToV1(source: { "return": types.v2.Signed }, adapters: VersionAdapters): VersionedResult<{ "return": types.v1.Signed }> {
+        
+            
+            
+                const converted0 = downcastSignedToV1(source["return"], adapters);
                 if (!converted0.ok) return converted0;
             
             return ok({
@@ -3563,6 +3684,12 @@ export interface VersionAdapters {
         
     }
 
+    export function downcastSignedToV2(source: types.v3.Signed, adapters: VersionAdapters): VersionedResult<types.v2.Signed> {
+        
+            return adapters.signedDowncastToV2(source);
+        
+    }
+
     export function upcastStateFromV2(source: types.v2.State, adapters: VersionAdapters): VersionedResult<types.v3.State> {
         
             switch (source) {
@@ -3837,6 +3964,36 @@ export interface VersionAdapters {
         
     }
 
+    export function upcastDepotReceiptRequestFromV2(source: ifaceTypes.v2.DepotReceiptRequest, adapters: VersionAdapters): VersionedResult<ifaceTypes.v3.DepotReceiptRequest> {
+        
+            
+            
+                const converted0 = upcastParcelFromV2(source["parcel"], adapters);
+                if (!converted0.ok) return converted0;
+            
+            return ok({
+                
+                        ["parcel"]: converted0.value,
+                
+            });
+        
+    }
+
+    export function downcastDepotReceiptResponseToV2(source: { "return": types.v3.Signed }, adapters: VersionAdapters): VersionedResult<{ "return": types.v2.Signed }> {
+        
+            
+            
+                const converted0 = downcastSignedToV2(source["return"], adapters);
+                if (!converted0.ok) return converted0;
+            
+            return ok({
+                
+                        ["return"]: converted0.value,
+                
+            });
+        
+    }
+
     export function upcastDepotShipRequestFromV2(source: ifaceTypes.v2.DepotShipRequest, adapters: VersionAdapters): VersionedResult<ifaceTypes.v3.DepotShipRequest> {
         
             
@@ -4097,6 +4254,18 @@ export interface VersionAdapters {
         return ok(head);
     }
 
+    function downcastStepDepotReceiptResultToV1(value: types.v2.Signed, adapters: VersionAdapters): VersionedResult<types.v1.Signed> {
+        const projected = downcastDepotReceiptResponseToV1({ return: value }, adapters);
+        if (!projected.ok) return projected;
+        return ok(projected.value.return);
+    }
+    export type DepotReceiptErrorFromV1 = FrameworkError;
+    export type DepotReceiptErrorToV1 = FrameworkError;
+    function downcastStepDepotReceiptErrorToV1(head: DepotReceiptErrorFromV1, adapters: VersionAdapters): VersionedResult<DepotReceiptErrorToV1> {
+        
+        return ok(head);
+    }
+
     function downcastStepDepotShipResultToV1(value: types.v2.State, adapters: VersionAdapters): VersionedResult<types.v1.State> {
         const projected = downcastDepotShipResponseToV1({ return: value }, adapters);
         if (!projected.ok) return projected;
@@ -4287,6 +4456,18 @@ export interface VersionAdapters {
     export type DepotOptionalChangeErrorFromV2 = FrameworkError;
     export type DepotOptionalChangeErrorToV2 = FrameworkError;
     function downcastStepDepotOptionalChangeErrorToV2(head: DepotOptionalChangeErrorFromV2, adapters: VersionAdapters): VersionedResult<DepotOptionalChangeErrorToV2> {
+        
+        return ok(head);
+    }
+
+    function downcastStepDepotReceiptResultToV2(value: types.v3.Signed, adapters: VersionAdapters): VersionedResult<types.v2.Signed> {
+        const projected = downcastDepotReceiptResponseToV2({ return: value }, adapters);
+        if (!projected.ok) return projected;
+        return ok(projected.value.return);
+    }
+    export type DepotReceiptErrorFromV2 = FrameworkError;
+    export type DepotReceiptErrorToV2 = FrameworkError;
+    function downcastStepDepotReceiptErrorToV2(head: DepotReceiptErrorFromV2, adapters: VersionAdapters): VersionedResult<DepotReceiptErrorToV2> {
         
         return ok(head);
     }
@@ -4822,8 +5003,62 @@ export type DispatchOutcome<T, Head> =
     }
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
-    export function decodeAndUpcastDepotShipFromV1(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotShipRequest> {
+    export function decodeAndUpcastDepotReceiptFromV1(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotReceiptRequest> {
         const parsed = wireRequest14Schema.safeParse(raw);
+        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-01", operation: "Depot.receipt", issues: parsed.error.issues } };
+        
+            const step0 = upcastDepotReceiptRequestFromV1(parsed.data, adapters);
+            if (!step0.ok) return step0;
+        
+            const step1 = upcastDepotReceiptRequestFromV2(step0.value, adapters);
+            if (!step1.ok) return step1;
+        
+        return step1;
+    }
+    export function downcastDepotReceiptResultToV1(head: types.v3.Signed, adapters: VersionAdapters): VersionedResult<types.v1.Signed> {
+        
+            const step0 = downcastStepDepotReceiptResultToV2(head, adapters);
+            if (!step0.ok) return step0;
+        
+            const step1 = downcastStepDepotReceiptResultToV1(step0.value, adapters);
+            if (!step1.ok) return step1;
+        
+        return step1;
+    }
+    export function downcastDepotReceiptErrorToV1(head: FrameworkError, adapters: VersionAdapters): VersionedResult<FrameworkError> {
+        
+            const step0 = downcastStepDepotReceiptErrorToV2(head, adapters);
+            if (!step0.ok) return step0;
+        
+            const step1 = downcastStepDepotReceiptErrorToV1(step0.value, adapters);
+            if (!step1.ok) return step1;
+        
+        return step1;
+    }
+    /** Failed projection retains the original Head outcome, including typed errors. */
+    export function downcastDepotReceiptOutcomeToV1(head: OperationOutcome<types.v3.Signed, FrameworkError>, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<types.v1.Signed, FrameworkError>, OperationOutcome<types.v3.Signed, FrameworkError>> {
+        if (head.ok) {
+            const result = downcastDepotReceiptResultToV1(head.value, adapters);
+            return result.ok ? { projected: true, value: { ok: true, value: result.value } } : { projected: false, head, error: result.error };
+        }
+        const result = downcastDepotReceiptErrorToV1(head.error, adapters);
+        return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
+    }
+    
+    export async function dispatchDepotReceiptFromV1(
+    raw: unknown,
+    handler: (request: ifaceTypes.v3.DepotReceiptRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Signed, FrameworkError>>,
+    adapters: VersionAdapters,
+    ): Promise<DispatchOutcome<OperationOutcome<types.v1.Signed, FrameworkError>, OperationOutcome<types.v3.Signed, FrameworkError>>> {
+        const request = decodeAndUpcastDepotReceiptFromV1(raw, adapters);
+        if (!request.ok) return { dispatched: false, error: request.error };
+        const head = await handler(request.value, { originalVersion: "2026-01", originalVersionId: "v1" });
+        return { dispatched: true, ...downcastDepotReceiptOutcomeToV1(head, adapters) };
+    }
+
+    /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
+    export function decodeAndUpcastDepotShipFromV1(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotShipRequest> {
+        const parsed = wireRequest16Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-01", operation: "Depot.ship", issues: parsed.error.issues } };
         
             const step0 = upcastDepotShipRequestFromV1(parsed.data, adapters);
@@ -4877,7 +5112,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotStateFromV1(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotStateRequest> {
-        const parsed = wireRequest16Schema.safeParse(raw);
+        const parsed = wireRequest17Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-01", operation: "Depot.state", issues: parsed.error.issues } };
         
             const step0 = upcastDepotStateRequestFromV1(parsed.data, adapters);
@@ -4931,7 +5166,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotTraceFromV1(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotTraceRequest> {
-        const parsed = wireRequest18Schema.safeParse(raw);
+        const parsed = wireRequest19Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-01", operation: "Depot.trace", issues: parsed.error.issues } };
         
             const step0 = upcastDepotTraceRequestFromV1(parsed.data, adapters);
@@ -4985,7 +5220,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotUpdateFromV1(raw: unknown, current: types.v3.Parcel, adapters: VersionAdapters): { ok: true; value: ifaceTypes.v3.DepotUpdateRequest; stored: DepotUpdateStored } | { ok: false; error: ValidationError | UnsupportedProjection } {
-        const parsed = wireRequest19Schema.safeParse(raw);
+        const parsed = wireRequest20Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-01", operation: "Depot.update", issues: parsed.error.issues } };
         
             const step0 = upcastDepotUpdateRequestFromV1(parsed.data, adapters);
@@ -5041,7 +5276,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotBindingsFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotBindingsRequest> {
-        const parsed = wireRequest21Schema.safeParse(raw);
+        const parsed = wireRequest22Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.bindings", issues: parsed.error.issues } };
         
             const step0 = upcastDepotBindingsRequestFromV2(parsed.data, adapters);
@@ -5086,7 +5321,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotBlobFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotBlobRequest> {
-        const parsed = wireRequest22Schema.safeParse(raw);
+        const parsed = wireRequest23Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.blob", issues: parsed.error.issues } };
         
             const step0 = upcastDepotBlobRequestFromV2(parsed.data, adapters);
@@ -5131,7 +5366,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotChooseFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotChooseRequest> {
-        const parsed = wireRequest23Schema.safeParse(raw);
+        const parsed = wireRequest24Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.choose", issues: parsed.error.issues } };
         
             const step0 = upcastDepotChooseRequestFromV2(parsed.data, adapters);
@@ -5176,7 +5411,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotContactFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotContactRequest> {
-        const parsed = wireRequest25Schema.safeParse(raw);
+        const parsed = wireRequest26Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.contact", issues: parsed.error.issues } };
         
             const step0 = upcastDepotContactRequestFromV2(parsed.data, adapters);
@@ -5221,7 +5456,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotExtraFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotExtraRequest> {
-        const parsed = wireRequest28Schema.safeParse(raw);
+        const parsed = wireRequest29Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.extra", issues: parsed.error.issues } };
         
             const step0 = upcastDepotExtraRequestFromV2(parsed.data, adapters);
@@ -5266,7 +5501,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotGetFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotGetRequest> {
-        const parsed = wireRequest30Schema.safeParse(raw);
+        const parsed = wireRequest31Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.get", issues: parsed.error.issues } };
         
             const step0 = upcastDepotGetRequestFromV2(parsed.data, adapters);
@@ -5311,7 +5546,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotInspectFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotInspectRequest> {
-        const parsed = wireRequest31Schema.safeParse(raw);
+        const parsed = wireRequest32Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.inspect", issues: parsed.error.issues } };
         
             const step0 = upcastDepotInspectRequestFromV2(parsed.data, adapters);
@@ -5356,7 +5591,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotOptionalChangeFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotOptionalChangeRequest> {
-        const parsed = wireRequest33Schema.safeParse(raw);
+        const parsed = wireRequest34Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.optional_change", issues: parsed.error.issues } };
         
             const step0 = upcastDepotOptionalChangeRequestFromV2(parsed.data, adapters);
@@ -5400,8 +5635,53 @@ export type DispatchOutcome<T, Head> =
     }
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
+    export function decodeAndUpcastDepotReceiptFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotReceiptRequest> {
+        const parsed = wireRequest36Schema.safeParse(raw);
+        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.receipt", issues: parsed.error.issues } };
+        
+            const step0 = upcastDepotReceiptRequestFromV2(parsed.data, adapters);
+            if (!step0.ok) return step0;
+        
+        return step0;
+    }
+    export function downcastDepotReceiptResultToV2(head: types.v3.Signed, adapters: VersionAdapters): VersionedResult<types.v2.Signed> {
+        
+            const step0 = downcastStepDepotReceiptResultToV2(head, adapters);
+            if (!step0.ok) return step0;
+        
+        return step0;
+    }
+    export function downcastDepotReceiptErrorToV2(head: FrameworkError, adapters: VersionAdapters): VersionedResult<FrameworkError> {
+        
+            const step0 = downcastStepDepotReceiptErrorToV2(head, adapters);
+            if (!step0.ok) return step0;
+        
+        return step0;
+    }
+    /** Failed projection retains the original Head outcome, including typed errors. */
+    export function downcastDepotReceiptOutcomeToV2(head: OperationOutcome<types.v3.Signed, FrameworkError>, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<types.v2.Signed, FrameworkError>, OperationOutcome<types.v3.Signed, FrameworkError>> {
+        if (head.ok) {
+            const result = downcastDepotReceiptResultToV2(head.value, adapters);
+            return result.ok ? { projected: true, value: { ok: true, value: result.value } } : { projected: false, head, error: result.error };
+        }
+        const result = downcastDepotReceiptErrorToV2(head.error, adapters);
+        return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
+    }
+    
+    export async function dispatchDepotReceiptFromV2(
+    raw: unknown,
+    handler: (request: ifaceTypes.v3.DepotReceiptRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Signed, FrameworkError>>,
+    adapters: VersionAdapters,
+    ): Promise<DispatchOutcome<OperationOutcome<types.v2.Signed, FrameworkError>, OperationOutcome<types.v3.Signed, FrameworkError>>> {
+        const request = decodeAndUpcastDepotReceiptFromV2(raw, adapters);
+        if (!request.ok) return { dispatched: false, error: request.error };
+        const head = await handler(request.value, { originalVersion: "2026-04", originalVersionId: "v2" });
+        return { dispatched: true, ...downcastDepotReceiptOutcomeToV2(head, adapters) };
+    }
+
+    /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotShipFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotShipRequest> {
-        const parsed = wireRequest35Schema.safeParse(raw);
+        const parsed = wireRequest38Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.ship", issues: parsed.error.issues } };
         
             const step0 = upcastDepotShipRequestFromV2(parsed.data, adapters);
@@ -5446,7 +5726,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotStateFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotStateRequest> {
-        const parsed = wireRequest37Schema.safeParse(raw);
+        const parsed = wireRequest39Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.state", issues: parsed.error.issues } };
         
             const step0 = upcastDepotStateRequestFromV2(parsed.data, adapters);
@@ -5491,7 +5771,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotTraceFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotTraceRequest> {
-        const parsed = wireRequest39Schema.safeParse(raw);
+        const parsed = wireRequest41Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.trace", issues: parsed.error.issues } };
         
             const step0 = upcastDepotTraceRequestFromV2(parsed.data, adapters);
@@ -5536,7 +5816,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotUpdateFromV2(raw: unknown, current: types.v3.Parcel, adapters: VersionAdapters): { ok: true; value: ifaceTypes.v3.DepotUpdateRequest; stored: DepotUpdateStored } | { ok: false; error: ValidationError | UnsupportedProjection } {
-        const parsed = wireRequest40Schema.safeParse(raw);
+        const parsed = wireRequest42Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04", operation: "Depot.update", issues: parsed.error.issues } };
         
             const step0 = upcastDepotUpdateRequestFromV2(parsed.data, current, adapters);
@@ -5583,7 +5863,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotBindingsFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotBindingsRequest> {
-        const parsed = wireRequest42Schema.safeParse(raw);
+        const parsed = wireRequest44Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.bindings", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -5619,7 +5899,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotBlobFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotBlobRequest> {
-        const parsed = wireRequest43Schema.safeParse(raw);
+        const parsed = wireRequest45Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.blob", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -5655,7 +5935,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotChooseFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotChooseRequest> {
-        const parsed = wireRequest44Schema.safeParse(raw);
+        const parsed = wireRequest46Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.choose", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -5691,7 +5971,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotContactFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotContactRequest> {
-        const parsed = wireRequest46Schema.safeParse(raw);
+        const parsed = wireRequest48Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.contact", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -5727,7 +6007,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotExtraFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotExtraRequest> {
-        const parsed = wireRequest49Schema.safeParse(raw);
+        const parsed = wireRequest51Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.extra", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -5763,7 +6043,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotGetFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotGetRequest> {
-        const parsed = wireRequest51Schema.safeParse(raw);
+        const parsed = wireRequest53Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.get", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -5799,7 +6079,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotHeadOnlyFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<{  }> {
-        const parsed = wireRequest52Schema.safeParse(raw);
+        const parsed = wireRequest54Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.head_only", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -5835,7 +6115,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotInspectFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotInspectRequest> {
-        const parsed = wireRequest53Schema.safeParse(raw);
+        const parsed = wireRequest55Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.inspect", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -5871,7 +6151,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotOptionalChangeFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotOptionalChangeRequest> {
-        const parsed = wireRequest55Schema.safeParse(raw);
+        const parsed = wireRequest57Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.optional_change", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -5906,8 +6186,44 @@ export type DispatchOutcome<T, Head> =
     }
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
+    export function decodeAndUpcastDepotReceiptFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotReceiptRequest> {
+        const parsed = wireRequest59Schema.safeParse(raw);
+        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.receipt", issues: parsed.error.issues } };
+        
+        return ok(parsed.data);
+    }
+    export function downcastDepotReceiptResultToV3(head: types.v3.Signed, adapters: VersionAdapters): VersionedResult<types.v3.Signed> {
+        
+        return ok(head);
+    }
+    export function downcastDepotReceiptErrorToV3(head: FrameworkError, adapters: VersionAdapters): VersionedResult<FrameworkError> {
+        
+        return ok(head);
+    }
+    /** Failed projection retains the original Head outcome, including typed errors. */
+    export function downcastDepotReceiptOutcomeToV3(head: OperationOutcome<types.v3.Signed, FrameworkError>, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<types.v3.Signed, FrameworkError>, OperationOutcome<types.v3.Signed, FrameworkError>> {
+        if (head.ok) {
+            const result = downcastDepotReceiptResultToV3(head.value, adapters);
+            return result.ok ? { projected: true, value: { ok: true, value: result.value } } : { projected: false, head, error: result.error };
+        }
+        const result = downcastDepotReceiptErrorToV3(head.error, adapters);
+        return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
+    }
+    
+    export async function dispatchDepotReceiptFromV3(
+    raw: unknown,
+    handler: (request: ifaceTypes.v3.DepotReceiptRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Signed, FrameworkError>>,
+    adapters: VersionAdapters,
+    ): Promise<DispatchOutcome<OperationOutcome<types.v3.Signed, FrameworkError>, OperationOutcome<types.v3.Signed, FrameworkError>>> {
+        const request = decodeAndUpcastDepotReceiptFromV3(raw, adapters);
+        if (!request.ok) return { dispatched: false, error: request.error };
+        const head = await handler(request.value, { originalVersion: "2026-07", originalVersionId: "v3" });
+        return { dispatched: true, ...downcastDepotReceiptOutcomeToV3(head, adapters) };
+    }
+
+    /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotShipFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotShipRequest> {
-        const parsed = wireRequest57Schema.safeParse(raw);
+        const parsed = wireRequest61Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.ship", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -5943,7 +6259,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotStateFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotStateRequest> {
-        const parsed = wireRequest59Schema.safeParse(raw);
+        const parsed = wireRequest62Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.state", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -5979,7 +6295,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotTraceFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotTraceRequest> {
-        const parsed = wireRequest61Schema.safeParse(raw);
+        const parsed = wireRequest64Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.trace", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -6015,7 +6331,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastDepotUpdateFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.DepotUpdateRequest> {
-        const parsed = wireRequest62Schema.safeParse(raw);
+        const parsed = wireRequest65Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07", operation: "Depot.update", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -6205,6 +6521,24 @@ export type DispatchOutcome<T, Head> =
                 case "v2": return dispatchDepotOptionalChangeFromV2(raw, handler, adapters);
             
                 case "v3": return dispatchDepotOptionalChangeFromV3(raw, handler, adapters);
+            
+        }
+    }
+
+    /** Compose one request using an already resolved version identifier. */
+    export async function dispatchDepotReceipt(
+    version: "v1" | "v2" | "v3",
+    raw: unknown,
+    handler: (request: ifaceTypes.v3.DepotReceiptRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Signed, FrameworkError>>,
+    adapters: VersionAdapters,
+    ): Promise<DispatchOutcome<OperationOutcome<types.v1.Signed | types.v2.Signed | types.v3.Signed, FrameworkError>, OperationOutcome<types.v3.Signed, FrameworkError>>> {
+        switch (version) {
+            
+                case "v1": return dispatchDepotReceiptFromV1(raw, handler, adapters);
+            
+                case "v2": return dispatchDepotReceiptFromV2(raw, handler, adapters);
+            
+                case "v3": return dispatchDepotReceiptFromV3(raw, handler, adapters);
             
         }
     }
@@ -6640,6 +6974,45 @@ export type DispatchOutcome<T, Head> =
                 case "v2": {
                     
                         const step0 = downcastParcelToV2(head, stored, adapters);
+                        if (!step0.ok) return step0;
+                    
+                    return step0;
+                }
+            
+                case "v3": {
+                    
+                    return ok(head);
+                }
+            
+        }
+    }
+
+    
+    
+        export function downcastSigned(version: "v1", head: types.v3.Signed, adapters: VersionAdapters): VersionedResult<types.v1.Signed>;
+    
+        export function downcastSigned(version: "v2", head: types.v3.Signed, adapters: VersionAdapters): VersionedResult<types.v2.Signed>;
+    
+        export function downcastSigned(version: "v3", head: types.v3.Signed, adapters: VersionAdapters): VersionedResult<types.v3.Signed>;
+    
+    export function downcastSigned(version: "v1" | "v2" | "v3", head: types.v3.Signed, adapters: VersionAdapters): VersionedResult<types.v1.Signed | types.v2.Signed | types.v3.Signed>;
+    export function downcastSigned(version: "v1" | "v2" | "v3", head: types.v3.Signed, adapters: VersionAdapters): VersionedResult<types.v1.Signed | types.v2.Signed | types.v3.Signed> {
+        switch (version) {
+            
+                case "v1": {
+                    
+                        const step0 = downcastSignedToV2(head, adapters);
+                        if (!step0.ok) return step0;
+                    
+                        const step1 = downcastSignedToV1(step0.value, adapters);
+                        if (!step1.ok) return step1;
+                    
+                    return step1;
+                }
+            
+                case "v2": {
+                    
+                        const step0 = downcastSignedToV2(head, adapters);
                         if (!step0.ok) return step0;
                     
                     return step0;

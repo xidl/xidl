@@ -33,6 +33,7 @@ const storage = {
   gates: new Map<string, string>([['20002', 'B-12']]),
   handlingNotes: new Map<string, string>([['p1', 'fragile']]),
   optionalNotes: new Map<string, string>([['kept', 'kept']]),
+  signedTags: new Map<string, string>([['proof', 'archived']]),
   traces: new Map<string, string>([['p1', 'trace-1']]),
 };
 const storedValues: a.StoredValues = {
@@ -106,6 +107,26 @@ const hooks: a.VersionAdapters = {
     });
   },
   parcelUpcastFromV2: () => ok({ audit: 'checked', handling_note: a.IGNORED }),
+  signedDowncastToV1: source =>
+    ok({
+      label: source.label,
+      signature: source.signature,
+      ...(source.tag === undefined ? {} : { tag: source.tag }),
+    }),
+  signedDowncastToV2: source => {
+    hookCalls++;
+    if (source.label === 'sealed-label') {
+      return refuse('2026-04', 'Signed.tag');
+    }
+    // The whole-type hook owns its wire shape: an unarchived label simply
+    // omits the member instead of marking it OMIT.
+    const tag = storage.signedTags.get(source.label);
+    return ok({
+      label: source.label,
+      signature: source.signature,
+      ...(tag === undefined ? {} : { tag }),
+    });
+  },
   stateDowncastToV1: () => refuse('2026-01', 'State'),
   stateDowncastToV2: () => ok('shipping' as const),
 };

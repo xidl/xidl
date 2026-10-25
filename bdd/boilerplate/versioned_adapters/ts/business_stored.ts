@@ -141,6 +141,45 @@ export async function runStoredJourney(
       'the refusal names the map element’s member',
     );
   }
+  // The derived type keeps one flattened wire shape: the whole conversion is
+  // a single explicit decision, so the hook reads storage itself and an
+  // unarchived label omits the retired member instead of inventing one.
+  const receipt = async (outcome: types.v3.Signed) => {
+    const served = await a.dispatchDepotReceiptFromV1(
+      { parcel: wireParcel },
+      async () => ({ ok: true as const, value: outcome }),
+      hooks,
+    );
+    assert(served.dispatched && served.projected && served.value.ok);
+    return served.value.value;
+  };
+  const archived = await receipt({ label: 'proof', signature: 'sig-1' });
+  assert.equal(archived.tag, 'archived');
+  assert.equal(archived.signature, 'sig-1');
+  const fresh = await receipt({ label: 'fresh', signature: 'sig-2' });
+  assert.equal(
+    Object.hasOwn(fresh, 'tag'),
+    false,
+    'an unarchived label omits the member',
+  );
+  const sealedHead = {
+    ok: true as const,
+    value: { label: 'sealed-label', signature: 'sig-3' } as types.v3.Signed,
+  };
+  const sealed = await a.dispatchDepotReceiptFromV1(
+    { parcel: wireParcel },
+    async () => sealedHead,
+    hooks,
+  );
+  assert.equal(sealed.dispatched, true);
+  assert.equal(sealed.projected, false);
+  if (!sealed.projected) {
+    assert.equal(
+      (sealed.head as typeof sealedHead).value.label,
+      'sealed-label',
+      'the refusal retains the committed Head outcome',
+    );
+  }
   // An old client sending the retired member must see it acknowledged, not forwarded.
   const v2Head = take(
     a.decodeAndUpcastDepotShipFromV2(
