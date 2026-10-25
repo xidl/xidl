@@ -7,6 +7,7 @@ impl SurfaceCollector {
         interface: &str,
         scope: &[String],
         http: &HttpOperation,
+        version: &str,
     ) -> IdlcResult<Operation> {
         let mut inputs = Vec::new();
         let mut outputs = Vec::new();
@@ -18,7 +19,7 @@ impl SurfaceCollector {
                 flatten: false,
                 path: Vec::new(),
                 value: Some(TypeUse {
-                    ty: parameter.ty.clone(),
+                    ty: Self::version_type(&parameter.ty, version),
                     scope: scope.to_vec(),
                     declarator: hir::Declarator::SimpleDeclarator(hir::SimpleDeclarator(
                         parameter.name.clone(),
@@ -66,7 +67,7 @@ impl SurfaceCollector {
                     flatten: false,
                     path: Vec::new(),
                     value: Some(TypeUse {
-                        ty: ty.clone(),
+                        ty: Self::version_type(ty, version),
                         scope: scope.to_vec(),
                         declarator: hir::Declarator::SimpleDeclarator(hir::SimpleDeclarator(
                             "return".into(),
@@ -100,6 +101,17 @@ impl SurfaceCollector {
                 .collect(),
             http: http.clone(),
         })
+    }
+
+    fn version_type(ty: &hir::TypeSpec, version: &str) -> hir::TypeSpec {
+        let mut relative = ty.clone();
+        relative.visit_scoped_names(&mut |name| {
+            if name.name.first().is_some_and(|first| first == version) {
+                name.name.remove(0);
+                name.is_root = true;
+            }
+        });
+        relative
     }
 
     fn binding(http: &HttpOperation, name: &str) -> IdlcResult<(String, &'static str)> {

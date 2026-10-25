@@ -97,7 +97,7 @@ expression: "&first[0].1"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
                           "Item"
                         ]
@@ -111,7 +111,7 @@ expression: "&first[0].1"
               "representations": [],
               "status": "200"
             },
-            "return_type": "Item",
+            "return_type": "::Item",
             "route": "/items/{id}/adopt",
             "routes": [
               {
@@ -179,7 +179,7 @@ expression: "&first[0].1"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
                           "Item"
                         ]
@@ -193,7 +193,7 @@ expression: "&first[0].1"
               "representations": [],
               "status": "200"
             },
-            "return_type": "Item",
+            "return_type": "::Item",
             "route": "/items/{id}/adopt",
             "routes": [
               {
@@ -299,7 +299,7 @@ expression: "&first[0].1"
                         "len": null,
                         "ty": {
                           "ScopedName": {
-                            "is_root": false,
+                            "is_root": true,
                             "name": [
                               "Item"
                             ]
@@ -315,7 +315,7 @@ expression: "&first[0].1"
               "representations": [],
               "status": "200"
             },
-            "return_type": "sequence<Item>",
+            "return_type": "sequence<::Item>",
             "route": "/items",
             "routes": [
               {

@@ -7,7 +7,7 @@ mod references;
 use super::model::*;
 use crate::error::{IdlcError, IdlcResult};
 use std::collections::BTreeMap;
-use xidl_parser::hir::{self, effective_wire_name, is_skipped};
+use xidl_parser::hir::{self, effective_wire_name, is_skipped, VisitScopedNames};
 use xidl_parser::rest_hir::{
     HttpOperation, HttpRequestBodyShape, HttpSignatureParamDirection, RestHirDocument,
 };
@@ -58,7 +58,7 @@ impl SurfaceCollector {
                 for operation in &interface.operations {
                     surface.operations.insert(
                         format!("{key}.{}", operation.meta.name),
-                        Self::operation(&key, &scope, operation)?,
+                        Self::operation(&key, &scope, operation, &version.id)?,
                     );
                 }
             }

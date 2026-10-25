@@ -145,7 +145,7 @@ expression: "crate::versioning::map::to_json(&map).expect(\"canonical map\")"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
                           "Item"
                         ]
@@ -159,7 +159,7 @@ expression: "crate::versioning::map::to_json(&map).expect(\"canonical map\")"
               "representations": [],
               "status": "200"
             },
-            "return_type": "Item",
+            "return_type": "::Item",
             "route": "/items",
             "routes": [
               {
@@ -224,7 +224,7 @@ expression: "crate::versioning::map::to_json(&map).expect(\"canonical map\")"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
                           "Item"
                         ]
@@ -238,7 +238,7 @@ expression: "crate::versioning::map::to_json(&map).expect(\"canonical map\")"
               "representations": [],
               "status": "200"
             },
-            "return_type": "Item",
+            "return_type": "::Item",
             "route": "/items",
             "routes": [
               {

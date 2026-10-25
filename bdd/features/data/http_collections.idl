@@ -1,3 +1,11 @@
+module transport {
+    typedef long Count;
+    typedef string Label;
+    typedef sequence<Count> Counts;
+    typedef sequence<Label> Labels;
+    typedef Labels Selection;
+};
+
 struct Collections {
     sequence<long> values;
     sequence<string> tags;
@@ -9,9 +17,9 @@ struct StreamValues { @optional sequence<long> values; };
 
 interface CollectionInputs {
     @get(path="/collections")
-    Collections read(@query sequence<long> values, @header sequence<string> tags,
-                     @cookie sequence<string> names, @query @optional sequence<string> labels);
-    @get(path="/search") Search search(@query @optional string term);
+    Collections read(@query transport::Counts values, @header transport::Selection tags,
+                     @cookie transport::Selection names, @query @optional transport::Selection labels);
+    @get(path="/search") Search search(@query @optional transport::Label term);
     @server_stream @get(path="/stream")
     StreamValues stream(@query @optional sequence<long> values);
 };

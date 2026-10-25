@@ -7,6 +7,22 @@ fn map(source: &str) -> VersionMap {
 }
 
 #[test]
+fn unchanged_scoped_alias_inputs_ignore_projection_module_names() {
+    let map = map(r#"
+        @version enum V { v1, v2, v3 };
+        module filters {
+            typedef string MediaType;
+            typedef sequence<MediaType> MediaTypes;
+            typedef MediaTypes Selection;
+        };
+        interface Catalog {
+            @get(path="/catalog") void search(@query filters::Selection media);
+        };
+    "#);
+    assert!(map.steps.iter().all(|step| step.operations.is_empty()));
+}
+
+#[test]
 fn identical_endpoints_keep_distinct_member_and_parameter_declarations() {
     let source = r#"
         @version enum V { v1, v2, v3 };
