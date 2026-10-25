@@ -8,6 +8,8 @@ baseline.
 
 The Rust `versioned_adapters_business` manifest also records element-wise
 conversion of declared fixed arrays, alongside recursive member layout support.
+The `wire_contract` manifests include an optional two-by-three stock grid whose
+row and bin order is checked by the shared HTTP journey.
 
 To regenerate after an intentional change to ordinary output, build `xidlc` in a
 clean checkout of the new baseline, then run for each target and fixture:
