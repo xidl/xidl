@@ -228,7 +228,14 @@ pub mod test {
                             ))?;
                         header_str.to_string()
                     }
-                    None => ::core::default::Default::default(),
+                    None => {
+                        return Err(
+                            ::xidl_rust_axum::Error::new(
+                                400,
+                                concat!("missing required header parameter ", "X-Req-Id"),
+                            ),
+                        );
+                    }
                 };
                 let mut flags: Vec<String> = Vec::new();
                 for header_value in xidl_headers.get_all("X-Flags").iter() {
@@ -241,11 +248,6 @@ pub mod test {
                     let parsed: String = header_str.to_string();
                     flags.push(parsed);
                 }
-                let flags: Vec<String> = if flags.is_empty() {
-                    ::core::default::Default::default()
-                } else {
-                    flags
-                };
                 let age: u32 = match xidl_headers.get("X-Age") {
                     Some(header_value) => {
                         let header_str = header_value
@@ -261,7 +263,14 @@ pub mod test {
                                 format!("{err:?}"),
                             ))?
                     }
-                    None => ::core::default::Default::default(),
+                    None => {
+                        return Err(
+                            ::xidl_rust_axum::Error::new(
+                                400,
+                                concat!("missing required header parameter ", "X-Age"),
+                            ),
+                        );
+                    }
                 };
                 let mut cookie_map: ::std::collections::HashMap<String, Vec<String>> = ::std::collections::HashMap::new();
                 for header_value in xidl_headers.get_all("cookie").iter() {
@@ -290,7 +299,14 @@ pub mod test {
                     .and_then(|values| values.first())
                 {
                     Some(value) => value.to_string(),
-                    None => ::core::default::Default::default(),
+                    None => {
+                        return Err(
+                            ::xidl_rust_axum::Error::new(
+                                400,
+                                concat!("missing required cookie parameter ", "sid"),
+                            ),
+                        );
+                    }
                 };
                 let mut prefs: Vec<String> = Vec::new();
                 if let Some(values) = cookie_map.get("pref") {
@@ -299,11 +315,6 @@ pub mod test {
                         prefs.push(parsed);
                     }
                 }
-                let prefs: Vec<String> = if prefs.is_empty() {
-                    ::core::default::Default::default()
-                } else {
-                    prefs
-                };
                 Ok(Self {
                     id,
                     req_id,
@@ -350,7 +361,14 @@ pub mod test {
                             ))?;
                         header_str.to_string()
                     }
-                    None => ::core::default::Default::default(),
+                    None => {
+                        return Err(
+                            ::xidl_rust_axum::Error::new(
+                                400,
+                                concat!("missing required header parameter ", "X-Token"),
+                            ),
+                        );
+                    }
                 };
                 let mut cookie_map: ::std::collections::HashMap<String, Vec<String>> = ::std::collections::HashMap::new();
                 for header_value in xidl_headers.get_all("cookie").iter() {
@@ -379,7 +397,14 @@ pub mod test {
                     .and_then(|values| values.first())
                 {
                     Some(value) => value.to_string(),
-                    None => ::core::default::Default::default(),
+                    None => {
+                        return Err(
+                            ::xidl_rust_axum::Error::new(
+                                400,
+                                concat!("missing required cookie parameter ", "sid"),
+                            ),
+                        );
+                    }
                 };
                 if !::xidl_rust_axum::http::content_type_matches(
                     xidl_headers,

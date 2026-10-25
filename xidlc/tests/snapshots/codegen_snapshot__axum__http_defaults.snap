@@ -133,9 +133,8 @@ struct HttpDefaultsServiceGetNameRequestOutQuery {
     #[serde(default)]
     name: String,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpDefaultsServiceGetNameRequestInQuery {
-    #[serde(default)]
     name: String,
 }
 #[derive(::serde::Deserialize)]
@@ -183,11 +182,9 @@ struct HttpDefaultsServiceListOrdersRequestOutQuery {
     #[serde(default)]
     size: u32,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpDefaultsServiceListOrdersRequestInQuery {
-    #[serde(default)]
     page: u32,
-    #[serde(default)]
     size: u32,
 }
 #[derive(::serde::Deserialize)]
@@ -449,9 +446,8 @@ struct HttpDefaultsServiceGetUserRequestOutQuery {
     #[serde(default)]
     lang: String,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpDefaultsServiceGetUserRequestInQuery {
-    #[serde(default)]
     lang: String,
 }
 #[derive(::serde::Deserialize)]
@@ -507,10 +503,9 @@ struct HttpDefaultsServiceGetUserAliasRequestOutQuery {
     #[serde(default)]
     locale: String,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpDefaultsServiceGetUserAliasRequestInQuery {
     #[serde(rename = "lang")]
-    #[serde(default)]
     locale: String,
 }
 #[derive(::serde::Deserialize)]
@@ -562,11 +557,9 @@ struct HttpDefaultsServiceDeleteUserRequestOutQuery {
     #[serde(default)]
     revision: u32,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpDefaultsServiceDeleteUserRequestInQuery {
-    #[serde(default)]
     id: u32,
-    #[serde(default)]
     revision: u32,
 }
 #[derive(::serde::Deserialize)]
@@ -610,11 +603,9 @@ struct HttpDefaultsServiceProbeUserRequestOutQuery {
     #[serde(default)]
     revision: u32,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpDefaultsServiceProbeUserRequestInQuery {
-    #[serde(default)]
     id: u32,
-    #[serde(default)]
     revision: u32,
 }
 #[derive(::serde::Deserialize)]
@@ -658,11 +649,9 @@ struct HttpDefaultsServiceUserOptionsRequestOutQuery {
     #[serde(default)]
     revision: u32,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpDefaultsServiceUserOptionsRequestInQuery {
-    #[serde(default)]
     id: u32,
-    #[serde(default)]
     revision: u32,
 }
 #[derive(::serde::Deserialize)]

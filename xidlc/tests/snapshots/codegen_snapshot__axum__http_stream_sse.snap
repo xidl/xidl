@@ -45,9 +45,8 @@ struct HttpStreamSseServiceWatchTopicRequestOutQuery {
     #[serde(default)]
     lang: String,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpStreamSseServiceWatchTopicRequestInQuery {
-    #[serde(default)]
     lang: String,
 }
 #[derive(::serde::Serialize, ::serde::Deserialize)]

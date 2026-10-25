@@ -48,11 +48,9 @@ struct HttpQueryTemplateServiceGetUserRequestOutQuery {
     #[serde(default)]
     region: String,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpQueryTemplateServiceGetUserRequestInQuery {
-    #[serde(default)]
     lang: String,
-    #[serde(default)]
     region: String,
 }
 #[derive(::serde::Deserialize)]
@@ -103,9 +101,8 @@ struct HttpQueryTemplateServiceSearchRequestOutQuery {
     #[serde(default)]
     keyword: String,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpQueryTemplateServiceSearchRequestInQuery {
-    #[serde(default)]
     keyword: String,
 }
 pub type HttpQueryTemplateServiceSearchRequestOutBody = String;

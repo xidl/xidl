@@ -1,0 +1,1546 @@
+---
+source: xidlc/tests/versioned_billing.rs
+expression: documents
+---
+{
+  "openapi_versioned_billing.v1.json": {
+    "components": {
+      "schemas": {
+        "Error": {
+          "properties": {
+            "code": {
+              "type": "integer"
+            },
+            "details": {
+              "type": "object"
+            },
+            "msg": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "msg"
+          ],
+          "type": "object"
+        },
+        "v1.Audit": {
+          "properties": {
+            "attempts": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "commits": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "attempts",
+            "commits"
+          ],
+          "type": "object"
+        },
+        "v1.Capture": {
+          "properties": {
+            "invoice_id": {
+              "type": "string"
+            },
+            "payment": {
+              "$ref": "#/components/schemas/v1.Payment"
+            }
+          },
+          "required": [
+            "invoice_id",
+            "payment"
+          ],
+          "type": "object"
+        },
+        "v1.Conflict": {
+          "properties": {
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "reason"
+          ],
+          "type": "object"
+        },
+        "v1.Denied": {
+          "properties": {
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "reason"
+          ],
+          "type": "object"
+        },
+        "v1.Invoice": {
+          "properties": {
+            "amount_paid": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "id": {
+              "type": "string"
+            },
+            "payment_intent": {
+              "type": "string"
+            },
+            "total": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "id",
+            "total",
+            "amount_paid"
+          ],
+          "type": "object"
+        },
+        "v1.NotFound": {
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "type": "object"
+        },
+        "v1.Payment": {
+          "properties": {
+            "amount": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "payment_intent": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "payment_intent",
+            "amount"
+          ],
+          "type": "object"
+        },
+        "v1.Rejected": {
+          "properties": {
+            "reason": {
+              "type": "string"
+            },
+            "type_path": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "reason",
+            "type_path"
+          ],
+          "type": "object"
+        },
+        "v1.Versions": {
+          "enum": [
+            "2025-01-01",
+            "2025-04-01"
+          ],
+          "type": "string"
+        }
+      }
+    },
+    "info": {
+      "title": "xidl",
+      "version": "2025-01-01"
+    },
+    "openapi": "3.1.0",
+    "paths": {
+      "/audit": {
+        "get": {
+          "operationId": "v1.Invoices.audit",
+          "parameters": [
+            {
+              "description": "API version; this document describes 2025-01-01.",
+              "in": "header",
+              "name": "X-Billing-Version",
+              "required": false,
+              "schema": {
+                "enum": [
+                  "2025-01-01"
+                ],
+                "type": "string"
+              }
+            },
+            {
+              "in": "cookie",
+              "name": "tenant",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v1.Audit"
+                  }
+                }
+              },
+              "description": "OK",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-01-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Bad Request",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-01-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "403": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v1.Denied"
+                  }
+                }
+              },
+              "description": "Error: Denied",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-01-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "500": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Internal Server Error",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-01-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "Invoices"
+          ]
+        }
+      },
+      "/invoices": {
+        "get": {
+          "operationId": "v1.Invoices.list",
+          "parameters": [
+            {
+              "in": "query",
+              "name": "limit",
+              "required": true,
+              "schema": {
+                "format": "int32",
+                "type": "integer"
+              }
+            },
+            {
+              "description": "API version; this document describes 2025-01-01.",
+              "in": "header",
+              "name": "X-Billing-Version",
+              "required": false,
+              "schema": {
+                "enum": [
+                  "2025-01-01"
+                ],
+                "type": "string"
+              }
+            },
+            {
+              "in": "cookie",
+              "name": "tenant",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "items": {
+                      "$ref": "#/components/schemas/v1.Invoice"
+                    },
+                    "type": "array"
+                  }
+                }
+              },
+              "description": "OK",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-01-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Bad Request",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-01-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "403": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v1.Denied"
+                  }
+                }
+              },
+              "description": "Error: Denied",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-01-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "422": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v1.Rejected"
+                  }
+                }
+              },
+              "description": "Error: Rejected",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-01-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "500": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Internal Server Error",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-01-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "Invoices"
+          ]
+        }
+      },
+      "/invoices/{id}": {
+        "get": {
+          "operationId": "v1.Invoices.get",
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "description": "API version; this document describes 2025-01-01.",
+              "in": "header",
+              "name": "X-Billing-Version",
+              "required": false,
+              "schema": {
+                "enum": [
+                  "2025-01-01"
+                ],
+                "type": "string"
+              }
+            },
+            {
+              "in": "cookie",
+              "name": "tenant",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v1.Invoice"
+                  }
+                }
+              },
+              "description": "OK",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-01-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Bad Request",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-01-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "403": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v1.Denied"
+                  }
+                }
+              },
+              "description": "Error: Denied",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-01-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "404": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v1.NotFound"
+                  }
+                }
+              },
+              "description": "Error: NotFound",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-01-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "422": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v1.Rejected"
+                  }
+                }
+              },
+              "description": "Error: Rejected",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-01-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "500": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Internal Server Error",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-01-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "Invoices"
+          ]
+        }
+      },
+      "/payments": {
+        "post": {
+          "operationId": "v1.Invoices.pay",
+          "parameters": [
+            {
+              "description": "API version; this document describes 2025-01-01.",
+              "in": "header",
+              "name": "X-Billing-Version",
+              "required": false,
+              "schema": {
+                "enum": [
+                  "2025-01-01"
+                ],
+                "type": "string"
+              }
+            },
+            {
+              "in": "header",
+              "name": "Idempotency-Key",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "in": "cookie",
+              "name": "tenant",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v1.Capture"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v1.Invoice"
+                  }
+                }
+              },
+              "description": "OK",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-01-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Bad Request",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-01-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "403": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v1.Denied"
+                  }
+                }
+              },
+              "description": "Error: Denied",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-01-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "404": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v1.NotFound"
+                  }
+                }
+              },
+              "description": "Error: NotFound",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-01-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "409": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v1.Conflict"
+                  }
+                }
+              },
+              "description": "Error: Conflict",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-01-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "422": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v1.Rejected"
+                  }
+                }
+              },
+              "description": "Error: Rejected",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-01-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "500": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Internal Server Error",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-01-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "Invoices"
+          ]
+        }
+      }
+    },
+    "tags": [
+      {
+        "name": "Invoices"
+      }
+    ]
+  },
+  "openapi_versioned_billing.v2.json": {
+    "components": {
+      "schemas": {
+        "Error": {
+          "properties": {
+            "code": {
+              "type": "integer"
+            },
+            "details": {
+              "type": "object"
+            },
+            "msg": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "msg"
+          ],
+          "type": "object"
+        },
+        "v2.Audit": {
+          "properties": {
+            "attempts": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "commits": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "attempts",
+            "commits"
+          ],
+          "type": "object"
+        },
+        "v2.Capture": {
+          "properties": {
+            "invoice_id": {
+              "type": "string"
+            },
+            "payment": {
+              "$ref": "#/components/schemas/v2.Payment"
+            }
+          },
+          "required": [
+            "invoice_id",
+            "payment"
+          ],
+          "type": "object"
+        },
+        "v2.Conflict": {
+          "properties": {
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "reason"
+          ],
+          "type": "object"
+        },
+        "v2.Denied": {
+          "properties": {
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "reason"
+          ],
+          "type": "object"
+        },
+        "v2.Invoice": {
+          "properties": {
+            "amount_paid": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "id": {
+              "type": "string"
+            },
+            "payments": {
+              "items": {
+                "$ref": "#/components/schemas/v2.Payment"
+              },
+              "type": "array"
+            },
+            "total": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "id",
+            "total",
+            "amount_paid",
+            "payments"
+          ],
+          "type": "object"
+        },
+        "v2.NotFound": {
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "type": "object"
+        },
+        "v2.Payment": {
+          "properties": {
+            "amount": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "payment_intent": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "payment_intent",
+            "amount"
+          ],
+          "type": "object"
+        },
+        "v2.Rejected": {
+          "properties": {
+            "reason": {
+              "type": "string"
+            },
+            "type_path": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "reason",
+            "type_path"
+          ],
+          "type": "object"
+        },
+        "v2.Versions": {
+          "enum": [
+            "2025-01-01",
+            "2025-04-01"
+          ],
+          "type": "string"
+        }
+      }
+    },
+    "info": {
+      "title": "xidl",
+      "version": "2025-04-01"
+    },
+    "openapi": "3.1.0",
+    "paths": {
+      "/audit": {
+        "get": {
+          "operationId": "v2.Invoices.audit",
+          "parameters": [
+            {
+              "description": "API version; this document describes 2025-04-01.",
+              "in": "header",
+              "name": "X-Billing-Version",
+              "required": false,
+              "schema": {
+                "enum": [
+                  "2025-04-01"
+                ],
+                "type": "string"
+              }
+            },
+            {
+              "in": "cookie",
+              "name": "tenant",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v2.Audit"
+                  }
+                }
+              },
+              "description": "OK",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-04-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Bad Request",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-04-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "403": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v2.Denied"
+                  }
+                }
+              },
+              "description": "Error: Denied",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-04-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "500": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Internal Server Error",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-04-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "Invoices"
+          ]
+        }
+      },
+      "/invoices": {
+        "get": {
+          "operationId": "v2.Invoices.list",
+          "parameters": [
+            {
+              "in": "query",
+              "name": "limit",
+              "required": true,
+              "schema": {
+                "format": "int32",
+                "type": "integer"
+              }
+            },
+            {
+              "description": "API version; this document describes 2025-04-01.",
+              "in": "header",
+              "name": "X-Billing-Version",
+              "required": false,
+              "schema": {
+                "enum": [
+                  "2025-04-01"
+                ],
+                "type": "string"
+              }
+            },
+            {
+              "in": "cookie",
+              "name": "tenant",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "items": {
+                      "$ref": "#/components/schemas/v2.Invoice"
+                    },
+                    "type": "array"
+                  }
+                }
+              },
+              "description": "OK",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-04-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Bad Request",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-04-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "403": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v2.Denied"
+                  }
+                }
+              },
+              "description": "Error: Denied",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-04-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "422": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v2.Rejected"
+                  }
+                }
+              },
+              "description": "Error: Rejected",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-04-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "500": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Internal Server Error",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-04-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "Invoices"
+          ]
+        }
+      },
+      "/invoices/{id}": {
+        "get": {
+          "operationId": "v2.Invoices.get",
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "description": "API version; this document describes 2025-04-01.",
+              "in": "header",
+              "name": "X-Billing-Version",
+              "required": false,
+              "schema": {
+                "enum": [
+                  "2025-04-01"
+                ],
+                "type": "string"
+              }
+            },
+            {
+              "in": "cookie",
+              "name": "tenant",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v2.Invoice"
+                  }
+                }
+              },
+              "description": "OK",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-04-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Bad Request",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-04-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "403": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v2.Denied"
+                  }
+                }
+              },
+              "description": "Error: Denied",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-04-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "404": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v2.NotFound"
+                  }
+                }
+              },
+              "description": "Error: NotFound",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-04-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "422": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v2.Rejected"
+                  }
+                }
+              },
+              "description": "Error: Rejected",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-04-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "500": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Internal Server Error",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-04-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "Invoices"
+          ]
+        }
+      },
+      "/payments": {
+        "post": {
+          "operationId": "v2.Invoices.pay",
+          "parameters": [
+            {
+              "description": "API version; this document describes 2025-04-01.",
+              "in": "header",
+              "name": "X-Billing-Version",
+              "required": false,
+              "schema": {
+                "enum": [
+                  "2025-04-01"
+                ],
+                "type": "string"
+              }
+            },
+            {
+              "in": "header",
+              "name": "Idempotency-Key",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "in": "cookie",
+              "name": "tenant",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2.Capture"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v2.Invoice"
+                  }
+                }
+              },
+              "description": "OK",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-04-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Bad Request",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-04-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "403": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v2.Denied"
+                  }
+                }
+              },
+              "description": "Error: Denied",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-04-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "404": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v2.NotFound"
+                  }
+                }
+              },
+              "description": "Error: NotFound",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-04-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "409": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v2.Conflict"
+                  }
+                }
+              },
+              "description": "Error: Conflict",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-04-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "422": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v2.Rejected"
+                  }
+                }
+              },
+              "description": "Error: Rejected",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-04-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "500": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Internal Server Error",
+              "headers": {
+                "X-Billing-Version": {
+                  "schema": {
+                    "enum": [
+                      "2025-04-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "Invoices"
+          ]
+        }
+      }
+    },
+    "tags": [
+      {
+        "name": "Invoices"
+      }
+    ]
+  }
+}

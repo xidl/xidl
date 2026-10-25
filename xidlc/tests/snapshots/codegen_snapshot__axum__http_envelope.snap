@@ -370,9 +370,8 @@ struct EnvelopeApiGetFileRequestOutQuery {
     #[serde(default)]
     key: String,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct EnvelopeApiGetFileRequestInQuery {
-    #[serde(default)]
     key: String,
 }
 #[derive(::serde::Deserialize)]
@@ -437,9 +436,8 @@ struct EnvelopeApiHeadFileRequestOutQuery {
     #[serde(default)]
     key: String,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct EnvelopeApiHeadFileRequestInQuery {
-    #[serde(default)]
     key: String,
 }
 #[derive(::serde::Deserialize)]
@@ -509,7 +507,14 @@ where
                         ))?;
                     header_str.to_string()
                 }
-                None => ::core::default::Default::default(),
+                None => {
+                    return Err(
+                        ::xidl_rust_axum::Error::new(
+                            400,
+                            concat!("missing required header parameter ", "If-Match"),
+                        ),
+                    );
+                }
             };
             Ok(Self { if_match })
         }

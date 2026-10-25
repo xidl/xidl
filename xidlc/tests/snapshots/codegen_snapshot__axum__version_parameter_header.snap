@@ -176,9 +176,8 @@ pub mod v1 {
             #[serde(default)]
             search: String,
         }
-        #[derive(::serde::Deserialize, ::core::default::Default)]
+        #[derive(::serde::Deserialize)]
         struct StoreGetRequestInQuery {
-            #[serde(default)]
             search: String,
         }
         #[derive(::serde::Deserialize)]
@@ -257,7 +256,14 @@ pub mod v1 {
                         .and_then(|values| values.first())
                     {
                         Some(value) => value.to_string(),
-                        None => ::core::default::Default::default(),
+                        None => {
+                            return Err(
+                                ::xidl_rust_axum::Error::new(
+                                    400,
+                                    concat!("missing required cookie parameter ", "theme"),
+                                ),
+                            );
+                        }
                     };
                     Ok(Self { id, search, theme })
                 }
@@ -350,9 +356,8 @@ pub mod v1 {
             #[serde(default)]
             room: String,
         }
-        #[derive(::serde::Deserialize, ::core::default::Default)]
+        #[derive(::serde::Deserialize)]
         struct StoreChatRequestInQuery {
-            #[serde(default)]
             room: String,
         }
         pub type StoreChatRequestOutBody = String;
@@ -1909,9 +1914,8 @@ pub mod v2 {
             #[serde(default)]
             search: String,
         }
-        #[derive(::serde::Deserialize, ::core::default::Default)]
+        #[derive(::serde::Deserialize)]
         struct StoreGetRequestInQuery {
-            #[serde(default)]
             search: String,
         }
         #[derive(::serde::Deserialize)]
@@ -1990,7 +1994,14 @@ pub mod v2 {
                         .and_then(|values| values.first())
                     {
                         Some(value) => value.to_string(),
-                        None => ::core::default::Default::default(),
+                        None => {
+                            return Err(
+                                ::xidl_rust_axum::Error::new(
+                                    400,
+                                    concat!("missing required cookie parameter ", "theme"),
+                                ),
+                            );
+                        }
                     };
                     Ok(Self { id, search, theme })
                 }
@@ -2083,9 +2094,8 @@ pub mod v2 {
             #[serde(default)]
             room: String,
         }
-        #[derive(::serde::Deserialize, ::core::default::Default)]
+        #[derive(::serde::Deserialize)]
         struct StoreChatRequestInQuery {
-            #[serde(default)]
             room: String,
         }
         pub type StoreChatRequestOutBody = String;

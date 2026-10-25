@@ -80,10 +80,9 @@ struct HttpCatchAllServiceReadAssetRequestOutQuery {
     #[serde(default)]
     version: String,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpCatchAllServiceReadAssetRequestInQuery {
     #[serde(rename = "v")]
-    #[serde(default)]
     version: String,
 }
 #[derive(::serde::Deserialize)]

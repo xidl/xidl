@@ -1,0 +1,37 @@
+@version(in = "header", name = "X-Billing-Version")
+enum Versions {
+    @rename("2025-01-01") v1,
+    @rename("2025-04-01") v2,
+};
+
+struct Payment { string payment_intent; long amount; };
+struct Capture { string invoice_id; Payment payment; };
+
+struct Invoice {
+    string id;
+    long total;
+    long amount_paid;
+    @removed(Versions::v2) @optional string payment_intent;
+    @added(Versions::v2) sequence<Payment> payments;
+};
+
+struct Audit { long attempts; long commits; };
+@http(404) exception NotFound { string id; };
+@http(403) exception Denied { string reason; };
+@http(409) exception Conflict { string reason; };
+@http(422) exception Rejected { string reason; string type_path; };
+
+interface Invoices {
+    @post(path = "/payments")
+    Invoice pay(@body Capture capture, @header @rename("Idempotency-Key") string key,
+                @cookie string tenant) raises(NotFound, Denied, Conflict, Rejected);
+
+    @get(path = "/invoices/{id}")
+    Invoice get(@path string id, @cookie string tenant) raises(NotFound, Denied, Rejected);
+
+    @get(path = "/invoices")
+    sequence<Invoice> list(@query long limit, @cookie string tenant) raises(Denied, Rejected);
+
+    @get(path = "/audit")
+    Audit audit(@cookie string tenant) raises(Denied);
+};

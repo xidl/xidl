@@ -97,9 +97,8 @@ struct HttpMediaServiceFetchMsgpackRequestOutQuery {
     #[serde(default)]
     id: String,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpMediaServiceFetchMsgpackRequestInQuery {
-    #[serde(default)]
     id: String,
 }
 #[derive(::serde::Deserialize)]

@@ -36,9 +36,8 @@ struct HttpUpgradeServiceConnectRawRequestOutQuery {
     #[serde(default)]
     token: String,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpUpgradeServiceConnectRawRequestInQuery {
-    #[serde(default)]
     token: String,
 }
 pub struct HttpUpgradeServiceServer<T> {

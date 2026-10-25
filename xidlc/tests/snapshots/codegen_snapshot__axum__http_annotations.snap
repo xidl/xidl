@@ -65,9 +65,8 @@ struct HttpAnnoServiceGetUserRequestOutQuery {
     #[serde(default)]
     lang: String,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpAnnoServiceGetUserRequestInQuery {
-    #[serde(default)]
     lang: String,
 }
 #[derive(::serde::Deserialize)]
@@ -176,9 +175,8 @@ struct HttpAnnoServiceGetNameRequestOutQuery {
     #[serde(default)]
     name: String,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpAnnoServiceGetNameRequestInQuery {
-    #[serde(default)]
     name: String,
 }
 #[derive(::serde::Deserialize)]
@@ -220,11 +218,9 @@ struct HttpAnnoServiceSearchUserRequestOutQuery {
     #[serde(default)]
     page: u32,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpAnnoServiceSearchUserRequestInQuery {
-    #[serde(default)]
     keyword: String,
-    #[serde(default)]
     page: u32,
 }
 #[derive(::serde::Deserialize)]
@@ -272,10 +268,9 @@ struct HttpAnnoServiceGetUserAliasRequestOutQuery {
     #[serde(default)]
     locale: String,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpAnnoServiceGetUserAliasRequestInQuery {
     #[serde(rename = "lang")]
-    #[serde(default)]
     locale: String,
 }
 #[derive(::serde::Deserialize)]

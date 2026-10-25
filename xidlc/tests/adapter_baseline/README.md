@@ -1,7 +1,12 @@
-These complete artifact manifests were generated from unmodified master
-`d98bc37a` with `XIDLC_VERSION=0.0.1 XIDLC_GIT_HASH=snapshot` and both client
-and server generation enabled. The tests compare paths and contents byte for
-byte; adapter generation is never involved in producing the baseline.
+These complete artifact manifests use
+`XIDLC_VERSION=0.0.1
+XIDLC_GIT_HASH=snapshot` and both client and server
+generation enabled. The TypeScript manifests retain the original `d98bc37a`
+baseline. The Rust manifests include the intentional #390 contract correction:
+absent required query, header and cookie scalars fail extraction instead of
+acquiring defaults; unary and streaming handlers share metadata decoding. The
+tests compare paths and contents byte for byte; adapter generation is never
+involved in producing the baseline.
 
 To regenerate after an intentional change to ordinary output, build `xidlc` in a
 clean checkout of the new baseline, then run for each target and fixture:
