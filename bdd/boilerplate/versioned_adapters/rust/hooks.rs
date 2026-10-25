@@ -5,9 +5,11 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 #[derive(Default)]
 pub struct Hooks {
     pub calls: AtomicUsize,
+    pub choices: AtomicUsize,
     pub errors: AtomicUsize,
     pub reject_downcast: bool,
     pub reject_patch: bool,
+    pub reject_choice: bool,
 }
 
 /// Storage keeps what Head no longer carries while older versions still read it.
@@ -16,6 +18,8 @@ pub struct Hooks {
 pub struct Storage {
     pub handling_notes: BTreeMap<String, String>,
     pub traces: BTreeMap<String, String>,
+    /// Gate codes retired inside Address elements, keyed by the element's zip.
+    pub gates: BTreeMap<String, String>,
 }
 
 impl StoredValues for Storage {
@@ -31,6 +35,10 @@ impl StoredValues for Storage {
     fn depot_trace_response_trace_id(&self, return_value: &String) -> Option<String> {
         self.traces.get(return_value).cloned()
     }
+    /// Elements carry no id: the reader resolves identity from the element.
+    fn address_gate(&self, source: &v3::Address) -> Option<String> {
+        self.gates.get(&source.zip).cloned()
+    }
 }
 
 pub fn refusal(version: &str, direction: Direction, path: &str) -> UnsupportedProjection {
@@ -41,7 +49,19 @@ pub fn refusal(version: &str, direction: Direction, path: &str) -> UnsupportedPr
 }
 
 impl VersionAdapters for Hooks {
+    fn address_upcast_from_v_2(&self, _: &v2::Address) -> VersionedResult<AddressUpcastFromV2Decision> {
+        Ok(AddressUpcastFromV2Decision { zone: None, gate: IGNORED })
+    }
+    fn address_downcast_to_v_2(&self, source: &v3::Address, stored: &dyn StoredValues) -> VersionedResult<AddressDowncastToV2Decision> {
+        // A gated dock is a business fact the middle release cannot ignore.
+        if source.zip == "90001" {
+            return Err(refusal("2026-04", Direction::Downcast, "Address.gate"));
+        }
+        Ok(AddressDowncastToV2Decision { gate: stored.address_gate(source) })
+    }
     fn choice_downcast_to_v_1(&self, source: &ChoiceDowncastToV1Changes<'_>) -> VersionedResult<v1::Choice> {
+        self.choices.fetch_add(1, Ordering::SeqCst);
+        if self.reject_choice { return Err(refusal("2026-01", Direction::Downcast, "Choice")); }
         let ChoiceDowncastToV1Changes::count(value) = source;
         Ok(v1::Choice::new_text(value.to_string()))
     }
