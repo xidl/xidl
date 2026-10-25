@@ -488,8 +488,8 @@ export type HttpDefaultsServiceCreateUserFlatRequest = z.infer<typeof HttpDefaul
 
     
 export const HttpDefaultsServiceSearchUserRequestSchema = z.object({
-        name: z.coerce.string(),
-        age: z.coerce.number().int().nonnegative(),
+        name: z.string(),
+        age: z.number().int().nonnegative(),
     });
 export type HttpDefaultsServiceSearchUserRequest = z.infer<typeof HttpDefaultsServiceSearchUserRequestSchema>;
 
@@ -537,16 +537,16 @@ export type HttpDefaultsServiceUserOptionsRequest = z.infer<typeof HttpDefaultsS
     
 export const HttpDefaultsServiceReplaceUserRequestSchema = z.object({
         user_id: z.coerce.number().int().nonnegative(),
-        name: z.coerce.string(),
-        age: z.coerce.number().int().nonnegative(),
+        name: z.string(),
+        age: z.number().int().nonnegative(),
     });
 export type HttpDefaultsServiceReplaceUserRequest = z.infer<typeof HttpDefaultsServiceReplaceUserRequestSchema>;
 
     
 export const HttpDefaultsServicePatchUserRequestSchema = z.object({
         user_id: z.coerce.number().int().nonnegative(),
-        name: z.coerce.string(),
-        age: z.coerce.number().int().nonnegative(),
+        name: z.string(),
+        age: z.number().int().nonnegative(),
     });
 export type HttpDefaultsServicePatchUserRequest = z.infer<typeof HttpDefaultsServicePatchUserRequestSchema>;
 ===============
@@ -1062,8 +1062,8 @@ import { xjson } from "xidl-typescript-codec";
     
     export const CreateUserRequestSchema = z.object({
         
-            name: z.coerce.string(),
+            name: z.string(),
         
-            age: z.coerce.number().int().nonnegative()
+            age: z.number().int().nonnegative()
         
     });

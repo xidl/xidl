@@ -11,7 +11,7 @@ use crate::generate::typescript::definition::TypeRefTarget;
 use crate::generate::typescript::definition::contexts::{ParamDeclContext, TsType, ZodSchema};
 use crate::generate::typescript::definition::names::{method_struct_prefix, scoped_name, ts_ident};
 use crate::generate::typescript::definition::type_expr::{
-    ts_type_for_type_spec, zod_schema_for_type_spec_with_prefix,
+    ts_type_for_type_spec, zod_coerced_schema_for_type_spec, zod_schema_for_type_spec_with_prefix,
 };
 use xidl_parser::hir;
 use xidl_parser::rest_hir::{
@@ -54,6 +54,7 @@ impl MethodModel {
         // surfaces to clients as `Uint8Array`.
         let byte_body_param = op.http.request.body.shape.byte_parameter();
 
+        let stringly = super::helpers::text_positions(op);
         let request_fields = op
             .signature
             .params
@@ -76,6 +77,8 @@ impl MethodModel {
                 },
                 schema: if byte_body_param == Some(p.name.as_str()) {
                     ZodSchema::Primitive("instanceof(Uint8Array)".into())
+                } else if stringly.contains(&p.name) {
+                    zod_coerced_schema_for_type_spec(&p.ty, module_path)
                 } else {
                     zod_schema_for_type_spec_with_prefix(&p.ty, module_path, Some("models"))
                 },

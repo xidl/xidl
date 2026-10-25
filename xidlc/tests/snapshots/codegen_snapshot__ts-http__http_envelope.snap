@@ -90,7 +90,7 @@ import {
                 return { kind: "OctetStream", value, ...buildResponsePayload(undefined, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }, { name: "X-Tag", key: "tags", optional: false, isMulti: true, decode: value => value }], [{ name: "cached", key: "cached", optional: false, isMulti: false }]) } as { kind: "Json", value: types.representations.FileMeta, etag: string, tags: Array<string>, cached: boolean } | { kind: "OctetStream", value: Uint8Array, etag: string, tags: Array<string>, cached: boolean } | { kind: "Text", value: string, etag: string, tags: Array<string>, cached: boolean };
             }
                 if (contentType === "text/plain") {
-                    const schema = z.coerce.string();
+                    const schema = z.string();
                 const value = schema.parse(await decodeResponseBody(resp, "text/plain", this.codecs, schema));
                 return { kind: "Text", value, ...buildResponsePayload(undefined, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }, { name: "X-Tag", key: "tags", optional: false, isMulti: true, decode: value => value }], [{ name: "cached", key: "cached", optional: false, isMulti: false }]) } as { kind: "Json", value: types.representations.FileMeta, etag: string, tags: Array<string>, cached: boolean } | { kind: "OctetStream", value: Uint8Array, etag: string, tags: Array<string>, cached: boolean } | { kind: "Text", value: string, etag: string, tags: Array<string>, cached: boolean };
             }
@@ -170,7 +170,7 @@ import {
         async throwGetFileError(resp: Response): Promise<never> {
             const status = resp.status;
             if (status === 404) {
-                const bodySchema = z.object({ "code": z.coerce.number().int().nonnegative(), "msg": z.coerce.string(),  });
+                const bodySchema = z.object({ "code": z.number().int().nonnegative(), "msg": z.string(),  });
                 const rawBody = await resp.clone().json().catch(() => undefined);
                 if (rawBody == null || rawBody["code"] === undefined || rawBody["msg"] === undefined) throw await parseXidlError(resp);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
@@ -207,7 +207,7 @@ import {
         async throwDeleteFileError(resp: Response): Promise<never> {
             const status = resp.status;
             if (status === 412) {
-                const bodySchema = z.object({ "code": z.coerce.number().int().nonnegative(), "msg": z.coerce.string(),  });
+                const bodySchema = z.object({ "code": z.number().int().nonnegative(), "msg": z.string(),  });
                 const rawBody = await resp.clone().json().catch(() => undefined);
                 if (rawBody == null || rawBody["code"] === undefined || rawBody["msg"] === undefined) throw await parseXidlError(resp);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
@@ -396,9 +396,9 @@ export type EnvelopeApiGetFileRequest = z.infer<typeof EnvelopeApiGetFileRequest
     
 export const EnvelopeApiGetFileResponseSchema = z.object({
         return: models.representations.FileResponseSchema,
-        etag: z.coerce.string(),
-        tags: z.array(z.coerce.string()),
-        cached: z.coerce.boolean(),
+        etag: z.string(),
+        tags: z.array(z.string()),
+        cached: z.boolean(),
     });
 export type EnvelopeApiGetFileResponse = z.infer<typeof EnvelopeApiGetFileResponseSchema>;
 
@@ -410,9 +410,9 @@ export type EnvelopeApiHeadFileRequest = z.infer<typeof EnvelopeApiHeadFileReque
 
     
 export const EnvelopeApiHeadFileResponseSchema = z.object({
-        etag: z.coerce.string(),
-        size: z.coerce.number().int().nonnegative(),
-        cached: z.coerce.boolean(),
+        etag: z.string(),
+        size: z.number().int().nonnegative(),
+        cached: z.boolean(),
     });
 export type EnvelopeApiHeadFileResponse = z.infer<typeof EnvelopeApiHeadFileResponseSchema>;
 
@@ -481,7 +481,7 @@ export const EnvelopeApiOperations = {
             bodyFields: [{ wireName: "return", key: "return" }],
             headers: [{ wireName: "ETag", key: "etag", multi: false }, { wireName: "X-Tag", key: "tags", multi: true }],
             cookies: [{ wireName: "cached", key: "cached", multi: false }],
-            representations: [{ kind: "Json", contentType: "application/json", schema: ifaceSchemas.models.representations.FileMetaSchema }, { kind: "OctetStream", contentType: "application/octet-stream" }, { kind: "Text", contentType: "text/plain", schema: z.coerce.string() }],
+            representations: [{ kind: "Json", contentType: "application/json", schema: ifaceSchemas.models.representations.FileMetaSchema }, { kind: "OctetStream", contentType: "application/octet-stream" }, { kind: "Text", contentType: "text/plain", schema: z.string() }],
             stream: false,
             
         },
@@ -674,41 +674,41 @@ import { xjson } from "xidl-typescript-codec";
     
     export const FileMetaSchema = z.object({
         
-            wrong: z.coerce.string()
+            wrong: z.string()
         
     });
 
     
     export const NotModifiedSchema = z.object({
         
-            etag: xjson(z.coerce.string(), {"name":"ETag"})
+            etag: xjson(z.string(), {"name":"ETag"})
         
     });
 
     
     export const PreconditionFailedSchema = z.object({
         
-            etag: xjson(z.coerce.string(), {"name":"ETag"}),
+            etag: xjson(z.string(), {"name":"ETag"}),
         
-            code: z.coerce.number().int().nonnegative(),
+            code: z.number().int().nonnegative(),
         
-            msg: z.coerce.string()
+            msg: z.string()
         
     });
 
     
     export const NotFoundSchema = z.object({
         
-            code: z.coerce.number().int().nonnegative(),
+            code: z.number().int().nonnegative(),
         
-            msg: z.coerce.string()
+            msg: z.string()
         
     });
 
     
     export const HeadMissingSchema = z.object({
         
-            code: xjson(z.coerce.string(), {"name":"X-Error-Code"})
+            code: xjson(z.string(), {"name":"X-Error-Code"})
         
     });
 
@@ -716,21 +716,21 @@ import { xjson } from "xidl-typescript-codec";
 
         export const FileDetailsSchema = z.object({
             
-                label: z.coerce.string()
+                label: z.string()
             
         });
 
         export const FileMetaSchema = z.object({
             
-                id: xjson(z.coerce.string(), {"name":"wire_id"}),
+                id: xjson(z.string(), {"name":"wire_id"}),
             
-                etag: z.coerce.string(),
+                etag: z.string(),
             
                 details: xjson(representations.FileDetailsSchema, {"flatten":true}),
             
-                note: z.coerce.string().nullish().transform((value) => value ?? undefined)
+                note: z.string().nullish().transform((value) => value ?? undefined)
             
         });
 
-        export const FileResponseSchema = z.union([z.object({ meta: FileMetaSchema }), z.object({ raw: z.array(z.coerce.number().int().nonnegative()) }), z.object({ text: z.coerce.string() })]);
+        export const FileResponseSchema = z.union([z.object({ meta: FileMetaSchema }), z.object({ raw: z.array(z.number().int().nonnegative()) }), z.object({ text: z.string() })]);
 }

@@ -152,7 +152,7 @@ import { xjson } from "xidl-typescript-codec";
 
     
 export const HttpAttributeServiceSetAttributeNameRequestSchema = z.object({
-        name: z.coerce.string(),
+        name: z.string(),
     });
 export type HttpAttributeServiceSetAttributeNameRequest = z.infer<typeof HttpAttributeServiceSetAttributeNameRequestSchema>;
 ===============

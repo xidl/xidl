@@ -84,9 +84,9 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["q"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["q"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
-            ["h"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["h"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
     })).transform((value) => ({
         
@@ -144,7 +144,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["text"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["text"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
     })).transform((value) => ({
         
@@ -204,7 +204,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["zip"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["zip"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
     })).transform((value) => ({
         
@@ -241,7 +241,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["address"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType0Schema),
         
-            ["tags"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.unknown().superRefine(rejectPrototypeKey).pipe(z.record(z.string(), z.coerce.string()))),
+            ["tags"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.unknown().superRefine(rejectPrototypeKey).pipe(z.record(z.string(), z.string()))),
         
     })).transform((value) => ({
         
@@ -307,7 +307,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["fixed"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["fixed"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
             ["metadata"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.any()),
         
@@ -367,7 +367,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
     })).transform((value) => ({
         
@@ -398,7 +398,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["name"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["name"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
             ["children"]: z.array(wireType4Schema).nullish().transform((value) => value ?? undefined),
         
@@ -458,7 +458,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["note"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
+            ["note"]: z.string().nullish().transform((value) => value ?? undefined),
         
     })).transform((value) => ({
         
@@ -538,9 +538,9 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
-            ["legacy"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["legacy"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
             ["address"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType0Schema),
         
@@ -659,9 +659,9 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["q"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["q"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
-            ["h"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["h"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
     })).transform((value) => ({
         
@@ -721,7 +721,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["text"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["text"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
     })).transform((value) => ({
         
@@ -744,7 +744,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["count"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.number().int()),
+            ["count"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.number().int()),
         
     })).transform((value) => ({
         
@@ -806,7 +806,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["zip"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["zip"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
     })).transform((value) => ({
         
@@ -843,7 +843,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["address"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType9Schema),
         
-            ["tags"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.unknown().superRefine(rejectPrototypeKey).pipe(z.record(z.string(), z.coerce.string()))),
+            ["tags"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.unknown().superRefine(rejectPrototypeKey).pipe(z.record(z.string(), z.string()))),
         
     })).transform((value) => ({
         
@@ -909,7 +909,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["fixed"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["fixed"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
             ["metadata"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.any()),
         
@@ -969,7 +969,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
     })).transform((value) => ({
         
@@ -1000,7 +1000,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["name"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["name"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
             ["children"]: z.array(wireType14Schema).nullish().transform((value) => value ?? undefined),
         
@@ -1060,7 +1060,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["note"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
+            ["note"]: z.string().nullish().transform((value) => value ?? undefined),
         
     })).transform((value) => ({
         
@@ -1148,13 +1148,13 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
-            ["tracking"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["tracking"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
-            ["carrier"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["carrier"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
-            ["note"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
+            ["note"]: z.string().nullish().transform((value) => value ?? undefined),
         
             ["address"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType9Schema),
         
@@ -1281,9 +1281,9 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["q"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["q"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
-            ["h"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["h"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
     })).transform((value) => ({
         
@@ -1343,7 +1343,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["text"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["text"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
     })).transform((value) => ({
         
@@ -1366,7 +1366,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["count"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.number().int()),
+            ["count"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.number().int()),
         
     })).transform((value) => ({
         
@@ -1426,9 +1426,9 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["zip"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["zip"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
-            ["zone"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
+            ["zone"]: z.string().nullish().transform((value) => value ?? undefined),
         
     })).transform((value) => ({
         
@@ -1465,7 +1465,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["address"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType19Schema),
         
-            ["tags"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.unknown().superRefine(rejectPrototypeKey).pipe(z.record(z.string(), z.coerce.string()))),
+            ["tags"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.unknown().superRefine(rejectPrototypeKey).pipe(z.record(z.string(), z.string()))),
         
     })).transform((value) => ({
         
@@ -1529,11 +1529,11 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["fixed"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["fixed"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
             ["metadata"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.any()),
         
-            ["future"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
+            ["future"]: z.string().nullish().transform((value) => value ?? undefined),
         
     })).transform((value) => ({
         
@@ -1595,7 +1595,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
     })).transform((value) => ({
         
@@ -1643,7 +1643,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["name"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["name"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
             ["children"]: z.array(wireType26Schema).nullish().transform((value) => value ?? undefined),
         
@@ -1703,7 +1703,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["note"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
+            ["note"]: z.string().nullish().transform((value) => value ?? undefined),
         
     })).transform((value) => ({
         
@@ -1793,17 +1793,17 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
-            ["tracking"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["tracking"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
-            ["carrier"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["carrier"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
-            ["note"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
+            ["note"]: z.string().nullish().transform((value) => value ?? undefined),
         
-            ["inspected"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
+            ["inspected"]: z.string().nullish().transform((value) => value ?? undefined),
         
-            ["audit"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["audit"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
             ["address"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType19Schema),
         

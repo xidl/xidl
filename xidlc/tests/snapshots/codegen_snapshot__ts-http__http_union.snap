@@ -130,7 +130,7 @@ import {
         async throwGetMetaError(resp: Response): Promise<never> {
             const status = resp.status;
             if (status === 404) {
-                const bodySchema = z.object({ "code": z.coerce.number().int().nonnegative(), "msg": z.coerce.string(),  });
+                const bodySchema = z.object({ "code": z.number().int().nonnegative(), "msg": z.string(),  });
                 const rawBody = await resp.clone().json().catch(() => undefined);
                 if (rawBody == null || rawBody["code"] === undefined || rawBody["msg"] === undefined) throw await parseXidlError(resp);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
@@ -147,7 +147,7 @@ import {
         async throwGetFileError(resp: Response): Promise<never> {
             const status = resp.status;
             if (status === 404) {
-                const bodySchema = z.object({ "code": z.coerce.number().int().nonnegative(), "msg": z.coerce.string(),  });
+                const bodySchema = z.object({ "code": z.number().int().nonnegative(), "msg": z.string(),  });
                 const rawBody = await resp.clone().json().catch(() => undefined);
                 if (rawBody == null || rawBody["code"] === undefined || rawBody["msg"] === undefined) throw await parseXidlError(resp);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
@@ -253,7 +253,7 @@ export type FilesGetFileRequest = z.infer<typeof FilesGetFileRequestSchema>;
     
 export const FilesGetFileResponseSchema = z.object({
         return: models.FileResponseSchema,
-        etag: z.coerce.string(),
+        etag: z.string(),
     });
 export type FilesGetFileResponse = z.infer<typeof FilesGetFileResponseSchema>;
 ===============
@@ -408,20 +408,20 @@ import { xjson } from "xidl-typescript-codec";
     
     export const FileMetaSchema = z.object({
         
-            id: z.coerce.string(),
+            id: z.string(),
         
-            etag: z.coerce.string()
+            etag: z.string()
         
     });
 
     
     export const NotFoundSchema = z.object({
         
-            code: z.coerce.number().int().nonnegative(),
+            code: z.number().int().nonnegative(),
         
-            msg: z.coerce.string()
+            msg: z.string()
         
     });
 
     
-    export const FileResponseSchema = z.union([z.object({ meta: FileMetaSchema }), z.object({ raw: z.array(z.coerce.number().int().nonnegative()) })]);
+    export const FileResponseSchema = z.union([z.object({ meta: FileMetaSchema }), z.object({ raw: z.array(z.number().int().nonnegative()) })]);

@@ -29,9 +29,9 @@ import { xjson } from "xidl-typescript-codec";
 
         export const MetadataSchema = z.object({
             
-                title: z.coerce.string()
+                title: z.string()
             
         });
 
-        export const PayloadSchema = z.union([z.object({ meta: MetadataSchema }), z.object({ text: z.coerce.string() })]);
+        export const PayloadSchema = z.union([z.object({ meta: MetadataSchema }), z.object({ text: z.string() })]);
 }

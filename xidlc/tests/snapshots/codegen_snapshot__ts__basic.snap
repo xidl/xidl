@@ -24,8 +24,8 @@ import { xjson } from "xidl-typescript-codec";
     
     export const PointSchema = z.object({
         
-            x: z.coerce.number().int(),
+            x: z.number().int(),
         
-            y: z.coerce.number().int()
+            y: z.number().int()
         
     });

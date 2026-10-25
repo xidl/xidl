@@ -9,7 +9,9 @@ use super::method::{MethodInfo, TypeRefTarget};
 use super::names::{ts_ident, ts_prop_name};
 use super::operation::render_op;
 use super::output::TsRenderOutput;
-use super::type_expr::{ts_type_for_type_spec, zod_schema_for_type_spec};
+use super::type_expr::{
+    ts_type_for_type_spec, zod_coerced_schema_for_type_spec, zod_schema_for_type_spec,
+};
 
 pub(crate) fn render_interface(
     interface: &hir::InterfaceDcl,
@@ -72,13 +74,28 @@ fn render_request(
     let Some(request_name) = &method.request_name else {
         return Ok(());
     };
+    // Scalar transports (path, query, header, cookie) arrive as text on the
+    // server, so exactly those positions coerce; body and envelope values
+    // keep the strict JSON rules the Rust target enforces.
+    let stringly = method
+        .path_params
+        .iter()
+        .chain(&method.query_params)
+        .chain(&method.header_params)
+        .chain(&method.cookie_params)
+        .map(|param| param.raw_name.clone())
+        .collect::<std::collections::BTreeSet<_>>();
     let params = method
         .params
         .iter()
         .map(|param| ParamDeclContext {
             prop: ts_prop_name(&param.raw_name),
             ty: ts_type_for_type_spec(&param.ty, module_path, TypeRefTarget::Types),
-            schema: zod_schema_for_type_spec(&param.ty, module_path),
+            schema: if stringly.contains(&param.raw_name) {
+                zod_coerced_schema_for_type_spec(&param.ty, module_path)
+            } else {
+                zod_schema_for_type_spec(&param.ty, module_path)
+            },
             optional: param.optional,
             doc: param.doc.clone(),
         })

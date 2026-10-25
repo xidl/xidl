@@ -3,8 +3,8 @@ use xidl_parser::hir;
 use super::contexts::{FieldTypeContext, FieldZodContext, TsType, ZodSchema};
 use super::method::TypeRefTarget;
 use super::names::{
-    declarator_name, integer_schema_primitive, ts_ident, ts_prop_name, ts_scoped_name,
-    zod_schema_ref,
+    declarator_name, integer_coerced_schema_primitive, integer_schema_primitive, ts_ident,
+    ts_prop_name, ts_scoped_name, zod_schema_ref,
 };
 
 pub(crate) fn ts_type_for_decl(
@@ -237,8 +237,10 @@ pub(crate) fn ts_type_for_type_spec(
     }
 }
 
+/// JSON positions reject values whose JSON type differs from the declared
+/// member type, matching the Rust target's strict serde decoding.
 pub(crate) fn zod_schema_for_type_spec(ty: &hir::TypeSpec, module_path: &[String]) -> ZodSchema {
-    zod_schema_for_type_spec_impl(ty, module_path, None)
+    zod_schema_for_type_spec_impl(ty, module_path, None, ZodCoercion::Strict)
 }
 
 pub(crate) fn zod_schema_for_type_spec_with_prefix(
@@ -246,21 +248,55 @@ pub(crate) fn zod_schema_for_type_spec_with_prefix(
     module_path: &[String],
     prefix: Option<&str>,
 ) -> ZodSchema {
-    zod_schema_for_type_spec_impl(ty, module_path, prefix)
+    zod_schema_for_type_spec_impl(ty, module_path, prefix, ZodCoercion::Strict)
+}
+
+/// Scalar transports (path, query, header, cookie) carry every value as text,
+/// so only those positions coerce text into the declared type.
+pub(crate) fn zod_coerced_schema_for_type_spec(
+    ty: &hir::TypeSpec,
+    module_path: &[String],
+) -> ZodSchema {
+    zod_schema_for_type_spec_impl(ty, module_path, None, ZodCoercion::Coerce)
+}
+
+/// Whether a schema position may coerce text into the declared type.
+#[derive(Clone, Copy)]
+pub(crate) enum ZodCoercion {
+    Strict,
+    Coerce,
 }
 
 fn zod_schema_for_type_spec_impl(
     ty: &hir::TypeSpec,
     module_path: &[String],
     prefix: Option<&str>,
+    coercion: ZodCoercion,
 ) -> ZodSchema {
     match ty {
-        hir::TypeSpec::IntegerType(value) => ZodSchema::Primitive(integer_schema_primitive(value)),
-        hir::TypeSpec::FloatingPtType => ZodSchema::Primitive("coerce.number()".to_string()),
+        hir::TypeSpec::IntegerType(value) => ZodSchema::Primitive(match coercion {
+            ZodCoercion::Strict => integer_schema_primitive(value),
+            ZodCoercion::Coerce => integer_coerced_schema_primitive(value),
+        }),
+        hir::TypeSpec::FloatingPtType => ZodSchema::Primitive(
+            match coercion {
+                ZodCoercion::Strict => "number()",
+                ZodCoercion::Coerce => "coerce.number()",
+            }
+            .to_string(),
+        ),
         hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => {
             ZodSchema::Primitive("string()".to_string())
         }
-        hir::TypeSpec::Boolean => ZodSchema::Primitive("coerce.boolean()".to_string()),
+        hir::TypeSpec::Boolean => match coercion {
+            ZodCoercion::Strict => ZodSchema::Primitive("boolean()".to_string()),
+            // Truthiness coercion would turn every non-empty text into true,
+            // including "false"; scalar transports accept only true/false.
+            ZodCoercion::Coerce => ZodSchema::Raw(
+                "z.union([z.boolean(), z.enum([\"true\", \"false\"]).transform((value) => value === \"true\")])"
+                    .to_string(),
+            ),
+        },
         hir::TypeSpec::AnyType | hir::TypeSpec::ObjectType | hir::TypeSpec::ValueBaseType => {
             ZodSchema::Any
         }
@@ -268,21 +304,36 @@ fn zod_schema_for_type_spec_impl(
             ZodSchema::ScopedName(zod_schema_ref(value, module_path, prefix))
         }
         hir::TypeSpec::SequenceType(seq) => ZodSchema::Array {
-            element: Box::new(zod_schema_for_type_spec_impl(&seq.ty, module_path, prefix)),
+            element: Box::new(zod_schema_for_type_spec_impl(
+                &seq.ty,
+                module_path,
+                prefix,
+                coercion,
+            )),
             length: seq
                 .len
                 .as_ref()
                 .and_then(|len| xidl_parser::hir::const_expr_to_i64(&len.0)),
         },
         hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => {
-            ZodSchema::Primitive("coerce.string()".to_string())
+            ZodSchema::Primitive(
+                match coercion {
+                    ZodCoercion::Strict => "string()",
+                    ZodCoercion::Coerce => "coerce.string()",
+                }
+                .to_string(),
+            )
         }
-        hir::TypeSpec::FixedPtType(_) => ZodSchema::Primitive("number()".to_string()),
-        hir::TypeSpec::MapType(map) => ZodSchema::Record(Box::new(zod_schema_for_type_spec_impl(
-            &map.value,
-            module_path,
-            prefix,
-        ))),
+        hir::TypeSpec::FixedPtType(_) => ZodSchema::Primitive(
+            match coercion {
+                ZodCoercion::Strict => "number()",
+                ZodCoercion::Coerce => "coerce.number()",
+            }
+            .to_string(),
+        ),
+        hir::TypeSpec::MapType(map) => ZodSchema::Record(Box::new(
+            zod_schema_for_type_spec_impl(&map.value, module_path, prefix, coercion),
+        )),
         hir::TypeSpec::TemplateType(value) => {
             let ty = ts_template_type(value, module_path, TypeRefTarget::Types);
             ZodSchema::Custom(ty)

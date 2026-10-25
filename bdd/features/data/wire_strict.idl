@@ -1,0 +1,19 @@
+#pragma xidlc package Wire Strict
+#pragma xidlc version v1
+
+// JSON positions keep the declared types exactly: a string never becomes a
+// boolean, and null never becomes a scalar. Scalar transports (query) carry
+// text and coerce it into the declared type.
+struct Probe {
+    string id;
+    boolean locked;
+    long minutes;
+};
+
+interface Probes {
+    @post(path = "/probe")
+    Probe check(@body Probe probe);
+
+    @get(path = "/probe")
+    Probe find(@query boolean deep, @query long count);
+};

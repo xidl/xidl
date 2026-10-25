@@ -191,7 +191,7 @@ import {
                 async throwFailError(resp: Response): Promise<never> {
                     const status = resp.status;
                     if (status === 409) {
-                        const bodySchema = z.object({ "message": z.coerce.string(),  });
+                        const bodySchema = z.object({ "message": z.string(),  });
                         const rawBody = await resp.clone().json().catch(() => undefined);
                         if (rawBody == null || rawBody["message"] === undefined) throw await parseXidlError(resp);
                         const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
@@ -666,7 +666,7 @@ import {
                 async throwFailError(resp: Response): Promise<never> {
                     const status = resp.status;
                     if (status === 409) {
-                        const bodySchema = z.object({ "message": z.coerce.string(),  });
+                        const bodySchema = z.object({ "message": z.string(),  });
                         const rawBody = await resp.clone().json().catch(() => undefined);
                         if (rawBody == null || rawBody["message"] === undefined) throw await parseXidlError(resp);
                         const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
@@ -1163,27 +1163,27 @@ import { xjson } from "xidl-typescript-codec";
 
         export const StoreChatRequestSchema = z.object({
                 room: z.coerce.string(),
-                text: z.coerce.string(),
+                text: z.string(),
             });
         export type StoreChatRequest = z.infer<typeof StoreChatRequestSchema>;
 
         export const StoreChatResponseSchema = z.object({
-                reply: z.coerce.string(),
+                reply: z.string(),
             });
         export type StoreChatResponse = z.infer<typeof StoreChatResponseSchema>;
 
         export const DuplexShapesScalarRequestSchema = z.object({
-                text: z.coerce.string(),
+                text: z.string(),
             });
         export type DuplexShapesScalarRequest = z.infer<typeof DuplexShapesScalarRequestSchema>;
 
         export const DuplexShapesModelRequestSchema = z.object({
-                id: z.coerce.string(),
+                id: z.string(),
             });
         export type DuplexShapesModelRequest = z.infer<typeof DuplexShapesModelRequestSchema>;
 
         export const DuplexShapesSinkRequestSchema = z.object({
-                text: z.coerce.string(),
+                text: z.string(),
             });
         export type DuplexShapesSinkRequest = z.infer<typeof DuplexShapesSinkRequestSchema>;
     }
@@ -1211,27 +1211,27 @@ import { xjson } from "xidl-typescript-codec";
 
         export const StoreChatRequestSchema = z.object({
                 room: z.coerce.string(),
-                text: z.coerce.string(),
+                text: z.string(),
             });
         export type StoreChatRequest = z.infer<typeof StoreChatRequestSchema>;
 
         export const StoreChatResponseSchema = z.object({
-                reply: z.coerce.string(),
+                reply: z.string(),
             });
         export type StoreChatResponse = z.infer<typeof StoreChatResponseSchema>;
 
         export const DuplexShapesScalarRequestSchema = z.object({
-                text: z.coerce.string(),
+                text: z.string(),
             });
         export type DuplexShapesScalarRequest = z.infer<typeof DuplexShapesScalarRequestSchema>;
 
         export const DuplexShapesModelRequestSchema = z.object({
-                id: z.coerce.string(),
+                id: z.string(),
             });
         export type DuplexShapesModelRequest = z.infer<typeof DuplexShapesModelRequestSchema>;
 
         export const DuplexShapesSinkRequestSchema = z.object({
-                text: z.coerce.string(),
+                text: z.string(),
             });
         export type DuplexShapesSinkRequest = z.infer<typeof DuplexShapesSinkRequestSchema>;
     }
@@ -2200,13 +2200,13 @@ import { xjson } from "xidl-typescript-codec";
 
             export const ItemSchema = z.object({
                 
-                    id: z.coerce.string()
+                    id: z.string()
                 
             });
 
             export const ConflictSchema = z.object({
                 
-                    message: z.coerce.string()
+                    message: z.string()
                 
             });
     }
@@ -2218,13 +2218,13 @@ import { xjson } from "xidl-typescript-codec";
 
             export const ItemSchema = z.object({
                 
-                    id: z.coerce.string()
+                    id: z.string()
                 
             });
 
             export const ConflictSchema = z.object({
                 
-                    message: z.coerce.string()
+                    message: z.string()
                 
             });
     }

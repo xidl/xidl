@@ -428,9 +428,9 @@ import { xjson } from "xidl-typescript-codec";
 
         export const PetSchema = z.object({
             
-                id: z.coerce.string(),
+                id: z.string(),
             
-                color: z.coerce.string()
+                color: z.string()
             
         });
 }
@@ -439,9 +439,9 @@ import { xjson } from "xidl-typescript-codec";
 
         export const PetSchema = z.object({
             
-                id: z.coerce.string(),
+                id: z.string(),
             
-                note: z.coerce.string().nullish().transform((value) => value ?? undefined)
+                note: z.string().nullish().transform((value) => value ?? undefined)
             
         });
 }

@@ -453,7 +453,7 @@ import { xjson } from "xidl-typescript-codec";
 
     export const ItemSchema: z.ZodType<import("./http_module_scope").nm.Item> = z.lazy(() => z.object({
         
-            id: z.coerce.string(),
+            id: z.string(),
         
             children: z.array(ItemSchema).nullish().transform((value) => value ?? undefined)
         
@@ -471,7 +471,7 @@ import { xjson } from "xidl-typescript-codec";
 
             export const LeafSchema = z.object({
                 
-                    id: z.coerce.string()
+                    id: z.string()
                 
             });
 

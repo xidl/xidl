@@ -36,7 +36,7 @@ import { xjson } from "xidl-typescript-codec";
     export const uint8_tSchema = u8Schema;
 
     
-    export const u8stringSchema = z.coerce.string();
+    export const u8stringSchema = z.string();
 
     
-    export const u16stringSchema = z.coerce.string();
+    export const u16stringSchema = z.string();

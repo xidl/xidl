@@ -91,7 +91,7 @@ import {
                     });
             }
             if (status === 412) {
-                const bodySchema = z.object({ "code": z.coerce.number().int().nonnegative(), "message": z.coerce.string(), "detail": z.coerce.string().optional(),  });
+                const bodySchema = z.object({ "code": z.number().int().nonnegative(), "message": z.string(), "detail": z.string().optional(),  });
                 const rawBody = await resp.clone().json().catch(() => undefined);
                 if (rawBody == null || rawBody["code"] === undefined || rawBody["message"] === undefined) throw await parseXidlError(resp);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
@@ -109,7 +109,7 @@ import {
                     });
             }
             if (status === 404) {
-                const bodySchema = z.object({ "code": z.coerce.number().int().nonnegative(), "msg": z.coerce.string(),  });
+                const bodySchema = z.object({ "code": z.number().int().nonnegative(), "msg": z.string(),  });
                 const rawBody = await resp.clone().json().catch(() => undefined);
                 if (rawBody == null || rawBody["code"] === undefined || rawBody["msg"] === undefined) throw await parseXidlError(resp);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
@@ -182,7 +182,7 @@ import {
                     });
             }
             if (status === 422) {
-                const bodySchema = z.object({ "reason": z.coerce.string(),  });
+                const bodySchema = z.object({ "reason": z.string(),  });
                 const rawBody = await resp.clone().json().catch(() => undefined);
                 if (rawBody == null || rawBody["reason"] === undefined) throw await parseXidlError(resp);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
@@ -241,7 +241,7 @@ import {
         async throwReadError(resp: Response): Promise<never> {
             const status = resp.status;
             if (status === 409) {
-                const bodySchema = z.object({ "reason": z.coerce.string(),  });
+                const bodySchema = z.object({ "reason": z.string(),  });
                 const rawBody = await resp.clone().json().catch(() => undefined);
                 if (rawBody == null || rawBody["reason"] === undefined) throw await parseXidlError(resp);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
@@ -252,7 +252,7 @@ import {
                     });
             }
             if (status === 502) {
-                const bodySchema = z.object({ "reason": z.coerce.string(),  });
+                const bodySchema = z.object({ "reason": z.string(),  });
                 const rawBody = await resp.clone().json().catch(() => undefined);
                 if (rawBody == null || rawBody["reason"] === undefined) throw await parseXidlError(resp);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
@@ -796,37 +796,37 @@ import { xjson } from "xidl-typescript-codec";
     
     export const NotModifiedSchema = z.object({
         
-            etag: xjson(z.coerce.string(), {"name":"ETag"})
+            etag: xjson(z.string(), {"name":"ETag"})
         
     });
 
     
     export const PreconditionFailedSchema = z.object({
         
-            etag: xjson(z.coerce.string(), {"name":"ETag"}),
+            etag: xjson(z.string(), {"name":"ETag"}),
         
-            hints: xjson(z.array(z.coerce.string()).nullish().transform((value) => value ?? undefined), {"name":"X-Hint"}),
+            hints: xjson(z.array(z.string()).nullish().transform((value) => value ?? undefined), {"name":"X-Hint"}),
         
-            session_id: xjson(z.coerce.string(), {"name":"session"}),
+            session_id: xjson(z.string(), {"name":"session"}),
         
-            retry_token: xjson(z.coerce.string().nullish().transform((value) => value ?? undefined), {"name":"retry"}),
+            retry_token: xjson(z.string().nullish().transform((value) => value ?? undefined), {"name":"retry"}),
         
-            attempts: xjson(z.array(z.coerce.string()).nullish().transform((value) => value ?? undefined), {"name":"attempt"}),
+            attempts: xjson(z.array(z.string()).nullish().transform((value) => value ?? undefined), {"name":"attempt"}),
         
-            code: z.coerce.number().int().nonnegative(),
+            code: z.number().int().nonnegative(),
         
-            msg: xjson(z.coerce.string(), {"name":"message"}),
+            msg: xjson(z.string(), {"name":"message"}),
         
-            detail: z.coerce.string().nullish().transform((value) => value ?? undefined)
+            detail: z.string().nullish().transform((value) => value ?? undefined)
         
     });
 
     
     export const NotFoundSchema = z.object({
         
-            code: z.coerce.number().int().nonnegative(),
+            code: z.number().int().nonnegative(),
         
-            msg: z.coerce.string()
+            msg: z.string()
         
     });
 
@@ -838,9 +838,9 @@ import { xjson } from "xidl-typescript-codec";
     
     export const FileMetaSchema = z.object({
         
-            id: z.coerce.string(),
+            id: z.string(),
         
-            etag: z.coerce.string()
+            etag: z.string()
         
     });
 
@@ -848,7 +848,7 @@ import { xjson } from "xidl-typescript-codec";
 
         export const DetailSchema = z.object({
             
-                message: z.coerce.string()
+                message: z.string()
             
         });
 
@@ -863,7 +863,7 @@ import { xjson } from "xidl-typescript-codec";
 
         export const FailureSchema = z.object({
             
-                reason: z.coerce.string()
+                reason: z.string()
             
         });
 }
@@ -872,13 +872,13 @@ import { xjson } from "xidl-typescript-codec";
 
         export const FilesClientSchema = z.object({
             
-                reason: z.coerce.string()
+                reason: z.string()
             
         });
 
         export const FrameworkSchema = z.object({
             
-                reason: z.coerce.string()
+                reason: z.string()
             
         });
 }
