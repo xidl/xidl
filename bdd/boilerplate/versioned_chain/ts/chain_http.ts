@@ -148,6 +148,7 @@ export async function runChainHttpJourney(): Promise<void> {
       {
         id: 'b1',
         items: [{ minutes: 60, title: 'Kickoff' }],
+        locked: false,
         owner: 'user-9',
         roster: ['ignored-by-the-chain'],
         title: 'Kickoff',
@@ -199,6 +200,7 @@ export async function runChainHttpJourney(): Promise<void> {
       {
         id: 'b-blank',
         items: [{ minutes: 0, title: ' ' }],
+        locked: false,
         title: '   ',
       },
       'blank-v1',
@@ -344,6 +346,25 @@ export async function runChainHttpJourney(): Promise<void> {
         'locked',
       ),
       false,
+    );
+    // A caller who owns the field keeps exactly what it sent: the implied
+    // value is only for callers who cannot state it yet.
+    const lockedBooking = await post(
+      '2026-10-01',
+      {
+        id: 'b-locked',
+        items: [{ minutes: 6, title: 'Sealed' }],
+        locked: true,
+        roster: [],
+        title: 'Sealed',
+      },
+      'locked',
+    );
+    assert.equal(lockedBooking.status, 200);
+    assert.equal((await lockedBooking.json()).locked, true);
+    assert.equal(
+      (await (await get(undefined, 'b-locked')).json()).locked,
+      true,
     );
 
     console.log(

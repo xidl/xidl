@@ -118,7 +118,19 @@ fn fingerprint(booking: &v2027_01_01::Booking) -> String {
         .iter()
         .map(|entry| format!("{};{}", entry.title, entry.minutes))
         .collect();
-    format!("book|{}|{}|{}", booking.id, booking.title, items.join(","))
+    // Every stated field participates: an implied value one caller stated and
+    // another omitted is a different command, exactly as on the wire.
+    format!(
+        "book|{}|{}|{}|{}|{}",
+        booking.id,
+        booking.title,
+        items.join(","),
+        booking.organizer.as_deref().unwrap_or(""),
+        booking
+            .locked
+            .map(|locked| locked.to_string())
+            .unwrap_or_default()
+    )
 }
 
 async fn book(
