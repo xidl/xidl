@@ -12,9 +12,6 @@ pub struct Hooks {
     pub reject_patch: bool,
     pub reject_choice: bool,
     pub reject_signed: bool,
-    /// The inherited member has no reader plumbing: the whole derived
-    /// conversion is one decision, so the hook reads storage itself.
-    pub signed_tags: std::sync::Mutex<BTreeMap<String, String>>,
 }
 
 /// Storage keeps what Head no longer carries while older versions still read it.
@@ -25,6 +22,7 @@ pub struct Storage {
     pub traces: BTreeMap<String, String>,
     /// Gate codes retired inside Address elements, keyed by the element's zip.
     pub gates: BTreeMap<String, String>,
+    pub signed_tags: BTreeMap<String, String>,
 }
 
 impl StoredValues for Storage {
@@ -43,6 +41,9 @@ impl StoredValues for Storage {
     /// Elements carry no id: the reader resolves identity from the element.
     fn address_gate(&self, source: &v3::Address) -> Option<String> {
         self.gates.get(&source.zip).cloned()
+    }
+    fn signed_tag(&self, source: &v3::Signed) -> Option<String> {
+        self.signed_tags.get(&source.base.label).cloned()
     }
 }
 
@@ -64,26 +65,12 @@ impl VersionAdapters for Hooks {
         }
         Ok(AddressDowncastToV2Decision { gate: stored.address_gate(source) })
     }
-    fn signed_downcast_to_v_1(&self, source: &v2::Signed) -> VersionedResult<v1::Signed> {
-        // The flattened base keeps every step explicit: both sides declare
-        // the tag, and the hook still copies the whole derived instance.
-        Ok(v1::Signed {
-            base: v1::Labelled { label: source.base.label.clone(), tag: source.base.tag.clone() },
-            signature: source.signature.clone(),
-        })
-    }
-    fn signed_downcast_to_v_2(&self, source: &v3::Signed) -> VersionedResult<v2::Signed> {
+    fn signed_downcast_to_v_2(&self, source: &v3::Signed, stored: &dyn StoredValues) -> VersionedResult<SignedDowncastToV2Decision> {
         self.signed.fetch_add(1, Ordering::SeqCst);
         if self.reject_signed || source.base.label == "sealed-label" {
             return Err(refusal("2026-04", Direction::Downcast, "Signed.tag"));
         }
-        Ok(v2::Signed {
-            base: v2::Labelled {
-                label: source.base.label.clone(),
-                tag: self.signed_tags.lock().unwrap().get(&source.base.label).cloned(),
-            },
-            signature: source.signature.clone(),
-        })
+        Ok(SignedDowncastToV2Decision { tag: stored.signed_tag(source) })
     }
     fn choice_downcast_to_v_1(&self, source: &ChoiceDowncastToV1Changes<'_>) -> VersionedResult<v1::Choice> {
         self.choices.fetch_add(1, Ordering::SeqCst);

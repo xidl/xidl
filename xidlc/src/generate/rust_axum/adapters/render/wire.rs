@@ -1,5 +1,6 @@
 //! Decode served-version wire layouts into their exact public model types.
 
+use super::super::construction::{ConstructionField, ConstructionValue};
 use super::*;
 use crate::generate::adapter::wire_layout::WireLayouts;
 use crate::generate::adapter::{TypeShape, TypeUse, VersionPlan};
@@ -201,6 +202,7 @@ impl WireBuilder<'_> {
             keys: Vec::new(),
             forbidden: Vec::new(),
             catch_all: false,
+            construction: None,
         };
         match shape {
             TypeShape::Struct(members) => {
@@ -255,14 +257,26 @@ impl WireBuilder<'_> {
                         schema: self.schema(
                             value,
                             version,
-                            self.renderer.layout.recursive(
-                                &format!("{}::{key}", version.version.id),
-                                &member.name,
-                            )?,
+                            self.renderer
+                                .member_recursive(member, &self.names(version), key)?,
                         )?,
                         flatten,
                     });
                 }
+                definition.construction = Some(
+                    self.renderer.layout.construction(
+                        &format!("{}::{key}", version.version.id),
+                        definition
+                            .fields
+                            .iter()
+                            .enumerate()
+                            .map(|(index, field)| ConstructionField {
+                                name: field.name.clone(),
+                                value: ConstructionValue::Decoded { index },
+                            })
+                            .collect(),
+                    )?,
+                );
             }
             TypeShape::Enum(_) => {
                 definition.kind = "enum";

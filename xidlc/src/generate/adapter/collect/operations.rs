@@ -16,6 +16,7 @@ impl SurfaceCollector {
                 wire: parameter.name.clone(),
                 key: parameter.name.clone(),
                 flatten: false,
+                path: Vec::new(),
                 value: Some(TypeUse {
                     ty: parameter.ty.clone(),
                     scope: scope.to_vec(),
@@ -63,6 +64,7 @@ impl SurfaceCollector {
                     wire: "return".into(),
                     key: "return".into(),
                     flatten: false,
+                    path: Vec::new(),
                     value: Some(TypeUse {
                         ty: ty.clone(),
                         scope: scope.to_vec(),

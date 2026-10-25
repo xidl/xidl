@@ -1,5 +1,6 @@
 //! Serializable Rust rendering contexts; no cross-version inference lives here.
 
+use super::construction::Construction;
 use serde::Serialize;
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -109,6 +110,7 @@ pub(super) struct Conversion {
     pub copies: Vec<Copy>,
     pub assignments: Vec<Assignment>,
     pub absences: Vec<String>,
+    pub construction: Option<Construction>,
     pub variants: Vec<String>,
     pub changed: Vec<ChangedVariant>,
     pub changed_type: String,
@@ -131,6 +133,7 @@ pub(super) enum Shape {
 #[derive(Serialize)]
 pub(super) struct Copy {
     pub source: String,
+    pub access: String,
     pub target: String,
     pub value: Value,
 }
@@ -351,6 +354,7 @@ pub(super) struct WireDefinition {
     pub keys: Vec<String>,
     pub forbidden: Vec<String>,
     pub catch_all: bool,
+    pub construction: Option<Construction>,
 }
 
 #[derive(Serialize)]

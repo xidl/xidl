@@ -45,6 +45,7 @@ const storedValues: a.StoredValues = {
   parcelHandlingNote: source => storage.handlingNotes.get(source.id),
   // Never stored: the hook derives the retired reference from the tracking number.
   parcelLegacy: () => undefined,
+  signedTag: source => storage.signedTags.get(source.label),
 };
 const hooks: a.VersionAdapters = {
   addressDowncastToV2: (source, stored) => {
@@ -114,25 +115,12 @@ const hooks: a.VersionAdapters = {
       // v2 callers never asked for a signature: the implied value, not the default.
       signature_required: false,
     }),
-  signedDowncastToV1: source =>
-    ok({
-      label: source.label,
-      signature: source.signature,
-      ...(source.tag === undefined ? {} : { tag: source.tag }),
-    }),
-  signedDowncastToV2: source => {
+  signedDowncastToV2: (source, stored) => {
     hookCalls++;
     if (source.label === 'sealed-label') {
       return refuse('2026-04', 'Signed.tag');
     }
-    // The whole-type hook owns its wire shape: an unarchived label simply
-    // omits the member instead of marking it OMIT.
-    const tag = storage.signedTags.get(source.label);
-    return ok({
-      label: source.label,
-      signature: source.signature,
-      ...(tag === undefined ? {} : { tag }),
-    });
+    return ok({ tag: stored.signedTag(source) ?? a.OMIT });
   },
   stateDowncastToV1: () => refuse('2026-01', 'State'),
   stateDowncastToV2: () => ok('shipping' as const),

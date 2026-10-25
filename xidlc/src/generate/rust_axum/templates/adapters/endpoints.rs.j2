@@ -17,17 +17,17 @@
         {% endfor %}
         let source = {{ endpoint.request }} { {% for field in endpoint.parameters %}{{ field.name }}: value_{{ loop.index0 }},{% endfor %} };
         {% if endpoint.stored_type %}
-            {% set ns = namespace(stored = endpoint.stored_type ~ "::default()") %}
+            let stored = {{ endpoint.stored_type }}::default();
             {% for call in endpoint.upcast %}
                 {% if call.pair %}
                     let upcast = {{ call.name }}(&source{% if call.current %}, &current{% endif %}, adapters)?;
-                    {% set ns.stored = ns.stored ~ ".merge(upcast.stored)" %}
+                    let stored = stored.merge(upcast.stored);
                     let source = upcast.value;
                 {% else %}
                     let source = {{ call.name }}(&source{% if call.current %}, &current{% endif %}, adapters)?;
                 {% endif %}
             {% endfor %}
-            Ok(Upcast { value: source, stored: {{ ns.stored }} })
+            Ok(Upcast { value: source, stored })
         {% else %}
             {% for call in endpoint.upcast %}let source = {{ call.name }}(&source{% if call.current %}, &current{% endif %}, adapters)?;{% endfor %}
             Ok(source)

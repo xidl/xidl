@@ -194,9 +194,7 @@ impl<'a> AdapterRenderer<'a> {
         declaration: Option<&str>,
     ) -> IdlcResult<String> {
         let recursive = match declaration {
-            Some(key) => self
-                .layout
-                .recursive(&format!("{}::{key}", names.version), &member.name)?,
+            Some(key) => self.member_recursive(member, names, key)?,
             None => false,
         };
         let value = member
@@ -204,6 +202,12 @@ impl<'a> AdapterRenderer<'a> {
             .as_ref()
             .ok_or_else(|| Layout::error(&member.name, "member has no value type"))?;
         names.value_type(value, recursive)
+    }
+
+    fn member_recursive(&self, member: &Member, names: &Names<'_>, key: &str) -> IdlcResult<bool> {
+        let owner = member.path.last().map(String::as_str).unwrap_or(key);
+        self.layout
+            .recursive(&format!("{}::{owner}", names.version), &member.name)
     }
 }
 

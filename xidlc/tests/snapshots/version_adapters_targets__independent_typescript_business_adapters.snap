@@ -2415,8 +2415,6 @@ export interface VersionAdapters {
     
         parcelDowncastToV1(source: types.v2.Parcel, stored: Pick<StoredValues, "parcelLegacy">): VersionedResult<ParcelDowncastDecisionToV1>;
     
-        signedDowncastToV1(source: types.v2.Signed): VersionedResult<types.v1.Signed>;
-    
         stateDowncastToV1(source: "shipping"): VersionedResult<types.v1.State>;
     
         depotGetBusyErrorDowncastToV1(source: errors.v2$Busy): VersionedResult<errors.v1$NotFound | FrameworkError>;
@@ -2433,7 +2431,7 @@ export interface VersionAdapters {
     
         parcelPatchUpcastFromV2(source: types.v2.ParcelPatch, current: types.v3.Parcel): VersionedResult<ParcelPatchUpcastDecisionFromV2>;
     
-        signedDowncastToV2(source: types.v3.Signed): VersionedResult<types.v2.Signed>;
+        signedDowncastToV2(source: types.v3.Signed, stored: Pick<StoredValues, "signedTag">): VersionedResult<SignedDowncastDecisionToV2>;
     
         stateDowncastToV2(source: "delivered"): VersionedResult<types.v2.State>;
     
@@ -2464,6 +2462,9 @@ export interface VersionAdapters {
             /** wire `handling_note`, last served by v2 */
             parcelHandlingNote(source: types.v3.Parcel): string | undefined;
         
+            /** wire `tag`, last served by v2 */
+            signedTag(source: types.v3.Signed): string | undefined;
+        
             /** wire `trace_id`, last served by v2 */
             depotTraceResponseTraceId(source: { "return": string }): string | undefined;
         
@@ -2478,6 +2479,8 @@ export interface VersionAdapters {
             "OptionalChange": { "2026-07": [], "2026-04": [], "2026-01": ["note"] },
         
             "Parcel": { "2026-07": [], "2026-04": ["handling_note"], "2026-01": ["handling_note", "reference"] },
+        
+            "Signed": { "2026-07": [], "2026-04": ["tag"], "2026-01": ["tag"] },
         
     } as const;
 
@@ -2553,6 +2556,12 @@ export interface VersionAdapters {
             handling_note: Ignored;
         
             stored: DepotUpdateStored;
+        
+    }
+
+    export interface SignedDowncastDecisionToV2 {
+        
+            tag: string | Omitted;
         
     }
 
@@ -2904,7 +2913,24 @@ export interface VersionAdapters {
 
     export function downcastSignedToV1(source: types.v2.Signed, adapters: VersionAdapters): VersionedResult<types.v1.Signed> {
         
-            return adapters.signedDowncastToV1(source);
+            
+            
+                const converted0 = ok(source["label"]);
+                if (!converted0.ok) return converted0;
+            
+                const converted1 = mapOptional(source["tag"], (item) => ok(item));
+                if (!converted1.ok) return converted1;
+            
+                const converted2 = ok(source["signature"]);
+                if (!converted2.ok) return converted2;
+            
+            return ok({
+                
+                        ["label"]: converted0.value,
+                        ...(converted1.value === undefined ? {} : { ["tag"]: converted1.value }),
+                        ["signature"]: converted2.value,
+                
+            });
         
     }
 
@@ -3728,9 +3754,26 @@ export interface VersionAdapters {
         
     }
 
-    export function downcastSignedToV2(source: types.v3.Signed, adapters: VersionAdapters): VersionedResult<types.v2.Signed> {
+    export function downcastSignedToV2(source: types.v3.Signed, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v2.Signed> {
         
-            return adapters.signedDowncastToV2(source);
+            
+                const decision = adapters.signedDowncastToV2(source, stored);
+                if (!decision.ok) return decision;
+            
+            
+                const converted0 = ok(source["label"]);
+                if (!converted0.ok) return converted0;
+            
+                const converted1 = ok(source["signature"]);
+                if (!converted1.ok) return converted1;
+            
+            return ok({
+                
+                        ["label"]: converted0.value,
+                        ["signature"]: converted1.value,
+                
+                        ...(decision.value["tag"] === OMIT ? {} : { ["tag"]: decision.value["tag"] }),
+            });
         
     }
 
@@ -4023,11 +4066,11 @@ export interface VersionAdapters {
         
     }
 
-    export function downcastDepotReceiptResponseToV2(source: { "return": types.v3.Signed }, adapters: VersionAdapters): VersionedResult<{ "return": types.v2.Signed }> {
+    export function downcastDepotReceiptResponseToV2(source: { "return": types.v3.Signed }, stored: StoredValues, adapters: VersionAdapters): VersionedResult<{ "return": types.v2.Signed }> {
         
             
             
-                const converted0 = downcastSignedToV2(source["return"], adapters);
+                const converted0 = downcastSignedToV2(source["return"], stored, adapters);
                 if (!converted0.ok) return converted0;
             
             return ok({
@@ -4504,14 +4547,14 @@ export interface VersionAdapters {
         return ok(head);
     }
 
-    function downcastStepDepotReceiptResultToV2(value: types.v3.Signed, adapters: VersionAdapters): VersionedResult<types.v2.Signed> {
-        const projected = downcastDepotReceiptResponseToV2({ return: value }, adapters);
+    function downcastStepDepotReceiptResultToV2(value: types.v3.Signed, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v2.Signed> {
+        const projected = downcastDepotReceiptResponseToV2({ return: value }, stored, adapters);
         if (!projected.ok) return projected;
         return ok(projected.value.return);
     }
     export type DepotReceiptErrorFromV2 = FrameworkError;
     export type DepotReceiptErrorToV2 = FrameworkError;
-    function downcastStepDepotReceiptErrorToV2(head: DepotReceiptErrorFromV2, adapters: VersionAdapters): VersionedResult<DepotReceiptErrorToV2> {
+    function downcastStepDepotReceiptErrorToV2(head: DepotReceiptErrorFromV2, stored: StoredValues, adapters: VersionAdapters): VersionedResult<DepotReceiptErrorToV2> {
         
         return ok(head);
     }
@@ -5059,9 +5102,9 @@ export type DispatchOutcome<T, Head> =
         
         return step1;
     }
-    export function downcastDepotReceiptResultToV1(head: types.v3.Signed, adapters: VersionAdapters): VersionedResult<types.v1.Signed> {
+    export function downcastDepotReceiptResultToV1(head: types.v3.Signed, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Signed> {
         
-            const step0 = downcastStepDepotReceiptResultToV2(head, adapters);
+            const step0 = downcastStepDepotReceiptResultToV2(head, stored, adapters);
             if (!step0.ok) return step0;
         
             const step1 = downcastStepDepotReceiptResultToV1(step0.value, adapters);
@@ -5069,9 +5112,9 @@ export type DispatchOutcome<T, Head> =
         
         return step1;
     }
-    export function downcastDepotReceiptErrorToV1(head: FrameworkError, adapters: VersionAdapters): VersionedResult<FrameworkError> {
+    export function downcastDepotReceiptErrorToV1(head: FrameworkError, stored: StoredValues, adapters: VersionAdapters): VersionedResult<FrameworkError> {
         
-            const step0 = downcastStepDepotReceiptErrorToV2(head, adapters);
+            const step0 = downcastStepDepotReceiptErrorToV2(head, stored, adapters);
             if (!step0.ok) return step0;
         
             const step1 = downcastStepDepotReceiptErrorToV1(step0.value, adapters);
@@ -5080,24 +5123,24 @@ export type DispatchOutcome<T, Head> =
         return step1;
     }
     /** Failed projection retains the original Head outcome, including typed errors. */
-    export function downcastDepotReceiptOutcomeToV1(head: OperationOutcome<types.v3.Signed, FrameworkError>, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<types.v1.Signed, FrameworkError>, OperationOutcome<types.v3.Signed, FrameworkError>> {
+    export function downcastDepotReceiptOutcomeToV1(head: OperationOutcome<types.v3.Signed, FrameworkError>, stored: StoredValues, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<types.v1.Signed, FrameworkError>, OperationOutcome<types.v3.Signed, FrameworkError>> {
         if (head.ok) {
-            const result = downcastDepotReceiptResultToV1(head.value, adapters);
+            const result = downcastDepotReceiptResultToV1(head.value, stored, adapters);
             return result.ok ? { projected: true, value: { ok: true, value: result.value } } : { projected: false, head, error: result.error };
         }
-        const result = downcastDepotReceiptErrorToV1(head.error, adapters);
+        const result = downcastDepotReceiptErrorToV1(head.error, stored, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
-    
+    /** The Head handler returns the stored values its outcome still needs for this version. */
     export async function dispatchDepotReceiptFromV1(
     raw: unknown,
-    handler: (request: ifaceTypes.v3.DepotReceiptRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Signed, FrameworkError>>,
+    handler: (request: ifaceTypes.v3.DepotReceiptRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Signed, FrameworkError> & { stored: StoredValues }>,
     adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v1.Signed, FrameworkError>, OperationOutcome<types.v3.Signed, FrameworkError>>> {
         const request = decodeAndUpcastDepotReceiptFromV1(raw, adapters);
         if (!request.ok) return { dispatched: false, error: request.error };
         const head = await handler(request.value, { originalVersion: "2026-01", originalVersionId: "v1" });
-        return { dispatched: true, ...downcastDepotReceiptOutcomeToV1(head, adapters) };
+        return { dispatched: true, ...downcastDepotReceiptOutcomeToV1(head, head.stored, adapters) };
     }
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
@@ -5688,39 +5731,39 @@ export type DispatchOutcome<T, Head> =
         
         return step0;
     }
-    export function downcastDepotReceiptResultToV2(head: types.v3.Signed, adapters: VersionAdapters): VersionedResult<types.v2.Signed> {
+    export function downcastDepotReceiptResultToV2(head: types.v3.Signed, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v2.Signed> {
         
-            const step0 = downcastStepDepotReceiptResultToV2(head, adapters);
+            const step0 = downcastStepDepotReceiptResultToV2(head, stored, adapters);
             if (!step0.ok) return step0;
         
         return step0;
     }
-    export function downcastDepotReceiptErrorToV2(head: FrameworkError, adapters: VersionAdapters): VersionedResult<FrameworkError> {
+    export function downcastDepotReceiptErrorToV2(head: FrameworkError, stored: StoredValues, adapters: VersionAdapters): VersionedResult<FrameworkError> {
         
-            const step0 = downcastStepDepotReceiptErrorToV2(head, adapters);
+            const step0 = downcastStepDepotReceiptErrorToV2(head, stored, adapters);
             if (!step0.ok) return step0;
         
         return step0;
     }
     /** Failed projection retains the original Head outcome, including typed errors. */
-    export function downcastDepotReceiptOutcomeToV2(head: OperationOutcome<types.v3.Signed, FrameworkError>, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<types.v2.Signed, FrameworkError>, OperationOutcome<types.v3.Signed, FrameworkError>> {
+    export function downcastDepotReceiptOutcomeToV2(head: OperationOutcome<types.v3.Signed, FrameworkError>, stored: StoredValues, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<types.v2.Signed, FrameworkError>, OperationOutcome<types.v3.Signed, FrameworkError>> {
         if (head.ok) {
-            const result = downcastDepotReceiptResultToV2(head.value, adapters);
+            const result = downcastDepotReceiptResultToV2(head.value, stored, adapters);
             return result.ok ? { projected: true, value: { ok: true, value: result.value } } : { projected: false, head, error: result.error };
         }
-        const result = downcastDepotReceiptErrorToV2(head.error, adapters);
+        const result = downcastDepotReceiptErrorToV2(head.error, stored, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
-    
+    /** The Head handler returns the stored values its outcome still needs for this version. */
     export async function dispatchDepotReceiptFromV2(
     raw: unknown,
-    handler: (request: ifaceTypes.v3.DepotReceiptRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Signed, FrameworkError>>,
+    handler: (request: ifaceTypes.v3.DepotReceiptRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Signed, FrameworkError> & { stored: StoredValues }>,
     adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v2.Signed, FrameworkError>, OperationOutcome<types.v3.Signed, FrameworkError>>> {
         const request = decodeAndUpcastDepotReceiptFromV2(raw, adapters);
         if (!request.ok) return { dispatched: false, error: request.error };
         const head = await handler(request.value, { originalVersion: "2026-04", originalVersionId: "v2" });
-        return { dispatched: true, ...downcastDepotReceiptOutcomeToV2(head, adapters) };
+        return { dispatched: true, ...downcastDepotReceiptOutcomeToV2(head, head.stored, adapters) };
     }
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
@@ -6573,7 +6616,7 @@ export type DispatchOutcome<T, Head> =
     export async function dispatchDepotReceipt(
     version: "v1" | "v2" | "v3",
     raw: unknown,
-    handler: (request: ifaceTypes.v3.DepotReceiptRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Signed, FrameworkError>>,
+    handler: (request: ifaceTypes.v3.DepotReceiptRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Signed, FrameworkError> & { stored: StoredValues }>,
     adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v1.Signed | types.v2.Signed | types.v3.Signed, FrameworkError>, OperationOutcome<types.v3.Signed, FrameworkError>>> {
         switch (version) {
@@ -7033,19 +7076,19 @@ export type DispatchOutcome<T, Head> =
 
     
     
-        export function downcastSigned(version: "v1", head: types.v3.Signed, adapters: VersionAdapters): VersionedResult<types.v1.Signed>;
+        export function downcastSigned(version: "v1", head: types.v3.Signed, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Signed>;
     
-        export function downcastSigned(version: "v2", head: types.v3.Signed, adapters: VersionAdapters): VersionedResult<types.v2.Signed>;
+        export function downcastSigned(version: "v2", head: types.v3.Signed, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v2.Signed>;
     
-        export function downcastSigned(version: "v3", head: types.v3.Signed, adapters: VersionAdapters): VersionedResult<types.v3.Signed>;
+        export function downcastSigned(version: "v3", head: types.v3.Signed, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v3.Signed>;
     
-    export function downcastSigned(version: "v1" | "v2" | "v3", head: types.v3.Signed, adapters: VersionAdapters): VersionedResult<types.v1.Signed | types.v2.Signed | types.v3.Signed>;
-    export function downcastSigned(version: "v1" | "v2" | "v3", head: types.v3.Signed, adapters: VersionAdapters): VersionedResult<types.v1.Signed | types.v2.Signed | types.v3.Signed> {
+    export function downcastSigned(version: "v1" | "v2" | "v3", head: types.v3.Signed, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Signed | types.v2.Signed | types.v3.Signed>;
+    export function downcastSigned(version: "v1" | "v2" | "v3", head: types.v3.Signed, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Signed | types.v2.Signed | types.v3.Signed> {
         switch (version) {
             
                 case "v1": {
                     
-                        const step0 = downcastSignedToV2(head, adapters);
+                        const step0 = downcastSignedToV2(head, stored, adapters);
                         if (!step0.ok) return step0;
                     
                         const step1 = downcastSignedToV1(step0.value, adapters);
@@ -7056,7 +7099,7 @@ export type DispatchOutcome<T, Head> =
             
                 case "v2": {
                     
-                        const step0 = downcastSignedToV2(head, adapters);
+                        const step0 = downcastSignedToV2(head, stored, adapters);
                         if (!step0.ok) return step0;
                     
                     return step0;

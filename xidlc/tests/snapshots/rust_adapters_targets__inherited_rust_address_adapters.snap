@@ -1,0 +1,2431 @@
+---
+source: xidlc/tests/rust_adapters_targets.rs
+expression: output
+---
+/// Pure version projections. The application owns routing and side effects.
+#[allow(unused_imports, unused_variables, non_snake_case, non_camel_case_types)]
+pub mod version_adapters {
+    use super::{v1, v2, v3};
+    /// Direction of an unsupported projection.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum Direction {
+        Upcast,
+        Downcast,
+    }
+    /// The application renders a refusal using its own frozen error vocabulary.
+    #[derive(Debug, Clone)]
+    pub struct UnsupportedProjection {
+        pub version: String,
+        pub direction: Direction,
+        pub type_path: String,
+        pub reason: String,
+    }
+    /// A projection either succeeds or requires an unsupported business choice.
+    pub type VersionedResult<T> = Result<T, UnsupportedProjection>;
+    /// Explicit acknowledgement that a source value is intentionally discarded.
+    #[derive(Debug, Clone, Copy)]
+    pub struct Ignored {
+        _private: (),
+    }
+    /// The acknowledgement hooks return for an intentionally retired member.
+    pub const IGNORED: Ignored = Ignored { _private: () };
+    /// An upcast value together with the members its handler persists.
+    pub struct Upcast<T, S> {
+        pub value: T,
+        pub stored: S,
+    }
+    /// A version resolved by the application before calling an adapter.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum Version {
+        V1,
+        V2,
+        V3,
+    }
+    impl Version {
+        /// Original contract identifier.
+        pub fn id(self) -> &'static str {
+            match self {
+                Self::V1 => "v1",
+                Self::V2 => "v2",
+                Self::V3 => "v3",
+            }
+        }
+        /// Original contract version value.
+        pub fn value(self) -> &'static str {
+            match self {
+                Self::V1 => "2026-01-01",
+                Self::V2 => "2026-04-01",
+                Self::V3 => "2026-07-01",
+            }
+        }
+    }
+    /// Context for application business policy; adapters do not select versions.
+    #[derive(Debug, Clone, Copy)]
+    pub struct VersionContext {
+        pub original_version: Version,
+    }
+    /// A failed response projection retains the original committed Head outcome.
+    pub enum ProjectionOutcome<T, H> {
+        Projected(T),
+        Unsupported { head: H, error: UnsupportedProjection },
+    }
+    /// Invalid served-version wire data is distinct from a business refusal.
+    #[derive(Debug)]
+    pub enum AdaptationError {
+        Validation(String),
+        Unsupported(UnsupportedProjection),
+    }
+    impl From<UnsupportedProjection> for AdaptationError {
+        fn from(value: UnsupportedProjection) -> Self {
+            Self::Unsupported(value)
+        }
+    }
+    /// Hooks remain synchronous, pure, deterministic, and mandatory.
+    pub trait VersionAdapters {
+        fn shipping_address_downcast_to_v_1(
+            &self,
+            source: &v2::shipping::Address,
+            stored: &dyn StoredValues,
+        ) -> VersionedResult<ShippingAddressDowncastToV1Decision>;
+        fn shipping_change_upcast_from_v_1(
+            &self,
+            source: &v1::shipping::Change,
+            current: &v3::shipping::Address,
+        ) -> VersionedResult<ShippingChangeUpcastFromV1Decision>;
+        fn shipping_address_downcast_to_v_2(
+            &self,
+            source: &v3::shipping::Address,
+            stored: &dyn StoredValues,
+        ) -> VersionedResult<ShippingAddressDowncastToV2Decision>;
+        fn shipping_change_upcast_from_v_2(
+            &self,
+            source: &v2::shipping::Change,
+            current: &v3::shipping::Address,
+        ) -> VersionedResult<ShippingChangeUpcastFromV2Decision>;
+    }
+    /// Members older versions still read that Head no longer carries, resolved by the application from the source instance of the downcast step that retires them.
+    pub trait StoredValues {
+        /// wire `countryCode`, last served by v1
+        fn shipping_address_country_code(
+            &self,
+            source: &v2::shipping::Address,
+        ) -> Option<String>;
+        /// wire `deliveryReference`, last served by v2
+        fn shipping_address_delivery_reference(
+            &self,
+            source: &v3::shipping::Address,
+        ) -> Option<String>;
+        /// wire `deliveryNote`, last served by v2
+        fn shipping_address_delivery_note(
+            &self,
+            source: &v3::shipping::Address,
+        ) -> Option<String>;
+    }
+    /// Wire names each served version still reads from storage, by type; Head reads nothing.
+    pub const NEEDS: &[(&str, &[(&str, &[&str])])] = &[
+        (
+            "shipping::Address",
+            &[
+                ("2026-07-01", &[]),
+                ("2026-04-01", &["deliveryNote", "deliveryReference"]),
+                ("2026-01-01", &["countryCode", "deliveryNote", "deliveryReference"]),
+            ],
+        ),
+    ];
+    /// A Head outcome together with the stored values its downcast still reads.
+    pub struct HeadOutcome<T, E, S> {
+        pub outcome: Result<T, E>,
+        pub stored: S,
+    }
+    /// Explicit business assignments and discarded-value acknowledgements.
+    pub struct ShippingAddressDowncastToV1Decision {
+        pub country_code: String,
+    }
+    /// Explicit business assignments and discarded-value acknowledgements.
+    pub struct ShippingChangeUpcastFromV1Decision {
+        pub country_code_v2: Option<v2::geo::Country>,
+        pub country_code: Ignored,
+        pub stored: ShippingAddressesUpdateStored,
+    }
+    /// Explicit business assignments and discarded-value acknowledgements.
+    pub struct ShippingAddressDowncastToV2Decision {
+        pub delivery_reference: String,
+        pub delivery_note: Option<String>,
+    }
+    /// Explicit business assignments and discarded-value acknowledgements.
+    pub struct ShippingChangeUpcastFromV2Decision {
+        pub signature_required: bool,
+        pub delivery_reference: Ignored,
+        pub delivery_note: Ignored,
+        pub stored: ShippingAddressesUpdateStored,
+    }
+    /// Members the update handler persists for this request chain.
+    #[derive(Debug, Clone, Default)]
+    pub struct ShippingAddressesUpdateStored {
+        pub country_code: Option<String>,
+        pub delivery_reference: Option<String>,
+        pub delivery_note: Option<String>,
+    }
+    impl ShippingAddressesUpdateStored {
+        /// Combine the persisted members collected along the request chain.
+        pub fn merge(self, other: Self) -> Self {
+            Self {
+                country_code: self.country_code.or(other.country_code),
+                delivery_reference: self.delivery_reference.or(other.delivery_reference),
+                delivery_note: self.delivery_note.or(other.delivery_note),
+            }
+        }
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct ShippingAddressesReadRequestV1 {
+        pub tenant: String,
+        pub id: String,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct ShippingAddressesUpdateRequestV1 {
+        pub tenant: String,
+        pub id: String,
+        pub patch: v1::shipping::Change,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct ShippingAddressesReadRequestV2 {
+        pub tenant: String,
+        pub id: String,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct ShippingAddressesUpdateRequestV2 {
+        pub tenant: String,
+        pub id: String,
+        pub patch: v2::shipping::Change,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct ShippingAddressesReadRequestV3 {
+        pub tenant: String,
+        pub id: String,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct ShippingAddressesUpdateRequestV3 {
+        pub tenant: String,
+        pub id: String,
+        pub patch: v3::shipping::Change,
+    }
+    fn locate<T>(result: VersionedResult<T>, path: &str) -> VersionedResult<T> {
+        result
+            .map_err(|error| UnsupportedProjection {
+                type_path: format!("{path}.{}", error.type_path),
+                ..error
+            })
+    }
+    fn map_sequence<S, T>(
+        source: &[S],
+        convert: impl Fn(&S) -> VersionedResult<T>,
+        path: &str,
+    ) -> VersionedResult<Vec<T>> {
+        source.iter().map(|item| locate(convert(item), path)).collect()
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn geo_anchor_downcast_to_v_1(
+        source: &v2::geo::Anchor,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v1::geo::Anchor> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "geo::Anchor".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = (&source.previous)
+            .as_ref()
+            .map(|item| map_sequence(
+                item,
+                |item| geo_anchor_downcast_to_v_1(item, adapters),
+                "geo::Anchor.previous",
+            ))
+            .transpose()?;
+        Ok(v1::geo::Anchor {
+            base: v1::geo::Marker {},
+            previous: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn geo_identifier_downcast_to_v_1(
+        source: &v2::geo::Identifier,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v1::geo::Identifier> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "geo::Identifier".into(),
+            reason: reason.into(),
+        };
+        Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(source))
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn shipping_address_downcast_to_v_1(
+        source: &v2::shipping::Address,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v1::shipping::Address> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "shipping::Address".into(),
+            reason: reason.into(),
+        };
+        let decision = adapters.shipping_address_downcast_to_v_1(source, stored)?;
+        let projected_0 = (&source.base.base.base.previous)
+            .as_ref()
+            .map(|item| map_sequence(
+                item,
+                |item| geo_anchor_downcast_to_v_1(item, adapters),
+                "shipping::Address.previous",
+            ))
+            .transpose()?;
+        let projected_1 = geo_identifier_downcast_to_v_1(
+            &source.base.base.id,
+            adapters,
+        )?;
+        let projected_2 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.base.base.tenant))?;
+        let projected_3 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.base.base.delivery_reference))?;
+        let projected_4 = (&source.base.base.delivery_note)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
+        let projected_5 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.base.street))?;
+        let projected_6 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.priority))?;
+        Ok(v1::shipping::Address {
+            base: v1::shipping::Postal {
+                base: v1::geo::Identity {
+                    base: v1::geo::Anchor {
+                        base: v1::geo::Marker {},
+                        previous: projected_0,
+                    },
+                    id: projected_1,
+                    tenant: projected_2,
+                    delivery_reference: projected_3,
+                    delivery_note: projected_4,
+                },
+                line: projected_5,
+                country_code: decision.country_code,
+            },
+            priority: projected_6,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn shipping_change_upcast_from_v_1(
+        source: &v1::shipping::Change,
+        current: &v3::shipping::Address,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<Upcast<v2::shipping::Change, ShippingAddressesUpdateStored>> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v1".into(),
+            direction: Direction::Upcast,
+            type_path: "shipping::Change".into(),
+            reason: reason.into(),
+        };
+        let decision = adapters.shipping_change_upcast_from_v_1(source, current)?;
+        let projected_0 = (&source.base.base.delivery_reference)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
+        let projected_1 = (&source.base.base.delivery_note)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
+        let projected_2 = (&source.base.line)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
+        let projected_3 = (&source.priority)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
+        Ok(Upcast {
+            value: v2::shipping::Change {
+                base: v2::shipping::PostalChange {
+                    base: v2::geo::Change {
+                        delivery_reference: projected_0,
+                        delivery_note: projected_1,
+                    },
+                    street: projected_2,
+                    country_code_v2: decision.country_code_v2,
+                },
+                priority: projected_3,
+            },
+            stored: ShippingAddressesUpdateStored::default().merge(decision.stored),
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn shipping_forbidden_downcast_to_v_1(
+        source: &v2::shipping::Forbidden,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v1::shipping::Forbidden> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "shipping::Forbidden".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.reason))?;
+        Ok(v1::shipping::Forbidden {
+            reason: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn shipping_missing_downcast_to_v_1(
+        source: &v2::shipping::Missing,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v1::shipping::Missing> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "shipping::Missing".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.reason))?;
+        Ok(v1::shipping::Missing {
+            reason: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn shipping_projection_downcast_to_v_1(
+        source: &v2::shipping::Projection,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v1::shipping::Projection> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "shipping::Projection".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.type_path))?;
+        let projected_1 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.reason))?;
+        Ok(v1::shipping::Projection {
+            type_path: projected_0,
+            reason: projected_1,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn shipping_addresses_read_request_upcast_from_v_1(
+        source: &ShippingAddressesReadRequestV1,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<ShippingAddressesReadRequestV2> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v1".into(),
+            direction: Direction::Upcast,
+            type_path: "ShippingAddressesReadRequest".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.tenant))?;
+        let projected_1 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        Ok(ShippingAddressesReadRequestV2 {
+            tenant: projected_0,
+            id: projected_1,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn shipping_addresses_read_response_downcast_to_v_1(
+        source: &v2::shipping::Address,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v1::shipping::Address> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "ShippingAddressesReadResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = shipping_address_downcast_to_v_1(source, stored, adapters)?;
+        Ok(projected_0)
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn shipping_addresses_update_request_upcast_from_v_1(
+        source: &ShippingAddressesUpdateRequestV1,
+        current: &v3::shipping::Address,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<
+        Upcast<ShippingAddressesUpdateRequestV2, ShippingAddressesUpdateStored>,
+    > {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v1".into(),
+            direction: Direction::Upcast,
+            type_path: "ShippingAddressesUpdateRequest".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.tenant))?;
+        let projected_1 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        let projected_2 = shipping_change_upcast_from_v_1(
+            &source.patch,
+            current,
+            adapters,
+        )?;
+        Ok(Upcast {
+            value: ShippingAddressesUpdateRequestV2 {
+                tenant: projected_0,
+                id: projected_1,
+                patch: projected_2.value,
+            },
+            stored: ShippingAddressesUpdateStored::default().merge(projected_2.stored),
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn shipping_addresses_update_response_downcast_to_v_1(
+        source: &v2::shipping::Address,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v1::shipping::Address> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "ShippingAddressesUpdateResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = shipping_address_downcast_to_v_1(source, stored, adapters)?;
+        Ok(projected_0)
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn geo_anchor_downcast_to_v_2(
+        source: &v3::geo::Anchor,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2::geo::Anchor> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v3".into(),
+            direction: Direction::Downcast,
+            type_path: "geo::Anchor".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = (&source.previous)
+            .as_ref()
+            .map(|item| map_sequence(
+                item,
+                |item| geo_anchor_downcast_to_v_2(item, adapters),
+                "geo::Anchor.previous",
+            ))
+            .transpose()?;
+        Ok(v2::geo::Anchor {
+            base: v2::geo::Marker {},
+            previous: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn geo_country_upcast_from_v_2(
+        source: &v2::geo::Country,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v3::geo::Country> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Upcast,
+            type_path: "geo::Country".into(),
+            reason: reason.into(),
+        };
+        match source {
+            v2::geo::Country::US => Ok(v3::geo::Country::US),
+            v2::geo::Country::CA => Ok(v3::geo::Country::CA),
+        }
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn geo_country_downcast_to_v_2(
+        source: &v3::geo::Country,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2::geo::Country> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v3".into(),
+            direction: Direction::Downcast,
+            type_path: "geo::Country".into(),
+            reason: reason.into(),
+        };
+        match source {
+            v3::geo::Country::US => Ok(v2::geo::Country::US),
+            v3::geo::Country::CA => Ok(v2::geo::Country::CA),
+        }
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn geo_identifier_downcast_to_v_2(
+        source: &v3::geo::Identifier,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2::geo::Identifier> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v3".into(),
+            direction: Direction::Downcast,
+            type_path: "geo::Identifier".into(),
+            reason: reason.into(),
+        };
+        Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(source))
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn shipping_address_downcast_to_v_2(
+        source: &v3::shipping::Address,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2::shipping::Address> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v3".into(),
+            direction: Direction::Downcast,
+            type_path: "shipping::Address".into(),
+            reason: reason.into(),
+        };
+        let decision = adapters.shipping_address_downcast_to_v_2(source, stored)?;
+        let projected_0 = (&source.base.base.base.previous)
+            .as_ref()
+            .map(|item| map_sequence(
+                item,
+                |item| geo_anchor_downcast_to_v_2(item, adapters),
+                "shipping::Address.previous",
+            ))
+            .transpose()?;
+        let projected_1 = geo_identifier_downcast_to_v_2(
+            &source.base.base.id,
+            adapters,
+        )?;
+        let projected_2 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.base.base.tenant))?;
+        let projected_3 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.base.street))?;
+        let projected_4 = geo_country_downcast_to_v_2(
+            &source.base.country_code_v2,
+            adapters,
+        )?;
+        let projected_5 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.priority))?;
+        Ok(v2::shipping::Address {
+            base: v2::shipping::Postal {
+                base: v2::geo::Identity {
+                    base: v2::geo::Anchor {
+                        base: v2::geo::Marker {},
+                        previous: projected_0,
+                    },
+                    id: projected_1,
+                    tenant: projected_2,
+                    delivery_reference: decision.delivery_reference,
+                    delivery_note: decision.delivery_note,
+                },
+                street: projected_3,
+                country_code_v2: projected_4,
+            },
+            priority: projected_5,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn shipping_change_upcast_from_v_2(
+        source: &v2::shipping::Change,
+        current: &v3::shipping::Address,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<Upcast<v3::shipping::Change, ShippingAddressesUpdateStored>> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Upcast,
+            type_path: "shipping::Change".into(),
+            reason: reason.into(),
+        };
+        let decision = adapters.shipping_change_upcast_from_v_2(source, current)?;
+        let projected_0 = (&source.base.street)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
+        let projected_1 = (&source.base.country_code_v2)
+            .as_ref()
+            .map(|item| geo_country_upcast_from_v_2(item, adapters))
+            .transpose()?;
+        let projected_2 = (&source.priority)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
+        Ok(Upcast {
+            value: v3::shipping::Change {
+                base: v3::shipping::PostalChange {
+                    base: v3::geo::Change {
+                        signature_required: Some(decision.signature_required),
+                    },
+                    street: projected_0,
+                    country_code_v2: projected_1,
+                },
+                priority: projected_2,
+            },
+            stored: ShippingAddressesUpdateStored::default().merge(decision.stored),
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn shipping_forbidden_downcast_to_v_2(
+        source: &v3::shipping::Forbidden,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2::shipping::Forbidden> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v3".into(),
+            direction: Direction::Downcast,
+            type_path: "shipping::Forbidden".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.reason))?;
+        Ok(v2::shipping::Forbidden {
+            reason: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn shipping_missing_downcast_to_v_2(
+        source: &v3::shipping::Missing,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2::shipping::Missing> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v3".into(),
+            direction: Direction::Downcast,
+            type_path: "shipping::Missing".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.reason))?;
+        Ok(v2::shipping::Missing {
+            reason: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn shipping_projection_downcast_to_v_2(
+        source: &v3::shipping::Projection,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2::shipping::Projection> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v3".into(),
+            direction: Direction::Downcast,
+            type_path: "shipping::Projection".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.type_path))?;
+        let projected_1 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.reason))?;
+        Ok(v2::shipping::Projection {
+            type_path: projected_0,
+            reason: projected_1,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn shipping_addresses_read_request_upcast_from_v_2(
+        source: &ShippingAddressesReadRequestV2,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<ShippingAddressesReadRequestV3> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Upcast,
+            type_path: "ShippingAddressesReadRequest".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.tenant))?;
+        let projected_1 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        Ok(ShippingAddressesReadRequestV3 {
+            tenant: projected_0,
+            id: projected_1,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn shipping_addresses_read_response_downcast_to_v_2(
+        source: &v3::shipping::Address,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2::shipping::Address> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v3".into(),
+            direction: Direction::Downcast,
+            type_path: "ShippingAddressesReadResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = shipping_address_downcast_to_v_2(source, stored, adapters)?;
+        Ok(projected_0)
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn shipping_addresses_update_request_upcast_from_v_2(
+        source: &ShippingAddressesUpdateRequestV2,
+        current: &v3::shipping::Address,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<
+        Upcast<ShippingAddressesUpdateRequestV3, ShippingAddressesUpdateStored>,
+    > {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Upcast,
+            type_path: "ShippingAddressesUpdateRequest".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.tenant))?;
+        let projected_1 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        let projected_2 = shipping_change_upcast_from_v_2(
+            &source.patch,
+            current,
+            adapters,
+        )?;
+        Ok(Upcast {
+            value: ShippingAddressesUpdateRequestV3 {
+                tenant: projected_0,
+                id: projected_1,
+                patch: projected_2.value,
+            },
+            stored: ShippingAddressesUpdateStored::default().merge(projected_2.stored),
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn shipping_addresses_update_response_downcast_to_v_2(
+        source: &v3::shipping::Address,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2::shipping::Address> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v3".into(),
+            direction: Direction::Downcast,
+            type_path: "ShippingAddressesUpdateResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = shipping_address_downcast_to_v_2(source, stored, adapters)?;
+        Ok(projected_0)
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_shipping_addresses_read_error_to_v_1(
+        source: &v2::shipping::AddressesReadError,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v1::shipping::AddressesReadError> {
+        match source {
+            v2::shipping::AddressesReadError::Missing(value) => {
+                shipping_missing_downcast_to_v_1(value, adapters)
+                    .map(v1::shipping::AddressesReadError::Missing)
+            }
+            v2::shipping::AddressesReadError::Projection(value) => {
+                shipping_projection_downcast_to_v_1(value, adapters)
+                    .map(v1::shipping::AddressesReadError::Projection)
+            }
+            v2::shipping::AddressesReadError::Forbidden(value) => {
+                shipping_forbidden_downcast_to_v_1(value, adapters)
+                    .map(v1::shipping::AddressesReadError::Forbidden)
+            }
+            v2::shipping::AddressesReadError::Framework(error) => {
+                Ok(v1::shipping::AddressesReadError::Framework(error.clone()))
+            }
+        }
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_shipping_addresses_update_error_to_v_1(
+        source: &v2::shipping::AddressesUpdateError,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v1::shipping::AddressesUpdateError> {
+        match source {
+            v2::shipping::AddressesUpdateError::Missing(value) => {
+                shipping_missing_downcast_to_v_1(value, adapters)
+                    .map(v1::shipping::AddressesUpdateError::Missing)
+            }
+            v2::shipping::AddressesUpdateError::Projection(value) => {
+                shipping_projection_downcast_to_v_1(value, adapters)
+                    .map(v1::shipping::AddressesUpdateError::Projection)
+            }
+            v2::shipping::AddressesUpdateError::Forbidden(value) => {
+                shipping_forbidden_downcast_to_v_1(value, adapters)
+                    .map(v1::shipping::AddressesUpdateError::Forbidden)
+            }
+            v2::shipping::AddressesUpdateError::Framework(error) => {
+                Ok(v1::shipping::AddressesUpdateError::Framework(error.clone()))
+            }
+        }
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_shipping_addresses_read_error_to_v_2(
+        source: &v3::shipping::AddressesReadError,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2::shipping::AddressesReadError> {
+        match source {
+            v3::shipping::AddressesReadError::Missing(value) => {
+                shipping_missing_downcast_to_v_2(value, adapters)
+                    .map(v2::shipping::AddressesReadError::Missing)
+            }
+            v3::shipping::AddressesReadError::Projection(value) => {
+                shipping_projection_downcast_to_v_2(value, adapters)
+                    .map(v2::shipping::AddressesReadError::Projection)
+            }
+            v3::shipping::AddressesReadError::Forbidden(value) => {
+                shipping_forbidden_downcast_to_v_2(value, adapters)
+                    .map(v2::shipping::AddressesReadError::Forbidden)
+            }
+            v3::shipping::AddressesReadError::Framework(error) => {
+                Ok(v2::shipping::AddressesReadError::Framework(error.clone()))
+            }
+        }
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_shipping_addresses_update_error_to_v_2(
+        source: &v3::shipping::AddressesUpdateError,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2::shipping::AddressesUpdateError> {
+        match source {
+            v3::shipping::AddressesUpdateError::Missing(value) => {
+                shipping_missing_downcast_to_v_2(value, adapters)
+                    .map(v2::shipping::AddressesUpdateError::Missing)
+            }
+            v3::shipping::AddressesUpdateError::Projection(value) => {
+                shipping_projection_downcast_to_v_2(value, adapters)
+                    .map(v2::shipping::AddressesUpdateError::Projection)
+            }
+            v3::shipping::AddressesUpdateError::Forbidden(value) => {
+                shipping_forbidden_downcast_to_v_2(value, adapters)
+                    .map(v2::shipping::AddressesUpdateError::Forbidden)
+            }
+            v3::shipping::AddressesUpdateError::Framework(error) => {
+                Ok(v2::shipping::AddressesUpdateError::Framework(error.clone()))
+            }
+        }
+    }
+    fn decode_wire_v_1_shipping_change(
+        wire: &::serde_json::Value,
+    ) -> Result<v1::shipping::Change, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &[
+            "countryCode",
+            "deliveryNote",
+            "deliveryReference",
+            "line",
+            "priority",
+        ];
+        let forbidden: &[&str] = &["countryCodeV2", "signatureRequired", "street"];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object
+            .get("deliveryReference")
+            .unwrap_or(&::serde_json::Value::Null);
+        let value_0: Option<String> = if (raw_0).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_0).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        let raw_1 = object.get("deliveryNote").unwrap_or(&::serde_json::Value::Null);
+        let value_1: Option<String> = if (raw_1).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_1).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        let raw_2 = object.get("line").unwrap_or(&::serde_json::Value::Null);
+        let value_2: Option<String> = if (raw_2).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_2).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        let raw_3 = object.get("countryCode").unwrap_or(&::serde_json::Value::Null);
+        let value_3: Option<String> = if (raw_3).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_3).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        let raw_4 = object.get("priority").unwrap_or(&::serde_json::Value::Null);
+        let value_4: Option<i32> = if (raw_4).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<i32>((raw_4).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        Ok(v1::shipping::Change {
+            base: v1::shipping::PostalChange {
+                base: v1::geo::Change {
+                    delivery_reference: value_0,
+                    delivery_note: value_1,
+                },
+                line: value_2,
+                country_code: value_3,
+            },
+            priority: value_4,
+        })
+    }
+    fn decode_wire_v_2_shipping_change(
+        wire: &::serde_json::Value,
+    ) -> Result<v2::shipping::Change, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &[
+            "countryCodeV2",
+            "deliveryNote",
+            "deliveryReference",
+            "priority",
+            "street",
+        ];
+        let forbidden: &[&str] = &["countryCode", "line", "signatureRequired"];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object
+            .get("deliveryReference")
+            .unwrap_or(&::serde_json::Value::Null);
+        let value_0: Option<String> = if (raw_0).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_0).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        let raw_1 = object.get("deliveryNote").unwrap_or(&::serde_json::Value::Null);
+        let value_1: Option<String> = if (raw_1).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_1).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        let raw_2 = object.get("street").unwrap_or(&::serde_json::Value::Null);
+        let value_2: Option<String> = if (raw_2).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_2).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        let raw_3 = object.get("countryCodeV2").unwrap_or(&::serde_json::Value::Null);
+        let value_3: Option<v2::geo::Country> = if (raw_3).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            decode_wire_v_2_geo_country(raw_3).map(Some)
+        }?;
+        let raw_4 = object.get("priority").unwrap_or(&::serde_json::Value::Null);
+        let value_4: Option<i32> = if (raw_4).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<i32>((raw_4).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        Ok(v2::shipping::Change {
+            base: v2::shipping::PostalChange {
+                base: v2::geo::Change {
+                    delivery_reference: value_0,
+                    delivery_note: value_1,
+                },
+                street: value_2,
+                country_code_v2: value_3,
+            },
+            priority: value_4,
+        })
+    }
+    fn decode_wire_v_2_geo_country(
+        wire: &::serde_json::Value,
+    ) -> Result<v2::geo::Country, String> {
+        ::serde_json::from_value(wire.clone()).map_err(|error| error.to_string())
+    }
+    fn decode_wire_v_3_shipping_change(
+        wire: &::serde_json::Value,
+    ) -> Result<v3::shipping::Change, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &[
+            "countryCodeV2",
+            "priority",
+            "signatureRequired",
+            "street",
+        ];
+        let forbidden: &[&str] = &[
+            "countryCode",
+            "deliveryNote",
+            "deliveryReference",
+            "line",
+        ];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object
+            .get("signatureRequired")
+            .unwrap_or(&::serde_json::Value::Null);
+        let value_0: Option<bool> = if (raw_0).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<bool>((raw_0).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        let raw_1 = object.get("street").unwrap_or(&::serde_json::Value::Null);
+        let value_1: Option<String> = if (raw_1).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_1).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        let raw_2 = object.get("countryCodeV2").unwrap_or(&::serde_json::Value::Null);
+        let value_2: Option<v3::geo::Country> = if (raw_2).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            decode_wire_v_3_geo_country(raw_2).map(Some)
+        }?;
+        let raw_3 = object.get("priority").unwrap_or(&::serde_json::Value::Null);
+        let value_3: Option<i32> = if (raw_3).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<i32>((raw_3).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        Ok(v3::shipping::Change {
+            base: v3::shipping::PostalChange {
+                base: v3::geo::Change {
+                    signature_required: value_0,
+                },
+                street: value_1,
+                country_code_v2: value_2,
+            },
+            priority: value_3,
+        })
+    }
+    fn decode_wire_v_3_geo_country(
+        wire: &::serde_json::Value,
+    ) -> Result<v3::geo::Country, String> {
+        ::serde_json::from_value(wire.clone()).map_err(|error| error.to_string())
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_shipping_addresses_read_from_v_1(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ShippingAddressesReadRequestV3, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["tenant", "id"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("tenant")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "tenant").into(),
+            ))?;
+        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+            .map_err(|error| error.to_string())
+            .map_err(AdaptationError::Validation)?;
+        let raw_1 = object
+            .get("id")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "id").into(),
+            ))?;
+        let value_1: String = ::serde_json::from_value::<String>((&raw_1).clone())
+            .map_err(|error| error.to_string())
+            .map_err(AdaptationError::Validation)?;
+        let source = ShippingAddressesReadRequestV1 {
+            tenant: value_0,
+            id: value_1,
+        };
+        let source = shipping_addresses_read_request_upcast_from_v_1(&source, adapters)?;
+        let source = shipping_addresses_read_request_upcast_from_v_2(&source, adapters)?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_shipping_addresses_read_from_v_1_outcome(
+        head: Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<v1::shipping::Address, v1::shipping::AddressesReadError>,
+        Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
+    > {
+        match &head {
+            Ok(source) => {
+                let source = match shipping_addresses_read_response_downcast_to_v_2(
+                    source,
+                    stored,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                let source = match shipping_addresses_read_response_downcast_to_v_1(
+                    &source,
+                    stored,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_shipping_addresses_read_error_to_v_2(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                let source = match downcast_shipping_addresses_read_error_to_v_1(
+                    &source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
+    pub async fn dispatch_shipping_addresses_read_from_v_1<F, Fut, R>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<v1::shipping::Address, v1::shipping::AddressesReadError>,
+            Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ShippingAddressesReadRequestV3, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<
+                v3::shipping::Address,
+                v3::shipping::AddressesReadError,
+                R,
+            >,
+        >,
+        R: StoredValues,
+    {
+        let input = decode_and_upcast_shipping_addresses_read_from_v_1(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V1,
+                },
+            )
+            .await;
+        Ok(
+            downcast_shipping_addresses_read_from_v_1_outcome(
+                head.outcome,
+                &head.stored,
+                adapters,
+            ),
+        )
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_shipping_addresses_update_from_v_1(
+        wire: ::serde_json::Value,
+        current: v3::shipping::Address,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<
+        Upcast<ShippingAddressesUpdateRequestV3, ShippingAddressesUpdateStored>,
+        AdaptationError,
+    > {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["tenant", "id", "patch"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("tenant")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "tenant").into(),
+            ))?;
+        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+            .map_err(|error| error.to_string())
+            .map_err(AdaptationError::Validation)?;
+        let raw_1 = object
+            .get("id")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "id").into(),
+            ))?;
+        let value_1: String = ::serde_json::from_value::<String>((&raw_1).clone())
+            .map_err(|error| error.to_string())
+            .map_err(AdaptationError::Validation)?;
+        let raw_2 = object
+            .get("patch")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "patch").into(),
+            ))?;
+        let value_2: v1::shipping::Change = decode_wire_v_1_shipping_change(&raw_2)
+            .map_err(AdaptationError::Validation)?;
+        let source = ShippingAddressesUpdateRequestV1 {
+            tenant: value_0,
+            id: value_1,
+            patch: value_2,
+        };
+        let stored = ShippingAddressesUpdateStored::default();
+        let upcast = shipping_addresses_update_request_upcast_from_v_1(
+            &source,
+            &current,
+            adapters,
+        )?;
+        let stored = stored.merge(upcast.stored);
+        let source = upcast.value;
+        let upcast = shipping_addresses_update_request_upcast_from_v_2(
+            &source,
+            &current,
+            adapters,
+        )?;
+        let stored = stored.merge(upcast.stored);
+        let source = upcast.value;
+        Ok(Upcast { value: source, stored })
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_shipping_addresses_update_from_v_1_outcome(
+        head: Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<v1::shipping::Address, v1::shipping::AddressesUpdateError>,
+        Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+    > {
+        match &head {
+            Ok(source) => {
+                let source = match shipping_addresses_update_response_downcast_to_v_2(
+                    source,
+                    stored,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                let source = match shipping_addresses_update_response_downcast_to_v_1(
+                    &source,
+                    stored,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_shipping_addresses_update_error_to_v_2(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                let source = match downcast_shipping_addresses_update_error_to_v_1(
+                    &source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once; it persists the upcast members and returns the stored values this version still reads.
+    pub async fn dispatch_shipping_addresses_update_from_v_1<F, Fut, R>(
+        wire: ::serde_json::Value,
+        current: v3::shipping::Address,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<v1::shipping::Address, v1::shipping::AddressesUpdateError>,
+            Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(
+            ShippingAddressesUpdateRequestV3,
+            VersionContext,
+            ShippingAddressesUpdateStored,
+        ) -> Fut,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<
+                v3::shipping::Address,
+                v3::shipping::AddressesUpdateError,
+                R,
+            >,
+        >,
+        R: StoredValues,
+    {
+        let input = decode_and_upcast_shipping_addresses_update_from_v_1(
+            wire,
+            current,
+            adapters,
+        )?;
+        let head = handler(
+                input.value,
+                VersionContext {
+                    original_version: Version::V1,
+                },
+                input.stored,
+            )
+            .await;
+        Ok(
+            downcast_shipping_addresses_update_from_v_1_outcome(
+                head.outcome,
+                &head.stored,
+                adapters,
+            ),
+        )
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_shipping_addresses_read_from_v_2(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ShippingAddressesReadRequestV3, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["tenant", "id"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("tenant")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "tenant").into(),
+            ))?;
+        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+            .map_err(|error| error.to_string())
+            .map_err(AdaptationError::Validation)?;
+        let raw_1 = object
+            .get("id")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "id").into(),
+            ))?;
+        let value_1: String = ::serde_json::from_value::<String>((&raw_1).clone())
+            .map_err(|error| error.to_string())
+            .map_err(AdaptationError::Validation)?;
+        let source = ShippingAddressesReadRequestV2 {
+            tenant: value_0,
+            id: value_1,
+        };
+        let source = shipping_addresses_read_request_upcast_from_v_2(&source, adapters)?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_shipping_addresses_read_from_v_2_outcome(
+        head: Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<v2::shipping::Address, v2::shipping::AddressesReadError>,
+        Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
+    > {
+        match &head {
+            Ok(source) => {
+                let source = match shipping_addresses_read_response_downcast_to_v_2(
+                    source,
+                    stored,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_shipping_addresses_read_error_to_v_2(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
+    pub async fn dispatch_shipping_addresses_read_from_v_2<F, Fut, R>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<v2::shipping::Address, v2::shipping::AddressesReadError>,
+            Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ShippingAddressesReadRequestV3, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<
+                v3::shipping::Address,
+                v3::shipping::AddressesReadError,
+                R,
+            >,
+        >,
+        R: StoredValues,
+    {
+        let input = decode_and_upcast_shipping_addresses_read_from_v_2(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V2,
+                },
+            )
+            .await;
+        Ok(
+            downcast_shipping_addresses_read_from_v_2_outcome(
+                head.outcome,
+                &head.stored,
+                adapters,
+            ),
+        )
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_shipping_addresses_update_from_v_2(
+        wire: ::serde_json::Value,
+        current: v3::shipping::Address,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<
+        Upcast<ShippingAddressesUpdateRequestV3, ShippingAddressesUpdateStored>,
+        AdaptationError,
+    > {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["tenant", "id", "patch"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("tenant")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "tenant").into(),
+            ))?;
+        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+            .map_err(|error| error.to_string())
+            .map_err(AdaptationError::Validation)?;
+        let raw_1 = object
+            .get("id")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "id").into(),
+            ))?;
+        let value_1: String = ::serde_json::from_value::<String>((&raw_1).clone())
+            .map_err(|error| error.to_string())
+            .map_err(AdaptationError::Validation)?;
+        let raw_2 = object
+            .get("patch")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "patch").into(),
+            ))?;
+        let value_2: v2::shipping::Change = decode_wire_v_2_shipping_change(&raw_2)
+            .map_err(AdaptationError::Validation)?;
+        let source = ShippingAddressesUpdateRequestV2 {
+            tenant: value_0,
+            id: value_1,
+            patch: value_2,
+        };
+        let stored = ShippingAddressesUpdateStored::default();
+        let upcast = shipping_addresses_update_request_upcast_from_v_2(
+            &source,
+            &current,
+            adapters,
+        )?;
+        let stored = stored.merge(upcast.stored);
+        let source = upcast.value;
+        Ok(Upcast { value: source, stored })
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_shipping_addresses_update_from_v_2_outcome(
+        head: Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<v2::shipping::Address, v2::shipping::AddressesUpdateError>,
+        Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+    > {
+        match &head {
+            Ok(source) => {
+                let source = match shipping_addresses_update_response_downcast_to_v_2(
+                    source,
+                    stored,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_shipping_addresses_update_error_to_v_2(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once; it persists the upcast members and returns the stored values this version still reads.
+    pub async fn dispatch_shipping_addresses_update_from_v_2<F, Fut, R>(
+        wire: ::serde_json::Value,
+        current: v3::shipping::Address,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<v2::shipping::Address, v2::shipping::AddressesUpdateError>,
+            Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(
+            ShippingAddressesUpdateRequestV3,
+            VersionContext,
+            ShippingAddressesUpdateStored,
+        ) -> Fut,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<
+                v3::shipping::Address,
+                v3::shipping::AddressesUpdateError,
+                R,
+            >,
+        >,
+        R: StoredValues,
+    {
+        let input = decode_and_upcast_shipping_addresses_update_from_v_2(
+            wire,
+            current,
+            adapters,
+        )?;
+        let head = handler(
+                input.value,
+                VersionContext {
+                    original_version: Version::V2,
+                },
+                input.stored,
+            )
+            .await;
+        Ok(
+            downcast_shipping_addresses_update_from_v_2_outcome(
+                head.outcome,
+                &head.stored,
+                adapters,
+            ),
+        )
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_shipping_addresses_read_from_v_3(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ShippingAddressesReadRequestV3, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["tenant", "id"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("tenant")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "tenant").into(),
+            ))?;
+        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+            .map_err(|error| error.to_string())
+            .map_err(AdaptationError::Validation)?;
+        let raw_1 = object
+            .get("id")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "id").into(),
+            ))?;
+        let value_1: String = ::serde_json::from_value::<String>((&raw_1).clone())
+            .map_err(|error| error.to_string())
+            .map_err(AdaptationError::Validation)?;
+        let source = ShippingAddressesReadRequestV3 {
+            tenant: value_0,
+            id: value_1,
+        };
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_shipping_addresses_read_from_v_3_outcome(
+        head: Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
+        Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
+    > {
+        ProjectionOutcome::Projected(head)
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_shipping_addresses_read_from_v_3<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
+            Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ShippingAddressesReadRequestV3, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
+        >,
+    {
+        let input = decode_and_upcast_shipping_addresses_read_from_v_3(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V3,
+                },
+            )
+            .await;
+        Ok(downcast_shipping_addresses_read_from_v_3_outcome(head, adapters))
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_shipping_addresses_update_from_v_3(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<
+        Upcast<ShippingAddressesUpdateRequestV3, ShippingAddressesUpdateStored>,
+        AdaptationError,
+    > {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["tenant", "id", "patch"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("tenant")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "tenant").into(),
+            ))?;
+        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+            .map_err(|error| error.to_string())
+            .map_err(AdaptationError::Validation)?;
+        let raw_1 = object
+            .get("id")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "id").into(),
+            ))?;
+        let value_1: String = ::serde_json::from_value::<String>((&raw_1).clone())
+            .map_err(|error| error.to_string())
+            .map_err(AdaptationError::Validation)?;
+        let raw_2 = object
+            .get("patch")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "patch").into(),
+            ))?;
+        let value_2: v3::shipping::Change = decode_wire_v_3_shipping_change(&raw_2)
+            .map_err(AdaptationError::Validation)?;
+        let source = ShippingAddressesUpdateRequestV3 {
+            tenant: value_0,
+            id: value_1,
+            patch: value_2,
+        };
+        let stored = ShippingAddressesUpdateStored::default();
+        Ok(Upcast { value: source, stored })
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_shipping_addresses_update_from_v_3_outcome(
+        head: Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+        Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+    > {
+        ProjectionOutcome::Projected(head)
+    }
+    /// Execute a caller-supplied Head handler once; it persists the upcast members.
+    pub async fn dispatch_shipping_addresses_update_from_v_3<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+            Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(
+            ShippingAddressesUpdateRequestV3,
+            VersionContext,
+            ShippingAddressesUpdateStored,
+        ) -> Fut,
+        Fut: ::std::future::Future<
+            Output = Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+        >,
+    {
+        let input = decode_and_upcast_shipping_addresses_update_from_v_3(
+            wire,
+            adapters,
+        )?;
+        let head = handler(
+                input.value,
+                VersionContext {
+                    original_version: Version::V3,
+                },
+                input.stored,
+            )
+            .await;
+        Ok(downcast_shipping_addresses_update_from_v_3_outcome(head, adapters))
+    }
+    /// The caller-selected version's projected model type.
+    pub enum GeoAnchorProjection {
+        V1(v1::geo::Anchor),
+        V2(v2::geo::Anchor),
+        V3(v3::geo::Anchor),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_geo_anchor(
+        version: Version,
+        head: v3::geo::Anchor,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<GeoAnchorProjection> {
+        match version {
+            Version::V1 => {
+                let source = geo_anchor_downcast_to_v_2(&head, adapters)?;
+                let source = geo_anchor_downcast_to_v_1(&source, adapters)?;
+                Ok(GeoAnchorProjection::V1(source))
+            }
+            Version::V2 => {
+                let source = geo_anchor_downcast_to_v_2(&head, adapters)?;
+                Ok(GeoAnchorProjection::V2(source))
+            }
+            Version::V3 => {
+                let source = head;
+                Ok(GeoAnchorProjection::V3(source))
+            }
+        }
+    }
+    /// The caller-selected version's projected model type.
+    pub enum GeoCountryProjection {
+        V2(v2::geo::Country),
+        V3(v3::geo::Country),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_geo_country(
+        version: Version,
+        head: v3::geo::Country,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<GeoCountryProjection> {
+        match version {
+            Version::V2 => {
+                let source = geo_country_downcast_to_v_2(&head, adapters)?;
+                Ok(GeoCountryProjection::V2(source))
+            }
+            Version::V3 => {
+                let source = head;
+                Ok(GeoCountryProjection::V3(source))
+            }
+            _ => {
+                Err(UnsupportedProjection {
+                    version: version.value().into(),
+                    direction: Direction::Downcast,
+                    type_path: "GeoCountryProjection".into(),
+                    reason: "type is not reachable in selected version".into(),
+                })
+            }
+        }
+    }
+    /// The caller-selected version's projected model type.
+    pub enum GeoIdentifierProjection {
+        V1(v1::geo::Identifier),
+        V2(v2::geo::Identifier),
+        V3(v3::geo::Identifier),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_geo_identifier(
+        version: Version,
+        head: v3::geo::Identifier,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<GeoIdentifierProjection> {
+        match version {
+            Version::V1 => {
+                let source = geo_identifier_downcast_to_v_2(&head, adapters)?;
+                let source = geo_identifier_downcast_to_v_1(&source, adapters)?;
+                Ok(GeoIdentifierProjection::V1(source))
+            }
+            Version::V2 => {
+                let source = geo_identifier_downcast_to_v_2(&head, adapters)?;
+                Ok(GeoIdentifierProjection::V2(source))
+            }
+            Version::V3 => {
+                let source = head;
+                Ok(GeoIdentifierProjection::V3(source))
+            }
+        }
+    }
+    /// The caller-selected version's projected model type.
+    pub enum ShippingAddressProjection {
+        V1(v1::shipping::Address),
+        V2(v2::shipping::Address),
+        V3(v3::shipping::Address),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_shipping_address(
+        version: Version,
+        head: v3::shipping::Address,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<ShippingAddressProjection> {
+        match version {
+            Version::V1 => {
+                let source = shipping_address_downcast_to_v_2(&head, stored, adapters)?;
+                let source = shipping_address_downcast_to_v_1(
+                    &source,
+                    stored,
+                    adapters,
+                )?;
+                Ok(ShippingAddressProjection::V1(source))
+            }
+            Version::V2 => {
+                let source = shipping_address_downcast_to_v_2(&head, stored, adapters)?;
+                Ok(ShippingAddressProjection::V2(source))
+            }
+            Version::V3 => {
+                let source = head;
+                Ok(ShippingAddressProjection::V3(source))
+            }
+        }
+    }
+    /// The caller-selected version's projected model type.
+    pub enum ShippingForbiddenProjection {
+        V1(v1::shipping::Forbidden),
+        V2(v2::shipping::Forbidden),
+        V3(v3::shipping::Forbidden),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_shipping_forbidden(
+        version: Version,
+        head: v3::shipping::Forbidden,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<ShippingForbiddenProjection> {
+        match version {
+            Version::V1 => {
+                let source = shipping_forbidden_downcast_to_v_2(&head, adapters)?;
+                let source = shipping_forbidden_downcast_to_v_1(&source, adapters)?;
+                Ok(ShippingForbiddenProjection::V1(source))
+            }
+            Version::V2 => {
+                let source = shipping_forbidden_downcast_to_v_2(&head, adapters)?;
+                Ok(ShippingForbiddenProjection::V2(source))
+            }
+            Version::V3 => {
+                let source = head;
+                Ok(ShippingForbiddenProjection::V3(source))
+            }
+        }
+    }
+    /// The caller-selected version's projected model type.
+    pub enum ShippingMissingProjection {
+        V1(v1::shipping::Missing),
+        V2(v2::shipping::Missing),
+        V3(v3::shipping::Missing),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_shipping_missing(
+        version: Version,
+        head: v3::shipping::Missing,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<ShippingMissingProjection> {
+        match version {
+            Version::V1 => {
+                let source = shipping_missing_downcast_to_v_2(&head, adapters)?;
+                let source = shipping_missing_downcast_to_v_1(&source, adapters)?;
+                Ok(ShippingMissingProjection::V1(source))
+            }
+            Version::V2 => {
+                let source = shipping_missing_downcast_to_v_2(&head, adapters)?;
+                Ok(ShippingMissingProjection::V2(source))
+            }
+            Version::V3 => {
+                let source = head;
+                Ok(ShippingMissingProjection::V3(source))
+            }
+        }
+    }
+    /// The caller-selected version's projected model type.
+    pub enum ShippingProjectionProjection {
+        V1(v1::shipping::Projection),
+        V2(v2::shipping::Projection),
+        V3(v3::shipping::Projection),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_shipping_projection(
+        version: Version,
+        head: v3::shipping::Projection,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<ShippingProjectionProjection> {
+        match version {
+            Version::V1 => {
+                let source = shipping_projection_downcast_to_v_2(&head, adapters)?;
+                let source = shipping_projection_downcast_to_v_1(&source, adapters)?;
+                Ok(ShippingProjectionProjection::V1(source))
+            }
+            Version::V2 => {
+                let source = shipping_projection_downcast_to_v_2(&head, adapters)?;
+                Ok(ShippingProjectionProjection::V2(source))
+            }
+            Version::V3 => {
+                let source = head;
+                Ok(ShippingProjectionProjection::V3(source))
+            }
+        }
+    }
+    /// Outcome in the caller's explicitly selected contract version.
+    pub enum ShippingAddressesReadOutcome {
+        V1(Result<v1::shipping::Address, v1::shipping::AddressesReadError>),
+        V2(Result<v2::shipping::Address, v2::shipping::AddressesReadError>),
+        V3(Result<v3::shipping::Address, v3::shipping::AddressesReadError>),
+    }
+    /// Decode a request using an application-resolved version before any hook.
+    pub fn decode_and_upcast_shipping_addresses_read(
+        version: Version,
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ShippingAddressesReadRequestV3, AdaptationError> {
+        match version {
+            Version::V1 => {
+                decode_and_upcast_shipping_addresses_read_from_v_1(wire, adapters)
+            }
+            Version::V2 => {
+                decode_and_upcast_shipping_addresses_read_from_v_2(wire, adapters)
+            }
+            Version::V3 => {
+                decode_and_upcast_shipping_addresses_read_from_v_3(wire, adapters)
+            }
+        }
+    }
+    /// Retain the original owned Head outcome when any projection refuses.
+    pub fn downcast_shipping_addresses_read_outcome(
+        version: Version,
+        head: Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        ShippingAddressesReadOutcome,
+        Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
+    > {
+        match version {
+            Version::V1 => {
+                match downcast_shipping_addresses_read_from_v_1_outcome(
+                    head,
+                    stored,
+                    adapters,
+                ) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            ShippingAddressesReadOutcome::V1(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V2 => {
+                match downcast_shipping_addresses_read_from_v_2_outcome(
+                    head,
+                    stored,
+                    adapters,
+                ) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            ShippingAddressesReadOutcome::V2(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V3 => {
+                match downcast_shipping_addresses_read_from_v_3_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            ShippingAddressesReadOutcome::V3(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /// Execute a Head handler once; it returns the stored values older versions still read.
+    pub async fn dispatch_shipping_addresses_read<F, Fut, R>(
+        version: Version,
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            ShippingAddressesReadOutcome,
+            Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ShippingAddressesReadRequestV3, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<
+                v3::shipping::Address,
+                v3::shipping::AddressesReadError,
+                R,
+            >,
+        >,
+        R: StoredValues,
+    {
+        let input = decode_and_upcast_shipping_addresses_read(version, wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: version,
+                },
+            )
+            .await;
+        Ok(
+            downcast_shipping_addresses_read_outcome(
+                version,
+                head.outcome,
+                &head.stored,
+                adapters,
+            ),
+        )
+    }
+    /// Outcome in the caller's explicitly selected contract version.
+    pub enum ShippingAddressesUpdateOutcome {
+        V1(Result<v1::shipping::Address, v1::shipping::AddressesUpdateError>),
+        V2(Result<v2::shipping::Address, v2::shipping::AddressesUpdateError>),
+        V3(Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>),
+    }
+    /// Decode a request using an application-resolved version before any hook.
+    pub fn decode_and_upcast_shipping_addresses_update(
+        version: Version,
+        wire: ::serde_json::Value,
+        current: v3::shipping::Address,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<
+        Upcast<ShippingAddressesUpdateRequestV3, ShippingAddressesUpdateStored>,
+        AdaptationError,
+    > {
+        match version {
+            Version::V1 => {
+                decode_and_upcast_shipping_addresses_update_from_v_1(
+                    wire,
+                    current,
+                    adapters,
+                )
+            }
+            Version::V2 => {
+                decode_and_upcast_shipping_addresses_update_from_v_2(
+                    wire,
+                    current,
+                    adapters,
+                )
+            }
+            Version::V3 => {
+                decode_and_upcast_shipping_addresses_update_from_v_3(wire, adapters)
+            }
+        }
+    }
+    /// Retain the original owned Head outcome when any projection refuses.
+    pub fn downcast_shipping_addresses_update_outcome(
+        version: Version,
+        head: Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+        stored: &dyn StoredValues,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        ShippingAddressesUpdateOutcome,
+        Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+    > {
+        match version {
+            Version::V1 => {
+                match downcast_shipping_addresses_update_from_v_1_outcome(
+                    head,
+                    stored,
+                    adapters,
+                ) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            ShippingAddressesUpdateOutcome::V1(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V2 => {
+                match downcast_shipping_addresses_update_from_v_2_outcome(
+                    head,
+                    stored,
+                    adapters,
+                ) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            ShippingAddressesUpdateOutcome::V2(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V3 => {
+                match downcast_shipping_addresses_update_from_v_3_outcome(
+                    head,
+                    adapters,
+                ) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            ShippingAddressesUpdateOutcome::V3(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /// Execute a Head handler once; it persists the upcast members and returns the stored values older versions still read.
+    pub async fn dispatch_shipping_addresses_update<F, Fut, R>(
+        version: Version,
+        wire: ::serde_json::Value,
+        current: v3::shipping::Address,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            ShippingAddressesUpdateOutcome,
+            Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(
+            ShippingAddressesUpdateRequestV3,
+            VersionContext,
+            ShippingAddressesUpdateStored,
+        ) -> Fut,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<
+                v3::shipping::Address,
+                v3::shipping::AddressesUpdateError,
+                R,
+            >,
+        >,
+        R: StoredValues,
+    {
+        let input = decode_and_upcast_shipping_addresses_update(
+            version,
+            wire,
+            current,
+            adapters,
+        )?;
+        let head = handler(
+                input.value,
+                VersionContext {
+                    original_version: version,
+                },
+                input.stored,
+            )
+            .await;
+        Ok(
+            downcast_shipping_addresses_update_outcome(
+                version,
+                head.outcome,
+                &head.stored,
+                adapters,
+            ),
+        )
+    }
+}
