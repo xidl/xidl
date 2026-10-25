@@ -11,7 +11,7 @@ const take = <T>(
 };
 
 /** Storage only moves forward: every emitted event keeps its exact id. */
-const state = { writes: 0, events: [] as types.v2026_07_01.Event[] };
+const state = { events: [] as types.v2026_07_01.Event[], writes: 0 };
 
 const hooks: a.VersionAdapters = {
   // Both halves of the split serve the old name: one delivered push and one
@@ -87,7 +87,11 @@ const replayed = await emit('v2026_04_01', {
 });
 assert(replayed.dispatched && replayed.projected && replayed.value.ok);
 assert.equal(replayed.value.value.kind, 'updated');
-assert.equal(state.events[2].kind, 'delivered', 'storage keeps the stated half');
+assert.equal(
+  state.events[2].kind,
+  'delivered',
+  'storage keeps the stated half',
+);
 assert.equal(state.writes, 3);
 
 // The declared loss: the half that does not own the name is only reachable
@@ -116,4 +120,6 @@ assert(roundTrip.dispatched && roundTrip.projected && roundTrip.value.ok);
 assert.equal(roundTrip.value.value[2].id, 'e3');
 assert.equal(roundTrip.value.value[2].kind, 'updated');
 
-console.log('PASS: event split keeps old names, distinct ids and one stated half');
+console.log(
+  'PASS: event split keeps old names, distinct ids and one stated half',
+);
