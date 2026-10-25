@@ -56,7 +56,7 @@ pub(crate) enum ZodSchema {
     Primitive(String),
     CoercedNumber {
         integer: bool,
-        nonnegative: bool,
+        unsigned: bool,
     },
     ScopedName(String),
     Array {

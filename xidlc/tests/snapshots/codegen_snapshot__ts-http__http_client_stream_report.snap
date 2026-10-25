@@ -201,7 +201,7 @@ import { xjson } from "xidl-typescript-codec";
         
             part_id: z.coerce.string(),
         
-            bytes: z.array(z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()))
+            bytes: z.array(z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()))
         
     });
 
@@ -210,6 +210,6 @@ import { xjson } from "xidl-typescript-codec";
         
             upload_id: z.coerce.string(),
         
-            accepted: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative())
+            accepted: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative())
         
     });

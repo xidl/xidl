@@ -254,7 +254,7 @@ fn zod_schema_for_type_spec_impl(
     match ty {
         hir::TypeSpec::IntegerType(value) => ZodSchema::CoercedNumber {
             integer: true,
-            nonnegative: matches!(
+            unsigned: matches!(
                 value,
                 hir::IntegerType::U64
                     | hir::IntegerType::U32
@@ -266,7 +266,7 @@ fn zod_schema_for_type_spec_impl(
         },
         hir::TypeSpec::FloatingPtType => ZodSchema::CoercedNumber {
             integer: false,
-            nonnegative: false,
+            unsigned: false,
         },
         hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => {
             ZodSchema::Primitive("string()".to_string())

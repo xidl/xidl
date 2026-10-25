@@ -91,7 +91,7 @@ import {
                     });
             }
             if (status === 412) {
-                const bodySchema = z.object({ "code": z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()), "message": z.coerce.string(), "detail": z.coerce.string().optional(),  });
+                const bodySchema = z.object({ "code": z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()), "message": z.coerce.string(), "detail": z.coerce.string().optional(),  });
                 const rawBody = await resp.clone().json().catch(() => undefined);
                 if (rawBody == null || rawBody["code"] === undefined || rawBody["message"] === undefined) throw await parseXidlError(resp);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
@@ -109,7 +109,7 @@ import {
                     });
             }
             if (status === 404) {
-                const bodySchema = z.object({ "code": z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()), "msg": z.coerce.string(),  });
+                const bodySchema = z.object({ "code": z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()), "msg": z.coerce.string(),  });
                 const rawBody = await resp.clone().json().catch(() => undefined);
                 if (rawBody == null || rawBody["code"] === undefined || rawBody["msg"] === undefined) throw await parseXidlError(resp);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
@@ -813,7 +813,7 @@ import { xjson } from "xidl-typescript-codec";
         
             attempts: xjson(z.array(z.coerce.string()).nullish().transform((value) => value ?? undefined), {"name":"attempt"}),
         
-            code: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+            code: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
         
             msg: xjson(z.coerce.string(), {"name":"message"}),
         
@@ -824,7 +824,7 @@ import { xjson } from "xidl-typescript-codec";
     
     export const NotFoundSchema = z.object({
         
-            code: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+            code: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
         
             msg: z.coerce.string()
         

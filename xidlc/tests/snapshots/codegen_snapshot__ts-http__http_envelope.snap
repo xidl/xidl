@@ -170,7 +170,7 @@ import {
         async throwGetFileError(resp: Response): Promise<never> {
             const status = resp.status;
             if (status === 404) {
-                const bodySchema = z.object({ "code": z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()), "msg": z.coerce.string(),  });
+                const bodySchema = z.object({ "code": z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()), "msg": z.coerce.string(),  });
                 const rawBody = await resp.clone().json().catch(() => undefined);
                 if (rawBody == null || rawBody["code"] === undefined || rawBody["msg"] === undefined) throw await parseXidlError(resp);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
@@ -207,7 +207,7 @@ import {
         async throwDeleteFileError(resp: Response): Promise<never> {
             const status = resp.status;
             if (status === 412) {
-                const bodySchema = z.object({ "code": z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()), "msg": z.coerce.string(),  });
+                const bodySchema = z.object({ "code": z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()), "msg": z.coerce.string(),  });
                 const rawBody = await resp.clone().json().catch(() => undefined);
                 if (rawBody == null || rawBody["code"] === undefined || rawBody["msg"] === undefined) throw await parseXidlError(resp);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
@@ -411,7 +411,7 @@ export type EnvelopeApiHeadFileRequest = z.infer<typeof EnvelopeApiHeadFileReque
     
 export const EnvelopeApiHeadFileResponseSchema = z.object({
         etag: z.coerce.string(),
-        size: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        size: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
         cached: z.coerce.boolean(),
     });
 export type EnvelopeApiHeadFileResponse = z.infer<typeof EnvelopeApiHeadFileResponseSchema>;
@@ -690,7 +690,7 @@ import { xjson } from "xidl-typescript-codec";
         
             etag: xjson(z.coerce.string(), {"name":"ETag"}),
         
-            code: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+            code: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
         
             msg: z.coerce.string()
         
@@ -699,7 +699,7 @@ import { xjson } from "xidl-typescript-codec";
     
     export const NotFoundSchema = z.object({
         
-            code: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+            code: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
         
             msg: z.coerce.string()
         
@@ -732,5 +732,5 @@ import { xjson } from "xidl-typescript-codec";
             
         });
 
-        export const FileResponseSchema = z.union([z.object({ meta: FileMetaSchema }), z.object({ raw: z.array(z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative())) }), z.object({ text: z.coerce.string() })]);
+        export const FileResponseSchema = z.union([z.object({ meta: FileMetaSchema }), z.object({ raw: z.array(z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative())) }), z.object({ text: z.coerce.string() })]);
 }

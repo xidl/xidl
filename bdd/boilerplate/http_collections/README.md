@@ -29,8 +29,9 @@ The [issue #401](https://github.com/xidl/xidl/issues/401) regression
 distinguishes empty and whitespace-only numeric text from an explicit zero.
 Scalar and sequence integers accept signed decimal digits; fractional, exponent,
 hexadecimal and trailing-newline integer text fails. Floating-point headers
-accept decimal fractions and exponents. Unsigned cookie values retain their
-nonnegative check. Optional numeric absence stays absent, while a supplied empty
-value fails. The same journey runs against both generated servers; both SDKs
-also check zero and optional numeric values. Numeric widths and nonfinite float
-policy are separate constraints from this text-decoding regression.
+accept decimal fractions and exponents. Unsigned cookie text accepts an optional
+plus sign and rejects a minus sign, including `-0`. Optional numeric absence
+stays absent, while a supplied empty value fails. The same journey runs against
+both generated servers; both SDKs also check zero and optional numeric values.
+Numeric widths and nonfinite float policy are separate constraints from this
+text-decoding regression.

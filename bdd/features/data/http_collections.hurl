@@ -76,7 +76,7 @@ jsonpath "$.threshold" not exists
 
 GET {{base_url}}/numbers?count=%2B2&threshold=0
 ratio: -.5e2
-Cookie: units=2
+Cookie: units=%2B2
 HTTP 200
 [Asserts]
 jsonpath "$.count" == 2
@@ -122,6 +122,11 @@ HTTP 400
 GET {{base_url}}/numbers?count=0
 ratio: 0
 Cookie: units=-1
+HTTP 400
+
+GET {{base_url}}/numbers?count=0
+ratio: 0
+Cookie: units=-0
 HTTP 400
 
 # Missing optional text is distinct from a supplied empty string.

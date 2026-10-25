@@ -332,4 +332,4 @@ import { xjson } from "xidl-typescript-codec";
     });
 
     
-    export const AreaSchema = z.union([z.object({ circle: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()) }), z.object({ square: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()) }), z.object({ fallback: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()) })]);
+    export const AreaSchema = z.union([z.object({ circle: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()) }), z.object({ square: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()) }), z.object({ fallback: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()) })]);
