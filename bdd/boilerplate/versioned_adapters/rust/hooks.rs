@@ -6,10 +6,15 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 pub struct Hooks {
     pub calls: AtomicUsize,
     pub choices: AtomicUsize,
+    pub signed: AtomicUsize,
     pub errors: AtomicUsize,
     pub reject_downcast: bool,
     pub reject_patch: bool,
     pub reject_choice: bool,
+    pub reject_signed: bool,
+    /// The inherited member has no reader plumbing: the whole derived
+    /// conversion is one decision, so the hook reads storage itself.
+    pub signed_tags: std::sync::Mutex<BTreeMap<String, String>>,
 }
 
 /// Storage keeps what Head no longer carries while older versions still read it.
@@ -58,6 +63,27 @@ impl VersionAdapters for Hooks {
             return Err(refusal("2026-04", Direction::Downcast, "Address.gate"));
         }
         Ok(AddressDowncastToV2Decision { gate: stored.address_gate(source) })
+    }
+    fn signed_downcast_to_v_1(&self, source: &v2::Signed) -> VersionedResult<v1::Signed> {
+        // The flattened base keeps every step explicit: both sides declare
+        // the tag, and the hook still copies the whole derived instance.
+        Ok(v1::Signed {
+            base: v1::Labelled { label: source.base.label.clone(), tag: source.base.tag.clone() },
+            signature: source.signature.clone(),
+        })
+    }
+    fn signed_downcast_to_v_2(&self, source: &v3::Signed) -> VersionedResult<v2::Signed> {
+        self.signed.fetch_add(1, Ordering::SeqCst);
+        if self.reject_signed || source.base.label == "sealed-label" {
+            return Err(refusal("2026-04", Direction::Downcast, "Signed.tag"));
+        }
+        Ok(v2::Signed {
+            base: v2::Labelled {
+                label: source.base.label.clone(),
+                tag: self.signed_tags.lock().unwrap().get(&source.base.label).cloned(),
+            },
+            signature: source.signature.clone(),
+        })
     }
     fn choice_downcast_to_v_1(&self, source: &ChoiceDowncastToV1Changes<'_>) -> VersionedResult<v1::Choice> {
         self.choices.fetch_add(1, Ordering::SeqCst);

@@ -249,6 +249,37 @@ pub async fn run() {
         ), "{version:?} must reject the invalid update envelope");
     }
     assert_eq!(update_writes.load(Ordering::SeqCst), 3);
+    // The derived type keeps one flattened wire shape: the whole conversion
+    // is a single explicit decision, so the hook reads storage itself and an
+    // unarchived label omits the retired member instead of inventing one.
+    hooks.signed_tags.lock().unwrap().insert("proof".into(), "archived".into());
+    let receipt = |outcome: v3::Signed| {
+        let hooks = &hooks;
+        async move {
+            match dispatch_depot_receipt(Version::V1, json!({"parcel": parcel()}), |_, _| async {
+                Ok(outcome)
+            }, hooks).await.unwrap() {
+                ProjectionOutcome::Projected(DepotReceiptOutcome::V1(Ok(value))) => value,
+                _ => panic!("the v1 receipt must project"),
+            }
+        }
+    };
+    let archived = receipt(v3::Signed { base: v3::Labelled { label: "proof".into() }, signature: "sig-1".into() }).await;
+    assert_eq!(archived.base.tag.as_deref(), Some("archived"));
+    assert_eq!(archived.signature, "sig-1");
+    let fresh = receipt(v3::Signed { base: v3::Labelled { label: "fresh".into() }, signature: "sig-2".into() }).await;
+    assert_eq!(fresh.base.tag, None, "an unarchived label omits the member");
+    assert_eq!(hooks.signed.load(Ordering::SeqCst), 2);
+    let sealed = v3::Signed { base: v3::Labelled { label: "sealed-label".into() }, signature: "sig-3".into() };
+    match dispatch_depot_receipt(Version::V1, json!({"parcel": parcel()}), |_, _| async {
+        Ok(sealed)
+    }, &hooks).await.unwrap() {
+        ProjectionOutcome::Unsupported { head: Ok(original), error } => {
+            assert_eq!(original.base.label, "sealed-label", "the refusal retains the committed Head outcome");
+            assert_eq!(error.type_path, "Signed.tag");
+        },
+        _ => panic!("a sealed label must refuse the receipt"),
+    }
     http_journey().await;
 }
 
