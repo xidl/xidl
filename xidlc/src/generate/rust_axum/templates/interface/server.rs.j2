@@ -282,34 +282,25 @@ T: {{ ident }} + Send + Sync + 'static,
                                         {% endif %}
                                     {% endfor %}
                                     {% for param in method.response_cookie_params %}
-                                        {% if method.response_struct %}
+                                        {% if method.response_struct or (method.response_params | length == 1 and not method.response_include_return) %}
                                             {% if param.is_sequence %}
                                                 let {{ param.name }}_cookie_values: Vec<String> = {
-                                                    let values = &resp_value.{{ param.name }};
+                                                    let values = &resp_value{% if method.response_struct %}.{{ param.name }}{% endif %};
                                                     values.iter().map(|value| {
                                                         {% if param.cookie_item_is_string %}value.clone(){% elif param.cookie_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
                                                         .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
                                                     }).collect()
                                                 };
-                                            {% else %}
-                                                let {{ param.name }}_cookie_value: String = {
-                                                    let value = &resp_value.{{ param.name }};
-                                                    {% if param.cookie_item_is_string %}value.clone(){% elif param.cookie_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
+                                            {% elif param.optional %}
+                                                let {{ param.name }}_cookie_value: Option<String> = {
+                                                    let value = &resp_value{% if method.response_struct %}.{{ param.name }}{% endif %};
+                                                    {% if param.cookie_item_is_string %}value.clone(){% elif param.cookie_item_is_primitive %}value.as_ref().map(|value| value.to_string()){% else %}value.as_ref().map(xidl_rust_axum::serde_json::to_string)
+                                                    .transpose()
                                                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
                                                 };
-                                            {% endif %}
-                                        {% elif method.response_params | length == 1 and not method.response_include_return %}
-                                            {% if param.is_sequence %}
-                                                let {{ param.name }}_cookie_values: Vec<String> = {
-                                                    let values = &resp_value;
-                                                    values.iter().map(|value| {
-                                                        {% if param.cookie_item_is_string %}value.clone(){% elif param.cookie_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
-                                                        .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
-                                                    }).collect()
-                                                };
                                             {% else %}
                                                 let {{ param.name }}_cookie_value: String = {
-                                                    let value = &resp_value;
+                                                    let value = &resp_value{% if method.response_struct %}.{{ param.name }}{% endif %};
                                                     {% if param.cookie_item_is_string %}value.clone(){% elif param.cookie_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
                                                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
                                                 };
@@ -417,6 +408,13 @@ T: {{ ident }} + Send + Sync + 'static,
                                         {% for param in method.response_cookie_params %}
                                             {% if param.is_sequence %}
                                                 for value_str in {{ param.name }}_cookie_values {
+                                                    let cookie_str = xidl_rust_axum::cookie::Cookie::new("{{ param.wire_name }}", value_str).encoded().to_string();
+                                                    let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&cookie_str)
+                                                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                                                    resp.headers_mut().append(::xidl_rust_axum::axum::http::header::SET_COOKIE, header_value);
+                                                }
+                                            {% elif param.optional %}
+                                                if let Some(value_str) = {{ param.name }}_cookie_value {
                                                     let cookie_str = xidl_rust_axum::cookie::Cookie::new("{{ param.wire_name }}", value_str).encoded().to_string();
                                                     let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&cookie_str)
                                                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;

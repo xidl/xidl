@@ -32,3 +32,24 @@ generated adapters do not own that policy. Tenant cookies are supplied fixture
 identities. Production authentication and persistent catalog IO remain
 application responsibilities. No network resource or SaaS credential is needed
 to run it.
+
+The same Head also accepts a separately submitted single-media preference.
+`GET /catalog?remember=...` returns the usual search body and an optional
+`bookmark` response cookie; `PUT /catalog/preference?media=...` returns only
+that cookie with a 204 and no body. Neither operation uses the preference to
+filter the catalog. An omitted preference emits no `Set-Cookie`, an explicit
+empty string writes `bookmark=`, and `image`, `video`, or `model_3d` writes that
+value. Unknown preferences and tenants are denied without writing a cookie.
+Repeating the same update is deterministic and never changes Head assets.
+
+This response metadata pattern is inspired by Hydrogen's application-owned
+[cart ID cookie setter](https://github.com/Shopify/hydrogen/blob/2026-04/packages/hydrogen/src/cart/cartSetIdDefault.ts).
+The reduced preference rules above belong to this fixture. An empty cookie value
+is valid under
+[RFC 6265 §4.1.1](https://www.rfc-editor.org/rfc/rfc6265.html#section-4.1.1); it
+does not delete the cookie. Expiration, browser persistence and production
+cookie attributes remain application policy. Hurl checks raw headers, empty 204
+bodies and rejected updates; both independently selected SDK generations check
+the three decoded presence states through Chain and Route. The Chain front end
+uses the same published `DeserializeFactory::deserialize_present` text decoder
+as generated routers, so supplied empty text stays present.

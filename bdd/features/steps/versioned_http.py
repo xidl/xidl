@@ -223,16 +223,18 @@ def versioned_openapi(context):
                     path = matches[0]
                 operation = document["paths"][path][request["method"].lower()]
                 contract = operation["responses"][str(response["status"])]
-                media_type = headers["content-type"].split(";", 1)[0].strip()
-                schema = contract["content"][media_type]["schema"]
                 for name, header in contract.get("headers", {}).items():
                     if name.lower() in headers:
                         Draft202012Validator(header["schema"]).validate(
                             headers[name.lower()]
                         )
-                body = json.loads(
-                    (context.versioned_report / response["body"]).read_text()
-                )
+                body = (context.versioned_report / response["body"]).read_bytes()
+                if not contract.get("content"):
+                    assert body == b"", (request, response)
+                    continue
+                media_type = headers["content-type"].split(";", 1)[0].strip()
+                schema = contract["content"][media_type]["schema"]
+                body = json.loads(body)
                 validator = Draft202012Validator(
                     {**schema, "components": document.get("components", {})}
                 )
