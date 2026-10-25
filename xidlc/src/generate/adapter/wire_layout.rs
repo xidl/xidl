@@ -93,12 +93,7 @@ impl WireLayouts<'_> {
     }
 
     pub(crate) fn resolve(&self, scope: &[String], name: &hir::ScopedName) -> IdlcResult<String> {
-        let mut name = name.clone();
-        if name.name.first().is_some_and(|first| first == self.version) {
-            name.name.remove(0);
-            name.is_root = true;
-        }
-        resolve_canonical(scope, &name, |key| self.types.contains_key(key))
+        resolve_canonical(scope, name, |key| self.types.contains_key(key))
             .ok_or_else(|| Self::error(&name.name.join("::"), "cannot resolve wire reference"))
     }
     fn error(key: &str, reason: &str) -> IdlcError {

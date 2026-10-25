@@ -69,6 +69,31 @@ fn imported_readers_keep_model_bridges_and_versioned_external_schemas() {
         5,
         "two readers share one three-version unit"
     );
+    for version in ["v1", "v2"] {
+        let document: Value = serde_json::from_str(
+            &documents[&format!("openapi_versioned_inheritance.{version}.json")],
+        )
+        .expect("historical address OpenAPI");
+        let schemas = &document["components"]["schemas"];
+        assert_eq!(
+            schemas[format!("{version}.DeliveryReference")]["type"],
+            "string"
+        );
+        assert_eq!(
+            schemas[format!("{version}.geo.DeliveryReference")]["type"],
+            "integer"
+        );
+        let reference = format!("#/components/schemas/{version}.DeliveryReference");
+        assert_eq!(
+            schemas[format!("{version}.geo.Change")]["properties"]["deliveryReference"]["$ref"],
+            reference
+        );
+        assert_eq!(
+            schemas[format!("{version}.geo.Identity")]["allOf"][0]["properties"]["deliveryReference"]
+                ["$ref"],
+            reference
+        );
+    }
     for (reader, version) in [("old_reader", "v1"), ("head_reader", "v3")] {
         let document: Value = serde_json::from_str(&documents[&format!("openapi_{reader}.json")])
             .expect("reader OpenAPI");

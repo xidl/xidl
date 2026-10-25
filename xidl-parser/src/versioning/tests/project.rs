@@ -84,7 +84,7 @@ fn projection_removes_the_version_enum_and_lifecycle_annotations() {
 }
 
 #[test]
-fn projection_makes_root_references_relative() {
+fn projection_keeps_root_references_in_the_version_namespace() {
     let (spec, record) = analyze(VERSIONED);
     let version = project_ids(&record)[0];
     let projected = record.project(&spec, version).expect("projection");
@@ -97,7 +97,7 @@ fn projection_makes_root_references_relative() {
                 if value.ident == "Pet" =>
             {
                 value.member.iter().find_map(|member| match &member.ty {
-                    TypeSpec::ScopedName(name) if name.name == ["Item"] => Some(name.clone()),
+                    TypeSpec::ScopedName(name) if name.name == ["v1", "Item"] => Some(name.clone()),
                     _ => None,
                 })
             }
@@ -105,7 +105,7 @@ fn projection_makes_root_references_relative() {
         })
         .expect("Pet.item should reference Item");
 
-    assert!(!item.is_root);
+    assert!(item.is_root);
 }
 
 #[test]

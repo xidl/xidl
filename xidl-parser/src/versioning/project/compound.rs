@@ -3,9 +3,6 @@
 use super::super::lifecycle::{Availability, SiteKind, availability};
 use super::super::paths::{declarator_name, join};
 use super::projector::Projector;
-use super::references::{
-    touch_const_expr, touch_declarators, touch_scoped, touch_switch_type, touch_type,
-};
 use super::strip_annotations;
 use crate::error::ParserResult;
 use crate::hir::{
@@ -51,7 +48,10 @@ impl<'a> Projector<'a> {
                 let mut projected = value.clone();
                 projected.annotations = strip_annotations(&value.annotations);
                 if let Some(parent_name) = &mut projected.parent {
-                    touch_scoped(parent_name, &mut self.references, &here);
+                    self.touch_scoped(parent_name, &here);
+                }
+                for field in &mut projected.field {
+                    self.touch_const_expr(&mut field.pos.0, &here);
                 }
                 Ok(Some(ConstrTypeDcl::BitsetDcl(projected)))
             }
@@ -100,7 +100,7 @@ impl<'a> Projector<'a> {
         let mut projected = value.clone();
         projected.annotations = strip_annotations(&value.annotations);
         for parent_name in &mut projected.parent {
-            touch_scoped(parent_name, &mut self.references, &here);
+            self.touch_scoped(parent_name, &here);
         }
         projected.member = self.members(&value.member, own, &here)?;
         // Semantic analysis recomputes inherited members from the projected
@@ -174,7 +174,7 @@ impl<'a> Projector<'a> {
             return Ok(None);
         }
         let mut switch = value.switch_type_spec.clone();
-        touch_switch_type(&mut switch, &mut self.references, &here);
+        self.touch_switch_type(&mut switch, &here);
         let mut cases = Vec::new();
         for case in &value.case {
             let case_path = join(&here, &declarator_name(&case.element.value));
@@ -191,7 +191,7 @@ impl<'a> Projector<'a> {
             let mut labels = case.label.clone();
             for label in &mut labels {
                 if let crate::hir::CaseLabel::Value(expr) = label {
-                    touch_const_expr(expr, &mut self.references, &case_path);
+                    self.touch_const_expr(expr, &case_path);
                 }
             }
             let mut element = ElementSpec {
@@ -202,13 +202,9 @@ impl<'a> Projector<'a> {
                 recursive: case.element.recursive,
                 references_deprecated: case.element.references_deprecated,
             };
-            touch_declarators(
-                std::slice::from_mut(&mut element.value),
-                &mut self.references,
-                &case_path,
-            );
+            self.touch_declarators(std::slice::from_mut(&mut element.value), &case_path);
             match &mut element.ty {
-                ElementSpecTy::TypeSpec(ty) => touch_type(ty, &mut self.references, &case_path),
+                ElementSpecTy::TypeSpec(ty) => self.touch_type(ty, &case_path),
                 ElementSpecTy::ConstrTypeDcl(constr) => {
                     element.ty = match self.constr(constr, case_own, &case_path)? {
                         Some(nested) => ElementSpecTy::ConstrTypeDcl(nested),

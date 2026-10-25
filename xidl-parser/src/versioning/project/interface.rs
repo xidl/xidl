@@ -3,14 +3,11 @@
 use super::super::lifecycle::{Availability, SiteKind, availability};
 use super::super::paths::{attribute_name, declarators_name, join};
 use super::projector::Projector;
-use super::references::{
-    Reference, relativize_names, touch_declarators, touch_interface_parent, touch_type,
-};
 use super::strip_annotations;
 use crate::error::ParserResult;
 use crate::hir::{
-    AttrDcl, AttrDclInner, AttrRaisesExpr, Export, InterfaceDcl, InterfaceDclInner, Member, OpDcl,
-    OpTypeSpec, ParamDcl,
+    AttrDcl, AttrDclInner, Export, InterfaceDcl, InterfaceDclInner, Member, OpDcl, OpTypeSpec,
+    ParamDcl,
 };
 
 impl<'a> Projector<'a> {
@@ -34,7 +31,11 @@ impl<'a> Projector<'a> {
         let mut projected = interface.clone();
         projected.annotations = strip_annotations(&interface.annotations);
         if let InterfaceDclInner::InterfaceDef(def) = &mut projected.decl {
-            touch_interface_parent(def, &mut self.references, &here);
+            if let Some(parent) = &mut def.header.parent {
+                for crate::hir::InterfaceName(name) in &mut parent.0 {
+                    self.touch_scoped(name, &here);
+                }
+            }
             if let Some(body) = &mut def.interface_body {
                 let mut exports = Vec::new();
                 for export in &body.0 {
@@ -88,21 +89,16 @@ impl<'a> Projector<'a> {
         let mut projected = operation.clone();
         projected.annotations = strip_annotations(&operation.annotations);
         if let OpTypeSpec::TypeSpec(ty) = &mut projected.ty {
-            touch_type(ty, &mut self.references, &here);
+            self.touch_type(ty, &here);
         }
         if let Some(parameters) = &operation.parameter {
             let mut kept = Vec::new();
-            let mut references = Vec::new();
             for parameter in &parameters.0 {
-                if let Some(parameter) = self.parameter(parameter, own, &here, &mut references)? {
+                if let Some(parameter) = self.parameter(parameter, own, &here)? {
                     kept.push(parameter);
                 }
             }
             projected.parameter = Some(crate::hir::ParameterDcls(kept));
-            self.references.extend(references);
-        }
-        if let Some(raises) = &mut projected.raises {
-            relativize_names(&mut raises.0);
         }
         Ok(Some(projected))
     }
@@ -112,7 +108,6 @@ impl<'a> Projector<'a> {
         parameter: &ParamDcl,
         parent: Availability,
         path: &str,
-        references: &mut Vec<Reference>,
     ) -> ParserResult<Option<ParamDcl>> {
         let here = join(path, &parameter.declarator.0);
         let site = self.site(&here, path, SiteKind::Parameter, &parameter.annotations);
@@ -122,7 +117,7 @@ impl<'a> Projector<'a> {
         }
         let mut projected = parameter.clone();
         projected.annotations = strip_annotations(&parameter.annotations);
-        touch_type(&mut projected.ty, references, &here);
+        self.touch_type(&mut projected.ty, &here);
         Ok(Some(projected))
     }
 
@@ -141,29 +136,8 @@ impl<'a> Projector<'a> {
         let mut projected = attribute.clone();
         projected.annotations = strip_annotations(&attribute.annotations);
         match &mut projected.decl {
-            AttrDclInner::ReadonlyAttrSpec(spec) => {
-                touch_type(&mut spec.ty, &mut self.references, &here);
-                if let Some(raises) = spec.declarator.raises_mut() {
-                    relativize_names(&mut raises.0);
-                }
-            }
-            AttrDclInner::AttrSpec(spec) => {
-                touch_type(&mut spec.ty, &mut self.references, &here);
-                if let crate::hir::AttrDeclarator::WithRaises { raises, .. } = &mut spec.declarator
-                {
-                    match raises {
-                        AttrRaisesExpr::Case1(get, set) => {
-                            relativize_names(&mut get.expr.0);
-                            if let Some(set) = set {
-                                relativize_names(&mut set.expr.0);
-                            }
-                        }
-                        AttrRaisesExpr::SetExcepExpr(set) => {
-                            relativize_names(&mut set.expr.0);
-                        }
-                    }
-                }
-            }
+            AttrDclInner::ReadonlyAttrSpec(spec) => self.touch_type(&mut spec.ty, &here),
+            AttrDclInner::AttrSpec(spec) => self.touch_type(&mut spec.ty, &here),
         }
         Ok(Some(projected))
     }
@@ -175,7 +149,6 @@ impl<'a> Projector<'a> {
         path: &str,
     ) -> ParserResult<Vec<Member>> {
         let mut kept = Vec::new();
-        let mut references = Vec::new();
         for member in members {
             let here = join(path, &declarators_name(&member.ident));
             let site = self.site(&here, path, SiteKind::Member, &member.annotations);
@@ -185,11 +158,13 @@ impl<'a> Projector<'a> {
             }
             let mut projected = member.clone();
             projected.annotations = strip_annotations(&member.annotations);
-            touch_type(&mut projected.ty, &mut references, &here);
-            touch_declarators(&mut projected.ident, &mut references, &here);
+            self.touch_type(&mut projected.ty, &here);
+            self.touch_declarators(&mut projected.ident, &here);
+            if let Some(default) = &mut projected.default {
+                self.touch_const_expr(&mut default.0, &here);
+            }
             kept.push(projected);
         }
-        self.references.extend(references);
         Ok(kept)
     }
 }

@@ -110,10 +110,6 @@ interface Store : ::Parent {
     for (version, definition) in record.timeline().iter() {
         let projected = record.project(&spec, version).unwrap();
         let json = serde_json::to_string(&projected).unwrap();
-        assert!(
-            !json.contains("\"is_root\":true"),
-            "all moved references must be relative"
-        );
         assert!(json.contains("Current"));
         assert_eq!(json.contains("Gone"), definition.ident == "v1");
         let body = projected
@@ -136,12 +132,16 @@ interface Store : ::Parent {
             .unwrap();
         assert_eq!(
             store.header.parent.as_ref().unwrap().0[0].0.name,
-            ["Parent"]
+            [definition.ident.as_str(), "Parent"]
         );
         let names = |values: &[hir::ScopedName]| {
             values
                 .iter()
-                .map(|name| name.name.join("::"))
+                .map(|name| {
+                    assert!(name.is_root);
+                    assert_eq!(name.name.first(), Some(&definition.ident));
+                    name.name[1..].join("::")
+                })
                 .collect::<Vec<_>>()
         };
         let expected = if definition.ident == "v1" {
@@ -212,7 +212,7 @@ interface Store : ::Parent {
         };
         for bound in [&sequence.len, &map.len] {
             assert!(
-                matches!(bound, Some(hir::PositiveIntConst(hir::ConstExpr::ScopedName(name))) if name.name == ["LIMIT"] && !name.is_root)
+                matches!(bound, Some(hir::PositiveIntConst(hir::ConstExpr::ScopedName(name))) if name.name == [definition.ident.as_str(), "LIMIT"] && name.is_root)
             );
         }
         let hir::Declarator::ArrayDeclarator(grid) = &batch.member[2].ident[0] else {

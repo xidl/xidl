@@ -1,0 +1,78 @@
+---
+source: xidl-parser/src/versioning/tests/roots.rs
+expression: "IdlPrinter::render(&merged)"
+---
+module v1 {
+    typedef string Identifier;
+    const long WIDTH = 8;
+    enum Kind {
+        ready,
+    };
+    bitset Flags {
+        bitfield<::v1::WIDTH, unsigned short> value;
+    };
+    module v1 {
+        typedef long Identifier;
+    };
+    module shipping {
+        typedef long Identifier;
+        const long WIDTH = 2;
+        struct Address {
+            ::v1::Identifier id;
+            sequence<::v1::Identifier, ::v1::WIDTH> labels;
+            map<string, ::v1::Identifier, ::v1::WIDTH> by_tag;
+            string<::v1::WIDTH> label;
+            wstring<::v1::WIDTH> wide;
+            fixed<::v1::WIDTH, 0> amount;
+            long parts[::v1::WIDTH];
+            long priority default (+::v1::WIDTH - 1);
+            ::v1::v1::Identifier legacy_code;
+        };
+        const long LIMIT = ::v1::WIDTH;
+        union State switch (::v1::Kind) {
+            case ::v1::Kind::ready:
+            ::v1::Identifier id;
+        };
+        interface Deliveries {
+            @post(path = "/delivery")
+            ::v1::Identifier retain(@body  ::v1::Identifier value);
+        };
+    };
+};
+module v2 {
+    typedef string Identifier;
+    const long WIDTH = 8;
+    enum Kind {
+        ready,
+    };
+    bitset Flags {
+        bitfield<::v2::WIDTH, unsigned short> value;
+    };
+    module v1 {
+        typedef long Identifier;
+    };
+    module shipping {
+        typedef long Identifier;
+        const long WIDTH = 2;
+        struct Address {
+            ::v2::Identifier id;
+            sequence<::v2::Identifier, ::v2::WIDTH> labels;
+            map<string, ::v2::Identifier, ::v2::WIDTH> by_tag;
+            string<::v2::WIDTH> label;
+            wstring<::v2::WIDTH> wide;
+            fixed<::v2::WIDTH, 0> amount;
+            long parts[::v2::WIDTH];
+            long priority default (+::v2::WIDTH - 1);
+            ::v2::v1::Identifier legacy_code;
+        };
+        const long LIMIT = ::v2::WIDTH;
+        union State switch (::v2::Kind) {
+            case ::v2::Kind::ready:
+            ::v2::Identifier id;
+        };
+        interface Deliveries {
+            @post(path = "/delivery")
+            ::v2::Identifier retain(@body  ::v2::Identifier value);
+        };
+    };
+};

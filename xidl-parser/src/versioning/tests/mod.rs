@@ -13,6 +13,7 @@ mod lifecycle;
 mod map;
 mod project;
 mod references;
+mod roots;
 mod timeline;
 mod version_parameter;
 
