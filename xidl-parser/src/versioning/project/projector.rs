@@ -4,10 +4,10 @@ use super::super::VersioningError;
 use super::super::lifecycle::{Availability, Site, SiteKind, availability};
 use super::super::paths::{declarators_name, join};
 use super::super::timeline::{VersionDef, VersionId, VersionTimeline};
-use super::declarations::for_each_declaration;
 use super::references::{Reference, touch_const_expr, touch_const_type, touch_type};
 use super::strip_annotations;
 use crate::error::ParserResult;
+use crate::hir::DeclarationNames;
 use crate::hir::{
     Annotation, AttrDclInner, AttrDeclarator, AttrRaisesExpr, ConstDcl, Definition, ExceptDcl,
     Export, InterfaceDclInner, ModuleDcl, ReadonlyAttrDeclarator, ScopedName, TypeDcl, TypeSpec,
@@ -180,7 +180,7 @@ impl<'a> Projector<'a> {
     /// Records every declaration inside a dropped subtree as dropped.
     pub(super) fn note_dropped_subtree(&mut self, definition: &Definition, path: &str) {
         let mut paths = Vec::new();
-        for_each_declaration(
+        DeclarationNames::visit(
             std::slice::from_ref(definition),
             path,
             &mut |declared: &str| {

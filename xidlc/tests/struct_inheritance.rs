@@ -18,6 +18,10 @@ interface Media {
 "#;
 
 fn generate(lang: &str) -> Vec<File> {
+    generate_source(lang, SOURCE)
+}
+
+fn generate_source(lang: &str, source: &str) -> Vec<File> {
     let props = HashMap::from([
         ("enable_client".to_string(), true.into()),
         ("enable_server".to_string(), true.into()),
@@ -25,7 +29,7 @@ fn generate(lang: &str) -> Vec<File> {
     ]);
     let mut generator = Generator::new(lang.to_string());
     generator
-        .generate_from_idl(SOURCE, Path::new("struct_inheritance.idl"), props)
+        .generate_from_idl(source, Path::new("struct_inheritance.idl"), props)
         .unwrap_or_else(|error| panic!("generate {lang}: {error}"))
 }
 
@@ -97,4 +101,62 @@ fn every_target_flattens_inherited_struct_fields() {
     let participant = &document["components"]["schemas"]["Participant"];
     assert_eq!(participant["properties"]["id"]["type"], "string");
     assert_eq!(participant["properties"]["role"]["type"], "string");
+}
+
+#[test]
+fn inherited_schemas_keep_declaring_scopes_even_when_names_are_shadowed() {
+    let source = r#"
+    typedef string Identifier;
+    struct Base { Identifier id; };
+    module geo {
+        typedef string Identifier;
+        struct Identity {
+            Identifier id;
+            sequence<Identifier> aliases;
+            map<string, Identifier> labels;
+        };
+    };
+    module shipping {
+        typedef long Identifier;
+        module geo { typedef long Identifier; };
+        struct RootAddress : ::Base { long priority; };
+        struct Address : ::geo::Identity { long priority; };
+        @no_security interface Addresses {
+            @get(path="/address") Address read();
+        };
+    };
+    // This legal name must not collide with the private root binding.
+    module __xidl_root { typedef long Identifier; };
+    "#;
+    let files = generate_source("typescript-rest", source);
+    let models = std::collections::BTreeMap::from([
+        ("types", content(&files, "struct_inheritance.d.ts")),
+        ("zod", content(&files, "struct_inheritance.zod.ts")),
+    ]);
+    insta::assert_json_snapshot!("inherited_lexical_scopes", models);
+    assert!(models["zod"].contains("id: $xidl_root.IdentifierSchema"));
+    assert!(models["zod"].contains("id: $xidl_root.geo.IdentifierSchema"));
+    assert!(models["zod"].contains("z.array($xidl_root.geo.IdentifierSchema)"));
+    assert!(models["zod"].contains("z.record(z.string(), $xidl_root.geo.IdentifierSchema)"));
+
+    let qualified = source
+        .replace(
+            "struct Base { Identifier id;",
+            "struct Base { ::Identifier id;",
+        )
+        .replace(
+            "            Identifier id;",
+            "            ::geo::Identifier id;",
+        )
+        .replace("sequence<Identifier>", "sequence<::geo::Identifier>")
+        .replace("map<string, Identifier>", "map<string, ::geo::Identifier>");
+    let qualified_files = generate_source("typescript-rest", &qualified);
+    let inherited = |files: &[File]| {
+        content(files, "struct_inheritance.zod.ts")
+            .split("export namespace shipping")
+            .nth(1)
+            .expect("shipping schemas")
+            .to_string()
+    };
+    assert_eq!(inherited(&files), inherited(&qualified_files));
 }
