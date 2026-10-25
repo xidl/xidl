@@ -77,6 +77,28 @@ expression: document
           }
         },
         "type": "object"
+      },
+      "transport.Count": {
+        "format": "int32",
+        "type": "integer"
+      },
+      "transport.Counts": {
+        "items": {
+          "$ref": "#/components/schemas/transport.Count"
+        },
+        "type": "array"
+      },
+      "transport.Label": {
+        "type": "string"
+      },
+      "transport.Labels": {
+        "items": {
+          "$ref": "#/components/schemas/transport.Label"
+        },
+        "type": "array"
+      },
+      "transport.Selection": {
+        "$ref": "#/components/schemas/transport.Labels"
       }
     }
   },

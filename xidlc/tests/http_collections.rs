@@ -67,3 +67,21 @@ fn selected_catalog_openapi_freezes_both_media_representations() {
     }
     insta::assert_json_snapshot!("catalog_openapi_contracts", documents);
 }
+
+#[test]
+#[cfg(feature = "gen-typescript-rest")]
+fn named_collection_server_extracts_all_wire_occurrences() {
+    let source = include_str!("../../bdd/features/data/http_collections.idl");
+    let files = xidlc::driver::Generator::new("typescript-rest".into())
+        .generate_from_idl(
+            source,
+            Path::new("http_collections.idl"),
+            HashMap::from([("enable_server".into(), true.into())]),
+        )
+        .expect("named collection TypeScript bindings");
+    let server = files
+        .iter()
+        .find(|file| file.path().ends_with(".server.ts"))
+        .expect("collection server output");
+    insta::assert_snapshot!("collection_typescript_server", server.content());
+}

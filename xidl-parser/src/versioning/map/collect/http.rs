@@ -25,7 +25,14 @@ pub(crate) fn collect_operations(
                 .join("::"),
             &interface.name,
         );
-        for operation in interface.operations {
+        for mut operation in interface.operations {
+            operation.visit_types(&mut |ty| {
+                ty.visit_scoped_names(&mut |name| {
+                    if name.name.first() == interface.module_path.first() {
+                        name.name.remove(0);
+                    }
+                });
+            });
             let params = operation
                 .http
                 .request

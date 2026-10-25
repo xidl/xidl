@@ -1,8 +1,11 @@
-use super::has_annotation;
+use super::semantics::has_annotation;
 use crate::error::{ParseError, ParserResult};
 use crate::hir;
 
+mod input;
+mod normalize;
 mod runtime;
+mod scope;
 
 struct Declaration<'a> {
     module_path: Vec<String>,
@@ -13,11 +16,12 @@ struct Declaration<'a> {
 enum DeclarationKind<'a> {
     BuiltinEnum(&'a hir::EnumDcl),
     HttpUnion(&'a hir::UnionDef),
+    Alias(&'a hir::TypeSpec),
     Type,
     Other,
 }
 
-/// Borrowed type declarations used while projecting HTTP unions.
+/// Borrowed declarations shared by HTTP bindings and representations.
 pub(super) struct TypeDeclarations<'a>(Vec<Declaration<'a>>);
 
 impl<'a> TypeDeclarations<'a> {
@@ -127,7 +131,14 @@ impl<'a> TypeDeclarations<'a> {
                         hir::Declarator::SimpleDeclarator(name) => &name.0,
                         hir::Declarator::ArrayDeclarator(array) => &array.ident,
                     };
-                    self.declare(ident, DeclarationKind::Type, scope);
+                    let kind = match (&ty.ty, decl) {
+                        (
+                            hir::TypedefType::TypeSpec(target),
+                            hir::Declarator::SimpleDeclarator(_),
+                        ) => DeclarationKind::Alias(target),
+                        _ => DeclarationKind::Type,
+                    };
+                    self.declare(ident, kind, scope);
                 }
             }
             hir::TypeDcl::NativeDcl(native) => {
@@ -148,7 +159,7 @@ impl<'a> TypeDeclarations<'a> {
     }
 
     fn resolve(&self, name: &hir::ScopedName, scope: &[String]) -> Option<&Declaration<'a>> {
-        super::HttpUnion::resolve_scoped_definition(
+        Self::resolve_scoped_definition(
             self.0
                 .iter()
                 .map(|decl| (decl.module_path.as_slice(), decl)),

@@ -22,6 +22,26 @@ pub enum TypeSpec {
     TemplateType(TemplateType),
 }
 
+impl TypeSpec {
+    /// Visits named type references, including sequence, map and template arguments.
+    pub fn visit_scoped_names(&mut self, visit: &mut impl FnMut(&mut ScopedName)) {
+        match self {
+            Self::ScopedName(name) => visit(name),
+            Self::SequenceType(sequence) => sequence.ty.visit_scoped_names(visit),
+            Self::MapType(map) => {
+                map.key.visit_scoped_names(visit);
+                map.value.visit_scoped_names(visit);
+            }
+            Self::TemplateType(template) => {
+                for argument in &mut template.args {
+                    argument.visit_scoped_names(visit);
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SequenceType {
     pub ty: Box<TypeSpec>,

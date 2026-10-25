@@ -37,6 +37,9 @@ pub fn project_with_options(
     ctx.collect_exceptions(&spec.0, &[])?;
     ctx.document.http_unions = HttpUnion::collect(&spec.0)?;
     ctx.collect_spec(spec, &[])?;
+    super::types::TypeDeclarations::collect(&spec.0)
+        .normalize(&mut ctx.interfaces)
+        .map_err(parse_err)?;
     ctx.document.exceptions = ctx.exceptions;
     ctx.document.version_parameter = options.version_parameter.clone();
     ctx.document.version_values = options.version_values.iter().cloned().collect();

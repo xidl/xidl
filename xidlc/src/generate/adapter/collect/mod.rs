@@ -47,7 +47,7 @@ impl SurfaceCollector {
                 for operation in &interface.operations {
                     surface.operations.insert(
                         format!("{key}.{}", operation.meta.name),
-                        Self::operation(&key, &scope, operation)?,
+                        Self::operation(&key, &scope, operation, &version.id)?,
                     );
                 }
             }

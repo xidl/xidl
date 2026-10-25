@@ -123,6 +123,25 @@ HTTP 403
 jsonpath "$.reason" == "unknown catalog tenant"
 jsonpath "$.products" not exists
 
+# A scalar alias still uses the first cookie, including a supplied empty value.
+GET {{base_url}}/catalog?media=video
+X-Catalog-Version: 2026-07-01
+Cookie: tenant=; tenant=shop-b
+HTTP 403
+[Asserts]
+jsonpath "$.reason" == "unknown catalog tenant"
+jsonpath "$.products" not exists
+
+GET {{base_url}}/catalog?media=video
+X-Catalog-Version: 2026-10-01
+Cookie: tenant=shop-a; tenant=shop-b
+HTTP 200
+[Asserts]
+jsonpath "$.products" count == 3
+jsonpath "$.products[0].id" == "clip"
+jsonpath "$.products[1].id" == "model"
+jsonpath "$.products[2].id" == "video-only"
+
 GET {{base_url}}/catalog
 X-Catalog-Version: 2026-10-01
 HTTP 400
