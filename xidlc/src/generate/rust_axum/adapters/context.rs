@@ -174,11 +174,7 @@ impl Value {
                 key.helpers(used);
                 value.helpers(used);
             }
-            Self::Optional(value) => {
-                used.insert("locate");
-                value.helpers(used);
-            }
-            Self::Boxed { value, .. } => value.helpers(used),
+            Self::Optional(value) | Self::Boxed { value, .. } => value.helpers(used),
             Self::Identity | Self::Named(_) => {}
         }
     }

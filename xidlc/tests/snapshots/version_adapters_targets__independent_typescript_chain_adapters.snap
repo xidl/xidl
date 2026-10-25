@@ -53,8 +53,8 @@ function mapRecord<S, T>(source: Record<string, S>, convert: (value: S) => Versi
     }
     return ok(Object.fromEntries(entries));
 }
-function mapOptional<S, T>(source: S | undefined, convert: (value: S) => VersionedResult<T>, path: string): VersionedResult<T | undefined> {
-    return source === undefined ? ok(undefined) : locate(convert(source), path);
+function mapOptional<S, T>(source: S | undefined, convert: (value: S) => VersionedResult<T>): VersionedResult<T | undefined> {
+    return source === undefined ? ok(undefined) : convert(source);
 }
 
 

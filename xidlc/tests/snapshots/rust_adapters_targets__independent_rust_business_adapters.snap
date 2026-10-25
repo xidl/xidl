@@ -559,16 +559,10 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.zip))?;
-        let projected_1 = locate(
-            (&source.gate)
-                .as_ref()
-                .map(|item| Ok::<
-                    _,
-                    UnsupportedProjection,
-                >(::std::clone::Clone::clone(item)))
-                .transpose(),
-            "Address.gate",
-        )?;
+        let projected_1 = (&source.gate)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
         Ok(v2::Address {
             zip: projected_0,
             gate: projected_1,
@@ -589,16 +583,10 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.zip))?;
-        let projected_1 = locate(
-            (&source.gate)
-                .as_ref()
-                .map(|item| Ok::<
-                    _,
-                    UnsupportedProjection,
-                >(::std::clone::Clone::clone(item)))
-                .transpose(),
-            "Address.gate",
-        )?;
+        let projected_1 = (&source.gate)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
         Ok(v1::Address {
             zip: projected_0,
             gate: projected_1,
@@ -876,17 +864,14 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.name))?;
-        let projected_1 = locate(
-            (&source.children)
-                .as_ref()
-                .map(|item| map_sequence(
-                    item,
-                    |item| node_upcast_from_v_1(item, adapters),
-                    "Node.children",
-                ))
-                .transpose(),
-            "Node.children",
-        )?;
+        let projected_1 = (&source.children)
+            .as_ref()
+            .map(|item| map_sequence(
+                item,
+                |item| node_upcast_from_v_1(item, adapters),
+                "Node.children",
+            ))
+            .transpose()?;
         Ok(v2::Node {
             name: projected_0,
             children: projected_1,
@@ -907,17 +892,14 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.name))?;
-        let projected_1 = locate(
-            (&source.children)
-                .as_ref()
-                .map(|item| map_sequence(
-                    item,
-                    |item| node_downcast_to_v_1(item, adapters),
-                    "Node.children",
-                ))
-                .transpose(),
-            "Node.children",
-        )?;
+        let projected_1 = (&source.children)
+            .as_ref()
+            .map(|item| map_sequence(
+                item,
+                |item| node_downcast_to_v_1(item, adapters),
+                "Node.children",
+            ))
+            .transpose()?;
         Ok(v1::Node {
             name: projected_0,
             children: projected_1,
@@ -1033,16 +1015,10 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.id))?;
-        let projected_1 = locate(
-            (&source.handling_note)
-                .as_ref()
-                .map(|item| Ok::<
-                    _,
-                    UnsupportedProjection,
-                >(::std::clone::Clone::clone(item)))
-                .transpose(),
-            "Parcel.handling_note",
-        )?;
+        let projected_1 = (&source.handling_note)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
         let projected_2 = address_upcast_from_v_1(&source.address, adapters)?;
         let projected_3 = map_sequence(
             &source.stops,
@@ -1091,16 +1067,10 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.id))?;
-        let projected_1 = locate(
-            (&source.handling_note)
-                .as_ref()
-                .map(|item| Ok::<
-                    _,
-                    UnsupportedProjection,
-                >(::std::clone::Clone::clone(item)))
-                .transpose(),
-            "Parcel.handling_note",
-        )?;
+        let projected_1 = (&source.handling_note)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
         let projected_2 = address_downcast_to_v_1(&source.address, adapters)?;
         let projected_3 = map_sequence(
             &source.stops,
@@ -1141,26 +1111,14 @@ pub mod version_adapters {
             type_path: "ParcelPatch".into(),
             reason: reason.into(),
         };
-        let projected_0 = locate(
-            (&source.note)
-                .as_ref()
-                .map(|item| Ok::<
-                    _,
-                    UnsupportedProjection,
-                >(::std::clone::Clone::clone(item)))
-                .transpose(),
-            "ParcelPatch.note",
-        )?;
-        let projected_1 = locate(
-            (&source.handling_note)
-                .as_ref()
-                .map(|item| Ok::<
-                    _,
-                    UnsupportedProjection,
-                >(::std::clone::Clone::clone(item)))
-                .transpose(),
-            "ParcelPatch.handling_note",
-        )?;
+        let projected_0 = (&source.note)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
+        let projected_1 = (&source.handling_note)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
         Ok(v2::ParcelPatch {
             note: projected_0,
             handling_note: projected_1,
@@ -2257,17 +2215,14 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.name))?;
-        let projected_1 = locate(
-            (&source.children)
-                .as_ref()
-                .map(|item| map_sequence(
-                    item,
-                    |item| node_upcast_from_v_2(item, adapters),
-                    "Node.children",
-                ))
-                .transpose(),
-            "Node.children",
-        )?;
+        let projected_1 = (&source.children)
+            .as_ref()
+            .map(|item| map_sequence(
+                item,
+                |item| node_upcast_from_v_2(item, adapters),
+                "Node.children",
+            ))
+            .transpose()?;
         Ok(v3::Node {
             name: projected_0,
             children: projected_1,
@@ -2288,17 +2243,14 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.name))?;
-        let projected_1 = locate(
-            (&source.children)
-                .as_ref()
-                .map(|item| map_sequence(
-                    item,
-                    |item| node_downcast_to_v_2(item, adapters),
-                    "Node.children",
-                ))
-                .transpose(),
-            "Node.children",
-        )?;
+        let projected_1 = (&source.children)
+            .as_ref()
+            .map(|item| map_sequence(
+                item,
+                |item| node_downcast_to_v_2(item, adapters),
+                "Node.children",
+            ))
+            .transpose()?;
         Ok(v2::Node {
             name: projected_0,
             children: projected_1,
@@ -2377,16 +2329,10 @@ pub mod version_adapters {
             type_path: "OptionalChange".into(),
             reason: reason.into(),
         };
-        let projected_0 = locate(
-            (&source.note)
-                .as_ref()
-                .map(|item| Ok::<
-                    _,
-                    UnsupportedProjection,
-                >(::std::clone::Clone::clone(item)))
-                .transpose(),
-            "OptionalChange.note",
-        )?;
+        let projected_0 = (&source.note)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
         Ok(v3::OptionalChange {
             note: projected_0,
         })
@@ -2402,16 +2348,10 @@ pub mod version_adapters {
             type_path: "OptionalChange".into(),
             reason: reason.into(),
         };
-        let projected_0 = locate(
-            (&source.note)
-                .as_ref()
-                .map(|item| Ok::<
-                    _,
-                    UnsupportedProjection,
-                >(::std::clone::Clone::clone(item)))
-                .transpose(),
-            "OptionalChange.note",
-        )?;
+        let projected_0 = (&source.note)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
         Ok(v2::OptionalChange {
             note: projected_0,
         })
@@ -2440,16 +2380,10 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.carrier))?;
-        let projected_3 = locate(
-            (&source.note)
-                .as_ref()
-                .map(|item| Ok::<
-                    _,
-                    UnsupportedProjection,
-                >(::std::clone::Clone::clone(item)))
-                .transpose(),
-            "Parcel.note",
-        )?;
+        let projected_3 = (&source.note)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
         let projected_4 = address_upcast_from_v_2(&source.address, adapters)?;
         let projected_5 = map_sequence(
             &source.stops,
@@ -2507,16 +2441,10 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.carrier))?;
-        let projected_3 = locate(
-            (&source.note)
-                .as_ref()
-                .map(|item| Ok::<
-                    _,
-                    UnsupportedProjection,
-                >(::std::clone::Clone::clone(item)))
-                .transpose(),
-            "Parcel.note",
-        )?;
+        let projected_3 = (&source.note)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
         let projected_4 = address_downcast_to_v_2(&source.address, stored, adapters)?;
         let projected_5 = map_sequence(
             &source.stops,
@@ -2561,16 +2489,10 @@ pub mod version_adapters {
             reason: reason.into(),
         };
         let decision = adapters.parcel_patch_upcast_from_v_2(source, current)?;
-        let projected_0 = locate(
-            (&source.note)
-                .as_ref()
-                .map(|item| Ok::<
-                    _,
-                    UnsupportedProjection,
-                >(::std::clone::Clone::clone(item)))
-                .transpose(),
-            "ParcelPatch.note",
-        )?;
+        let projected_0 = (&source.note)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
         Ok(Upcast {
             value: v3::ParcelPatch {
                 note: projected_0,
