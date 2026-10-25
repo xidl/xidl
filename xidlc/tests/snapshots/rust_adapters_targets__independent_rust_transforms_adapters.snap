@@ -212,11 +212,19 @@ pub mod version_adapters {
     }
     /// Public model parameters for one served version's operation.
     pub struct DirectoryRosterRequestV20260701 {}
+    fn locate<T>(result: VersionedResult<T>, path: &str) -> VersionedResult<T> {
+        result
+            .map_err(|error| UnsupportedProjection {
+                type_path: format!("{path}.{}", error.type_path),
+                ..error
+            })
+    }
     fn map_sequence<S, T>(
         source: &[S],
         convert: impl Fn(&S) -> VersionedResult<T>,
+        path: &str,
     ) -> VersionedResult<Vec<T>> {
-        source.iter().map(convert).collect()
+        source.iter().map(|item| locate(convert(item), path)).collect()
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn missing_downcast_to_v_2026_01_01(
@@ -472,6 +480,7 @@ pub mod version_adapters {
         let projected_0 = map_sequence(
             source,
             |item| profile_downcast_to_v_2026_01_01(item, stored, adapters),
+            "DirectoryRosterResponse.r#return",
         )?;
         Ok(projected_0)
     }
@@ -752,6 +761,7 @@ pub mod version_adapters {
         let projected_0 = map_sequence(
             source,
             |item| profile_downcast_to_v_2026_04_01(item, stored, adapters),
+            "DirectoryRosterResponse.r#return",
         )?;
         Ok(projected_0)
     }

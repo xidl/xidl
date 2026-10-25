@@ -31,19 +31,23 @@ export const OMIT = "xidl.omit";
 export type Omitted = typeof OMIT;
 const ok = <T>(value: T): VersionedResult<T> => ({ ok: true, value });
 
-function mapSequence<S, T>(source: S[], convert: (value: S) => VersionedResult<T>): VersionedResult<T[]> {
+function locate<T>(result: VersionedResult<T>, path: string): VersionedResult<T> {
+    if (result.ok) return result;
+    return { ok: false, error: { ...result.error, typePath: `${path}.${result.error.typePath}` } };
+}
+function mapSequence<S, T>(source: S[], convert: (value: S) => VersionedResult<T>, path: string): VersionedResult<T[]> {
     const values: T[] = [];
     for (const value of source) {
-        const next = convert(value);
+        const next = locate(convert(value), path);
         if (!next.ok) return next;
         values.push(next.value);
     }
     return ok(values);
 }
-function mapRecord<S, T>(source: Record<string, S>, convert: (value: S) => VersionedResult<T>): VersionedResult<Record<string, T>> {
+function mapRecord<S, T>(source: Record<string, S>, convert: (value: S) => VersionedResult<T>, path: string): VersionedResult<Record<string, T>> {
     const entries: Array<[string, T]> = [];
     for (const [key, value] of Object.entries(source)) {
-        const next = convert(value);
+        const next = locate(convert(value), path);
         if (!next.ok) return next;
         entries.push([key, next.value]);
     }
@@ -1091,7 +1095,7 @@ export interface VersionAdapters {
         
             
             
-                const converted0 = mapSequence(source["return"], (item) => downcastProfileToV20260101(item, stored, adapters));
+                const converted0 = mapSequence(source["return"], (item) => downcastProfileToV20260101(item, stored, adapters), "DirectoryRosterResponse.return");
                 if (!converted0.ok) return converted0;
             
             return ok({
@@ -1330,7 +1334,7 @@ export interface VersionAdapters {
         
             
             
-                const converted0 = mapSequence(source["return"], (item) => downcastProfileToV20260401(item, stored, adapters));
+                const converted0 = mapSequence(source["return"], (item) => downcastProfileToV20260401(item, stored, adapters), "DirectoryRosterResponse.return");
                 if (!converted0.ok) return converted0;
             
             return ok({
