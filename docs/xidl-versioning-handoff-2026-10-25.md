@@ -41,26 +41,26 @@ xidl 是一个 Rust 编写的 IDL 编译器（`xidlc`），一份 IDL 契约同�
 
 ## 3. 变化目录（E1–E14）与覆盖矩阵
 
-这是需求的「变化目录」：每种破坏性变化怎么转换、由谁负责。完整定义见
-PR #382 的描述与本文各语料章节；速览：
+这是需求的「变化目录」：每种破坏性变化怎么转换、由谁负责。完整定义见 PR #382
+的描述与本文各语料章节；速览：
 
-| 记号 | 例子 | 语义 |
-|---|---|---|
-| 🟢 机械 | E2 字符串拆结构 | 生成器自动 |
-| 🔵 转换函数 | E3 合并、E5 枚举值拆字段、E6 精度、E7 一变多、E8 默认值翻转、E10 错误细分、E11 事件拆分、E12 新必填 | `down(prev, head)` / `up(view, cur)` 应用钩子 |
-| 🟡 需保留数据 | E1 删除字段、E3 | 存储保留，NEEDS 报告，退休才删 |
-| 🟠 业务分支 | E13 删除接口 | 退休接口用新操作重实现，保留到退休 |
-| ⚪ 新接口 | E9 分页变更、E14 路径变更 | 只在新版本提供；版本只由头决定 |
-| 🔴 无法表示 | E4 枚举新增值 | 422，带 typePath |
+| 记号          | 例子                                                                                                | 语义                                          |
+| ------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| 🟢 机械       | E2 字符串拆结构                                                                                     | 生成器自动                                    |
+| 🔵 转换函数   | E3 合并、E5 枚举值拆字段、E6 精度、E7 一变多、E8 默认值翻转、E10 错误细分、E11 事件拆分、E12 新必填 | `down(prev, head)` / `up(view, cur)` 应用钩子 |
+| 🟡 需保留数据 | E1 删除字段、E3                                                                                     | 存储保留，NEEDS 报告，退休才删                |
+| 🟠 业务分支   | E13 删除接口                                                                                        | 退休接口用新操作重实现，保留到退休            |
+| ⚪ 新接口     | E9 分页变更、E14 路径变更                                                                           | 只在新版本提供；版本只由头决定                |
+| 🔴 无法表示   | E4 枚举新增值                                                                                       | 422，带 typePath                              |
 
 **语料覆盖现状**（`bdd/features/data/` + `bdd/boilerplate/`，双语言）：
 
-| 语料 | 覆盖 |
-|---|---|
-| `versioned_chain`（booking） | E1（agenda 退休进存储）、E7（items↔agenda 不可逆拆包）、机械 rename、`@default` implied、幂等指纹（跨版本重放）、v1 PATCH、缺 owner、locked |
+| 语料                                   | 覆盖                                                                                                                                                                                                                                                                                   |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `versioned_chain`（booking）           | E1（agenda 退休进存储）、E7（items↔agenda 不可逆拆包）、机械 rename、`@default` implied、幂等指纹（跨版本重放）、v1 PATCH、缺 owner、locked                                                                                                                                            |
 | `versioned_transforms`（profile/目录） | E2（recipient→to）、E3（名字合并）、E4（chat 拒绝）、E5（read_at↔status）、E6（epoch↔RFC3339，严格解析）、E7（note↔notes，caller-aware 写规则）、E8（fallback 翻转）、E9（roster 整表投影）、E10（Sealed 409 降级）、E12（必填 tier）；HTTP 旅程含协商、404 回显、空表 500、逐元素拒绝 |
-| `versioned_events`（E11） | 事件拆分：双半边下行都映射旧名、事件 id 各自保留、上行声明取哪一半、旧合同没有的值在 hook 前拒绝 |
-| `versioned_adapters_business` | 容器元素退休（Address.gate 在 sequence/map 里逐元素恢复/拒绝/OMIT）、继承结构（Signed:Labelled 全类型 hook 现状）、union 降级运行时（count→text）、错误降级表、@replaces、更新流（PATCH + 存储袋） |
+| `versioned_events`（E11）              | 事件拆分：双半边下行都映射旧名、事件 id 各自保留、上行声明取哪一半、旧合同没有的值在 hook 前拒绝                                                                                                                                                                                       |
+| `versioned_adapters_business`          | 容器元素退休（Address.gate 在 sequence/map 里逐元素恢复/拒绝/OMIT）、继承结构（Signed:Labelled 全类型 hook 现状）、union 降级运行时（count→text）、错误降级表、@replaces、更新流（PATCH + 存储袋）                                                                                     |
 
 未覆盖：**E13（退休接口用新操作重实现）**、E14 的路径变更部分（E14 的「版本只
 由头决定」语义已被协商旅程覆盖）。
@@ -97,7 +97,8 @@ adapter planner      ── xidlc/src/generate/adapter/
 
 ## 5. 版本适配层（生成物契约）
 
-以 `versioned_transforms` 为例。IDL 片段（`bdd/features/data/versioned_transforms.idl`）：
+以 `versioned_transforms` 为例。IDL
+片段（`bdd/features/data/versioned_transforms.idl`）：
 
 ```idl
 @version(in = "header", name = "X-Transform-Version")
@@ -118,8 +119,8 @@ struct Profile {
 };
 ```
 
-生成的适配器（TS 侧 `versioned_transforms.adapters.ts` / Rust 侧 `.adapters.rs`）
-提供：
+生成的适配器（TS 侧 `versioned_transforms.adapters.ts` / Rust 侧
+`.adapters.rs`） 提供：
 
 ### 5.1 VersionAdapters——应用必须实现的纯钩子
 
@@ -155,7 +156,11 @@ export interface StoredValues {
 
 ```ts
 export const NEEDS = {
-  Parcel: { "2026-01": ["handling_note", "reference"], "2026-04": ["handling_note"], "2026-07": [] },
+  Parcel: {
+    "2026-01": ["handling_note", "reference"],
+    "2026-04": ["handling_note"],
+    "2026-07": [],
+  },
 } as const;
 ```
 
@@ -225,19 +230,19 @@ resolve_version(header): 缺头→Head；日历日期→不晚于它的最近版
 
 ## 6. 模块导航（接手先读这些文件）
 
-| 路径 | 职责 |
-|---|---|
-| `xidl-parser/src/versioning/` | 逐版本投影（project/）、注解校验、`@replaces`（replaces.rs）、生命周期 |
-| `xidl-parser/src/rest_hir/` | HTTP 语义模型；`HttpInputBinding.source_param` 是「文本传输位」判断的数据源 |
-| `xidlc/src/generate/adapter/` | 共享计划器：`model.rs`（TypeShape/ValuePlan/TypePlan）、`collect/`、`planner/`、`updates.rs`、`wire_layout.rs` |
-| `xidlc/src/generate/typescript_rest/adapters/` | TS 适配器上下文与渲染（context/names/render/*、wire/） |
-| `xidlc/src/generate/rust_axum/adapters/` | Rust 适配器（context、render/{conversions,endpoints,operations,stored,unions,update,wire}） |
-| `xidlc/src/generate/typescript_rest/interface/method.rs` | 操作信封；`helpers::text_positions(op)` 决定哪些参数位 coerce |
-| `xidlc/src/generate/typescript/definition/type_expr.rs` | zod schema 构建；`ZodCoercion::{Strict,Coerce}` 双模式（#391） |
-| `xidlc/tests/version_adapters_targets.rs` / `rust_adapters_targets.rs` | 适配器 insta 快照测试 |
-| `xidlc/tests/adapter_baseline/` | 普通目标的字节级 baseline（README 有重生成规程） |
-| `bdd/features/steps/version_adapters.py` | 版本化 BDD 步骤；`prepare_rust_application` 的 companions 映射 |
-| `bdd/boilerplate/versioned_*/` | 各语料的应用实现（TS+Rust），是「生成器 × 真实业务」的合同 |
+| 路径                                                                   | 职责                                                                                                           |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `xidl-parser/src/versioning/`                                          | 逐版本投影（project/）、注解校验、`@replaces`（replaces.rs）、生命周期                                         |
+| `xidl-parser/src/rest_hir/`                                            | HTTP 语义模型；`HttpInputBinding.source_param` 是「文本传输位」判断的数据源                                    |
+| `xidlc/src/generate/adapter/`                                          | 共享计划器：`model.rs`（TypeShape/ValuePlan/TypePlan）、`collect/`、`planner/`、`updates.rs`、`wire_layout.rs` |
+| `xidlc/src/generate/typescript_rest/adapters/`                         | TS 适配器上下文与渲染（context/names/render/*、wire/）                                                         |
+| `xidlc/src/generate/rust_axum/adapters/`                               | Rust 适配器（context、render/{conversions,endpoints,operations,stored,unions,update,wire}）                    |
+| `xidlc/src/generate/typescript_rest/interface/method.rs`               | 操作信封；`helpers::text_positions(op)` 决定哪些参数位 coerce                                                  |
+| `xidlc/src/generate/typescript/definition/type_expr.rs`                | zod schema 构建；`ZodCoercion::{Strict,Coerce}` 双模式（#391）                                                 |
+| `xidlc/tests/version_adapters_targets.rs` / `rust_adapters_targets.rs` | 适配器 insta 快照测试                                                                                          |
+| `xidlc/tests/adapter_baseline/`                                        | 普通目标的字节级 baseline（README 有重生成规程）                                                               |
+| `bdd/features/steps/version_adapters.py`                               | 版本化 BDD 步骤；`prepare_rust_application` 的 companions 映射                                                 |
+| `bdd/boilerplate/versioned_*/`                                         | 各语料的应用实现（TS+Rust），是「生成器 × 真实业务」的合同                                                     |
 
 ### 代码范例：钩子 + reader + 往返（Rust，节选自 business/chain 语料）
 
@@ -265,9 +270,9 @@ assert_eq!(missing.type_path, "Booking.roster");
 ```ts
 const hooks: a.VersionAdapters = {
   // 两个半边都服务旧名：delivered/read 各自是一次 updated 推送
-  eventKindDowncastToV20260401: () => ok('updated'),
+  eventKindDowncastToV20260401: () => ok("updated"),
   // 旧名只保一个半边：应用声明哪一半拥有这个名字（有损，写进变更说明）
-  eventKindUpcastFromV20260401: () => ok('delivered'),
+  eventKindUpcastFromV20260401: () => ok("delivered"),
 };
 // 断言：老订阅者对同一条消息收到两次 updated，事件 id 各自保留；
 // 老写入永远不产生 read（不编造）；delivered 出现在 v2 wire 上直接被
@@ -282,20 +287,20 @@ const hooks: a.VersionAdapters = {
    StoredValues/NEEDS/OMIT/IGNORED 语义；booking 链语料。
 2. **#380** `feat/version-update-adapters`——更新流（PATCH）从配对退休推导；
    容器形状 C1–C6：union 降级运行时、容器元素丢弃、元素内退休成员（gate）、
-   深路径 locate（生成器改进 + optional 修正）、继承语料（现状受支持面）+
-   issue #389；v1 PATCH、幂等、空补丁。
-3. **#381** `feat/version-rename-from`——`@replaces` 机械配对（维护者裁定：
-   不做 rename_from，做 replaces）；absent 保持 absent。
-4. **#382** `feat/version-default-upcast`——`@default` 的 implied 值语义；
-   E1–E12 全目录 transforms 语料（双语言 + HTTP 旅程）；E11 事件拆分语料。
+   深路径 locate（生成器改进 + optional 修正）、继承语料（现状受支持面）+ issue
+   #389；v1 PATCH、幂等、空补丁。
+3. **#381** `feat/version-rename-from`——`@replaces` 机械配对（维护者裁定： 不做
+   rename_from，做 replaces）；absent 保持 absent。
+4. **#382** `feat/version-default-upcast`——`@default` 的 implied 值语义； E1–E12
+   全目录 transforms 语料（双语言 + HTTP 旅程）；E11 事件拆分语料。
 
 **独立修复**：
 
 - **#385** `fix/union-enum-variant-paths`（修 #384）：union 跨用户枚举的变体
   路径限定。CI 绿，待维护者合并。
 - **#391** `fix/ts-strict-json-decode`（修 #388）：JSON 位严格解码、文本位
-  （path/query/header/cookie、表单体）coerce、布尔只认 true/false；双语言
-  hurl 回归（`wire_strict` 语料）。提交时 CI 运行中。
+  （path/query/header/cookie、表单体）coerce、布尔只认 true/false；双语言 hurl
+  回归（`wire_strict` 语料）。提交时 CI 运行中。
 
 **其它**：#383 `feat/deprecated-sites`（@deprecated 扩面）开着；issue #368
 （removed-member 分类，评论里维护者已给方向：merge 语义不进 xidl，靠应用
@@ -319,10 +324,10 @@ before/after）。
    语料描述改写为「应用层示例策略」（见 §5.6，PR #379 已回复）。
 5. **E13 退休接口**：接口级 `@removed` 保留到退休日，用最新操作重实现；需要
    「退休接口仍在 wire 上服务老版本」的运行时腿 + NEEDS 的接口级条目。
-6. **NEEDS 报告补全**：全类型 hook（继承）服务的退休成员不出现在表里——
-   随 #389 一起修。
-7. **webhook 平台特性 #323**：outbound 接口、OpenAPI webhooks、Standard
-   Webhooks 助手。E11 语料（versioned_events）已经把「事件拆分的翻译语义」
+6. **NEEDS 报告补全**：全类型 hook（继承）服务的退休成员不出现在表里—— 随 #389
+   一起修。
+7. **webhook 平台特性 #323**：outbound 接口、OpenAPI webhooks、Standard Webhooks
+   助手。E11 语料（versioned_events）已经把「事件拆分的翻译语义」
    钉住，是它的前置。
 8. **#320 跨目标 wire 一致性**、#366/#367 相关适配器特性——见 issue。
 
@@ -332,8 +337,9 @@ before/after）。
 
 - 功能分支自 `master`；版本化栈内部叠放（#379→#380→#381→#382），重爆用
   `git rebase --onto <新基> <旧基>` 只重放本 PR 自己的提交。
-- 每个提交走 conventional commits（`fix(versioning): …` / `test(versioning): …`）；
-  **测试必须位于功能/修复 PR 内**（维护者明确要求，参考 #386 被打回）。
+- 每个提交走 conventional commits（`fix(versioning): …` /
+  `test(versioning): …`）； **测试必须位于功能/修复 PR
+  内**（维护者明确要求，参考 #386 被打回）。
 - 手写代码遵守 `AGENTS.md`（行数门 400、pub 项 Rustdoc ≤20 行、禁
   dead_code/`#[allow(dead_code)]`、函数 ≤4 参、错误点名契约……）。
 
@@ -352,9 +358,9 @@ BDD 分片与 tag 的映射在 `.github/workflows/check-bddtest.yml`（如
 
 ### 9.3 改生成器后的重录规程（最容易翻车，逐步照抄）
 
-版本戳是**编译期**烙进 `xidlc` 的（`XIDLC_VERSION`/`XIDLC_GIT_HASH`）：
-任何 `cargo build/test` 不带环境变量都会用真实版本号覆盖
-`target/debug/xidlc`，导致 baseline 对不上。规程：
+版本戳是**编译期**烙进 `xidlc` 的（`XIDLC_VERSION`/`XIDLC_GIT_HASH`）： 任何
+`cargo build/test` 不带环境变量都会用真实版本号覆盖 `target/debug/xidlc`，导致
+baseline 对不上。规程：
 
 ```sh
 # 1) 全程带钉死环境（建议 export 在同一 shell 里）
@@ -401,14 +407,15 @@ done
   头逐版本翻译；「请求头 > SDK 版本 > 账户默认」的优先级链是应用层策略的范本。
   我们的链式相邻转换 + NEEDS 退休表直接对标它的「平台内部只有最新形态」。
 - **Polar（@polar-sh/sdk 按 `/2026-10` 子路径导入）**：SDK 侧钉具体版本、自动
-  带版本头；「项目默认版本在创建时写成具体日期，不存 latest」——我们生成的
-  client 每版本模块 pin 常量版本号即同一原则。其 Current/pinned 双轨对应我们
-  的 Head/退休窗口。
+  带版本头；「项目默认版本在创建时写成具体日期，不存 latest」——我们生成的 client
+  每版本模块 pin 常量版本号即同一原则。其 Current/pinned 双轨对应我们 的
+  Head/退休窗口。
 - **Cadwyn**（Python/FastAPI 版本化框架）：用「版本路由 + 中间件改写请求/响应」
   的运行时翻译；对照结论：我们把翻译下沉到**编译期生成的纯函数**（可快照、可
-  审计、跨语言一致），运行时只留应用钩子。（对比结论：Cadwyn 在运行时逐请求改写；xidl 在编译期生成纯函数链。）
-- **serde / serde_urlencoded（Rust）**：严格解码的语义基准。#391 之后 TS 与
-  Rust 的行为对齐：JSON 位严格、文本位（含表单）按字段类型解析、布尔只认
+  审计、跨语言一致），运行时只留应用钩子。（对比结论：Cadwyn
+  在运行时逐请求改写；xidl 在编译期生成纯函数链。）
+- **serde / serde_urlencoded（Rust）**：严格解码的语义基准。#391 之后 TS 与 Rust
+  的行为对齐：JSON 位严格、文本位（含表单）按字段类型解析、布尔只认
   true/false（`bool::from_str` 同义）。
 - **Standard Webhooks**：#323 平台特性的协议参照；E11 语料钉住的事件拆分语义
   （旧订阅者收两次 updated、id 各自保留）需要在变更说明中向用户声明。
@@ -417,8 +424,8 @@ done
 
 ### 11.1 版本策略外置的正式化（对应 §5.6、§8.4）
 
-现状：生成物不选版本（好），但「应用如何解析版本」没有共享的形状，每个语料
-手写 `resolve_version`。提案：生成一个**纯数据**的 `VersionPlan`（版本值、排
+现状：生成物不选版本（好），但「应用如何解析版本」没有共享的形状，每个语料 手写
+`resolve_version`。提案：生成一个**纯数据**的 `VersionPlan`（版本值、排
 序、头名/查询名/cookie 名），并提供语言侧极薄的 `resolve(raw: string|null)`
 原语集合（`exact | nearestNotAfter | reject`），**不提供任何组合策略**——策略
 （Stripe 链、Polar 链、账户默认）由应用组合这些原语实现。收益：负向钉住天然
@@ -454,8 +461,8 @@ IDL：`@removed(V::v3) @get(path="/poll") …`。语义：接口退休后**仍�
 
 ### 11.5 Webhook 事件拆分的订阅展开（对应 #323 + E11）
 
-E11 已钉：下行双半边→旧名；上行旧名→**一个**声明的半边（一进一出）。目录里
-E11 的 `upSubscription`（一进多出 flatMap 展开）在枚举逐值机制里不可表达——
+E11 已钉：下行双半边→旧名；上行旧名→**一个**声明的半边（一进一出）。目录里 E11
+的 `upSubscription`（一进多出 flatMap 展开）在枚举逐值机制里不可表达——
 这是**有意的**：把「订阅一个旧事件等于订阅两个新事件」留给业务（信息可能被
 编造：调用方也许只想要其中一半）。若未来要支持，正确形状是给
 `sequence<EventKind>` 成员提供**成员级**展开钩子（decision 返回列表），而不是
@@ -472,13 +479,14 @@ E11 的 `upSubscription`（一进多出 flatMap 展开）在枚举逐值机制�
 ## 12. 一页速览（接手第一天的 todo）
 
 1. 读 `AGENTS.md` + 本文档 §2/§5/§9。
-2. `gh pr list` 看开着的 PR；合并顺序：#385、#391（独立）→ #379→#380→#381→#382（栈）。
+2. `gh pr list` 看开着的 PR；合并顺序：#385、#391（独立）→
+   #379→#380→#381→#382（栈）。
 3. #391/#385 合并后按 §9.3 重爆栈并重录。
 4. 从 §8 的优先级列表挑下一件（建议 #390 → #389 → 版本策略负向钉住 → E13）。
-5. 所有新行为：**先写业务语料（双语言），再动生成器**；生成器改动必带快照
-   与 baseline 重录；测试进同一个 PR。
+5. 所有新行为：**先写业务语料（双语言），再动生成器**；生成器改动必带快照 与
+   baseline 重录；测试进同一个 PR。
 
 ---
 
-*文档由 2026-10-25 会话整理；对应工作：PR #379–#382、#385、#391；issue
-#384、#388（已修）、#389、#390、#366–#368、#323、#320。*
+_文档由 2026-10-25 会话整理；对应工作：PR #379–#382、#385、#391；issue
+#384、#388（已修）、#389、#390、#366–#368、#323、#320。_
