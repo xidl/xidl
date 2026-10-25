@@ -27,7 +27,9 @@ export type DispatchOutcome<T, Head> =
         {%- if endpoint.stored_type %}
             {% set last = endpoint.steps | length - 1 %}
             {% set last_pair = endpoint.steps[last].request_call.pair %}
-            return { ok: true, value: step{{ last }}.value{% if last_pair %}.value{% endif %}, stored: { {% for step in endpoint.steps %}{% if step.request_call.pair %}...step{{ loop.index0 }}.value.stored, {% endif %}{% endfor %}} };
+            {#- Spread later steps first so the earliest recorded fact wins,
+            matching the Rust bag merge (`self.or(other)`). #}
+            return { ok: true, value: step{{ last }}.value{% if last_pair %}.value{% endif %}, stored: mergeStored({% for i in range(endpoint.steps | length) %}{% if endpoint.steps[i].request_call.pair %}step{{ i }}.value.stored, {% endif %}{% endfor %}) };
         {%- else %}
         return {{ ("step" ~ (endpoint.steps | length - 1)) if endpoint.steps else "ok(parsed.data)" }};
         {%- endif %}

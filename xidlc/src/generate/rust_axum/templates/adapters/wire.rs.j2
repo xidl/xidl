@@ -1,3 +1,4 @@
+{% from "adapters/construction.rs.j2" import construct %}
 {% macro decode(schema, source) -%}
     {%- if schema.kind == "Scalar" -%}::serde_json::from_value::<{{ schema.data }}>(({{ source }}).clone()).map_err(|error| error.to_string())
     {%- elif schema.kind == "Named" -%}{{ schema.data }}({{ source }})
@@ -70,7 +71,7 @@
                                 let value_{{ loop.index0 }}: {{ field.ty }} = {{ decode(field.schema, "raw_" ~ loop.index0) }}?;
                             {% endif %}
                         {% endfor %}
-                        Ok({{ definition.ty }} { {% for field in definition.fields %}{{ field.name }}: value_{{ loop.index0 }},{% endfor %} })
+                        Ok({{ construct(definition.construction) }})
                     {% endif %}
                 }
             {% endfor %}

@@ -1,5 +1,6 @@
 //! Independent Rust Axum adapter artifact, consuming public HIR and map facts.
 
+mod construction;
 mod context;
 mod layout;
 mod names;

@@ -12,6 +12,9 @@ pub(crate) struct Member {
     pub wire: String,
     pub flatten: bool,
     pub key: String,
+    /// Canonical base declarations from the immediate base to the field owner.
+    /// An empty path identifies a field declared on the current type.
+    pub path: Vec<String>,
     pub value: Option<TypeUse>,
 }
 

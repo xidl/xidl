@@ -94,7 +94,7 @@
                 }
                 impl {{ bag.name }} {
                     /// Combine the persisted members collected along the request chain.
-                    fn merge(self, other: Self) -> Self {
+        pub fn merge(self, other: Self) -> Self {
                         Self { {% for field in bag.fields %}{{ field.name }}: self.{{ field.name }}.or(other.{{ field.name }}), {% endfor %} }
                     }
                 }

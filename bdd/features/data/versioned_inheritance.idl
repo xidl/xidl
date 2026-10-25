@@ -1,0 +1,65 @@
+// Inspired by Shopify MailingAddress.countryCode (String, deprecated) and
+// countryCodeV2 (CountryCode). The release dates, inheritance and delivery
+// history below belong to this fixture, not to Shopify's API.
+@version(in = "header", name = "X-Address-Version")
+enum Versions {
+    @rename("2026-01-01") v1,
+    @rename("2026-04-01") v2,
+    @rename("2026-07-01") v3,
+};
+
+module geo {
+    typedef string Identifier;
+    enum Country { US, CA };
+    struct Marker {};
+    struct Anchor : Marker { @optional sequence<geo::Anchor> previous; };
+
+    @rename_all("camelCase")
+    struct Identity : Anchor {
+        geo::Identifier id;
+        string tenant;
+        @removed(Versions::v3) string delivery_reference;
+        @removed(Versions::v3) @optional string delivery_note;
+        @added(Versions::v3) @optional @default(true) boolean signature_required;
+    };
+
+    @rename_all("camelCase")
+    struct Change {
+        @removed(Versions::v3) @optional string delivery_reference;
+        @removed(Versions::v3) @optional string delivery_note;
+        @added(Versions::v3) @optional @default(true) boolean signature_required;
+    };
+};
+
+module shipping {
+    // Deliberately shadows geo::Identifier. Inherited ids remain strings.
+    typedef long Identifier;
+
+    @rename_all("camelCase")
+    struct Postal : geo::Identity {
+        @removed(Versions::v2) string line;
+        @added(Versions::v2) string street;
+        @removed(Versions::v2) string country_code;
+        @added(Versions::v2) geo::Country country_code_v2;
+    };
+    struct Address : Postal { long priority; };
+
+    @rename_all("camelCase")
+    struct PostalChange : geo::Change {
+        @removed(Versions::v2) @optional string line;
+        @added(Versions::v2) @optional string street;
+        @removed(Versions::v2) @optional string country_code;
+        @added(Versions::v2) @optional geo::Country country_code_v2;
+    };
+    struct Change : PostalChange { @optional long priority; };
+
+    @http(404) exception Missing { string reason; };
+    @http(422) exception Projection { string type_path; string reason; };
+    @http(403) exception Forbidden { string reason; };
+    interface Addresses {
+        @get(path = "/tenants/{tenant}/addresses/{id}")
+        Address read(@path string tenant, @path string id) raises(Missing, Projection, Forbidden);
+        @patch(path = "/tenants/{tenant}/addresses/{id}")
+        Address update(@path string tenant, @path string id, @body Change patch) raises(Missing, Projection, Forbidden);
+    };
+};
