@@ -71,10 +71,12 @@ pub(crate) fn go_type(
 
 fn scoped_type_name(value: &hir::ScopedName, prefix: &[String]) -> String {
     let mut parts = Vec::new();
-    if value.name.len() == 1 {
-        parts.extend(prefix.iter().cloned());
-    } else if let Some(module) = prefix.first() {
-        parts.push(module.clone());
+    if !value.is_root {
+        if value.name.len() == 1 {
+            parts.extend(prefix.iter().cloned());
+        } else if let Some(module) = prefix.first() {
+            parts.push(module.clone());
+        }
     }
     parts.extend(value.name.iter().cloned());
     parts

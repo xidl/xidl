@@ -226,7 +226,7 @@ type TestHeaderServiceGetUserRequest struct {
 }
 
 type TestHeaderServiceGetUserResponse struct {
-	Return User `xjson:"return"`
+	Return TestUser `xjson:"return"`
 }
 
 func TestHeaderServiceGetUserSecurityRequirements() []xidlgohttp.SecurityRequirement {
@@ -247,7 +247,7 @@ func formatTestHeaderServiceGetUserPath(req *TestHeaderServiceGetUserRequest) st
 }
 func decodeTestHeaderServiceGetUserResponse(resp *http.Response) (TestHeaderServiceGetUserResponse, error) {
 	out := TestHeaderServiceGetUserResponse{}
-	var body User
+	var body TestUser
 	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil {
 		return out, err
 	}
