@@ -1,0 +1,6 @@
+interface Addresses {
+    @get(path = "/tenants/{tenant}/addresses/{id}")
+    Address read(@path string tenant, @path string id) raises(Missing, Projection, Forbidden);
+    @patch(path = "/tenants/{tenant}/addresses/{id}")
+    Address update(@path string tenant, @path string id, @body Change patch) raises(Missing, Projection, Forbidden);
+};

@@ -1,4 +1,4 @@
-"""Inherited requests through real version routers, chains and selected SDKs."""
+"""Split address libraries through version routers, chains and selected SDKs."""
 
 import json
 import os
@@ -26,7 +26,7 @@ def run(command, directory, env=None):
 def inherited_application(context, mode):
     assert mode in ("chain", "route")
     context.execute_steps(
-        'Given a REST IDL file "bdd/features/data/versioned_inheritance.idl"'
+        'Given a REST IDL file "bdd/features/data/versioned_libraries/service/xidl.toml"'
     )
     context.inherited_mode = mode
 
@@ -38,17 +38,35 @@ def inherited_generate(context):
     rust = output / "rust"
     typescript = output / "ts"
     cli = root / "target/debug/xidlc"
-    run([str(cli), "lint", "--deny", "warnings", context.idl_file], root)
+    libraries = root / "bdd/features/data/versioned_libraries"
+    run(
+        [str(cli), "lint", "--deny", "warnings", *map(str, libraries.rglob("*.idl"))],
+        output,
+    )
 
     def generate(target, folder, version=None, *options):
         command = [str(cli), "gen", "-o", str(folder)]
         if version is not None:
             command += ["--api-version", version]
-        run([*command, target, *options, context.idl_file], root)
+        # Resolve paths from each manifest, independently of the working directory.
+        run([*command, target, *options, context.idl_file], output)
 
     generate("rust-axum", rust, None, "--client", "--server")
     generate("rust-axum-adapters", rust)
     generate("openapi", output / "openapi")
+    run(
+        [
+            str(cli),
+            "gen",
+            "-o",
+            str(typescript / "imported"),
+            "typescript-rest",
+            "--client",
+            "--server",
+            str(libraries / "readers/xidl.toml"),
+        ],
+        output,
+    )
     for version in ("v1", "v2", "v3"):
         generate("rust-axum", rust / "selected" / version, version, "--client")
         generate("typescript-rest", typescript / version, version, "--client")
@@ -78,6 +96,7 @@ def inherited_generate(context):
     (typescript / "package.json").write_text(package)
     shutil.copy(boilerplate / "ts/tsconfig.json", typescript)
     shutil.copy(boilerplate / "ts/sdk.ts", typescript)
+    shutil.copy(boilerplate / "ts/imports.ts", typescript)
     run(["pnpm", "install", "--ignore-scripts", "--no-frozen-lockfile"], typescript)
     run(["pnpm", "exec", "tsc", "--noEmit"], typescript)
     env = os.environ.copy()

@@ -1,0 +1,20 @@
+// Deliberately shadows geo::Identifier. Inherited ids remain strings.
+typedef long Identifier;
+
+@rename_all("camelCase")
+struct Postal : geo::Identity {
+    @removed(Versions::v2) string line;
+    @added(Versions::v2) string street;
+    @removed(Versions::v2) string country_code;
+    @added(Versions::v2) geo::Country country_code_v2;
+};
+struct Address : Postal { long priority; };
+
+@rename_all("camelCase")
+struct PostalChange : geo::Change {
+    @removed(Versions::v2) @optional string line;
+    @added(Versions::v2) @optional string street;
+    @removed(Versions::v2) @optional string country_code;
+    @added(Versions::v2) @optional geo::Country country_code_v2;
+};
+struct Change : PostalChange { @optional long priority; };

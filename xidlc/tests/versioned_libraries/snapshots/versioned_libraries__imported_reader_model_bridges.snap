@@ -1,0 +1,42 @@
+---
+source: xidlc/tests/versioned_libraries/mod.rs
+expression: bridges
+---
+{
+  "head_reader.client.ts": [
+    "import * as ifaceSchemas from \"./head_reader.iface.zod\";"
+  ],
+  "head_reader.d.ts": [
+    "import * as versioned_inheritance from \"./versioned_inheritance\";",
+    "export { versioned_inheritance };"
+  ],
+  "head_reader.iface.d.ts": [],
+  "head_reader.iface.zod.ts": [
+    "    import * as models from \"./head_reader.zod\";"
+  ],
+  "head_reader.server.ts": [
+    "import * as ifaceSchemas from \"./head_reader.iface.zod\";"
+  ],
+  "head_reader.zod.ts": [
+    "import * as versioned_inheritance from \"./versioned_inheritance.zod\";",
+    "export { versioned_inheritance };"
+  ],
+  "old_reader.client.ts": [
+    "import * as ifaceSchemas from \"./old_reader.iface.zod\";"
+  ],
+  "old_reader.d.ts": [
+    "import * as versioned_inheritance from \"./versioned_inheritance\";",
+    "export { versioned_inheritance };"
+  ],
+  "old_reader.iface.d.ts": [],
+  "old_reader.iface.zod.ts": [
+    "    import * as models from \"./old_reader.zod\";"
+  ],
+  "old_reader.server.ts": [
+    "import * as ifaceSchemas from \"./old_reader.iface.zod\";"
+  ],
+  "old_reader.zod.ts": [
+    "import * as versioned_inheritance from \"./versioned_inheritance.zod\";",
+    "export { versioned_inheritance };"
+  ]
+}

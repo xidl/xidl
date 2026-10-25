@@ -1,0 +1,9 @@
+name = "address-readers"
+version = "1.0.0"
+files = ["*_reader.idl"]
+
+[dependencies]
+"contracts" = { path = "../service" }
+"contracts/calendar" = { path = "../calendar" }
+"contracts/identity" = { path = "../identity" }
+"contracts/shipping" = { path = "../shipping" }
