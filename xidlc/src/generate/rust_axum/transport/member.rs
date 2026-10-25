@@ -1,10 +1,9 @@
 //! Keep transport member layout and owned conversions aligned with public models.
 
 use super::super::{render::RustAxumRenderer, scope::TypeScope};
-use super::{TransportDirection, TransportFieldContext, convert::convert_expr, map_type_inner};
+use super::{TransportDirection, TransportFieldContext, convert::OwnedConversion, map_type_inner};
 use crate::error::IdlcResult;
 use crate::generate::rust::util::{array_type, declarator_dims, declarator_name, rust_ident};
-use serde::Serialize;
 use xidl_parser::hir;
 
 /// Projects a declared member using the same layout layers as its public model.
@@ -13,13 +12,6 @@ pub(super) struct MemberProjection<'a> {
     owner: &'a hir::StructDcl,
     scope: TypeScope<'a>,
     renderer: &'a RustAxumRenderer,
-}
-
-#[derive(Serialize)]
-#[serde(tag = "kind", rename_all = "snake_case")]
-enum Conversion<'a> {
-    Map { source: &'a str, converted: &'a str },
-    Box { converted: &'a str },
 }
 
 impl<'a> MemberProjection<'a> {
@@ -52,11 +44,12 @@ impl<'a> MemberProjection<'a> {
         let dimensions = declarator_dims(decl);
         let ty = self.wire_type(&dimensions, direction, module_name)?;
         let source = format!("value.{name}");
+        let conversion = OwnedConversion::new(self.scope, self.renderer);
         let converted = if self.member.is_optional() {
-            let inner = self.boxed_conversion("value", dimensions.len())?;
-            self.map(&source, &inner)?
+            let inner = self.boxed_conversion(&conversion, "value", dimensions.len())?;
+            conversion.map(&source, &inner)?
         } else {
-            self.boxed_conversion(&source, dimensions.len())?
+            self.boxed_conversion(&conversion, &source, dimensions.len())?
         };
         Ok(TransportFieldContext {
             flatten: crate::generate::utils::has_annotation(&self.member.annotations, "flatten"),
@@ -88,35 +81,18 @@ impl<'a> MemberProjection<'a> {
         Ok(ty)
     }
 
-    fn boxed_conversion(&self, source: &str, dimensions: usize) -> IdlcResult<String> {
+    fn boxed_conversion(
+        &self,
+        conversion: &OwnedConversion<'_>,
+        source: &str,
+        dimensions: usize,
+    ) -> IdlcResult<String> {
         if self.member.recursive {
-            let converted = self.array_conversion(&format!("(*{source})"), dimensions)?;
-            self.renderer.render_template(
-                "interface/transport_expression.rs.j2",
-                &Conversion::Box {
-                    converted: &converted,
-                },
-            )
+            let converted =
+                conversion.array(&format!("(*{source})"), &self.member.ty, dimensions)?;
+            conversion.boxed(&converted)
         } else {
-            self.array_conversion(source, dimensions)
+            conversion.array(source, &self.member.ty, dimensions)
         }
-    }
-
-    fn array_conversion(&self, source: &str, dimensions: usize) -> IdlcResult<String> {
-        if dimensions == 0 {
-            return convert_expr(source, &self.member.ty, self.scope);
-        }
-        let converted = self.array_conversion("value", dimensions - 1)?;
-        self.map(source, &converted)
-    }
-
-    fn map(&self, source: &str, converted: &str) -> IdlcResult<String> {
-        if converted == "value" {
-            return Ok(source.to_owned());
-        }
-        self.renderer.render_template(
-            "interface/transport_expression.rs.j2",
-            &Conversion::Map { source, converted },
-        )
     }
 }

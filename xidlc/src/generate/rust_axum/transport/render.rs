@@ -35,7 +35,7 @@ pub(super) fn render_module(
                 module_path,
             )?),
             TransportTypeDef::Enum(def) => items.push(render_enum(name, def, module_path)),
-            TransportTypeDef::Typedef(_) | TransportTypeDef::Public => {}
+            TransportTypeDef::Typedef { .. } | TransportTypeDef::Public => {}
         }
     }
     Ok(TransportModuleContext {

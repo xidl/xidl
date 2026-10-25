@@ -3,6 +3,7 @@ typedef long Identifier;
 
 @rename_all("camelCase")
 struct Postal : geo::Identity {
+    @optional geo::MapPosition coordinates;
     @removed(Versions::v2) string line;
     @added(Versions::v2) @replaces(line) string street;
     @removed(Versions::v2) string country_code;
@@ -12,6 +13,7 @@ struct Address : Postal { long priority; };
 
 @rename_all("camelCase")
 struct PostalChange : geo::Change {
+    @optional geo::MapPosition coordinates;
     @removed(Versions::v2) @optional string line;
     @added(Versions::v2) @replaces(line) @optional string street;
     @removed(Versions::v2) @optional string country_code;

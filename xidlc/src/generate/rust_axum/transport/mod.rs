@@ -13,7 +13,7 @@ pub(crate) use convert::{decode_expr, encode_expr};
 
 use super::scope::TypeScope;
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::rust::util::{declarator_name, rust_ident};
+use crate::generate::rust::util::{array_type, declarator_dims, declarator_name, rust_ident};
 use names::{canonical_name, transport_ident, transport_module};
 use render::render_module;
 use std::collections::{BTreeSet, HashMap};
@@ -126,7 +126,10 @@ fn collect_type_decl(ty: &hir::TypeDcl, module_path: &[String], out: &mut TypeRe
             for decl in &def.decl {
                 out.insert(
                     canonical_name(module_path, &declarator_name(decl)),
-                    TransportTypeDef::Typedef(def.clone()),
+                    TransportTypeDef::Typedef {
+                        ty: def.ty.clone(),
+                        declarator: decl.clone(),
+                    },
                 );
             }
         }
@@ -195,17 +198,18 @@ fn map_scoped(
             }
             Ok(format!("{module_name}::{}", transport_ident(key.as_str())))
         }
-        Some(TransportTypeDef::Typedef(def)) => match &def.ty {
+        Some(TransportTypeDef::Typedef { ty, declarator }) => match ty {
             hir::TypedefType::TypeSpec(ty) => {
                 let mut parent = key.split("::").map(str::to_string).collect::<Vec<_>>();
                 parent.pop();
-                map_type_inner(
+                let base = map_type_inner(
                     ty,
                     direction,
                     module_name,
                     scope.in_declaration(&parent),
                     tracker,
-                )
+                )?;
+                Ok(array_type(&base, &declarator_dims(declarator)))
             }
             hir::TypedefType::ConstrTypeDcl(_) => Err(IdlcError::rpc(format!(
                 "unsupported inline typedef transport for '{key}'"

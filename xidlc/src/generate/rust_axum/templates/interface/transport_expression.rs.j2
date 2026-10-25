@@ -1,5 +1,9 @@
 {%- if kind == "map" -%}
 {{ source }}.map(|value| {{ converted }})
-{%- else -%}
+{%- elif kind == "box" -%}
 Box::new({{ converted }})
+{%- elif kind == "sequence" -%}
+{{ source }}.into_iter(){% if converted %}.map(|value| {{ converted }}){% endif %}.collect()
+{%- elif kind == "record" -%}
+{{ source }}.into_iter(){% if converted %}.map(|(key, value)| (key, {{ converted }})){% endif %}.collect()
 {%- endif -%}

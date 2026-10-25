@@ -6,6 +6,8 @@ Feature: Split address libraries keep historical delivery facts
   import consumers read pinned old and Head contracts through the same service.
   Optional parent links carry a finite delivery handoff chain; malformed deep
   checkpoints are rejected before either Head or retained delivery facts change.
+  Imported coordinate aliases preserve longitude/latitude order and fixed arity
+  across pinned SDKs, generated validators and the shared Head store.
 
   Scenario Outline: Split inherited contracts through real HTTP and selected SDKs
     Given the inherited address application in "<mode>" mode

@@ -13,6 +13,8 @@ jsonpath "$.base" not exists
 jsonpath "$.previous" exists
 jsonpath "$.previous[0].previous" not exists
 jsonpath "$.previous[0].base" not exists
+jsonpath "$.coordinates[0]" == 12.5
+jsonpath "$.coordinates[1]" == -7.25
 jsonpath "$.checkpoint" == "dispatch"
 jsonpath "$.parent.checkpoint" == "handover"
 jsonpath "$.parent.parent.checkpoint" == "packed"
@@ -25,13 +27,15 @@ PATCH {{base_url}}/tenants/acme/addresses/a1
 Authorization: Bearer test-acme
 X-Address-Version: 2026-01-01
 Content-Type: application/json
-{"deliveryReference":"A-NEW","deliveryNote":"","line":"New street","countryCode":"CA","priority":0,"parent":{"checkpoint":"rerouted","parent":{"checkpoint":"","parent":{}}}}
+{"coordinates":[-180,90],"deliveryReference":"A-NEW","deliveryNote":"","line":"New street","countryCode":"CA","priority":0,"parent":{"checkpoint":"rerouted","parent":{"checkpoint":"","parent":{}}}}
 HTTP 200
 [Asserts]
 jsonpath "$.deliveryReference" == "A-NEW"
 jsonpath "$.deliveryNote" == ""
 jsonpath "$.line" == "New street"
 jsonpath "$.priority" == 0
+jsonpath "$.coordinates[0]" == -180
+jsonpath "$.coordinates[1]" == 90
 jsonpath "$.parent.checkpoint" == "rerouted"
 jsonpath "$.parent.parent.checkpoint" == ""
 jsonpath "$.parent.parent.parent.checkpoint" not exists
@@ -44,7 +48,11 @@ HTTP 200
 header "X-Address-Version" == "2026-07-01"
 jsonpath "$.street" == "New street"
 jsonpath "$.countryCodeV2" == "CA"
+jsonpath "$.coordinates[0]" == -180
+jsonpath "$.coordinates[1]" == 90
 jsonpath "$.signatureRequired" == true
+jsonpath "$.coordinates[0]" == -180
+jsonpath "$.coordinates[1]" == 90
 jsonpath "$.deliveryReference" not exists
 jsonpath "$.deliveryNote" not exists
 jsonpath "$.line" not exists
@@ -87,7 +95,7 @@ PATCH {{base_url}}/tenants/acme/addresses/a1
 Authorization: Bearer test-acme
 X-Address-Version: 2026-01-01
 Content-Type: application/json
-{"deliveryReference":"A-NEW","deliveryNote":"","line":"Head street","countryCode":"CA","priority":0,"parent":{"checkpoint":"rerouted","parent":{"checkpoint":"","parent":{}}}}
+{"coordinates":[-180,90],"deliveryReference":"A-NEW","deliveryNote":"","line":"Head street","countryCode":"CA","priority":0,"parent":{"checkpoint":"rerouted","parent":{"checkpoint":"","parent":{}}}}
 HTTP 200
 [Asserts]
 jsonpath "$.deliveryNote" == ""
@@ -147,7 +155,7 @@ PATCH {{base_url}}/tenants/other/addresses/a1
 Authorization: Bearer test-acme
 X-Address-Version: 2026-07-01
 Content-Type: application/json
-{"street":"unauthorized","signatureRequired":false,"parent":{"checkpoint":"unauthorized"}}
+{"coordinates":[0,0],"street":"unauthorized","signatureRequired":false,"parent":{"checkpoint":"unauthorized"}}
 HTTP 403
 [Asserts]
 jsonpath "$.reason" == "tenant access denied"
