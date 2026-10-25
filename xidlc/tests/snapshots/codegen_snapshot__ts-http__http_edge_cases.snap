@@ -291,7 +291,7 @@ export const HttpEdgeCasesServiceOperations = {
                 args: ["trace"],
                 schema: ifaceSchemas.HttpEdgeCasesServiceHealthRequestSchema,
                 path: [],
-                query: [{ wireName: "trace_id", key: "trace", multi: false }],
+                query: [{ wireName: "trace_id", key: "trace", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -325,7 +325,7 @@ export const HttpEdgeCasesServiceOperations = {
                 args: ["uid", "locale"],
                 schema: ifaceSchemas.HttpEdgeCasesServiceGetUserRequestSchema,
                 path: [{ parameter: "id", wireName: "id", key: "uid", multi: false, catchAll: false }],
-                query: [{ wireName: "lang", key: "locale", multi: false }],
+                query: [{ wireName: "lang", key: "locale", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -427,7 +427,7 @@ export const HttpEdgeCasesServiceOperations = {
                 args: ["keyword", "page_size"],
                 schema: ifaceSchemas.HttpEdgeCasesServiceLookupRequestSchema,
                 path: [],
-                query: [{ wireName: "keyword", key: "keyword", multi: false }, { wireName: "limit", key: "page_size", multi: false }],
+                query: [{ wireName: "keyword", key: "keyword", multi: false, optional: false }, { wireName: "limit", key: "page_size", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {

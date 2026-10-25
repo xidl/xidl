@@ -1,0 +1,17 @@
+struct Collections {
+    sequence<long> values;
+    sequence<string> tags;
+    sequence<string> names;
+    @optional sequence<string> labels;
+};
+struct Search { @optional string term; };
+struct StreamValues { @optional sequence<long> values; };
+
+interface CollectionInputs {
+    @get(path="/collections")
+    Collections read(@query sequence<long> values, @header sequence<string> tags,
+                     @cookie sequence<string> names, @query @optional sequence<string> labels);
+    @get(path="/search") Search search(@query @optional string term);
+    @server_stream @get(path="/stream")
+    StreamValues stream(@query @optional sequence<long> values);
+};

@@ -1159,9 +1159,9 @@ import {
                         args: ["id", "search", "theme"],
                         schema: ifaceSchemas.v1.business.StoreGetRequestSchema,
                         path: [{ parameter: "id", wireName: "id", key: "id", multi: false, catchAll: false }],
-                        query: [{ wireName: "search", key: "search", multi: false }],
+                        query: [{ wireName: "search", key: "search", multi: false, optional: false }],
                         headers: [],
-                        cookies: [{ wireName: "theme", key: "theme", multi: false }],
+                        cookies: [{ wireName: "theme", key: "theme", multi: false, optional: false }],
                         body: {
                             kind: "none",
                             contentType: "",
@@ -1286,7 +1286,7 @@ import {
                         args: ["room", "text"],
                         schema: ifaceSchemas.v1.business.StoreChatRequestSchema,
                         path: [],
-                        query: [{ wireName: "room", key: "room", multi: false }],
+                        query: [{ wireName: "room", key: "room", multi: false, optional: false }],
                         headers: [],
                         cookies: [],
                         body: {
@@ -1634,9 +1634,9 @@ import {
                         args: ["id", "search", "theme"],
                         schema: ifaceSchemas.v2.business.StoreGetRequestSchema,
                         path: [{ parameter: "id", wireName: "id", key: "id", multi: false, catchAll: false }],
-                        query: [{ wireName: "search", key: "search", multi: false }],
+                        query: [{ wireName: "search", key: "search", multi: false, optional: false }],
                         headers: [],
-                        cookies: [{ wireName: "theme", key: "theme", multi: false }],
+                        cookies: [{ wireName: "theme", key: "theme", multi: false, optional: false }],
                         body: {
                             kind: "none",
                             contentType: "",
@@ -1761,7 +1761,7 @@ import {
                         args: ["room", "text"],
                         schema: ifaceSchemas.v2.business.StoreChatRequestSchema,
                         path: [],
-                        query: [{ wireName: "room", key: "room", multi: false }],
+                        query: [{ wireName: "room", key: "room", multi: false, optional: false }],
                         headers: [],
                         cookies: [],
                         body: {

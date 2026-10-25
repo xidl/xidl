@@ -6,8 +6,14 @@
                 let header_str = header_value
                 .to_str()
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                {% if param.header_item_is_string or param.header_item_is_primitive %}
+                for header_str in header_str.split(',').map(str::trim) {
+                {% endif %}
                 let parsed: {{ param.header_item_ty }} = {% if param.header_item_is_string %}header_str.to_string(){% elif param.header_item_is_primitive %}header_str.parse().map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% else %}::xidl_rust_axum::serde_json::from_str(header_str).map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %};
                 {{ param.name }}.push(parsed);
+                {% if param.header_item_is_string or param.header_item_is_primitive %}
+                }
+                {% endif %}
             }
             {% if param.optional %}
                 let {{ param.name }} = if {{ param.name }}.is_empty() { None } else { Some({{ param.name }}) };
