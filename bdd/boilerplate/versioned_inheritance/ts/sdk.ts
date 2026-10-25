@@ -31,17 +31,25 @@ const written = await first.update('acme', 'a2', {
   delivery_note: '',
   delivery_reference: 'T-SDK',
   line: 'TS street',
+  parent: { checkpoint: 'TS reroute', parent: { checkpoint: 'TS original' } },
   priority: 0,
 });
 assert.equal(written.id, 'a2');
 assert.equal(written.delivery_reference, 'T-SDK');
 assert.equal(written.delivery_note, '');
 assert.equal(written.priority, 0);
+const parent = written.parent;
+assert(parent);
+assert.equal(parent.checkpoint, 'TS reroute');
+assert(parent.parent);
+assert.equal(parent.parent.checkpoint, 'TS original');
+assert.equal(Object.hasOwn(parent.parent, 'parent'), false);
 const latest = await head.update('acme', 'a2', {
   signature_required: false,
   street: 'TS Head',
 });
 assert.equal(Object.hasOwn(latest, 'delivery_reference'), false);
+assert.deepEqual(latest.parent, written.parent);
 const view = await middle.read('acme', 'a2');
 assert.equal(view.delivery_reference, 'T-SDK');
 assert.equal(view.delivery_note, '');

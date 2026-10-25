@@ -15,8 +15,25 @@ struct Record {
 pub struct Store(Mutex<BTreeMap<(String, String), Record>>);
 
 impl Store {
+    fn checkpoint(name: &str, parent: Option<v3::geo::Anchor>) -> v3::geo::Anchor {
+        v3::geo::Anchor {
+            base: v3::geo::Marker {},
+            checkpoint: Some(name.into()),
+            parent: parent.map(Box::new),
+            previous: None,
+        }
+    }
+
     pub fn seeded() -> Self {
         let mut rows = BTreeMap::new();
+        let mut anchor = Self::checkpoint(
+            "dispatch",
+            Some(Self::checkpoint(
+                "handover",
+                Some(Self::checkpoint("packed", None)),
+            )),
+        );
+        anchor.previous = Some(vec![Self::checkpoint("confirmed", None)]);
         for (tenant, id, reference) in [
             ("acme", "a1", Some("A-1")),
             ("acme", "a2", Some("A-2")),
@@ -29,13 +46,7 @@ impl Store {
                     head: v3::shipping::Address {
                         base: v3::shipping::Postal {
                             base: v3::geo::Identity {
-                                base: v3::geo::Anchor {
-                                    base: v3::geo::Marker {},
-                                    previous: Some(vec![v3::geo::Anchor {
-                                        base: v3::geo::Marker {},
-                                        previous: None,
-                                    }]),
-                                },
+                                base: anchor.clone(),
                                 id: id.into(),
                                 tenant: tenant.into(),
                                 signature_required: Some(true),
@@ -84,6 +95,9 @@ impl Store {
         let mut rows = self.0.lock().unwrap();
         let row = rows.get_mut(&(input.tenant.clone(), input.id)).unwrap();
         let patch = input.patch;
+        if let Some(parent) = patch.base.base.parent {
+            row.head.base.base.base.parent = Some(Box::new(parent));
+        }
         if let Some(street) = patch.base.street {
             row.head.base.street = street;
         }

@@ -6,6 +6,9 @@ after that fixture gained a retired optional member. The tests compare paths and
 contents byte for byte; adapter generation is never involved in producing the
 baseline.
 
+The Rust `versioned_adapters_business` manifest also records element-wise
+conversion of declared fixed arrays, alongside recursive member layout support.
+
 To regenerate after an intentional change to ordinary output, build `xidlc` in a
 clean checkout of the new baseline, then run for each target and fixture:
 
