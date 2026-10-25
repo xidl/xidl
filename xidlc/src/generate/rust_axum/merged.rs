@@ -3,7 +3,7 @@ use crate::generate::rust::{RustRender, RustRenderer};
 use crate::generate::rust_axum::interface::render_interface_with_path;
 use crate::generate::rust_axum::transport::TypeRegistry;
 use crate::generate::rust_axum::{RustAxumRenderOutput, RustAxumRenderer};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use xidl_parser::hir;
 
 /// Merged Axum specification renderer with types before interfaces.
@@ -11,7 +11,6 @@ pub(crate) struct MergedAxumSpecBuilder<'a> {
     axum_renderer: &'a RustAxumRenderer,
     rust_renderer: RustRenderer,
     registry: TypeRegistry,
-    reachable: HashSet<String>,
 }
 
 impl<'a> MergedAxumSpecBuilder<'a> {
@@ -20,17 +19,15 @@ impl<'a> MergedAxumSpecBuilder<'a> {
         axum_renderer: &'a RustAxumRenderer,
         rust_renderer: RustRenderer,
         registry: TypeRegistry,
-        reachable: HashSet<String>,
     ) -> Self {
         Self {
             axum_renderer,
             rust_renderer,
             registry,
-            reachable,
         }
     }
 
-    /// Render a specification with reachable types before interfaces.
+    /// Render all declared models before interfaces.
     pub(crate) fn render(&self, spec: &hir::Specification) -> IdlcResult<Vec<String>> {
         let defs = spec.0.iter().collect::<Vec<_>>();
         self.render_body(&defs, &[])
@@ -43,7 +40,7 @@ impl<'a> MergedAxumSpecBuilder<'a> {
     ) -> IdlcResult<Vec<String>> {
         let mut out = Vec::new();
         for &def in defs {
-            if self.is_type_def(def) && self.is_reachable_type(def, module_path) {
+            if self.is_type_def(def) {
                 out.extend(self.render_type(def, module_path)?.source);
             }
         }
@@ -111,22 +108,6 @@ impl<'a> MergedAxumSpecBuilder<'a> {
                 | hir::Definition::InterfaceDcl(_)
                 | hir::Definition::Pragma(_)
         )
-    }
-
-    fn is_reachable_type(&self, def: &hir::Definition, module_path: &[String]) -> bool {
-        match def {
-            hir::Definition::ConstDcl(_) | hir::Definition::ExceptDcl(_) => true,
-            _ => {
-                for ident in super::get_def_idents(def) {
-                    let mut full = module_path.to_vec();
-                    full.push(ident);
-                    if self.reachable.contains(full.join("::").as_str()) {
-                        return true;
-                    }
-                }
-                false
-            }
-        }
     }
 
     fn render_type(

@@ -18,6 +18,23 @@ pub struct WireNames {
     pub hidden: i32,
 }
 impl WireNames {}
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    Copy,
+    Eq,
+    Default,
+)]
+pub enum WireState {
+    #[serde(rename = "stateActive")]
+    #[default]
+    state_active,
+    #[serde(rename = "archived")]
+    state_old,
+}
 #[allow(
     non_snake_case,
     unused_attributes,

@@ -9,6 +9,23 @@ version_parameter_query.rs
 
 #[allow(clippy::too_many_arguments, clippy::large_enum_variant)]
 pub mod v1 {
+    #[derive(
+        Debug,
+        Clone,
+        PartialEq,
+        ::serde::Serialize,
+        ::serde::Deserialize,
+        Copy,
+        Eq,
+        Default,
+    )]
+    pub enum Versions {
+        #[serde(rename = "2026-04")]
+        #[default]
+        v1,
+        #[serde(rename = "版本 +/%;=")]
+        v2,
+    }
     #[allow(clippy::too_many_arguments, clippy::large_enum_variant)]
     pub mod business {
         #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
@@ -1731,6 +1748,23 @@ pub mod v1 {
 }
 #[allow(clippy::too_many_arguments, clippy::large_enum_variant)]
 pub mod v2 {
+    #[derive(
+        Debug,
+        Clone,
+        PartialEq,
+        ::serde::Serialize,
+        ::serde::Deserialize,
+        Copy,
+        Eq,
+        Default,
+    )]
+    pub enum Versions {
+        #[serde(rename = "2026-04")]
+        #[default]
+        v1,
+        #[serde(rename = "版本 +/%;=")]
+        v2,
+    }
     #[allow(clippy::too_many_arguments, clippy::large_enum_variant)]
     pub mod business {
         #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]

@@ -319,3 +319,31 @@ fn an_include_at_a_version_splices_that_version() {
     assert!(!source.contains("pub mod v2"), "app.rs: {source}");
     assert!(!source.contains("monotonic"), "app.rs: {source}");
 }
+
+#[test]
+fn axum_imports_are_preserved_when_only_declared_models_reference_them() {
+    let root = temp_dir("axum-models");
+    let out = root.join("out");
+    let app = root.join("app.idl");
+    write(
+        &root.join("catalog/index.idl"),
+        "enum State { pending, complete }; struct Record { State state; };",
+    );
+    write(
+        &app,
+        r#"import "catalog";
+        struct Archive { sequence<catalog::Record> records; };
+        interface Health { @get(path="/health") boolean read(); };"#,
+    );
+    generate_with_http("rust-axum", &out, vec![app], true, true)
+        .expect("model-only import generation");
+    let importer = fs::read_to_string(out.join("app.rs")).expect("app models");
+    assert!(importer.contains("use crate::catalog;"), "{importer}");
+    assert!(
+        importer.contains("pub records: Vec<catalog::Record>"),
+        "{importer}"
+    );
+    let dependency = fs::read_to_string(out.join("catalog.rs")).expect("imported models");
+    assert!(dependency.contains("pub struct Record"), "{dependency}");
+    assert!(dependency.contains("pub enum State"), "{dependency}");
+}
