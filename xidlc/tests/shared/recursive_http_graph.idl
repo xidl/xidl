@@ -1,0 +1,27 @@
+module graph {
+    struct Node {
+        string label;
+        @optional Node previous;
+        @optional Node pair[2];
+        @optional sequence<Node> children;
+        @optional map<string, Node> indexed;
+    };
+
+    struct Left;
+    struct Right;
+    struct Left { @optional Right next; };
+    struct Right { @optional Left next; };
+
+    struct Graph {
+        Node root;
+        Left linked;
+        @optional Node grid[2][2];
+        @optional sequence<Node> branches[2];
+        @optional long counts[2];
+    };
+
+    interface Graphs {
+        @post(path="/graphs")
+        Graph replace(@body Graph value);
+    };
+};

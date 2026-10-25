@@ -38,3 +38,12 @@ alias. Old writes and responses must continue to use the root string contract. A
 numeric PATCH is rejected before storage changes in both modes. The operations
 also use absolute exception paths; the existing HTTP and SDK journeys exercise
 their 403/404/422 responses after version projection.
+
+The address also carries a recorded handoff chain: an optional `Anchor.parent`
+points to another checkpoint, alongside the existing `previous` sequence. Old
+and Head SDKs read finite chains with omitted leaves. A PATCH can replace the
+parent chain through the shared Head store; omission preserves it. This current
+handoff chain is separate from append-only retired delivery facts in `history`.
+The shared journey checks nested round trips, repeated writes, deep malformed
+leaves and cross-tenant refusal through both Chain and Route fronts. Imported
+readers retain the same recursive parent data and generated OpenAPI shape.
