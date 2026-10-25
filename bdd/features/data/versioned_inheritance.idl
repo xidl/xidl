@@ -10,12 +10,16 @@ enum Versions {
 
 // Stored delivery references remain strings in every published version.
 typedef string DeliveryReference;
+const long COORDINATE_AXES = 2;
+const long BOUND_COMPONENTS = COORDINATE_AXES * 2;
 
 module geo {
     // This unrelated local alias must not rebind ::DeliveryReference.
     typedef long DeliveryReference;
     typedef string Identifier;
     enum Country { US, CA };
+    // Literal dimensions independently check the split libraries' expressions.
+    const long COORDINATE_AXES = 3;
     typedef double Coordinates[2], Bounds[4];
     typedef Coordinates MapPosition;
     struct Marker {};

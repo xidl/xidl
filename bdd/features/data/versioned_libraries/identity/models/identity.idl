@@ -2,7 +2,9 @@
 typedef long DeliveryReference;
 typedef string Identifier;
 enum Country { US, CA };
-typedef double Coordinates[2], Bounds[4];
+// Local shadowing must not change the shared coordinate contract.
+const long COORDINATE_AXES = 3;
+typedef double Coordinates[::BOUND_COMPONENTS / 2], Bounds[::BOUND_COMPONENTS];
 typedef Coordinates MapPosition;
 struct Marker {};
 struct Anchor : Marker {
