@@ -114,7 +114,7 @@ pub mod version_adapters {
         fn shipping_address_delivery_reference(
             &self,
             source: &v3::shipping::Address,
-        ) -> Option<String>;
+        ) -> Option<v2::DeliveryReference>;
         /// wire `deliveryNote`, last served by v2
         fn shipping_address_delivery_note(
             &self,
@@ -149,7 +149,7 @@ pub mod version_adapters {
     }
     /// Explicit business assignments and discarded-value acknowledgements.
     pub struct ShippingAddressDowncastToV2Decision {
-        pub delivery_reference: String,
+        pub delivery_reference: v2::DeliveryReference,
         pub delivery_note: Option<String>,
     }
     /// Explicit business assignments and discarded-value acknowledgements.
@@ -163,7 +163,7 @@ pub mod version_adapters {
     #[derive(Debug, Clone, Default)]
     pub struct ShippingAddressesUpdateStored {
         pub country_code: Option<String>,
-        pub delivery_reference: Option<String>,
+        pub delivery_reference: Option<v3::DeliveryReference>,
         pub delivery_note: Option<String>,
     }
     impl ShippingAddressesUpdateStored {
@@ -222,6 +222,32 @@ pub mod version_adapters {
         path: &str,
     ) -> VersionedResult<Vec<T>> {
         source.iter().map(|item| locate(convert(item), path)).collect()
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn delivery_reference_upcast_from_v_1(
+        source: &v1::DeliveryReference,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2::DeliveryReference> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v1".into(),
+            direction: Direction::Upcast,
+            type_path: "DeliveryReference".into(),
+            reason: reason.into(),
+        };
+        Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(source))
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn delivery_reference_downcast_to_v_1(
+        source: &v2::DeliveryReference,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v1::DeliveryReference> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "DeliveryReference".into(),
+            reason: reason.into(),
+        };
+        Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(source))
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn geo_anchor_downcast_to_v_1(
@@ -289,10 +315,10 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.base.base.tenant))?;
-        let projected_3 = Ok::<
-            _,
-            UnsupportedProjection,
-        >(::std::clone::Clone::clone(&source.base.base.delivery_reference))?;
+        let projected_3 = delivery_reference_downcast_to_v_1(
+            &source.base.base.delivery_reference,
+            adapters,
+        )?;
         let projected_4 = (&source.base.base.delivery_note)
             .as_ref()
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
@@ -338,7 +364,7 @@ pub mod version_adapters {
         let decision = adapters.shipping_change_upcast_from_v_1(source, current)?;
         let projected_0 = (&source.base.base.delivery_reference)
             .as_ref()
-            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .map(|item| delivery_reference_upcast_from_v_1(item, adapters))
             .transpose()?;
         let projected_1 = (&source.base.base.delivery_note)
             .as_ref()
@@ -952,12 +978,10 @@ pub mod version_adapters {
         let raw_0 = object
             .get("deliveryReference")
             .unwrap_or(&::serde_json::Value::Null);
-        let value_0: Option<String> = if (raw_0).is_null() {
+        let value_0: Option<v1::DeliveryReference> = if (raw_0).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_0).clone())
-                .map_err(|error| error.to_string())
-                .map(Some)
+            decode_wire_v_1_delivery_reference(raw_0).map(Some)
         }?;
         let raw_1 = object.get("deliveryNote").unwrap_or(&::serde_json::Value::Null);
         let value_1: Option<String> = if (raw_1).is_null() {
@@ -1003,6 +1027,12 @@ pub mod version_adapters {
             priority: value_4,
         })
     }
+    fn decode_wire_v_1_delivery_reference(
+        wire: &::serde_json::Value,
+    ) -> Result<v1::DeliveryReference, String> {
+        ::serde_json::from_value::<String>((wire).clone())
+            .map_err(|error| error.to_string())
+    }
     fn decode_wire_v_2_shipping_change(
         wire: &::serde_json::Value,
     ) -> Result<v2::shipping::Change, String> {
@@ -1025,12 +1055,10 @@ pub mod version_adapters {
         let raw_0 = object
             .get("deliveryReference")
             .unwrap_or(&::serde_json::Value::Null);
-        let value_0: Option<String> = if (raw_0).is_null() {
+        let value_0: Option<v2::DeliveryReference> = if (raw_0).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_0).clone())
-                .map_err(|error| error.to_string())
-                .map(Some)
+            decode_wire_v_2_delivery_reference(raw_0).map(Some)
         }?;
         let raw_1 = object.get("deliveryNote").unwrap_or(&::serde_json::Value::Null);
         let value_1: Option<String> = if (raw_1).is_null() {
@@ -1073,6 +1101,12 @@ pub mod version_adapters {
             },
             priority: value_4,
         })
+    }
+    fn decode_wire_v_2_delivery_reference(
+        wire: &::serde_json::Value,
+    ) -> Result<v2::DeliveryReference, String> {
+        ::serde_json::from_value::<String>((wire).clone())
+            .map_err(|error| error.to_string())
     }
     fn decode_wire_v_2_geo_country(
         wire: &::serde_json::Value,
@@ -1936,6 +1970,31 @@ pub mod version_adapters {
             )
             .await;
         Ok(downcast_shipping_addresses_update_from_v_3_outcome(head, adapters))
+    }
+    /// The caller-selected version's projected model type.
+    pub enum DeliveryReferenceProjection {
+        V3(v3::DeliveryReference),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_delivery_reference(
+        version: Version,
+        head: v3::DeliveryReference,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<DeliveryReferenceProjection> {
+        match version {
+            Version::V3 => {
+                let source = head;
+                Ok(DeliveryReferenceProjection::V3(source))
+            }
+            _ => {
+                Err(UnsupportedProjection {
+                    version: version.value().into(),
+                    direction: Direction::Downcast,
+                    type_path: "DeliveryReferenceProjection".into(),
+                    reason: "type is not reachable in selected version".into(),
+                })
+            }
+        }
     }
     /// The caller-selected version's projected model type.
     pub enum GeoAnchorProjection {

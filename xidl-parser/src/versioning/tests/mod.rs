@@ -14,6 +14,7 @@ mod map;
 mod project;
 mod references;
 mod replaces;
+mod roots;
 mod timeline;
 mod version_parameter;
 

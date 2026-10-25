@@ -8,7 +8,12 @@ enum Versions {
     @rename("2026-07-01") v3,
 };
 
+// Stored delivery references remain strings in every published version.
+typedef string DeliveryReference;
+
 module geo {
+    // This unrelated local alias must not rebind ::DeliveryReference.
+    typedef long DeliveryReference;
     typedef string Identifier;
     enum Country { US, CA };
     struct Marker {};
@@ -18,14 +23,14 @@ module geo {
     struct Identity : Anchor {
         Identifier id;
         string tenant;
-        @removed(Versions::v3) string delivery_reference;
+        @removed(Versions::v3) ::DeliveryReference delivery_reference;
         @removed(Versions::v3) @optional string delivery_note;
         @added(Versions::v3) @optional @default(true) boolean signature_required;
     };
 
     @rename_all("camelCase")
     struct Change {
-        @removed(Versions::v3) @optional string delivery_reference;
+        @removed(Versions::v3) @optional ::DeliveryReference delivery_reference;
         @removed(Versions::v3) @optional string delivery_note;
         @added(Versions::v3) @optional @default(true) boolean signature_required;
     };
@@ -58,8 +63,8 @@ module shipping {
     @http(403) exception Forbidden { string reason; };
     interface Addresses {
         @get(path = "/tenants/{tenant}/addresses/{id}")
-        Address read(@path string tenant, @path string id) raises(Missing, Projection, Forbidden);
+        Address read(@path string tenant, @path string id) raises(::shipping::Missing, ::shipping::Projection, ::shipping::Forbidden);
         @patch(path = "/tenants/{tenant}/addresses/{id}")
-        Address update(@path string tenant, @path string id, @body Change patch) raises(Missing, Projection, Forbidden);
+        Address update(@path string tenant, @path string id, @body Change patch) raises(::shipping::Missing, ::shipping::Projection, ::shipping::Forbidden);
     };
 };

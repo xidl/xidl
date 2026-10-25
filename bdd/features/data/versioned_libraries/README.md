@@ -31,3 +31,10 @@ The address evolution is inspired by Shopify's deprecated string `countryCode`
 and enum `countryCodeV2` in
 [MailingAddress](https://shopify.dev/docs/api/storefront/2026-10/objects/MailingAddress).
 Release dates, inheritance and retained delivery history are fixture policy.
+
+The retained `deliveryReference` uses the root string alias
+`::DeliveryReference`, while `geo` deliberately declares a same-named integer
+alias. Old writes and responses must continue to use the root string contract. A
+numeric PATCH is rejected before storage changes in both modes. The operations
+also use absolute exception paths; the existing HTTP and SDK journeys exercise
+their 403/404/422 responses after version projection.

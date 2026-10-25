@@ -9,7 +9,6 @@ use xidl_parser::hir;
 pub(super) struct ReferencePlanner<'a> {
     pub surface: &'a VersionSurface,
     pub paired: &'a BTreeSet<String>,
-    pub version: &'a str,
     pub context: &'a str,
 }
 
@@ -34,13 +33,8 @@ impl ReferencePlanner<'_> {
     fn ty(&self, ty: &hir::TypeSpec, scope: &[String]) -> IdlcResult<ValuePlan> {
         match ty {
             hir::TypeSpec::ScopedName(name) => {
-                let mut name = name.clone();
-                if name.name.first().is_some_and(|first| first == self.version) {
-                    name.name.remove(0);
-                    name.is_root = true;
-                }
                 let key =
-                    resolve_canonical(scope, &name, |key| self.surface.types.contains_key(key));
+                    resolve_canonical(scope, name, |key| self.surface.types.contains_key(key));
                 match key {
                     Some(key) if self.paired.contains(&key) => Ok(ValuePlan::Named(key)),
                     Some(key) => Err(IdlcError::rpc(format!(
@@ -141,7 +135,6 @@ impl AdapterPlan {
         let references = ReferencePlanner {
             surface: &head.surface,
             paired: &paired,
-            version: &head.version.id,
             context: "Head outputs",
         };
         let mut pending = Vec::new();

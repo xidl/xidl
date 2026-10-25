@@ -31,7 +31,7 @@ pub(crate) fn project_version(
         }
         .into());
     };
-    let mut projector = Projector::new(timeline, version, def);
+    let mut projector = Projector::new(timeline, version, def, &spec.0);
     let mut pragmas = Vec::new();
     let mut body = Vec::new();
     for definition in &spec.0 {

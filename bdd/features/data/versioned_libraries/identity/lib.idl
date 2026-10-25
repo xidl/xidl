@@ -1,3 +1,6 @@
+// A root-level shared wire identifier, included before the geo module.
+typedef string DeliveryReference;
+
 module geo {
     #include "models/identity.idl"
 };

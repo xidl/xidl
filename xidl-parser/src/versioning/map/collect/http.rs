@@ -4,7 +4,7 @@ use super::super::helpers::descriptor;
 use super::super::model::OperationSurface;
 use super::render::{join, render_method, render_param_kind, render_type};
 use crate::error::ParserResult;
-use crate::hir::Specification;
+use crate::hir::{Specification, VisitScopedNames};
 use crate::rest_hir::{self, HttpParamKind};
 use serde_json::Value;
 use std::collections::BTreeMap;
@@ -25,7 +25,10 @@ pub(crate) fn collect_operations(
                 .join("::"),
             &interface.name,
         );
-        for operation in interface.operations {
+        for mut operation in interface.operations {
+            if let Some(version) = interface.module_path.first() {
+                operation.remove_root_namespace(version);
+            }
             let params = operation
                 .http
                 .request
