@@ -1,5 +1,10 @@
 //! Single-base struct inheritance and its flattened wire shape.
 
+mod bindings;
+
+#[cfg(test)]
+mod tests;
+
 use crate::error::{ParseError, ParserResult};
 use crate::hir::{
     Annotation, ConstrTypeDcl, Declarator, Definition, Member, ScopedName, Specification,
@@ -12,11 +17,12 @@ use std::collections::{BTreeMap, BTreeSet};
 ///
 /// A struct has at most one base struct, the base must name a complete struct,
 /// the chain must not cycle, and no field may repeat a field declared by an
-/// ancestor. Inherited members keep their wire names so a target can flatten
-/// them without re-deriving the base struct's annotations.
+/// ancestor. Inherited members keep their wire names and resolved references so
+/// targets do not reinterpret the base struct's annotations or lexical scope.
 pub(crate) fn analyze(spec: &mut Specification) -> ParserResult<()> {
     let structs = collect_structs(&spec.0);
-    let inherited = flatten(&structs)?;
+    let names = crate::hir::DeclarationNames::collect(&spec.0);
+    let inherited = flatten(&structs, &names)?;
     apply(&mut spec.0, &[], &inherited);
     Ok(())
 }
@@ -79,7 +85,10 @@ fn collect_constr(constr: &ConstrTypeDcl, scope: &[String], out: &mut BTreeMap<S
 }
 
 /// Returns the inherited members of every struct, ancestor first.
-fn flatten(structs: &BTreeMap<String, StructDcl>) -> ParserResult<BTreeMap<String, Vec<Member>>> {
+fn flatten(
+    structs: &BTreeMap<String, StructDcl>,
+    names: &crate::hir::DeclarationNames,
+) -> ParserResult<BTreeMap<String, Vec<Member>>> {
     let mut out = BTreeMap::new();
     for key in structs.keys() {
         let mut chain = Vec::new();
@@ -101,8 +110,11 @@ fn flatten(structs: &BTreeMap<String, StructDcl>) -> ParserResult<BTreeMap<Strin
         let mut inherited = Vec::new();
         for ancestor in chain.iter().skip(1).rev() {
             let def = &structs[ancestor];
+            let binding = bindings::MemberBinding::new(names, scope_of(ancestor));
             for member in &def.member {
-                inherited.extend(wire_named_members(member, &def.annotations));
+                let mut member = member.clone();
+                binding.bind(&mut member);
+                inherited.extend(wire_named_members(&member, &def.annotations));
             }
         }
         validate_duplicates(key, &structs[key], &inherited)?;
