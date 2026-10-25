@@ -10,7 +10,7 @@ use crate::openapi::request_body::RequestBody;
 use crate::openapi::schema::{ObjectBuilder, Schema, Type};
 use crate::openapi::{RefOr, security::SecurityRequirement};
 use xidl_parser::rest_hir::{
-    HttpException, HttpOperation, HttpRequestBodyShape, HttpResponseBodyShape,
+    HttpException, HttpOperation, HttpParamKind, HttpRequestBodyShape, HttpResponseBodyShape,
     semantics::{HttpSecurityRequirement, HttpStreamCodec, HttpStreamKind},
 };
 
@@ -82,7 +82,7 @@ pub(crate) fn render_http_operation(
             ParameterIn::Query,
             &binding.wire_name,
             scope.schema_for_type(&binding.ty)?,
-            !binding.optional,
+            binding.requires_presence(HttpParamKind::Query),
             None,
         ));
     }
@@ -91,7 +91,7 @@ pub(crate) fn render_http_operation(
             ParameterIn::Header,
             &binding.wire_name,
             scope.schema_for_type(&binding.ty)?,
-            !binding.optional,
+            binding.requires_presence(HttpParamKind::Header),
             None,
         ));
     }
@@ -100,7 +100,7 @@ pub(crate) fn render_http_operation(
             ParameterIn::Cookie,
             &binding.wire_name,
             scope.schema_for_type(&binding.ty)?,
-            !binding.optional,
+            binding.requires_presence(HttpParamKind::Cookie),
             None,
         ));
     }

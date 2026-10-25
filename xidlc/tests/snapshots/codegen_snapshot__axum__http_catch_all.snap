@@ -113,7 +113,7 @@ where
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
             let HttpCatchAllServiceReadAssetPath { key } = xidl_path;
-            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
+            let ::xidl_rust_axum::axum_extra::extract::Query(xidl_query) = <::xidl_rust_axum::axum_extra::extract::Query<
                 HttpCatchAllServiceReadAssetRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
@@ -354,7 +354,7 @@ impl HttpCatchAllServiceClient {
         let query = HttpCatchAllServiceReadAssetRequestOutQuery {
             version,
         };
-        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        let query = xidl_rust_axum::serde_html_form::to_string(&query)
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         if !query.is_empty() {
             req.url_mut().set_query(Some(&query));

@@ -608,7 +608,7 @@ export const HttpDefaultsServiceOperations = {
                 args: ["name"],
                 schema: ifaceSchemas.HttpDefaultsServiceGetNameRequestSchema,
                 path: [],
-                query: [{ wireName: "name", key: "name", multi: false }],
+                query: [{ wireName: "name", key: "name", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -642,7 +642,7 @@ export const HttpDefaultsServiceOperations = {
                 args: ["user_id", "page", "size"],
                 schema: ifaceSchemas.HttpDefaultsServiceListOrdersRequestSchema,
                 path: [{ parameter: "uid", wireName: "uid", key: "user_id", multi: false, catchAll: false }],
-                query: [{ wireName: "page", key: "page", multi: false }, { wireName: "size", key: "size", multi: false }],
+                query: [{ wireName: "page", key: "page", multi: false, optional: false }, { wireName: "size", key: "size", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -819,7 +819,7 @@ export const HttpDefaultsServiceOperations = {
                 args: ["id", "lang"],
                 schema: ifaceSchemas.HttpDefaultsServiceGetUserRequestSchema,
                 path: [{ parameter: "id", wireName: "id", key: "id", multi: false, catchAll: false }],
-                query: [{ wireName: "lang", key: "lang", multi: false }],
+                query: [{ wireName: "lang", key: "lang", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -853,7 +853,7 @@ export const HttpDefaultsServiceOperations = {
                 args: ["user_id", "locale"],
                 schema: ifaceSchemas.HttpDefaultsServiceGetUserAliasRequestSchema,
                 path: [{ parameter: "id", wireName: "id", key: "user_id", multi: false, catchAll: false }],
-                query: [{ wireName: "lang", key: "locale", multi: false }],
+                query: [{ wireName: "lang", key: "locale", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -887,7 +887,7 @@ export const HttpDefaultsServiceOperations = {
                 args: ["id", "revision"],
                 schema: ifaceSchemas.HttpDefaultsServiceDeleteUserRequestSchema,
                 path: [],
-                query: [{ wireName: "id", key: "id", multi: false }, { wireName: "revision", key: "revision", multi: false }],
+                query: [{ wireName: "id", key: "id", multi: false, optional: false }, { wireName: "revision", key: "revision", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -921,7 +921,7 @@ export const HttpDefaultsServiceOperations = {
                 args: ["id", "revision"],
                 schema: ifaceSchemas.HttpDefaultsServiceProbeUserRequestSchema,
                 path: [],
-                query: [{ wireName: "id", key: "id", multi: false }, { wireName: "revision", key: "revision", multi: false }],
+                query: [{ wireName: "id", key: "id", multi: false, optional: false }, { wireName: "revision", key: "revision", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -955,7 +955,7 @@ export const HttpDefaultsServiceOperations = {
                 args: ["id", "revision"],
                 schema: ifaceSchemas.HttpDefaultsServiceUserOptionsRequestSchema,
                 path: [],
-                query: [{ wireName: "id", key: "id", multi: false }, { wireName: "revision", key: "revision", multi: false }],
+                query: [{ wireName: "id", key: "id", multi: false, optional: false }, { wireName: "revision", key: "revision", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {

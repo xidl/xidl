@@ -156,7 +156,7 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
+            let ::xidl_rust_axum::axum_extra::extract::Query(xidl_query) = <::xidl_rust_axum::axum_extra::extract::Query<
                 HttpDefaultsServiceGetNameRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
@@ -216,7 +216,7 @@ where
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
             let HttpDefaultsServiceListOrdersPath { user_id } = xidl_path;
-            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
+            let ::xidl_rust_axum::axum_extra::extract::Query(xidl_query) = <::xidl_rust_axum::axum_extra::extract::Query<
                 HttpDefaultsServiceListOrdersRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
@@ -478,7 +478,7 @@ where
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
             let HttpDefaultsServiceGetUserPath { id } = xidl_path;
-            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
+            let ::xidl_rust_axum::axum_extra::extract::Query(xidl_query) = <::xidl_rust_axum::axum_extra::extract::Query<
                 HttpDefaultsServiceGetUserRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
@@ -536,7 +536,7 @@ where
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
             let HttpDefaultsServiceGetUserAliasPath { user_id } = xidl_path;
-            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
+            let ::xidl_rust_axum::axum_extra::extract::Query(xidl_query) = <::xidl_rust_axum::axum_extra::extract::Query<
                 HttpDefaultsServiceGetUserAliasRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
@@ -582,7 +582,7 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
+            let ::xidl_rust_axum::axum_extra::extract::Query(xidl_query) = <::xidl_rust_axum::axum_extra::extract::Query<
                 HttpDefaultsServiceDeleteUserRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
@@ -628,7 +628,7 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
+            let ::xidl_rust_axum::axum_extra::extract::Query(xidl_query) = <::xidl_rust_axum::axum_extra::extract::Query<
                 HttpDefaultsServiceProbeUserRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
@@ -674,7 +674,7 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
+            let ::xidl_rust_axum::axum_extra::extract::Query(xidl_query) = <::xidl_rust_axum::axum_extra::extract::Query<
                 HttpDefaultsServiceUserOptionsRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
@@ -1603,7 +1603,7 @@ impl HttpDefaultsServiceClient {
         let query = HttpDefaultsServiceGetNameRequestOutQuery {
             name,
         };
-        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        let query = xidl_rust_axum::serde_html_form::to_string(&query)
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         if !query.is_empty() {
             req.url_mut().set_query(Some(&query));
@@ -1655,7 +1655,7 @@ impl HttpDefaultsServiceClient {
             page,
             size,
         };
-        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        let query = xidl_rust_axum::serde_html_form::to_string(&query)
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         if !query.is_empty() {
             req.url_mut().set_query(Some(&query));
@@ -1917,7 +1917,7 @@ impl HttpDefaultsServiceClient {
         let query = HttpDefaultsServiceGetUserRequestOutQuery {
             lang,
         };
-        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        let query = xidl_rust_axum::serde_html_form::to_string(&query)
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         if !query.is_empty() {
             req.url_mut().set_query(Some(&query));
@@ -1967,7 +1967,7 @@ impl HttpDefaultsServiceClient {
         let query = HttpDefaultsServiceGetUserAliasRequestOutQuery {
             locale,
         };
-        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        let query = xidl_rust_axum::serde_html_form::to_string(&query)
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         if !query.is_empty() {
             req.url_mut().set_query(Some(&query));
@@ -2020,7 +2020,7 @@ impl HttpDefaultsServiceClient {
             id,
             revision,
         };
-        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        let query = xidl_rust_axum::serde_html_form::to_string(&query)
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         if !query.is_empty() {
             req.url_mut().set_query(Some(&query));
@@ -2070,7 +2070,7 @@ impl HttpDefaultsServiceClient {
             id,
             revision,
         };
-        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        let query = xidl_rust_axum::serde_html_form::to_string(&query)
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         if !query.is_empty() {
             req.url_mut().set_query(Some(&query));
@@ -2117,7 +2117,7 @@ impl HttpDefaultsServiceClient {
             id,
             revision,
         };
-        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        let query = xidl_rust_axum::serde_html_form::to_string(&query)
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         if !query.is_empty() {
             req.url_mut().set_query(Some(&query));

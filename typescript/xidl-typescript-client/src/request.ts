@@ -31,7 +31,7 @@ export function appendHeader(
   headers: Headers,
   key: string,
   value: unknown,
-  optional: boolean,
+  _optional: boolean,
   isMulti: boolean,
 ): void {
   if (value === undefined || value === null) {
@@ -39,7 +39,18 @@ export function appendHeader(
   }
   if (isMulti && Array.isArray(value)) {
     for (const item of value) {
-      headers.append(key, encodeScalar(item));
+      const encoded = encodeScalar(item);
+      if (
+        typeof item === 'string' &&
+        (encoded.includes(',') || encoded.trim() !== encoded)
+      ) {
+        throw new XidlClientError(
+          `unrepresentable simple header collection element: ${key}`,
+          400,
+          400,
+        );
+      }
+      headers.append(key, encoded);
     }
     return;
   }
@@ -50,7 +61,7 @@ export function appendCookie(
   cookies: string[],
   key: string,
   value: unknown,
-  optional: boolean,
+  _optional: boolean,
   isMulti: boolean,
 ): void {
   if (value === undefined || value === null) {

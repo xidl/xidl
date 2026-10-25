@@ -70,6 +70,35 @@ fn serde_factories_reject_unsupported_mime_types() {
 }
 
 #[test]
+fn present_query_values_preserve_empty_strings_and_repeated_elements() {
+    #[derive(Debug, serde::Deserialize, PartialEq)]
+    struct Query {
+        #[serde(default, deserialize_with = "DeserializeFactory::deserialize_present")]
+        term: Option<String>,
+        #[serde(default, deserialize_with = "DeserializeFactory::deserialize_present")]
+        labels: Option<Vec<String>>,
+    }
+    for (wire, term, labels) in [
+        ("", None, None),
+        ("term=&labels=", Some(""), Some(vec![""])),
+        (
+            "term=a%26b&labels=first&labels=first",
+            Some("a&b"),
+            Some(vec!["first", "first"]),
+        ),
+    ] {
+        assert_eq!(
+            xidl_rust_axum::serde_html_form::from_str::<Query>(wire).unwrap(),
+            Query {
+                term: term.map(str::to_owned),
+                labels: labels.map(|values| values.into_iter().map(str::to_owned).collect()),
+            }
+        );
+    }
+    assert!(xidl_rust_axum::serde_html_form::from_str::<Query>("term=one&term=two").is_err());
+}
+
+#[test]
 fn http_helpers_cover_invalid_expected_and_invalid_content_type() {
     let headers = http::HeaderMap::new();
     assert!(!accepts_media_type(&headers, "invalid"));

@@ -245,8 +245,10 @@ pub mod test {
                             400,
                             format!("{err:?}"),
                         ))?;
-                    let parsed: String = header_str.to_string();
-                    flags.push(parsed);
+                    for header_str in header_str.split(',').map(str::trim) {
+                        let parsed: String = header_str.to_string();
+                        flags.push(parsed);
+                    }
                 }
                 let age: u32 = match xidl_headers.get("X-Age") {
                     Some(header_value) => {
@@ -657,6 +659,20 @@ pub mod test {
                 .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
             for value in flags {
                 let header_value_str = value;
+                if header_value_str.contains(',')
+                    || header_value_str.trim() != header_value_str
+                {
+                    return Err(
+                        xidl_rust_axum::Error::new(
+                                400,
+                                concat!(
+                                    "unrepresentable simple header collection element: ",
+                                    "X-Flags"
+                                ),
+                            )
+                            .into(),
+                    );
+                }
                 let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
                         &header_value_str,
                     )

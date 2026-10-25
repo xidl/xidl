@@ -191,7 +191,7 @@ export const HttpQueryTemplateServiceOperations = {
                 args: ["id", "lang", "region"],
                 schema: ifaceSchemas.HttpQueryTemplateServiceGetUserRequestSchema,
                 path: [{ parameter: "id", wireName: "id", key: "id", multi: false, catchAll: false }],
-                query: [{ wireName: "lang", key: "lang", multi: false }, { wireName: "region", key: "region", multi: false }],
+                query: [{ wireName: "lang", key: "lang", multi: false, optional: false }, { wireName: "region", key: "region", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -225,7 +225,7 @@ export const HttpQueryTemplateServiceOperations = {
                 args: ["keyword", "payload"],
                 schema: ifaceSchemas.HttpQueryTemplateServiceSearchRequestSchema,
                 path: [],
-                query: [{ wireName: "keyword", key: "keyword", multi: false }],
+                query: [{ wireName: "keyword", key: "keyword", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {

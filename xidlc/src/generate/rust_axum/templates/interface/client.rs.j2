@@ -329,6 +329,11 @@
                                         for value in {{ param.name }} {
                                             let header_value_str = {% if param.header_item_is_string %}value{% elif param.header_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(&value)
                                             .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %};
+                                            {% if param.header_item_is_string %}
+                                                if header_value_str.contains(',') || header_value_str.trim() != header_value_str {
+                                                    return Err(xidl_rust_axum::Error::new(400, concat!("unrepresentable simple header collection element: ", {{ param.wire_name | tojson }})).into());
+                                                }
+                                            {% endif %}
                                             let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
                                             &header_value_str,
                                             )
@@ -397,7 +402,7 @@
                                     {{ param.name }}{% if param.name != param.out_expr %}: {{ param.out_expr }}{% endif %},
                                 {% endfor %}
                             };
-                            let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+                            let query = xidl_rust_axum::serde_html_form::to_string(&query)
                             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                             if !query.is_empty() {
                                 req.url_mut().set_query(Some(&query));
@@ -463,7 +468,7 @@
                                         {{ param.name }}{% if param.name != param.out_expr %}: {{ param.out_expr }}{% endif %},
                                     {% endfor %}
                                 };
-                                let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+                                let query = xidl_rust_axum::serde_html_form::to_string(&query)
                                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                                 if !query.is_empty() {
                                     ws_url.push(if ws_url.contains('?') { '&' } else { '?' });

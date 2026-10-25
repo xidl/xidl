@@ -1884,6 +1884,9 @@ struct HttpSecurityMatrixServiceAlternativeSecurityRequestOutQuery {
 #[derive(::serde::Deserialize)]
 struct HttpSecurityMatrixServiceAlternativeSecurityRequestInQuery {
     #[serde(default)]
+    #[serde(
+        deserialize_with = "::xidl_rust_axum::DeserializeFactory::deserialize_present"
+    )]
     locale: Option<String>,
 }
 #[derive(::serde::Deserialize)]
@@ -1914,7 +1917,7 @@ where
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
             let HttpSecurityMatrixServiceAlternativeSecurityPath { id } = xidl_path;
-            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
+            let ::xidl_rust_axum::axum_extra::extract::Query(xidl_query) = <::xidl_rust_axum::axum_extra::extract::Query<
                 HttpSecurityMatrixServiceAlternativeSecurityRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
@@ -2583,7 +2586,7 @@ impl HttpSecurityMatrixServiceClient {
         let query = HttpSecurityMatrixServiceAlternativeSecurityRequestOutQuery {
             locale,
         };
-        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        let query = xidl_rust_axum::serde_html_form::to_string(&query)
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         if !query.is_empty() {
             req.url_mut().set_query(Some(&query));

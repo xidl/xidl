@@ -1,0 +1,520 @@
+---
+source: xidlc/tests/http_collections.rs
+expression: documents
+---
+{
+  "v1": {
+    "components": {
+      "schemas": {
+        "Error": {
+          "properties": {
+            "code": {
+              "type": "integer"
+            },
+            "details": {
+              "type": "object"
+            },
+            "msg": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "msg"
+          ],
+          "type": "object"
+        },
+        "v1.ApiVersion": {
+          "enum": [
+            "2026-07-01",
+            "2026-10-01"
+          ],
+          "type": "string"
+        },
+        "v1.Denied": {
+          "properties": {
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "reason"
+          ],
+          "type": "object"
+        },
+        "v1.Image": {
+          "properties": {
+            "url": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "url"
+          ],
+          "type": "object"
+        },
+        "v1.Media": {
+          "properties": {
+            "kind": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "url"
+          ],
+          "type": "object"
+        },
+        "v1.Message": {
+          "properties": {
+            "code": {
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "value"
+          ],
+          "type": "object"
+        },
+        "v1.Page": {
+          "properties": {
+            "messages": {
+              "items": {
+                "$ref": "#/components/schemas/v1.Message"
+              },
+              "type": "array"
+            },
+            "products": {
+              "items": {
+                "$ref": "#/components/schemas/v1.Product"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "products",
+            "messages"
+          ],
+          "type": "object"
+        },
+        "v1.Product": {
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "media": {
+              "items": {
+                "$ref": "#/components/schemas/v1.Image"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "id",
+            "media"
+          ],
+          "type": "object"
+        }
+      }
+    },
+    "info": {
+      "title": "versioned_catalog",
+      "version": "2026-07-01"
+    },
+    "openapi": "3.1.0",
+    "paths": {
+      "/catalog": {
+        "get": {
+          "operationId": "v1.Catalog.search",
+          "parameters": [
+            {
+              "in": "query",
+              "name": "media",
+              "required": false,
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "description": "API version; this document describes 2026-07-01.",
+              "in": "header",
+              "name": "X-Catalog-Version",
+              "required": false,
+              "schema": {
+                "enum": [
+                  "2026-07-01"
+                ],
+                "type": "string"
+              }
+            },
+            {
+              "in": "cookie",
+              "name": "tenant",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v1.Page"
+                  }
+                }
+              },
+              "description": "OK",
+              "headers": {
+                "X-Catalog-Version": {
+                  "schema": {
+                    "enum": [
+                      "2026-07-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Bad Request",
+              "headers": {
+                "X-Catalog-Version": {
+                  "schema": {
+                    "enum": [
+                      "2026-07-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "403": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v1.Denied"
+                  }
+                }
+              },
+              "description": "Error: Denied",
+              "headers": {
+                "X-Catalog-Version": {
+                  "schema": {
+                    "enum": [
+                      "2026-07-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "500": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Internal Server Error",
+              "headers": {
+                "X-Catalog-Version": {
+                  "schema": {
+                    "enum": [
+                      "2026-07-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "Catalog"
+          ]
+        }
+      }
+    },
+    "tags": [
+      {
+        "name": "Catalog"
+      }
+    ]
+  },
+  "v2": {
+    "components": {
+      "schemas": {
+        "Error": {
+          "properties": {
+            "code": {
+              "type": "integer"
+            },
+            "details": {
+              "type": "object"
+            },
+            "msg": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "msg"
+          ],
+          "type": "object"
+        },
+        "v2.ApiVersion": {
+          "enum": [
+            "2026-07-01",
+            "2026-10-01"
+          ],
+          "type": "string"
+        },
+        "v2.Denied": {
+          "properties": {
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "reason"
+          ],
+          "type": "object"
+        },
+        "v2.Image": {
+          "properties": {
+            "url": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "url"
+          ],
+          "type": "object"
+        },
+        "v2.Media": {
+          "properties": {
+            "kind": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "url"
+          ],
+          "type": "object"
+        },
+        "v2.Message": {
+          "properties": {
+            "code": {
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "value"
+          ],
+          "type": "object"
+        },
+        "v2.Page": {
+          "properties": {
+            "messages": {
+              "items": {
+                "$ref": "#/components/schemas/v2.Message"
+              },
+              "type": "array"
+            },
+            "products": {
+              "items": {
+                "$ref": "#/components/schemas/v2.Product"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "products",
+            "messages"
+          ],
+          "type": "object"
+        },
+        "v2.Product": {
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "media": {
+              "items": {
+                "$ref": "#/components/schemas/v2.Media"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "id",
+            "media"
+          ],
+          "type": "object"
+        }
+      }
+    },
+    "info": {
+      "title": "versioned_catalog",
+      "version": "2026-10-01"
+    },
+    "openapi": "3.1.0",
+    "paths": {
+      "/catalog": {
+        "get": {
+          "operationId": "v2.Catalog.search",
+          "parameters": [
+            {
+              "in": "query",
+              "name": "media",
+              "required": false,
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "description": "API version; this document describes 2026-10-01.",
+              "in": "header",
+              "name": "X-Catalog-Version",
+              "required": false,
+              "schema": {
+                "enum": [
+                  "2026-10-01"
+                ],
+                "type": "string"
+              }
+            },
+            {
+              "in": "cookie",
+              "name": "tenant",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v2.Page"
+                  }
+                }
+              },
+              "description": "OK",
+              "headers": {
+                "X-Catalog-Version": {
+                  "schema": {
+                    "enum": [
+                      "2026-10-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Bad Request",
+              "headers": {
+                "X-Catalog-Version": {
+                  "schema": {
+                    "enum": [
+                      "2026-10-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "403": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v2.Denied"
+                  }
+                }
+              },
+              "description": "Error: Denied",
+              "headers": {
+                "X-Catalog-Version": {
+                  "schema": {
+                    "enum": [
+                      "2026-10-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "500": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Internal Server Error",
+              "headers": {
+                "X-Catalog-Version": {
+                  "schema": {
+                    "enum": [
+                      "2026-10-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "Catalog"
+          ]
+        }
+      }
+    },
+    "tags": [
+      {
+        "name": "Catalog"
+      }
+    ]
+  }
+}

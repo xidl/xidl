@@ -155,6 +155,9 @@
                         {% if param.optional or param.is_sequence %}
                             #[serde(default)]
                         {% endif %}
+                        {% if param.optional %}
+                            #[serde(deserialize_with = "::xidl_rust_axum::DeserializeFactory::deserialize_present")]
+                        {% endif %}
                         {{ param.name }}: {{ param.in_ty }},
                     {% endfor %}
                 }
@@ -257,8 +260,8 @@
                             } = xidl_path;
                         {% endif %}
                         {% if method.query_params | length > 0 %}
-                            let ::xidl_rust_axum::axum::extract::Query(xidl_query) =
-                            <::xidl_rust_axum::axum::extract::Query<{{ method.struct_prefix }}RequestInQuery> as ::xidl_rust_axum::axum::extract::FromRequestParts<S>>::from_request_parts(&mut parts, state)
+                            let ::xidl_rust_axum::axum_extra::extract::Query(xidl_query) =
+                            <::xidl_rust_axum::axum_extra::extract::Query<{{ method.struct_prefix }}RequestInQuery> as ::xidl_rust_axum::axum::extract::FromRequestParts<S>>::from_request_parts(&mut parts, state)
                             .await
                             .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
                             let {{ method.struct_prefix }}RequestInQuery {

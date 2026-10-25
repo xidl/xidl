@@ -1,8 +1,10 @@
-"""Exercise generated version routers and chain adapters with one real ledger."""
+"""Run the same business journey through generated version routers and chains."""
 
+from dataclasses import dataclass
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import time
@@ -11,6 +13,23 @@ from behave import given, then, when
 import requests
 
 from server_process import start_server_process
+
+
+@dataclass(frozen=True)
+class Application:
+    package: str
+    header: str
+    versions: tuple[str, str]
+
+
+APPLICATIONS = {
+    "billing": Application(
+        "versioned_billing", "x-billing-version", ("2025-01-01", "2025-04-01")
+    ),
+    "catalog": Application(
+        "versioned_catalog", "x-catalog-version", ("2026-07-01", "2026-10-01")
+    ),
+}
 
 
 def run(command, directory, env=None):
@@ -23,19 +42,21 @@ def run(command, directory, env=None):
     return result.stdout
 
 
-@given('the versioned billing application in "{mode}" mode')
-def billing_contract(context, mode):
+@given('the versioned "{application}" application in "{mode}" mode')
+def versioned_contract(context, application, mode):
     assert mode in ("chain", "route")
+    context.versioned_app = APPLICATIONS[application]
     context.execute_steps(
-        'Given a REST IDL file "bdd/features/data/versioned_billing.idl"'
+        f'Given a REST IDL file "bdd/features/data/{context.versioned_app.package}.idl"'
     )
-    context.billing_mode = mode
+    context.versioned_mode = mode
 
 
-@when("I generate independently selected billing SDKs and start the application")
-def billing_generate(context):
+@when("I generate independently selected SDKs and start the versioned application")
+def versioned_generate(context):
     root = Path.cwd()
     output = Path(context.temp_dir)
+    package_name = context.versioned_app.package
     rust = output / "rust"
     typescript = output / "ts"
     cli = root / "target/debug/xidlc"
@@ -57,7 +78,7 @@ def billing_generate(context):
             "--api-version",
             version,
         )
-        selected = (rust / "selected" / version / "versioned_billing.rs").read_text()
+        selected = (rust / "selected" / version / f"{package_name}.rs").read_text()
         assert f"pub mod {version}" in selected
         assert f"pub mod {'v2' if version == 'v1' else 'v1'}" not in selected
         generate(
@@ -68,7 +89,7 @@ def billing_generate(context):
             version,
         )
 
-    boilerplate = root / "bdd/boilerplate/versioned_billing"
+    boilerplate = root / "bdd/boilerplate" / package_name
     shutil.copytree(boilerplate / "rust", rust, dirs_exist_ok=True)
     manifest = rust / "Cargo.toml"
     manifest.write_text(
@@ -91,21 +112,21 @@ def billing_generate(context):
         root / "bdd/boilerplate/required_parameters/ts/tsconfig.json", typescript
     )
     run(["pnpm", "install", "--ignore-scripts", "--no-frozen-lockfile"], typescript)
-    run(["pnpm", "exec", "tsc", "--noEmit"], typescript)
+    run(["node", "node_modules/typescript/bin/tsc", "--noEmit"], typescript)
 
     env = os.environ.copy()
     target = root / "bdd/.temp/rust_target"
     env.update(CARGO_TARGET_DIR=str(target), PORT=str(context.port))
     run(["cargo", "build", "--quiet"], rust, env)
-    context.billing_binary = target / "debug/versioned-billing"
-    context.billing_typescript = typescript
-    context.billing_base = f"http://127.0.0.1:{context.port}"
+    context.versioned_binary = target / "debug" / package_name.replace("_", "-")
+    context.versioned_typescript = typescript
+    context.versioned_base = f"http://127.0.0.1:{context.port}"
     context.port_guard.close()
     context.port_guard = None
     log_path = output / "server.log"
     with log_path.open("w") as log:
         context.server_process = start_server_process(
-            [str(context.billing_binary), context.billing_mode],
+            [str(context.versioned_binary), context.versioned_mode],
             cwd=rust,
             env=env,
             stdout=log,
@@ -116,7 +137,7 @@ def billing_generate(context):
         assert context.server_process.poll() is None, log_path.read_text()
         try:
             if (
-                requests.get(context.billing_base + "/ready", timeout=0.5).status_code
+                requests.get(context.versioned_base + "/ready", timeout=0.5).status_code
                 == 204
             ):
                 return
@@ -124,13 +145,13 @@ def billing_generate(context):
             pass
         time.sleep(0.05)
     raise AssertionError(
-        "billing application did not become ready\n" + log_path.read_text()
+        f"{package_name} application did not become ready\n" + log_path.read_text()
     )
 
 
-@then("the shared billing Hurl journey preserves validation and committed payments")
-def billing_hurl(context):
-    context.billing_report = Path(context.temp_dir) / "hurl-report"
+@then("the shared versioned Hurl journey succeeds")
+def versioned_hurl(context):
+    context.versioned_report = Path(context.temp_dir) / "hurl-report"
     run(
         [
             "hurl",
@@ -138,17 +159,17 @@ def billing_hurl(context):
             "--max-time",
             "5",
             "--report-json",
-            str(context.billing_report),
+            str(context.versioned_report),
             "--variable",
-            f"base_url={context.billing_base}",
-            "bdd/features/data/versioned_billing.hurl",
+            f"base_url={context.versioned_base}",
+            f"bdd/features/data/{context.versioned_app.package}.hurl",
         ],
         Path.cwd(),
     )
 
 
-@then("every billing Hurl response matches its generated OpenAPI contract")
-def billing_openapi(context):
+@then("every versioned Hurl response matches its generated OpenAPI contract")
+def versioned_openapi(context):
     from jsonschema import Draft202012Validator
 
     documents = {
@@ -156,8 +177,8 @@ def billing_openapi(context):
         for path in (Path(context.temp_dir) / "openapi").glob("*.json")
         for document in [json.loads(path.read_text())]
     }
-    assert set(documents) == {"2025-01-01", "2025-04-01"}
-    report = json.loads((context.billing_report / "report.json").read_text())
+    assert set(documents) == set(context.versioned_app.versions)
+    report = json.loads((context.versioned_report / "report.json").read_text())
     # Hurl's report contains the actual response files; schemas come only from generation.
     for result in report:
         for entry in result["entries"]:
@@ -172,17 +193,34 @@ def billing_openapi(context):
                     header["name"].lower(): header["value"]
                     for header in request["headers"]
                 }
-                version = request_headers.get("x-billing-version", "2025-04-01")
+                version_header = context.versioned_app.header
+                version = request_headers.get(
+                    version_header, context.versioned_app.versions[-1]
+                )
                 if version in documents:
-                    assert headers.get("x-billing-version") == version
+                    assert headers.get(version_header) == version
                 else:
                     assert response["status"] == 400
-                    assert "x-billing-version" not in headers
-                    version = "2025-04-01"
+                    assert version_header not in headers
+                    version = context.versioned_app.versions[-1]
                 document = documents[version]
                 path = requests.utils.urlparse(request["url"]).path
-                if path.startswith("/invoices/"):
-                    path = "/invoices/{id}"
+                if path not in document["paths"]:
+                    matches = [
+                        template
+                        for template in document["paths"]
+                        if re.fullmatch(
+                            "/".join(
+                                "[^/]+"
+                                if segment.startswith("{")
+                                else re.escape(segment)
+                                for segment in template.split("/")
+                            ),
+                            path,
+                        )
+                    ]
+                    assert len(matches) == 1, (path, matches)
+                    path = matches[0]
                 operation = document["paths"][path][request["method"].lower()]
                 contract = operation["responses"][str(response["status"])]
                 media_type = headers["content-type"].split(";", 1)[0].strip()
@@ -193,7 +231,7 @@ def billing_openapi(context):
                             headers[name.lower()]
                         )
                 body = json.loads(
-                    (context.billing_report / response["body"]).read_text()
+                    (context.versioned_report / response["body"]).read_text()
                 )
                 validator = Draft202012Validator(
                     {**schema, "components": document.get("components", {})}
@@ -201,15 +239,15 @@ def billing_openapi(context):
                 validator.validate(body)
 
 
-@then("independent Rust and TypeScript billing SDKs use the same versioned endpoint")
-def billing_sdks(context):
+@then("independent Rust and TypeScript SDKs use the same versioned endpoint")
+def versioned_sdks(context):
     stdout = run(
-        [str(context.billing_binary), "sdk", context.billing_base],
+        [str(context.versioned_binary), "sdk", context.versioned_base],
         Path(context.temp_dir),
     )
     assert "PASS: independent Rust SDKs" in stdout
     stdout = run(
-        ["pnpm", "exec", "tsx", "sdk.ts", context.billing_base],
-        context.billing_typescript,
+        ["node", "--import", "tsx", "sdk.ts", context.versioned_base],
+        context.versioned_typescript,
     )
     assert "PASS: independent TypeScript SDKs" in stdout

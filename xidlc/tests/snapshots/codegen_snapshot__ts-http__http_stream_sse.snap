@@ -217,7 +217,7 @@ export const HttpStreamSseServiceOperations = {
                 args: ["topic", "lang"],
                 schema: ifaceSchemas.HttpStreamSseServiceWatchTopicRequestSchema,
                 path: [{ parameter: "topic", wireName: "topic", key: "topic", multi: false, catchAll: false }],
-                query: [{ wireName: "lang", key: "lang", multi: false }],
+                query: [{ wireName: "lang", key: "lang", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {

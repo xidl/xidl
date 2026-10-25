@@ -213,7 +213,7 @@ pub mod v1 {
                             err.to_string(),
                         ))?;
                     let StoreGetPath { id } = xidl_path;
-                    let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
+                    let ::xidl_rust_axum::axum_extra::extract::Query(xidl_query) = <::xidl_rust_axum::axum_extra::extract::Query<
                         StoreGetRequestInQuery,
                     > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                         S,
@@ -596,9 +596,9 @@ pub mod v1 {
                 ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
                 headers: ::xidl_rust_axum::axum::http::HeaderMap,
                 uri: ::xidl_rust_axum::axum::http::Uri,
-                xidl_rust_axum::axum::extract::Query(
+                xidl_rust_axum::axum_extra::extract::Query(
                     query,
-                ): xidl_rust_axum::axum::extract::Query<StoreChatRequestInQuery>,
+                ): xidl_rust_axum::axum_extra::extract::Query<StoreChatRequestInQuery>,
                 ws: ::xidl_rust_axum::axum::extract::ws::WebSocketUpgrade,
             ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
                 let _ = &headers;
@@ -728,7 +728,7 @@ pub mod v1 {
                     req.headers_mut().insert(cookie_name, header_value);
                 }
                 let query = StoreGetRequestOutQuery { search };
-                let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+                let query = xidl_rust_axum::serde_html_form::to_string(&query)
                     .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 if !query.is_empty() {
                     req.url_mut().set_query(Some(&query));
@@ -949,7 +949,7 @@ pub mod v1 {
                 let _ = auth_target;
                 let mut ws_url = self.client.ws_url(&xidl_path)?;
                 let query = StoreChatRequestOutQuery { room };
-                let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+                let query = xidl_rust_axum::serde_html_form::to_string(&query)
                     .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 if !query.is_empty() {
                     ws_url.push(if ws_url.contains('?') { '&' } else { '?' });
@@ -1940,7 +1940,7 @@ pub mod v2 {
                             err.to_string(),
                         ))?;
                     let StoreGetPath { id } = xidl_path;
-                    let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
+                    let ::xidl_rust_axum::axum_extra::extract::Query(xidl_query) = <::xidl_rust_axum::axum_extra::extract::Query<
                         StoreGetRequestInQuery,
                     > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                         S,
@@ -2323,9 +2323,9 @@ pub mod v2 {
                 ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
                 headers: ::xidl_rust_axum::axum::http::HeaderMap,
                 uri: ::xidl_rust_axum::axum::http::Uri,
-                xidl_rust_axum::axum::extract::Query(
+                xidl_rust_axum::axum_extra::extract::Query(
                     query,
-                ): xidl_rust_axum::axum::extract::Query<StoreChatRequestInQuery>,
+                ): xidl_rust_axum::axum_extra::extract::Query<StoreChatRequestInQuery>,
                 ws: ::xidl_rust_axum::axum::extract::ws::WebSocketUpgrade,
             ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
                 let _ = &headers;
@@ -2455,7 +2455,7 @@ pub mod v2 {
                     req.headers_mut().insert(cookie_name, header_value);
                 }
                 let query = StoreGetRequestOutQuery { search };
-                let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+                let query = xidl_rust_axum::serde_html_form::to_string(&query)
                     .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 if !query.is_empty() {
                     req.url_mut().set_query(Some(&query));
@@ -2676,7 +2676,7 @@ pub mod v2 {
                 let _ = auth_target;
                 let mut ws_url = self.client.ws_url(&xidl_path)?;
                 let query = StoreChatRequestOutQuery { room };
-                let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+                let query = xidl_rust_axum::serde_html_form::to_string(&query)
                     .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 if !query.is_empty() {
                     ws_url.push(if ws_url.contains('?') { '&' } else { '?' });

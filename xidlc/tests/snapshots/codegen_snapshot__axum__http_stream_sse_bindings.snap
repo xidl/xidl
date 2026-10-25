@@ -95,6 +95,9 @@ struct HttpStreamSseBindingsServiceWatchProjectRequestOutQuery {
 #[derive(::serde::Deserialize)]
 struct HttpStreamSseBindingsServiceWatchProjectRequestInQuery {
     #[serde(default)]
+    #[serde(
+        deserialize_with = "::xidl_rust_axum::DeserializeFactory::deserialize_present"
+    )]
     cursor: Option<String>,
 }
 #[derive(::serde::Serialize, ::serde::Deserialize)]
@@ -148,9 +151,9 @@ where
         ): ::xidl_rust_axum::axum::extract::Path<
             HttpStreamSseBindingsServiceWatchProjectPath,
         >,
-        xidl_rust_axum::axum::extract::Query(
+        xidl_rust_axum::axum_extra::extract::Query(
             query,
-        ): xidl_rust_axum::axum::extract::Query<
+        ): xidl_rust_axum::axum_extra::extract::Query<
             HttpStreamSseBindingsServiceWatchProjectRequestInQuery,
         >,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
@@ -266,7 +269,7 @@ impl HttpStreamSseBindingsServiceClient {
         let query = HttpStreamSseBindingsServiceWatchProjectRequestOutQuery {
             cursor,
         };
-        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        let query = xidl_rust_axum::serde_html_form::to_string(&query)
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         if !query.is_empty() {
             req.url_mut().set_query(Some(&query));

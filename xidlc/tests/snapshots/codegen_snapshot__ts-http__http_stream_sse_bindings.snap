@@ -155,8 +155,8 @@ export const HttpStreamSseBindingsServiceOperations = {
                 args: ["project_id", "cursor", "trace_id"],
                 schema: ifaceSchemas.HttpStreamSseBindingsServiceWatchProjectRequestSchema,
                 path: [{ parameter: "project_id", wireName: "project_id", key: "project_id", multi: false, catchAll: false }],
-                query: [{ wireName: "cursor", key: "cursor", multi: false }],
-                headers: [{ wireName: "X-Trace-Id", key: "trace_id", multi: false }],
+                query: [{ wireName: "cursor", key: "cursor", multi: false, optional: true }],
+                headers: [{ wireName: "X-Trace-Id", key: "trace_id", multi: false, optional: false }],
                 cookies: [],
                 body: {
                     kind: "none",

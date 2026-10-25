@@ -295,7 +295,7 @@ export const FilesOperations = {
                 args: ["path"],
                 schema: ifaceSchemas.FilesGetMetaRequestSchema,
                 path: [],
-                query: [{ wireName: "path", key: "path", multi: false }],
+                query: [{ wireName: "path", key: "path", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -350,7 +350,7 @@ export const FilesOperations = {
                 args: ["path"],
                 schema: ifaceSchemas.FilesGetFileRequestSchema,
                 path: [],
-                query: [{ wireName: "path", key: "path", multi: false }],
+                query: [{ wireName: "path", key: "path", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {

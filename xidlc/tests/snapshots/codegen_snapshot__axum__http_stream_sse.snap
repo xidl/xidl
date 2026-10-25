@@ -158,9 +158,9 @@ where
         ::xidl_rust_axum::axum::extract::Path(
             path,
         ): ::xidl_rust_axum::axum::extract::Path<HttpStreamSseServiceWatchTopicPath>,
-        xidl_rust_axum::axum::extract::Query(
+        xidl_rust_axum::axum_extra::extract::Query(
             query,
-        ): xidl_rust_axum::axum::extract::Query<
+        ): xidl_rust_axum::axum_extra::extract::Query<
             HttpStreamSseServiceWatchTopicRequestInQuery,
         >,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
@@ -369,7 +369,7 @@ impl HttpStreamSseServiceClient {
         let query = HttpStreamSseServiceWatchTopicRequestOutQuery {
             lang,
         };
-        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        let query = xidl_rust_axum::serde_html_form::to_string(&query)
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         if !query.is_empty() {
             req.url_mut().set_query(Some(&query));

@@ -219,6 +219,19 @@ pub struct HttpInputBinding {
     pub optional: bool,
 }
 
+impl HttpInputBinding {
+    /// Whether this binding requires at least one wire occurrence.
+    ///
+    /// Unbounded non-path sequences encode an empty list with zero occurrences.
+    /// This does not make the logical signature parameter optional. Other input
+    /// shapes retain their existing presence declaration.
+    pub fn requires_presence(&self, location: HttpParamKind) -> bool {
+        location == HttpParamKind::Path
+            || (!self.optional
+                && !matches!(&self.ty, hir::TypeSpec::SequenceType(sequence) if sequence.len.is_none()))
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HttpRequestBodyMapping {
     pub content_type: Option<String>,

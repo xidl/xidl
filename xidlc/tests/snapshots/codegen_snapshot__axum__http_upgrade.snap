@@ -77,9 +77,9 @@ where
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
         uri: ::xidl_rust_axum::axum::http::Uri,
-        xidl_rust_axum::axum::extract::Query(
+        xidl_rust_axum::axum_extra::extract::Query(
             query,
-        ): xidl_rust_axum::axum::extract::Query<
+        ): xidl_rust_axum::axum_extra::extract::Query<
             HttpUpgradeServiceConnectRawRequestInQuery,
         >,
         req: ::xidl_rust_axum::axum::extract::Request,
@@ -166,7 +166,7 @@ impl HttpUpgradeServiceClient {
         let query = HttpUpgradeServiceConnectRawRequestOutQuery {
             token,
         };
-        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        let query = xidl_rust_axum::serde_html_form::to_string(&query)
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         if !query.is_empty() {
             req.url_mut().set_query(Some(&query));

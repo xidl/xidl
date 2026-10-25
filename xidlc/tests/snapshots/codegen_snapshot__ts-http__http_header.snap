@@ -222,8 +222,8 @@ import {
                     schema: ifaceSchemas.test.HeaderServiceGetUserRequestSchema,
                     path: [{ parameter: "id", wireName: "id", key: "id", multi: false, catchAll: false }],
                     query: [],
-                    headers: [{ wireName: "X-Req-Id", key: "req_id", multi: false }, { wireName: "X-Flags", key: "flags", multi: true }, { wireName: "X-Age", key: "age", multi: false }],
-                    cookies: [{ wireName: "sid", key: "session_id", multi: false }, { wireName: "pref", key: "prefs", multi: true }],
+                    headers: [{ wireName: "X-Req-Id", key: "req_id", multi: false, optional: false }, { wireName: "X-Flags", key: "flags", multi: true, optional: false }, { wireName: "X-Age", key: "age", multi: false, optional: false }],
+                    cookies: [{ wireName: "sid", key: "session_id", multi: false, optional: false }, { wireName: "pref", key: "prefs", multi: true, optional: false }],
                     body: {
                         kind: "none",
                         contentType: "",
@@ -257,8 +257,8 @@ import {
                     schema: ifaceSchemas.test.HeaderServiceCreateUserRequestSchema,
                     path: [],
                     query: [],
-                    headers: [{ wireName: "X-Token", key: "token", multi: false }],
-                    cookies: [{ wireName: "sid", key: "session_id", multi: false }],
+                    headers: [{ wireName: "X-Token", key: "token", multi: false, optional: false }],
+                    cookies: [{ wireName: "sid", key: "session_id", multi: false, optional: false }],
                     body: {
                         kind: "value",
                         contentType: "text/plain",
