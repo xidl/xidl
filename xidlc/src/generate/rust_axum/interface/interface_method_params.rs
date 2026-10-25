@@ -303,6 +303,13 @@ fn build_param_context(
         source: param_source_code(input.source),
         serde_rename: input.serde_name,
         is_sequence: matches!(input.wire_ty, TypeSpec::SequenceType(_)),
+        is_floating: match input.wire_ty {
+            TypeSpec::FloatingPtType => true,
+            TypeSpec::SequenceType(sequence) => {
+                matches!(*sequence.ty, TypeSpec::FloatingPtType)
+            }
+            _ => false,
+        },
         header_item_ty: env.header_item_ty(input.wire_ty),
         header_item_is_string: header_item_is_string(input.wire_ty),
         header_item_is_primitive: header_item_is_primitive(input.wire_ty),

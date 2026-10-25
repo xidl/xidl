@@ -278,6 +278,25 @@
                                     {{ param.name }},
                                 {% endfor %}
                             } = xidl_query;
+                            {% for param in method.query_params %}
+                                {% if param.is_floating %}
+                                    {% if param.is_sequence %}
+                                        if {{ param.name }}.iter().any(|value| !value.is_finite()) {
+                                            return Err(::xidl_rust_axum::Error::new(400, concat!("non-finite value for query parameter ", {{ param.wire_name | tojson }})));
+                                        }
+                                    {% elif param.optional %}
+                                        if let Some(value) = &{{ param.name }} {
+                                            if !value.is_finite() {
+                                                return Err(::xidl_rust_axum::Error::new(400, concat!("non-finite value for query parameter ", {{ param.wire_name | tojson }})));
+                                            }
+                                        }
+                                    {% else %}
+                                        if !{{ param.name }}.is_finite() {
+                                            return Err(::xidl_rust_axum::Error::new(400, concat!("non-finite value for query parameter ", {{ param.wire_name | tojson }})));
+                                        }
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
                         {% endif %}
                         let xidl_headers = &parts.headers;
                         let _ = xidl_headers;

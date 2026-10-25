@@ -102,11 +102,6 @@ pub(crate) fn integer_schema_primitive(value: &hir::IntegerType) -> String {
     }
 }
 
-/// Scalar transports carry every value as text, so their positions coerce.
-pub(crate) fn integer_coerced_schema_primitive(value: &hir::IntegerType) -> String {
-    format!("coerce.{}", integer_schema_primitive(value))
-}
-
 pub(crate) fn ts_ident(value: &str) -> String {
     let mut out = String::new();
     for (idx, ch) in value.chars().enumerate() {

@@ -70,6 +70,36 @@ fn selected_catalog_openapi_freezes_both_media_representations() {
 
 #[test]
 #[cfg(feature = "gen-typescript-rest")]
+fn text_position_request_schemas_coerce_typedef_collections() {
+    let source = include_str!("../../bdd/features/data/http_collections.idl");
+    let files = xidlc::driver::Generator::new("typescript-rest".into())
+        .generate_from_idl(source, Path::new("http_collections.idl"), HashMap::new())
+        .expect("collection TypeScript iface schemas");
+    let iface = files
+        .iter()
+        .find(|file| file.path().ends_with(".iface.zod.ts"))
+        .expect("collection iface schemas");
+    let schema = iface.content();
+    // Typedef'd numeric collections expand to per-element text grammars;
+    // string typedefs keep their model reference with the models prefix, and
+    // the unsigned cookie grammar rejects minus signs before coercion.
+    assert!(
+        schema.contains("values: z.array(z.union([z.number(),"),
+        "typedef'd numeric query must expand to a coerced element grammar"
+    );
+    assert!(
+        schema.contains("labels: z.array(z.coerce.string()).optional()"),
+        "string typedefs expand inline; only JSON positions reference models"
+    );
+    assert!(
+        schema.contains(".pipe(z.number().int().nonnegative())"),
+        "unsigned scalar transports must reject minus signs"
+    );
+    insta::assert_snapshot!("collection_iface_zod", schema);
+}
+
+#[test]
+#[cfg(feature = "gen-typescript-rest")]
 fn named_collection_server_extracts_all_wire_occurrences() {
     let source = include_str!("../../bdd/features/data/http_collections.idl");
     let files = xidlc::driver::Generator::new("typescript-rest".into())

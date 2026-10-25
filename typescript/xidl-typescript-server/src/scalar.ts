@@ -57,14 +57,34 @@ export function readRequestCookies(headers: Headers): Map<string, string[]> {
   if (!raw) {
     return values;
   }
+  let seenPair = false;
   for (const part of raw.split(';')) {
     const item = part.trim();
+    if (item.length === 0) {
+      continue;
+    }
     const separator = item.indexOf('=');
     if (separator < 0) {
+      // The Rust cookie crate treats a leading bare word as a missing pair
+      // and later bare words as attributes.
+      if (!seenPair) {
+        throw new XidlServerError(400, `malformed cookie pair: ${item}`);
+      }
       continue;
     }
     const name = item.slice(0, separator).trim();
-    const value = decodeURIComponent(item.slice(separator + 1));
+    if (name.length === 0) {
+      throw new XidlServerError(400, 'malformed cookie pair: empty name');
+    }
+    // Values keep surrounding quotes and trim around '=' exactly like the
+    // cookie crate; invalid percent escapes stay literal.
+    let value = item.slice(separator + 1).trim();
+    try {
+      value = decodeURIComponent(value);
+    } catch {
+      // percent-encoding keeps invalid escapes verbatim
+    }
+    seenPair = true;
     values.set(name, [...(values.get(name) ?? []), value]);
   }
   return values;

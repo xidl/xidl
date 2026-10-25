@@ -19,11 +19,19 @@ commas; surrounding separator whitespace is removed. A string element containing
 a literal comma or surrounding whitespace cannot round-trip through this
 encoding, so both SDKs reject it before sending. Unicode and reserved characters
 in query/cookie values use their normal transport encoding. The fixture
-exercises direct string and integer sequences. Typedef sequences, character
-headers and complex collection elements still need separate cross-target
-contract coverage. Bounded-sequence semantics are tracked in
+exercises direct sequences, chained collection typedefs and scalar numeric
+aliases. Character headers and complex collection elements still need separate
+cross-target contract coverage. Bounded-sequence semantics are tracked in
 [issue #399](https://github.com/xidl/xidl/issues/399); this corpus exercises
-unbounded lists and makes no exact-length assumption. The empty numeric-text
-coercion mismatch is tracked in
-[issue #401](https://github.com/xidl/xidl/issues/401); this fixture does not
-equate an empty numeric element with an explicit zero.
+unbounded lists and makes no exact-length assumption.
+
+The [issue #401](https://github.com/xidl/xidl/issues/401) regression
+distinguishes empty and whitespace-only numeric text from an explicit zero.
+Scalar and sequence integers accept signed decimal digits; fractional, exponent,
+hexadecimal and trailing-newline integer text fails. Floating-point headers
+accept decimal fractions and exponents. Unsigned cookie text accepts an optional
+plus sign and rejects a minus sign, including `-0`. Optional numeric absence
+stays absent, while a supplied empty value fails. The same journey runs against
+both generated servers; both SDKs also check zero and optional numeric values.
+Numeric widths and nonfinite float policy are separate constraints from this
+text-decoding regression.

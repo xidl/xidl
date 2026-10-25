@@ -28,6 +28,21 @@ impl gen::CollectionInputs for Inputs {
         Ok(gen::Search { term })
     }
 
+    async fn numbers(
+        &self,
+        count: i32,
+        ratio: f64,
+        units: u32,
+        threshold: Option<f64>,
+    ) -> Result<gen::Numbers> {
+        Ok(gen::Numbers {
+            count,
+            ratio,
+            units,
+            threshold,
+        })
+    }
+
     async fn stream(
         &self,
         req: xidl_rust_axum::Request<gen::CollectionInputsStreamRequest>,
@@ -73,6 +88,13 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         for term in [None, Some(String::new()), Some("a&b 雪".into())] {
             assert_eq!(client.search(term.clone()).await?.term, term);
         }
+        let numbers = client.numbers(2, -50.0, 2, Some(0.0)).await?;
+        assert_eq!(numbers.count, 2);
+        assert_eq!(numbers.ratio, -50.0);
+        assert_eq!(numbers.units, 2);
+        assert_eq!(numbers.threshold, Some(0.0));
+        let numbers = client.numbers(0, 0.0, 0, None).await?;
+        assert_eq!(numbers.threshold, None);
         for tag in ["one,two", " leading", "trailing "] {
             let error = client
                 .read(vec![], vec![tag.into()], vec![], None)

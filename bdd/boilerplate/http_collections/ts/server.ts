@@ -6,6 +6,12 @@ import {
 } from './http_collections.server.js';
 
 const service: CollectionInputs = {
+  numbers: (count, ratio, units, threshold) => ({
+    count,
+    ratio,
+    threshold,
+    units,
+  }),
   read: (values, tags, names, labels) => ({ labels, names, tags, values }),
   search: term => ({ term }),
   async *stream(values) {
