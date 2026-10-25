@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { runDispatchJourney } from './business_dispatch';
 import { runHttpJourney } from './business_http';
 import { runStoredJourney } from './business_stored';
 import { runUpdateJourney } from './business_update';
@@ -29,11 +30,14 @@ let exceptionHooks = 0;
 // Storage keeps what Head no longer carries while older versions still read it.
 // Readers resolve identity from the Head instance; the chain never touches storage.
 const storage = {
+  gates: new Map<string, string>([['20002', 'B-12']]),
   handlingNotes: new Map<string, string>([['p1', 'fragile']]),
   optionalNotes: new Map<string, string>([['kept', 'kept']]),
   traces: new Map<string, string>([['p1', 'trace-1']]),
 };
 const storedValues: a.StoredValues = {
+  // Elements carry no id: the reader resolves identity from the element.
+  addressGate: source => storage.gates.get(source.zip),
   // The trace header left the Head response; storage keeps it per traced id.
   depotTraceResponseTraceId: ({ return: id }) => storage.traces.get(id),
   optionalChangeNote: source => storage.optionalNotes.get(source.note ?? ''),
@@ -42,6 +46,14 @@ const storedValues: a.StoredValues = {
   parcelLegacy: () => undefined,
 };
 const hooks: a.VersionAdapters = {
+  addressDowncastToV2: (source, stored) => {
+    // A gated dock is a business fact the middle release cannot ignore.
+    if (source.zip === '90001') {
+      return refuse('2026-04', 'Address.gate');
+    }
+    return ok({ gate: stored.addressGate(source) ?? a.OMIT });
+  },
+  addressUpcastFromV2: () => ok({ gate: a.IGNORED }),
   choiceDowncastToV1: source => ok({ text: String(source.count) }),
   depotGetBusyErrorDowncastToV1: source => {
     exceptionHooks++;
@@ -241,110 +253,10 @@ assert.deepEqual(
   { h: 'header', q: 'query' },
 );
 
-const framework: a.FrameworkError = {
-  error: new Error('transport'),
-  kind: 'Framework',
-};
-assert.equal(
-  take(a.downcastDepotGetErrorToV1(framework, storedValues, hooks)),
-  framework,
-);
-assert.equal(exceptionHooks, 0);
-const businessError = take(
-  a.downcastDepotGetErrorToV1(
-    new errors.Framework({ reason: 'locked' }),
-    storedValues,
-    hooks,
-  ),
-);
-assert(businessError instanceof errors.v1$NotFound);
-assert.equal(businessError.id, 'locked');
-assert.equal(exceptionHooks, 2);
-const denied = take(
-  a.downcastDepotGetErrorToV1(
-    new errors.Denied({ reason: 'denied' }),
-    storedValues,
-    hooks,
-  ),
-);
-assert(denied instanceof errors.v1$NotFound);
-assert.equal(
-  exceptionHooks,
-  4,
-  'every adjacent error hook must execute exactly once',
-);
-
-const typedHead = {
-  error: new errors.Denied({ reason: 'original denial' }),
-  ok: false as const,
-};
-const typedRefusal = a.downcastDepotGetOutcomeToV1(typedHead, storedValues, {
-  ...hooks,
-  depotGetBusyErrorDowncastToV1: () => refuse('2026-01', 'Depot.get'),
+await runDispatchJourney(hooks, storedValues, wireParcel, {
+  calls: () => hookCalls,
+  errorHooks: () => exceptionHooks,
 });
-assert.equal(typedRefusal.projected, false);
-if (!typedRefusal.projected) {
-  assert.equal(typedRefusal.head, typedHead);
-  assert.equal(typedRefusal.head.error.reason, 'original denial');
-}
-
-const terminal = { ok: true as const, value: 'delivered' as const };
-const failure = a.downcastDepotShipOutcomeToV1(terminal, hooks);
-assert.equal(failure.projected, false);
-if (!failure.projected) {
-  assert.equal(failure.head, terminal);
-  assert.equal(
-    failure.error.version,
-    '2026-01',
-    'later downcast refusal must retain the original delivered outcome',
-  );
-}
-const blocked: a.VersionAdapters = {
-  ...hooks,
-  parcelUpcastFromV2: () => ({
-    error: {
-      direction: 'upcast',
-      reason: 'business decision refused',
-      typePath: 'Parcel',
-      version: '2026-04',
-    },
-    ok: false,
-  }),
-};
-const beforeMiddleRefusal = hookCalls;
-let callsAfterRefusal = 0;
-const rejected = await a.dispatchDepotShip(
-  'v1',
-  { parcel: wireParcel },
-  async () => {
-    callsAfterRefusal++;
-    return { ok: true, value: 'pending' };
-  },
-  blocked,
-);
-assert.equal(rejected.dispatched, false);
-assert.equal(callsAfterRefusal, 0);
-assert.equal(
-  hookCalls,
-  beforeMiddleRefusal + 1,
-  'the earlier upcast ran before the middle refusal',
-);
-const headOnly = await a.dispatchDepotHeadOnly(
-  'v3',
-  {},
-  async (_, context) => {
-    assert.equal(context.originalVersionId, 'v3');
-    return { ok: true, value: 'head' };
-  },
-  hooks,
-);
-assert.equal(
-  headOnly.dispatched &&
-    headOnly.projected &&
-    headOnly.value.ok &&
-    headOnly.value.value,
-  'head',
-);
 
 const optionalHead = take(
   a.decodeAndUpcastDepotOptionalChangeFromV1(

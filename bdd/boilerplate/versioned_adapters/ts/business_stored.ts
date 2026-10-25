@@ -54,6 +54,93 @@ export async function runStoredJourney(
     ),
     false,
   );
+  // A member added inside the element type leaves every older view with the
+  // element count and keys intact: the sequence, the map and the fixed array
+  // all drop the newest member per element instead of failing the container.
+  const zoned: types.v3.Parcel = {
+    ...head,
+    address: { ...head.address, zone: 'dock-3' },
+    by_tag: Object.fromEntries(
+      Object.entries(head.by_tag).map(([tag, stop]) => [
+        tag,
+        { ...stop, zone: 'rear' },
+      ]),
+    ),
+    fixed: head.fixed.map(stop => ({ ...stop, zone: 'bay-9' })),
+    stops: head.stops.map(stop => ({ ...stop, zone: 'gate-2' })),
+  };
+  for (const version of ['v1', 'v2'] as const) {
+    const view = take(a.downcastParcel(version, zoned, storedValues, hooks));
+    assert.equal(Object.hasOwn(view.address, 'zone'), false, version);
+    for (const stop of [...view.stops, ...view.fixed]) {
+      assert.equal(Object.hasOwn(stop, 'zone'), false, version);
+    }
+    assert.equal(
+      Object.values(view.by_tag).every(stop => !Object.hasOwn(stop, 'zone')),
+      true,
+      version,
+    );
+    assert.equal(view.stops.length, zoned.stops.length, version);
+    assert.deepEqual(
+      Object.keys(view.by_tag).sort(),
+      Object.keys(zoned.by_tag).sort(),
+      version,
+    );
+    assert.equal(view.fixed.length, zoned.fixed.length, version);
+  }
+  // A member retired inside every container element returns per element from
+  // storage, an element without its row omits the member, and a business
+  // refusal surfaces the full container path.
+  const gatedStored: a.StoredValues = {
+    ...storedValues,
+    addressGate: source => (source.zip === '20002' ? 'B-12' : undefined),
+  };
+  const element = (zip: string): types.v3.Address => ({ ...head.address, zip });
+  const gated: types.v3.Parcel = {
+    ...head,
+    by_tag: { dock: element('30003') },
+    stops: [element('20002')],
+  };
+  for (const version of ['v1', 'v2'] as const) {
+    const view = take(a.downcastParcel(version, gated, gatedStored, hooks));
+    // The served releases both declare the retired member on every element.
+    const stop = view.stops[0] as { gate?: string };
+    const dock = view.by_tag.dock as { gate?: string };
+    assert.equal(stop.gate, 'B-12', version);
+    assert.equal(
+      Object.hasOwn(dock, 'gate'),
+      false,
+      `${version}: storage without the element row omits the member`,
+    );
+  }
+  const refusedStops = a.downcastParcel(
+    'v2',
+    { ...gated, stops: [element('20002'), element('90001')] },
+    gatedStored,
+    hooks,
+  );
+  assert.equal(refusedStops.ok, false);
+  if (!refusedStops.ok) {
+    assert.equal(
+      refusedStops.error.typePath,
+      'Parcel.stops.Address.gate',
+      'the refusal names the sequence element’s member',
+    );
+  }
+  const refusedMap = a.downcastParcel(
+    'v2',
+    { ...gated, by_tag: { dock: element('90001') } },
+    gatedStored,
+    hooks,
+  );
+  assert.equal(refusedMap.ok, false);
+  if (!refusedMap.ok) {
+    assert.equal(
+      refusedMap.error.typePath,
+      'Parcel.by_tag.Address.gate',
+      'the refusal names the map element’s member',
+    );
+  }
   // An old client sending the retired member must see it acknowledged, not forwarded.
   const v2Head = take(
     a.decodeAndUpcastDepotShipFromV2(

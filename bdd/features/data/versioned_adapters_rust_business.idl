@@ -7,6 +7,9 @@
 struct Address {
     @rename("zip_code") string zip;
     @added(Versions::v3) @optional string zone;
+    // Retired inside a container element: older releases still read it from
+    // storage per element, so readers resolve identity from the element.
+    @removed(Versions::v3) @optional string gate;
 };
 
 struct Parcel {
