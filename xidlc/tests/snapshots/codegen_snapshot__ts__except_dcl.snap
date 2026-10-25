@@ -33,7 +33,7 @@ import { xjson } from "xidl-typescript-codec";
         
             b: z.array(u16Schema).length(10),
         
-            c: z.array(z.array(z.string()).length(10)).length(20),
+            c: z.array(z.array(z.string()).length(20)).length(10),
         
             c1: z.array(u8Schema),
         

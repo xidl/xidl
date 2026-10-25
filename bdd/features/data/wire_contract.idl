@@ -14,6 +14,8 @@ struct Item {
     @skip string internal_note;
     @optional string memo;
     Color color;
+    // Stock in two shelf rows, each with three bins; position is part of the contract.
+    @optional long stock_grid[2][3];
 };
 
 interface Store {

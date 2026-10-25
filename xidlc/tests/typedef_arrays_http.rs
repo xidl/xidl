@@ -24,12 +24,17 @@ fn typescript_validators_resolve_constant_dimensions_in_the_declaring_scope() {
     for schema in [
         "PairSchema = z.array(LabelSchema).length(2)",
         "TripleSchema = z.array(LabelSchema).length(3)",
-        "CoordinatesSchema = z.array(z.coerce.number()).length(2)",
-        "BoundsSchema = z.array(z.coerce.number()).length(4)",
+        "CoordinatesSchema = z.array(z.number()).length(2)",
+        "BoundsSchema = z.array(z.number()).length(4)",
+        "GridSchema = z.array(z.array(PairSchema).length(3)).length(2)",
         "slots: z.array(ImportedPairSchema).length(2)",
     ] {
         assert!(output.contains(schema), "missing {schema}");
     }
+    insta::assert_json_snapshot!(
+        "typedef_array_zod_contract",
+        output.lines().collect::<Vec<_>>()
+    );
 }
 
 #[test]

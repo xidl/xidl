@@ -368,7 +368,7 @@ pub(crate) fn apply_array_ts(mut base: TsType, decl: &hir::Declarator) -> TsType
 
 pub(crate) fn apply_array_zod(mut base: ZodSchema, decl: &hir::Declarator) -> ZodSchema {
     if let hir::Declarator::ArrayDeclarator(array) = decl {
-        for len in &array.len {
+        for len in array.len.iter().rev() {
             base = ZodSchema::Array {
                 element: Box::new(base),
                 length: xidl_parser::hir::const_expr_to_i64(&len.0),
