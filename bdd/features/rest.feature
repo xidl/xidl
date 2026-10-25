@@ -83,6 +83,14 @@ Feature: REST API Generation and Communication
     And the generated ts iface zod file should import the model schemas
 
   @bdd_rest-media-and-any
+  Scenario: TypeScript fixed-array validators preserve shelf and bin dimensions
+    Given a REST IDL file "bdd/features/data/wire_contract.idl"
+    When I generate ts code for the IDL
+    Then the generated ts code should be valid
+    And I can run the generated ts server using boilerplate
+    And the generated fixed-array validators accept only the declared stock grid
+
+  @bdd_rest-media-and-any
   Scenario: TypeScript recursive type schemas compile and load lazily
     Given a REST IDL file "bdd/features/data/recursive.idl"
     When I generate ts code for the IDL
