@@ -1,0 +1,8 @@
+interface RequiredQuery {
+    @get(path = "/items")
+    sequence<string> list(
+        @query long limit,
+        @query sequence<string> values,
+        @query @optional boolean archived
+    );
+};

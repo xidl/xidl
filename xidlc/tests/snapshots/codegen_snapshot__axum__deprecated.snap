@@ -207,7 +207,7 @@ pub mod legacy {
         #[serde(default)]
         fields: Option<String>,
     }
-    #[derive(::serde::Deserialize, ::core::default::Default)]
+    #[derive(::serde::Deserialize)]
     struct MessagesGetRequestInQuery {
         #[serde(default)]
         fields: Option<String>,

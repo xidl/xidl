@@ -163,11 +163,11 @@ pub(crate) struct ParamContext {
     pub(crate) out_ty: String,
     pub(crate) source: String,
     pub(crate) serde_rename: Option<String>,
-    pub(crate) header_is_multi: bool,
+    /// Sequences encode an empty list with zero parameter occurrences.
+    pub(crate) is_sequence: bool,
     pub(crate) header_item_ty: String,
     pub(crate) header_item_is_string: bool,
     pub(crate) header_item_is_primitive: bool,
-    pub(crate) cookie_is_multi: bool,
     pub(crate) cookie_item_ty: String,
     pub(crate) cookie_item_is_string: bool,
     pub(crate) cookie_item_is_primitive: bool,

@@ -6,7 +6,7 @@
         let headers = resp.headers().clone();
         {% if method.response_header_params | length > 0 %}
             {% for param in method.response_header_params %}
-                {% if param.header_is_multi %}
+                {% if param.is_sequence %}
                     let mut {{ param.name }}: Vec<{{ param.header_item_ty }}> = Vec::new();
                     for header_value in headers.get_all("{{ param.wire_name }}").iter() {
                         let header_str = header_value
@@ -52,7 +52,7 @@
         {% if method.response_cookie_params | length > 0 %}
             let cookie_map = xidl_rust_axum::http::parse_set_cookies(headers.get_all(::xidl_rust_axum::reqwest::header::SET_COOKIE).iter());
             {% for param in method.response_cookie_params %}
-                {% if param.cookie_is_multi %}
+                {% if param.is_sequence %}
                     let mut {{ param.name }}: Vec<{{ param.cookie_item_ty }}> = Vec::new();
                     if let Some(values) = cookie_map.get("{{ param.wire_name }}") {
                         for value in values {
@@ -325,7 +325,7 @@
                                     "{{ param.wire_name }}".as_bytes(),
                                     )
                                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-                                    {% if param.header_is_multi %}
+                                    {% if param.is_sequence %}
                                         for value in {{ param.name }} {
                                             let header_value_str = {% if param.header_item_is_string %}value{% elif param.header_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(&value)
                                             .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %};
@@ -355,7 +355,7 @@
                                 {% if param.optional %}
                                     if let Some({{ param.name }}) = {{ param.name }} {
                                     {% endif %}
-                                    {% if param.cookie_is_multi %}
+                                    {% if param.is_sequence %}
                                         for value in {{ param.name }} {
                                             let value_str = {% if param.cookie_item_is_string %}value{% elif param.cookie_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(&value)
                                             .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %};
@@ -678,7 +678,7 @@
                                                 let headers = resp.headers().clone();
                                                 {% if method.response_header_params | length > 0 %}
                                                     {% for param in method.response_header_params %}
-                                                        {% if param.header_is_multi %}
+                                                        {% if param.is_sequence %}
                                                             let mut {{ param.name }}: Vec<{{ param.header_item_ty }}> = Vec::new();
                                                             for header_value in headers.get_all("{{ param.wire_name }}").iter() {
                                                                 let header_str = header_value
@@ -724,7 +724,7 @@
                                                 {% if method.response_cookie_params | length > 0 %}
                                                     let cookie_map = xidl_rust_axum::http::parse_set_cookies(headers.get_all(::xidl_rust_axum::reqwest::header::SET_COOKIE).iter());
                                                     {% for param in method.response_cookie_params %}
-                                                        {% if param.cookie_is_multi %}
+                                                        {% if param.is_sequence %}
                                                             let mut {{ param.name }}: Vec<{{ param.cookie_item_ty }}> = Vec::new();
                                                             if let Some(values) = cookie_map.get("{{ param.wire_name }}") {
                                                                 for value in values {

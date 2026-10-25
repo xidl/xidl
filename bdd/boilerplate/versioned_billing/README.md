@@ -50,10 +50,11 @@ The required-parameters fixture covers unary query/header/cookie scalars,
 optional omission, explicit zero/true/empty values, and server-stream inputs.
 The Rust SDK also verifies explicit false. TypeScript false decoding belongs to
 the separate fix in [PR #391](https://github.com/xidl/xidl/pull/391). A missing
-path segment is a routing 404. Rust inbound query deserialization now defaults
-only optional members, including for collection types. Header/cookie collections
-still decode missing members as empty lists; their presence and empty-list
-serialization need the separate cross-target contract decision tracked in
+path segment is a routing 404. Rust inbound query deserialization defaults
+optional members and sequences; an empty sequence contributes no parameter
+occurrences. Header/cookie sequences also decode zero occurrences as empty
+lists. OpenAPI presence declarations and empty-list serialization need the
+separate cross-target contract decision tracked in
 [issue #393](https://github.com/xidl/xidl/issues/393).
 
 OpenAPI schema validation checks declared fields, media types and response
