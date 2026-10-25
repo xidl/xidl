@@ -37,11 +37,10 @@ pub fn generate(
     let mut renderer = RustAxumRenderer::new()?;
     renderer.extend(&props, rest_hir.clone());
 
-    let reachable = collect_reachable_types(&rest_hir);
     let refs = spec.0.iter().collect::<Vec<_>>();
     let registry = transport::build_type_registry(&refs, &[]);
     let rust_renderer = crate::generate::rust::RustRenderer::new(std::collections::HashMap::new())?;
-    let builder = merged::MergedAxumSpecBuilder::new(&renderer, rust_renderer, registry, reachable);
+    let builder = merged::MergedAxumSpecBuilder::new(&renderer, rust_renderer, registry);
     let definitions = builder.render(&spec)?;
     let imports = crate::generate::utils::referenced_imports(&props, &definitions, "::");
 
@@ -57,81 +56,6 @@ pub fn generate(
         path: filename,
         content,
     })])
-}
-
-fn collect_reachable_types(
-    rest_hir: &xidl_parser::rest_hir::RestHirDocument,
-) -> std::collections::HashSet<String> {
-    let mut reachable = std::collections::HashSet::new();
-    let mut registry = std::collections::HashMap::new();
-    collect_registry(&rest_hir.spec.0, &[], &mut registry);
-
-    for interface in &rest_hir.interfaces {
-        for op in &interface.operations {
-            for param in &op.signature.params {
-                mark_reachable(&param.ty, &mut reachable, &registry, &interface.module_path);
-            }
-            if let Some(ret) = &op.signature.return_type {
-                mark_reachable(ret, &mut reachable, &registry, &interface.module_path);
-            }
-        }
-    }
-
-    // Include constants and exceptions as roots
-    for def in &rest_hir.spec.0 {
-        collect_extra_roots(def, &mut reachable, &registry, &[]);
-    }
-
-    reachable
-}
-
-fn collect_extra_roots(
-    def: &hir::Definition,
-    reachable: &mut std::collections::HashSet<String>,
-    registry: &std::collections::HashMap<String, &hir::Definition>,
-    scope: &[String],
-) {
-    match def {
-        hir::Definition::ModuleDcl(m) => {
-            let mut next = scope.to_vec();
-            next.push(m.ident.clone());
-            for def in &m.definition {
-                collect_extra_roots(def, reachable, registry, &next);
-            }
-        }
-        hir::Definition::ConstDcl(c) => {
-            mark_reachable_const(&c.ty, reachable, registry, scope);
-        }
-        hir::Definition::ExceptDcl(e) => {
-            for m in &e.member {
-                mark_reachable(&m.ty, reachable, registry, scope);
-            }
-        }
-        _ => {}
-    }
-}
-
-fn collect_registry<'a>(
-    defs: &'a [hir::Definition],
-    path: &[String],
-    registry: &mut std::collections::HashMap<String, &'a hir::Definition>,
-) {
-    for def in defs {
-        match def {
-            hir::Definition::ModuleDcl(m) => {
-                let mut next = path.to_vec();
-                next.push(m.ident.clone());
-                collect_registry(&m.definition, &next, registry);
-            }
-            _ => {
-                for ident in get_def_idents(def) {
-                    let mut full = path.to_vec();
-                    full.push(ident);
-                    registry.insert(full.join("::"), def);
-                }
-            }
-        }
-    }
 }
 
 pub(crate) fn get_def_idents(def: &hir::Definition) -> Vec<String> {
@@ -168,142 +92,6 @@ pub(crate) fn get_def_idents(def: &hir::Definition) -> Vec<String> {
         hir::Definition::ConstDcl(c) => vec![c.ident.clone()],
         hir::Definition::ExceptDcl(e) => vec![e.ident.clone()],
         _ => vec![],
-    }
-}
-
-fn mark_reachable(
-    ty: &hir::TypeSpec,
-    reachable: &mut std::collections::HashSet<String>,
-    registry: &std::collections::HashMap<String, &hir::Definition>,
-    scope: &[String],
-) {
-    match ty {
-        hir::TypeSpec::ScopedName(name) => {
-            mark_reachable_scoped(name, reachable, registry, scope);
-        }
-        hir::TypeSpec::SequenceType(seq) => mark_reachable(&seq.ty, reachable, registry, scope),
-        hir::TypeSpec::MapType(map) => {
-            mark_reachable(&map.key, reachable, registry, scope);
-            mark_reachable(&map.value, reachable, registry, scope);
-        }
-        hir::TypeSpec::TemplateType(tmpl) => {
-            for arg in &tmpl.args {
-                mark_reachable(arg, reachable, registry, scope);
-            }
-        }
-        _ => {}
-    }
-}
-
-fn mark_reachable_scoped(
-    name: &hir::ScopedName,
-    reachable: &mut std::collections::HashSet<String>,
-    registry: &std::collections::HashMap<String, &hir::Definition>,
-    scope: &[String],
-) {
-    let canonical = crate::generate::utils::scope::resolve_canonical(scope, name, |key| {
-        registry.contains_key(key)
-    });
-    if let Some(full) = canonical {
-        if reachable.insert(full.clone()) {
-            if let Some(def) = registry.get(full.as_str()) {
-                let parent = parent_scope(&full);
-                mark_reachable_from_def(def, reachable, registry, &parent);
-            }
-        }
-    } else {
-        reachable.insert(name.name.join("::"));
-    }
-}
-
-fn parent_scope(canonical: &str) -> Vec<String> {
-    let mut parts: Vec<String> = canonical.split("::").map(str::to_string).collect();
-    parts.pop();
-    parts
-}
-
-fn mark_reachable_const(
-    ty: &hir::ConstType,
-    reachable: &mut std::collections::HashSet<String>,
-    registry: &std::collections::HashMap<String, &hir::Definition>,
-    scope: &[String],
-) {
-    match ty {
-        hir::ConstType::ScopedName(name) => {
-            mark_reachable_scoped(name, reachable, registry, scope);
-        }
-        hir::ConstType::SequenceType(seq) => mark_reachable(&seq.ty, reachable, registry, scope),
-        _ => {}
-    }
-}
-
-fn mark_reachable_from_def(
-    def: &hir::Definition,
-    reachable: &mut std::collections::HashSet<String>,
-    registry: &std::collections::HashMap<String, &hir::Definition>,
-    scope: &[String],
-) {
-    match def {
-        hir::Definition::TypeDcl(ty) => match ty {
-            hir::TypeDcl::ConstrTypeDcl(c) => {
-                mark_reachable_from_constr(c, reachable, registry, scope);
-            }
-            hir::TypeDcl::TypedefDcl(t) => {
-                if let hir::TypedefType::TypeSpec(ty) = &t.ty {
-                    mark_reachable(ty, reachable, registry, scope)
-                }
-            }
-            _ => {}
-        },
-        hir::Definition::ConstrTypeDcl(c) => {
-            mark_reachable_from_constr(c, reachable, registry, scope);
-        }
-        hir::Definition::ConstDcl(c) => mark_reachable_const(&c.ty, reachable, registry, scope),
-        hir::Definition::ExceptDcl(e) => {
-            for m in &e.member {
-                mark_reachable(&m.ty, reachable, registry, scope);
-            }
-        }
-        _ => {}
-    }
-}
-
-fn mark_reachable_from_constr(
-    c: &hir::ConstrTypeDcl,
-    reachable: &mut std::collections::HashSet<String>,
-    registry: &std::collections::HashMap<String, &hir::Definition>,
-    scope: &[String],
-) {
-    match c {
-        hir::ConstrTypeDcl::StructDcl(s) => {
-            if let Some(parent) = s.parent.first() {
-                mark_reachable_scoped(parent, reachable, registry, scope);
-            }
-            for m in &s.member {
-                mark_reachable(&m.ty, reachable, registry, scope);
-            }
-        }
-        hir::ConstrTypeDcl::UnionDef(u) => {
-            if let hir::SwitchTypeSpec::ScopedName(name) = &u.switch_type_spec {
-                mark_reachable_scoped(name, reachable, registry, scope);
-            }
-            for c in &u.case {
-                match &c.element.ty {
-                    hir::ElementSpecTy::TypeSpec(ty) => {
-                        mark_reachable(ty, reachable, registry, scope)
-                    }
-                    hir::ElementSpecTy::ConstrTypeDcl(c) => {
-                        mark_reachable_from_constr(c, reachable, registry, scope)
-                    }
-                }
-            }
-        }
-        hir::ConstrTypeDcl::BitsetDcl(b) => {
-            if let Some(parent) = &b.parent {
-                mark_reachable_scoped(parent, reachable, registry, scope);
-            }
-        }
-        _ => {}
     }
 }
 
