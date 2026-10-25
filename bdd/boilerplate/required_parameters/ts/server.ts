@@ -13,8 +13,10 @@ const inputs = (count: number, active: boolean, label: string) => ({
 const service: RequiredParameters = {
   cookie: inputs,
   header: inputs,
-  optional: (count, active, label) =>
-    inputs(count ?? 0, active ?? false, label ?? ''),
+  optional: (count, active, label) => ({
+    ...inputs(count ?? 0, active ?? false, label ?? ''),
+    note: label,
+  }),
   query: inputs,
   async *stream(count, active, label) {
     yield inputs(count, active, label);

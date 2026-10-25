@@ -169,9 +169,9 @@ pub(super) struct Endpoint {
     pub request: String,
     pub head_request: String,
     pub response: String,
-    pub head_response: String,
     pub error: String,
-    pub head_error: String,
+    pub result: String,
+    pub head_result: String,
     pub upcast: Vec<String>,
     pub downcast: Vec<String>,
     pub downcast_error: Vec<String>,
@@ -183,8 +183,7 @@ pub(super) struct Dispatch {
     pub prefix: String,
     pub outcome: String,
     pub request: String,
-    pub response: String,
-    pub error: String,
+    pub head_result: String,
     pub variants: Vec<DispatchVariant>,
     pub exhaustive: bool,
 }
@@ -193,8 +192,7 @@ pub(super) struct Dispatch {
 pub(super) struct DispatchVariant {
     pub id: String,
     pub prefix: String,
-    pub response: String,
-    pub error: String,
+    pub result: String,
 }
 
 #[derive(Serialize)]

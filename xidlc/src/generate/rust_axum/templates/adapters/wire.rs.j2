@@ -1,5 +1,5 @@
 {% macro decode(schema, source) -%}
-    {%- if schema.kind == "Scalar" -%}::serde_json::from_value::<{{ schema.data }}>(({{ source }}).clone()).map_err(|error| error.to_string())
+    {%- if schema.kind == "Scalar" -%}::serde_json::from_value::<{{ schema.data }}>(::std::clone::Clone::clone({{ source }})).map_err(|error| error.to_string())
     {%- elif schema.kind == "Named" -%}{{ schema.data }}({{ source }})
     {%- elif schema.kind == "Optional" -%}if ({{ source }}).is_null() { Ok::<_, String>(None) } else { {{ decode(schema.data, source) }}.map(Some) }
     {%- elif schema.kind == "Boxed" -%}{{ decode(schema.data, source) }}.map(Box::new)

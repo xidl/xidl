@@ -1,8 +1,9 @@
 //! Preserve ordinary request/result layouts and the complete typed error table.
 
 use super::*;
-use crate::generate::adapter::{Operation as SurfaceOperation, OperationPlan};
+use crate::generate::adapter::{Operation as SurfaceOperation, OperationPlan, ValueRepresentation};
 use crate::generate::rust_axum::interface::{RaisesContext, method_struct_prefix};
+use xidl_parser::hir;
 
 impl AdapterRenderer<'_> {
     pub(super) fn request(
@@ -29,6 +30,14 @@ impl AdapterRenderer<'_> {
     pub(super) fn request_type(&self, operation: &SurfaceOperation, version: &str) -> String {
         format!(
             "{}Request{}",
+            Self::prefix(operation),
+            version.to_case(Case::Pascal)
+        )
+    }
+
+    pub(super) fn result_type(&self, operation: &SurfaceOperation, version: &str) -> String {
+        format!(
+            "{}Result{}",
             Self::prefix(operation),
             version.to_case(Case::Pascal)
         )
@@ -92,6 +101,27 @@ impl AdapterRenderer<'_> {
         names.named(&Layout::key(&operation.scope, &format!("{prefix}Error")))
     }
 
+    fn response_source_type(
+        &self,
+        operation: &SurfaceOperation,
+        names: &Names<'_>,
+    ) -> IdlcResult<(String, Shape)> {
+        if let [member] = operation.outputs.as_slice()
+            && member.name == "return"
+            && let Some(value) = &member.value
+            && !value.optional
+            && value.representation == ValueRepresentation::Model
+            && matches!(value.declarator, hir::Declarator::SimpleDeclarator(_))
+            && let hir::TypeSpec::SequenceType(sequence) = &value.ty
+        {
+            return Ok((
+                format!("[{}]", names.type_name(&sequence.ty, &value.scope)?),
+                Shape::Direct,
+            ));
+        }
+        self.response_type(operation, names)
+    }
+
     pub(super) fn operation(
         &self,
         plan: &OperationPlan,
@@ -117,7 +147,7 @@ impl AdapterRenderer<'_> {
             },
             file,
         )?;
-        let (source_response, source_shape) = self.response_type(&plan.target, new)?;
+        let (source_response, source_shape) = self.response_source_type(&plan.target, new)?;
         let (target_response, target_shape) = self.response_type(&plan.source, old)?;
         let response_key = format!("{prefix}Response");
         self.conversion(

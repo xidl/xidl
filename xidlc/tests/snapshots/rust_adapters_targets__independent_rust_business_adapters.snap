@@ -3005,7 +3005,7 @@ pub mod version_adapters {
             .ok_or_else(|| "union payload is missing".to_string())?;
         match tag {
             "0" => {
-                ::serde_json::from_value::<String>((data).clone())
+                ::serde_json::from_value::<String>(::std::clone::Clone::clone(data))
                     .map_err(|error| error.to_string())
                     .map(v1::Choice::new_text)
             }
@@ -3063,7 +3063,9 @@ pub mod version_adapters {
                     .into_keys()
                     .next()
                     .ok_or_else(|| "map key was not decoded".to_string())?;
-                let value = ::serde_json::from_value::<String>((raw_value).clone())
+                let value = ::serde_json::from_value::<
+                    String,
+                >(::std::clone::Clone::clone(raw_value))
                     .map_err(|error| error.to_string())?;
                 if decoded.insert(key, value).is_some() {
                     return Err("distinct wire keys decode to the same map key".into());
@@ -3094,7 +3096,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "zip_code").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         Ok(v1::Address { zip: value_0 })
     }
@@ -3114,7 +3118,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "fixed").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let flattened = object
             .iter()
@@ -3127,7 +3133,7 @@ pub mod version_adapters {
         let flattened_wire = ::serde_json::Value::Object(flattened);
         let value_1: ::serde_json::Value = ::serde_json::from_value::<
             ::serde_json::Value,
-        >((&flattened_wire).clone())
+        >(::std::clone::Clone::clone(&flattened_wire))
             .map_err(|error| error.to_string())?;
         Ok(v1::Extra {
             fixed: value_0,
@@ -3150,7 +3156,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "name").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object.get("children").unwrap_or(&::serde_json::Value::Null);
         let value_1: Option<Vec<v1::Node>> = if (raw_1).is_null() {
@@ -3238,7 +3246,7 @@ pub mod version_adapters {
         let value_0: Option<String> = if (raw_0).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_0).clone())
+            ::serde_json::from_value::<String>(::std::clone::Clone::clone(raw_0))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -3262,14 +3270,18 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "id").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object
             .get("reference")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "reference").to_string()
             })?;
-        let value_1: String = ::serde_json::from_value::<String>((raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())?;
         let raw_2 = object
             .get("address")
@@ -3338,7 +3350,7 @@ pub mod version_adapters {
             let values = array
                 .iter()
                 .map(|item| {
-                    ::serde_json::from_value::<i32>((item).clone())
+                    ::serde_json::from_value::<i32>(::std::clone::Clone::clone(item))
                         .map_err(|error| error.to_string())
                 })
                 .collect::<Result<Vec<_>, String>>()?;
@@ -3396,14 +3408,18 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "id").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object
             .get("extra")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "extra").to_string()
             })?;
-        let value_1: String = ::serde_json::from_value::<String>((raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())?;
         Ok(v1::FullPayload {
             id: value_0,
@@ -3428,7 +3444,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "id").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         Ok(v1::ShortPayload { id: value_0 })
     }
@@ -3474,12 +3492,12 @@ pub mod version_adapters {
             .ok_or_else(|| "union payload is missing".to_string())?;
         match tag {
             "0" => {
-                ::serde_json::from_value::<String>((data).clone())
+                ::serde_json::from_value::<String>(::std::clone::Clone::clone(data))
                     .map_err(|error| error.to_string())
                     .map(v2::Choice::new_text)
             }
             "1" => {
-                ::serde_json::from_value::<i32>((data).clone())
+                ::serde_json::from_value::<i32>(::std::clone::Clone::clone(data))
                     .map_err(|error| error.to_string())
                     .map(v2::Choice::new_count)
             }
@@ -3537,7 +3555,9 @@ pub mod version_adapters {
                     .into_keys()
                     .next()
                     .ok_or_else(|| "map key was not decoded".to_string())?;
-                let value = ::serde_json::from_value::<String>((raw_value).clone())
+                let value = ::serde_json::from_value::<
+                    String,
+                >(::std::clone::Clone::clone(raw_value))
                     .map_err(|error| error.to_string())?;
                 if decoded.insert(key, value).is_some() {
                     return Err("distinct wire keys decode to the same map key".into());
@@ -3568,7 +3588,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "zip_code").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         Ok(v2::Address { zip: value_0 })
     }
@@ -3588,7 +3610,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "fixed").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let flattened = object
             .iter()
@@ -3601,7 +3625,7 @@ pub mod version_adapters {
         let flattened_wire = ::serde_json::Value::Object(flattened);
         let value_1: ::serde_json::Value = ::serde_json::from_value::<
             ::serde_json::Value,
-        >((&flattened_wire).clone())
+        >(::std::clone::Clone::clone(&flattened_wire))
             .map_err(|error| error.to_string())?;
         Ok(v2::Extra {
             fixed: value_0,
@@ -3624,7 +3648,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "name").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object.get("children").unwrap_or(&::serde_json::Value::Null);
         let value_1: Option<Vec<v2::Node>> = if (raw_1).is_null() {
@@ -3712,7 +3738,7 @@ pub mod version_adapters {
         let value_0: Option<String> = if (raw_0).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_0).clone())
+            ::serde_json::from_value::<String>(::std::clone::Clone::clone(raw_0))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -3745,27 +3771,33 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "id").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object
             .get("reference")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "reference").to_string()
             })?;
-        let value_1: String = ::serde_json::from_value::<String>((raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())?;
         let raw_2 = object
             .get("carrier")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "carrier").to_string()
             })?;
-        let value_2: String = ::serde_json::from_value::<String>((raw_2).clone())
+        let value_2: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_2))
             .map_err(|error| error.to_string())?;
         let raw_3 = object.get("note").unwrap_or(&::serde_json::Value::Null);
         let value_3: Option<String> = if (raw_3).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_3).clone())
+            ::serde_json::from_value::<String>(::std::clone::Clone::clone(raw_3))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -3836,7 +3868,7 @@ pub mod version_adapters {
             let values = array
                 .iter()
                 .map(|item| {
-                    ::serde_json::from_value::<i32>((item).clone())
+                    ::serde_json::from_value::<i32>(::std::clone::Clone::clone(item))
                         .map_err(|error| error.to_string())
                 })
                 .collect::<Result<Vec<_>, String>>()?;
@@ -3896,14 +3928,18 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "id").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object
             .get("extra")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "extra").to_string()
             })?;
-        let value_1: String = ::serde_json::from_value::<String>((raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())?;
         Ok(v2::FullPayload {
             id: value_0,
@@ -3928,7 +3964,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "id").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         Ok(v2::ShortPayload { id: value_0 })
     }
@@ -3974,12 +4012,12 @@ pub mod version_adapters {
             .ok_or_else(|| "union payload is missing".to_string())?;
         match tag {
             "0" => {
-                ::serde_json::from_value::<String>((data).clone())
+                ::serde_json::from_value::<String>(::std::clone::Clone::clone(data))
                     .map_err(|error| error.to_string())
                     .map(v3::Choice::new_text)
             }
             "1" => {
-                ::serde_json::from_value::<i32>((data).clone())
+                ::serde_json::from_value::<i32>(::std::clone::Clone::clone(data))
                     .map_err(|error| error.to_string())
                     .map(v3::Choice::new_count)
             }
@@ -4037,7 +4075,9 @@ pub mod version_adapters {
                     .into_keys()
                     .next()
                     .ok_or_else(|| "map key was not decoded".to_string())?;
-                let value = ::serde_json::from_value::<String>((raw_value).clone())
+                let value = ::serde_json::from_value::<
+                    String,
+                >(::std::clone::Clone::clone(raw_value))
                     .map_err(|error| error.to_string())?;
                 if decoded.insert(key, value).is_some() {
                     return Err("distinct wire keys decode to the same map key".into());
@@ -4068,13 +4108,15 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "zip_code").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object.get("zone").unwrap_or(&::serde_json::Value::Null);
         let value_1: Option<String> = if (raw_1).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_1).clone())
+            ::serde_json::from_value::<String>(::std::clone::Clone::clone(raw_1))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -4099,7 +4141,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "fixed").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let flattened = object
             .iter()
@@ -4112,13 +4156,13 @@ pub mod version_adapters {
         let flattened_wire = ::serde_json::Value::Object(flattened);
         let value_1: ::serde_json::Value = ::serde_json::from_value::<
             ::serde_json::Value,
-        >((&flattened_wire).clone())
+        >(::std::clone::Clone::clone(&flattened_wire))
             .map_err(|error| error.to_string())?;
         let raw_2 = object.get("future").unwrap_or(&::serde_json::Value::Null);
         let value_2: Option<String> = if (raw_2).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_2).clone())
+            ::serde_json::from_value::<String>(::std::clone::Clone::clone(raw_2))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -4144,7 +4188,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "name").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object.get("children").unwrap_or(&::serde_json::Value::Null);
         let value_1: Option<Vec<v3::Node>> = if (raw_1).is_null() {
@@ -4232,7 +4278,7 @@ pub mod version_adapters {
         let value_0: Option<String> = if (raw_0).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_0).clone())
+            ::serde_json::from_value::<String>(::std::clone::Clone::clone(raw_0))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -4267,27 +4313,33 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "id").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object
             .get("reference")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "reference").to_string()
             })?;
-        let value_1: String = ::serde_json::from_value::<String>((raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())?;
         let raw_2 = object
             .get("carrier")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "carrier").to_string()
             })?;
-        let value_2: String = ::serde_json::from_value::<String>((raw_2).clone())
+        let value_2: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_2))
             .map_err(|error| error.to_string())?;
         let raw_3 = object.get("note").unwrap_or(&::serde_json::Value::Null);
         let value_3: Option<String> = if (raw_3).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_3).clone())
+            ::serde_json::from_value::<String>(::std::clone::Clone::clone(raw_3))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -4295,7 +4347,7 @@ pub mod version_adapters {
         let value_4: Option<String> = if (raw_4).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_4).clone())
+            ::serde_json::from_value::<String>(::std::clone::Clone::clone(raw_4))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -4304,7 +4356,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "audit").to_string()
             })?;
-        let value_5: String = ::serde_json::from_value::<String>((raw_5).clone())
+        let value_5: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_5))
             .map_err(|error| error.to_string())?;
         let raw_6 = object
             .get("address")
@@ -4373,7 +4427,7 @@ pub mod version_adapters {
             let values = array
                 .iter()
                 .map(|item| {
-                    ::serde_json::from_value::<i32>((item).clone())
+                    ::serde_json::from_value::<i32>(::std::clone::Clone::clone(item))
                         .map_err(|error| error.to_string())
                 })
                 .collect::<Result<Vec<_>, String>>()?;
@@ -4435,14 +4489,18 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "id").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object
             .get("extra")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "extra").to_string()
             })?;
-        let value_1: String = ::serde_json::from_value::<String>((raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())?;
         Ok(v3::FullPayload {
             id: value_0,
@@ -4467,13 +4525,20 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "id").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         Ok(v3::ShortPayload { id: value_0 })
     }
     fn decode_wire_v_3_state(wire: &::serde_json::Value) -> Result<v3::State, String> {
         ::serde_json::from_value(wire.clone()).map_err(|error| error.to_string())
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotAmbiguousResultV1 = Result<
+        v1::AmbiguousRepresentation,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_ambiguous_from_v_1(
         wire: ::serde_json::Value,
@@ -4492,12 +4557,11 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("value")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "value").into(),
             ))?;
         let value_0: v1::AmbiguousRepresentation = decode_wire_v_1_ambiguous_representation(
-                &raw_0,
+                raw_0,
             )
             .map_err(AdaptationError::Validation)?;
         let source = DepotAmbiguousRequestV1 {
@@ -4509,12 +4573,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_ambiguous_from_v_1_outcome(
-        head: Result<v3::AmbiguousRepresentation, ::xidl_rust_axum::Error>,
+        head: DepotAmbiguousResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v1::AmbiguousRepresentation, ::xidl_rust_axum::Error>,
-        Result<v3::AmbiguousRepresentation, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotAmbiguousResultV1, DepotAmbiguousResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_ambiguous_response_downcast_to_v_2(
@@ -4578,17 +4639,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v1::AmbiguousRepresentation, ::xidl_rust_axum::Error>,
-            Result<v3::AmbiguousRepresentation, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotAmbiguousResultV1, DepotAmbiguousResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotAmbiguousRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::AmbiguousRepresentation, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotAmbiguousResultV3>,
     {
         let input = decode_and_upcast_depot_ambiguous_from_v_1(wire, adapters)?;
         let head = handler(
@@ -4600,6 +4656,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_ambiguous_from_v_1_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotBindingsResultV1 = Result<String, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_bindings_from_v_1(
         wire: ::serde_json::Value,
@@ -4618,20 +4676,22 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("q")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "q").into(),
             ))?;
-        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let raw_1 = object
             .get("h")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "h").into(),
             ))?;
-        let value_1: String = ::serde_json::from_value::<String>((&raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let source = DepotBindingsRequestV1 {
@@ -4644,12 +4704,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_bindings_from_v_1_outcome(
-        head: Result<String, ::xidl_rust_axum::Error>,
+        head: DepotBindingsResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<String, ::xidl_rust_axum::Error>,
-        Result<String, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotBindingsResultV1, DepotBindingsResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_bindings_response_downcast_to_v_2(
@@ -4713,15 +4770,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<String, ::xidl_rust_axum::Error>,
-            Result<String, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotBindingsResultV1, DepotBindingsResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotBindingsRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<String, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotBindingsResultV3>,
     {
         let input = decode_and_upcast_depot_bindings_from_v_1(wire, adapters)?;
         let head = handler(
@@ -4733,6 +4787,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_bindings_from_v_1_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotBlobResultV1 = Result<i32, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_blob_from_v_1(
         wire: ::serde_json::Value,
@@ -4751,18 +4807,17 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("data")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "data").into(),
             ))?;
         let value_0: Vec<u8> = (|| {
-            let array = (&raw_0)
+            let array = (raw_0)
                 .as_array()
                 .ok_or_else(|| "expected an array".to_string())?;
             let values = array
                 .iter()
                 .map(|item| {
-                    ::serde_json::from_value::<u8>((item).clone())
+                    ::serde_json::from_value::<u8>(::std::clone::Clone::clone(item))
                         .map_err(|error| error.to_string())
                 })
                 .collect::<Result<Vec<_>, String>>()?;
@@ -4778,12 +4833,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_blob_from_v_1_outcome(
-        head: Result<i32, ::xidl_rust_axum::Error>,
+        head: DepotBlobResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<i32, ::xidl_rust_axum::Error>,
-        Result<i32, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotBlobResultV1, DepotBlobResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_blob_response_downcast_to_v_2(
@@ -4840,16 +4892,10 @@ pub mod version_adapters {
         wire: ::serde_json::Value,
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
-    ) -> Result<
-        ProjectionOutcome<
-            Result<i32, ::xidl_rust_axum::Error>,
-            Result<i32, ::xidl_rust_axum::Error>,
-        >,
-        AdaptationError,
-    >
+    ) -> Result<ProjectionOutcome<DepotBlobResultV1, DepotBlobResultV3>, AdaptationError>
     where
         F: FnOnce(DepotBlobRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<i32, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotBlobResultV3>,
     {
         let input = decode_and_upcast_depot_blob_from_v_1(wire, adapters)?;
         let head = handler(
@@ -4861,6 +4907,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_blob_from_v_1_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotChooseResultV1 = Result<v1::Choice, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_choose_from_v_1(
         wire: ::serde_json::Value,
@@ -4879,11 +4927,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("choice")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "choice").into(),
             ))?;
-        let value_0: v1::Choice = decode_wire_v_1_choice(&raw_0)
+        let value_0: v1::Choice = decode_wire_v_1_choice(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotChooseRequestV1 {
             choice: value_0,
@@ -4894,12 +4941,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_choose_from_v_1_outcome(
-        head: Result<v3::Choice, ::xidl_rust_axum::Error>,
+        head: DepotChooseResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v1::Choice, ::xidl_rust_axum::Error>,
-        Result<v3::Choice, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotChooseResultV1, DepotChooseResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_choose_response_downcast_to_v_2(
@@ -4960,15 +5004,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v1::Choice, ::xidl_rust_axum::Error>,
-            Result<v3::Choice, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotChooseResultV1, DepotChooseResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotChooseRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::Choice, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotChooseResultV3>,
     {
         let input = decode_and_upcast_depot_choose_from_v_1(wire, adapters)?;
         let head = handler(
@@ -4980,6 +5021,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_choose_from_v_1_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotContactResultV1 = Result<v1::Contact, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_contact_from_v_1(
         wire: ::serde_json::Value,
@@ -4998,11 +5041,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("contact")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "contact").into(),
             ))?;
-        let value_0: v1::Contact = decode_wire_v_1_contact(&raw_0)
+        let value_0: v1::Contact = decode_wire_v_1_contact(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotContactRequestV1 {
             contact: value_0,
@@ -5013,12 +5055,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_contact_from_v_1_outcome(
-        head: Result<v3::Contact, ::xidl_rust_axum::Error>,
+        head: DepotContactResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v1::Contact, ::xidl_rust_axum::Error>,
-        Result<v3::Contact, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotContactResultV1, DepotContactResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_contact_response_downcast_to_v_2(
@@ -5082,17 +5121,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v1::Contact, ::xidl_rust_axum::Error>,
-            Result<v3::Contact, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotContactResultV1, DepotContactResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotContactRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::Contact, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotContactResultV3>,
     {
         let input = decode_and_upcast_depot_contact_from_v_1(wire, adapters)?;
         let head = handler(
@@ -5104,6 +5138,11 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_contact_from_v_1_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotExchangeResultV1 = Result<
+        v1::DepotExchangeResponse,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_exchange_from_v_1(
         wire: ::serde_json::Value,
@@ -5122,11 +5161,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("parcel")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "parcel").into(),
             ))?;
-        let value_0: v1::Parcel = decode_wire_v_1_parcel(&raw_0)
+        let value_0: v1::Parcel = decode_wire_v_1_parcel(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotExchangeRequestV1 {
             parcel: value_0,
@@ -5137,12 +5175,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_exchange_from_v_1_outcome(
-        head: Result<v3::DepotExchangeResponse, ::xidl_rust_axum::Error>,
+        head: DepotExchangeResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v1::DepotExchangeResponse, ::xidl_rust_axum::Error>,
-        Result<v3::DepotExchangeResponse, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotExchangeResultV1, DepotExchangeResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_exchange_response_downcast_to_v_2(
@@ -5206,17 +5241,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v1::DepotExchangeResponse, ::xidl_rust_axum::Error>,
-            Result<v3::DepotExchangeResponse, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotExchangeResultV1, DepotExchangeResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotExchangeRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::DepotExchangeResponse, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotExchangeResultV3>,
     {
         let input = decode_and_upcast_depot_exchange_from_v_1(wire, adapters)?;
         let head = handler(
@@ -5228,6 +5258,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_exchange_from_v_1_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotExtraResultV1 = Result<v1::Extra, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_extra_from_v_1(
         wire: ::serde_json::Value,
@@ -5246,11 +5278,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("extra")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "extra").into(),
             ))?;
-        let value_0: v1::Extra = decode_wire_v_1_extra(&raw_0)
+        let value_0: v1::Extra = decode_wire_v_1_extra(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotExtraRequestV1 {
             extra: value_0,
@@ -5261,12 +5292,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_extra_from_v_1_outcome(
-        head: Result<v3::Extra, ::xidl_rust_axum::Error>,
+        head: DepotExtraResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v1::Extra, ::xidl_rust_axum::Error>,
-        Result<v3::Extra, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotExtraResultV1, DepotExtraResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_extra_response_downcast_to_v_2(
@@ -5324,15 +5352,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v1::Extra, ::xidl_rust_axum::Error>,
-            Result<v3::Extra, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotExtraResultV1, DepotExtraResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotExtraRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::Extra, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotExtraResultV3>,
     {
         let input = decode_and_upcast_depot_extra_from_v_1(wire, adapters)?;
         let head = handler(
@@ -5344,6 +5369,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_extra_from_v_1_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotGetResultV1 = Result<v1::Parcel, v1::DepotGetError>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_get_from_v_1(
         wire: ::serde_json::Value,
@@ -5362,11 +5389,12 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("id")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "id").into(),
             ))?;
-        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let source = DepotGetRequestV1 { id: value_0 };
@@ -5376,12 +5404,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_get_from_v_1_outcome(
-        head: Result<v3::Parcel, v3::DepotGetError>,
+        head: DepotGetResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v1::Parcel, v1::DepotGetError>,
-        Result<v3::Parcel, v3::DepotGetError>,
-    > {
+    ) -> ProjectionOutcome<DepotGetResultV1, DepotGetResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_get_response_downcast_to_v_2(source, adapters) {
@@ -5435,16 +5460,10 @@ pub mod version_adapters {
         wire: ::serde_json::Value,
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
-    ) -> Result<
-        ProjectionOutcome<
-            Result<v1::Parcel, v1::DepotGetError>,
-            Result<v3::Parcel, v3::DepotGetError>,
-        >,
-        AdaptationError,
-    >
+    ) -> Result<ProjectionOutcome<DepotGetResultV1, DepotGetResultV3>, AdaptationError>
     where
         F: FnOnce(DepotGetRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::Parcel, v3::DepotGetError>>,
+        Fut: ::std::future::Future<Output = DepotGetResultV3>,
     {
         let input = decode_and_upcast_depot_get_from_v_1(wire, adapters)?;
         let head = handler(
@@ -5456,6 +5475,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_get_from_v_1_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotIndexResultV1 = Result<v1::NumericIndex, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_index_from_v_1(
         wire: ::serde_json::Value,
@@ -5474,11 +5495,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("index")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "index").into(),
             ))?;
-        let value_0: v1::NumericIndex = decode_wire_v_1_numeric_index(&raw_0)
+        let value_0: v1::NumericIndex = decode_wire_v_1_numeric_index(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotIndexRequestV1 {
             index: value_0,
@@ -5489,12 +5509,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_index_from_v_1_outcome(
-        head: Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
+        head: DepotIndexResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v1::NumericIndex, ::xidl_rust_axum::Error>,
-        Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotIndexResultV1, DepotIndexResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_index_response_downcast_to_v_2(
@@ -5552,17 +5569,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v1::NumericIndex, ::xidl_rust_axum::Error>,
-            Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotIndexResultV1, DepotIndexResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotIndexRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotIndexResultV3>,
     {
         let input = decode_and_upcast_depot_index_from_v_1(wire, adapters)?;
         let head = handler(
@@ -5574,6 +5586,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_index_from_v_1_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotInspectResultV1 = Result<v1::Node, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_inspect_from_v_1(
         wire: ::serde_json::Value,
@@ -5592,11 +5606,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("node")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "node").into(),
             ))?;
-        let value_0: v1::Node = decode_wire_v_1_node(&raw_0)
+        let value_0: v1::Node = decode_wire_v_1_node(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotInspectRequestV1 {
             node: value_0,
@@ -5607,12 +5620,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_inspect_from_v_1_outcome(
-        head: Result<v3::Node, ::xidl_rust_axum::Error>,
+        head: DepotInspectResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v1::Node, ::xidl_rust_axum::Error>,
-        Result<v3::Node, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotInspectResultV1, DepotInspectResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_inspect_response_downcast_to_v_2(
@@ -5676,15 +5686,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v1::Node, ::xidl_rust_axum::Error>,
-            Result<v3::Node, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotInspectResultV1, DepotInspectResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotInspectRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::Node, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotInspectResultV3>,
     {
         let input = decode_and_upcast_depot_inspect_from_v_1(wire, adapters)?;
         let head = handler(
@@ -5696,6 +5703,11 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_inspect_from_v_1_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotOptionalChangeResultV1 = Result<
+        v1::OptionalChange,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_optional_change_from_v_1(
         wire: ::serde_json::Value,
@@ -5714,11 +5726,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("value")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "value").into(),
             ))?;
-        let value_0: v1::OptionalChange = decode_wire_v_1_optional_change(&raw_0)
+        let value_0: v1::OptionalChange = decode_wire_v_1_optional_change(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotOptionalChangeRequestV1 {
             value: value_0,
@@ -5729,12 +5740,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_optional_change_from_v_1_outcome(
-        head: Result<v3::OptionalChange, ::xidl_rust_axum::Error>,
+        head: DepotOptionalChangeResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v1::OptionalChange, ::xidl_rust_axum::Error>,
-        Result<v3::OptionalChange, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotOptionalChangeResultV1, DepotOptionalChangeResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_optional_change_response_downcast_to_v_2(
@@ -5798,17 +5806,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v1::OptionalChange, ::xidl_rust_axum::Error>,
-            Result<v3::OptionalChange, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotOptionalChangeResultV1, DepotOptionalChangeResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotOptionalChangeRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::OptionalChange, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotOptionalChangeResultV3>,
     {
         let input = decode_and_upcast_depot_optional_change_from_v_1(wire, adapters)?;
         let head = handler(
@@ -5820,6 +5823,11 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_optional_change_from_v_1_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotRepresentationResultV1 = Result<
+        v1::Representation,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_representation_from_v_1(
         wire: ::serde_json::Value,
@@ -5838,11 +5846,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("value")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "value").into(),
             ))?;
-        let value_0: v1::Representation = decode_wire_v_1_representation(&raw_0)
+        let value_0: v1::Representation = decode_wire_v_1_representation(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotRepresentationRequestV1 {
             value: value_0,
@@ -5853,12 +5860,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_representation_from_v_1_outcome(
-        head: Result<v3::Representation, ::xidl_rust_axum::Error>,
+        head: DepotRepresentationResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v1::Representation, ::xidl_rust_axum::Error>,
-        Result<v3::Representation, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotRepresentationResultV1, DepotRepresentationResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_representation_response_downcast_to_v_2(
@@ -5922,17 +5926,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v1::Representation, ::xidl_rust_axum::Error>,
-            Result<v3::Representation, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotRepresentationResultV1, DepotRepresentationResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotRepresentationRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::Representation, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotRepresentationResultV3>,
     {
         let input = decode_and_upcast_depot_representation_from_v_1(wire, adapters)?;
         let head = handler(
@@ -5944,6 +5943,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_representation_from_v_1_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotShipResultV1 = Result<v1::State, v1::DepotShipError>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_ship_from_v_1(
         wire: ::serde_json::Value,
@@ -5962,11 +5963,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("parcel")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "parcel").into(),
             ))?;
-        let value_0: v1::Parcel = decode_wire_v_1_parcel(&raw_0)
+        let value_0: v1::Parcel = decode_wire_v_1_parcel(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotShipRequestV1 {
             parcel: value_0,
@@ -5977,12 +5977,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_ship_from_v_1_outcome(
-        head: Result<v3::State, v3::DepotShipError>,
+        head: DepotShipResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v1::State, v1::DepotShipError>,
-        Result<v3::State, v3::DepotShipError>,
-    > {
+    ) -> ProjectionOutcome<DepotShipResultV1, DepotShipResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_ship_response_downcast_to_v_2(
@@ -6039,16 +6036,10 @@ pub mod version_adapters {
         wire: ::serde_json::Value,
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
-    ) -> Result<
-        ProjectionOutcome<
-            Result<v1::State, v1::DepotShipError>,
-            Result<v3::State, v3::DepotShipError>,
-        >,
-        AdaptationError,
-    >
+    ) -> Result<ProjectionOutcome<DepotShipResultV1, DepotShipResultV3>, AdaptationError>
     where
         F: FnOnce(DepotShipRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::State, v3::DepotShipError>>,
+        Fut: ::std::future::Future<Output = DepotShipResultV3>,
     {
         let input = decode_and_upcast_depot_ship_from_v_1(wire, adapters)?;
         let head = handler(
@@ -6060,6 +6051,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_ship_from_v_1_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotStateResultV1 = Result<v1::State, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_state_from_v_1(
         wire: ::serde_json::Value,
@@ -6078,11 +6071,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("state")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "state").into(),
             ))?;
-        let value_0: v1::State = decode_wire_v_1_state(&raw_0)
+        let value_0: v1::State = decode_wire_v_1_state(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotStateRequestV1 {
             state: value_0,
@@ -6093,12 +6085,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_state_from_v_1_outcome(
-        head: Result<v3::State, ::xidl_rust_axum::Error>,
+        head: DepotStateResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v1::State, ::xidl_rust_axum::Error>,
-        Result<v3::State, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotStateResultV1, DepotStateResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_state_response_downcast_to_v_2(
@@ -6156,15 +6145,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v1::State, ::xidl_rust_axum::Error>,
-            Result<v3::State, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotStateResultV1, DepotStateResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotStateRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::State, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotStateResultV3>,
     {
         let input = decode_and_upcast_depot_state_from_v_1(wire, adapters)?;
         let head = handler(
@@ -6176,6 +6162,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_state_from_v_1_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotVerifyResultV1 = Result<v1::State, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_verify_from_v_1(
         wire: ::serde_json::Value,
@@ -6194,19 +6182,19 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("parcel")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "parcel").into(),
             ))?;
-        let value_0: v1::Parcel = decode_wire_v_1_parcel(&raw_0)
+        let value_0: v1::Parcel = decode_wire_v_1_parcel(raw_0)
             .map_err(AdaptationError::Validation)?;
         let raw_1 = object
             .get("actor")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "actor").into(),
             ))?;
-        let value_1: String = ::serde_json::from_value::<String>((&raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let source = DepotVerifyRequestV1 {
@@ -6219,12 +6207,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_verify_from_v_1_outcome(
-        head: Result<v3::State, ::xidl_rust_axum::Error>,
+        head: DepotVerifyResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v1::State, ::xidl_rust_axum::Error>,
-        Result<v3::State, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotVerifyResultV1, DepotVerifyResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_verify_response_downcast_to_v_2(
@@ -6285,15 +6270,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v1::State, ::xidl_rust_axum::Error>,
-            Result<v3::State, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotVerifyResultV1, DepotVerifyResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotVerifyRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::State, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotVerifyResultV3>,
     {
         let input = decode_and_upcast_depot_verify_from_v_1(wire, adapters)?;
         let head = handler(
@@ -6305,6 +6287,11 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_verify_from_v_1_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotAmbiguousResultV2 = Result<
+        v2::AmbiguousRepresentation,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_ambiguous_from_v_2(
         wire: ::serde_json::Value,
@@ -6323,12 +6310,11 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("value")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "value").into(),
             ))?;
         let value_0: v2::AmbiguousRepresentation = decode_wire_v_2_ambiguous_representation(
-                &raw_0,
+                raw_0,
             )
             .map_err(AdaptationError::Validation)?;
         let source = DepotAmbiguousRequestV2 {
@@ -6339,12 +6325,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_ambiguous_from_v_2_outcome(
-        head: Result<v3::AmbiguousRepresentation, ::xidl_rust_axum::Error>,
+        head: DepotAmbiguousResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v2::AmbiguousRepresentation, ::xidl_rust_axum::Error>,
-        Result<v3::AmbiguousRepresentation, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotAmbiguousResultV2, DepotAmbiguousResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_ambiguous_response_downcast_to_v_2(
@@ -6384,17 +6367,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v2::AmbiguousRepresentation, ::xidl_rust_axum::Error>,
-            Result<v3::AmbiguousRepresentation, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotAmbiguousResultV2, DepotAmbiguousResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotAmbiguousRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::AmbiguousRepresentation, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotAmbiguousResultV3>,
     {
         let input = decode_and_upcast_depot_ambiguous_from_v_2(wire, adapters)?;
         let head = handler(
@@ -6406,6 +6384,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_ambiguous_from_v_2_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotBindingsResultV2 = Result<String, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_bindings_from_v_2(
         wire: ::serde_json::Value,
@@ -6424,20 +6404,22 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("q")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "q").into(),
             ))?;
-        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let raw_1 = object
             .get("h")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "h").into(),
             ))?;
-        let value_1: String = ::serde_json::from_value::<String>((&raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let source = DepotBindingsRequestV2 {
@@ -6449,12 +6431,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_bindings_from_v_2_outcome(
-        head: Result<String, ::xidl_rust_axum::Error>,
+        head: DepotBindingsResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<String, ::xidl_rust_axum::Error>,
-        Result<String, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotBindingsResultV2, DepotBindingsResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_bindings_response_downcast_to_v_2(
@@ -6494,15 +6473,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<String, ::xidl_rust_axum::Error>,
-            Result<String, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotBindingsResultV2, DepotBindingsResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotBindingsRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<String, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotBindingsResultV3>,
     {
         let input = decode_and_upcast_depot_bindings_from_v_2(wire, adapters)?;
         let head = handler(
@@ -6514,6 +6490,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_bindings_from_v_2_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotBlobResultV2 = Result<i32, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_blob_from_v_2(
         wire: ::serde_json::Value,
@@ -6532,18 +6510,17 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("data")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "data").into(),
             ))?;
         let value_0: Vec<u8> = (|| {
-            let array = (&raw_0)
+            let array = (raw_0)
                 .as_array()
                 .ok_or_else(|| "expected an array".to_string())?;
             let values = array
                 .iter()
                 .map(|item| {
-                    ::serde_json::from_value::<u8>((item).clone())
+                    ::serde_json::from_value::<u8>(::std::clone::Clone::clone(item))
                         .map_err(|error| error.to_string())
                 })
                 .collect::<Result<Vec<_>, String>>()?;
@@ -6558,12 +6535,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_blob_from_v_2_outcome(
-        head: Result<i32, ::xidl_rust_axum::Error>,
+        head: DepotBlobResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<i32, ::xidl_rust_axum::Error>,
-        Result<i32, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotBlobResultV2, DepotBlobResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_blob_response_downcast_to_v_2(
@@ -6599,16 +6573,10 @@ pub mod version_adapters {
         wire: ::serde_json::Value,
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
-    ) -> Result<
-        ProjectionOutcome<
-            Result<i32, ::xidl_rust_axum::Error>,
-            Result<i32, ::xidl_rust_axum::Error>,
-        >,
-        AdaptationError,
-    >
+    ) -> Result<ProjectionOutcome<DepotBlobResultV2, DepotBlobResultV3>, AdaptationError>
     where
         F: FnOnce(DepotBlobRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<i32, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotBlobResultV3>,
     {
         let input = decode_and_upcast_depot_blob_from_v_2(wire, adapters)?;
         let head = handler(
@@ -6620,6 +6588,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_blob_from_v_2_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotChooseResultV2 = Result<v2::Choice, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_choose_from_v_2(
         wire: ::serde_json::Value,
@@ -6638,11 +6608,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("choice")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "choice").into(),
             ))?;
-        let value_0: v2::Choice = decode_wire_v_2_choice(&raw_0)
+        let value_0: v2::Choice = decode_wire_v_2_choice(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotChooseRequestV2 {
             choice: value_0,
@@ -6652,12 +6621,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_choose_from_v_2_outcome(
-        head: Result<v3::Choice, ::xidl_rust_axum::Error>,
+        head: DepotChooseResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v2::Choice, ::xidl_rust_axum::Error>,
-        Result<v3::Choice, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotChooseResultV2, DepotChooseResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_choose_response_downcast_to_v_2(
@@ -6694,15 +6660,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v2::Choice, ::xidl_rust_axum::Error>,
-            Result<v3::Choice, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotChooseResultV2, DepotChooseResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotChooseRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::Choice, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotChooseResultV3>,
     {
         let input = decode_and_upcast_depot_choose_from_v_2(wire, adapters)?;
         let head = handler(
@@ -6714,6 +6677,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_choose_from_v_2_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotContactResultV2 = Result<v2::Contact, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_contact_from_v_2(
         wire: ::serde_json::Value,
@@ -6732,11 +6697,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("contact")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "contact").into(),
             ))?;
-        let value_0: v2::Contact = decode_wire_v_2_contact(&raw_0)
+        let value_0: v2::Contact = decode_wire_v_2_contact(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotContactRequestV2 {
             contact: value_0,
@@ -6746,12 +6710,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_contact_from_v_2_outcome(
-        head: Result<v3::Contact, ::xidl_rust_axum::Error>,
+        head: DepotContactResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v2::Contact, ::xidl_rust_axum::Error>,
-        Result<v3::Contact, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotContactResultV2, DepotContactResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_contact_response_downcast_to_v_2(
@@ -6791,17 +6752,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v2::Contact, ::xidl_rust_axum::Error>,
-            Result<v3::Contact, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotContactResultV2, DepotContactResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotContactRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::Contact, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotContactResultV3>,
     {
         let input = decode_and_upcast_depot_contact_from_v_2(wire, adapters)?;
         let head = handler(
@@ -6813,6 +6769,11 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_contact_from_v_2_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotExchangeResultV2 = Result<
+        v2::DepotExchangeResponse,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_exchange_from_v_2(
         wire: ::serde_json::Value,
@@ -6831,11 +6792,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("parcel")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "parcel").into(),
             ))?;
-        let value_0: v2::Parcel = decode_wire_v_2_parcel(&raw_0)
+        let value_0: v2::Parcel = decode_wire_v_2_parcel(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotExchangeRequestV2 {
             parcel: value_0,
@@ -6845,12 +6805,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_exchange_from_v_2_outcome(
-        head: Result<v3::DepotExchangeResponse, ::xidl_rust_axum::Error>,
+        head: DepotExchangeResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v2::DepotExchangeResponse, ::xidl_rust_axum::Error>,
-        Result<v3::DepotExchangeResponse, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotExchangeResultV2, DepotExchangeResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_exchange_response_downcast_to_v_2(
@@ -6890,17 +6847,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v2::DepotExchangeResponse, ::xidl_rust_axum::Error>,
-            Result<v3::DepotExchangeResponse, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotExchangeResultV2, DepotExchangeResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotExchangeRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::DepotExchangeResponse, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotExchangeResultV3>,
     {
         let input = decode_and_upcast_depot_exchange_from_v_2(wire, adapters)?;
         let head = handler(
@@ -6912,6 +6864,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_exchange_from_v_2_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotExtraResultV2 = Result<v2::Extra, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_extra_from_v_2(
         wire: ::serde_json::Value,
@@ -6930,11 +6884,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("extra")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "extra").into(),
             ))?;
-        let value_0: v2::Extra = decode_wire_v_2_extra(&raw_0)
+        let value_0: v2::Extra = decode_wire_v_2_extra(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotExtraRequestV2 {
             extra: value_0,
@@ -6944,12 +6897,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_extra_from_v_2_outcome(
-        head: Result<v3::Extra, ::xidl_rust_axum::Error>,
+        head: DepotExtraResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v2::Extra, ::xidl_rust_axum::Error>,
-        Result<v3::Extra, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotExtraResultV2, DepotExtraResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_extra_response_downcast_to_v_2(
@@ -6986,15 +6936,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v2::Extra, ::xidl_rust_axum::Error>,
-            Result<v3::Extra, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotExtraResultV2, DepotExtraResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotExtraRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::Extra, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotExtraResultV3>,
     {
         let input = decode_and_upcast_depot_extra_from_v_2(wire, adapters)?;
         let head = handler(
@@ -7006,6 +6953,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_extra_from_v_2_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotGetResultV2 = Result<v2::Parcel, v2::DepotGetError>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_get_from_v_2(
         wire: ::serde_json::Value,
@@ -7024,11 +6973,12 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("id")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "id").into(),
             ))?;
-        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let source = DepotGetRequestV2 { id: value_0 };
@@ -7037,12 +6987,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_get_from_v_2_outcome(
-        head: Result<v3::Parcel, v3::DepotGetError>,
+        head: DepotGetResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v2::Parcel, v2::DepotGetError>,
-        Result<v3::Parcel, v3::DepotGetError>,
-    > {
+    ) -> ProjectionOutcome<DepotGetResultV2, DepotGetResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_get_response_downcast_to_v_2(source, adapters) {
@@ -7075,16 +7022,10 @@ pub mod version_adapters {
         wire: ::serde_json::Value,
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
-    ) -> Result<
-        ProjectionOutcome<
-            Result<v2::Parcel, v2::DepotGetError>,
-            Result<v3::Parcel, v3::DepotGetError>,
-        >,
-        AdaptationError,
-    >
+    ) -> Result<ProjectionOutcome<DepotGetResultV2, DepotGetResultV3>, AdaptationError>
     where
         F: FnOnce(DepotGetRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::Parcel, v3::DepotGetError>>,
+        Fut: ::std::future::Future<Output = DepotGetResultV3>,
     {
         let input = decode_and_upcast_depot_get_from_v_2(wire, adapters)?;
         let head = handler(
@@ -7096,6 +7037,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_get_from_v_2_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotIndexResultV2 = Result<v2::NumericIndex, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_index_from_v_2(
         wire: ::serde_json::Value,
@@ -7114,11 +7057,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("index")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "index").into(),
             ))?;
-        let value_0: v2::NumericIndex = decode_wire_v_2_numeric_index(&raw_0)
+        let value_0: v2::NumericIndex = decode_wire_v_2_numeric_index(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotIndexRequestV2 {
             index: value_0,
@@ -7128,12 +7070,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_index_from_v_2_outcome(
-        head: Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
+        head: DepotIndexResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v2::NumericIndex, ::xidl_rust_axum::Error>,
-        Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotIndexResultV2, DepotIndexResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_index_response_downcast_to_v_2(
@@ -7170,17 +7109,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v2::NumericIndex, ::xidl_rust_axum::Error>,
-            Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotIndexResultV2, DepotIndexResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotIndexRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotIndexResultV3>,
     {
         let input = decode_and_upcast_depot_index_from_v_2(wire, adapters)?;
         let head = handler(
@@ -7192,6 +7126,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_index_from_v_2_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotInspectResultV2 = Result<v2::Node, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_inspect_from_v_2(
         wire: ::serde_json::Value,
@@ -7210,11 +7146,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("node")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "node").into(),
             ))?;
-        let value_0: v2::Node = decode_wire_v_2_node(&raw_0)
+        let value_0: v2::Node = decode_wire_v_2_node(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotInspectRequestV2 {
             node: value_0,
@@ -7224,12 +7159,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_inspect_from_v_2_outcome(
-        head: Result<v3::Node, ::xidl_rust_axum::Error>,
+        head: DepotInspectResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v2::Node, ::xidl_rust_axum::Error>,
-        Result<v3::Node, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotInspectResultV2, DepotInspectResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_inspect_response_downcast_to_v_2(
@@ -7269,15 +7201,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v2::Node, ::xidl_rust_axum::Error>,
-            Result<v3::Node, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotInspectResultV2, DepotInspectResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotInspectRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::Node, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotInspectResultV3>,
     {
         let input = decode_and_upcast_depot_inspect_from_v_2(wire, adapters)?;
         let head = handler(
@@ -7289,6 +7218,11 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_inspect_from_v_2_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotOptionalChangeResultV2 = Result<
+        v2::OptionalChange,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_optional_change_from_v_2(
         wire: ::serde_json::Value,
@@ -7307,11 +7241,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("value")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "value").into(),
             ))?;
-        let value_0: v2::OptionalChange = decode_wire_v_2_optional_change(&raw_0)
+        let value_0: v2::OptionalChange = decode_wire_v_2_optional_change(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotOptionalChangeRequestV2 {
             value: value_0,
@@ -7321,12 +7254,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_optional_change_from_v_2_outcome(
-        head: Result<v3::OptionalChange, ::xidl_rust_axum::Error>,
+        head: DepotOptionalChangeResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v2::OptionalChange, ::xidl_rust_axum::Error>,
-        Result<v3::OptionalChange, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotOptionalChangeResultV2, DepotOptionalChangeResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_optional_change_response_downcast_to_v_2(
@@ -7366,17 +7296,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v2::OptionalChange, ::xidl_rust_axum::Error>,
-            Result<v3::OptionalChange, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotOptionalChangeResultV2, DepotOptionalChangeResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotOptionalChangeRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::OptionalChange, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotOptionalChangeResultV3>,
     {
         let input = decode_and_upcast_depot_optional_change_from_v_2(wire, adapters)?;
         let head = handler(
@@ -7388,6 +7313,11 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_optional_change_from_v_2_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotRepresentationResultV2 = Result<
+        v2::Representation,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_representation_from_v_2(
         wire: ::serde_json::Value,
@@ -7406,11 +7336,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("value")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "value").into(),
             ))?;
-        let value_0: v2::Representation = decode_wire_v_2_representation(&raw_0)
+        let value_0: v2::Representation = decode_wire_v_2_representation(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotRepresentationRequestV2 {
             value: value_0,
@@ -7420,12 +7349,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_representation_from_v_2_outcome(
-        head: Result<v3::Representation, ::xidl_rust_axum::Error>,
+        head: DepotRepresentationResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v2::Representation, ::xidl_rust_axum::Error>,
-        Result<v3::Representation, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotRepresentationResultV2, DepotRepresentationResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_representation_response_downcast_to_v_2(
@@ -7465,17 +7391,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v2::Representation, ::xidl_rust_axum::Error>,
-            Result<v3::Representation, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotRepresentationResultV2, DepotRepresentationResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotRepresentationRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::Representation, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotRepresentationResultV3>,
     {
         let input = decode_and_upcast_depot_representation_from_v_2(wire, adapters)?;
         let head = handler(
@@ -7487,6 +7408,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_representation_from_v_2_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotShipResultV2 = Result<v2::State, v2::DepotShipError>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_ship_from_v_2(
         wire: ::serde_json::Value,
@@ -7505,11 +7428,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("parcel")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "parcel").into(),
             ))?;
-        let value_0: v2::Parcel = decode_wire_v_2_parcel(&raw_0)
+        let value_0: v2::Parcel = decode_wire_v_2_parcel(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotShipRequestV2 {
             parcel: value_0,
@@ -7519,12 +7441,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_ship_from_v_2_outcome(
-        head: Result<v3::State, v3::DepotShipError>,
+        head: DepotShipResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v2::State, v2::DepotShipError>,
-        Result<v3::State, v3::DepotShipError>,
-    > {
+    ) -> ProjectionOutcome<DepotShipResultV2, DepotShipResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_ship_response_downcast_to_v_2(
@@ -7560,16 +7479,10 @@ pub mod version_adapters {
         wire: ::serde_json::Value,
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
-    ) -> Result<
-        ProjectionOutcome<
-            Result<v2::State, v2::DepotShipError>,
-            Result<v3::State, v3::DepotShipError>,
-        >,
-        AdaptationError,
-    >
+    ) -> Result<ProjectionOutcome<DepotShipResultV2, DepotShipResultV3>, AdaptationError>
     where
         F: FnOnce(DepotShipRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::State, v3::DepotShipError>>,
+        Fut: ::std::future::Future<Output = DepotShipResultV3>,
     {
         let input = decode_and_upcast_depot_ship_from_v_2(wire, adapters)?;
         let head = handler(
@@ -7581,6 +7494,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_ship_from_v_2_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotStateResultV2 = Result<v2::State, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_state_from_v_2(
         wire: ::serde_json::Value,
@@ -7599,11 +7514,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("state")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "state").into(),
             ))?;
-        let value_0: v2::State = decode_wire_v_2_state(&raw_0)
+        let value_0: v2::State = decode_wire_v_2_state(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotStateRequestV2 {
             state: value_0,
@@ -7613,12 +7527,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_state_from_v_2_outcome(
-        head: Result<v3::State, ::xidl_rust_axum::Error>,
+        head: DepotStateResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v2::State, ::xidl_rust_axum::Error>,
-        Result<v3::State, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotStateResultV2, DepotStateResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_state_response_downcast_to_v_2(
@@ -7655,15 +7566,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v2::State, ::xidl_rust_axum::Error>,
-            Result<v3::State, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotStateResultV2, DepotStateResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotStateRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::State, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotStateResultV3>,
     {
         let input = decode_and_upcast_depot_state_from_v_2(wire, adapters)?;
         let head = handler(
@@ -7675,6 +7583,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_state_from_v_2_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotVerifyResultV2 = Result<v2::State, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_verify_from_v_2(
         wire: ::serde_json::Value,
@@ -7693,19 +7603,19 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("parcel")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "parcel").into(),
             ))?;
-        let value_0: v2::Parcel = decode_wire_v_2_parcel(&raw_0)
+        let value_0: v2::Parcel = decode_wire_v_2_parcel(raw_0)
             .map_err(AdaptationError::Validation)?;
         let raw_1 = object
             .get("actor")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "actor").into(),
             ))?;
-        let value_1: String = ::serde_json::from_value::<String>((&raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let source = DepotVerifyRequestV2 {
@@ -7717,12 +7627,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_verify_from_v_2_outcome(
-        head: Result<v3::State, ::xidl_rust_axum::Error>,
+        head: DepotVerifyResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v2::State, ::xidl_rust_axum::Error>,
-        Result<v3::State, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotVerifyResultV2, DepotVerifyResultV3> {
         match &head {
             Ok(source) => {
                 let source = match depot_verify_response_downcast_to_v_2(
@@ -7759,15 +7666,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v2::State, ::xidl_rust_axum::Error>,
-            Result<v3::State, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotVerifyResultV2, DepotVerifyResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotVerifyRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::State, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotVerifyResultV3>,
     {
         let input = decode_and_upcast_depot_verify_from_v_2(wire, adapters)?;
         let head = handler(
@@ -7779,6 +7683,11 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_verify_from_v_2_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotAmbiguousResultV3 = Result<
+        v3::AmbiguousRepresentation,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_ambiguous_from_v_3(
         wire: ::serde_json::Value,
@@ -7797,12 +7706,11 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("value")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "value").into(),
             ))?;
         let value_0: v3::AmbiguousRepresentation = decode_wire_v_3_ambiguous_representation(
-                &raw_0,
+                raw_0,
             )
             .map_err(AdaptationError::Validation)?;
         let source = DepotAmbiguousRequestV3 {
@@ -7812,12 +7720,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_ambiguous_from_v_3_outcome(
-        head: Result<v3::AmbiguousRepresentation, ::xidl_rust_axum::Error>,
+        head: DepotAmbiguousResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v3::AmbiguousRepresentation, ::xidl_rust_axum::Error>,
-        Result<v3::AmbiguousRepresentation, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotAmbiguousResultV3, DepotAmbiguousResultV3> {
         ProjectionOutcome::Projected(head)
     }
     /// Execute a caller-supplied Head handler once after successful adaptation.
@@ -7826,17 +7731,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v3::AmbiguousRepresentation, ::xidl_rust_axum::Error>,
-            Result<v3::AmbiguousRepresentation, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotAmbiguousResultV3, DepotAmbiguousResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotAmbiguousRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::AmbiguousRepresentation, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotAmbiguousResultV3>,
     {
         let input = decode_and_upcast_depot_ambiguous_from_v_3(wire, adapters)?;
         let head = handler(
@@ -7848,6 +7748,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_ambiguous_from_v_3_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotBindingsResultV3 = Result<String, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_bindings_from_v_3(
         wire: ::serde_json::Value,
@@ -7866,20 +7768,22 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("q")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "q").into(),
             ))?;
-        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let raw_1 = object
             .get("h")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "h").into(),
             ))?;
-        let value_1: String = ::serde_json::from_value::<String>((&raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let source = DepotBindingsRequestV3 {
@@ -7890,12 +7794,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_bindings_from_v_3_outcome(
-        head: Result<String, ::xidl_rust_axum::Error>,
+        head: DepotBindingsResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<String, ::xidl_rust_axum::Error>,
-        Result<String, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotBindingsResultV3, DepotBindingsResultV3> {
         ProjectionOutcome::Projected(head)
     }
     /// Execute a caller-supplied Head handler once after successful adaptation.
@@ -7904,15 +7805,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<String, ::xidl_rust_axum::Error>,
-            Result<String, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotBindingsResultV3, DepotBindingsResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotBindingsRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<String, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotBindingsResultV3>,
     {
         let input = decode_and_upcast_depot_bindings_from_v_3(wire, adapters)?;
         let head = handler(
@@ -7924,6 +7822,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_bindings_from_v_3_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotBlobResultV3 = Result<i32, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_blob_from_v_3(
         wire: ::serde_json::Value,
@@ -7942,18 +7842,17 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("data")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "data").into(),
             ))?;
         let value_0: Vec<u8> = (|| {
-            let array = (&raw_0)
+            let array = (raw_0)
                 .as_array()
                 .ok_or_else(|| "expected an array".to_string())?;
             let values = array
                 .iter()
                 .map(|item| {
-                    ::serde_json::from_value::<u8>((item).clone())
+                    ::serde_json::from_value::<u8>(::std::clone::Clone::clone(item))
                         .map_err(|error| error.to_string())
                 })
                 .collect::<Result<Vec<_>, String>>()?;
@@ -7967,12 +7866,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_blob_from_v_3_outcome(
-        head: Result<i32, ::xidl_rust_axum::Error>,
+        head: DepotBlobResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<i32, ::xidl_rust_axum::Error>,
-        Result<i32, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotBlobResultV3, DepotBlobResultV3> {
         ProjectionOutcome::Projected(head)
     }
     /// Execute a caller-supplied Head handler once after successful adaptation.
@@ -7980,16 +7876,10 @@ pub mod version_adapters {
         wire: ::serde_json::Value,
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
-    ) -> Result<
-        ProjectionOutcome<
-            Result<i32, ::xidl_rust_axum::Error>,
-            Result<i32, ::xidl_rust_axum::Error>,
-        >,
-        AdaptationError,
-    >
+    ) -> Result<ProjectionOutcome<DepotBlobResultV3, DepotBlobResultV3>, AdaptationError>
     where
         F: FnOnce(DepotBlobRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<i32, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotBlobResultV3>,
     {
         let input = decode_and_upcast_depot_blob_from_v_3(wire, adapters)?;
         let head = handler(
@@ -8001,6 +7891,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_blob_from_v_3_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotChooseResultV3 = Result<v3::Choice, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_choose_from_v_3(
         wire: ::serde_json::Value,
@@ -8019,11 +7911,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("choice")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "choice").into(),
             ))?;
-        let value_0: v3::Choice = decode_wire_v_3_choice(&raw_0)
+        let value_0: v3::Choice = decode_wire_v_3_choice(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotChooseRequestV3 {
             choice: value_0,
@@ -8032,12 +7923,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_choose_from_v_3_outcome(
-        head: Result<v3::Choice, ::xidl_rust_axum::Error>,
+        head: DepotChooseResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v3::Choice, ::xidl_rust_axum::Error>,
-        Result<v3::Choice, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotChooseResultV3, DepotChooseResultV3> {
         ProjectionOutcome::Projected(head)
     }
     /// Execute a caller-supplied Head handler once after successful adaptation.
@@ -8046,15 +7934,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v3::Choice, ::xidl_rust_axum::Error>,
-            Result<v3::Choice, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotChooseResultV3, DepotChooseResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotChooseRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::Choice, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotChooseResultV3>,
     {
         let input = decode_and_upcast_depot_choose_from_v_3(wire, adapters)?;
         let head = handler(
@@ -8066,6 +7951,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_choose_from_v_3_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotContactResultV3 = Result<v3::Contact, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_contact_from_v_3(
         wire: ::serde_json::Value,
@@ -8084,11 +7971,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("contact")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "contact").into(),
             ))?;
-        let value_0: v3::Contact = decode_wire_v_3_contact(&raw_0)
+        let value_0: v3::Contact = decode_wire_v_3_contact(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotContactRequestV3 {
             contact: value_0,
@@ -8097,12 +7983,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_contact_from_v_3_outcome(
-        head: Result<v3::Contact, ::xidl_rust_axum::Error>,
+        head: DepotContactResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v3::Contact, ::xidl_rust_axum::Error>,
-        Result<v3::Contact, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotContactResultV3, DepotContactResultV3> {
         ProjectionOutcome::Projected(head)
     }
     /// Execute a caller-supplied Head handler once after successful adaptation.
@@ -8111,17 +7994,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v3::Contact, ::xidl_rust_axum::Error>,
-            Result<v3::Contact, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotContactResultV3, DepotContactResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotContactRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::Contact, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotContactResultV3>,
     {
         let input = decode_and_upcast_depot_contact_from_v_3(wire, adapters)?;
         let head = handler(
@@ -8133,6 +8011,11 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_contact_from_v_3_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotExchangeResultV3 = Result<
+        v3::DepotExchangeResponse,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_exchange_from_v_3(
         wire: ::serde_json::Value,
@@ -8151,11 +8034,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("parcel")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "parcel").into(),
             ))?;
-        let value_0: v3::Parcel = decode_wire_v_3_parcel(&raw_0)
+        let value_0: v3::Parcel = decode_wire_v_3_parcel(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotExchangeRequestV3 {
             parcel: value_0,
@@ -8164,12 +8046,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_exchange_from_v_3_outcome(
-        head: Result<v3::DepotExchangeResponse, ::xidl_rust_axum::Error>,
+        head: DepotExchangeResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v3::DepotExchangeResponse, ::xidl_rust_axum::Error>,
-        Result<v3::DepotExchangeResponse, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotExchangeResultV3, DepotExchangeResultV3> {
         ProjectionOutcome::Projected(head)
     }
     /// Execute a caller-supplied Head handler once after successful adaptation.
@@ -8178,17 +8057,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v3::DepotExchangeResponse, ::xidl_rust_axum::Error>,
-            Result<v3::DepotExchangeResponse, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotExchangeResultV3, DepotExchangeResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotExchangeRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::DepotExchangeResponse, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotExchangeResultV3>,
     {
         let input = decode_and_upcast_depot_exchange_from_v_3(wire, adapters)?;
         let head = handler(
@@ -8200,6 +8074,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_exchange_from_v_3_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotExtraResultV3 = Result<v3::Extra, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_extra_from_v_3(
         wire: ::serde_json::Value,
@@ -8218,11 +8094,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("extra")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "extra").into(),
             ))?;
-        let value_0: v3::Extra = decode_wire_v_3_extra(&raw_0)
+        let value_0: v3::Extra = decode_wire_v_3_extra(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotExtraRequestV3 {
             extra: value_0,
@@ -8231,12 +8106,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_extra_from_v_3_outcome(
-        head: Result<v3::Extra, ::xidl_rust_axum::Error>,
+        head: DepotExtraResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v3::Extra, ::xidl_rust_axum::Error>,
-        Result<v3::Extra, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotExtraResultV3, DepotExtraResultV3> {
         ProjectionOutcome::Projected(head)
     }
     /// Execute a caller-supplied Head handler once after successful adaptation.
@@ -8245,15 +8117,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v3::Extra, ::xidl_rust_axum::Error>,
-            Result<v3::Extra, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotExtraResultV3, DepotExtraResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotExtraRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::Extra, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotExtraResultV3>,
     {
         let input = decode_and_upcast_depot_extra_from_v_3(wire, adapters)?;
         let head = handler(
@@ -8265,6 +8134,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_extra_from_v_3_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotGetResultV3 = Result<v3::Parcel, v3::DepotGetError>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_get_from_v_3(
         wire: ::serde_json::Value,
@@ -8283,11 +8154,12 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("id")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "id").into(),
             ))?;
-        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let source = DepotGetRequestV3 { id: value_0 };
@@ -8295,12 +8167,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_get_from_v_3_outcome(
-        head: Result<v3::Parcel, v3::DepotGetError>,
+        head: DepotGetResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v3::Parcel, v3::DepotGetError>,
-        Result<v3::Parcel, v3::DepotGetError>,
-    > {
+    ) -> ProjectionOutcome<DepotGetResultV3, DepotGetResultV3> {
         ProjectionOutcome::Projected(head)
     }
     /// Execute a caller-supplied Head handler once after successful adaptation.
@@ -8308,16 +8177,10 @@ pub mod version_adapters {
         wire: ::serde_json::Value,
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
-    ) -> Result<
-        ProjectionOutcome<
-            Result<v3::Parcel, v3::DepotGetError>,
-            Result<v3::Parcel, v3::DepotGetError>,
-        >,
-        AdaptationError,
-    >
+    ) -> Result<ProjectionOutcome<DepotGetResultV3, DepotGetResultV3>, AdaptationError>
     where
         F: FnOnce(DepotGetRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::Parcel, v3::DepotGetError>>,
+        Fut: ::std::future::Future<Output = DepotGetResultV3>,
     {
         let input = decode_and_upcast_depot_get_from_v_3(wire, adapters)?;
         let head = handler(
@@ -8329,6 +8192,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_get_from_v_3_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotHeadOnlyResultV3 = Result<String, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_head_only_from_v_3(
         wire: ::serde_json::Value,
@@ -8350,12 +8215,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_head_only_from_v_3_outcome(
-        head: Result<String, ::xidl_rust_axum::Error>,
+        head: DepotHeadOnlyResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<String, ::xidl_rust_axum::Error>,
-        Result<String, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotHeadOnlyResultV3, DepotHeadOnlyResultV3> {
         ProjectionOutcome::Projected(head)
     }
     /// Execute a caller-supplied Head handler once after successful adaptation.
@@ -8364,15 +8226,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<String, ::xidl_rust_axum::Error>,
-            Result<String, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotHeadOnlyResultV3, DepotHeadOnlyResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotHeadOnlyRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<String, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotHeadOnlyResultV3>,
     {
         let input = decode_and_upcast_depot_head_only_from_v_3(wire, adapters)?;
         let head = handler(
@@ -8384,6 +8243,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_head_only_from_v_3_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotIndexResultV3 = Result<v3::NumericIndex, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_index_from_v_3(
         wire: ::serde_json::Value,
@@ -8402,11 +8263,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("index")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "index").into(),
             ))?;
-        let value_0: v3::NumericIndex = decode_wire_v_3_numeric_index(&raw_0)
+        let value_0: v3::NumericIndex = decode_wire_v_3_numeric_index(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotIndexRequestV3 {
             index: value_0,
@@ -8415,12 +8275,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_index_from_v_3_outcome(
-        head: Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
+        head: DepotIndexResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
-        Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotIndexResultV3, DepotIndexResultV3> {
         ProjectionOutcome::Projected(head)
     }
     /// Execute a caller-supplied Head handler once after successful adaptation.
@@ -8429,17 +8286,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
-            Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotIndexResultV3, DepotIndexResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotIndexRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotIndexResultV3>,
     {
         let input = decode_and_upcast_depot_index_from_v_3(wire, adapters)?;
         let head = handler(
@@ -8451,6 +8303,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_index_from_v_3_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotInspectResultV3 = Result<v3::Node, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_inspect_from_v_3(
         wire: ::serde_json::Value,
@@ -8469,11 +8323,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("node")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "node").into(),
             ))?;
-        let value_0: v3::Node = decode_wire_v_3_node(&raw_0)
+        let value_0: v3::Node = decode_wire_v_3_node(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotInspectRequestV3 {
             node: value_0,
@@ -8482,12 +8335,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_inspect_from_v_3_outcome(
-        head: Result<v3::Node, ::xidl_rust_axum::Error>,
+        head: DepotInspectResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v3::Node, ::xidl_rust_axum::Error>,
-        Result<v3::Node, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotInspectResultV3, DepotInspectResultV3> {
         ProjectionOutcome::Projected(head)
     }
     /// Execute a caller-supplied Head handler once after successful adaptation.
@@ -8496,15 +8346,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v3::Node, ::xidl_rust_axum::Error>,
-            Result<v3::Node, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotInspectResultV3, DepotInspectResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotInspectRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::Node, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotInspectResultV3>,
     {
         let input = decode_and_upcast_depot_inspect_from_v_3(wire, adapters)?;
         let head = handler(
@@ -8516,6 +8363,11 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_inspect_from_v_3_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotOptionalChangeResultV3 = Result<
+        v3::OptionalChange,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_optional_change_from_v_3(
         wire: ::serde_json::Value,
@@ -8534,11 +8386,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("value")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "value").into(),
             ))?;
-        let value_0: v3::OptionalChange = decode_wire_v_3_optional_change(&raw_0)
+        let value_0: v3::OptionalChange = decode_wire_v_3_optional_change(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotOptionalChangeRequestV3 {
             value: value_0,
@@ -8547,12 +8398,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_optional_change_from_v_3_outcome(
-        head: Result<v3::OptionalChange, ::xidl_rust_axum::Error>,
+        head: DepotOptionalChangeResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v3::OptionalChange, ::xidl_rust_axum::Error>,
-        Result<v3::OptionalChange, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotOptionalChangeResultV3, DepotOptionalChangeResultV3> {
         ProjectionOutcome::Projected(head)
     }
     /// Execute a caller-supplied Head handler once after successful adaptation.
@@ -8561,17 +8409,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v3::OptionalChange, ::xidl_rust_axum::Error>,
-            Result<v3::OptionalChange, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotOptionalChangeResultV3, DepotOptionalChangeResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotOptionalChangeRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::OptionalChange, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotOptionalChangeResultV3>,
     {
         let input = decode_and_upcast_depot_optional_change_from_v_3(wire, adapters)?;
         let head = handler(
@@ -8583,6 +8426,11 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_optional_change_from_v_3_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotRepresentationResultV3 = Result<
+        v3::Representation,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_representation_from_v_3(
         wire: ::serde_json::Value,
@@ -8601,11 +8449,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("value")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "value").into(),
             ))?;
-        let value_0: v3::Representation = decode_wire_v_3_representation(&raw_0)
+        let value_0: v3::Representation = decode_wire_v_3_representation(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotRepresentationRequestV3 {
             value: value_0,
@@ -8614,12 +8461,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_representation_from_v_3_outcome(
-        head: Result<v3::Representation, ::xidl_rust_axum::Error>,
+        head: DepotRepresentationResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v3::Representation, ::xidl_rust_axum::Error>,
-        Result<v3::Representation, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotRepresentationResultV3, DepotRepresentationResultV3> {
         ProjectionOutcome::Projected(head)
     }
     /// Execute a caller-supplied Head handler once after successful adaptation.
@@ -8628,17 +8472,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v3::Representation, ::xidl_rust_axum::Error>,
-            Result<v3::Representation, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotRepresentationResultV3, DepotRepresentationResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotRepresentationRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::Representation, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotRepresentationResultV3>,
     {
         let input = decode_and_upcast_depot_representation_from_v_3(wire, adapters)?;
         let head = handler(
@@ -8650,6 +8489,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_representation_from_v_3_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotShipResultV3 = Result<v3::State, v3::DepotShipError>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_ship_from_v_3(
         wire: ::serde_json::Value,
@@ -8668,11 +8509,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("parcel")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "parcel").into(),
             ))?;
-        let value_0: v3::Parcel = decode_wire_v_3_parcel(&raw_0)
+        let value_0: v3::Parcel = decode_wire_v_3_parcel(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotShipRequestV3 {
             parcel: value_0,
@@ -8681,12 +8521,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_ship_from_v_3_outcome(
-        head: Result<v3::State, v3::DepotShipError>,
+        head: DepotShipResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v3::State, v3::DepotShipError>,
-        Result<v3::State, v3::DepotShipError>,
-    > {
+    ) -> ProjectionOutcome<DepotShipResultV3, DepotShipResultV3> {
         ProjectionOutcome::Projected(head)
     }
     /// Execute a caller-supplied Head handler once after successful adaptation.
@@ -8694,16 +8531,10 @@ pub mod version_adapters {
         wire: ::serde_json::Value,
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
-    ) -> Result<
-        ProjectionOutcome<
-            Result<v3::State, v3::DepotShipError>,
-            Result<v3::State, v3::DepotShipError>,
-        >,
-        AdaptationError,
-    >
+    ) -> Result<ProjectionOutcome<DepotShipResultV3, DepotShipResultV3>, AdaptationError>
     where
         F: FnOnce(DepotShipRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::State, v3::DepotShipError>>,
+        Fut: ::std::future::Future<Output = DepotShipResultV3>,
     {
         let input = decode_and_upcast_depot_ship_from_v_3(wire, adapters)?;
         let head = handler(
@@ -8715,6 +8546,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_ship_from_v_3_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotStateResultV3 = Result<v3::State, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_state_from_v_3(
         wire: ::serde_json::Value,
@@ -8733,11 +8566,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("state")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "state").into(),
             ))?;
-        let value_0: v3::State = decode_wire_v_3_state(&raw_0)
+        let value_0: v3::State = decode_wire_v_3_state(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DepotStateRequestV3 {
             state: value_0,
@@ -8746,12 +8578,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_state_from_v_3_outcome(
-        head: Result<v3::State, ::xidl_rust_axum::Error>,
+        head: DepotStateResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v3::State, ::xidl_rust_axum::Error>,
-        Result<v3::State, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotStateResultV3, DepotStateResultV3> {
         ProjectionOutcome::Projected(head)
     }
     /// Execute a caller-supplied Head handler once after successful adaptation.
@@ -8760,15 +8589,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v3::State, ::xidl_rust_axum::Error>,
-            Result<v3::State, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotStateResultV3, DepotStateResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotStateRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::State, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotStateResultV3>,
     {
         let input = decode_and_upcast_depot_state_from_v_3(wire, adapters)?;
         let head = handler(
@@ -8780,6 +8606,8 @@ pub mod version_adapters {
             .await;
         Ok(downcast_depot_state_from_v_3_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DepotVerifyResultV3 = Result<v3::State, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_verify_from_v_3(
         wire: ::serde_json::Value,
@@ -8798,19 +8626,19 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("parcel")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "parcel").into(),
             ))?;
-        let value_0: v3::Parcel = decode_wire_v_3_parcel(&raw_0)
+        let value_0: v3::Parcel = decode_wire_v_3_parcel(raw_0)
             .map_err(AdaptationError::Validation)?;
         let raw_1 = object
             .get("actor")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "actor").into(),
             ))?;
-        let value_1: String = ::serde_json::from_value::<String>((&raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let source = DepotVerifyRequestV3 {
@@ -8821,12 +8649,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_verify_from_v_3_outcome(
-        head: Result<v3::State, ::xidl_rust_axum::Error>,
+        head: DepotVerifyResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v3::State, ::xidl_rust_axum::Error>,
-        Result<v3::State, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotVerifyResultV3, DepotVerifyResultV3> {
         ProjectionOutcome::Projected(head)
     }
     /// Execute a caller-supplied Head handler once after successful adaptation.
@@ -8835,15 +8660,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v3::State, ::xidl_rust_axum::Error>,
-            Result<v3::State, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotVerifyResultV3, DepotVerifyResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotVerifyRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::State, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotVerifyResultV3>,
     {
         let input = decode_and_upcast_depot_verify_from_v_3(wire, adapters)?;
         let head = handler(
@@ -9388,9 +9210,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum DepotAmbiguousOutcome {
-        V1(Result<v1::AmbiguousRepresentation, ::xidl_rust_axum::Error>),
-        V2(Result<v2::AmbiguousRepresentation, ::xidl_rust_axum::Error>),
-        V3(Result<v3::AmbiguousRepresentation, ::xidl_rust_axum::Error>),
+        V1(DepotAmbiguousResultV1),
+        V2(DepotAmbiguousResultV2),
+        V3(DepotAmbiguousResultV3),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_depot_ambiguous(
@@ -9407,12 +9229,9 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_depot_ambiguous_outcome(
         version: Version,
-        head: Result<v3::AmbiguousRepresentation, ::xidl_rust_axum::Error>,
+        head: DepotAmbiguousResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        DepotAmbiguousOutcome,
-        Result<v3::AmbiguousRepresentation, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotAmbiguousOutcome, DepotAmbiguousResultV3> {
         match version {
             Version::V1 => {
                 match downcast_depot_ambiguous_from_v_1_outcome(head, adapters) {
@@ -9462,17 +9281,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            DepotAmbiguousOutcome,
-            Result<v3::AmbiguousRepresentation, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotAmbiguousOutcome, DepotAmbiguousResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotAmbiguousRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::AmbiguousRepresentation, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotAmbiguousResultV3>,
     {
         let input = decode_and_upcast_depot_ambiguous(version, wire, adapters)?;
         let head = handler(
@@ -9486,9 +9300,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum DepotBindingsOutcome {
-        V1(Result<String, ::xidl_rust_axum::Error>),
-        V2(Result<String, ::xidl_rust_axum::Error>),
-        V3(Result<String, ::xidl_rust_axum::Error>),
+        V1(DepotBindingsResultV1),
+        V2(DepotBindingsResultV2),
+        V3(DepotBindingsResultV3),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_depot_bindings(
@@ -9505,12 +9319,9 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_depot_bindings_outcome(
         version: Version,
-        head: Result<String, ::xidl_rust_axum::Error>,
+        head: DepotBindingsResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        DepotBindingsOutcome,
-        Result<String, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotBindingsOutcome, DepotBindingsResultV3> {
         match version {
             Version::V1 => {
                 match downcast_depot_bindings_from_v_1_outcome(head, adapters) {
@@ -9560,12 +9371,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<DepotBindingsOutcome, Result<String, ::xidl_rust_axum::Error>>,
+        ProjectionOutcome<DepotBindingsOutcome, DepotBindingsResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotBindingsRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<String, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotBindingsResultV3>,
     {
         let input = decode_and_upcast_depot_bindings(version, wire, adapters)?;
         let head = handler(
@@ -9579,9 +9390,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum DepotBlobOutcome {
-        V1(Result<i32, ::xidl_rust_axum::Error>),
-        V2(Result<i32, ::xidl_rust_axum::Error>),
-        V3(Result<i32, ::xidl_rust_axum::Error>),
+        V1(DepotBlobResultV1),
+        V2(DepotBlobResultV2),
+        V3(DepotBlobResultV3),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_depot_blob(
@@ -9598,9 +9409,9 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_depot_blob_outcome(
         version: Version,
-        head: Result<i32, ::xidl_rust_axum::Error>,
+        head: DepotBlobResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<DepotBlobOutcome, Result<i32, ::xidl_rust_axum::Error>> {
+    ) -> ProjectionOutcome<DepotBlobOutcome, DepotBlobResultV3> {
         match version {
             Version::V1 => {
                 match downcast_depot_blob_from_v_1_outcome(head, adapters) {
@@ -9649,13 +9460,10 @@ pub mod version_adapters {
         wire: ::serde_json::Value,
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
-    ) -> Result<
-        ProjectionOutcome<DepotBlobOutcome, Result<i32, ::xidl_rust_axum::Error>>,
-        AdaptationError,
-    >
+    ) -> Result<ProjectionOutcome<DepotBlobOutcome, DepotBlobResultV3>, AdaptationError>
     where
         F: FnOnce(DepotBlobRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<i32, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotBlobResultV3>,
     {
         let input = decode_and_upcast_depot_blob(version, wire, adapters)?;
         let head = handler(
@@ -9669,9 +9477,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum DepotChooseOutcome {
-        V1(Result<v1::Choice, ::xidl_rust_axum::Error>),
-        V2(Result<v2::Choice, ::xidl_rust_axum::Error>),
-        V3(Result<v3::Choice, ::xidl_rust_axum::Error>),
+        V1(DepotChooseResultV1),
+        V2(DepotChooseResultV2),
+        V3(DepotChooseResultV3),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_depot_choose(
@@ -9688,12 +9496,9 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_depot_choose_outcome(
         version: Version,
-        head: Result<v3::Choice, ::xidl_rust_axum::Error>,
+        head: DepotChooseResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        DepotChooseOutcome,
-        Result<v3::Choice, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotChooseOutcome, DepotChooseResultV3> {
         match version {
             Version::V1 => {
                 match downcast_depot_choose_from_v_1_outcome(head, adapters) {
@@ -9743,15 +9548,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            DepotChooseOutcome,
-            Result<v3::Choice, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotChooseOutcome, DepotChooseResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotChooseRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::Choice, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotChooseResultV3>,
     {
         let input = decode_and_upcast_depot_choose(version, wire, adapters)?;
         let head = handler(
@@ -9765,9 +9567,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum DepotContactOutcome {
-        V1(Result<v1::Contact, ::xidl_rust_axum::Error>),
-        V2(Result<v2::Contact, ::xidl_rust_axum::Error>),
-        V3(Result<v3::Contact, ::xidl_rust_axum::Error>),
+        V1(DepotContactResultV1),
+        V2(DepotContactResultV2),
+        V3(DepotContactResultV3),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_depot_contact(
@@ -9784,12 +9586,9 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_depot_contact_outcome(
         version: Version,
-        head: Result<v3::Contact, ::xidl_rust_axum::Error>,
+        head: DepotContactResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        DepotContactOutcome,
-        Result<v3::Contact, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotContactOutcome, DepotContactResultV3> {
         match version {
             Version::V1 => {
                 match downcast_depot_contact_from_v_1_outcome(head, adapters) {
@@ -9839,17 +9638,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            DepotContactOutcome,
-            Result<v3::Contact, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotContactOutcome, DepotContactResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotContactRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::Contact, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotContactResultV3>,
     {
         let input = decode_and_upcast_depot_contact(version, wire, adapters)?;
         let head = handler(
@@ -9863,9 +9657,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum DepotExchangeOutcome {
-        V1(Result<v1::DepotExchangeResponse, ::xidl_rust_axum::Error>),
-        V2(Result<v2::DepotExchangeResponse, ::xidl_rust_axum::Error>),
-        V3(Result<v3::DepotExchangeResponse, ::xidl_rust_axum::Error>),
+        V1(DepotExchangeResultV1),
+        V2(DepotExchangeResultV2),
+        V3(DepotExchangeResultV3),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_depot_exchange(
@@ -9882,12 +9676,9 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_depot_exchange_outcome(
         version: Version,
-        head: Result<v3::DepotExchangeResponse, ::xidl_rust_axum::Error>,
+        head: DepotExchangeResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        DepotExchangeOutcome,
-        Result<v3::DepotExchangeResponse, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotExchangeOutcome, DepotExchangeResultV3> {
         match version {
             Version::V1 => {
                 match downcast_depot_exchange_from_v_1_outcome(head, adapters) {
@@ -9937,17 +9728,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            DepotExchangeOutcome,
-            Result<v3::DepotExchangeResponse, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotExchangeOutcome, DepotExchangeResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotExchangeRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::DepotExchangeResponse, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotExchangeResultV3>,
     {
         let input = decode_and_upcast_depot_exchange(version, wire, adapters)?;
         let head = handler(
@@ -9961,9 +9747,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum DepotExtraOutcome {
-        V1(Result<v1::Extra, ::xidl_rust_axum::Error>),
-        V2(Result<v2::Extra, ::xidl_rust_axum::Error>),
-        V3(Result<v3::Extra, ::xidl_rust_axum::Error>),
+        V1(DepotExtraResultV1),
+        V2(DepotExtraResultV2),
+        V3(DepotExtraResultV3),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_depot_extra(
@@ -9980,12 +9766,9 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_depot_extra_outcome(
         version: Version,
-        head: Result<v3::Extra, ::xidl_rust_axum::Error>,
+        head: DepotExtraResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        DepotExtraOutcome,
-        Result<v3::Extra, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotExtraOutcome, DepotExtraResultV3> {
         match version {
             Version::V1 => {
                 match downcast_depot_extra_from_v_1_outcome(head, adapters) {
@@ -10035,12 +9818,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<DepotExtraOutcome, Result<v3::Extra, ::xidl_rust_axum::Error>>,
+        ProjectionOutcome<DepotExtraOutcome, DepotExtraResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotExtraRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::Extra, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotExtraResultV3>,
     {
         let input = decode_and_upcast_depot_extra(version, wire, adapters)?;
         let head = handler(
@@ -10054,9 +9837,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum DepotGetOutcome {
-        V1(Result<v1::Parcel, v1::DepotGetError>),
-        V2(Result<v2::Parcel, v2::DepotGetError>),
-        V3(Result<v3::Parcel, v3::DepotGetError>),
+        V1(DepotGetResultV1),
+        V2(DepotGetResultV2),
+        V3(DepotGetResultV3),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_depot_get(
@@ -10073,9 +9856,9 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_depot_get_outcome(
         version: Version,
-        head: Result<v3::Parcel, v3::DepotGetError>,
+        head: DepotGetResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<DepotGetOutcome, Result<v3::Parcel, v3::DepotGetError>> {
+    ) -> ProjectionOutcome<DepotGetOutcome, DepotGetResultV3> {
         match version {
             Version::V1 => {
                 match downcast_depot_get_from_v_1_outcome(head, adapters) {
@@ -10124,13 +9907,10 @@ pub mod version_adapters {
         wire: ::serde_json::Value,
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
-    ) -> Result<
-        ProjectionOutcome<DepotGetOutcome, Result<v3::Parcel, v3::DepotGetError>>,
-        AdaptationError,
-    >
+    ) -> Result<ProjectionOutcome<DepotGetOutcome, DepotGetResultV3>, AdaptationError>
     where
         F: FnOnce(DepotGetRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::Parcel, v3::DepotGetError>>,
+        Fut: ::std::future::Future<Output = DepotGetResultV3>,
     {
         let input = decode_and_upcast_depot_get(version, wire, adapters)?;
         let head = handler(
@@ -10144,7 +9924,7 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum DepotHeadOnlyOutcome {
-        V3(Result<String, ::xidl_rust_axum::Error>),
+        V3(DepotHeadOnlyResultV3),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_depot_head_only(
@@ -10169,12 +9949,9 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_depot_head_only_outcome(
         version: Version,
-        head: Result<String, ::xidl_rust_axum::Error>,
+        head: DepotHeadOnlyResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        DepotHeadOnlyOutcome,
-        Result<String, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotHeadOnlyOutcome, DepotHeadOnlyResultV3> {
         match version {
             Version::V3 => {
                 match downcast_depot_head_only_from_v_3_outcome(head, adapters) {
@@ -10209,12 +9986,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<DepotHeadOnlyOutcome, Result<String, ::xidl_rust_axum::Error>>,
+        ProjectionOutcome<DepotHeadOnlyOutcome, DepotHeadOnlyResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotHeadOnlyRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<String, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotHeadOnlyResultV3>,
     {
         let input = decode_and_upcast_depot_head_only(version, wire, adapters)?;
         let head = handler(
@@ -10228,9 +10005,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum DepotIndexOutcome {
-        V1(Result<v1::NumericIndex, ::xidl_rust_axum::Error>),
-        V2(Result<v2::NumericIndex, ::xidl_rust_axum::Error>),
-        V3(Result<v3::NumericIndex, ::xidl_rust_axum::Error>),
+        V1(DepotIndexResultV1),
+        V2(DepotIndexResultV2),
+        V3(DepotIndexResultV3),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_depot_index(
@@ -10247,12 +10024,9 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_depot_index_outcome(
         version: Version,
-        head: Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
+        head: DepotIndexResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        DepotIndexOutcome,
-        Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotIndexOutcome, DepotIndexResultV3> {
         match version {
             Version::V1 => {
                 match downcast_depot_index_from_v_1_outcome(head, adapters) {
@@ -10302,17 +10076,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            DepotIndexOutcome,
-            Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotIndexOutcome, DepotIndexResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotIndexRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotIndexResultV3>,
     {
         let input = decode_and_upcast_depot_index(version, wire, adapters)?;
         let head = handler(
@@ -10326,9 +10095,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum DepotInspectOutcome {
-        V1(Result<v1::Node, ::xidl_rust_axum::Error>),
-        V2(Result<v2::Node, ::xidl_rust_axum::Error>),
-        V3(Result<v3::Node, ::xidl_rust_axum::Error>),
+        V1(DepotInspectResultV1),
+        V2(DepotInspectResultV2),
+        V3(DepotInspectResultV3),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_depot_inspect(
@@ -10345,12 +10114,9 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_depot_inspect_outcome(
         version: Version,
-        head: Result<v3::Node, ::xidl_rust_axum::Error>,
+        head: DepotInspectResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        DepotInspectOutcome,
-        Result<v3::Node, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotInspectOutcome, DepotInspectResultV3> {
         match version {
             Version::V1 => {
                 match downcast_depot_inspect_from_v_1_outcome(head, adapters) {
@@ -10400,15 +10166,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            DepotInspectOutcome,
-            Result<v3::Node, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotInspectOutcome, DepotInspectResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotInspectRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::Node, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotInspectResultV3>,
     {
         let input = decode_and_upcast_depot_inspect(version, wire, adapters)?;
         let head = handler(
@@ -10422,9 +10185,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum DepotOptionalChangeOutcome {
-        V1(Result<v1::OptionalChange, ::xidl_rust_axum::Error>),
-        V2(Result<v2::OptionalChange, ::xidl_rust_axum::Error>),
-        V3(Result<v3::OptionalChange, ::xidl_rust_axum::Error>),
+        V1(DepotOptionalChangeResultV1),
+        V2(DepotOptionalChangeResultV2),
+        V3(DepotOptionalChangeResultV3),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_depot_optional_change(
@@ -10447,12 +10210,9 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_depot_optional_change_outcome(
         version: Version,
-        head: Result<v3::OptionalChange, ::xidl_rust_axum::Error>,
+        head: DepotOptionalChangeResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        DepotOptionalChangeOutcome,
-        Result<v3::OptionalChange, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotOptionalChangeOutcome, DepotOptionalChangeResultV3> {
         match version {
             Version::V1 => {
                 match downcast_depot_optional_change_from_v_1_outcome(head, adapters) {
@@ -10508,17 +10268,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            DepotOptionalChangeOutcome,
-            Result<v3::OptionalChange, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotOptionalChangeOutcome, DepotOptionalChangeResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotOptionalChangeRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::OptionalChange, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotOptionalChangeResultV3>,
     {
         let input = decode_and_upcast_depot_optional_change(version, wire, adapters)?;
         let head = handler(
@@ -10532,9 +10287,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum DepotRepresentationOutcome {
-        V1(Result<v1::Representation, ::xidl_rust_axum::Error>),
-        V2(Result<v2::Representation, ::xidl_rust_axum::Error>),
-        V3(Result<v3::Representation, ::xidl_rust_axum::Error>),
+        V1(DepotRepresentationResultV1),
+        V2(DepotRepresentationResultV2),
+        V3(DepotRepresentationResultV3),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_depot_representation(
@@ -10557,12 +10312,9 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_depot_representation_outcome(
         version: Version,
-        head: Result<v3::Representation, ::xidl_rust_axum::Error>,
+        head: DepotRepresentationResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        DepotRepresentationOutcome,
-        Result<v3::Representation, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotRepresentationOutcome, DepotRepresentationResultV3> {
         match version {
             Version::V1 => {
                 match downcast_depot_representation_from_v_1_outcome(head, adapters) {
@@ -10618,17 +10370,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            DepotRepresentationOutcome,
-            Result<v3::Representation, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotRepresentationOutcome, DepotRepresentationResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotRepresentationRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::Representation, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DepotRepresentationResultV3>,
     {
         let input = decode_and_upcast_depot_representation(version, wire, adapters)?;
         let head = handler(
@@ -10642,9 +10389,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum DepotShipOutcome {
-        V1(Result<v1::State, v1::DepotShipError>),
-        V2(Result<v2::State, v2::DepotShipError>),
-        V3(Result<v3::State, v3::DepotShipError>),
+        V1(DepotShipResultV1),
+        V2(DepotShipResultV2),
+        V3(DepotShipResultV3),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_depot_ship(
@@ -10661,9 +10408,9 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_depot_ship_outcome(
         version: Version,
-        head: Result<v3::State, v3::DepotShipError>,
+        head: DepotShipResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<DepotShipOutcome, Result<v3::State, v3::DepotShipError>> {
+    ) -> ProjectionOutcome<DepotShipOutcome, DepotShipResultV3> {
         match version {
             Version::V1 => {
                 match downcast_depot_ship_from_v_1_outcome(head, adapters) {
@@ -10712,13 +10459,10 @@ pub mod version_adapters {
         wire: ::serde_json::Value,
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
-    ) -> Result<
-        ProjectionOutcome<DepotShipOutcome, Result<v3::State, v3::DepotShipError>>,
-        AdaptationError,
-    >
+    ) -> Result<ProjectionOutcome<DepotShipOutcome, DepotShipResultV3>, AdaptationError>
     where
         F: FnOnce(DepotShipRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::State, v3::DepotShipError>>,
+        Fut: ::std::future::Future<Output = DepotShipResultV3>,
     {
         let input = decode_and_upcast_depot_ship(version, wire, adapters)?;
         let head = handler(
@@ -10732,9 +10476,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum DepotStateOutcome {
-        V1(Result<v1::State, ::xidl_rust_axum::Error>),
-        V2(Result<v2::State, ::xidl_rust_axum::Error>),
-        V3(Result<v3::State, ::xidl_rust_axum::Error>),
+        V1(DepotStateResultV1),
+        V2(DepotStateResultV2),
+        V3(DepotStateResultV3),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_depot_state(
@@ -10751,12 +10495,9 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_depot_state_outcome(
         version: Version,
-        head: Result<v3::State, ::xidl_rust_axum::Error>,
+        head: DepotStateResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        DepotStateOutcome,
-        Result<v3::State, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotStateOutcome, DepotStateResultV3> {
         match version {
             Version::V1 => {
                 match downcast_depot_state_from_v_1_outcome(head, adapters) {
@@ -10806,12 +10547,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<DepotStateOutcome, Result<v3::State, ::xidl_rust_axum::Error>>,
+        ProjectionOutcome<DepotStateOutcome, DepotStateResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotStateRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::State, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotStateResultV3>,
     {
         let input = decode_and_upcast_depot_state(version, wire, adapters)?;
         let head = handler(
@@ -10825,9 +10566,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum DepotVerifyOutcome {
-        V1(Result<v1::State, ::xidl_rust_axum::Error>),
-        V2(Result<v2::State, ::xidl_rust_axum::Error>),
-        V3(Result<v3::State, ::xidl_rust_axum::Error>),
+        V1(DepotVerifyResultV1),
+        V2(DepotVerifyResultV2),
+        V3(DepotVerifyResultV3),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_depot_verify(
@@ -10844,12 +10585,9 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_depot_verify_outcome(
         version: Version,
-        head: Result<v3::State, ::xidl_rust_axum::Error>,
+        head: DepotVerifyResultV3,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        DepotVerifyOutcome,
-        Result<v3::State, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DepotVerifyOutcome, DepotVerifyResultV3> {
         match version {
             Version::V1 => {
                 match downcast_depot_verify_from_v_1_outcome(head, adapters) {
@@ -10899,15 +10637,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            DepotVerifyOutcome,
-            Result<v3::State, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DepotVerifyOutcome, DepotVerifyResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(DepotVerifyRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::State, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<Output = DepotVerifyResultV3>,
     {
         let input = decode_and_upcast_depot_verify(version, wire, adapters)?;
         let head = handler(

@@ -172,13 +172,10 @@ pub mod demo {
                             .push(cookie.value().to_string());
                     }
                 }
-                let session_token: Option<String> = match cookie_map
+                let session_token: Option<String> = cookie_map
                     .get("session_token")
                     .and_then(|values| values.first())
-                {
-                    Some(value) => Some(value.to_string()),
-                    None => None,
-                };
+                    .cloned();
                 let mut prefs: Vec<String> = Vec::new();
                 if let Some(values) = cookie_map.get("pref") {
                     for value in values {

@@ -1,0 +1,1959 @@
+---
+source: xidlc/tests/rust_adapters_targets.rs
+expression: "&files[0].1"
+---
+/// Pure version projections. The application owns routing and side effects.
+#[allow(unused_imports, unused_variables, non_snake_case, non_camel_case_types)]
+pub mod version_adapters {
+    use super::{v1, v2};
+    /// Direction of an unsupported projection.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum Direction {
+        Upcast,
+        Downcast,
+    }
+    /// The application renders a refusal using its own frozen error vocabulary.
+    #[derive(Debug, Clone)]
+    pub struct UnsupportedProjection {
+        pub version: String,
+        pub direction: Direction,
+        pub type_path: String,
+        pub reason: String,
+    }
+    /// A projection either succeeds or requires an unsupported business choice.
+    pub type VersionedResult<T> = Result<T, UnsupportedProjection>;
+    /// Explicit acknowledgement that a source value is intentionally discarded.
+    #[derive(Debug, Clone, Copy)]
+    pub struct Ignored {
+        _private: (),
+    }
+    /// The acknowledgement hooks return for an intentionally retired member.
+    pub const IGNORED: Ignored = Ignored { _private: () };
+    /// A version resolved by the application before calling an adapter.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum Version {
+        V1,
+        V2,
+    }
+    impl Version {
+        /// Original contract identifier.
+        pub fn id(self) -> &'static str {
+            match self {
+                Self::V1 => "v1",
+                Self::V2 => "v2",
+            }
+        }
+        /// Original contract version value.
+        pub fn value(self) -> &'static str {
+            match self {
+                Self::V1 => "v1",
+                Self::V2 => "v2",
+            }
+        }
+    }
+    /// Context for application business policy; adapters do not select versions.
+    #[derive(Debug, Clone, Copy)]
+    pub struct VersionContext {
+        pub original_version: Version,
+    }
+    /// A failed response projection retains the original committed Head outcome.
+    pub enum ProjectionOutcome<T, H> {
+        Projected(T),
+        Unsupported { head: H, error: UnsupportedProjection },
+    }
+    /// Invalid served-version wire data is distinct from a business refusal.
+    #[derive(Debug)]
+    pub enum AdaptationError {
+        Validation(String),
+        Unsupported(UnsupportedProjection),
+    }
+    impl From<UnsupportedProjection> for AdaptationError {
+        fn from(value: UnsupportedProjection) -> Self {
+            Self::Unsupported(value)
+        }
+    }
+    /// Hooks remain synchronous, pure, deterministic, and mandatory.
+    pub trait VersionAdapters {
+        fn responses_retired_header_response_downcast_to_v_1(
+            &self,
+            source: &[v2::Item],
+        ) -> VersionedResult<ResponsesRetiredHeaderResponseDowncastToV1Decision>;
+    }
+    /// Explicit business assignments and discarded-value acknowledgements.
+    pub struct ResponsesRetiredHeaderResponseDowncastToV1Decision {
+        pub receipt: String,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct ResponsesAliasRequestV1 {}
+    /// Public model parameters for one served version's operation.
+    pub struct ResponsesBytesRequestV1 {}
+    /// Public model parameters for one served version's operation.
+    pub struct ResponsesItemsRequestV1 {}
+    /// Public model parameters for one served version's operation.
+    pub struct ResponsesLabelsRequestV1 {}
+    /// Public model parameters for one served version's operation.
+    pub struct ResponsesMatrixRequestV1 {}
+    /// Public model parameters for one served version's operation.
+    pub struct ResponsesOptionalRequestV1 {}
+    /// Public model parameters for one served version's operation.
+    pub struct ResponsesRetiredHeaderRequestV1 {}
+    /// Public model parameters for one served version's operation.
+    pub struct ResponsesAliasRequestV2 {}
+    /// Public model parameters for one served version's operation.
+    pub struct ResponsesBytesRequestV2 {}
+    /// Public model parameters for one served version's operation.
+    pub struct ResponsesItemsRequestV2 {}
+    /// Public model parameters for one served version's operation.
+    pub struct ResponsesLabelsRequestV2 {}
+    /// Public model parameters for one served version's operation.
+    pub struct ResponsesMatrixRequestV2 {}
+    /// Public model parameters for one served version's operation.
+    pub struct ResponsesOptionalRequestV2 {}
+    /// Public model parameters for one served version's operation.
+    pub struct ResponsesRetiredHeaderRequestV2 {}
+    fn map_sequence<S, T>(
+        source: &[S],
+        convert: impl Fn(&S) -> VersionedResult<T>,
+    ) -> VersionedResult<Vec<T>> {
+        source.iter().map(convert).collect()
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn item_downcast_to_v_1(
+        source: &v2::Item,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v1::Item> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "Item".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        Ok(v1::Item { id: projected_0 })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn items_downcast_to_v_1(
+        source: &v2::Items,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v1::Items> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "Items".into(),
+            reason: reason.into(),
+        };
+        map_sequence(source, |item| item_downcast_to_v_1(item, adapters))
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn responses_alias_request_upcast_from_v_1(
+        source: &ResponsesAliasRequestV1,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<ResponsesAliasRequestV2> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v1".into(),
+            direction: Direction::Upcast,
+            type_path: "ResponsesAliasRequest".into(),
+            reason: reason.into(),
+        };
+        Ok(ResponsesAliasRequestV2 {})
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn responses_alias_response_downcast_to_v_1(
+        source: &v2::Items,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v1::Items> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "ResponsesAliasResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = items_downcast_to_v_1(source, adapters)?;
+        Ok(projected_0)
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn responses_bytes_request_upcast_from_v_1(
+        source: &ResponsesBytesRequestV1,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<ResponsesBytesRequestV2> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v1".into(),
+            direction: Direction::Upcast,
+            type_path: "ResponsesBytesRequest".into(),
+            reason: reason.into(),
+        };
+        Ok(ResponsesBytesRequestV2 {})
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn responses_bytes_response_downcast_to_v_1(
+        source: &[u8],
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<Vec<u8>> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "ResponsesBytesResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = map_sequence(
+            source,
+            |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
+        )?;
+        Ok(projected_0)
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn responses_items_request_upcast_from_v_1(
+        source: &ResponsesItemsRequestV1,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<ResponsesItemsRequestV2> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v1".into(),
+            direction: Direction::Upcast,
+            type_path: "ResponsesItemsRequest".into(),
+            reason: reason.into(),
+        };
+        Ok(ResponsesItemsRequestV2 {})
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn responses_items_response_downcast_to_v_1(
+        source: &[v2::Item],
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<Vec<v1::Item>> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "ResponsesItemsResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = map_sequence(
+            source,
+            |item| item_downcast_to_v_1(item, adapters),
+        )?;
+        Ok(projected_0)
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn responses_labels_request_upcast_from_v_1(
+        source: &ResponsesLabelsRequestV1,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<ResponsesLabelsRequestV2> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v1".into(),
+            direction: Direction::Upcast,
+            type_path: "ResponsesLabelsRequest".into(),
+            reason: reason.into(),
+        };
+        Ok(ResponsesLabelsRequestV2 {})
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn responses_labels_response_downcast_to_v_1(
+        source: &[String],
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<Vec<String>> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "ResponsesLabelsResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = map_sequence(
+            source,
+            |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
+        )?;
+        Ok(projected_0)
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn responses_matrix_request_upcast_from_v_1(
+        source: &ResponsesMatrixRequestV1,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<ResponsesMatrixRequestV2> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v1".into(),
+            direction: Direction::Upcast,
+            type_path: "ResponsesMatrixRequest".into(),
+            reason: reason.into(),
+        };
+        Ok(ResponsesMatrixRequestV2 {})
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn responses_matrix_response_downcast_to_v_1(
+        source: &[Vec<i32>],
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<Vec<Vec<i32>>> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "ResponsesMatrixResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = map_sequence(
+            source,
+            |item| map_sequence(
+                item,
+                |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
+            ),
+        )?;
+        Ok(projected_0)
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn responses_optional_request_upcast_from_v_1(
+        source: &ResponsesOptionalRequestV1,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<ResponsesOptionalRequestV2> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v1".into(),
+            direction: Direction::Upcast,
+            type_path: "ResponsesOptionalRequest".into(),
+            reason: reason.into(),
+        };
+        Ok(ResponsesOptionalRequestV2 {})
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn responses_optional_response_downcast_to_v_1(
+        source: &[v2::Item],
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<Vec<v1::Item>> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "ResponsesOptionalResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = map_sequence(
+            source,
+            |item| item_downcast_to_v_1(item, adapters),
+        )?;
+        Ok(projected_0)
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn responses_retired_header_request_upcast_from_v_1(
+        source: &ResponsesRetiredHeaderRequestV1,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<ResponsesRetiredHeaderRequestV2> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v1".into(),
+            direction: Direction::Upcast,
+            type_path: "ResponsesRetiredHeaderRequest".into(),
+            reason: reason.into(),
+        };
+        Ok(ResponsesRetiredHeaderRequestV2 {})
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn responses_retired_header_response_downcast_to_v_1(
+        source: &[v2::Item],
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v1::ResponsesRetiredHeaderResponse> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "ResponsesRetiredHeaderResponse".into(),
+            reason: reason.into(),
+        };
+        let decision = adapters
+            .responses_retired_header_response_downcast_to_v_1(source)?;
+        let projected_0 = map_sequence(
+            source,
+            |item| item_downcast_to_v_1(item, adapters),
+        )?;
+        Ok(v1::ResponsesRetiredHeaderResponse {
+            r#return: projected_0,
+            receipt: decision.receipt,
+        })
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_responses_alias_error_to_v_1(
+        source: &::xidl_rust_axum::Error,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<::xidl_rust_axum::Error> {
+        Ok(source.clone())
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_responses_bytes_error_to_v_1(
+        source: &::xidl_rust_axum::Error,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<::xidl_rust_axum::Error> {
+        Ok(source.clone())
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_responses_items_error_to_v_1(
+        source: &::xidl_rust_axum::Error,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<::xidl_rust_axum::Error> {
+        Ok(source.clone())
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_responses_labels_error_to_v_1(
+        source: &::xidl_rust_axum::Error,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<::xidl_rust_axum::Error> {
+        Ok(source.clone())
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_responses_matrix_error_to_v_1(
+        source: &::xidl_rust_axum::Error,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<::xidl_rust_axum::Error> {
+        Ok(source.clone())
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_responses_optional_error_to_v_1(
+        source: &::xidl_rust_axum::Error,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<::xidl_rust_axum::Error> {
+        Ok(source.clone())
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_responses_retired_header_error_to_v_1(
+        source: &::xidl_rust_axum::Error,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<::xidl_rust_axum::Error> {
+        Ok(source.clone())
+    }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type ResponsesAliasResultV1 = Result<v1::Items, ::xidl_rust_axum::Error>;
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_responses_alias_from_v_1(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ResponsesAliasRequestV2, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &[];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let source = ResponsesAliasRequestV1 {};
+        let source = responses_alias_request_upcast_from_v_1(&source, adapters)?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_responses_alias_from_v_1_outcome(
+        head: ResponsesAliasResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<ResponsesAliasResultV1, ResponsesAliasResultV2> {
+        match &head {
+            Ok(source) => {
+                let source = match responses_alias_response_downcast_to_v_1(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_responses_alias_error_to_v_1(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_responses_alias_from_v_1<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<ResponsesAliasResultV1, ResponsesAliasResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ResponsesAliasRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = ResponsesAliasResultV2>,
+    {
+        let input = decode_and_upcast_responses_alias_from_v_1(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V1,
+                },
+            )
+            .await;
+        Ok(downcast_responses_alias_from_v_1_outcome(head, adapters))
+    }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type ResponsesBytesResultV1 = Result<Vec<u8>, ::xidl_rust_axum::Error>;
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_responses_bytes_from_v_1(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ResponsesBytesRequestV2, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &[];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let source = ResponsesBytesRequestV1 {};
+        let source = responses_bytes_request_upcast_from_v_1(&source, adapters)?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_responses_bytes_from_v_1_outcome(
+        head: ResponsesBytesResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<ResponsesBytesResultV1, ResponsesBytesResultV2> {
+        match &head {
+            Ok(source) => {
+                let source = match responses_bytes_response_downcast_to_v_1(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_responses_bytes_error_to_v_1(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_responses_bytes_from_v_1<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<ResponsesBytesResultV1, ResponsesBytesResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ResponsesBytesRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = ResponsesBytesResultV2>,
+    {
+        let input = decode_and_upcast_responses_bytes_from_v_1(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V1,
+                },
+            )
+            .await;
+        Ok(downcast_responses_bytes_from_v_1_outcome(head, adapters))
+    }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type ResponsesItemsResultV1 = Result<Vec<v1::Item>, ::xidl_rust_axum::Error>;
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_responses_items_from_v_1(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ResponsesItemsRequestV2, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &[];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let source = ResponsesItemsRequestV1 {};
+        let source = responses_items_request_upcast_from_v_1(&source, adapters)?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_responses_items_from_v_1_outcome(
+        head: ResponsesItemsResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<ResponsesItemsResultV1, ResponsesItemsResultV2> {
+        match &head {
+            Ok(source) => {
+                let source = match responses_items_response_downcast_to_v_1(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_responses_items_error_to_v_1(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_responses_items_from_v_1<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<ResponsesItemsResultV1, ResponsesItemsResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ResponsesItemsRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = ResponsesItemsResultV2>,
+    {
+        let input = decode_and_upcast_responses_items_from_v_1(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V1,
+                },
+            )
+            .await;
+        Ok(downcast_responses_items_from_v_1_outcome(head, adapters))
+    }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type ResponsesLabelsResultV1 = Result<Vec<String>, ::xidl_rust_axum::Error>;
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_responses_labels_from_v_1(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ResponsesLabelsRequestV2, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &[];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let source = ResponsesLabelsRequestV1 {};
+        let source = responses_labels_request_upcast_from_v_1(&source, adapters)?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_responses_labels_from_v_1_outcome(
+        head: ResponsesLabelsResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<ResponsesLabelsResultV1, ResponsesLabelsResultV2> {
+        match &head {
+            Ok(source) => {
+                let source = match responses_labels_response_downcast_to_v_1(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_responses_labels_error_to_v_1(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_responses_labels_from_v_1<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<ResponsesLabelsResultV1, ResponsesLabelsResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ResponsesLabelsRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = ResponsesLabelsResultV2>,
+    {
+        let input = decode_and_upcast_responses_labels_from_v_1(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V1,
+                },
+            )
+            .await;
+        Ok(downcast_responses_labels_from_v_1_outcome(head, adapters))
+    }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type ResponsesMatrixResultV1 = Result<Vec<Vec<i32>>, ::xidl_rust_axum::Error>;
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_responses_matrix_from_v_1(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ResponsesMatrixRequestV2, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &[];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let source = ResponsesMatrixRequestV1 {};
+        let source = responses_matrix_request_upcast_from_v_1(&source, adapters)?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_responses_matrix_from_v_1_outcome(
+        head: ResponsesMatrixResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<ResponsesMatrixResultV1, ResponsesMatrixResultV2> {
+        match &head {
+            Ok(source) => {
+                let source = match responses_matrix_response_downcast_to_v_1(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_responses_matrix_error_to_v_1(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_responses_matrix_from_v_1<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<ResponsesMatrixResultV1, ResponsesMatrixResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ResponsesMatrixRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = ResponsesMatrixResultV2>,
+    {
+        let input = decode_and_upcast_responses_matrix_from_v_1(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V1,
+                },
+            )
+            .await;
+        Ok(downcast_responses_matrix_from_v_1_outcome(head, adapters))
+    }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type ResponsesOptionalResultV1 = Result<Vec<v1::Item>, ::xidl_rust_axum::Error>;
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_responses_optional_from_v_1(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ResponsesOptionalRequestV2, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &[];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let source = ResponsesOptionalRequestV1 {};
+        let source = responses_optional_request_upcast_from_v_1(&source, adapters)?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_responses_optional_from_v_1_outcome(
+        head: ResponsesOptionalResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<ResponsesOptionalResultV1, ResponsesOptionalResultV2> {
+        match &head {
+            Ok(source) => {
+                let source = match responses_optional_response_downcast_to_v_1(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_responses_optional_error_to_v_1(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_responses_optional_from_v_1<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<ResponsesOptionalResultV1, ResponsesOptionalResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ResponsesOptionalRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = ResponsesOptionalResultV2>,
+    {
+        let input = decode_and_upcast_responses_optional_from_v_1(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V1,
+                },
+            )
+            .await;
+        Ok(downcast_responses_optional_from_v_1_outcome(head, adapters))
+    }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type ResponsesRetiredHeaderResultV1 = Result<
+        v1::ResponsesRetiredHeaderResponse,
+        ::xidl_rust_axum::Error,
+    >;
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_responses_retired_header_from_v_1(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ResponsesRetiredHeaderRequestV2, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &[];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let source = ResponsesRetiredHeaderRequestV1 {};
+        let source = responses_retired_header_request_upcast_from_v_1(
+            &source,
+            adapters,
+        )?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_responses_retired_header_from_v_1_outcome(
+        head: ResponsesRetiredHeaderResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        ResponsesRetiredHeaderResultV1,
+        ResponsesRetiredHeaderResultV2,
+    > {
+        match &head {
+            Ok(source) => {
+                let source = match responses_retired_header_response_downcast_to_v_1(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_responses_retired_header_error_to_v_1(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_responses_retired_header_from_v_1<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            ResponsesRetiredHeaderResultV1,
+            ResponsesRetiredHeaderResultV2,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ResponsesRetiredHeaderRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = ResponsesRetiredHeaderResultV2>,
+    {
+        let input = decode_and_upcast_responses_retired_header_from_v_1(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V1,
+                },
+            )
+            .await;
+        Ok(downcast_responses_retired_header_from_v_1_outcome(head, adapters))
+    }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type ResponsesAliasResultV2 = Result<v2::Items, ::xidl_rust_axum::Error>;
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_responses_alias_from_v_2(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ResponsesAliasRequestV2, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &[];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let source = ResponsesAliasRequestV2 {};
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_responses_alias_from_v_2_outcome(
+        head: ResponsesAliasResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<ResponsesAliasResultV2, ResponsesAliasResultV2> {
+        ProjectionOutcome::Projected(head)
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_responses_alias_from_v_2<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<ResponsesAliasResultV2, ResponsesAliasResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ResponsesAliasRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = ResponsesAliasResultV2>,
+    {
+        let input = decode_and_upcast_responses_alias_from_v_2(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V2,
+                },
+            )
+            .await;
+        Ok(downcast_responses_alias_from_v_2_outcome(head, adapters))
+    }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type ResponsesBytesResultV2 = Result<Vec<u8>, ::xidl_rust_axum::Error>;
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_responses_bytes_from_v_2(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ResponsesBytesRequestV2, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &[];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let source = ResponsesBytesRequestV2 {};
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_responses_bytes_from_v_2_outcome(
+        head: ResponsesBytesResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<ResponsesBytesResultV2, ResponsesBytesResultV2> {
+        ProjectionOutcome::Projected(head)
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_responses_bytes_from_v_2<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<ResponsesBytesResultV2, ResponsesBytesResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ResponsesBytesRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = ResponsesBytesResultV2>,
+    {
+        let input = decode_and_upcast_responses_bytes_from_v_2(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V2,
+                },
+            )
+            .await;
+        Ok(downcast_responses_bytes_from_v_2_outcome(head, adapters))
+    }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type ResponsesItemsResultV2 = Result<Vec<v2::Item>, ::xidl_rust_axum::Error>;
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_responses_items_from_v_2(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ResponsesItemsRequestV2, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &[];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let source = ResponsesItemsRequestV2 {};
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_responses_items_from_v_2_outcome(
+        head: ResponsesItemsResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<ResponsesItemsResultV2, ResponsesItemsResultV2> {
+        ProjectionOutcome::Projected(head)
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_responses_items_from_v_2<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<ResponsesItemsResultV2, ResponsesItemsResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ResponsesItemsRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = ResponsesItemsResultV2>,
+    {
+        let input = decode_and_upcast_responses_items_from_v_2(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V2,
+                },
+            )
+            .await;
+        Ok(downcast_responses_items_from_v_2_outcome(head, adapters))
+    }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type ResponsesLabelsResultV2 = Result<Vec<String>, ::xidl_rust_axum::Error>;
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_responses_labels_from_v_2(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ResponsesLabelsRequestV2, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &[];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let source = ResponsesLabelsRequestV2 {};
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_responses_labels_from_v_2_outcome(
+        head: ResponsesLabelsResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<ResponsesLabelsResultV2, ResponsesLabelsResultV2> {
+        ProjectionOutcome::Projected(head)
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_responses_labels_from_v_2<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<ResponsesLabelsResultV2, ResponsesLabelsResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ResponsesLabelsRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = ResponsesLabelsResultV2>,
+    {
+        let input = decode_and_upcast_responses_labels_from_v_2(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V2,
+                },
+            )
+            .await;
+        Ok(downcast_responses_labels_from_v_2_outcome(head, adapters))
+    }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type ResponsesMatrixResultV2 = Result<Vec<Vec<i32>>, ::xidl_rust_axum::Error>;
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_responses_matrix_from_v_2(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ResponsesMatrixRequestV2, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &[];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let source = ResponsesMatrixRequestV2 {};
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_responses_matrix_from_v_2_outcome(
+        head: ResponsesMatrixResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<ResponsesMatrixResultV2, ResponsesMatrixResultV2> {
+        ProjectionOutcome::Projected(head)
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_responses_matrix_from_v_2<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<ResponsesMatrixResultV2, ResponsesMatrixResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ResponsesMatrixRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = ResponsesMatrixResultV2>,
+    {
+        let input = decode_and_upcast_responses_matrix_from_v_2(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V2,
+                },
+            )
+            .await;
+        Ok(downcast_responses_matrix_from_v_2_outcome(head, adapters))
+    }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type ResponsesOptionalResultV2 = Result<Vec<v2::Item>, ::xidl_rust_axum::Error>;
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_responses_optional_from_v_2(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ResponsesOptionalRequestV2, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &[];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let source = ResponsesOptionalRequestV2 {};
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_responses_optional_from_v_2_outcome(
+        head: ResponsesOptionalResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<ResponsesOptionalResultV2, ResponsesOptionalResultV2> {
+        ProjectionOutcome::Projected(head)
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_responses_optional_from_v_2<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<ResponsesOptionalResultV2, ResponsesOptionalResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ResponsesOptionalRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = ResponsesOptionalResultV2>,
+    {
+        let input = decode_and_upcast_responses_optional_from_v_2(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V2,
+                },
+            )
+            .await;
+        Ok(downcast_responses_optional_from_v_2_outcome(head, adapters))
+    }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type ResponsesRetiredHeaderResultV2 = Result<
+        Vec<v2::Item>,
+        ::xidl_rust_axum::Error,
+    >;
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_responses_retired_header_from_v_2(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ResponsesRetiredHeaderRequestV2, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &[];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let source = ResponsesRetiredHeaderRequestV2 {};
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_responses_retired_header_from_v_2_outcome(
+        head: ResponsesRetiredHeaderResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        ResponsesRetiredHeaderResultV2,
+        ResponsesRetiredHeaderResultV2,
+    > {
+        ProjectionOutcome::Projected(head)
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_responses_retired_header_from_v_2<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            ResponsesRetiredHeaderResultV2,
+            ResponsesRetiredHeaderResultV2,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ResponsesRetiredHeaderRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = ResponsesRetiredHeaderResultV2>,
+    {
+        let input = decode_and_upcast_responses_retired_header_from_v_2(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V2,
+                },
+            )
+            .await;
+        Ok(downcast_responses_retired_header_from_v_2_outcome(head, adapters))
+    }
+    /// The caller-selected version's projected model type.
+    pub enum ItemProjection {
+        V1(v1::Item),
+        V2(v2::Item),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_item(
+        version: Version,
+        head: v2::Item,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<ItemProjection> {
+        match version {
+            Version::V1 => {
+                let source = item_downcast_to_v_1(&head, adapters)?;
+                Ok(ItemProjection::V1(source))
+            }
+            Version::V2 => {
+                let source = head;
+                Ok(ItemProjection::V2(source))
+            }
+        }
+    }
+    /// The caller-selected version's projected model type.
+    pub enum ItemsProjection {
+        V1(v1::Items),
+        V2(v2::Items),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_items(
+        version: Version,
+        head: v2::Items,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<ItemsProjection> {
+        match version {
+            Version::V1 => {
+                let source = items_downcast_to_v_1(&head, adapters)?;
+                Ok(ItemsProjection::V1(source))
+            }
+            Version::V2 => {
+                let source = head;
+                Ok(ItemsProjection::V2(source))
+            }
+        }
+    }
+    /// Outcome in the caller's explicitly selected contract version.
+    pub enum ResponsesAliasOutcome {
+        V1(ResponsesAliasResultV1),
+        V2(ResponsesAliasResultV2),
+    }
+    /// Decode a request using an application-resolved version before any hook.
+    pub fn decode_and_upcast_responses_alias(
+        version: Version,
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ResponsesAliasRequestV2, AdaptationError> {
+        match version {
+            Version::V1 => decode_and_upcast_responses_alias_from_v_1(wire, adapters),
+            Version::V2 => decode_and_upcast_responses_alias_from_v_2(wire, adapters),
+        }
+    }
+    /// Retain the original owned Head outcome when any projection refuses.
+    pub fn downcast_responses_alias_outcome(
+        version: Version,
+        head: ResponsesAliasResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<ResponsesAliasOutcome, ResponsesAliasResultV2> {
+        match version {
+            Version::V1 => {
+                match downcast_responses_alias_from_v_1_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(ResponsesAliasOutcome::V1(value))
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V2 => {
+                match downcast_responses_alias_from_v_2_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(ResponsesAliasOutcome::V2(value))
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /// Execute a Head handler once; the application supplies version resolution.
+    pub async fn dispatch_responses_alias<F, Fut>(
+        version: Version,
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<ResponsesAliasOutcome, ResponsesAliasResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ResponsesAliasRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = ResponsesAliasResultV2>,
+    {
+        let input = decode_and_upcast_responses_alias(version, wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: version,
+                },
+            )
+            .await;
+        Ok(downcast_responses_alias_outcome(version, head, adapters))
+    }
+    /// Outcome in the caller's explicitly selected contract version.
+    pub enum ResponsesBytesOutcome {
+        V1(ResponsesBytesResultV1),
+        V2(ResponsesBytesResultV2),
+    }
+    /// Decode a request using an application-resolved version before any hook.
+    pub fn decode_and_upcast_responses_bytes(
+        version: Version,
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ResponsesBytesRequestV2, AdaptationError> {
+        match version {
+            Version::V1 => decode_and_upcast_responses_bytes_from_v_1(wire, adapters),
+            Version::V2 => decode_and_upcast_responses_bytes_from_v_2(wire, adapters),
+        }
+    }
+    /// Retain the original owned Head outcome when any projection refuses.
+    pub fn downcast_responses_bytes_outcome(
+        version: Version,
+        head: ResponsesBytesResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<ResponsesBytesOutcome, ResponsesBytesResultV2> {
+        match version {
+            Version::V1 => {
+                match downcast_responses_bytes_from_v_1_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(ResponsesBytesOutcome::V1(value))
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V2 => {
+                match downcast_responses_bytes_from_v_2_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(ResponsesBytesOutcome::V2(value))
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /// Execute a Head handler once; the application supplies version resolution.
+    pub async fn dispatch_responses_bytes<F, Fut>(
+        version: Version,
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<ResponsesBytesOutcome, ResponsesBytesResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ResponsesBytesRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = ResponsesBytesResultV2>,
+    {
+        let input = decode_and_upcast_responses_bytes(version, wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: version,
+                },
+            )
+            .await;
+        Ok(downcast_responses_bytes_outcome(version, head, adapters))
+    }
+    /// Outcome in the caller's explicitly selected contract version.
+    pub enum ResponsesItemsOutcome {
+        V1(ResponsesItemsResultV1),
+        V2(ResponsesItemsResultV2),
+    }
+    /// Decode a request using an application-resolved version before any hook.
+    pub fn decode_and_upcast_responses_items(
+        version: Version,
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ResponsesItemsRequestV2, AdaptationError> {
+        match version {
+            Version::V1 => decode_and_upcast_responses_items_from_v_1(wire, adapters),
+            Version::V2 => decode_and_upcast_responses_items_from_v_2(wire, adapters),
+        }
+    }
+    /// Retain the original owned Head outcome when any projection refuses.
+    pub fn downcast_responses_items_outcome(
+        version: Version,
+        head: ResponsesItemsResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<ResponsesItemsOutcome, ResponsesItemsResultV2> {
+        match version {
+            Version::V1 => {
+                match downcast_responses_items_from_v_1_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(ResponsesItemsOutcome::V1(value))
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V2 => {
+                match downcast_responses_items_from_v_2_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(ResponsesItemsOutcome::V2(value))
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /// Execute a Head handler once; the application supplies version resolution.
+    pub async fn dispatch_responses_items<F, Fut>(
+        version: Version,
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<ResponsesItemsOutcome, ResponsesItemsResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ResponsesItemsRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = ResponsesItemsResultV2>,
+    {
+        let input = decode_and_upcast_responses_items(version, wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: version,
+                },
+            )
+            .await;
+        Ok(downcast_responses_items_outcome(version, head, adapters))
+    }
+    /// Outcome in the caller's explicitly selected contract version.
+    pub enum ResponsesLabelsOutcome {
+        V1(ResponsesLabelsResultV1),
+        V2(ResponsesLabelsResultV2),
+    }
+    /// Decode a request using an application-resolved version before any hook.
+    pub fn decode_and_upcast_responses_labels(
+        version: Version,
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ResponsesLabelsRequestV2, AdaptationError> {
+        match version {
+            Version::V1 => decode_and_upcast_responses_labels_from_v_1(wire, adapters),
+            Version::V2 => decode_and_upcast_responses_labels_from_v_2(wire, adapters),
+        }
+    }
+    /// Retain the original owned Head outcome when any projection refuses.
+    pub fn downcast_responses_labels_outcome(
+        version: Version,
+        head: ResponsesLabelsResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<ResponsesLabelsOutcome, ResponsesLabelsResultV2> {
+        match version {
+            Version::V1 => {
+                match downcast_responses_labels_from_v_1_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(ResponsesLabelsOutcome::V1(value))
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V2 => {
+                match downcast_responses_labels_from_v_2_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(ResponsesLabelsOutcome::V2(value))
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /// Execute a Head handler once; the application supplies version resolution.
+    pub async fn dispatch_responses_labels<F, Fut>(
+        version: Version,
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<ResponsesLabelsOutcome, ResponsesLabelsResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ResponsesLabelsRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = ResponsesLabelsResultV2>,
+    {
+        let input = decode_and_upcast_responses_labels(version, wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: version,
+                },
+            )
+            .await;
+        Ok(downcast_responses_labels_outcome(version, head, adapters))
+    }
+    /// Outcome in the caller's explicitly selected contract version.
+    pub enum ResponsesMatrixOutcome {
+        V1(ResponsesMatrixResultV1),
+        V2(ResponsesMatrixResultV2),
+    }
+    /// Decode a request using an application-resolved version before any hook.
+    pub fn decode_and_upcast_responses_matrix(
+        version: Version,
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ResponsesMatrixRequestV2, AdaptationError> {
+        match version {
+            Version::V1 => decode_and_upcast_responses_matrix_from_v_1(wire, adapters),
+            Version::V2 => decode_and_upcast_responses_matrix_from_v_2(wire, adapters),
+        }
+    }
+    /// Retain the original owned Head outcome when any projection refuses.
+    pub fn downcast_responses_matrix_outcome(
+        version: Version,
+        head: ResponsesMatrixResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<ResponsesMatrixOutcome, ResponsesMatrixResultV2> {
+        match version {
+            Version::V1 => {
+                match downcast_responses_matrix_from_v_1_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(ResponsesMatrixOutcome::V1(value))
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V2 => {
+                match downcast_responses_matrix_from_v_2_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(ResponsesMatrixOutcome::V2(value))
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /// Execute a Head handler once; the application supplies version resolution.
+    pub async fn dispatch_responses_matrix<F, Fut>(
+        version: Version,
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<ResponsesMatrixOutcome, ResponsesMatrixResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ResponsesMatrixRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = ResponsesMatrixResultV2>,
+    {
+        let input = decode_and_upcast_responses_matrix(version, wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: version,
+                },
+            )
+            .await;
+        Ok(downcast_responses_matrix_outcome(version, head, adapters))
+    }
+    /// Outcome in the caller's explicitly selected contract version.
+    pub enum ResponsesOptionalOutcome {
+        V1(ResponsesOptionalResultV1),
+        V2(ResponsesOptionalResultV2),
+    }
+    /// Decode a request using an application-resolved version before any hook.
+    pub fn decode_and_upcast_responses_optional(
+        version: Version,
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ResponsesOptionalRequestV2, AdaptationError> {
+        match version {
+            Version::V1 => decode_and_upcast_responses_optional_from_v_1(wire, adapters),
+            Version::V2 => decode_and_upcast_responses_optional_from_v_2(wire, adapters),
+        }
+    }
+    /// Retain the original owned Head outcome when any projection refuses.
+    pub fn downcast_responses_optional_outcome(
+        version: Version,
+        head: ResponsesOptionalResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<ResponsesOptionalOutcome, ResponsesOptionalResultV2> {
+        match version {
+            Version::V1 => {
+                match downcast_responses_optional_from_v_1_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(ResponsesOptionalOutcome::V1(value))
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V2 => {
+                match downcast_responses_optional_from_v_2_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(ResponsesOptionalOutcome::V2(value))
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /// Execute a Head handler once; the application supplies version resolution.
+    pub async fn dispatch_responses_optional<F, Fut>(
+        version: Version,
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<ResponsesOptionalOutcome, ResponsesOptionalResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ResponsesOptionalRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = ResponsesOptionalResultV2>,
+    {
+        let input = decode_and_upcast_responses_optional(version, wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: version,
+                },
+            )
+            .await;
+        Ok(downcast_responses_optional_outcome(version, head, adapters))
+    }
+    /// Outcome in the caller's explicitly selected contract version.
+    pub enum ResponsesRetiredHeaderOutcome {
+        V1(ResponsesRetiredHeaderResultV1),
+        V2(ResponsesRetiredHeaderResultV2),
+    }
+    /// Decode a request using an application-resolved version before any hook.
+    pub fn decode_and_upcast_responses_retired_header(
+        version: Version,
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<ResponsesRetiredHeaderRequestV2, AdaptationError> {
+        match version {
+            Version::V1 => {
+                decode_and_upcast_responses_retired_header_from_v_1(wire, adapters)
+            }
+            Version::V2 => {
+                decode_and_upcast_responses_retired_header_from_v_2(wire, adapters)
+            }
+        }
+    }
+    /// Retain the original owned Head outcome when any projection refuses.
+    pub fn downcast_responses_retired_header_outcome(
+        version: Version,
+        head: ResponsesRetiredHeaderResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        ResponsesRetiredHeaderOutcome,
+        ResponsesRetiredHeaderResultV2,
+    > {
+        match version {
+            Version::V1 => {
+                match downcast_responses_retired_header_from_v_1_outcome(
+                    head,
+                    adapters,
+                ) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            ResponsesRetiredHeaderOutcome::V1(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V2 => {
+                match downcast_responses_retired_header_from_v_2_outcome(
+                    head,
+                    adapters,
+                ) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            ResponsesRetiredHeaderOutcome::V2(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /// Execute a Head handler once; the application supplies version resolution.
+    pub async fn dispatch_responses_retired_header<F, Fut>(
+        version: Version,
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<ResponsesRetiredHeaderOutcome, ResponsesRetiredHeaderResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(ResponsesRetiredHeaderRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = ResponsesRetiredHeaderResultV2>,
+    {
+        let input = decode_and_upcast_responses_retired_header(version, wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: version,
+                },
+            )
+            .await;
+        Ok(downcast_responses_retired_header_outcome(version, head, adapters))
+    }
+}

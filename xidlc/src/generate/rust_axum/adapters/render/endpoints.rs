@@ -75,9 +75,9 @@ impl AdapterRenderer<'_> {
                     request: self.request_type(operation, names.version),
                     head_request: self.request_type(head_operation, head_names.version),
                     response: self.response_type(operation, &names)?.0,
-                    head_response: self.response_type(head_operation, &head_names)?.0,
                     error: self.error_type(operation, &names),
-                    head_error: self.error_type(head_operation, &head_names),
+                    result: self.result_type(operation, names.version),
+                    head_result: self.result_type(head_operation, head_names.version),
                     upcast,
                     downcast,
                     downcast_error,
@@ -121,16 +121,14 @@ impl AdapterRenderer<'_> {
                         prefix.to_case(Case::Snake),
                         version.version.id.to_case(Case::Snake)
                     ),
-                    response: self.response_type(served, &names)?.0,
-                    error: self.error_type(served, &names),
+                    result: self.result_type(served, names.version),
                 });
             }
             file.dispatches.push(Dispatch {
                 prefix: prefix.to_case(Case::Snake),
                 outcome: format!("{prefix}Outcome"),
                 request: self.request_type(operation, names.version),
-                response: self.response_type(operation, &names)?.0,
-                error: self.error_type(operation, &names),
+                head_result: self.result_type(operation, names.version),
                 exhaustive: variants.len() == self.plan.versions.len(),
                 variants,
             });

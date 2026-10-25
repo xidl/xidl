@@ -33,6 +33,14 @@ fn single_version_rust_target_keeps_typed_decoding_and_owned_identity_outcomes()
 }
 
 #[test]
+fn borrowed_sequence_responses_preserve_owned_results() {
+    let files = render(include_str!(
+        "../../bdd/features/data/borrowed_responses.idl"
+    ));
+    insta::assert_snapshot!("borrowed_sequence_responses", &files[0].1);
+}
+
+#[test]
 fn inherited_models_require_explicit_adapter_decisions() {
     let files = render(
         r#"@version enum V { v1, v2 };

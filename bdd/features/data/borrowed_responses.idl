@@ -1,0 +1,15 @@
+@version enum Version { v1, v2 };
+
+struct Item { string id; };
+typedef sequence<Item> Items;
+
+interface Responses {
+    @get(path="/items") sequence<Item> items();
+    @get(path="/labels") sequence<string> labels();
+    @get(path="/matrix") sequence<sequence<long>> matrix();
+    @get(path="/alias") Items alias();
+    @get(path="/bytes") sequence<octet> bytes();
+    @get(path="/optional") @optional sequence<Item> optional();
+    @get(path="/retired-header")
+    sequence<Item> retired_header(@removed(Version::v2) @header out string receipt);
+};

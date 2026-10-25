@@ -109,6 +109,7 @@ impl<'a> AdapterRenderer<'a> {
             .chain(&file.requests)
             .map(|item| &item.name)
             .chain(file.conversions.iter().map(|item| &item.name))
+            .chain(file.endpoints.iter().map(|item| &item.result))
             .chain(file.wire.iter().map(|item| &item.name))
             .chain(
                 file.types
