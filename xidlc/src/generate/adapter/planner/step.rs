@@ -123,13 +123,12 @@ impl StepPlanner<'_> {
             .get(key)
             .ok_or_else(|| self.error(key, "missing target type"))?;
         let facts = self.facts.types.get(key);
-        let empty = BTreeMap::new();
-        let changes = facts.map(|fact| &fact.members).unwrap_or(&empty);
         match (old, new) {
             (TypeShape::Struct(old), TypeShape::Struct(new))
             | (TypeShape::Enum(old), TypeShape::Enum(new))
             | (TypeShape::Union(old), TypeShape::Union(new)) => {
-                MapFacts::validate_members(changes, old, new, key)?;
+                let changes = MapFacts::type_members(&self.facts.types, key, old, new);
+                MapFacts::validate_members(&changes, old, new, key)?;
                 let kind = match self.source.types.get(key) {
                     Some(TypeShape::Enum(_) | TypeShape::Union(_)) => MemberSetKind::Variants,
                     _ => MemberSetKind::Fields,
@@ -142,7 +141,7 @@ impl StepPlanner<'_> {
                 let mut plan = MemberClassifier {
                     source,
                     target,
-                    facts: changes,
+                    facts: &changes,
                     direction,
                     kind,
                     context: key,
@@ -165,14 +164,6 @@ impl StepPlanner<'_> {
                     new
                 };
                 Ok(TypeConversion::Alias(references.value(value)?))
-            }
-            (TypeShape::Unsupported(kind), _) | (_, TypeShape::Unsupported(kind))
-                if kind == "struct inheritance" =>
-            {
-                // A flattened base changes the public model layout, so the
-                // adapter cannot copy fields mechanically. Keep the decision
-                // explicit instead of emitting an incorrect conversion.
-                Ok(TypeConversion::Hook)
             }
             (TypeShape::Unsupported(kind), _) | (_, TypeShape::Unsupported(kind)) => {
                 Err(self.error(key, &format!("{kind} conversion is not supported")))
