@@ -1,5 +1,7 @@
 // A root-level shared wire identifier, included before the geo module.
 typedef string DeliveryReference;
+const long COORDINATE_AXES = 2;
+const long BOUND_COMPONENTS = COORDINATE_AXES * 2;
 
 module geo {
     #include "models/identity.idl"

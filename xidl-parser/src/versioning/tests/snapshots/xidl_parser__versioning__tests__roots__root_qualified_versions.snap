@@ -24,7 +24,7 @@ module v1 {
             string<::v1::WIDTH> label;
             wstring<::v1::WIDTH> wide;
             fixed<::v1::WIDTH, 0> amount;
-            long parts[::v1::WIDTH];
+            long parts[8];
             long priority default (+::v1::WIDTH - 1);
             ::v1::v1::Identifier legacy_code;
         };
@@ -61,7 +61,7 @@ module v2 {
             string<::v2::WIDTH> label;
             wstring<::v2::WIDTH> wide;
             fixed<::v2::WIDTH, 0> amount;
-            long parts[::v2::WIDTH];
+            long parts[8];
             long priority default (+::v2::WIDTH - 1);
             ::v2::v1::Identifier legacy_code;
         };

@@ -28,8 +28,7 @@ fn source_modules_named_like_versions_are_not_unwrapped_twice() {
             vec![
                 "v1::v1::Identifier",
                 "v2::v1::Identifier",
-                "v1::v1::WIDTH",
-                "v2::v1::WIDTH",
+                "array.len() != (3) as usize",
             ],
         ),
         (

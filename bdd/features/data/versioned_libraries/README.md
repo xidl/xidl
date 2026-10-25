@@ -58,3 +58,11 @@ enforced by generated Zod validators. Both fronts preserve the pair's order,
 accept zero and geographic edge values, retain an omitted pair and refuse
 malformed arrays before any Head or historical fact changes. Geographic range
 checks remain application policy.
+
+The identity library declares shared coordinate and bounding-box dimensions as
+integer constants. Its nested model file uses rooted constant expressions, while
+a local same-named constant deliberately has a different value. The flat oracle
+keeps literal `[2]` and `[4]` sizes. All generated artifacts must match byte for
+byte, including independently selected versions. The existing SDK, Hurl and
+OpenAPI journeys then verify the shared contract through both fronts; splitting
+files or resolving constants must not weaken validation or change stored facts.

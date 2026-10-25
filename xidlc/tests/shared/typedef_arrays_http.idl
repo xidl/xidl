@@ -1,17 +1,22 @@
+const long PAIR = 2;
 module spatial {
+    const long PAIR = 3;
+    const long WIDTH = ::PAIR;
+    const long TRIPLE = WIDTH + 1;
     struct Label { string name; };
     enum Mode { Foot, Van };
-    typedef Label Pair[2], Triple[3];
-    typedef Pair Grid[2][3];
-    typedef sequence<Pair> Batches[2];
-    typedef map<string, Pair> LookupRows[2];
-    typedef Mode ModePair[2];
-    typedef double Coordinates[2], Bounds[4];
+    typedef Label Pair[WIDTH], Triple[TRIPLE];
+    typedef Pair Grid[WIDTH][TRIPLE];
+    typedef sequence<Pair> Batches[WIDTH];
+    typedef map<string, Pair> LookupRows[WIDTH];
+    typedef Mode ModePair[WIDTH];
+    typedef double Coordinates[WIDTH], Bounds[WIDTH * WIDTH];
 };
 
 typedef spatial::Pair RootPair;
 
 module client {
+    const long WIDTH = 9;
     typedef long Label;
     typedef long RootPair;
     typedef spatial::Pair ImportedPair;
@@ -25,7 +30,7 @@ module client {
         spatial::ModePair modes;
         spatial::Bounds bounds;
         @optional spatial::Coordinates coordinates;
-        ImportedPair slots[2];
+        ImportedPair slots[::PAIR];
         ::RootPair rooted;
     };
     interface Geo {
