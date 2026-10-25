@@ -1,0 +1,5 @@
+module shipping {
+    #include "models/address.idl"
+    #include "errors.idl"
+    #include "addresses.idl"
+};

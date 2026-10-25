@@ -190,7 +190,7 @@ fn typescript_reexports_the_units_a_file_references() {
 
     let types = fs::read_to_string(out.join("app.d.ts")).expect("app.d.ts");
     assert!(
-        types.contains("export * as timestamp from \"./timestamp\";"),
+        types.contains("import * as timestamp from \"./timestamp\";\nexport { timestamp };"),
         "app.d.ts: {types}"
     );
     assert!(
@@ -199,7 +199,7 @@ fn typescript_reexports_the_units_a_file_references() {
     );
     let zod = fs::read_to_string(out.join("app.zod.ts")).expect("app.zod.ts");
     assert!(
-        zod.contains("export * as timestamp from \"./timestamp.zod\";"),
+        zod.contains("import * as timestamp from \"./timestamp.zod\";\nexport { timestamp };"),
         "app.zod.ts: {zod}"
     );
 }

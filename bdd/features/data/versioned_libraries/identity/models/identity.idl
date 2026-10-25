@@ -1,0 +1,20 @@
+typedef string Identifier;
+enum Country { US, CA };
+struct Marker {};
+struct Anchor : Marker { @optional sequence<geo::Anchor> previous; };
+
+@rename_all("camelCase")
+struct Identity : Anchor {
+    geo::Identifier id;
+    string tenant;
+    @removed(Versions::v3) string delivery_reference;
+    @removed(Versions::v3) @optional string delivery_note;
+    @added(Versions::v3) @optional @default(true) boolean signature_required;
+};
+
+@rename_all("camelCase")
+struct Change {
+    @removed(Versions::v3) @optional string delivery_reference;
+    @removed(Versions::v3) @optional string delivery_note;
+    @added(Versions::v3) @optional @default(true) boolean signature_required;
+};
