@@ -35,6 +35,17 @@ fn transforms_target_snapshots_every_change_shape_of_the_catalogue() {
 }
 
 #[test]
+fn events_target_snapshots_the_split_event_surface() {
+    let source = include_str!("../../bdd/features/data/versioned_events.idl");
+    let files = render(source, "events.idl");
+    assert_eq!(files, render(source, "events.idl"));
+    assert_eq!(files.len(), 1);
+    assert!(files[0].1.contains("eventKindDowncastToV20260401"));
+    assert!(files[0].1.contains("eventKindUpcastFromV20260401"));
+    insta::assert_snapshot!("independent_typescript_events_adapters", &files[0].1);
+}
+
+#[test]
 fn chain_target_snapshots_the_retirement_surface_of_the_booking_corpus() {
     let source = include_str!("../../bdd/features/data/versioned_chain.idl");
     let files = render(source, "chain.idl");

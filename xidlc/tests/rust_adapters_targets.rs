@@ -37,6 +37,17 @@ fn rust_transforms_target_snapshots_every_change_shape_of_the_catalogue() {
 }
 
 #[test]
+fn rust_events_target_snapshots_the_split_event_surface() {
+    let source = include_str!("../../bdd/features/data/versioned_events_rust.idl");
+    let files = render(source);
+    assert_eq!(files, render(source));
+    assert_eq!(files.len(), 1);
+    assert!(files[0].1.contains("event_kind_downcast_to_v_2026_04_01"));
+    assert!(files[0].1.contains("event_kind_upcast_from_v_2026_04_01"));
+    insta::assert_snapshot!("independent_rust_events_adapters", &files[0].1);
+}
+
+#[test]
 fn rust_chain_target_snapshots_storage_backed_retirement() {
     let source = include_str!("../../bdd/features/data/versioned_chain_rust.idl");
     let files = render(source);

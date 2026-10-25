@@ -218,6 +218,7 @@ def prepare_rust_application(context, script, boilerplate_name="versioned_adapte
         "versioned_chain": {
             "main.rs": ["hooks.rs", "chain.rs", "http.rs", "http_app.rs"]
         },
+        "versioned_events": {"main.rs": ["events.rs"]},
         "versioned_transforms": {
             "main.rs": [
                 "hooks.rs",
@@ -361,6 +362,24 @@ def rust_versioned_chain_journey(context):
     )
     result = run(["cargo", "run", "--quiet"], cwd=output)
     assert "PASS: booking chain" in result.stdout
+
+
+@then("the versioned event split keeps old names, distinct ids and one stated half")
+def versioned_events_journey(context):
+    output = prepare_application(
+        context, "events.ts", boilerplate_name="versioned_events"
+    )
+    result = run(["pnpm", "exec", "tsx", "events.ts"], cwd=output)
+    assert "PASS: event split" in result.stdout
+
+
+@then("the Rust versioned event split keeps the same promises")
+def rust_versioned_events_journey(context):
+    output = prepare_rust_application(
+        context, "main.rs", boilerplate_name="versioned_events"
+    )
+    result = run(["cargo", "run", "--quiet"], cwd=output)
+    assert "PASS: event split" in result.stdout
 
 
 @then("the versioned transform shapes upcast, downcast and round-trip")
