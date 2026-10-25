@@ -165,9 +165,23 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType10Schema: z.ZodType<types.v1.shipping.Change> = z.lazy(() =>
+    const wireType5Schema: z.ZodType<types.v1.geo.Coordinates> = z.lazy(() =>
+    
+        z.array(z.coerce.number()).length(2)
+    
+    );
+
+    const wireType10Schema: z.ZodType<types.v1.geo.MapPosition> = z.lazy(() =>
+    
+        wireType5Schema
+    
+    );
+
+    const wireType13Schema: z.ZodType<types.v1.shipping.Change> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
+        
+            ["coordinates"]: z.unknown().optional(),
         
             ["countryCode"]: z.unknown().optional(),
         
@@ -197,6 +211,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["delivery_note"]: wire["deliveryNote"],
         
+            ["coordinates"]: wire["coordinates"],
+        
             ["line"]: wire["line"],
         
             ["country_code"]: wire["countryCode"],
@@ -211,6 +227,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
             ["delivery_reference"]: wireType0Schema.nullish().transform((value) => value ?? undefined),
         
             ["delivery_note"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
+        
+            ["coordinates"]: wireType10Schema.nullish().transform((value) => value ?? undefined),
         
             ["line"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
         
@@ -230,6 +248,10 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             
                 ...(value["delivery_note"] === undefined ? {} : { ["delivery_note"]: value["delivery_note"] }),
+            
+        
+            
+                ...(value["coordinates"] === undefined ? {} : { ["coordinates"]: value["coordinates"] }),
             
         
             
@@ -275,7 +297,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
         
-            ["patch"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType10Schema),
+            ["patch"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType13Schema),
         
     })).transform((value) => ({
         
@@ -295,7 +317,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest5Schema: z.ZodType<ifaceTypes.v2.shipping.AddressesReadRequest> = z.lazy(() =>
+    const wireRequest7Schema: z.ZodType<ifaceTypes.v2.shipping.AddressesReadRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -332,7 +354,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType19Schema: z.ZodType<types.v2.geo.Anchor> = z.lazy(() =>
+    const wireType22Schema: z.ZodType<types.v2.geo.Anchor> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -357,9 +379,9 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["checkpoint"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
         
-            ["parent"]: wireType19Schema.nullish().transform((value) => value ?? undefined),
+            ["parent"]: wireType22Schema.nullish().transform((value) => value ?? undefined),
         
-            ["previous"]: z.array(wireType19Schema).nullish().transform((value) => value ?? undefined),
+            ["previous"]: z.array(wireType22Schema).nullish().transform((value) => value ?? undefined),
         
     })).transform((value) => ({
         
@@ -379,21 +401,35 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType17Schema: z.ZodType<types.v2.DeliveryReference> = z.lazy(() =>
+    const wireType20Schema: z.ZodType<types.v2.DeliveryReference> = z.lazy(() =>
     
         z.coerce.string()
     
     );
 
-    const wireType21Schema: z.ZodType<types.v2.geo.Country> = z.lazy(() =>
+    const wireType25Schema: z.ZodType<types.v2.geo.Coordinates> = z.lazy(() =>
+    
+        z.array(z.coerce.number()).length(2)
+    
+    );
+
+    const wireType30Schema: z.ZodType<types.v2.geo.MapPosition> = z.lazy(() =>
+    
+        wireType25Schema
+    
+    );
+
+    const wireType26Schema: z.ZodType<types.v2.geo.Country> = z.lazy(() =>
     
         z.enum(["US", "CA"])
     
     );
 
-    const wireType27Schema: z.ZodType<types.v2.shipping.Change> = z.lazy(() =>
+    const wireType33Schema: z.ZodType<types.v2.shipping.Change> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
+        
+            ["coordinates"]: z.unknown().optional(),
         
             ["countryCodeV2"]: z.unknown().optional(),
         
@@ -423,6 +459,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["delivery_note"]: wire["deliveryNote"],
         
+            ["coordinates"]: wire["coordinates"],
+        
             ["street"]: wire["street"],
         
             ["country_code_v2"]: wire["countryCodeV2"],
@@ -432,15 +470,17 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["parent"]: wireType19Schema.nullish().transform((value) => value ?? undefined),
+            ["parent"]: wireType22Schema.nullish().transform((value) => value ?? undefined),
         
-            ["delivery_reference"]: wireType17Schema.nullish().transform((value) => value ?? undefined),
+            ["delivery_reference"]: wireType20Schema.nullish().transform((value) => value ?? undefined),
         
             ["delivery_note"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
         
+            ["coordinates"]: wireType30Schema.nullish().transform((value) => value ?? undefined),
+        
             ["street"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
         
-            ["country_code_v2"]: wireType21Schema.nullish().transform((value) => value ?? undefined),
+            ["country_code_v2"]: wireType26Schema.nullish().transform((value) => value ?? undefined),
         
             ["priority"]: z.coerce.number().int().nullish().transform((value) => value ?? undefined),
         
@@ -459,6 +499,10 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
             
         
             
+                ...(value["coordinates"] === undefined ? {} : { ["coordinates"]: value["coordinates"] }),
+            
+        
+            
                 ...(value["street"] === undefined ? {} : { ["street"]: value["street"] }),
             
         
@@ -474,7 +518,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest6Schema: z.ZodType<ifaceTypes.v2.shipping.AddressesUpdateRequest> = z.lazy(() =>
+    const wireRequest8Schema: z.ZodType<ifaceTypes.v2.shipping.AddressesUpdateRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -501,7 +545,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
         
-            ["patch"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType27Schema),
+            ["patch"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType33Schema),
         
     })).transform((value) => ({
         
@@ -521,7 +565,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest11Schema: z.ZodType<ifaceTypes.v3.shipping.AddressesReadRequest> = z.lazy(() =>
+    const wireRequest15Schema: z.ZodType<ifaceTypes.v3.shipping.AddressesReadRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -558,7 +602,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType36Schema: z.ZodType<types.v3.geo.Anchor> = z.lazy(() =>
+    const wireType42Schema: z.ZodType<types.v3.geo.Anchor> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -583,9 +627,9 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["checkpoint"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
         
-            ["parent"]: wireType36Schema.nullish().transform((value) => value ?? undefined),
+            ["parent"]: wireType42Schema.nullish().transform((value) => value ?? undefined),
         
-            ["previous"]: z.array(wireType36Schema).nullish().transform((value) => value ?? undefined),
+            ["previous"]: z.array(wireType42Schema).nullish().transform((value) => value ?? undefined),
         
     })).transform((value) => ({
         
@@ -605,15 +649,29 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType38Schema: z.ZodType<types.v3.geo.Country> = z.lazy(() =>
+    const wireType45Schema: z.ZodType<types.v3.geo.Coordinates> = z.lazy(() =>
+    
+        z.array(z.coerce.number()).length(2)
+    
+    );
+
+    const wireType50Schema: z.ZodType<types.v3.geo.MapPosition> = z.lazy(() =>
+    
+        wireType45Schema
+    
+    );
+
+    const wireType46Schema: z.ZodType<types.v3.geo.Country> = z.lazy(() =>
     
         z.enum(["US", "CA"])
     
     );
 
-    const wireType44Schema: z.ZodType<types.v3.shipping.Change> = z.lazy(() =>
+    const wireType53Schema: z.ZodType<types.v3.shipping.Change> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
+        
+            ["coordinates"]: z.unknown().optional(),
         
             ["countryCodeV2"]: z.unknown().optional(),
         
@@ -639,6 +697,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["signature_required"]: wire["signatureRequired"],
         
+            ["coordinates"]: wire["coordinates"],
+        
             ["street"]: wire["street"],
         
             ["country_code_v2"]: wire["countryCodeV2"],
@@ -648,13 +708,15 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["parent"]: wireType36Schema.nullish().transform((value) => value ?? undefined),
+            ["parent"]: wireType42Schema.nullish().transform((value) => value ?? undefined),
         
             ["signature_required"]: z.coerce.boolean().nullish().transform((value) => value ?? undefined),
         
+            ["coordinates"]: wireType50Schema.nullish().transform((value) => value ?? undefined),
+        
             ["street"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
         
-            ["country_code_v2"]: wireType38Schema.nullish().transform((value) => value ?? undefined),
+            ["country_code_v2"]: wireType46Schema.nullish().transform((value) => value ?? undefined),
         
             ["priority"]: z.coerce.number().int().nullish().transform((value) => value ?? undefined),
         
@@ -666,6 +728,10 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             
                 ...(value["signature_required"] === undefined ? {} : { ["signature_required"]: value["signature_required"] }),
+            
+        
+            
+                ...(value["coordinates"] === undefined ? {} : { ["coordinates"]: value["coordinates"] }),
             
         
             
@@ -684,7 +750,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest12Schema: z.ZodType<ifaceTypes.v3.shipping.AddressesUpdateRequest> = z.lazy(() =>
+    const wireRequest16Schema: z.ZodType<ifaceTypes.v3.shipping.AddressesUpdateRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -711,7 +777,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
         
-            ["patch"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType44Schema),
+            ["patch"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType53Schema),
         
     })).transform((value) => ({
         
@@ -887,9 +953,33 @@ export interface VersionAdapters {
         
     }
 
+    export function upcastGeoCoordinatesFromV1(source: types.v1.geo.Coordinates, adapters: VersionAdapters): VersionedResult<types.v2.geo.Coordinates> {
+        
+            return mapSequence(source, (item) => ok(item), "geo::Coordinates");
+        
+    }
+
+    export function downcastGeoCoordinatesToV1(source: types.v2.geo.Coordinates, adapters: VersionAdapters): VersionedResult<types.v1.geo.Coordinates> {
+        
+            return mapSequence(source, (item) => ok(item), "geo::Coordinates");
+        
+    }
+
     export function downcastGeoIdentifierToV1(source: types.v2.geo.Identifier, adapters: VersionAdapters): VersionedResult<types.v1.geo.Identifier> {
         
             return ok(source);
+        
+    }
+
+    export function upcastGeoMapPositionFromV1(source: types.v1.geo.MapPosition, adapters: VersionAdapters): VersionedResult<types.v2.geo.MapPosition> {
+        
+            return upcastGeoCoordinatesFromV1(source, adapters);
+        
+    }
+
+    export function downcastGeoMapPositionToV1(source: types.v2.geo.MapPosition, adapters: VersionAdapters): VersionedResult<types.v1.geo.MapPosition> {
+        
+            return downcastGeoCoordinatesToV1(source, adapters);
         
     }
 
@@ -921,8 +1011,11 @@ export interface VersionAdapters {
                 const converted6 = mapOptional(source["delivery_note"], (item) => ok(item));
                 if (!converted6.ok) return converted6;
             
-                const converted7 = ok(source["priority"]);
+                const converted7 = mapOptional(source["coordinates"], (item) => downcastGeoMapPositionToV1(item, adapters));
                 if (!converted7.ok) return converted7;
+            
+                const converted8 = ok(source["priority"]);
+                if (!converted8.ok) return converted8;
             
             return ok({
                 
@@ -933,7 +1026,8 @@ export interface VersionAdapters {
                         ["tenant"]: converted4.value,
                         ["delivery_reference"]: converted5.value,
                         ...(converted6.value === undefined ? {} : { ["delivery_note"]: converted6.value }),
-                        ["priority"]: converted7.value,
+                        ...(converted7.value === undefined ? {} : { ["coordinates"]: converted7.value }),
+                        ["priority"]: converted8.value,
                 
                         ["line"]: decision.value["line"],
                         ["country_code"]: decision.value["country_code"],
@@ -957,8 +1051,11 @@ export interface VersionAdapters {
                 const converted2 = mapOptional(source["delivery_note"], (item) => ok(item));
                 if (!converted2.ok) return converted2;
             
-                const converted3 = mapOptional(source["priority"], (item) => ok(item));
+                const converted3 = mapOptional(source["coordinates"], (item) => upcastGeoMapPositionFromV1(item, adapters));
                 if (!converted3.ok) return converted3;
+            
+                const converted4 = mapOptional(source["priority"], (item) => ok(item));
+                if (!converted4.ok) return converted4;
             
                 return ok({
                     value: {
@@ -980,7 +1077,12 @@ export interface VersionAdapters {
                         
                             
                             
-                                ...(converted3.value === undefined ? {} : { ["priority"]: converted3.value }),
+                                ...(converted3.value === undefined ? {} : { ["coordinates"]: converted3.value }),
+                            
+                        
+                            
+                            
+                                ...(converted4.value === undefined ? {} : { ["priority"]: converted4.value }),
                             
                         
                         
@@ -994,6 +1096,8 @@ export interface VersionAdapters {
                         
                     },
                     stored: {
+                        
+                            
                         
                             
                         
@@ -1204,6 +1308,18 @@ export interface VersionAdapters {
         
     }
 
+    export function upcastGeoCoordinatesFromV2(source: types.v2.geo.Coordinates, adapters: VersionAdapters): VersionedResult<types.v3.geo.Coordinates> {
+        
+            return mapSequence(source, (item) => ok(item), "geo::Coordinates");
+        
+    }
+
+    export function downcastGeoCoordinatesToV2(source: types.v3.geo.Coordinates, adapters: VersionAdapters): VersionedResult<types.v2.geo.Coordinates> {
+        
+            return mapSequence(source, (item) => ok(item), "geo::Coordinates");
+        
+    }
+
     export function upcastGeoCountryFromV2(source: types.v2.geo.Country, adapters: VersionAdapters): VersionedResult<types.v3.geo.Country> {
         
             switch (source) {
@@ -1240,6 +1356,18 @@ export interface VersionAdapters {
         
     }
 
+    export function upcastGeoMapPositionFromV2(source: types.v2.geo.MapPosition, adapters: VersionAdapters): VersionedResult<types.v3.geo.MapPosition> {
+        
+            return upcastGeoCoordinatesFromV2(source, adapters);
+        
+    }
+
+    export function downcastGeoMapPositionToV2(source: types.v3.geo.MapPosition, adapters: VersionAdapters): VersionedResult<types.v2.geo.MapPosition> {
+        
+            return downcastGeoCoordinatesToV2(source, adapters);
+        
+    }
+
     export function downcastShippingAddressToV2(source: types.v3.shipping.Address, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v2.shipping.Address> {
         
             
@@ -1262,14 +1390,17 @@ export interface VersionAdapters {
                 const converted4 = ok(source["tenant"]);
                 if (!converted4.ok) return converted4;
             
-                const converted5 = ok(source["street"]);
+                const converted5 = mapOptional(source["coordinates"], (item) => downcastGeoMapPositionToV2(item, adapters));
                 if (!converted5.ok) return converted5;
             
-                const converted6 = downcastGeoCountryToV2(source["country_code_v2"], adapters);
+                const converted6 = ok(source["street"]);
                 if (!converted6.ok) return converted6;
             
-                const converted7 = ok(source["priority"]);
+                const converted7 = downcastGeoCountryToV2(source["country_code_v2"], adapters);
                 if (!converted7.ok) return converted7;
+            
+                const converted8 = ok(source["priority"]);
+                if (!converted8.ok) return converted8;
             
             return ok({
                 
@@ -1278,9 +1409,10 @@ export interface VersionAdapters {
                         ...(converted2.value === undefined ? {} : { ["previous"]: converted2.value }),
                         ["id"]: converted3.value,
                         ["tenant"]: converted4.value,
-                        ["street"]: converted5.value,
-                        ["country_code_v2"]: converted6.value,
-                        ["priority"]: converted7.value,
+                        ...(converted5.value === undefined ? {} : { ["coordinates"]: converted5.value }),
+                        ["street"]: converted6.value,
+                        ["country_code_v2"]: converted7.value,
+                        ["priority"]: converted8.value,
                 
                         ["delivery_reference"]: decision.value["delivery_reference"],
                         ...(decision.value["delivery_note"] === OMIT ? {} : { ["delivery_note"]: decision.value["delivery_note"] }),
@@ -1298,14 +1430,17 @@ export interface VersionAdapters {
                 const converted0 = mapOptional(source["parent"], (item) => upcastGeoAnchorFromV2(item, adapters));
                 if (!converted0.ok) return converted0;
             
-                const converted1 = mapOptional(source["street"], (item) => ok(item));
+                const converted1 = mapOptional(source["coordinates"], (item) => upcastGeoMapPositionFromV2(item, adapters));
                 if (!converted1.ok) return converted1;
             
-                const converted2 = mapOptional(source["country_code_v2"], (item) => upcastGeoCountryFromV2(item, adapters));
+                const converted2 = mapOptional(source["street"], (item) => ok(item));
                 if (!converted2.ok) return converted2;
             
-                const converted3 = mapOptional(source["priority"], (item) => ok(item));
+                const converted3 = mapOptional(source["country_code_v2"], (item) => upcastGeoCountryFromV2(item, adapters));
                 if (!converted3.ok) return converted3;
+            
+                const converted4 = mapOptional(source["priority"], (item) => ok(item));
+                if (!converted4.ok) return converted4;
             
                 return ok({
                     value: {
@@ -1317,17 +1452,22 @@ export interface VersionAdapters {
                         
                             
                             
-                                ...(converted1.value === undefined ? {} : { ["street"]: converted1.value }),
+                                ...(converted1.value === undefined ? {} : { ["coordinates"]: converted1.value }),
                             
                         
                             
                             
-                                ...(converted2.value === undefined ? {} : { ["country_code_v2"]: converted2.value }),
+                                ...(converted2.value === undefined ? {} : { ["street"]: converted2.value }),
                             
                         
                             
                             
-                                ...(converted3.value === undefined ? {} : { ["priority"]: converted3.value }),
+                                ...(converted3.value === undefined ? {} : { ["country_code_v2"]: converted3.value }),
+                            
+                        
+                            
+                            
+                                ...(converted4.value === undefined ? {} : { ["priority"]: converted4.value }),
                             
                         
                         
@@ -1337,6 +1477,8 @@ export interface VersionAdapters {
                         
                     },
                     stored: {
+                        
+                            
                         
                             
                         
@@ -1773,7 +1915,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastshipping_AddressesReadFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.shipping.AddressesReadRequest> {
-        const parsed = wireRequest5Schema.safeParse(raw);
+        const parsed = wireRequest7Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04-01", operation: "shipping::Addresses.read", issues: parsed.error.issues } };
         
             const step0 = upcastShippingAddressesReadRequestFromV2(parsed.data, adapters);
@@ -1818,7 +1960,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastshipping_AddressesUpdateFromV2(raw: unknown, current: types.v3.shipping.Address, adapters: VersionAdapters): { ok: true; value: ifaceTypes.v3.shipping.AddressesUpdateRequest; stored: ShippingAddressesUpdateStored } | { ok: false; error: ValidationError | UnsupportedProjection } {
-        const parsed = wireRequest6Schema.safeParse(raw);
+        const parsed = wireRequest8Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04-01", operation: "shipping::Addresses.update", issues: parsed.error.issues } };
         
             const step0 = upcastShippingAddressesUpdateRequestFromV2(parsed.data, current, adapters);
@@ -1865,7 +2007,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastshipping_AddressesReadFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.shipping.AddressesReadRequest> {
-        const parsed = wireRequest11Schema.safeParse(raw);
+        const parsed = wireRequest15Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07-01", operation: "shipping::Addresses.read", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -1901,7 +2043,7 @@ export type DispatchOutcome<T, Head> =
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastshipping_AddressesUpdateFromV3(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v3.shipping.AddressesUpdateRequest> {
-        const parsed = wireRequest12Schema.safeParse(raw);
+        const parsed = wireRequest16Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07-01", operation: "shipping::Addresses.update", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -2032,6 +2174,45 @@ export type DispatchOutcome<T, Head> =
 
     
     
+        export function downcastGeoCoordinates(version: "v1", head: types.v3.geo.Coordinates, adapters: VersionAdapters): VersionedResult<types.v1.geo.Coordinates>;
+    
+        export function downcastGeoCoordinates(version: "v2", head: types.v3.geo.Coordinates, adapters: VersionAdapters): VersionedResult<types.v2.geo.Coordinates>;
+    
+        export function downcastGeoCoordinates(version: "v3", head: types.v3.geo.Coordinates, adapters: VersionAdapters): VersionedResult<types.v3.geo.Coordinates>;
+    
+    export function downcastGeoCoordinates(version: "v1" | "v2" | "v3", head: types.v3.geo.Coordinates, adapters: VersionAdapters): VersionedResult<types.v1.geo.Coordinates | types.v2.geo.Coordinates | types.v3.geo.Coordinates>;
+    export function downcastGeoCoordinates(version: "v1" | "v2" | "v3", head: types.v3.geo.Coordinates, adapters: VersionAdapters): VersionedResult<types.v1.geo.Coordinates | types.v2.geo.Coordinates | types.v3.geo.Coordinates> {
+        switch (version) {
+            
+                case "v1": {
+                    
+                        const step0 = downcastGeoCoordinatesToV2(head, adapters);
+                        if (!step0.ok) return step0;
+                    
+                        const step1 = downcastGeoCoordinatesToV1(step0.value, adapters);
+                        if (!step1.ok) return step1;
+                    
+                    return step1;
+                }
+            
+                case "v2": {
+                    
+                        const step0 = downcastGeoCoordinatesToV2(head, adapters);
+                        if (!step0.ok) return step0;
+                    
+                    return step0;
+                }
+            
+                case "v3": {
+                    
+                    return ok(head);
+                }
+            
+        }
+    }
+
+    
+    
         export function downcastGeoCountry(version: "v2", head: types.v3.geo.Country, adapters: VersionAdapters): VersionedResult<types.v2.geo.Country>;
     
         export function downcastGeoCountry(version: "v3", head: types.v3.geo.Country, adapters: VersionAdapters): VersionedResult<types.v3.geo.Country>;
@@ -2082,6 +2263,45 @@ export type DispatchOutcome<T, Head> =
                 case "v2": {
                     
                         const step0 = downcastGeoIdentifierToV2(head, adapters);
+                        if (!step0.ok) return step0;
+                    
+                    return step0;
+                }
+            
+                case "v3": {
+                    
+                    return ok(head);
+                }
+            
+        }
+    }
+
+    
+    
+        export function downcastGeoMapPosition(version: "v1", head: types.v3.geo.MapPosition, adapters: VersionAdapters): VersionedResult<types.v1.geo.MapPosition>;
+    
+        export function downcastGeoMapPosition(version: "v2", head: types.v3.geo.MapPosition, adapters: VersionAdapters): VersionedResult<types.v2.geo.MapPosition>;
+    
+        export function downcastGeoMapPosition(version: "v3", head: types.v3.geo.MapPosition, adapters: VersionAdapters): VersionedResult<types.v3.geo.MapPosition>;
+    
+    export function downcastGeoMapPosition(version: "v1" | "v2" | "v3", head: types.v3.geo.MapPosition, adapters: VersionAdapters): VersionedResult<types.v1.geo.MapPosition | types.v2.geo.MapPosition | types.v3.geo.MapPosition>;
+    export function downcastGeoMapPosition(version: "v1" | "v2" | "v3", head: types.v3.geo.MapPosition, adapters: VersionAdapters): VersionedResult<types.v1.geo.MapPosition | types.v2.geo.MapPosition | types.v3.geo.MapPosition> {
+        switch (version) {
+            
+                case "v1": {
+                    
+                        const step0 = downcastGeoMapPositionToV2(head, adapters);
+                        if (!step0.ok) return step0;
+                    
+                        const step1 = downcastGeoMapPositionToV1(step0.value, adapters);
+                        if (!step1.ok) return step1;
+                    
+                    return step1;
+                }
+            
+                case "v2": {
+                    
+                        const step0 = downcastGeoMapPositionToV2(head, adapters);
                         if (!step0.ok) return step0;
                     
                     return step0;

@@ -46,4 +46,15 @@ parent chain through the shared Head store; omission preserves it. This current
 handoff chain is separate from append-only retired delivery facts in `history`.
 The shared journey checks nested round trips, repeated writes, deep malformed
 leaves and cross-tenant refusal through both Chain and Route fronts. Imported
-readers retain the same recursive parent data and generated OpenAPI shape.
+readers retain the same recursive parent data and generated OpenAPI shape. The
+postal model also carries an optional map position through the imported
+`geo::MapPosition -> Coordinates` alias chain. The fixed pair follows Mapbox's
+[longitude/latitude coordinate format](https://docs.mapbox.com/api/guides/#coordinate-format)
+and
+[GeoJSON response shape](https://docs.mapbox.com/api/search/geocoding/#geocoding-response-object).
+The fixture owns its API history and does not call Mapbox. Rust SDKs represent
+the pair as `[f64; 2]`; TypeScript models use `number[]`, with fixed length
+enforced by generated Zod validators. Both fronts preserve the pair's order,
+accept zero and geographic edge values, retain an omitted pair and refuse
+malformed arrays before any Head or historical fact changes. Geographic range
+checks remain application policy.

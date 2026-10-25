@@ -207,6 +207,12 @@ def inherited_openapi(context):
                     assert not validator.is_valid(malformed), (
                         f"{version} OpenAPI must validate recursive checkpoint types"
                     )
+                    for coordinates in ([], [1], [1, 2, 3], [1, {}]):
+                        malformed = json.loads(json.dumps(body))
+                        malformed["coordinates"] = coordinates
+                        assert not validator.is_valid(malformed), (
+                            f"{version} OpenAPI must preserve coordinate arity and type"
+                        )
                     checked_recursive_contracts.add(version)
     assert checked_recursive_contracts == set(documents)
 
@@ -229,6 +235,10 @@ def inherited_mode_boundary(context):
     # Root alias identity and a deep recursive leaf are checked before mutation.
     for version, patch in [
         ("2026-01-01", {"deliveryReference": 42}),
+        ("2026-01-01", {"coordinates": [1], "deliveryReference": "must-not-persist"}),
+        ("2026-04-01", {"coordinates": [], "street": "must-not-persist"}),
+        ("2026-07-01", {"coordinates": [1, 2, 3], "signatureRequired": False}),
+        ("2026-07-01", {"coordinates": [1, {}], "signatureRequired": False}),
         (
             "2026-01-01",
             {

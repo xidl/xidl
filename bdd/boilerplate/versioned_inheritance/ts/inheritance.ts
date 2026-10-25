@@ -20,6 +20,7 @@ const refusal = (
   ok: false,
 });
 let current: types.v3.shipping.Address = {
+  coordinates: [12.5, -7.25],
   country_code_v2: 'US',
   id: 'a1',
   parent: { checkpoint: 'handover', parent: { checkpoint: 'packed' } },
@@ -116,6 +117,7 @@ const handler = async (
 const envelope = (patch: unknown) => ({ id: 'a1', patch, tenant: 'acme' });
 const first = await a.dispatchshipping_AddressesUpdateFromV1(
   envelope({
+    coordinates: [-180, 90],
     countryCode: 'CA',
     deliveryNote: '',
     deliveryReference: 'A-NEW',
@@ -132,6 +134,8 @@ assert.equal(first.value.value.delivery_note, '');
 assert.equal(first.value.value.delivery_reference, 'A-NEW');
 assert.equal(first.value.value.line, 'New street');
 assert.equal(first.value.value.priority, 0);
+assert.deepEqual(first.value.value.coordinates, [-180, 90]);
+assert.deepEqual(current.coordinates, [-180, 90]);
 assert.deepEqual(first.value.value.previous, [{}]);
 assert.deepEqual(first.value.value.parent, current.parent);
 assert.equal(current.parent?.parent?.checkpoint, 'confirmed');
@@ -152,6 +156,7 @@ const before = structuredClone({ current, history });
 const view = take(a.downcastShippingAddress('v1', current, stored(), hooks));
 const restated = await a.dispatchshipping_AddressesUpdateFromV1(
   envelope({
+    coordinates: view.coordinates,
     countryCode: view.country_code,
     deliveryNote: view.delivery_note,
     deliveryReference: view.delivery_reference,
@@ -181,6 +186,10 @@ const tracked = {
 };
 for (const patch of [
   { countryCodeV2: 'Atlantis' },
+  { coordinates: [], deliveryNote: 'must-not-persist' },
+  { coordinates: [1], deliveryNote: 'must-not-persist' },
+  { coordinates: [1, 2, 3], deliveryNote: 'must-not-persist' },
+  { coordinates: [{}, 2], deliveryNote: 'must-not-persist' },
   { signatureRequired: false },
   { base: { deliveryNote: 'hidden' } },
   { deliveryNote: 'must-not-persist', parent: { parent: [] } },

@@ -1,0 +1,36 @@
+module spatial {
+    struct Label { string name; };
+    enum Mode { Foot, Van };
+    typedef Label Pair[2], Triple[3];
+    typedef Pair Grid[2][3];
+    typedef sequence<Pair> Batches[2];
+    typedef map<string, Pair> LookupRows[2];
+    typedef Mode ModePair[2];
+    typedef double Coordinates[2], Bounds[4];
+};
+
+typedef spatial::Pair RootPair;
+
+module client {
+    typedef long Label;
+    typedef long RootPair;
+    typedef spatial::Pair ImportedPair;
+    struct Envelope {
+        ImportedPair pair;
+        @optional ImportedPair optional_pair;
+        spatial::Triple triple;
+        spatial::Grid grid;
+        spatial::Batches batches;
+        spatial::LookupRows rows;
+        spatial::ModePair modes;
+        spatial::Bounds bounds;
+        @optional spatial::Coordinates coordinates;
+        ImportedPair slots[2];
+        ::RootPair rooted;
+    };
+    interface Geo {
+        @post(path="/envelopes") Envelope echo(@body Envelope value);
+        @post(path="/pairs") ImportedPair pair(@body ImportedPair value);
+        @post(path="/coordinates") spatial::Coordinates locate(@body spatial::Coordinates value);
+    };
+};
