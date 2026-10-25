@@ -98,7 +98,7 @@ import * as $xidl_root from "./struct_def.zod";
         
             b: z.array(u16Schema).length(10),
         
-            c: z.array(z.array(z.coerce.string()).length(10)).length(20),
+            c: z.array(z.array(z.coerce.string()).length(20)).length(10),
         
             c1: z.array(u8Schema),
         
