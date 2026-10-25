@@ -2,8 +2,9 @@ These complete artifact manifests were regenerated from the branch that widened
 `@deprecated` sites (#369), which adds `deprecated` to the generated transport
 allow lists. The Rust manifests include the intentional #390 contract
 correction: absent required query, header and cookie scalars fail extraction
-instead of acquiring defaults, and unary and streaming handlers share metadata
-decoding. The TypeScript manifests retain the original `d98bc37a` baseline.
+instead of acquiring defaults, and empty sequences retain their zero-occurrence
+encoding. Unary and streaming handlers share metadata decoding. The TypeScript
+manifests retain the original `d98bc37a` baseline.
 
 To regenerate after an intentional change to ordinary output, build `xidlc` in a
 clean checkout of the new baseline, then run for each target and fixture:
