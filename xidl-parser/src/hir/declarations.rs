@@ -1,7 +1,7 @@
 //! Canonical declaration paths shared by semantic analysis and version projection.
 
 use super::{Declarator, ScopedName};
-use crate::hir::{ConstrTypeDcl, Definition, Export, InterfaceDclInner, TypeDcl};
+use crate::hir::{ConstrTypeDcl, Definition, Export, InterfaceDclInner, TypeDcl, TypedefType};
 use std::collections::BTreeSet;
 
 /// Names declared in one specification, resolved with IDL lexical scope.
@@ -80,6 +80,9 @@ impl DeclarationNames {
         match type_dcl {
             TypeDcl::ConstrTypeDcl(constr) => Self::constr(constr, path, visit),
             TypeDcl::TypedefDcl(typedef) => {
+                if let TypedefType::ConstrTypeDcl(constr) = &typedef.ty {
+                    Self::constr(constr, path, visit);
+                }
                 for declarator in &typedef.decl {
                     visit(&Self::join(path, Self::declarator_name(declarator)));
                 }

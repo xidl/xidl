@@ -2,6 +2,7 @@
 
 use super::*;
 use crate::generate::utils::scope::resolve_canonical;
+use hir::VisitScopedNames;
 use std::collections::BTreeSet;
 
 impl SurfaceCollector {
@@ -25,10 +26,7 @@ impl SurfaceCollector {
         let Some((scope, mut parent)) = self.parents.get(key).cloned() else {
             return Ok(());
         };
-        if parent.name.first().is_some_and(|name| name == version) {
-            parent.name.remove(0);
-            parent.is_root = true;
-        }
+        parent.remove_root_namespace(version);
         let parent = resolve_canonical(&scope, &parent, |name| self.types.contains_key(name))
             .ok_or_else(|| {
                 IdlcError::rpc(format!(

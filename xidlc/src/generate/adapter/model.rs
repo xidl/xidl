@@ -27,6 +27,7 @@ pub(crate) enum ValueRepresentation {
 
 #[derive(Debug, Clone)]
 pub(crate) struct TypeUse {
+    /// Root names are absolute within this version surface, without its wrapper.
     pub ty: hir::TypeSpec,
     pub scope: Vec<String>,
     pub declarator: hir::Declarator,

@@ -23,13 +23,11 @@ impl StepPlanner<'_> {
         let up = ReferencePlanner {
             surface: self.source,
             paired: &paired,
-            version: &self.facts.from,
             context: self.contract,
         };
         let down = ReferencePlanner {
             surface: self.target,
             paired: &paired,
-            version: &self.facts.to,
             context: self.contract,
         };
         let operations = self.operations(&up, &down)?;
