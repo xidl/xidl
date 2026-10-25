@@ -7,7 +7,10 @@ use xidl_parser::hir;
 pub enum TransportTypeDef {
     Struct(hir::StructDcl),
     Enum(hir::EnumDcl),
-    Typedef(hir::TypedefDcl),
+    Typedef {
+        ty: hir::TypedefType,
+        declarator: hir::Declarator,
+    },
     /// Declaration rendered directly rather than projected into a wire type.
     Public,
 }

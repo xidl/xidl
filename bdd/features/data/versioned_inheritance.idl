@@ -16,6 +16,8 @@ module geo {
     typedef long DeliveryReference;
     typedef string Identifier;
     enum Country { US, CA };
+    typedef double Coordinates[2], Bounds[4];
+    typedef Coordinates MapPosition;
     struct Marker {};
     struct Anchor : Marker {
         @optional string checkpoint;
@@ -47,6 +49,7 @@ module shipping {
 
     @rename_all("camelCase")
     struct Postal : geo::Identity {
+        @optional geo::MapPosition coordinates;
         @removed(Versions::v2) string line;
         @added(Versions::v2) string street;
         @removed(Versions::v2) string country_code;
@@ -56,6 +59,7 @@ module shipping {
 
     @rename_all("camelCase")
     struct PostalChange : geo::Change {
+        @optional geo::MapPosition coordinates;
         @removed(Versions::v2) @optional string line;
         @added(Versions::v2) @optional string street;
         @removed(Versions::v2) @optional string country_code;
