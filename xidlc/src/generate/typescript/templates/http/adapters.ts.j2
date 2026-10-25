@@ -31,26 +31,30 @@ export const OMIT = "xidl.omit";
 export type Omitted = typeof OMIT;
 const ok = <T>(value: T): VersionedResult<T> => ({ ok: true, value });
 
-function mapSequence<S, T>(source: S[], convert: (value: S) => VersionedResult<T>): VersionedResult<T[]> {
+function locate<T>(result: VersionedResult<T>, path: string): VersionedResult<T> {
+    if (result.ok) return result;
+    return { ok: false, error: { ...result.error, typePath: `${path}.${result.error.typePath}` } };
+}
+function mapSequence<S, T>(source: S[], convert: (value: S) => VersionedResult<T>, path: string): VersionedResult<T[]> {
     const values: T[] = [];
     for (const value of source) {
-        const next = convert(value);
+        const next = locate(convert(value), path);
         if (!next.ok) return next;
         values.push(next.value);
     }
     return ok(values);
 }
-function mapRecord<S, T>(source: Record<string, S>, convert: (value: S) => VersionedResult<T>): VersionedResult<Record<string, T>> {
+function mapRecord<S, T>(source: Record<string, S>, convert: (value: S) => VersionedResult<T>, path: string): VersionedResult<Record<string, T>> {
     const entries: Array<[string, T]> = [];
     for (const [key, value] of Object.entries(source)) {
-        const next = convert(value);
+        const next = locate(convert(value), path);
         if (!next.ok) return next;
         entries.push([key, next.value]);
     }
     return ok(Object.fromEntries(entries));
 }
-function mapOptional<S, T>(source: S | undefined, convert: (value: S) => VersionedResult<T>): VersionedResult<T | undefined> {
-    return source === undefined ? ok(undefined) : convert(source);
+function mapOptional<S, T>(source: S | undefined, convert: (value: S) => VersionedResult<T>, path: string): VersionedResult<T | undefined> {
+    return source === undefined ? ok(undefined) : locate(convert(source), path);
 }
 
 {% include "http/adapters_wire.ts.j2" %}
@@ -92,12 +96,12 @@ export interface VersionAdapters {
     }
 {% endfor %}
 
-{% macro convert(value, source) -%}
+{% macro convert(value, source, path) -%}
     {%- if value.kind == "Identity" -%}ok({{ source }})
     {%- elif value.kind == "Named" -%}{{ value.data.name }}({{ source }}{% if value.data.current %}, current{% endif %}{% if value.data.stored %}, stored{% endif %}, adapters)
-    {%- elif value.kind == "Sequence" -%}mapSequence({{ source }}, (item) => {{ convert(value.data, "item") }})
-    {%- elif value.kind == "Map" -%}mapRecord({{ source }}, (item) => {{ convert(value.data, "item") }})
-    {%- elif value.kind == "Optional" -%}mapOptional({{ source }}, (item) => {{ convert(value.data, "item") }})
+    {%- elif value.kind == "Sequence" -%}mapSequence({{ source }}, (item) => {{ convert(value.data, "item", path) }}, {{ path | tojson }})
+    {%- elif value.kind == "Map" -%}mapRecord({{ source }}, (item) => {{ convert(value.data, "item", path) }}, {{ path | tojson }})
+    {%- elif value.kind == "Optional" -%}mapOptional({{ source }}, (item) => {{ convert(value.data, "item", path) }}, {{ path | tojson }})
 {%- endif -%}
 {%- endmacro %}
 
@@ -106,7 +110,7 @@ export interface VersionAdapters {
         {% if c.kind == "hook" %}
             return adapters.{{ c.hook }}(source);
         {% elif c.kind == "alias" %}
-            return {{ convert(c.value, "source") }};
+            return {{ convert(c.value, "source", c.path) }};
         {% elif c.kind == "enum" %}
             switch (source) {
                 {% for shared in c.shared_values %}
@@ -121,7 +125,7 @@ export interface VersionAdapters {
         {% elif c.kind == "union" %}
             {% for copy in c.copies %}
                 if ({{ copy.source | tojson }} in source) {
-                    const projected = {{ convert(copy.value, "source[" ~ (copy.source | tojson) ~ "]") }};
+                    const projected = {{ convert(copy.value, "source[" ~ (copy.source | tojson) ~ "]", c.path ~ "." ~ copy.source) }};
                     if (!projected.ok) return projected;
                     return ok({ [{{ copy.target | tojson }}]: projected.value });
                 }
@@ -138,7 +142,7 @@ export interface VersionAdapters {
                 if (!decision.ok) return decision;
             {% endif %}
             {% for copy in c.copies %}
-                const converted{{ loop.index0 }} = {{ convert(copy.value, "source[" ~ (copy.source | tojson) ~ "]") }};
+                const converted{{ loop.index0 }} = {{ convert(copy.value, "source[" ~ (copy.source | tojson) ~ "]", c.path ~ "." ~ copy.source) }};
                 if (!converted{{ loop.index0 }}.ok) return converted{{ loop.index0 }};
             {% endfor %}
             {%- if c.pair %}

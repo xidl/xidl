@@ -1,6 +1,5 @@
 ---
 source: xidlc/tests/rust_adapters_targets.rs
-assertion_line: 21
 expression: "&files[0].1"
 ---
 /// Pure version projections. The application owns routing and side effects.
@@ -117,6 +116,15 @@ pub mod version_adapters {
             &self,
             source: &v2::Busy,
         ) -> VersionedResult<v1::DepotUpdateError>;
+        fn address_upcast_from_v_2(
+            &self,
+            source: &v2::Address,
+        ) -> VersionedResult<AddressUpcastFromV2Decision>;
+        fn address_downcast_to_v_2(
+            &self,
+            source: &v3::Address,
+            stored: &dyn StoredValues,
+        ) -> VersionedResult<AddressDowncastToV2Decision>;
         fn parcel_upcast_from_v_2(
             &self,
             source: &v2::Parcel,
@@ -163,6 +171,8 @@ pub mod version_adapters {
         fn optional_change_note(&self, source: &v2::OptionalChange) -> Option<String>;
         /// wire `reference`, last served by v1
         fn parcel_legacy(&self, source: &v2::Parcel) -> Option<String>;
+        /// wire `gate`, last served by v2
+        fn address_gate(&self, source: &v3::Address) -> Option<String>;
         /// wire `handling_note`, last served by v2
         fn parcel_handling_note(&self, source: &v3::Parcel) -> Option<String>;
         /// wire `trace_id`, last served by v2
@@ -170,6 +180,7 @@ pub mod version_adapters {
     }
     /// Wire names each served version still reads from storage, by type; Head reads nothing.
     pub const NEEDS: &[(&str, &[(&str, &[&str])])] = &[
+        ("Address", &[("2026-07", &[]), ("2026-04", &["gate"]), ("2026-01", &["gate"])]),
         (
             "Depot.trace",
             &[("2026-07", &[]), ("2026-04", &["trace_id"]), ("2026-01", &["trace_id"])],
@@ -211,6 +222,15 @@ pub mod version_adapters {
     /// Explicit business assignments and discarded-value acknowledgements.
     pub struct ParcelDowncastToV1Decision {
         pub legacy: String,
+    }
+    /// Explicit business assignments and discarded-value acknowledgements.
+    pub struct AddressUpcastFromV2Decision {
+        pub zone: Option<String>,
+        pub gate: Ignored,
+    }
+    /// Explicit business assignments and discarded-value acknowledgements.
+    pub struct AddressDowncastToV2Decision {
+        pub gate: Option<String>,
     }
     /// Explicit business assignments and discarded-value acknowledgements.
     pub struct ParcelUpcastFromV2Decision {
@@ -459,18 +479,30 @@ pub mod version_adapters {
         pub parcel: v3::Parcel,
         pub actor: String,
     }
+    fn locate<T>(result: VersionedResult<T>, path: &str) -> VersionedResult<T> {
+        result
+            .map_err(|error| UnsupportedProjection {
+                type_path: format!("{path}.{}", error.type_path),
+                ..error
+            })
+    }
     fn map_sequence<S, T>(
         source: &[S],
         convert: impl Fn(&S) -> VersionedResult<T>,
+        path: &str,
     ) -> VersionedResult<Vec<T>> {
-        source.iter().map(convert).collect()
+        source.iter().map(|item| locate(convert(item), path)).collect()
     }
     fn map_array<S, T, const N: usize>(
         source: &[S; N],
         convert: impl Fn(&S) -> VersionedResult<T>,
         refusal: impl Fn(&str) -> UnsupportedProjection,
+        path: &str,
     ) -> VersionedResult<[T; N]> {
-        let values = source.iter().map(convert).collect::<VersionedResult<Vec<_>>>()?;
+        let values = source
+            .iter()
+            .map(|item| locate(convert(item), path))
+            .collect::<VersionedResult<Vec<_>>>()?;
         values
             .try_into()
             .map_err(|_: Vec<T>| refusal("array projection changed its length"))
@@ -480,11 +512,12 @@ pub mod version_adapters {
         key: impl Fn(&K) -> VersionedResult<L>,
         value: impl Fn(&V) -> VersionedResult<W>,
         refusal: impl Fn(&str) -> UnsupportedProjection,
+        path: &str,
     ) -> VersionedResult<::std::collections::BTreeMap<L, W>> {
         let mut target = ::std::collections::BTreeMap::new();
         for (old_key, old_value) in source {
-            let next_key = key(old_key)?;
-            let next_value = value(old_value)?;
+            let next_key = locate(key(old_key), path)?;
+            let next_value = locate(value(old_value), path)?;
             if target.insert(next_key, next_value).is_some() {
                 return Err(refusal("map key projection is not injective"));
             }
@@ -506,7 +539,20 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.zip))?;
-        Ok(v2::Address { zip: projected_0 })
+        let projected_1 = locate(
+            (&source.gate)
+                .as_ref()
+                .map(|item| Ok::<
+                    _,
+                    UnsupportedProjection,
+                >(::std::clone::Clone::clone(item)))
+                .transpose(),
+            "Address.gate",
+        )?;
+        Ok(v2::Address {
+            zip: projected_0,
+            gate: projected_1,
+        })
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn address_downcast_to_v_1(
@@ -523,7 +569,20 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.zip))?;
-        Ok(v1::Address { zip: projected_0 })
+        let projected_1 = locate(
+            (&source.gate)
+                .as_ref()
+                .map(|item| Ok::<
+                    _,
+                    UnsupportedProjection,
+                >(::std::clone::Clone::clone(item)))
+                .transpose(),
+            "Address.gate",
+        )?;
+        Ok(v1::Address {
+            zip: projected_0,
+            gate: projected_1,
+        })
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn ambiguous_representation_upcast_from_v_1(
@@ -655,6 +714,7 @@ pub mod version_adapters {
             |key| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(key)),
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
             refusal,
+            "Contact.tags",
         )?;
         Ok(v2::Contact {
             address: projected_0,
@@ -678,6 +738,7 @@ pub mod version_adapters {
             |key| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(key)),
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
             refusal,
+            "Contact.tags",
         )?;
         Ok(v1::Contact {
             address: projected_0,
@@ -795,10 +856,17 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.name))?;
-        let projected_1 = (&source.children)
-            .as_ref()
-            .map(|item| map_sequence(item, |item| node_upcast_from_v_1(item, adapters)))
-            .transpose()?;
+        let projected_1 = locate(
+            (&source.children)
+                .as_ref()
+                .map(|item| map_sequence(
+                    item,
+                    |item| node_upcast_from_v_1(item, adapters),
+                    "Node.children",
+                ))
+                .transpose(),
+            "Node.children",
+        )?;
         Ok(v2::Node {
             name: projected_0,
             children: projected_1,
@@ -819,10 +887,17 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.name))?;
-        let projected_1 = (&source.children)
-            .as_ref()
-            .map(|item| map_sequence(item, |item| node_downcast_to_v_1(item, adapters)))
-            .transpose()?;
+        let projected_1 = locate(
+            (&source.children)
+                .as_ref()
+                .map(|item| map_sequence(
+                    item,
+                    |item| node_downcast_to_v_1(item, adapters),
+                    "Node.children",
+                ))
+                .transpose(),
+            "Node.children",
+        )?;
         Ok(v1::Node {
             name: projected_0,
             children: projected_1,
@@ -861,6 +936,7 @@ pub mod version_adapters {
             |key| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(key)),
             |item| address_upcast_from_v_1(item, adapters),
             refusal,
+            "NumericIndex.addresses",
         )?;
         Ok(v2::NumericIndex {
             addresses: projected_0,
@@ -882,6 +958,7 @@ pub mod version_adapters {
             |key| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(key)),
             |item| address_downcast_to_v_1(item, adapters),
             refusal,
+            "NumericIndex.addresses",
         )?;
         Ok(v1::NumericIndex {
             addresses: projected_0,
@@ -936,25 +1013,34 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.id))?;
-        let projected_1 = (&source.handling_note)
-            .as_ref()
-            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
-            .transpose()?;
+        let projected_1 = locate(
+            (&source.handling_note)
+                .as_ref()
+                .map(|item| Ok::<
+                    _,
+                    UnsupportedProjection,
+                >(::std::clone::Clone::clone(item)))
+                .transpose(),
+            "Parcel.handling_note",
+        )?;
         let projected_2 = address_upcast_from_v_1(&source.address, adapters)?;
         let projected_3 = map_sequence(
             &source.stops,
             |item| address_upcast_from_v_1(item, adapters),
+            "Parcel.stops",
         )?;
         let projected_4 = map_record(
             &source.by_tag,
             |key| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(key)),
             |item| address_upcast_from_v_1(item, adapters),
             refusal,
+            "Parcel.by_tag",
         )?;
         let projected_5 = map_array(
             &source.fixed,
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
             refusal,
+            "Parcel.fixed",
         )?;
         Ok(v2::Parcel {
             id: projected_0,
@@ -985,25 +1071,34 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.id))?;
-        let projected_1 = (&source.handling_note)
-            .as_ref()
-            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
-            .transpose()?;
+        let projected_1 = locate(
+            (&source.handling_note)
+                .as_ref()
+                .map(|item| Ok::<
+                    _,
+                    UnsupportedProjection,
+                >(::std::clone::Clone::clone(item)))
+                .transpose(),
+            "Parcel.handling_note",
+        )?;
         let projected_2 = address_downcast_to_v_1(&source.address, adapters)?;
         let projected_3 = map_sequence(
             &source.stops,
             |item| address_downcast_to_v_1(item, adapters),
+            "Parcel.stops",
         )?;
         let projected_4 = map_record(
             &source.by_tag,
             |key| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(key)),
             |item| address_downcast_to_v_1(item, adapters),
             refusal,
+            "Parcel.by_tag",
         )?;
         let projected_5 = map_array(
             &source.fixed,
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
             refusal,
+            "Parcel.fixed",
         )?;
         Ok(v1::Parcel {
             id: projected_0,
@@ -1026,14 +1121,26 @@ pub mod version_adapters {
             type_path: "ParcelPatch".into(),
             reason: reason.into(),
         };
-        let projected_0 = (&source.note)
-            .as_ref()
-            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
-            .transpose()?;
-        let projected_1 = (&source.handling_note)
-            .as_ref()
-            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
-            .transpose()?;
+        let projected_0 = locate(
+            (&source.note)
+                .as_ref()
+                .map(|item| Ok::<
+                    _,
+                    UnsupportedProjection,
+                >(::std::clone::Clone::clone(item)))
+                .transpose(),
+            "ParcelPatch.note",
+        )?;
+        let projected_1 = locate(
+            (&source.handling_note)
+                .as_ref()
+                .map(|item| Ok::<
+                    _,
+                    UnsupportedProjection,
+                >(::std::clone::Clone::clone(item)))
+                .transpose(),
+            "ParcelPatch.handling_note",
+        )?;
         Ok(v2::ParcelPatch {
             note: projected_0,
             handling_note: projected_1,
@@ -1174,6 +1281,7 @@ pub mod version_adapters {
             |key| state_downcast_to_v_1(key, adapters),
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
             refusal,
+            "StateIndex.states",
         )?;
         Ok(v1::StateIndex {
             states: projected_0,
@@ -1759,18 +1867,20 @@ pub mod version_adapters {
             type_path: "Address".into(),
             reason: reason.into(),
         };
+        let decision = adapters.address_upcast_from_v_2(source)?;
         let projected_0 = Ok::<
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.zip))?;
         Ok(v3::Address {
             zip: projected_0,
-            zone: None,
+            zone: decision.zone,
         })
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn address_downcast_to_v_2(
         source: &v3::Address,
+        stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> VersionedResult<v2::Address> {
         let refusal = |reason: &str| UnsupportedProjection {
@@ -1779,11 +1889,15 @@ pub mod version_adapters {
             type_path: "Address".into(),
             reason: reason.into(),
         };
+        let decision = adapters.address_downcast_to_v_2(source, stored)?;
         let projected_0 = Ok::<
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.zip))?;
-        Ok(v2::Address { zip: projected_0 })
+        Ok(v2::Address {
+            zip: projected_0,
+            gate: decision.gate,
+        })
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn ambiguous_representation_upcast_from_v_2(
@@ -1936,6 +2050,7 @@ pub mod version_adapters {
             |key| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(key)),
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
             refusal,
+            "Contact.tags",
         )?;
         Ok(v3::Contact {
             address: projected_0,
@@ -1945,6 +2060,7 @@ pub mod version_adapters {
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn contact_downcast_to_v_2(
         source: &v3::Contact,
+        stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> VersionedResult<v2::Contact> {
         let refusal = |reason: &str| UnsupportedProjection {
@@ -1953,12 +2069,13 @@ pub mod version_adapters {
             type_path: "Contact".into(),
             reason: reason.into(),
         };
-        let projected_0 = address_downcast_to_v_2(&source.address, adapters)?;
+        let projected_0 = address_downcast_to_v_2(&source.address, stored, adapters)?;
         let projected_1 = map_record(
             &source.tags,
             |key| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(key)),
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
             refusal,
+            "Contact.tags",
         )?;
         Ok(v2::Contact {
             address: projected_0,
@@ -2077,10 +2194,17 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.name))?;
-        let projected_1 = (&source.children)
-            .as_ref()
-            .map(|item| map_sequence(item, |item| node_upcast_from_v_2(item, adapters)))
-            .transpose()?;
+        let projected_1 = locate(
+            (&source.children)
+                .as_ref()
+                .map(|item| map_sequence(
+                    item,
+                    |item| node_upcast_from_v_2(item, adapters),
+                    "Node.children",
+                ))
+                .transpose(),
+            "Node.children",
+        )?;
         Ok(v3::Node {
             name: projected_0,
             children: projected_1,
@@ -2101,10 +2225,17 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.name))?;
-        let projected_1 = (&source.children)
-            .as_ref()
-            .map(|item| map_sequence(item, |item| node_downcast_to_v_2(item, adapters)))
-            .transpose()?;
+        let projected_1 = locate(
+            (&source.children)
+                .as_ref()
+                .map(|item| map_sequence(
+                    item,
+                    |item| node_downcast_to_v_2(item, adapters),
+                    "Node.children",
+                ))
+                .transpose(),
+            "Node.children",
+        )?;
         Ok(v2::Node {
             name: projected_0,
             children: projected_1,
@@ -2143,6 +2274,7 @@ pub mod version_adapters {
             |key| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(key)),
             |item| address_upcast_from_v_2(item, adapters),
             refusal,
+            "NumericIndex.addresses",
         )?;
         Ok(v3::NumericIndex {
             addresses: projected_0,
@@ -2151,6 +2283,7 @@ pub mod version_adapters {
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn numeric_index_downcast_to_v_2(
         source: &v3::NumericIndex,
+        stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> VersionedResult<v2::NumericIndex> {
         let refusal = |reason: &str| UnsupportedProjection {
@@ -2162,8 +2295,9 @@ pub mod version_adapters {
         let projected_0 = map_record(
             &source.addresses,
             |key| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(key)),
-            |item| address_downcast_to_v_2(item, adapters),
+            |item| address_downcast_to_v_2(item, stored, adapters),
             refusal,
+            "NumericIndex.addresses",
         )?;
         Ok(v2::NumericIndex {
             addresses: projected_0,
@@ -2180,10 +2314,16 @@ pub mod version_adapters {
             type_path: "OptionalChange".into(),
             reason: reason.into(),
         };
-        let projected_0 = (&source.note)
-            .as_ref()
-            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
-            .transpose()?;
+        let projected_0 = locate(
+            (&source.note)
+                .as_ref()
+                .map(|item| Ok::<
+                    _,
+                    UnsupportedProjection,
+                >(::std::clone::Clone::clone(item)))
+                .transpose(),
+            "OptionalChange.note",
+        )?;
         Ok(v3::OptionalChange {
             note: projected_0,
         })
@@ -2199,10 +2339,16 @@ pub mod version_adapters {
             type_path: "OptionalChange".into(),
             reason: reason.into(),
         };
-        let projected_0 = (&source.note)
-            .as_ref()
-            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
-            .transpose()?;
+        let projected_0 = locate(
+            (&source.note)
+                .as_ref()
+                .map(|item| Ok::<
+                    _,
+                    UnsupportedProjection,
+                >(::std::clone::Clone::clone(item)))
+                .transpose(),
+            "OptionalChange.note",
+        )?;
         Ok(v2::OptionalChange {
             note: projected_0,
         })
@@ -2231,25 +2377,34 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.carrier))?;
-        let projected_3 = (&source.note)
-            .as_ref()
-            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
-            .transpose()?;
+        let projected_3 = locate(
+            (&source.note)
+                .as_ref()
+                .map(|item| Ok::<
+                    _,
+                    UnsupportedProjection,
+                >(::std::clone::Clone::clone(item)))
+                .transpose(),
+            "Parcel.note",
+        )?;
         let projected_4 = address_upcast_from_v_2(&source.address, adapters)?;
         let projected_5 = map_sequence(
             &source.stops,
             |item| address_upcast_from_v_2(item, adapters),
+            "Parcel.stops",
         )?;
         let projected_6 = map_record(
             &source.by_tag,
             |key| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(key)),
             |item| address_upcast_from_v_2(item, adapters),
             refusal,
+            "Parcel.by_tag",
         )?;
         let projected_7 = map_array(
             &source.fixed,
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
             refusal,
+            "Parcel.fixed",
         )?;
         Ok(v3::Parcel {
             id: projected_0,
@@ -2289,25 +2444,34 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.carrier))?;
-        let projected_3 = (&source.note)
-            .as_ref()
-            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
-            .transpose()?;
-        let projected_4 = address_downcast_to_v_2(&source.address, adapters)?;
+        let projected_3 = locate(
+            (&source.note)
+                .as_ref()
+                .map(|item| Ok::<
+                    _,
+                    UnsupportedProjection,
+                >(::std::clone::Clone::clone(item)))
+                .transpose(),
+            "Parcel.note",
+        )?;
+        let projected_4 = address_downcast_to_v_2(&source.address, stored, adapters)?;
         let projected_5 = map_sequence(
             &source.stops,
-            |item| address_downcast_to_v_2(item, adapters),
+            |item| address_downcast_to_v_2(item, stored, adapters),
+            "Parcel.stops",
         )?;
         let projected_6 = map_record(
             &source.by_tag,
             |key| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(key)),
-            |item| address_downcast_to_v_2(item, adapters),
+            |item| address_downcast_to_v_2(item, stored, adapters),
             refusal,
+            "Parcel.by_tag",
         )?;
         let projected_7 = map_array(
             &source.fixed,
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
             refusal,
+            "Parcel.fixed",
         )?;
         Ok(v2::Parcel {
             id: projected_0,
@@ -2334,10 +2498,16 @@ pub mod version_adapters {
             reason: reason.into(),
         };
         let decision = adapters.parcel_patch_upcast_from_v_2(source, current)?;
-        let projected_0 = (&source.note)
-            .as_ref()
-            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
-            .transpose()?;
+        let projected_0 = locate(
+            (&source.note)
+                .as_ref()
+                .map(|item| Ok::<
+                    _,
+                    UnsupportedProjection,
+                >(::std::clone::Clone::clone(item)))
+                .transpose(),
+            "ParcelPatch.note",
+        )?;
         Ok(Upcast {
             value: v3::ParcelPatch {
                 note: projected_0,
@@ -2482,6 +2652,7 @@ pub mod version_adapters {
             |key| state_downcast_to_v_2(key, adapters),
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
             refusal,
+            "StateIndex.states",
         )?;
         Ok(v2::StateIndex {
             states: projected_0,
@@ -2646,6 +2817,7 @@ pub mod version_adapters {
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn depot_contact_response_downcast_to_v_2(
         source: &v3::Contact,
+        stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> VersionedResult<v2::Contact> {
         let refusal = |reason: &str| UnsupportedProjection {
@@ -2654,7 +2826,7 @@ pub mod version_adapters {
             type_path: "DepotContactResponse".into(),
             reason: reason.into(),
         };
-        let projected_0 = contact_downcast_to_v_2(source, adapters)?;
+        let projected_0 = contact_downcast_to_v_2(source, stored, adapters)?;
         Ok(projected_0)
     }
     /// Projects one adjacent declaration by borrowing its source value.
@@ -2780,6 +2952,7 @@ pub mod version_adapters {
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn depot_index_response_downcast_to_v_2(
         source: &v3::NumericIndex,
+        stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> VersionedResult<v2::NumericIndex> {
         let refusal = |reason: &str| UnsupportedProjection {
@@ -2788,7 +2961,7 @@ pub mod version_adapters {
             type_path: "DepotIndexResponse".into(),
             reason: reason.into(),
         };
-        let projected_0 = numeric_index_downcast_to_v_2(source, adapters)?;
+        let projected_0 = numeric_index_downcast_to_v_2(source, stored, adapters)?;
         Ok(projected_0)
     }
     /// Projects one adjacent declaration by borrowing its source value.
@@ -3455,7 +3628,7 @@ pub mod version_adapters {
         let object = wire
             .as_object()
             .ok_or_else(|| "expected a served-version object".to_string())?;
-        let keys: &[&str] = &["zip_code"];
+        let keys: &[&str] = &["gate", "zip_code"];
         let forbidden: &[&str] = &["zone"];
         for key in object.keys() {
             if forbidden.contains(&key.as_str()) {
@@ -3465,7 +3638,7 @@ pub mod version_adapters {
         let flattened = object
             .iter()
             .filter(|(key, _)| {
-                let promoted: &[&str] = &["zip_code"];
+                let promoted: &[&str] = &["gate", "zip_code"];
                 promoted.contains(&key.as_str())
             })
             .map(|(key, value)| (key.clone(), value.clone()))
@@ -3519,7 +3692,7 @@ pub mod version_adapters {
         let object = wire
             .as_object()
             .ok_or_else(|| "expected a served-version object".to_string())?;
-        let keys: &[&str] = &["zip_code"];
+        let keys: &[&str] = &["gate", "zip_code"];
         let forbidden: &[&str] = &["zone"];
         for key in object.keys() {
             if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
@@ -3533,7 +3706,18 @@ pub mod version_adapters {
             })?;
         let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
             .map_err(|error| error.to_string())?;
-        Ok(v1::Address { zip: value_0 })
+        let raw_1 = object.get("gate").unwrap_or(&::serde_json::Value::Null);
+        let value_1: Option<String> = if (raw_1).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_1).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        Ok(v1::Address {
+            zip: value_0,
+            gate: value_1,
+        })
     }
     fn decode_wire_v_1_extra(wire: &::serde_json::Value) -> Result<v1::Extra, String> {
         let object = wire
@@ -3980,7 +4164,7 @@ pub mod version_adapters {
         let object = wire
             .as_object()
             .ok_or_else(|| "expected a served-version object".to_string())?;
-        let keys: &[&str] = &["zip_code"];
+        let keys: &[&str] = &["gate", "zip_code"];
         let forbidden: &[&str] = &["zone"];
         for key in object.keys() {
             if forbidden.contains(&key.as_str()) {
@@ -3990,7 +4174,7 @@ pub mod version_adapters {
         let flattened = object
             .iter()
             .filter(|(key, _)| {
-                let promoted: &[&str] = &["zip_code"];
+                let promoted: &[&str] = &["gate", "zip_code"];
                 promoted.contains(&key.as_str())
             })
             .map(|(key, value)| (key.clone(), value.clone()))
@@ -4044,7 +4228,7 @@ pub mod version_adapters {
         let object = wire
             .as_object()
             .ok_or_else(|| "expected a served-version object".to_string())?;
-        let keys: &[&str] = &["zip_code"];
+        let keys: &[&str] = &["gate", "zip_code"];
         let forbidden: &[&str] = &["zone"];
         for key in object.keys() {
             if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
@@ -4058,7 +4242,18 @@ pub mod version_adapters {
             })?;
         let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
             .map_err(|error| error.to_string())?;
-        Ok(v2::Address { zip: value_0 })
+        let raw_1 = object.get("gate").unwrap_or(&::serde_json::Value::Null);
+        let value_1: Option<String> = if (raw_1).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_1).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        Ok(v2::Address {
+            zip: value_0,
+            gate: value_1,
+        })
     }
     fn decode_wire_v_2_extra(wire: &::serde_json::Value) -> Result<v2::Extra, String> {
         let object = wire
@@ -4525,7 +4720,7 @@ pub mod version_adapters {
             .as_object()
             .ok_or_else(|| "expected a served-version object".to_string())?;
         let keys: &[&str] = &["zip_code", "zone"];
-        let forbidden: &[&str] = &[];
+        let forbidden: &[&str] = &["gate"];
         for key in object.keys() {
             if forbidden.contains(&key.as_str()) {
                 return Err(format!("field {key} is not declared in served version"));
@@ -4589,7 +4784,7 @@ pub mod version_adapters {
             .as_object()
             .ok_or_else(|| "expected a served-version object".to_string())?;
         let keys: &[&str] = &["zip_code", "zone"];
-        let forbidden: &[&str] = &[];
+        let forbidden: &[&str] = &["gate"];
         for key in object.keys() {
             if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
                 return Err(format!("field {key} is not declared in served version"));
@@ -5569,6 +5764,7 @@ pub mod version_adapters {
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_contact_from_v_1_outcome(
         head: Result<v3::Contact, ::xidl_rust_axum::Error>,
+        stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
         Result<v1::Contact, ::xidl_rust_axum::Error>,
@@ -5578,6 +5774,7 @@ pub mod version_adapters {
             Ok(source) => {
                 let source = match depot_contact_response_downcast_to_v_2(
                     source,
+                    stored,
                     adapters,
                 ) {
                     Ok(value) => value,
@@ -5631,8 +5828,8 @@ pub mod version_adapters {
             }
         }
     }
-    /// Execute a caller-supplied Head handler once after successful adaptation.
-    pub async fn dispatch_depot_contact_from_v_1<F, Fut>(
+    /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
+    pub async fn dispatch_depot_contact_from_v_1<F, Fut, R>(
         wire: ::serde_json::Value,
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
@@ -5646,8 +5843,9 @@ pub mod version_adapters {
     where
         F: FnOnce(DepotContactRequestV3, VersionContext) -> Fut,
         Fut: ::std::future::Future<
-            Output = Result<v3::Contact, ::xidl_rust_axum::Error>,
+            Output = HeadOutcome<v3::Contact, ::xidl_rust_axum::Error, R>,
         >,
+        R: StoredValues,
     {
         let input = decode_and_upcast_depot_contact_from_v_1(wire, adapters)?;
         let head = handler(
@@ -5657,7 +5855,7 @@ pub mod version_adapters {
                 },
             )
             .await;
-        Ok(downcast_depot_contact_from_v_1_outcome(head, adapters))
+        Ok(downcast_depot_contact_from_v_1_outcome(head.outcome, &head.stored, adapters))
     }
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_exchange_from_v_1(
@@ -6064,6 +6262,7 @@ pub mod version_adapters {
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_index_from_v_1_outcome(
         head: Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
+        stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
         Result<v1::NumericIndex, ::xidl_rust_axum::Error>,
@@ -6073,6 +6272,7 @@ pub mod version_adapters {
             Ok(source) => {
                 let source = match depot_index_response_downcast_to_v_2(
                     source,
+                    stored,
                     adapters,
                 ) {
                     Ok(value) => value,
@@ -6120,8 +6320,8 @@ pub mod version_adapters {
             }
         }
     }
-    /// Execute a caller-supplied Head handler once after successful adaptation.
-    pub async fn dispatch_depot_index_from_v_1<F, Fut>(
+    /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
+    pub async fn dispatch_depot_index_from_v_1<F, Fut, R>(
         wire: ::serde_json::Value,
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
@@ -6135,8 +6335,9 @@ pub mod version_adapters {
     where
         F: FnOnce(DepotIndexRequestV3, VersionContext) -> Fut,
         Fut: ::std::future::Future<
-            Output = Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
+            Output = HeadOutcome<v3::NumericIndex, ::xidl_rust_axum::Error, R>,
         >,
+        R: StoredValues,
     {
         let input = decode_and_upcast_depot_index_from_v_1(wire, adapters)?;
         let head = handler(
@@ -6146,7 +6347,7 @@ pub mod version_adapters {
                 },
             )
             .await;
-        Ok(downcast_depot_index_from_v_1_outcome(head, adapters))
+        Ok(downcast_depot_index_from_v_1_outcome(head.outcome, &head.stored, adapters))
     }
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_inspect_from_v_1(
@@ -7590,6 +7791,7 @@ pub mod version_adapters {
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_contact_from_v_2_outcome(
         head: Result<v3::Contact, ::xidl_rust_axum::Error>,
+        stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
         Result<v2::Contact, ::xidl_rust_axum::Error>,
@@ -7599,6 +7801,7 @@ pub mod version_adapters {
             Ok(source) => {
                 let source = match depot_contact_response_downcast_to_v_2(
                     source,
+                    stored,
                     adapters,
                 ) {
                     Ok(value) => value,
@@ -7628,8 +7831,8 @@ pub mod version_adapters {
             }
         }
     }
-    /// Execute a caller-supplied Head handler once after successful adaptation.
-    pub async fn dispatch_depot_contact_from_v_2<F, Fut>(
+    /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
+    pub async fn dispatch_depot_contact_from_v_2<F, Fut, R>(
         wire: ::serde_json::Value,
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
@@ -7643,8 +7846,9 @@ pub mod version_adapters {
     where
         F: FnOnce(DepotContactRequestV3, VersionContext) -> Fut,
         Fut: ::std::future::Future<
-            Output = Result<v3::Contact, ::xidl_rust_axum::Error>,
+            Output = HeadOutcome<v3::Contact, ::xidl_rust_axum::Error, R>,
         >,
+        R: StoredValues,
     {
         let input = decode_and_upcast_depot_contact_from_v_2(wire, adapters)?;
         let head = handler(
@@ -7654,7 +7858,7 @@ pub mod version_adapters {
                 },
             )
             .await;
-        Ok(downcast_depot_contact_from_v_2_outcome(head, adapters))
+        Ok(downcast_depot_contact_from_v_2_outcome(head.outcome, &head.stored, adapters))
     }
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_exchange_from_v_2(
@@ -7989,6 +8193,7 @@ pub mod version_adapters {
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_index_from_v_2_outcome(
         head: Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
+        stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
         Result<v2::NumericIndex, ::xidl_rust_axum::Error>,
@@ -7998,6 +8203,7 @@ pub mod version_adapters {
             Ok(source) => {
                 let source = match depot_index_response_downcast_to_v_2(
                     source,
+                    stored,
                     adapters,
                 ) {
                     Ok(value) => value,
@@ -8024,8 +8230,8 @@ pub mod version_adapters {
             }
         }
     }
-    /// Execute a caller-supplied Head handler once after successful adaptation.
-    pub async fn dispatch_depot_index_from_v_2<F, Fut>(
+    /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
+    pub async fn dispatch_depot_index_from_v_2<F, Fut, R>(
         wire: ::serde_json::Value,
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
@@ -8039,8 +8245,9 @@ pub mod version_adapters {
     where
         F: FnOnce(DepotIndexRequestV3, VersionContext) -> Fut,
         Fut: ::std::future::Future<
-            Output = Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
+            Output = HeadOutcome<v3::NumericIndex, ::xidl_rust_axum::Error, R>,
         >,
+        R: StoredValues,
     {
         let input = decode_and_upcast_depot_index_from_v_2(wire, adapters)?;
         let head = handler(
@@ -8050,7 +8257,7 @@ pub mod version_adapters {
                 },
             )
             .await;
-        Ok(downcast_depot_index_from_v_2_outcome(head, adapters))
+        Ok(downcast_depot_index_from_v_2_outcome(head.outcome, &head.stored, adapters))
     }
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_inspect_from_v_2(
@@ -10080,16 +10287,17 @@ pub mod version_adapters {
     pub fn downcast_address(
         version: Version,
         head: v3::Address,
+        stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> VersionedResult<AddressProjection> {
         match version {
             Version::V1 => {
-                let source = address_downcast_to_v_2(&head, adapters)?;
+                let source = address_downcast_to_v_2(&head, stored, adapters)?;
                 let source = address_downcast_to_v_1(&source, adapters)?;
                 Ok(AddressProjection::V1(source))
             }
             Version::V2 => {
-                let source = address_downcast_to_v_2(&head, adapters)?;
+                let source = address_downcast_to_v_2(&head, stored, adapters)?;
                 Ok(AddressProjection::V2(source))
             }
             Version::V3 => {
@@ -10225,16 +10433,17 @@ pub mod version_adapters {
     pub fn downcast_contact(
         version: Version,
         head: v3::Contact,
+        stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> VersionedResult<ContactProjection> {
         match version {
             Version::V1 => {
-                let source = contact_downcast_to_v_2(&head, adapters)?;
+                let source = contact_downcast_to_v_2(&head, stored, adapters)?;
                 let source = contact_downcast_to_v_1(&source, adapters)?;
                 Ok(ContactProjection::V1(source))
             }
             Version::V2 => {
-                let source = contact_downcast_to_v_2(&head, adapters)?;
+                let source = contact_downcast_to_v_2(&head, stored, adapters)?;
                 Ok(ContactProjection::V2(source))
             }
             Version::V3 => {
@@ -10415,16 +10624,17 @@ pub mod version_adapters {
     pub fn downcast_numeric_index(
         version: Version,
         head: v3::NumericIndex,
+        stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> VersionedResult<NumericIndexProjection> {
         match version {
             Version::V1 => {
-                let source = numeric_index_downcast_to_v_2(&head, adapters)?;
+                let source = numeric_index_downcast_to_v_2(&head, stored, adapters)?;
                 let source = numeric_index_downcast_to_v_1(&source, adapters)?;
                 Ok(NumericIndexProjection::V1(source))
             }
             Version::V2 => {
-                let source = numeric_index_downcast_to_v_2(&head, adapters)?;
+                let source = numeric_index_downcast_to_v_2(&head, stored, adapters)?;
                 Ok(NumericIndexProjection::V2(source))
             }
             Version::V3 => {
@@ -11002,6 +11212,7 @@ pub mod version_adapters {
     pub fn downcast_depot_contact_outcome(
         version: Version,
         head: Result<v3::Contact, ::xidl_rust_axum::Error>,
+        stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
         DepotContactOutcome,
@@ -11009,7 +11220,7 @@ pub mod version_adapters {
     > {
         match version {
             Version::V1 => {
-                match downcast_depot_contact_from_v_1_outcome(head, adapters) {
+                match downcast_depot_contact_from_v_1_outcome(head, stored, adapters) {
                     ProjectionOutcome::Projected(value) => {
                         ProjectionOutcome::Projected(DepotContactOutcome::V1(value))
                     }
@@ -11022,7 +11233,7 @@ pub mod version_adapters {
                 }
             }
             Version::V2 => {
-                match downcast_depot_contact_from_v_2_outcome(head, adapters) {
+                match downcast_depot_contact_from_v_2_outcome(head, stored, adapters) {
                     ProjectionOutcome::Projected(value) => {
                         ProjectionOutcome::Projected(DepotContactOutcome::V2(value))
                     }
@@ -11049,8 +11260,8 @@ pub mod version_adapters {
             }
         }
     }
-    /// Execute a Head handler once; the application supplies version resolution.
-    pub async fn dispatch_depot_contact<F, Fut>(
+    /// Execute a Head handler once; it returns the stored values older versions still read.
+    pub async fn dispatch_depot_contact<F, Fut, R>(
         version: Version,
         wire: ::serde_json::Value,
         handler: F,
@@ -11065,8 +11276,9 @@ pub mod version_adapters {
     where
         F: FnOnce(DepotContactRequestV3, VersionContext) -> Fut,
         Fut: ::std::future::Future<
-            Output = Result<v3::Contact, ::xidl_rust_axum::Error>,
+            Output = HeadOutcome<v3::Contact, ::xidl_rust_axum::Error, R>,
         >,
+        R: StoredValues,
     {
         let input = decode_and_upcast_depot_contact(version, wire, adapters)?;
         let head = handler(
@@ -11076,7 +11288,7 @@ pub mod version_adapters {
                 },
             )
             .await;
-        Ok(downcast_depot_contact_outcome(version, head, adapters))
+        Ok(downcast_depot_contact_outcome(version, head.outcome, &head.stored, adapters))
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum DepotExchangeOutcome {
@@ -11478,6 +11690,7 @@ pub mod version_adapters {
     pub fn downcast_depot_index_outcome(
         version: Version,
         head: Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
+        stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
         DepotIndexOutcome,
@@ -11485,7 +11698,7 @@ pub mod version_adapters {
     > {
         match version {
             Version::V1 => {
-                match downcast_depot_index_from_v_1_outcome(head, adapters) {
+                match downcast_depot_index_from_v_1_outcome(head, stored, adapters) {
                     ProjectionOutcome::Projected(value) => {
                         ProjectionOutcome::Projected(DepotIndexOutcome::V1(value))
                     }
@@ -11498,7 +11711,7 @@ pub mod version_adapters {
                 }
             }
             Version::V2 => {
-                match downcast_depot_index_from_v_2_outcome(head, adapters) {
+                match downcast_depot_index_from_v_2_outcome(head, stored, adapters) {
                     ProjectionOutcome::Projected(value) => {
                         ProjectionOutcome::Projected(DepotIndexOutcome::V2(value))
                     }
@@ -11525,8 +11738,8 @@ pub mod version_adapters {
             }
         }
     }
-    /// Execute a Head handler once; the application supplies version resolution.
-    pub async fn dispatch_depot_index<F, Fut>(
+    /// Execute a Head handler once; it returns the stored values older versions still read.
+    pub async fn dispatch_depot_index<F, Fut, R>(
         version: Version,
         wire: ::serde_json::Value,
         handler: F,
@@ -11541,8 +11754,9 @@ pub mod version_adapters {
     where
         F: FnOnce(DepotIndexRequestV3, VersionContext) -> Fut,
         Fut: ::std::future::Future<
-            Output = Result<v3::NumericIndex, ::xidl_rust_axum::Error>,
+            Output = HeadOutcome<v3::NumericIndex, ::xidl_rust_axum::Error, R>,
         >,
+        R: StoredValues,
     {
         let input = decode_and_upcast_depot_index(version, wire, adapters)?;
         let head = handler(
@@ -11552,7 +11766,7 @@ pub mod version_adapters {
                 },
             )
             .await;
-        Ok(downcast_depot_index_outcome(version, head, adapters))
+        Ok(downcast_depot_index_outcome(version, head.outcome, &head.stored, adapters))
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum DepotInspectOutcome {

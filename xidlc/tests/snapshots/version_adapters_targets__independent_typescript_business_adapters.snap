@@ -1,6 +1,5 @@
 ---
 source: xidlc/tests/version_adapters_targets.rs
-assertion_line: 23
 expression: "&files[0].1"
 ---
 
@@ -35,26 +34,30 @@ export const OMIT = "xidl.omit";
 export type Omitted = typeof OMIT;
 const ok = <T>(value: T): VersionedResult<T> => ({ ok: true, value });
 
-function mapSequence<S, T>(source: S[], convert: (value: S) => VersionedResult<T>): VersionedResult<T[]> {
+function locate<T>(result: VersionedResult<T>, path: string): VersionedResult<T> {
+    if (result.ok) return result;
+    return { ok: false, error: { ...result.error, typePath: `${path}.${result.error.typePath}` } };
+}
+function mapSequence<S, T>(source: S[], convert: (value: S) => VersionedResult<T>, path: string): VersionedResult<T[]> {
     const values: T[] = [];
     for (const value of source) {
-        const next = convert(value);
+        const next = locate(convert(value), path);
         if (!next.ok) return next;
         values.push(next.value);
     }
     return ok(values);
 }
-function mapRecord<S, T>(source: Record<string, S>, convert: (value: S) => VersionedResult<T>): VersionedResult<Record<string, T>> {
+function mapRecord<S, T>(source: Record<string, S>, convert: (value: S) => VersionedResult<T>, path: string): VersionedResult<Record<string, T>> {
     const entries: Array<[string, T]> = [];
     for (const [key, value] of Object.entries(source)) {
-        const next = convert(value);
+        const next = locate(convert(value), path);
         if (!next.ok) return next;
         entries.push([key, next.value]);
     }
     return ok(Object.fromEntries(entries));
 }
-function mapOptional<S, T>(source: S | undefined, convert: (value: S) => VersionedResult<T>): VersionedResult<T | undefined> {
-    return source === undefined ? ok(undefined) : convert(source);
+function mapOptional<S, T>(source: S | undefined, convert: (value: S) => VersionedResult<T>, path: string): VersionedResult<T | undefined> {
+    return source === undefined ? ok(undefined) : locate(convert(source), path);
 }
 
 
@@ -194,6 +197,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
+            ["gate"]: z.unknown().optional(),
+        
             ["zip_code"]: z.unknown().optional(),
         
     }).strict()
@@ -208,15 +213,23 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["zip"]: wire["zip_code"],
         
+            ["gate"]: wire["gate"],
+        
     }))
     .pipe(z.object({
         
             ["zip"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
         
+            ["gate"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
+        
     })).transform((value) => ({
         
             
                 ["zip"]: value["zip"],
+            
+        
+            
+                ...(value["gate"] === undefined ? {} : { ["gate"]: value["gate"] }),
             
         
     })))
@@ -226,6 +239,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     const wireType2Schema: z.ZodType<types.v1.Contact> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
+        
+            ["gate"]: z.unknown().optional(),
         
             ["zip_code"]: z.unknown().optional(),
         
@@ -239,9 +254,9 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     .transform((wire): Record<string, unknown> => ({
         
-            ["address"]: flattenWire(wire, ["zip_code"], ["zip_code"], false, false),
+            ["address"]: flattenWire(wire, ["gate","zip_code"], ["gate","zip_code"], false, false),
         
-            ["tags"]: flattenWire(wire, [], ["zip_code"], true, false),
+            ["tags"]: flattenWire(wire, [], ["gate","zip_code"], true, false),
         
     }))
     .pipe(z.object({
@@ -907,6 +922,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
+            ["gate"]: z.unknown().optional(),
+        
             ["zip_code"]: z.unknown().optional(),
         
     }).strict()
@@ -921,15 +938,23 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["zip"]: wire["zip_code"],
         
+            ["gate"]: wire["gate"],
+        
     }))
     .pipe(z.object({
         
             ["zip"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
         
+            ["gate"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
+        
     })).transform((value) => ({
         
             
                 ["zip"]: value["zip"],
+            
+        
+            
+                ...(value["gate"] === undefined ? {} : { ["gate"]: value["gate"] }),
             
         
     })))
@@ -939,6 +964,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     const wireType13Schema: z.ZodType<types.v2.Contact> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
+        
+            ["gate"]: z.unknown().optional(),
         
             ["zip_code"]: z.unknown().optional(),
         
@@ -952,9 +979,9 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     .transform((wire): Record<string, unknown> => ({
         
-            ["address"]: flattenWire(wire, ["zip_code"], ["zip_code"], false, false),
+            ["address"]: flattenWire(wire, ["gate","zip_code"], ["gate","zip_code"], false, false),
         
-            ["tags"]: flattenWire(wire, [], ["zip_code"], true, false),
+            ["tags"]: flattenWire(wire, [], ["gate","zip_code"], true, false),
         
     }))
     .pipe(z.object({
@@ -1646,6 +1673,12 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
     }).strict()
     
+        .superRefine((wire, context) => {
+            for (const key of ["gate"]) {
+                if (Object.hasOwn(wire, key)) context.addIssue({ code: "custom", path: [key], message: "field is not available in served version" });
+            }
+        })
+    
     .transform((wire): Record<string, unknown> => ({
         
             ["zip"]: wire["zip_code"],
@@ -1682,6 +1715,12 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
             ["zone"]: z.unknown().optional(),
         
     }).catchall(z.unknown())
+    
+        .superRefine((wire, context) => {
+            for (const key of ["gate"]) {
+                if (Object.hasOwn(wire, key)) context.addIssue({ code: "custom", path: [key], message: "field is not available in served version" });
+            }
+        })
     
     .transform((wire): Record<string, unknown> => ({
         
@@ -2271,6 +2310,10 @@ export interface VersionAdapters {
     
         depotUpdateBusyErrorDowncastToV1(source: errors.v2$Busy): VersionedResult<errors.v1$NotFound | FrameworkError>;
     
+        addressUpcastFromV2(source: types.v2.Address): VersionedResult<AddressUpcastDecisionFromV2>;
+    
+        addressDowncastToV2(source: types.v3.Address, stored: Pick<StoredValues, "addressGate">): VersionedResult<AddressDowncastDecisionToV2>;
+    
         parcelUpcastFromV2(source: types.v2.Parcel): VersionedResult<ParcelUpcastDecisionFromV2>;
     
         parcelDowncastToV2(source: types.v3.Parcel, stored: Pick<StoredValues, "parcelHandlingNote">): VersionedResult<ParcelDowncastDecisionToV2>;
@@ -2300,6 +2343,9 @@ export interface VersionAdapters {
             /** wire `reference`, last served by v1 */
             parcelLegacy(source: types.v2.Parcel): string | undefined;
         
+            /** wire `gate`, last served by v2 */
+            addressGate(source: types.v3.Address): string | undefined;
+        
             /** wire `handling_note`, last served by v2 */
             parcelHandlingNote(source: types.v3.Parcel): string | undefined;
         
@@ -2309,6 +2355,8 @@ export interface VersionAdapters {
     }
     /** Wire names each served version still reads from storage, by type; Head reads nothing. */
     export const NEEDS = {
+        
+            "Address": { "2026-07": [], "2026-04": ["gate"], "2026-01": ["gate"] },
         
             "Depot.trace": { "2026-07": [], "2026-04": ["trace_id"], "2026-01": ["trace_id"] },
         
@@ -2348,6 +2396,20 @@ export interface VersionAdapters {
     export interface ParcelDowncastDecisionToV1 {
         
             legacy: string;
+        
+    }
+
+    export interface AddressUpcastDecisionFromV2 {
+        
+            zone?: string;
+        
+            gate: Ignored;
+        
+    }
+
+    export interface AddressDowncastDecisionToV2 {
+        
+            gate: string | Omitted;
         
     }
 
@@ -2400,9 +2462,13 @@ export interface VersionAdapters {
                 const converted0 = ok(source["zip"]);
                 if (!converted0.ok) return converted0;
             
+                const converted1 = mapOptional(source["gate"], (item) => ok(item), "Address.gate");
+                if (!converted1.ok) return converted1;
+            
             return ok({
                 
                         ["zip"]: converted0.value,
+                        ...(converted1.value === undefined ? {} : { ["gate"]: converted1.value }),
                 
             });
         
@@ -2415,9 +2481,13 @@ export interface VersionAdapters {
                 const converted0 = ok(source["zip"]);
                 if (!converted0.ok) return converted0;
             
+                const converted1 = mapOptional(source["gate"], (item) => ok(item), "Address.gate");
+                if (!converted1.ok) return converted1;
+            
             return ok({
                 
                         ["zip"]: converted0.value,
+                        ...(converted1.value === undefined ? {} : { ["gate"]: converted1.value }),
                 
             });
         
@@ -2461,7 +2531,7 @@ export interface VersionAdapters {
                 const converted0 = upcastAddressFromV1(source["address"], adapters);
                 if (!converted0.ok) return converted0;
             
-                const converted1 = mapRecord(source["tags"], (item) => ok(item));
+                const converted1 = mapRecord(source["tags"], (item) => ok(item), "Contact.tags");
                 if (!converted1.ok) return converted1;
             
             return ok({
@@ -2480,7 +2550,7 @@ export interface VersionAdapters {
                 const converted0 = downcastAddressToV1(source["address"], adapters);
                 if (!converted0.ok) return converted0;
             
-                const converted1 = mapRecord(source["tags"], (item) => ok(item));
+                const converted1 = mapRecord(source["tags"], (item) => ok(item), "Contact.tags");
                 if (!converted1.ok) return converted1;
             
             return ok({
@@ -2537,7 +2607,7 @@ export interface VersionAdapters {
                 const converted0 = ok(source["name"]);
                 if (!converted0.ok) return converted0;
             
-                const converted1 = mapOptional(source["children"], (item) => mapSequence(item, (item) => upcastNodeFromV1(item, adapters)));
+                const converted1 = mapOptional(source["children"], (item) => mapSequence(item, (item) => upcastNodeFromV1(item, adapters), "Node.children"), "Node.children");
                 if (!converted1.ok) return converted1;
             
             return ok({
@@ -2556,7 +2626,7 @@ export interface VersionAdapters {
                 const converted0 = ok(source["name"]);
                 if (!converted0.ok) return converted0;
             
-                const converted1 = mapOptional(source["children"], (item) => mapSequence(item, (item) => downcastNodeToV1(item, adapters)));
+                const converted1 = mapOptional(source["children"], (item) => mapSequence(item, (item) => downcastNodeToV1(item, adapters), "Node.children"), "Node.children");
                 if (!converted1.ok) return converted1;
             
             return ok({
@@ -2623,19 +2693,19 @@ export interface VersionAdapters {
                 const converted0 = ok(source["id"]);
                 if (!converted0.ok) return converted0;
             
-                const converted1 = mapOptional(source["handling_note"], (item) => ok(item));
+                const converted1 = mapOptional(source["handling_note"], (item) => ok(item), "Parcel.handling_note");
                 if (!converted1.ok) return converted1;
             
                 const converted2 = upcastAddressFromV1(source["address"], adapters);
                 if (!converted2.ok) return converted2;
             
-                const converted3 = mapSequence(source["stops"], (item) => upcastAddressFromV1(item, adapters));
+                const converted3 = mapSequence(source["stops"], (item) => upcastAddressFromV1(item, adapters), "Parcel.stops");
                 if (!converted3.ok) return converted3;
             
-                const converted4 = mapRecord(source["by_tag"], (item) => upcastAddressFromV1(item, adapters));
+                const converted4 = mapRecord(source["by_tag"], (item) => upcastAddressFromV1(item, adapters), "Parcel.by_tag");
                 if (!converted4.ok) return converted4;
             
-                const converted5 = mapSequence(source["fixed"], (item) => upcastAddressFromV1(item, adapters));
+                const converted5 = mapSequence(source["fixed"], (item) => upcastAddressFromV1(item, adapters), "Parcel.fixed");
                 if (!converted5.ok) return converted5;
             
             return ok({
@@ -2664,19 +2734,19 @@ export interface VersionAdapters {
                 const converted0 = ok(source["id"]);
                 if (!converted0.ok) return converted0;
             
-                const converted1 = mapOptional(source["handling_note"], (item) => ok(item));
+                const converted1 = mapOptional(source["handling_note"], (item) => ok(item), "Parcel.handling_note");
                 if (!converted1.ok) return converted1;
             
                 const converted2 = downcastAddressToV1(source["address"], adapters);
                 if (!converted2.ok) return converted2;
             
-                const converted3 = mapSequence(source["stops"], (item) => downcastAddressToV1(item, adapters));
+                const converted3 = mapSequence(source["stops"], (item) => downcastAddressToV1(item, adapters), "Parcel.stops");
                 if (!converted3.ok) return converted3;
             
-                const converted4 = mapRecord(source["by_tag"], (item) => downcastAddressToV1(item, adapters));
+                const converted4 = mapRecord(source["by_tag"], (item) => downcastAddressToV1(item, adapters), "Parcel.by_tag");
                 if (!converted4.ok) return converted4;
             
-                const converted5 = mapSequence(source["fixed"], (item) => downcastAddressToV1(item, adapters));
+                const converted5 = mapSequence(source["fixed"], (item) => downcastAddressToV1(item, adapters), "Parcel.fixed");
                 if (!converted5.ok) return converted5;
             
             return ok({
@@ -2697,10 +2767,10 @@ export interface VersionAdapters {
         
             
             
-                const converted0 = mapOptional(source["note"], (item) => ok(item));
+                const converted0 = mapOptional(source["note"], (item) => ok(item), "ParcelPatch.note");
                 if (!converted0.ok) return converted0;
             
-                const converted1 = mapOptional(source["handling_note"], (item) => ok(item));
+                const converted1 = mapOptional(source["handling_note"], (item) => ok(item), "ParcelPatch.handling_note");
                 if (!converted1.ok) return converted1;
             
             return ok({
@@ -3113,6 +3183,9 @@ export interface VersionAdapters {
     export function upcastAddressFromV2(source: types.v2.Address, adapters: VersionAdapters): VersionedResult<types.v3.Address> {
         
             
+                const decision = adapters.addressUpcastFromV2(source);
+                if (!decision.ok) return decision;
+            
             
                 const converted0 = ok(source["zip"]);
                 if (!converted0.ok) return converted0;
@@ -3121,12 +3194,16 @@ export interface VersionAdapters {
                 
                         ["zip"]: converted0.value,
                 
+                        ...(decision.value["zone"] === undefined ? {} : { ["zone"]: decision.value["zone"] }),
             });
         
     }
 
-    export function downcastAddressToV2(source: types.v3.Address, adapters: VersionAdapters): VersionedResult<types.v2.Address> {
+    export function downcastAddressToV2(source: types.v3.Address, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v2.Address> {
         
+            
+                const decision = adapters.addressDowncastToV2(source, stored);
+                if (!decision.ok) return decision;
             
             
                 const converted0 = ok(source["zip"]);
@@ -3136,6 +3213,7 @@ export interface VersionAdapters {
                 
                         ["zip"]: converted0.value,
                 
+                        ...(decision.value["gate"] === OMIT ? {} : { ["gate"]: decision.value["gate"] }),
             });
         
     }
@@ -3206,7 +3284,7 @@ export interface VersionAdapters {
                 const converted0 = upcastAddressFromV2(source["address"], adapters);
                 if (!converted0.ok) return converted0;
             
-                const converted1 = mapRecord(source["tags"], (item) => ok(item));
+                const converted1 = mapRecord(source["tags"], (item) => ok(item), "Contact.tags");
                 if (!converted1.ok) return converted1;
             
             return ok({
@@ -3218,14 +3296,14 @@ export interface VersionAdapters {
         
     }
 
-    export function downcastContactToV2(source: types.v3.Contact, adapters: VersionAdapters): VersionedResult<types.v2.Contact> {
+    export function downcastContactToV2(source: types.v3.Contact, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v2.Contact> {
         
             
             
-                const converted0 = downcastAddressToV2(source["address"], adapters);
+                const converted0 = downcastAddressToV2(source["address"], stored, adapters);
                 if (!converted0.ok) return converted0;
             
-                const converted1 = mapRecord(source["tags"], (item) => ok(item));
+                const converted1 = mapRecord(source["tags"], (item) => ok(item), "Contact.tags");
                 if (!converted1.ok) return converted1;
             
             return ok({
@@ -3282,7 +3360,7 @@ export interface VersionAdapters {
                 const converted0 = ok(source["name"]);
                 if (!converted0.ok) return converted0;
             
-                const converted1 = mapOptional(source["children"], (item) => mapSequence(item, (item) => upcastNodeFromV2(item, adapters)));
+                const converted1 = mapOptional(source["children"], (item) => mapSequence(item, (item) => upcastNodeFromV2(item, adapters), "Node.children"), "Node.children");
                 if (!converted1.ok) return converted1;
             
             return ok({
@@ -3301,7 +3379,7 @@ export interface VersionAdapters {
                 const converted0 = ok(source["name"]);
                 if (!converted0.ok) return converted0;
             
-                const converted1 = mapOptional(source["children"], (item) => mapSequence(item, (item) => downcastNodeToV2(item, adapters)));
+                const converted1 = mapOptional(source["children"], (item) => mapSequence(item, (item) => downcastNodeToV2(item, adapters), "Node.children"), "Node.children");
                 if (!converted1.ok) return converted1;
             
             return ok({
@@ -3332,7 +3410,7 @@ export interface VersionAdapters {
         
             
             
-                const converted0 = mapOptional(source["note"], (item) => ok(item));
+                const converted0 = mapOptional(source["note"], (item) => ok(item), "OptionalChange.note");
                 if (!converted0.ok) return converted0;
             
             return ok({
@@ -3347,7 +3425,7 @@ export interface VersionAdapters {
         
             
             
-                const converted0 = mapOptional(source["note"], (item) => ok(item));
+                const converted0 = mapOptional(source["note"], (item) => ok(item), "OptionalChange.note");
                 if (!converted0.ok) return converted0;
             
             return ok({
@@ -3374,19 +3452,19 @@ export interface VersionAdapters {
                 const converted2 = ok(source["carrier"]);
                 if (!converted2.ok) return converted2;
             
-                const converted3 = mapOptional(source["note"], (item) => ok(item));
+                const converted3 = mapOptional(source["note"], (item) => ok(item), "Parcel.note");
                 if (!converted3.ok) return converted3;
             
                 const converted4 = upcastAddressFromV2(source["address"], adapters);
                 if (!converted4.ok) return converted4;
             
-                const converted5 = mapSequence(source["stops"], (item) => upcastAddressFromV2(item, adapters));
+                const converted5 = mapSequence(source["stops"], (item) => upcastAddressFromV2(item, adapters), "Parcel.stops");
                 if (!converted5.ok) return converted5;
             
-                const converted6 = mapRecord(source["by_tag"], (item) => upcastAddressFromV2(item, adapters));
+                const converted6 = mapRecord(source["by_tag"], (item) => upcastAddressFromV2(item, adapters), "Parcel.by_tag");
                 if (!converted6.ok) return converted6;
             
-                const converted7 = mapSequence(source["fixed"], (item) => upcastAddressFromV2(item, adapters));
+                const converted7 = mapSequence(source["fixed"], (item) => upcastAddressFromV2(item, adapters), "Parcel.fixed");
                 if (!converted7.ok) return converted7;
             
             return ok({
@@ -3422,19 +3500,19 @@ export interface VersionAdapters {
                 const converted2 = ok(source["carrier"]);
                 if (!converted2.ok) return converted2;
             
-                const converted3 = mapOptional(source["note"], (item) => ok(item));
+                const converted3 = mapOptional(source["note"], (item) => ok(item), "Parcel.note");
                 if (!converted3.ok) return converted3;
             
-                const converted4 = downcastAddressToV2(source["address"], adapters);
+                const converted4 = downcastAddressToV2(source["address"], stored, adapters);
                 if (!converted4.ok) return converted4;
             
-                const converted5 = mapSequence(source["stops"], (item) => downcastAddressToV2(item, adapters));
+                const converted5 = mapSequence(source["stops"], (item) => downcastAddressToV2(item, stored, adapters), "Parcel.stops");
                 if (!converted5.ok) return converted5;
             
-                const converted6 = mapRecord(source["by_tag"], (item) => downcastAddressToV2(item, adapters));
+                const converted6 = mapRecord(source["by_tag"], (item) => downcastAddressToV2(item, stored, adapters), "Parcel.by_tag");
                 if (!converted6.ok) return converted6;
             
-                const converted7 = mapSequence(source["fixed"], (item) => downcastAddressToV2(item, adapters));
+                const converted7 = mapSequence(source["fixed"], (item) => downcastAddressToV2(item, stored, adapters), "Parcel.fixed");
                 if (!converted7.ok) return converted7;
             
             return ok({
@@ -3460,7 +3538,7 @@ export interface VersionAdapters {
                 if (!decision.ok) return decision;
             
             
-                const converted0 = mapOptional(source["note"], (item) => ok(item));
+                const converted0 = mapOptional(source["note"], (item) => ok(item), "ParcelPatch.note");
                 if (!converted0.ok) return converted0;
             
                 return ok({
@@ -3624,11 +3702,11 @@ export interface VersionAdapters {
         
     }
 
-    export function downcastDepotContactResponseToV2(source: { "return": types.v3.Contact }, adapters: VersionAdapters): VersionedResult<{ "return": types.v2.Contact }> {
+    export function downcastDepotContactResponseToV2(source: { "return": types.v3.Contact }, stored: StoredValues, adapters: VersionAdapters): VersionedResult<{ "return": types.v2.Contact }> {
         
             
             
-                const converted0 = downcastContactToV2(source["return"], adapters);
+                const converted0 = downcastContactToV2(source["return"], stored, adapters);
                 if (!converted0.ok) return converted0;
             
             return ok({
@@ -4125,14 +4203,14 @@ export interface VersionAdapters {
         return ok(head);
     }
 
-    function downcastStepDepotContactResultToV2(value: types.v3.Contact, adapters: VersionAdapters): VersionedResult<types.v2.Contact> {
-        const projected = downcastDepotContactResponseToV2({ return: value }, adapters);
+    function downcastStepDepotContactResultToV2(value: types.v3.Contact, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v2.Contact> {
+        const projected = downcastDepotContactResponseToV2({ return: value }, stored, adapters);
         if (!projected.ok) return projected;
         return ok(projected.value.return);
     }
     export type DepotContactErrorFromV2 = FrameworkError;
     export type DepotContactErrorToV2 = FrameworkError;
-    function downcastStepDepotContactErrorToV2(head: DepotContactErrorFromV2, adapters: VersionAdapters): VersionedResult<DepotContactErrorToV2> {
+    function downcastStepDepotContactErrorToV2(head: DepotContactErrorFromV2, stored: StoredValues, adapters: VersionAdapters): VersionedResult<DepotContactErrorToV2> {
         
         return ok(head);
     }
@@ -4486,9 +4564,9 @@ export type DispatchOutcome<T, Head> =
         
         return step1;
     }
-    export function downcastDepotContactResultToV1(head: types.v3.Contact, adapters: VersionAdapters): VersionedResult<types.v1.Contact> {
+    export function downcastDepotContactResultToV1(head: types.v3.Contact, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Contact> {
         
-            const step0 = downcastStepDepotContactResultToV2(head, adapters);
+            const step0 = downcastStepDepotContactResultToV2(head, stored, adapters);
             if (!step0.ok) return step0;
         
             const step1 = downcastStepDepotContactResultToV1(step0.value, adapters);
@@ -4496,9 +4574,9 @@ export type DispatchOutcome<T, Head> =
         
         return step1;
     }
-    export function downcastDepotContactErrorToV1(head: FrameworkError, adapters: VersionAdapters): VersionedResult<FrameworkError> {
+    export function downcastDepotContactErrorToV1(head: FrameworkError, stored: StoredValues, adapters: VersionAdapters): VersionedResult<FrameworkError> {
         
-            const step0 = downcastStepDepotContactErrorToV2(head, adapters);
+            const step0 = downcastStepDepotContactErrorToV2(head, stored, adapters);
             if (!step0.ok) return step0;
         
             const step1 = downcastStepDepotContactErrorToV1(step0.value, adapters);
@@ -4507,24 +4585,24 @@ export type DispatchOutcome<T, Head> =
         return step1;
     }
     /** Failed projection retains the original Head outcome, including typed errors. */
-    export function downcastDepotContactOutcomeToV1(head: OperationOutcome<types.v3.Contact, FrameworkError>, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<types.v1.Contact, FrameworkError>, OperationOutcome<types.v3.Contact, FrameworkError>> {
+    export function downcastDepotContactOutcomeToV1(head: OperationOutcome<types.v3.Contact, FrameworkError>, stored: StoredValues, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<types.v1.Contact, FrameworkError>, OperationOutcome<types.v3.Contact, FrameworkError>> {
         if (head.ok) {
-            const result = downcastDepotContactResultToV1(head.value, adapters);
+            const result = downcastDepotContactResultToV1(head.value, stored, adapters);
             return result.ok ? { projected: true, value: { ok: true, value: result.value } } : { projected: false, head, error: result.error };
         }
-        const result = downcastDepotContactErrorToV1(head.error, adapters);
+        const result = downcastDepotContactErrorToV1(head.error, stored, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
-    
+    /** The Head handler returns the stored values its outcome still needs for this version. */
     export async function dispatchDepotContactFromV1(
     raw: unknown,
-    handler: (request: ifaceTypes.v3.DepotContactRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Contact, FrameworkError>>,
+    handler: (request: ifaceTypes.v3.DepotContactRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Contact, FrameworkError> & { stored: StoredValues }>,
     adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v1.Contact, FrameworkError>, OperationOutcome<types.v3.Contact, FrameworkError>>> {
         const request = decodeAndUpcastDepotContactFromV1(raw, adapters);
         if (!request.ok) return { dispatched: false, error: request.error };
         const head = await handler(request.value, { originalVersion: "2026-01", originalVersionId: "v1" });
-        return { dispatched: true, ...downcastDepotContactOutcomeToV1(head, adapters) };
+        return { dispatched: true, ...downcastDepotContactOutcomeToV1(head, head.stored, adapters) };
     }
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
@@ -5106,39 +5184,39 @@ export type DispatchOutcome<T, Head> =
         
         return step0;
     }
-    export function downcastDepotContactResultToV2(head: types.v3.Contact, adapters: VersionAdapters): VersionedResult<types.v2.Contact> {
+    export function downcastDepotContactResultToV2(head: types.v3.Contact, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v2.Contact> {
         
-            const step0 = downcastStepDepotContactResultToV2(head, adapters);
+            const step0 = downcastStepDepotContactResultToV2(head, stored, adapters);
             if (!step0.ok) return step0;
         
         return step0;
     }
-    export function downcastDepotContactErrorToV2(head: FrameworkError, adapters: VersionAdapters): VersionedResult<FrameworkError> {
+    export function downcastDepotContactErrorToV2(head: FrameworkError, stored: StoredValues, adapters: VersionAdapters): VersionedResult<FrameworkError> {
         
-            const step0 = downcastStepDepotContactErrorToV2(head, adapters);
+            const step0 = downcastStepDepotContactErrorToV2(head, stored, adapters);
             if (!step0.ok) return step0;
         
         return step0;
     }
     /** Failed projection retains the original Head outcome, including typed errors. */
-    export function downcastDepotContactOutcomeToV2(head: OperationOutcome<types.v3.Contact, FrameworkError>, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<types.v2.Contact, FrameworkError>, OperationOutcome<types.v3.Contact, FrameworkError>> {
+    export function downcastDepotContactOutcomeToV2(head: OperationOutcome<types.v3.Contact, FrameworkError>, stored: StoredValues, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<types.v2.Contact, FrameworkError>, OperationOutcome<types.v3.Contact, FrameworkError>> {
         if (head.ok) {
-            const result = downcastDepotContactResultToV2(head.value, adapters);
+            const result = downcastDepotContactResultToV2(head.value, stored, adapters);
             return result.ok ? { projected: true, value: { ok: true, value: result.value } } : { projected: false, head, error: result.error };
         }
-        const result = downcastDepotContactErrorToV2(head.error, adapters);
+        const result = downcastDepotContactErrorToV2(head.error, stored, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
-    
+    /** The Head handler returns the stored values its outcome still needs for this version. */
     export async function dispatchDepotContactFromV2(
     raw: unknown,
-    handler: (request: ifaceTypes.v3.DepotContactRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Contact, FrameworkError>>,
+    handler: (request: ifaceTypes.v3.DepotContactRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Contact, FrameworkError> & { stored: StoredValues }>,
     adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v2.Contact, FrameworkError>, OperationOutcome<types.v3.Contact, FrameworkError>>> {
         const request = decodeAndUpcastDepotContactFromV2(raw, adapters);
         if (!request.ok) return { dispatched: false, error: request.error };
         const head = await handler(request.value, { originalVersion: "2026-04", originalVersionId: "v2" });
-        return { dispatched: true, ...downcastDepotContactOutcomeToV2(head, adapters) };
+        return { dispatched: true, ...downcastDepotContactOutcomeToV2(head, head.stored, adapters) };
     }
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
@@ -6031,7 +6109,7 @@ export type DispatchOutcome<T, Head> =
     export async function dispatchDepotContact(
     version: "v1" | "v2" | "v3",
     raw: unknown,
-    handler: (request: ifaceTypes.v3.DepotContactRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Contact, FrameworkError>>,
+    handler: (request: ifaceTypes.v3.DepotContactRequest, context: VersionContext) => Promise<OperationOutcome<types.v3.Contact, FrameworkError> & { stored: StoredValues }>,
     adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v1.Contact | types.v2.Contact | types.v3.Contact, FrameworkError>, OperationOutcome<types.v3.Contact, FrameworkError>>> {
         switch (version) {
@@ -6207,19 +6285,19 @@ export type DispatchOutcome<T, Head> =
 
     
     
-        export function downcastAddress(version: "v1", head: types.v3.Address, adapters: VersionAdapters): VersionedResult<types.v1.Address>;
+        export function downcastAddress(version: "v1", head: types.v3.Address, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Address>;
     
-        export function downcastAddress(version: "v2", head: types.v3.Address, adapters: VersionAdapters): VersionedResult<types.v2.Address>;
+        export function downcastAddress(version: "v2", head: types.v3.Address, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v2.Address>;
     
-        export function downcastAddress(version: "v3", head: types.v3.Address, adapters: VersionAdapters): VersionedResult<types.v3.Address>;
+        export function downcastAddress(version: "v3", head: types.v3.Address, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v3.Address>;
     
-    export function downcastAddress(version: "v1" | "v2" | "v3", head: types.v3.Address, adapters: VersionAdapters): VersionedResult<types.v1.Address | types.v2.Address | types.v3.Address>;
-    export function downcastAddress(version: "v1" | "v2" | "v3", head: types.v3.Address, adapters: VersionAdapters): VersionedResult<types.v1.Address | types.v2.Address | types.v3.Address> {
+    export function downcastAddress(version: "v1" | "v2" | "v3", head: types.v3.Address, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Address | types.v2.Address | types.v3.Address>;
+    export function downcastAddress(version: "v1" | "v2" | "v3", head: types.v3.Address, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Address | types.v2.Address | types.v3.Address> {
         switch (version) {
             
                 case "v1": {
                     
-                        const step0 = downcastAddressToV2(head, adapters);
+                        const step0 = downcastAddressToV2(head, stored, adapters);
                         if (!step0.ok) return step0;
                     
                         const step1 = downcastAddressToV1(step0.value, adapters);
@@ -6230,7 +6308,7 @@ export type DispatchOutcome<T, Head> =
             
                 case "v2": {
                     
-                        const step0 = downcastAddressToV2(head, adapters);
+                        const step0 = downcastAddressToV2(head, stored, adapters);
                         if (!step0.ok) return step0;
                     
                     return step0;
@@ -6311,19 +6389,19 @@ export type DispatchOutcome<T, Head> =
 
     
     
-        export function downcastContact(version: "v1", head: types.v3.Contact, adapters: VersionAdapters): VersionedResult<types.v1.Contact>;
+        export function downcastContact(version: "v1", head: types.v3.Contact, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Contact>;
     
-        export function downcastContact(version: "v2", head: types.v3.Contact, adapters: VersionAdapters): VersionedResult<types.v2.Contact>;
+        export function downcastContact(version: "v2", head: types.v3.Contact, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v2.Contact>;
     
-        export function downcastContact(version: "v3", head: types.v3.Contact, adapters: VersionAdapters): VersionedResult<types.v3.Contact>;
+        export function downcastContact(version: "v3", head: types.v3.Contact, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v3.Contact>;
     
-    export function downcastContact(version: "v1" | "v2" | "v3", head: types.v3.Contact, adapters: VersionAdapters): VersionedResult<types.v1.Contact | types.v2.Contact | types.v3.Contact>;
-    export function downcastContact(version: "v1" | "v2" | "v3", head: types.v3.Contact, adapters: VersionAdapters): VersionedResult<types.v1.Contact | types.v2.Contact | types.v3.Contact> {
+    export function downcastContact(version: "v1" | "v2" | "v3", head: types.v3.Contact, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Contact | types.v2.Contact | types.v3.Contact>;
+    export function downcastContact(version: "v1" | "v2" | "v3", head: types.v3.Contact, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Contact | types.v2.Contact | types.v3.Contact> {
         switch (version) {
             
                 case "v1": {
                     
-                        const step0 = downcastContactToV2(head, adapters);
+                        const step0 = downcastContactToV2(head, stored, adapters);
                         if (!step0.ok) return step0;
                     
                         const step1 = downcastContactToV1(step0.value, adapters);
@@ -6334,7 +6412,7 @@ export type DispatchOutcome<T, Head> =
             
                 case "v2": {
                     
-                        const step0 = downcastContactToV2(head, adapters);
+                        const step0 = downcastContactToV2(head, stored, adapters);
                         if (!step0.ok) return step0;
                     
                     return step0;

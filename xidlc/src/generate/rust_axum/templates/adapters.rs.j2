@@ -106,14 +106,22 @@
                     }
                 {% endfor %}
 
+                {% if "locate" in helpers %}
+                    fn locate<T>(result: VersionedResult<T>, path: &str) -> VersionedResult<T> {
+                        result.map_err(|error| UnsupportedProjection {
+                            type_path: format!("{path}.{}", error.type_path),
+                            ..error
+                        })
+                    }
+                {% endif %}
                 {% if "sequence" in helpers %}
-                    fn map_sequence<S, T>(source: &[S], convert: impl Fn(&S) -> VersionedResult<T>) -> VersionedResult<Vec<T>> {
-                        source.iter().map(convert).collect()
+                    fn map_sequence<S, T>(source: &[S], convert: impl Fn(&S) -> VersionedResult<T>, path: &str) -> VersionedResult<Vec<T>> {
+                        source.iter().map(|item| locate(convert(item), path)).collect()
                     }
                 {% endif %}
                 {% if "array" in helpers %}
-                    fn map_array<S, T, const N: usize>(source: &[S; N], convert: impl Fn(&S) -> VersionedResult<T>, refusal: impl Fn(&str) -> UnsupportedProjection) -> VersionedResult<[T; N]> {
-                        let values = source.iter().map(convert).collect::<VersionedResult<Vec<_>>>()?;
+                    fn map_array<S, T, const N: usize>(source: &[S; N], convert: impl Fn(&S) -> VersionedResult<T>, refusal: impl Fn(&str) -> UnsupportedProjection, path: &str) -> VersionedResult<[T; N]> {
+                        let values = source.iter().map(|item| locate(convert(item), path)).collect::<VersionedResult<Vec<_>>>()?;
                         // The iteration preserves the input array length exactly.
                         values.try_into().map_err(|_: Vec<T>| refusal("array projection changed its length"))
                     }
@@ -124,11 +132,12 @@
                     key: impl Fn(&K) -> VersionedResult<L>,
                     value: impl Fn(&V) -> VersionedResult<W>,
                     refusal: impl Fn(&str) -> UnsupportedProjection,
+                    path: &str,
                     ) -> VersionedResult<::std::collections::BTreeMap<L, W>> {
                         let mut target = ::std::collections::BTreeMap::new();
                         for (old_key, old_value) in source {
-                            let next_key = key(old_key)?;
-                            let next_value = value(old_value)?;
+                            let next_key = locate(key(old_key), path)?;
+                            let next_value = locate(value(old_value), path)?;
                             if target.insert(next_key, next_value).is_some() { return Err(refusal("map key projection is not injective")); }
                         }
                         Ok(target)

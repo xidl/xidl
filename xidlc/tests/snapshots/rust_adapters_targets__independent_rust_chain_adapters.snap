@@ -160,11 +160,19 @@ pub mod version_adapters {
     pub struct SchedulerGetRequestV20270101 {
         pub id: String,
     }
+    fn locate<T>(result: VersionedResult<T>, path: &str) -> VersionedResult<T> {
+        result
+            .map_err(|error| UnsupportedProjection {
+                type_path: format!("{path}.{}", error.type_path),
+                ..error
+            })
+    }
     fn map_sequence<S, T>(
         source: &[S],
         convert: impl Fn(&S) -> VersionedResult<T>,
+        path: &str,
     ) -> VersionedResult<Vec<T>> {
-        source.iter().map(convert).collect()
+        source.iter().map(|item| locate(convert(item), path)).collect()
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn booking_upcast_from_v_2026_06_01(
@@ -189,6 +197,7 @@ pub mod version_adapters {
         let projected_2 = map_sequence(
             &source.roster,
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
+            "Booking.roster",
         )?;
         Ok(v2026_10_01::Booking {
             id: projected_0,
@@ -221,6 +230,7 @@ pub mod version_adapters {
         let projected_2 = map_sequence(
             &source.roster,
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
+            "Booking.roster",
         )?;
         Ok(v2026_06_01::Booking {
             id: projected_0,
@@ -384,6 +394,7 @@ pub mod version_adapters {
         let projected_2 = map_sequence(
             &source.items,
             |item| agenda_entry_upcast_from_v_2026_10_01(item, adapters),
+            "Booking.items",
         )?;
         Ok(v2027_01_01::Booking {
             id: projected_0,
@@ -415,6 +426,7 @@ pub mod version_adapters {
         let projected_2 = map_sequence(
             &source.items,
             |item| agenda_entry_downcast_to_v_2026_10_01(item, adapters),
+            "Booking.items",
         )?;
         Ok(v2026_10_01::Booking {
             id: projected_0,

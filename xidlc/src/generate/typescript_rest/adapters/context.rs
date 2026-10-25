@@ -149,6 +149,8 @@ pub(super) struct Assignment {
 pub(super) struct Conversion {
     pub name: String,
     pub kind: &'static str,
+    /// Locates container-element refusals: the owning type or operation key.
+    pub path: String,
     pub source: TsType,
     pub target: TsType,
     pub hook: Option<String>,
