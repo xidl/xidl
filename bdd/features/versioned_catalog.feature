@@ -6,6 +6,9 @@ Feature: Media filters run on Head facts before historical catalog projection
   product remains a match even when its old response has an empty media list.
   Both SDK versions use a shared named filter list without changing its wire
   shape, including empty, repeated and unrecognized media filters.
+  Optional response cookies carry a separately submitted single-media preference:
+  missing leaves it unchanged, empty explicitly selects a neutral value, and
+  known media stores that value. A cookie-only update follows the same rules.
 
   Scenario Outline: repeated filters preserve business meaning across versions
     Given the versioned "catalog" application in "<mode>" mode
