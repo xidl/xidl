@@ -17,6 +17,7 @@
 
 {% macro render_zod(schema) -%}
     {%- if schema.kind == "Primitive" -%}z.{{ schema.data }}
+    {%- elif schema.kind == "Raw" -%}{{ schema.data }}
     {%- elif schema.kind == "ScopedName" -%}{{ schema.data }}
     {%- elif schema.kind == "Array" -%}z.array({{ render_zod(schema.data.element) }}){% if schema.data.length is not none %}.length({{ schema.data.length }}){% endif %}
     {%- elif schema.kind == "Record" -%}z.record(z.string(), {{ render_zod(schema.data) }})

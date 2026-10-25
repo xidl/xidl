@@ -199,17 +199,17 @@ import { xjson } from "xidl-typescript-codec";
     
     export const UploadChunkSchema = z.object({
         
-            part_id: z.coerce.string(),
+            part_id: z.string(),
         
-            bytes: z.array(z.coerce.number().int().nonnegative())
+            bytes: z.array(z.number().int().nonnegative())
         
     });
 
     
     export const UploadSummarySchema = z.object({
         
-            upload_id: z.coerce.string(),
+            upload_id: z.string(),
         
-            accepted: z.coerce.number().int().nonnegative()
+            accepted: z.number().int().nonnegative()
         
     });

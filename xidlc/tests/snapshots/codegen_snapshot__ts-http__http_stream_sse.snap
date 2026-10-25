@@ -173,7 +173,7 @@ export type HttpStreamSseServiceWatchTopicRequest = z.infer<typeof HttpStreamSse
 
     
 export const HttpStreamSseServiceSetAttributeOnlineRequestSchema = z.object({
-        online: z.coerce.boolean(),
+        online: z.boolean(),
     });
 export type HttpStreamSseServiceSetAttributeOnlineRequest = z.infer<typeof HttpStreamSseServiceSetAttributeOnlineRequestSchema>;
 ===============

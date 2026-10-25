@@ -245,16 +245,16 @@ import { xjson } from "xidl-typescript-codec";
     
 export const BodyShapeDocumentResponseSchema = z.object({
         return: models.DocumentSchema,
-        etag: z.coerce.string(),
+        etag: z.string(),
     });
 export type BodyShapeDocumentResponse = z.infer<typeof BodyShapeDocumentResponseSchema>;
 
     
 export const BodyShapeScalarResponseSchema = z.object({
-        return: z.coerce.string(),
-        etag: z.coerce.string(),
-        count: z.coerce.number().int().nonnegative(),
-        cached: z.coerce.boolean(),
+        return: z.string(),
+        etag: z.string(),
+        count: z.number().int().nonnegative(),
+        cached: z.boolean(),
     });
 export type BodyShapeScalarResponse = z.infer<typeof BodyShapeScalarResponseSchema>;
 
@@ -267,14 +267,14 @@ export type BodyShapeRenameRequest = z.infer<typeof BodyShapeRenameRequestSchema
     
 export const BodyShapeRenameResponseSchema = z.object({
         return: models.DocumentSchema,
-        etag: z.coerce.string(),
+        etag: z.string(),
     });
 export type BodyShapeRenameResponse = z.infer<typeof BodyShapeRenameResponseSchema>;
 
     
 export const BodyShapeOutputResponseSchema = z.object({
         document: models.DocumentSchema,
-        etag: z.coerce.string(),
+        etag: z.string(),
     });
 export type BodyShapeOutputResponse = z.infer<typeof BodyShapeOutputResponseSchema>;
 
@@ -505,15 +505,15 @@ import { xjson } from "xidl-typescript-codec";
     
     export const DocumentSchema = z.object({
         
-            title: z.coerce.string()
+            title: z.string()
         
     });
 
     
     export const UploadResultSchema = z.object({
         
-            media_type: z.coerce.string(),
+            media_type: z.string(),
         
-            size: z.coerce.number().int().nonnegative()
+            size: z.number().int().nonnegative()
         
     });

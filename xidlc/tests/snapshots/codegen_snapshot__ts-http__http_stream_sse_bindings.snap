@@ -194,8 +194,8 @@ import { xjson } from "xidl-typescript-codec";
     
     export const ProjectEventSchema = z.object({
         
-            id: z.coerce.string(),
+            id: z.string(),
         
-            payload: z.coerce.string()
+            payload: z.string()
         
     });

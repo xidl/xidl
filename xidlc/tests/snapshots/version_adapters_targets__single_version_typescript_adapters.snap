@@ -80,7 +80,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["value"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+            ["value"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
     })).transform((value) => ({
         

@@ -184,7 +184,7 @@ export type HttpSecurityServiceGetUserRequest = z.infer<typeof HttpSecurityServi
 
     
 export const HttpSecurityServiceSearchUserRequestSchema = z.object({
-        keyword: z.coerce.string(),
+        keyword: z.string(),
     });
 export type HttpSecurityServiceSearchUserRequest = z.infer<typeof HttpSecurityServiceSearchUserRequestSchema>;
 ===============

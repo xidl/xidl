@@ -477,7 +477,7 @@ import { xjson } from "xidl-typescript-codec";
 
         export const ItemSchema = z.object({
             
-                id: z.coerce.string()
+                id: z.string()
             
         });
 }
@@ -487,7 +487,7 @@ import { xjson } from "xidl-typescript-codec";
 
         export const ItemSchema = z.object({
             
-                id: z.coerce.string()
+                id: z.string()
             
         });
 }

@@ -323,13 +323,13 @@ import { xjson } from "xidl-typescript-codec";
     
     export const ShapeSchema = z.object({
         
-            id: xjson(z.coerce.string(), {"name":"shape_id"}),
+            id: xjson(z.string(), {"name":"shape_id"}),
         
-            note: z.coerce.string().nullish().transform((value) => value ?? undefined),
+            note: z.string().nullish().transform((value) => value ?? undefined),
         
             kind: ShapeKindSchema
         
     });
 
     
-    export const AreaSchema = z.union([z.object({ circle: z.coerce.number().int().nonnegative() }), z.object({ square: z.coerce.number().int().nonnegative() }), z.object({ fallback: z.coerce.number().int().nonnegative() })]);
+    export const AreaSchema = z.union([z.object({ circle: z.number().int().nonnegative() }), z.object({ square: z.number().int().nonnegative() }), z.object({ fallback: z.number().int().nonnegative() })]);

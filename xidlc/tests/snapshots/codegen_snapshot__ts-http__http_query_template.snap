@@ -151,7 +151,7 @@ export type HttpQueryTemplateServiceGetUserRequest = z.infer<typeof HttpQueryTem
     
 export const HttpQueryTemplateServiceSearchRequestSchema = z.object({
         keyword: z.coerce.string(),
-        payload: z.coerce.string(),
+        payload: z.string(),
     });
 export type HttpQueryTemplateServiceSearchRequest = z.infer<typeof HttpQueryTemplateServiceSearchRequestSchema>;
 ===============

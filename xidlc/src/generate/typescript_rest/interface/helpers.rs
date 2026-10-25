@@ -15,6 +15,37 @@ use xidl_parser::rest_hir::{
     semantics::{HttpSecurityRequirement, HttpStreamCodec, HttpStreamKind},
 };
 
+/// The parameter positions that arrive as text: scalar transports always,
+/// and the fields of a text-encoded (form) body with them. Exactly these
+/// positions coerce; every JSON position stays strict like the Rust target.
+pub(super) fn text_positions(op: &HttpOperation) -> std::collections::BTreeSet<String> {
+    let mut names = op
+        .http
+        .request
+        .path
+        .iter()
+        .chain(&op.http.request.query)
+        .chain(&op.http.request.header)
+        .chain(&op.http.request.cookie)
+        .map(|binding| binding.source_param.clone())
+        .collect::<std::collections::BTreeSet<_>>();
+    let form_body = op
+        .http
+        .request
+        .body
+        .content_type
+        .as_deref()
+        .is_some_and(|ct| ct.eq_ignore_ascii_case("application/x-www-form-urlencoded"));
+    if form_body {
+        if let HttpRequestBodyShape::Object { fields } = &op.http.request.body.shape {
+            for field in fields {
+                names.insert(field.source_param.clone());
+            }
+        }
+    }
+    names
+}
+
 pub(super) fn build_response_fields(
     op: &HttpOperation,
     module_path: &[String],

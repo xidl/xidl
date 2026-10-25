@@ -183,19 +183,19 @@ import { xjson } from "xidl-typescript-codec";
     
     export const UserRefSchema = z.object({
         
-            user_id: xjson(z.coerce.string(), {"name":"userId"}),
+            user_id: xjson(z.string(), {"name":"userId"}),
         
-            avatar_url: xjson(z.coerce.string().nullish().transform((value) => value ?? undefined), {"name":"avatarUrl"})
+            avatar_url: xjson(z.string().nullish().transform((value) => value ?? undefined), {"name":"avatarUrl"})
         
     });
 
     
     export const ParticipantSchema = z.object({
         
-            user_id: xjson(z.coerce.string(), {"name":"userId"}),
+            user_id: xjson(z.string(), {"name":"userId"}),
         
-            avatar_url: xjson(z.coerce.string().nullish().transform((value) => value ?? undefined), {"name":"avatarUrl"}),
+            avatar_url: xjson(z.string().nullish().transform((value) => value ?? undefined), {"name":"avatarUrl"}),
         
-            role_name: z.coerce.string()
+            role_name: z.string()
         
     });
