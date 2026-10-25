@@ -263,6 +263,42 @@ pub mod version_adapters {
         Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(source))
     }
     /// Projects one adjacent declaration by borrowing its source value.
+    pub fn geo_anchor_upcast_from_v_1(
+        source: &v1::geo::Anchor,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2::geo::Anchor> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v1".into(),
+            direction: Direction::Upcast,
+            type_path: "geo::Anchor".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = (&source.checkpoint)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
+        let projected_1 = (&source.parent)
+            .as_ref()
+            .map(|item| {
+                geo_anchor_upcast_from_v_1((item).as_ref(), adapters).map(Box::new)
+            })
+            .transpose()?;
+        let projected_2 = (&source.previous)
+            .as_ref()
+            .map(|item| map_sequence(
+                item,
+                |item| geo_anchor_upcast_from_v_1(item, adapters),
+                "geo::Anchor.previous",
+            ))
+            .transpose()?;
+        Ok(v2::geo::Anchor {
+            base: v2::geo::Marker {},
+            checkpoint: projected_0,
+            parent: projected_1,
+            previous: projected_2,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
     pub fn geo_anchor_downcast_to_v_1(
         source: &v2::geo::Anchor,
         adapters: &dyn VersionAdapters,
@@ -273,7 +309,17 @@ pub mod version_adapters {
             type_path: "geo::Anchor".into(),
             reason: reason.into(),
         };
-        let projected_0 = (&source.previous)
+        let projected_0 = (&source.checkpoint)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
+        let projected_1 = (&source.parent)
+            .as_ref()
+            .map(|item| {
+                geo_anchor_downcast_to_v_1((item).as_ref(), adapters).map(Box::new)
+            })
+            .transpose()?;
+        let projected_2 = (&source.previous)
             .as_ref()
             .map(|item| map_sequence(
                 item,
@@ -283,7 +329,9 @@ pub mod version_adapters {
             .transpose()?;
         Ok(v1::geo::Anchor {
             base: v1::geo::Marker {},
-            previous: projected_0,
+            checkpoint: projected_0,
+            parent: projected_1,
+            previous: projected_2,
         })
     }
     /// Projects one adjacent declaration by borrowing its source value.
@@ -312,7 +360,17 @@ pub mod version_adapters {
             reason: reason.into(),
         };
         let decision = adapters.shipping_address_downcast_to_v_1(source, stored)?;
-        let projected_0 = (&source.base.base.base.previous)
+        let projected_0 = (&source.base.base.base.checkpoint)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
+        let projected_1 = (&source.base.base.base.parent)
+            .as_ref()
+            .map(|item| {
+                geo_anchor_downcast_to_v_1((item).as_ref(), adapters).map(Box::new)
+            })
+            .transpose()?;
+        let projected_2 = (&source.base.base.base.previous)
             .as_ref()
             .map(|item| map_sequence(
                 item,
@@ -320,23 +378,23 @@ pub mod version_adapters {
                 "shipping::Address.previous",
             ))
             .transpose()?;
-        let projected_1 = geo_identifier_downcast_to_v_1(
+        let projected_3 = geo_identifier_downcast_to_v_1(
             &source.base.base.id,
             adapters,
         )?;
-        let projected_2 = Ok::<
+        let projected_4 = Ok::<
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.base.base.tenant))?;
-        let projected_3 = delivery_reference_downcast_to_v_1(
+        let projected_5 = delivery_reference_downcast_to_v_1(
             &source.base.base.delivery_reference,
             adapters,
         )?;
-        let projected_4 = (&source.base.base.delivery_note)
+        let projected_6 = (&source.base.base.delivery_note)
             .as_ref()
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
-        let projected_5 = Ok::<
+        let projected_7 = Ok::<
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.priority))?;
@@ -345,17 +403,19 @@ pub mod version_adapters {
                 base: v1::geo::Identity {
                     base: v1::geo::Anchor {
                         base: v1::geo::Marker {},
-                        previous: projected_0,
+                        checkpoint: projected_0,
+                        parent: projected_1,
+                        previous: projected_2,
                     },
-                    id: projected_1,
-                    tenant: projected_2,
-                    delivery_reference: projected_3,
-                    delivery_note: projected_4,
+                    id: projected_3,
+                    tenant: projected_4,
+                    delivery_reference: projected_5,
+                    delivery_note: projected_6,
                 },
                 line: decision.line,
                 country_code: decision.country_code,
             },
-            priority: projected_5,
+            priority: projected_7,
         })
     }
     /// Projects one adjacent declaration by borrowing its source value.
@@ -371,15 +431,19 @@ pub mod version_adapters {
             reason: reason.into(),
         };
         let decision = adapters.shipping_change_upcast_from_v_1(source, current)?;
-        let projected_0 = (&source.base.base.delivery_reference)
+        let projected_0 = (&source.base.base.parent)
+            .as_ref()
+            .map(|item| geo_anchor_upcast_from_v_1(item, adapters))
+            .transpose()?;
+        let projected_1 = (&source.base.base.delivery_reference)
             .as_ref()
             .map(|item| delivery_reference_upcast_from_v_1(item, adapters))
             .transpose()?;
-        let projected_1 = (&source.base.base.delivery_note)
+        let projected_2 = (&source.base.base.delivery_note)
             .as_ref()
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
-        let projected_2 = (&source.priority)
+        let projected_3 = (&source.priority)
             .as_ref()
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
@@ -387,13 +451,14 @@ pub mod version_adapters {
             value: v2::shipping::Change {
                 base: v2::shipping::PostalChange {
                     base: v2::geo::Change {
-                        delivery_reference: projected_0,
-                        delivery_note: projected_1,
+                        parent: projected_0,
+                        delivery_reference: projected_1,
+                        delivery_note: projected_2,
                     },
                     street: decision.street,
                     country_code_v2: decision.country_code_v2,
                 },
-                priority: projected_2,
+                priority: projected_3,
             },
             stored: ShippingAddressesUpdateStored::default().merge(decision.stored),
         })
@@ -551,6 +616,42 @@ pub mod version_adapters {
         Ok(projected_0)
     }
     /// Projects one adjacent declaration by borrowing its source value.
+    pub fn geo_anchor_upcast_from_v_2(
+        source: &v2::geo::Anchor,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v3::geo::Anchor> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Upcast,
+            type_path: "geo::Anchor".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = (&source.checkpoint)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
+        let projected_1 = (&source.parent)
+            .as_ref()
+            .map(|item| {
+                geo_anchor_upcast_from_v_2((item).as_ref(), adapters).map(Box::new)
+            })
+            .transpose()?;
+        let projected_2 = (&source.previous)
+            .as_ref()
+            .map(|item| map_sequence(
+                item,
+                |item| geo_anchor_upcast_from_v_2(item, adapters),
+                "geo::Anchor.previous",
+            ))
+            .transpose()?;
+        Ok(v3::geo::Anchor {
+            base: v3::geo::Marker {},
+            checkpoint: projected_0,
+            parent: projected_1,
+            previous: projected_2,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
     pub fn geo_anchor_downcast_to_v_2(
         source: &v3::geo::Anchor,
         adapters: &dyn VersionAdapters,
@@ -561,7 +662,17 @@ pub mod version_adapters {
             type_path: "geo::Anchor".into(),
             reason: reason.into(),
         };
-        let projected_0 = (&source.previous)
+        let projected_0 = (&source.checkpoint)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
+        let projected_1 = (&source.parent)
+            .as_ref()
+            .map(|item| {
+                geo_anchor_downcast_to_v_2((item).as_ref(), adapters).map(Box::new)
+            })
+            .transpose()?;
+        let projected_2 = (&source.previous)
             .as_ref()
             .map(|item| map_sequence(
                 item,
@@ -571,7 +682,9 @@ pub mod version_adapters {
             .transpose()?;
         Ok(v2::geo::Anchor {
             base: v2::geo::Marker {},
-            previous: projected_0,
+            checkpoint: projected_0,
+            parent: projected_1,
+            previous: projected_2,
         })
     }
     /// Projects one adjacent declaration by borrowing its source value.
@@ -632,7 +745,17 @@ pub mod version_adapters {
             reason: reason.into(),
         };
         let decision = adapters.shipping_address_downcast_to_v_2(source, stored)?;
-        let projected_0 = (&source.base.base.base.previous)
+        let projected_0 = (&source.base.base.base.checkpoint)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
+        let projected_1 = (&source.base.base.base.parent)
+            .as_ref()
+            .map(|item| {
+                geo_anchor_downcast_to_v_2((item).as_ref(), adapters).map(Box::new)
+            })
+            .transpose()?;
+        let projected_2 = (&source.base.base.base.previous)
             .as_ref()
             .map(|item| map_sequence(
                 item,
@@ -640,23 +763,23 @@ pub mod version_adapters {
                 "shipping::Address.previous",
             ))
             .transpose()?;
-        let projected_1 = geo_identifier_downcast_to_v_2(
+        let projected_3 = geo_identifier_downcast_to_v_2(
             &source.base.base.id,
             adapters,
         )?;
-        let projected_2 = Ok::<
+        let projected_4 = Ok::<
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.base.base.tenant))?;
-        let projected_3 = Ok::<
+        let projected_5 = Ok::<
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.base.street))?;
-        let projected_4 = geo_country_downcast_to_v_2(
+        let projected_6 = geo_country_downcast_to_v_2(
             &source.base.country_code_v2,
             adapters,
         )?;
-        let projected_5 = Ok::<
+        let projected_7 = Ok::<
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.priority))?;
@@ -665,17 +788,19 @@ pub mod version_adapters {
                 base: v2::geo::Identity {
                     base: v2::geo::Anchor {
                         base: v2::geo::Marker {},
-                        previous: projected_0,
+                        checkpoint: projected_0,
+                        parent: projected_1,
+                        previous: projected_2,
                     },
-                    id: projected_1,
-                    tenant: projected_2,
+                    id: projected_3,
+                    tenant: projected_4,
                     delivery_reference: decision.delivery_reference,
                     delivery_note: decision.delivery_note,
                 },
-                street: projected_3,
-                country_code_v2: projected_4,
+                street: projected_5,
+                country_code_v2: projected_6,
             },
-            priority: projected_5,
+            priority: projected_7,
         })
     }
     /// Projects one adjacent declaration by borrowing its source value.
@@ -691,15 +816,19 @@ pub mod version_adapters {
             reason: reason.into(),
         };
         let decision = adapters.shipping_change_upcast_from_v_2(source, current)?;
-        let projected_0 = (&source.base.street)
+        let projected_0 = (&source.base.base.parent)
+            .as_ref()
+            .map(|item| geo_anchor_upcast_from_v_2(item, adapters))
+            .transpose()?;
+        let projected_1 = (&source.base.street)
             .as_ref()
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
-        let projected_1 = (&source.base.country_code_v2)
+        let projected_2 = (&source.base.country_code_v2)
             .as_ref()
             .map(|item| geo_country_upcast_from_v_2(item, adapters))
             .transpose()?;
-        let projected_2 = (&source.priority)
+        let projected_3 = (&source.priority)
             .as_ref()
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
@@ -707,12 +836,13 @@ pub mod version_adapters {
             value: v3::shipping::Change {
                 base: v3::shipping::PostalChange {
                     base: v3::geo::Change {
+                        parent: projected_0,
                         signature_required: Some(decision.signature_required),
                     },
-                    street: projected_0,
-                    country_code_v2: projected_1,
+                    street: projected_1,
+                    country_code_v2: projected_2,
                 },
-                priority: projected_2,
+                priority: projected_3,
             },
             stored: ShippingAddressesUpdateStored::default().merge(decision.stored),
         })
@@ -972,6 +1102,7 @@ pub mod version_adapters {
             "deliveryNote",
             "deliveryReference",
             "line",
+            "parent",
             "priority",
         ];
         let forbidden: &[&str] = &["countryCodeV2", "signatureRequired", "street"];
@@ -980,23 +1111,21 @@ pub mod version_adapters {
                 return Err(format!("field {key} is not declared in served version"));
             }
         }
-        let raw_0 = object
+        let raw_0 = object.get("parent").unwrap_or(&::serde_json::Value::Null);
+        let value_0: Option<v1::geo::Anchor> = if (raw_0).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            decode_wire_v_1_geo_anchor(raw_0).map(Some)
+        }?;
+        let raw_1 = object
             .get("deliveryReference")
             .unwrap_or(&::serde_json::Value::Null);
-        let value_0: Option<v1::DeliveryReference> = if (raw_0).is_null() {
+        let value_1: Option<v1::DeliveryReference> = if (raw_1).is_null() {
             Ok::<_, String>(None)
         } else {
-            decode_wire_v_1_delivery_reference(raw_0).map(Some)
+            decode_wire_v_1_delivery_reference(raw_1).map(Some)
         }?;
-        let raw_1 = object.get("deliveryNote").unwrap_or(&::serde_json::Value::Null);
-        let value_1: Option<String> = if (raw_1).is_null() {
-            Ok::<_, String>(None)
-        } else {
-            ::serde_json::from_value::<String>((raw_1).clone())
-                .map_err(|error| error.to_string())
-                .map(Some)
-        }?;
-        let raw_2 = object.get("line").unwrap_or(&::serde_json::Value::Null);
+        let raw_2 = object.get("deliveryNote").unwrap_or(&::serde_json::Value::Null);
         let value_2: Option<String> = if (raw_2).is_null() {
             Ok::<_, String>(None)
         } else {
@@ -1004,7 +1133,7 @@ pub mod version_adapters {
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
-        let raw_3 = object.get("countryCode").unwrap_or(&::serde_json::Value::Null);
+        let raw_3 = object.get("line").unwrap_or(&::serde_json::Value::Null);
         let value_3: Option<String> = if (raw_3).is_null() {
             Ok::<_, String>(None)
         } else {
@@ -1012,24 +1141,33 @@ pub mod version_adapters {
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
-        let raw_4 = object.get("priority").unwrap_or(&::serde_json::Value::Null);
-        let value_4: Option<i32> = if (raw_4).is_null() {
+        let raw_4 = object.get("countryCode").unwrap_or(&::serde_json::Value::Null);
+        let value_4: Option<String> = if (raw_4).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<i32>((raw_4).clone())
+            ::serde_json::from_value::<String>((raw_4).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        let raw_5 = object.get("priority").unwrap_or(&::serde_json::Value::Null);
+        let value_5: Option<i32> = if (raw_5).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<i32>((raw_5).clone())
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
         Ok(v1::shipping::Change {
             base: v1::shipping::PostalChange {
                 base: v1::geo::Change {
-                    delivery_reference: value_0,
-                    delivery_note: value_1,
+                    parent: value_0,
+                    delivery_reference: value_1,
+                    delivery_note: value_2,
                 },
-                line: value_2,
-                country_code: value_3,
+                line: value_3,
+                country_code: value_4,
             },
-            priority: value_4,
+            priority: value_5,
         })
     }
     fn decode_wire_v_1_delivery_reference(
@@ -1037,6 +1175,56 @@ pub mod version_adapters {
     ) -> Result<v1::DeliveryReference, String> {
         ::serde_json::from_value::<String>((wire).clone())
             .map_err(|error| error.to_string())
+    }
+    fn decode_wire_v_1_geo_anchor(
+        wire: &::serde_json::Value,
+    ) -> Result<v1::geo::Anchor, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &["checkpoint", "parent", "previous"];
+        let forbidden: &[&str] = &[];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object.get("checkpoint").unwrap_or(&::serde_json::Value::Null);
+        let value_0: Option<String> = if (raw_0).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_0).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        let raw_1 = object.get("parent").unwrap_or(&::serde_json::Value::Null);
+        let value_1: Option<Box<v1::geo::Anchor>> = if (raw_1).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            decode_wire_v_1_geo_anchor(raw_1).map(Box::new).map(Some)
+        }?;
+        let raw_2 = object.get("previous").unwrap_or(&::serde_json::Value::Null);
+        let value_2: Option<Vec<v1::geo::Anchor>> = if (raw_2).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            (|| {
+                let array = (raw_2)
+                    .as_array()
+                    .ok_or_else(|| "expected an array".to_string())?;
+                let values = array
+                    .iter()
+                    .map(|item| decode_wire_v_1_geo_anchor(item))
+                    .collect::<Result<Vec<_>, String>>()?;
+                Ok::<_, String>(values)
+            })()
+                .map(Some)
+        }?;
+        Ok(v1::geo::Anchor {
+            base: v1::geo::Marker {},
+            checkpoint: value_0,
+            parent: value_1,
+            previous: value_2,
+        })
     }
     fn decode_wire_v_2_shipping_change(
         wire: &::serde_json::Value,
@@ -1048,6 +1236,7 @@ pub mod version_adapters {
             "countryCodeV2",
             "deliveryNote",
             "deliveryReference",
+            "parent",
             "priority",
             "street",
         ];
@@ -1057,23 +1246,21 @@ pub mod version_adapters {
                 return Err(format!("field {key} is not declared in served version"));
             }
         }
-        let raw_0 = object
+        let raw_0 = object.get("parent").unwrap_or(&::serde_json::Value::Null);
+        let value_0: Option<v2::geo::Anchor> = if (raw_0).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            decode_wire_v_2_geo_anchor(raw_0).map(Some)
+        }?;
+        let raw_1 = object
             .get("deliveryReference")
             .unwrap_or(&::serde_json::Value::Null);
-        let value_0: Option<v2::DeliveryReference> = if (raw_0).is_null() {
+        let value_1: Option<v2::DeliveryReference> = if (raw_1).is_null() {
             Ok::<_, String>(None)
         } else {
-            decode_wire_v_2_delivery_reference(raw_0).map(Some)
+            decode_wire_v_2_delivery_reference(raw_1).map(Some)
         }?;
-        let raw_1 = object.get("deliveryNote").unwrap_or(&::serde_json::Value::Null);
-        let value_1: Option<String> = if (raw_1).is_null() {
-            Ok::<_, String>(None)
-        } else {
-            ::serde_json::from_value::<String>((raw_1).clone())
-                .map_err(|error| error.to_string())
-                .map(Some)
-        }?;
-        let raw_2 = object.get("street").unwrap_or(&::serde_json::Value::Null);
+        let raw_2 = object.get("deliveryNote").unwrap_or(&::serde_json::Value::Null);
         let value_2: Option<String> = if (raw_2).is_null() {
             Ok::<_, String>(None)
         } else {
@@ -1081,30 +1268,39 @@ pub mod version_adapters {
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
-        let raw_3 = object.get("countryCodeV2").unwrap_or(&::serde_json::Value::Null);
-        let value_3: Option<v2::geo::Country> = if (raw_3).is_null() {
+        let raw_3 = object.get("street").unwrap_or(&::serde_json::Value::Null);
+        let value_3: Option<String> = if (raw_3).is_null() {
             Ok::<_, String>(None)
         } else {
-            decode_wire_v_2_geo_country(raw_3).map(Some)
+            ::serde_json::from_value::<String>((raw_3).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
         }?;
-        let raw_4 = object.get("priority").unwrap_or(&::serde_json::Value::Null);
-        let value_4: Option<i32> = if (raw_4).is_null() {
+        let raw_4 = object.get("countryCodeV2").unwrap_or(&::serde_json::Value::Null);
+        let value_4: Option<v2::geo::Country> = if (raw_4).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<i32>((raw_4).clone())
+            decode_wire_v_2_geo_country(raw_4).map(Some)
+        }?;
+        let raw_5 = object.get("priority").unwrap_or(&::serde_json::Value::Null);
+        let value_5: Option<i32> = if (raw_5).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<i32>((raw_5).clone())
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
         Ok(v2::shipping::Change {
             base: v2::shipping::PostalChange {
                 base: v2::geo::Change {
-                    delivery_reference: value_0,
-                    delivery_note: value_1,
+                    parent: value_0,
+                    delivery_reference: value_1,
+                    delivery_note: value_2,
                 },
-                street: value_2,
-                country_code_v2: value_3,
+                street: value_3,
+                country_code_v2: value_4,
             },
-            priority: value_4,
+            priority: value_5,
         })
     }
     fn decode_wire_v_2_delivery_reference(
@@ -1112,6 +1308,56 @@ pub mod version_adapters {
     ) -> Result<v2::DeliveryReference, String> {
         ::serde_json::from_value::<String>((wire).clone())
             .map_err(|error| error.to_string())
+    }
+    fn decode_wire_v_2_geo_anchor(
+        wire: &::serde_json::Value,
+    ) -> Result<v2::geo::Anchor, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &["checkpoint", "parent", "previous"];
+        let forbidden: &[&str] = &[];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object.get("checkpoint").unwrap_or(&::serde_json::Value::Null);
+        let value_0: Option<String> = if (raw_0).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_0).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        let raw_1 = object.get("parent").unwrap_or(&::serde_json::Value::Null);
+        let value_1: Option<Box<v2::geo::Anchor>> = if (raw_1).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            decode_wire_v_2_geo_anchor(raw_1).map(Box::new).map(Some)
+        }?;
+        let raw_2 = object.get("previous").unwrap_or(&::serde_json::Value::Null);
+        let value_2: Option<Vec<v2::geo::Anchor>> = if (raw_2).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            (|| {
+                let array = (raw_2)
+                    .as_array()
+                    .ok_or_else(|| "expected an array".to_string())?;
+                let values = array
+                    .iter()
+                    .map(|item| decode_wire_v_2_geo_anchor(item))
+                    .collect::<Result<Vec<_>, String>>()?;
+                Ok::<_, String>(values)
+            })()
+                .map(Some)
+        }?;
+        Ok(v2::geo::Anchor {
+            base: v2::geo::Marker {},
+            checkpoint: value_0,
+            parent: value_1,
+            previous: value_2,
+        })
     }
     fn decode_wire_v_2_geo_country(
         wire: &::serde_json::Value,
@@ -1126,6 +1372,7 @@ pub mod version_adapters {
             .ok_or_else(|| "expected a served-version object".to_string())?;
         let keys: &[&str] = &[
             "countryCodeV2",
+            "parent",
             "priority",
             "signatureRequired",
             "street",
@@ -1141,47 +1388,104 @@ pub mod version_adapters {
                 return Err(format!("field {key} is not declared in served version"));
             }
         }
-        let raw_0 = object
+        let raw_0 = object.get("parent").unwrap_or(&::serde_json::Value::Null);
+        let value_0: Option<v3::geo::Anchor> = if (raw_0).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            decode_wire_v_3_geo_anchor(raw_0).map(Some)
+        }?;
+        let raw_1 = object
             .get("signatureRequired")
             .unwrap_or(&::serde_json::Value::Null);
-        let value_0: Option<bool> = if (raw_0).is_null() {
+        let value_1: Option<bool> = if (raw_1).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<bool>((raw_0).clone())
+            ::serde_json::from_value::<bool>((raw_1).clone())
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
-        let raw_1 = object.get("street").unwrap_or(&::serde_json::Value::Null);
-        let value_1: Option<String> = if (raw_1).is_null() {
+        let raw_2 = object.get("street").unwrap_or(&::serde_json::Value::Null);
+        let value_2: Option<String> = if (raw_2).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_1).clone())
+            ::serde_json::from_value::<String>((raw_2).clone())
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
-        let raw_2 = object.get("countryCodeV2").unwrap_or(&::serde_json::Value::Null);
-        let value_2: Option<v3::geo::Country> = if (raw_2).is_null() {
+        let raw_3 = object.get("countryCodeV2").unwrap_or(&::serde_json::Value::Null);
+        let value_3: Option<v3::geo::Country> = if (raw_3).is_null() {
             Ok::<_, String>(None)
         } else {
-            decode_wire_v_3_geo_country(raw_2).map(Some)
+            decode_wire_v_3_geo_country(raw_3).map(Some)
         }?;
-        let raw_3 = object.get("priority").unwrap_or(&::serde_json::Value::Null);
-        let value_3: Option<i32> = if (raw_3).is_null() {
+        let raw_4 = object.get("priority").unwrap_or(&::serde_json::Value::Null);
+        let value_4: Option<i32> = if (raw_4).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<i32>((raw_3).clone())
+            ::serde_json::from_value::<i32>((raw_4).clone())
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
         Ok(v3::shipping::Change {
             base: v3::shipping::PostalChange {
                 base: v3::geo::Change {
-                    signature_required: value_0,
+                    parent: value_0,
+                    signature_required: value_1,
                 },
-                street: value_1,
-                country_code_v2: value_2,
+                street: value_2,
+                country_code_v2: value_3,
             },
-            priority: value_3,
+            priority: value_4,
+        })
+    }
+    fn decode_wire_v_3_geo_anchor(
+        wire: &::serde_json::Value,
+    ) -> Result<v3::geo::Anchor, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &["checkpoint", "parent", "previous"];
+        let forbidden: &[&str] = &[];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object.get("checkpoint").unwrap_or(&::serde_json::Value::Null);
+        let value_0: Option<String> = if (raw_0).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_0).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        let raw_1 = object.get("parent").unwrap_or(&::serde_json::Value::Null);
+        let value_1: Option<Box<v3::geo::Anchor>> = if (raw_1).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            decode_wire_v_3_geo_anchor(raw_1).map(Box::new).map(Some)
+        }?;
+        let raw_2 = object.get("previous").unwrap_or(&::serde_json::Value::Null);
+        let value_2: Option<Vec<v3::geo::Anchor>> = if (raw_2).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            (|| {
+                let array = (raw_2)
+                    .as_array()
+                    .ok_or_else(|| "expected an array".to_string())?;
+                let values = array
+                    .iter()
+                    .map(|item| decode_wire_v_3_geo_anchor(item))
+                    .collect::<Result<Vec<_>, String>>()?;
+                Ok::<_, String>(values)
+            })()
+                .map(Some)
+        }?;
+        Ok(v3::geo::Anchor {
+            base: v3::geo::Marker {},
+            checkpoint: value_0,
+            parent: value_1,
+            previous: value_2,
         })
     }
     fn decode_wire_v_3_geo_country(

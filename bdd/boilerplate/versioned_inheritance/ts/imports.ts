@@ -34,6 +34,7 @@ export async function verifyImportedReaders(base: string) {
   const current = await latest.read('acme', 'a2');
   assert.equal(first.id, 'a2');
   assert.equal(first.line, current.street);
+  assert.deepEqual(first.parent, current.parent);
   assert.equal(typeof first.delivery_reference, 'string');
   assert.equal(Object.hasOwn(current, 'delivery_reference'), false);
   assert.deepEqual(

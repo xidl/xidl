@@ -29,7 +29,14 @@ pub async fn run(base: &str) {
     assert!(old.base.base.base.previous.as_ref().unwrap()[0]
         .previous
         .is_none());
-    let patch = serde_json::from_value(json!({"deliveryReference":"R-SDK","deliveryNote":"","line":"SDK street","countryCode":"CA","priority":0})).unwrap();
+    let parent = old.base.base.base.parent.as_deref().unwrap();
+    assert_eq!(parent.checkpoint.as_deref(), Some("handover"));
+    assert_eq!(
+        parent.parent.as_deref().unwrap().checkpoint.as_deref(),
+        Some("packed")
+    );
+    assert!(parent.parent.as_deref().unwrap().parent.is_none());
+    let patch = serde_json::from_value(json!({"deliveryReference":"R-SDK","deliveryNote":"","line":"SDK street","countryCode":"CA","priority":0,"parent":{"checkpoint":"Rust reroute","parent":{"checkpoint":"Rust original"}}})).unwrap();
     let written = first
         .update("acme".into(), "a2".into(), patch)
         .await
@@ -37,9 +44,17 @@ pub async fn run(base: &str) {
     assert_eq!(written.base.base.delivery_reference, "R-SDK");
     assert_eq!(written.base.base.delivery_note.as_deref(), Some(""));
     assert_eq!(written.priority, 0);
+    assert_eq!(
+        written.base.base.base.parent.as_deref().unwrap().checkpoint.as_deref(),
+        Some("Rust reroute")
+    );
     let current = head.read("acme".into(), "a2".into()).await.unwrap();
     assert_eq!(current.base.base.signature_required, Some(true));
     assert_eq!(current.base.street, "SDK street");
+    assert_eq!(
+        current.base.base.base.parent.as_deref().unwrap().parent.as_deref().unwrap().checkpoint.as_deref(),
+        Some("Rust original")
+    );
     let patch =
         serde_json::from_value(json!({"street":"Head street","signatureRequired":false})).unwrap();
     head.update("acme".into(), "a2".into(), patch)

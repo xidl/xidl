@@ -164,6 +164,7 @@ def inherited_openapi(context):
     }
     assert set(documents) == {"2026-01-01", "2026-04-01", "2026-07-01"}
     report = json.loads((context.inherited_report / "report.json").read_text())
+    checked_recursive_contracts = set()
     for result in report:
         for entry in result["entries"]:
             for call in entry["calls"]:
@@ -193,9 +194,21 @@ def inherited_openapi(context):
                 body = json.loads(
                     (context.inherited_report / response["body"]).read_text()
                 )
-                Draft202012Validator(
+                validator = Draft202012Validator(
                     {**contract, "components": document["components"]}
-                ).validate(body)
+                )
+                validator.validate(body)
+                if (
+                    response["status"] == 200
+                    and version not in checked_recursive_contracts
+                ):
+                    malformed = json.loads(json.dumps(body))
+                    malformed["parent"]["parent"]["checkpoint"] = 42
+                    assert not validator.is_valid(malformed), (
+                        f"{version} OpenAPI must validate recursive checkpoint types"
+                    )
+                    checked_recursive_contracts.add(version)
+    assert checked_recursive_contracts == set(documents)
 
 
 @then("the independent address SDKs preserve inherited history")
@@ -213,18 +226,29 @@ def inherited_sdks(context):
 def inherited_mode_boundary(context):
     base = context.inherited_base
     before = requests.get(base + "/audit", timeout=5).json()
-    # The root string alias wins over geo's numeric alias in both request fronts.
-    response = requests.patch(
-        base + "/tenants/acme/addresses/a1",
-        json={"deliveryReference": 42},
-        headers={
-            "x-address-version": "2026-01-01",
-            "authorization": "Bearer test-acme",
-        },
-        timeout=5,
-    )
-    assert response.status_code == 400, response.text
-    assert requests.get(base + "/audit", timeout=5).json() == before
+    # Root alias identity and a deep recursive leaf are checked before mutation.
+    for version, patch in [
+        ("2026-01-01", {"deliveryReference": 42}),
+        (
+            "2026-01-01",
+            {
+                "parent": {"parent": {"checkpoint": 42}},
+                "deliveryReference": "must-not-persist",
+            },
+        ),
+        (
+            "2026-07-01",
+            {"parent": {"parent": True}, "signatureRequired": False},
+        ),
+    ]:
+        response = requests.patch(
+            base + "/tenants/acme/addresses/a1",
+            json=patch,
+            headers={"x-address-version": version, "authorization": "Bearer test-acme"},
+            timeout=5,
+        )
+        assert response.status_code == 400, response.text
+        assert requests.get(base + "/audit", timeout=5).json() == before
     # Ordinary serde routers currently ignore unknown fields. The adapter wire
     # decoder rejects them before hooks. Neither may persist the hidden value.
     for version, patch in [

@@ -1,16 +1,15 @@
 //! Project a rendered transport module and its fields.
 
 use super::super::scope::TypeScope;
+use super::member::MemberProjection;
 use super::model::{TransportTypeDef, TransportVariantContext, TypeRegistry};
 use super::names::transport_ident;
 use super::{
     TransportDirection, TransportFieldContext, TransportItemContext, TransportModuleContext,
-    decode_expr, encode_expr, map_type_inner,
+    map_type_inner,
 };
 use crate::error::IdlcResult;
-use crate::generate::rust::util::{
-    array_type, declarator_dims, declarator_name, is_skipped_from_annotations, rust_ident,
-};
+use crate::generate::rust::util::{is_skipped_from_annotations, rust_ident};
 use std::collections::BTreeSet;
 use xidl_parser::hir;
 
@@ -66,6 +65,7 @@ fn render_struct(
         output: &output,
     };
     let mut fields = Vec::new();
+    let renderer = super::super::render::RustAxumRenderer::new()?;
     if let Some(parent) = def.parent.first() {
         let ty = map_type_inner(
             &hir::TypeSpec::ScopedName(parent.clone()),
@@ -89,40 +89,11 @@ fn render_struct(
             continue;
         }
         for decl in &member.ident {
-            let raw = declarator_name(decl);
-            let name = rust_ident(&raw);
-            let ty = member_ty(member, decl, direction, module_name, scope)?;
-            let wire = hir::effective_wire_name(&raw, &member.annotations, &def.annotations);
-            let serde_rename = (wire != name).then_some(wire);
-            let (enc, dec) = if member.is_optional() {
-                let e = encode_expr("value", &member.ty, scope)?;
-                let d = decode_expr("value", &member.ty, scope)?;
-                let enc = if e == "value" {
-                    format!("value.{name}")
-                } else {
-                    format!("value.{name}.map(|value| {e})")
-                };
-                let dec = if d == "value" {
-                    format!("value.{name}")
-                } else {
-                    format!("value.{name}.map(|value| {d})")
-                };
-                (enc, dec)
-            } else {
-                (
-                    encode_expr(&format!("value.{name}"), &member.ty, scope)?,
-                    decode_expr(&format!("value.{name}"), &member.ty, scope)?,
-                )
-            };
-            fields.push(TransportFieldContext {
-                flatten: crate::generate::utils::has_annotation(&member.annotations, "flatten"),
-                name: name.clone(),
-                ty,
-                serde_rename,
-                optional: member.is_optional(),
-                encode_expr: enc,
-                decode_expr: dec,
-            });
+            fields.push(MemberProjection::new(member, def, scope, &renderer).render(
+                decl,
+                direction,
+                module_name,
+            )?);
         }
     }
     Ok(TransportItemContext {
@@ -167,23 +138,4 @@ fn render_enum(
             })
             .collect(),
     }
-}
-
-fn member_ty(
-    member: &hir::Member,
-    decl: &hir::Declarator,
-    direction: TransportDirection,
-    module_name: &str,
-    scope: TypeScope<'_>,
-) -> IdlcResult<String> {
-    let mut base = map_type_inner(&member.ty, direction, module_name, scope, None)?;
-    if member.is_optional() {
-        base = format!("Option<{base}>");
-    }
-    let dims = declarator_dims(decl);
-    Ok(if dims.is_empty() {
-        base
-    } else {
-        array_type(&base, &dims)
-    })
 }
