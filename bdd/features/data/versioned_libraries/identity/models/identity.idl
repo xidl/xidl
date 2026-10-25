@@ -1,11 +1,11 @@
 typedef string Identifier;
 enum Country { US, CA };
 struct Marker {};
-struct Anchor : Marker { @optional sequence<geo::Anchor> previous; };
+struct Anchor : Marker { @optional sequence<Anchor> previous; };
 
 @rename_all("camelCase")
 struct Identity : Anchor {
-    geo::Identifier id;
+    Identifier id;
     string tenant;
     @removed(Versions::v3) string delivery_reference;
     @removed(Versions::v3) @optional string delivery_note;

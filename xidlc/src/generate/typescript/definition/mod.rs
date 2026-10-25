@@ -8,6 +8,7 @@ mod module_render;
 pub(crate) mod names;
 mod operation;
 mod output;
+mod root_imports;
 mod route_template;
 mod stream_validation;
 mod struct_fields;

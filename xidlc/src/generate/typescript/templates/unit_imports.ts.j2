@@ -1,3 +1,6 @@
+{% if root_import -%}
+import * as $xidl_root from "./{{ file_stem }}{{ import_suffix }}";
+{% endif -%}
 {% for prefix in imports -%}
 import * as {{ prefix }} from "./{{ prefix }}{{ import_suffix }}";
 export { {{ prefix }} };

@@ -6,6 +6,7 @@ use super::contexts::{ClientFileContext, ModuleContext, TsRenderCtx, TypesFileCo
 use super::interface_render::render_interface;
 use super::names::{indent_block, ts_ident};
 use super::output::TsRenderOutput;
+use super::root_imports::RootImports;
 use super::type_render::{render_constr_type, render_exception, render_type_dcl};
 
 pub fn render_typescript(
@@ -42,12 +43,15 @@ impl TsGenerator {
         };
         let blocks = render_module_body(&spec.0, &[], mode, &ctx)?;
         let imports = renderer.imported_units();
+        let roots = RootImports::collect(spec, mode);
         let types = renderer.render_template(
             "types.d.ts.j2",
             &TypesFileContext {
                 blocks: blocks.types,
                 imports: imports.clone(),
                 import_suffix: String::new(),
+                root_import: roots.types,
+                file_stem: self.file_stem.clone(),
             },
         )?;
         let zod = renderer.render_template(
@@ -56,6 +60,8 @@ impl TsGenerator {
                 blocks: blocks.zod,
                 imports,
                 import_suffix: ".zod".to_string(),
+                root_import: roots.zod,
+                file_stem: self.file_stem.clone(),
             },
         )?;
         let client = if mode.allows_interfaces() {

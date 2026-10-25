@@ -25,7 +25,8 @@ impl WireDecoderBuilder<'_> {
             hir::TypeSpec::ScopedName(name) => {
                 let key = self.layouts(version)?.resolve(scope, name)?;
                 name.name = vec![self.ensure(version, &key)?];
-                name.is_root = true;
+                // Wire schemas are local declarations in this adapter file.
+                name.is_root = false;
             }
             hir::TypeSpec::SequenceType(sequence) => {
                 self.normalize(&mut sequence.ty, version, scope)?

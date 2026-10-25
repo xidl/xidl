@@ -50,6 +50,7 @@ pub(crate) fn ts_scoped_name(
     }
     let name = parts.join(".");
     match target {
+        TypeRefTarget::Types if value.is_root => format!("$xidl_root.{name}"),
         TypeRefTarget::Types => name,
         TypeRefTarget::Client => format!("types.{name}"),
     }
@@ -80,6 +81,8 @@ pub(crate) fn zod_schema_ref(
     let joined = parts.join(".");
     if let Some(p) = prefix {
         format!("{}.{}", p, joined)
+    } else if value.is_root {
+        format!("$xidl_root.{joined}")
     } else {
         joined
     }
