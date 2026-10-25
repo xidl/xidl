@@ -68,21 +68,22 @@ fn single_version_rust_target_keeps_typed_decoding_and_owned_identity_outcomes()
 }
 
 #[test]
-fn inherited_models_require_explicit_adapter_decisions() {
-    let files = render(
-        r#"@version enum V { v1, v2 };
-        struct Base {
-            string id;
-            @added(V::v2) @optional string note;
-        };
-        struct Item : Base { string role; };
-        interface Store { @get(path="/item") Item read(); };"#,
+fn inherited_requests_and_responses_share_member_decisions_and_storage_needs() {
+    let source = include_str!("../../bdd/features/data/versioned_inheritance.idl");
+    let files = render(source);
+    assert_eq!(
+        files,
+        render(
+            &source
+                .replace("geo::Identifier id", "Identifier id")
+                .replace("geo::Anchor previous", "Anchor previous")
+        )
     );
-    assert!(
-        files[0].1.contains("item_downcast_to_v_1"),
-        "{}",
-        files[0].1
-    );
+    let output = &files[0].1;
+    assert!(output.contains("source.base.base.delivery_reference"));
+    assert!(output.contains("v1::geo::Identifier"));
+    assert!(!output.contains("v1::shipping::Identifier"));
+    insta::assert_snapshot!("inherited_rust_address_adapters", output);
 }
 
 #[test]
@@ -90,6 +91,7 @@ fn rust_target_rejects_public_layouts_without_an_explicit_construction_contract(
     for source in [
         r#"@version enum V { only }; @derive(Ord, PartialOrd) enum Key { visible, @skip hidden }; typedef Key Alias; interface Store { @post(path="/values") string save(@body map<Alias,string> values); };"#,
         r#"@version enum V { only }; struct Item { @skip string hidden; }; interface Store { @get(path="/items") Item read(); };"#,
+        r#"@version enum V { only }; struct Base { @skip string hidden; }; struct Item : Base { string id; }; interface Store { @get(path="/items") Item read(); };"#,
         r#"@version enum V { only }; enum State { visible, @skip hidden }; interface Store { @post(path="/state") State save(@body State state); };"#,
         r#"@version enum V { v1,v2 }; enum State { visible, @skip hidden }; interface Store { @post(path="/state") State save(@body State state); };"#,
         r#"@version enum V { only }; @http union U switch(ContentType) { case Json: string visible; case Text: @skip string hidden; }; interface Store { @post(path="/u") U save(@body U value); };"#,

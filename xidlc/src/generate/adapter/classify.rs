@@ -32,6 +32,9 @@ impl MemberClassifier<'_> {
         let mut plan = ConversionPlan::default();
         let upward = self.direction == Direction::Upcast;
         let paired = |source: &Member, target: &Member| {
+            if source.path.last() != target.path.last() {
+                return false;
+            }
             if source.key != target.key {
                 return false;
             }

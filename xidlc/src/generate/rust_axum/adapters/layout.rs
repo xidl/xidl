@@ -124,6 +124,9 @@ impl<'a> Layout<'a> {
     }
 
     pub(super) fn validate(&self, key: &str) -> IdlcResult<()> {
+        if let Some(parent) = self.parent(key)? {
+            self.validate(&parent)?;
+        }
         let skipped = match self.declarations.get(key) {
             Some(Declaration::Struct(_) | Declaration::Exception(_)) => {
                 self.members(key)?;

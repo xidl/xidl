@@ -61,8 +61,7 @@ struct OptionalChange {
 struct Node { string name; @optional sequence<Node> children; };
 
 // Inheritance keeps one flattened wire shape per release: a member retired on
-// the base stays readable by every release that still declares it, and the
-// whole derived conversion is one application decision.
+// the base stays readable through the derived type's member decision and reader.
 struct Labelled {
     string label;
     @removed(Versions::v3) @optional string tag;

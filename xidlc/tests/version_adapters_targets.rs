@@ -80,18 +80,19 @@ fn changed_source_declarations_require_decisions_even_with_identical_wire_shapes
 }
 
 #[test]
-fn inherited_models_require_explicit_adapter_decisions() {
-    let files = render(
-        r#"@version enum V { v1, v2 };
-        struct Base {
-            string id;
-            @added(V::v2) @optional string note;
-        };
-        struct Item : Base { string role; };
-        interface Store { @get(path="/item") Item read(); };"#,
-        "inheritance.idl",
+fn inherited_requests_and_responses_share_member_decisions_and_storage_needs() {
+    let source = include_str!("../../bdd/features/data/versioned_inheritance.idl");
+    let files = render(source, "inheritance.idl");
+    assert_eq!(
+        files,
+        render(
+            &source
+                .replace("geo::Identifier id", "Identifier id")
+                .replace("geo::Anchor previous", "Anchor previous"),
+            "inheritance.idl"
+        )
     );
-    assert!(files[0].1.contains("itemDowncastToV1"), "{}", files[0].1);
+    insta::assert_snapshot!("inherited_typescript_address_adapters", &files[0].1);
 }
 
 #[test]

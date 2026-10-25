@@ -66,6 +66,38 @@ impl ParameterSide {
 pub(super) struct MapFacts;
 
 impl MapFacts {
+    /// Inherited fields use the change recorded on their declaring base. Moving
+    /// a wire name between declarations is handled as an explicit decision.
+    pub(super) fn type_members(
+        types: &BTreeMap<String, xidl_parser::versioning::map::TypeChange>,
+        key: &str,
+        source: &[Member],
+        target: &[Member],
+    ) -> BTreeMap<String, Change> {
+        let mut facts = types
+            .get(key)
+            .map(|change| change.members.clone())
+            .unwrap_or_default();
+        for member in source.iter().chain(target) {
+            if let Some(change) = member
+                .path
+                .last()
+                .and_then(|owner| types.get(owner))
+                .and_then(|change| change.members.get(&member.key))
+            {
+                facts.insert(member.key.clone(), change.clone());
+            }
+        }
+        for old in source {
+            if let Some(new) = target.iter().find(|member| member.key == old.key)
+                && old.path.last() != new.path.last()
+            {
+                facts.remove(&old.key);
+            }
+        }
+        facts
+    }
+
     pub(super) fn read(props: &ParserProperties) -> IdlcResult<VersionMap> {
         let value = props.get("version_map").ok_or_else(|| {
             IdlcError::rpc(

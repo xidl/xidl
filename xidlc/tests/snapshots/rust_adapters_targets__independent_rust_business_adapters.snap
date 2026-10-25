@@ -104,10 +104,6 @@ pub mod version_adapters {
             source: &v2::Parcel,
             stored: &dyn StoredValues,
         ) -> VersionedResult<ParcelDowncastToV1Decision>;
-        fn signed_downcast_to_v_1(
-            &self,
-            source: &v2::Signed,
-        ) -> VersionedResult<v1::Signed>;
         fn state_downcast_to_v_1(
             &self,
             source: &StateDowncastToV1Changes,
@@ -146,7 +142,8 @@ pub mod version_adapters {
         fn signed_downcast_to_v_2(
             &self,
             source: &v3::Signed,
-        ) -> VersionedResult<v2::Signed>;
+            stored: &dyn StoredValues,
+        ) -> VersionedResult<SignedDowncastToV2Decision>;
         fn state_downcast_to_v_2(
             &self,
             source: &StateDowncastToV2Changes,
@@ -185,6 +182,8 @@ pub mod version_adapters {
         fn parcel_handling_note(&self, source: &v3::Parcel) -> Option<String>;
         /// wire `courier_note`, last served by v2
         fn parcel_courier_note(&self, source: &v3::Parcel) -> Option<String>;
+        /// wire `tag`, last served by v2
+        fn signed_tag(&self, source: &v3::Signed) -> Option<String>;
         /// wire `trace_id`, last served by v2
         fn depot_trace_response_trace_id(&self, source: &String) -> Option<String>;
     }
@@ -207,6 +206,7 @@ pub mod version_adapters {
                 ("2026-01", &["courier_note", "handling_note", "reference"]),
             ],
         ),
+        ("Signed", &[("2026-07", &[]), ("2026-04", &["tag"]), ("2026-01", &["tag"])]),
     ];
     /// A Head outcome together with the stored values its downcast still reads.
     pub struct HeadOutcome<T, E, S> {
@@ -263,6 +263,10 @@ pub mod version_adapters {
         pub stored: DepotUpdateStored,
     }
     /// Explicit business assignments and discarded-value acknowledgements.
+    pub struct SignedDowncastToV2Decision {
+        pub tag: Option<String>,
+    }
+    /// Explicit business assignments and discarded-value acknowledgements.
     pub struct DepotTraceResponseDowncastToV2Decision {
         pub trace_id: String,
     }
@@ -273,7 +277,7 @@ pub mod version_adapters {
     }
     impl DepotUpdateStored {
         /// Combine the persisted members collected along the request chain.
-        fn merge(self, other: Self) -> Self {
+        pub fn merge(self, other: Self) -> Self {
             Self {
                 handling_note: self.handling_note.or(other.handling_note),
             }
@@ -1225,7 +1229,25 @@ pub mod version_adapters {
             type_path: "Signed".into(),
             reason: reason.into(),
         };
-        adapters.signed_downcast_to_v_1(source)
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.base.label))?;
+        let projected_1 = (&source.base.tag)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
+        let projected_2 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.signature))?;
+        Ok(v1::Signed {
+            base: v1::Labelled {
+                label: projected_0,
+                tag: projected_1,
+            },
+            signature: projected_2,
+        })
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn state_upcast_from_v_1(
@@ -2596,6 +2618,7 @@ pub mod version_adapters {
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn signed_downcast_to_v_2(
         source: &v3::Signed,
+        stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> VersionedResult<v2::Signed> {
         let refusal = |reason: &str| UnsupportedProjection {
@@ -2604,7 +2627,22 @@ pub mod version_adapters {
             type_path: "Signed".into(),
             reason: reason.into(),
         };
-        adapters.signed_downcast_to_v_2(source)
+        let decision = adapters.signed_downcast_to_v_2(source, stored)?;
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.base.label))?;
+        let projected_1 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.signature))?;
+        Ok(v2::Signed {
+            base: v2::Labelled {
+                label: projected_0,
+                tag: decision.tag,
+            },
+            signature: projected_1,
+        })
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn state_upcast_from_v_2(
@@ -3052,6 +3090,7 @@ pub mod version_adapters {
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn depot_receipt_response_downcast_to_v_2(
         source: &v3::Signed,
+        stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> VersionedResult<v2::Signed> {
         let refusal = |reason: &str| UnsupportedProjection {
@@ -3060,7 +3099,7 @@ pub mod version_adapters {
             type_path: "DepotReceiptResponse".into(),
             reason: reason.into(),
         };
-        let projected_0 = signed_downcast_to_v_2(source, adapters)?;
+        let projected_0 = signed_downcast_to_v_2(source, stored, adapters)?;
         Ok(projected_0)
     }
     /// Projects one adjacent declaration by borrowing its source value.
@@ -6736,6 +6775,7 @@ pub mod version_adapters {
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_receipt_from_v_1_outcome(
         head: Result<v3::Signed, ::xidl_rust_axum::Error>,
+        stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
         Result<v1::Signed, ::xidl_rust_axum::Error>,
@@ -6745,6 +6785,7 @@ pub mod version_adapters {
             Ok(source) => {
                 let source = match depot_receipt_response_downcast_to_v_2(
                     source,
+                    stored,
                     adapters,
                 ) {
                     Ok(value) => value,
@@ -6798,8 +6839,8 @@ pub mod version_adapters {
             }
         }
     }
-    /// Execute a caller-supplied Head handler once after successful adaptation.
-    pub async fn dispatch_depot_receipt_from_v_1<F, Fut>(
+    /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
+    pub async fn dispatch_depot_receipt_from_v_1<F, Fut, R>(
         wire: ::serde_json::Value,
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
@@ -6812,7 +6853,10 @@ pub mod version_adapters {
     >
     where
         F: FnOnce(DepotReceiptRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::Signed, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<v3::Signed, ::xidl_rust_axum::Error, R>,
+        >,
+        R: StoredValues,
     {
         let input = decode_and_upcast_depot_receipt_from_v_1(wire, adapters)?;
         let head = handler(
@@ -6822,7 +6866,7 @@ pub mod version_adapters {
                 },
             )
             .await;
-        Ok(downcast_depot_receipt_from_v_1_outcome(head, adapters))
+        Ok(downcast_depot_receipt_from_v_1_outcome(head.outcome, &head.stored, adapters))
     }
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_representation_from_v_1(
@@ -7336,13 +7380,12 @@ pub mod version_adapters {
             id: value_0,
             patch: value_1,
         };
+        let stored = DepotUpdateStored::default();
         let source = depot_update_request_upcast_from_v_1(&source, adapters)?;
         let upcast = depot_update_request_upcast_from_v_2(&source, &current, adapters)?;
+        let stored = stored.merge(upcast.stored);
         let source = upcast.value;
-        Ok(Upcast {
-            value: source,
-            stored: DepotUpdateStored::default().merge(upcast.stored),
-        })
+        Ok(Upcast { value: source, stored })
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_update_from_v_1_outcome(
@@ -8708,6 +8751,7 @@ pub mod version_adapters {
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_receipt_from_v_2_outcome(
         head: Result<v3::Signed, ::xidl_rust_axum::Error>,
+        stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
         Result<v2::Signed, ::xidl_rust_axum::Error>,
@@ -8717,6 +8761,7 @@ pub mod version_adapters {
             Ok(source) => {
                 let source = match depot_receipt_response_downcast_to_v_2(
                     source,
+                    stored,
                     adapters,
                 ) {
                     Ok(value) => value,
@@ -8746,8 +8791,8 @@ pub mod version_adapters {
             }
         }
     }
-    /// Execute a caller-supplied Head handler once after successful adaptation.
-    pub async fn dispatch_depot_receipt_from_v_2<F, Fut>(
+    /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
+    pub async fn dispatch_depot_receipt_from_v_2<F, Fut, R>(
         wire: ::serde_json::Value,
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
@@ -8760,7 +8805,10 @@ pub mod version_adapters {
     >
     where
         F: FnOnce(DepotReceiptRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::Signed, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<v3::Signed, ::xidl_rust_axum::Error, R>,
+        >,
+        R: StoredValues,
     {
         let input = decode_and_upcast_depot_receipt_from_v_2(wire, adapters)?;
         let head = handler(
@@ -8770,7 +8818,7 @@ pub mod version_adapters {
                 },
             )
             .await;
-        Ok(downcast_depot_receipt_from_v_2_outcome(head, adapters))
+        Ok(downcast_depot_receipt_from_v_2_outcome(head.outcome, &head.stored, adapters))
     }
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_depot_representation_from_v_2(
@@ -9193,12 +9241,11 @@ pub mod version_adapters {
             id: value_0,
             patch: value_1,
         };
+        let stored = DepotUpdateStored::default();
         let upcast = depot_update_request_upcast_from_v_2(&source, &current, adapters)?;
+        let stored = stored.merge(upcast.stored);
         let source = upcast.value;
-        Ok(Upcast {
-            value: source,
-            stored: DepotUpdateStored::default().merge(upcast.stored),
-        })
+        Ok(Upcast { value: source, stored })
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_update_from_v_2_outcome(
@@ -10542,10 +10589,8 @@ pub mod version_adapters {
             id: value_0,
             patch: value_1,
         };
-        Ok(Upcast {
-            value: source,
-            stored: DepotUpdateStored::default(),
-        })
+        let stored = DepotUpdateStored::default();
+        Ok(Upcast { value: source, stored })
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_depot_update_from_v_3_outcome(
@@ -11149,16 +11194,17 @@ pub mod version_adapters {
     pub fn downcast_signed(
         version: Version,
         head: v3::Signed,
+        stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> VersionedResult<SignedProjection> {
         match version {
             Version::V1 => {
-                let source = signed_downcast_to_v_2(&head, adapters)?;
+                let source = signed_downcast_to_v_2(&head, stored, adapters)?;
                 let source = signed_downcast_to_v_1(&source, adapters)?;
                 Ok(SignedProjection::V1(source))
             }
             Version::V2 => {
-                let source = signed_downcast_to_v_2(&head, adapters)?;
+                let source = signed_downcast_to_v_2(&head, stored, adapters)?;
                 Ok(SignedProjection::V2(source))
             }
             Version::V3 => {
@@ -12419,6 +12465,7 @@ pub mod version_adapters {
     pub fn downcast_depot_receipt_outcome(
         version: Version,
         head: Result<v3::Signed, ::xidl_rust_axum::Error>,
+        stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
         DepotReceiptOutcome,
@@ -12426,7 +12473,7 @@ pub mod version_adapters {
     > {
         match version {
             Version::V1 => {
-                match downcast_depot_receipt_from_v_1_outcome(head, adapters) {
+                match downcast_depot_receipt_from_v_1_outcome(head, stored, adapters) {
                     ProjectionOutcome::Projected(value) => {
                         ProjectionOutcome::Projected(DepotReceiptOutcome::V1(value))
                     }
@@ -12439,7 +12486,7 @@ pub mod version_adapters {
                 }
             }
             Version::V2 => {
-                match downcast_depot_receipt_from_v_2_outcome(head, adapters) {
+                match downcast_depot_receipt_from_v_2_outcome(head, stored, adapters) {
                     ProjectionOutcome::Projected(value) => {
                         ProjectionOutcome::Projected(DepotReceiptOutcome::V2(value))
                     }
@@ -12466,8 +12513,8 @@ pub mod version_adapters {
             }
         }
     }
-    /// Execute a Head handler once; the application supplies version resolution.
-    pub async fn dispatch_depot_receipt<F, Fut>(
+    /// Execute a Head handler once; it returns the stored values older versions still read.
+    pub async fn dispatch_depot_receipt<F, Fut, R>(
         version: Version,
         wire: ::serde_json::Value,
         handler: F,
@@ -12481,7 +12528,10 @@ pub mod version_adapters {
     >
     where
         F: FnOnce(DepotReceiptRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<v3::Signed, ::xidl_rust_axum::Error>>,
+        Fut: ::std::future::Future<
+            Output = HeadOutcome<v3::Signed, ::xidl_rust_axum::Error, R>,
+        >,
+        R: StoredValues,
     {
         let input = decode_and_upcast_depot_receipt(version, wire, adapters)?;
         let head = handler(
@@ -12491,7 +12541,7 @@ pub mod version_adapters {
                 },
             )
             .await;
-        Ok(downcast_depot_receipt_outcome(version, head, adapters))
+        Ok(downcast_depot_receipt_outcome(version, head.outcome, &head.stored, adapters))
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum DepotRepresentationOutcome {
