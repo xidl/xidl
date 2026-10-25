@@ -25,7 +25,7 @@ use serde_json::{json, Value};
 use std::{
     collections::{BTreeMap, BTreeSet, HashMap},
     sync::{
-        atomic::{AtomicUsize, Ordering},
+        atomic::AtomicUsize,
         Arc, Mutex,
     },
 };
@@ -96,6 +96,79 @@ pub(crate) fn header<'a>(headers: &'a HeaderMap, name: &str) -> Option<&'a str> 
     headers.get(name).and_then(|value| value.to_str().ok())
 }
 
+/// The journey's typed client: every leg goes through one request builder so
+/// the three endpoints share one version-header rule.
+pub(crate) struct JourneyClient {
+    base: String,
+    http: xidl_rust_axum::reqwest::Client,
+}
+
+impl JourneyClient {
+    pub(crate) fn new(base: String) -> Self {
+        JourneyClient {
+            base,
+            http: xidl_rust_axum::reqwest::Client::new(),
+        }
+    }
+
+    async fn send(
+        &self,
+        method: xidl_rust_axum::reqwest::Method,
+        path: &str,
+        version: Option<&str>,
+        body: Option<Value>,
+    ) -> xidl_rust_axum::reqwest::Response {
+        let mut request = self
+            .http
+            .request(method, format!("{}{path}", self.base));
+        if let Some(version) = version {
+            request = request.header("x-transform-version", version);
+        }
+        if let Some(body) = body {
+            request = request.json(&body);
+        }
+        request.send().await.unwrap()
+    }
+
+    pub(crate) async fn get(
+        &self,
+        version: Option<&str>,
+        id: &str,
+    ) -> xidl_rust_axum::reqwest::Response {
+        self.send(
+            xidl_rust_axum::reqwest::Method::GET,
+            &format!("/profiles?id={id}"),
+            version,
+            None,
+        )
+        .await
+    }
+
+    pub(crate) async fn post(
+        &self,
+        version: Option<&str>,
+        body: Value,
+    ) -> xidl_rust_axum::reqwest::Response {
+        self.send(
+            xidl_rust_axum::reqwest::Method::POST,
+            "/profiles",
+            version,
+            Some(body),
+        )
+        .await
+    }
+
+    pub(crate) async fn roster(&self, version: Option<&str>) -> xidl_rust_axum::reqwest::Response {
+        self.send(
+            xidl_rust_axum::reqwest::Method::GET,
+            "/roster",
+            version,
+            None,
+        )
+        .await
+    }
+}
+
 pub(crate) fn echo(mut response: Response, version: Option<Version>) -> Response {
     let label = match version {
         Some(Version::V20260101) => "2026-01-01",
@@ -154,20 +227,21 @@ pub(crate) fn remember_facts(app: &AppState, id: &str, raw: &Value) {
             None => None,
         },
     };
-    let note = raw
-        .get("note")
-        .and_then(|note| note.get("text"))
-        .and_then(Value::as_str)
-        .map(str::to_owned)
-        .or_else(|| {
-            raw.get("notes")
-                .and_then(Value::as_array)
-                .and_then(|list| list.first())
-                .and_then(|note| note.get("text"))
-                .and_then(Value::as_str)
-                .map(str::to_owned)
-        })
-        .or(previous.note);
+    // E7 write rule: a caller that owns the whole list clears the note fact
+    // by sending an empty list; callers without the list keep the stored fact.
+    let note = match raw.get("notes").and_then(Value::as_array) {
+        Some(list) => list
+            .first()
+            .and_then(|note| note.get("text"))
+            .and_then(Value::as_str)
+            .map(str::to_owned),
+        None => raw
+            .get("note")
+            .and_then(|note| note.get("text"))
+            .and_then(Value::as_str)
+            .map(str::to_owned)
+            .or(previous.note),
+    };
     rows.insert(
         id.to_owned(),
         Facts {

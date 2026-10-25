@@ -268,6 +268,50 @@ export async function runTransformsHttpJourney(): Promise<void> {
     });
     assert.equal((await get('2026-04-01', 'p3')).status, 422);
 
+    // E7, the Head-clearing case: a caller that owns the list empties it, and
+    // the note fact older callers read is gone with it, never a ghost.
+    await post(undefined, {
+      created_at_utc: '2026-06-01T12:00:00.000Z',
+      display_name: 'Dr. Ann Lee',
+      id: 'p2',
+      notes: [],
+      read_at: '2026-06-02T08:00:00.000Z',
+      tier: 'premium',
+      title: 'engineer',
+      to: { handle: 'lee@example.test', protocol: 'relay' },
+    });
+    const clearedRead = await get('2026-04-01', 'p2');
+    assert.equal(clearedRead.status, 200);
+    const clearedView = (await clearedRead.json()) as Record<string, unknown>;
+    assert.equal(Object.hasOwn(clearedView, 'note'), false);
+    // E5 downward, end to end: the read time on the Head instance is the
+    // newest fact, so the middle release serves the retired value from it.
+    assert.equal(clearedView.status, 'read');
+
+    // The creation stamp is parsed by one strict RFC 3339 shape in every
+    // language: offsets and impossible calendar dates never become facts.
+    for (const stamp of [
+      '2026-06-01T12:00:00+02:00',
+      '2026-02-31T00:00:00Z',
+      '2026-06-01T25:00:00Z',
+    ]) {
+      await post(undefined, {
+        created_at_utc: stamp,
+        display_name: 'Stamped',
+        id: 'p-stamp',
+        notes: [],
+        tier: 'standard',
+        title: 'stamp',
+        to: { handle: 'stamp@example.test' },
+      });
+      const stampRead = await get('2026-04-01', 'p-stamp');
+      assert.equal(stampRead.status, 422, stamp);
+      assert.match(
+        ((await stampRead.json()) as { reason: string }).reason,
+        /creation time/,
+      );
+    }
+
     // One element without its stored facts refuses the whole read: the list
     // cannot be served partially without inventing the missing pieces.
     await post(undefined, {

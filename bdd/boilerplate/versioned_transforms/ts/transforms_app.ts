@@ -1,5 +1,10 @@
 import { createServer } from 'node:http';
-import { hooks, resolveVersion, VERSION_IDS } from './transforms_hooks';
+import {
+  hooks,
+  resolveVersion,
+  rfc3339ToEpoch,
+  VERSION_IDS,
+} from './transforms_hooks';
 import type * as types from './versioned_transforms';
 import * as a from './versioned_transforms.adapters';
 import * as errors from './versioned_transforms.errors';
@@ -32,23 +37,27 @@ export const rememberFacts = (
   const notes = raw.notes as Array<{ text: string }> | undefined;
   const to = raw.to as { handle?: unknown } | undefined;
   const createdAtUtc = raw.created_at_utc as string | undefined;
-  const parsed =
-    createdAtUtc === undefined ? Number.NaN : Date.parse(createdAtUtc);
+  const parsed = rfc3339ToEpoch(createdAtUtc ?? '');
   state.rows.set(id, {
     createdAt:
       typeof raw.created_at === 'number'
         ? raw.created_at
-        : Number.isNaN(parsed)
+        : parsed === undefined
           ? previous?.createdAt
-          : Math.floor(parsed / 1000),
+          : parsed,
     firstName:
       typeof raw.first_name === 'string' ? raw.first_name : previous?.firstName,
     lastName:
       typeof raw.last_name === 'string' ? raw.last_name : previous?.lastName,
     note:
       (raw.note as { text: string } | undefined) ??
-      (notes !== undefined && notes.length > 0 ? notes[0] : undefined) ??
-      previous?.note,
+      (notes !== undefined
+        ? // A Head caller owns the whole list: clearing it clears the fact.
+          notes.length > 0
+          ? notes[0]
+          : undefined
+        : undefined) ??
+      (notes === undefined ? previous?.note : undefined),
     recipient:
       typeof raw.recipient === 'string'
         ? raw.recipient
@@ -67,7 +76,10 @@ export function createDirectoryApp(state: DirectoryState) {
     profileLastName: source => state.rows.get(source.id)?.lastName,
     profileNote: source => state.rows.get(source.id)?.note,
     profileRecipient: source => state.rows.get(source.id)?.recipient,
-    profileStatus: source => state.rows.get(source.id)?.status,
+    // E5 downward: the read time on the Head instance is the newest fact, so
+    // the retired value derives from it before storage is consulted.
+    profileStatus: source =>
+      source.read_at !== undefined ? 'read' : state.rows.get(source.id)?.status,
   };
   return createServer(async (request, response) => {
     try {

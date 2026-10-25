@@ -215,38 +215,55 @@ pub(crate) async fn profile(
         Ok(ProjectionOutcome::Projected(DirectoryProfileOutcome::V20260701(Err(
             error,
         )))) => {
-            let status = match error {
-                v2026_07_01::DirectoryProfileError::Missing(_) => StatusCode::NOT_FOUND,
-                v2026_07_01::DirectoryProfileError::Sealed(_) => StatusCode::CONFLICT,
-                v2026_07_01::DirectoryProfileError::Framework(ref runtime) => StatusCode
-                    ::from_u16(runtime.code)
-                    .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR),
+            // Declared errors carry their status; downgraded refinements keep
+            // the committed reason on the runtime channel, matching the
+            // TypeScript application word for word.
+            let (status, why) = match &error {
+                v2026_07_01::DirectoryProfileError::Missing(_) => {
+                    (StatusCode::NOT_FOUND, "v2026_07_01$Missing".to_owned())
+                }
+                v2026_07_01::DirectoryProfileError::Sealed(_) => {
+                    (StatusCode::CONFLICT, "Sealed".to_owned())
+                }
+                v2026_07_01::DirectoryProfileError::Framework(runtime) => (
+                    StatusCode::from_u16(runtime.code)
+                        .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR),
+                    runtime.message.to_string(),
+                ),
             };
-            reason(status, "profile read refused", echoed)
+            reason(status, &why, echoed)
         }
         // Declared errors carry their status; downgraded refinements keep the
         // committed status on the runtime channel.
         Ok(ProjectionOutcome::Projected(DirectoryProfileOutcome::V20260401(Err(
             error,
         )))) => {
-            let status = match error {
-                v2026_04_01::DirectoryProfileError::Missing(_) => StatusCode::NOT_FOUND,
-                v2026_04_01::DirectoryProfileError::Framework(ref runtime) => StatusCode
-                    ::from_u16(runtime.code)
-                    .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR),
+            let (status, why) = match &error {
+                v2026_04_01::DirectoryProfileError::Missing(_) => {
+                    (StatusCode::NOT_FOUND, "v2026_04_01$Missing".to_owned())
+                }
+                v2026_04_01::DirectoryProfileError::Framework(runtime) => (
+                    StatusCode::from_u16(runtime.code)
+                        .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR),
+                    runtime.message.to_string(),
+                ),
             };
-            reason(status, "profile read refused", echoed)
+            reason(status, &why, echoed)
         }
         Ok(ProjectionOutcome::Projected(DirectoryProfileOutcome::V20260101(Err(
             error,
         )))) => {
-            let status = match error {
-                v2026_01_01::DirectoryProfileError::Missing(_) => StatusCode::NOT_FOUND,
-                v2026_01_01::DirectoryProfileError::Framework(ref runtime) => StatusCode
-                    ::from_u16(runtime.code)
-                    .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR),
+            let (status, why) = match &error {
+                v2026_01_01::DirectoryProfileError::Missing(_) => {
+                    (StatusCode::NOT_FOUND, "v2026_01_01$Missing".to_owned())
+                }
+                v2026_01_01::DirectoryProfileError::Framework(runtime) => (
+                    StatusCode::from_u16(runtime.code)
+                        .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR),
+                    runtime.message.to_string(),
+                ),
             };
-            reason(status, "profile read refused", echoed)
+            reason(status, &why, echoed)
         }
     }
 }
@@ -299,7 +316,8 @@ pub(crate) async fn roster(State(app): State<Arc<AppState>>, headers: HeaderMap)
         }
         Ok(ProjectionOutcome::Projected(outcome)) => {
             // The three element types are the wire shapes of their own
-            // release; serialize whichever projected.
+            // release; serialize whichever projected. A typed refusal never
+            // becomes a successful empty list.
             let value = match outcome {
                 crate::gen::version_adapters::DirectoryRosterOutcome::V20260101(Ok(value)) => {
                     serde_json::to_value(&value).unwrap_or(Value::Array(Vec::new()))
@@ -310,7 +328,13 @@ pub(crate) async fn roster(State(app): State<Arc<AppState>>, headers: HeaderMap)
                 crate::gen::version_adapters::DirectoryRosterOutcome::V20260701(Ok(value)) => {
                     serde_json::to_value(&value).unwrap_or(Value::Array(Vec::new()))
                 }
-                _ => Value::Array(Vec::new()),
+                _ => {
+                    return reason(
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        "roster read refused",
+                        echoed,
+                    )
+                }
             };
             echo((StatusCode::OK, Json(value)).into_response(), echoed)
         }

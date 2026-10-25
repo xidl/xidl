@@ -31,6 +31,11 @@ impl StoredValues for Storage {
         self.notes.get(&source.id).cloned()
     }
     fn profile_status(&self, source: &v2026_07_01::Profile) -> Option<String> {
+        // E5: the read time on the Head instance is the newest fact, so the
+        // retired value derives from it before storage is consulted.
+        if source.read_at.is_some() {
+            return Some("read".into());
+        }
         self.statuses.get(&source.id).cloned()
     }
 }
@@ -186,7 +191,7 @@ impl VersionAdapters for Hooks {
     /// E4: the newest value simply has no image one release earlier.
     fn route_protocol_downcast_to_v_2026_04_01(
         &self,
-        source: &RouteProtocolDowncastToV20260401Changes,
+        _source: &RouteProtocolDowncastToV20260401Changes,
     ) -> VersionedResult<v2026_04_01::RouteProtocol> {
         self.protocol_refusals.fetch_add(1, Ordering::SeqCst);
         Err(UnsupportedProjection {
@@ -244,10 +249,19 @@ fn parse_date(date: &str) -> Option<i64> {
     let year: i64 = parts.next()?.parse().ok()?;
     let month: i64 = parts.next()?.parse().ok()?;
     let day: i64 = parts.next()?.parse().ok()?;
+    // The calendar is validated, never rolled over: 2026-02-31 refuses.
+    if !(1..=12).contains(&month) {
+        return None;
+    }
     let leap = |y: i64| y % 4 == 0 && (y % 100 != 0 || y % 400 == 0);
+    let february: i64 = if leap(year) { 29 } else { 28 };
+    let lengths = [31, february, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    if day < 1 || day > lengths[(month - 1) as usize] {
+        return None;
+    }
     let cumulative = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
     let mut days = 365 * (year - 1970) + (1970..year).filter(|y| leap(*y)).count() as i64;
-    days += cumulative[(month - 1).clamp(0, 11) as usize];
+    days += cumulative[(month - 1) as usize];
     if month > 2 && leap(year) {
         days += 1;
     }
@@ -259,5 +273,8 @@ fn parse_time(time: &str) -> Option<i64> {
     let hour: i64 = parts.next()?.parse().ok()?;
     let minute: i64 = parts.next()?.parse().ok()?;
     let second: f64 = parts.next()?.parse().ok()?;
+    if !(0..24).contains(&hour) || !(0..60).contains(&minute) || !(0.0..60.0).contains(&second) {
+        return None;
+    }
     Some(hour * 3_600 + minute * 60 + second as i64)
 }

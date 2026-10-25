@@ -7,6 +7,7 @@ mod hooks;
 mod routes;
 mod http;
 mod http_app;
+mod http_roster;
 mod transforms;
 
 fn main() {

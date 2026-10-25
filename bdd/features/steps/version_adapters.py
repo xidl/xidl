@@ -224,6 +224,7 @@ def prepare_rust_application(context, script, boilerplate_name="versioned_adapte
                 "transforms.rs",
                 "http.rs",
                 "http_app.rs",
+                "http_roster.rs",
                 "routes.rs",
             ]
         },

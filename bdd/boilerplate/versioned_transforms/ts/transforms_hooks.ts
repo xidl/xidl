@@ -11,6 +11,19 @@ export type VersionId = (typeof VERSION_IDS)[keyof typeof VERSION_IDS];
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
+/** The exact RFC 3339 shape both languages derive creation seconds from. */
+const RFC3339_UTC = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
+
+export const rfc3339ToEpoch = (value: string): number | undefined => {
+  if (!RFC3339_UTC.test(value)) return undefined;
+  const parsed = Date.parse(value);
+  if (Number.isNaN(parsed)) return undefined;
+  // Round-trip the calendar: 2026-02-31 must refuse, never roll over.
+  const canonical = new Date(parsed).toISOString();
+  if (canonical.slice(0, 19) !== value.slice(0, 19)) return undefined;
+  return Math.floor(parsed / 1000);
+};
+
 const isCalendarDate = (value: string): boolean => {
   if (!ISO_DATE.test(value)) return false;
   const parsed = Date.parse(`${value}T00:00:00Z`);
