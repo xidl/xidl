@@ -1,11 +1,11 @@
-{% macro value(plan, source) -%}
+{% macro value(plan, source, path) -%}
     {%- if plan.kind == "Identity" -%}Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone({{ source }}))
     {%- elif plan.kind == "Named" -%}{{ plan.data.name }}({{ source }}{% if plan.data.current %}, current{% endif %}{% if plan.data.stored %}, stored{% endif %}, adapters)
-    {%- elif plan.kind == "Sequence" -%}map_sequence({{ source }}, |item| {{ value(plan.data, "item") }})
-    {%- elif plan.kind == "Array" -%}map_array({{ source }}, |item| {{ value(plan.data, "item") }}, refusal)
-    {%- elif plan.kind == "Map" -%}map_record({{ source }}, |key| {{ value(plan.data.key, "key") }}, |item| {{ value(plan.data.value, "item") }}, refusal)
-    {%- elif plan.kind == "Optional" -%}({{ source }}).as_ref().map(|item| {{ value(plan.data, "item") }}).transpose()
-{%- elif plan.kind == "Boxed" -%}{{ value(plan.data.value, "(" ~ source ~ ").as_ref()" if plan.data.source else source) }}{% if plan.data.target %}.map(Box::new){% endif %}
+    {%- elif plan.kind == "Sequence" -%}map_sequence({{ source }}, |item| {{ value(plan.data, "item", path) }}, {{ path | tojson }})
+    {%- elif plan.kind == "Array" -%}map_array({{ source }}, |item| {{ value(plan.data, "item", path) }}, refusal, {{ path | tojson }})
+    {%- elif plan.kind == "Map" -%}map_record({{ source }}, |key| {{ value(plan.data.key, "key", path) }}, |item| {{ value(plan.data.value, "item", path) }}, refusal, {{ path | tojson }})
+    {%- elif plan.kind == "Optional" -%}locate(({{ source }}).as_ref().map(|item| {{ value(plan.data, "item", path) }}).transpose(), {{ path | tojson }})
+{%- elif plan.kind == "Boxed" -%}{{ value(plan.data.value, "(" ~ source ~ ").as_ref()" if plan.data.source else source, path) }}{% if plan.data.target %}.map(Box::new){% endif %}
 {%- endif -%}
 {%- endmacro %}
 {% for conversion in conversions %}
@@ -24,7 +24,7 @@
             {% if conversion.kind == "hook" %}
                 adapters.{{ conversion.hook }}(source)
             {% elif conversion.kind == "alias" %}
-                {{ value(conversion.value, "source") }}
+                {{ value(conversion.value, "source", conversion.type_path) }}
             {% elif conversion.kind == "enum" %}
                 match source {
                     {% for variant in conversion.variants %}{{ conversion.source }}::{{ variant }} => Ok({{ conversion.target }}::{{ variant }}),{% endfor %}
@@ -34,7 +34,7 @@
                         {% if conversion.kind == "http_union" %}
                             match source {
                                 {% for copy in conversion.copies %}
-                                    {{ conversion.source }}::{{ copy.source }}(item) => {{ value(copy.value, "item") }}.map({{ conversion.target }}::{{ copy.target }}),
+                                    {{ conversion.source }}::{{ copy.source }}(item) => {{ value(copy.value, "item", conversion.type_path ~ "." ~ copy.source) }}.map({{ conversion.target }}::{{ copy.target }}),
                                 {% endfor %}
                                 {% for changed in conversion.changed %}
                                     {{ conversion.source }}::{{ changed.name }}(item) => adapters.{{ conversion.hook }}(&{{ conversion.changed_type }}::{{ changed.name }}(item)),
@@ -42,7 +42,7 @@
                             }
                         {% else %}
                             {% for copy in conversion.copies %}
-                                if source.is_{{ copy.source }}() { return {{ value(copy.value, "source.as_" ~ copy.source ~ "()") }}.map({{ conversion.target }}::new_{{ copy.target }}); }
+                                if source.is_{{ copy.source }}() { return {{ value(copy.value, "source.as_" ~ copy.source ~ "()", conversion.type_path ~ "." ~ copy.source) }}.map({{ conversion.target }}::new_{{ copy.target }}); }
                             {% endfor %}
                             {% for changed in conversion.changed %}
                                 if source.is_{{ changed.name }}() { return adapters.{{ conversion.hook }}(&{{ conversion.changed_type }}::{{ changed.name }}(source.as_{{ changed.name }}())); }
@@ -52,7 +52,7 @@
                     {% else %}
                         {% if conversion.hook %}let decision = adapters.{{ conversion.hook }}(source{% if conversion.hook_current %}, current{% endif %}{% if conversion.hook_stored %}, stored{% endif %})?;{% endif %}
                             {% for copy in conversion.copies %}
-                                let projected_{{ loop.index0 }} = {{ value(copy.value, "source" if conversion.source_shape == "direct" else "&source." ~ copy.source) }}?;
+                                let projected_{{ loop.index0 }} = {{ value(copy.value, "source" if conversion.source_shape == "direct" else "&source." ~ copy.source, conversion.type_path ~ "." ~ copy.source) }}?;
                             {% endfor %}
                             {% if conversion.pair %}
                                 {% set ns = namespace(stored = conversion.stored_type ~ "::default()") %}
