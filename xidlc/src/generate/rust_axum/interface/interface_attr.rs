@@ -74,6 +74,13 @@ pub(crate) fn render_attr_operation_from_http(
                 source: param_source_code(ParamSource::Body),
                 serde_rename: None,
                 is_sequence: matches!(&p.ty, xidl_parser::hir::TypeSpec::SequenceType(_)),
+                is_floating: match &p.ty {
+                    xidl_parser::hir::TypeSpec::FloatingPtType => true,
+                    xidl_parser::hir::TypeSpec::SequenceType(sequence) => {
+                        matches!(*sequence.ty, xidl_parser::hir::TypeSpec::FloatingPtType)
+                    }
+                    _ => false,
+                },
                 header_item_ty: ty.clone(),
                 header_item_is_string: false,
                 header_item_is_primitive: false,

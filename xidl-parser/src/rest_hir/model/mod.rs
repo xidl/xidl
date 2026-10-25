@@ -395,9 +395,4 @@ pub struct HttpInterface {
     pub operations: Vec<HttpOperation>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RestHirDocument {
-    pub spec: hir::Specification,
-    pub document: HttpDocumentMetadata,
-    pub interfaces: Vec<HttpInterface>,
-}
+pub use document::RestHirDocument;

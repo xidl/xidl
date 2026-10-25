@@ -165,6 +165,9 @@ pub(crate) struct ParamContext {
     pub(crate) serde_rename: Option<String>,
     /// Sequences encode an empty list with zero parameter occurrences.
     pub(crate) is_sequence: bool,
+    /// A float arrives directly or as the sequence element: non-finite text
+    /// (`inf`, `NaN`) must fail extraction instead of reaching the handler.
+    pub(crate) is_floating: bool,
     pub(crate) header_item_ty: String,
     pub(crate) header_item_is_string: bool,
     pub(crate) header_item_is_primitive: bool,

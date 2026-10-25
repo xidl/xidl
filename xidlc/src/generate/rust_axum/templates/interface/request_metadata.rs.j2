@@ -10,6 +10,11 @@
                 for header_str in header_str.split(',').map(str::trim) {
                 {% endif %}
                 let parsed: {{ param.header_item_ty }} = {% if param.header_item_is_string %}header_str.to_string(){% elif param.header_item_is_primitive %}header_str.parse().map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% else %}::xidl_rust_axum::serde_json::from_str(header_str).map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %};
+                {% if param.is_floating %}
+                    if !parsed.is_finite() {
+                        return Err(::xidl_rust_axum::Error::new(400, concat!("non-finite value for header parameter ", {{ param.wire_name | tojson }})));
+                    }
+                {% endif %}
                 {{ param.name }}.push(parsed);
                 {% if param.header_item_is_string or param.header_item_is_primitive %}
                 }
@@ -29,6 +34,13 @@
                     }
                     None => None,
                 };
+                {% if param.is_floating %}
+                    if let Some(value) = &{{ param.name }} {
+                        if !value.is_finite() {
+                            return Err(::xidl_rust_axum::Error::new(400, concat!("non-finite value for header parameter ", {{ param.wire_name | tojson }})));
+                        }
+                    }
+                {% endif %}
             {% else %}
                 let {{ param.name }}: {{ param.ty }} = match {{ request_headers }}.get("{{ param.wire_name }}") {
                     Some(header_value) => {
@@ -39,6 +51,11 @@
                         }
                         None => return Err(::xidl_rust_axum::Error::new(400, concat!("missing required header parameter ", {{ param.wire_name | tojson }}))),
                     };
+                    {% if param.is_floating %}
+                        if !{{ param.name }}.is_finite() {
+                            return Err(::xidl_rust_axum::Error::new(400, concat!("non-finite value for header parameter ", {{ param.wire_name | tojson }})));
+                        }
+                    {% endif %}
                 {% endif %}
             {% endif %}
         {% endfor %}
@@ -60,6 +77,11 @@
                 if let Some(values) = cookie_map.get("{{ param.wire_name }}") {
                     for value in values {
                         let parsed: {{ param.cookie_item_ty }} = {% if param.cookie_item_is_string %}value.to_string(){% elif param.cookie_item_is_primitive %}value.parse().map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% else %}::xidl_rust_axum::serde_json::from_str(value).map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %};
+                        {% if param.is_floating %}
+                            if !parsed.is_finite() {
+                                return Err(::xidl_rust_axum::Error::new(400, concat!("non-finite value for cookie parameter ", {{ param.wire_name | tojson }})));
+                            }
+                        {% endif %}
                         {{ param.name }}.push(parsed);
                     }
                 }
@@ -76,11 +98,23 @@
                         None => None,
                     };
                     {% endif %}
+                    {% if param.is_floating %}
+                        if let Some(value) = &{{ param.name }} {
+                            if !value.is_finite() {
+                                return Err(::xidl_rust_axum::Error::new(400, concat!("non-finite value for cookie parameter ", {{ param.wire_name | tojson }})));
+                            }
+                        }
+                    {% endif %}
                 {% else %}
                     let {{ param.name }}: {{ param.ty }} = match cookie_map.get("{{ param.wire_name }}").and_then(|values| values.first()) {
                         Some(value) => {% if param.cookie_item_is_string %}value.to_string(){% elif param.cookie_item_is_primitive %}value.parse().map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% else %}::xidl_rust_axum::serde_json::from_str(value).map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %},
                         None => return Err(::xidl_rust_axum::Error::new(400, concat!("missing required cookie parameter ", {{ param.wire_name | tojson }}))),
                     };
+                    {% if param.is_floating %}
+                        if !{{ param.name }}.is_finite() {
+                            return Err(::xidl_rust_axum::Error::new(400, concat!("non-finite value for cookie parameter ", {{ param.wire_name | tojson }})));
+                        }
+                    {% endif %}
                 {% endif %}
             {% endif %}
         {% endfor %}

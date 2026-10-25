@@ -3,8 +3,8 @@ use xidl_parser::hir;
 use super::contexts::{FieldTypeContext, FieldZodContext, TsType, ZodSchema};
 use super::method::TypeRefTarget;
 use super::names::{
-    declarator_name, integer_coerced_schema_primitive, integer_schema_primitive, ts_ident,
-    ts_prop_name, ts_scoped_name, zod_schema_ref,
+    declarator_name, integer_schema_primitive, ts_ident, ts_prop_name, ts_scoped_name,
+    zod_schema_ref,
 };
 
 pub(crate) fn ts_type_for_decl(
@@ -282,17 +282,28 @@ fn zod_schema_for_type_spec_impl(
     coercion: ZodCoercion,
 ) -> ZodSchema {
     match ty {
-        hir::TypeSpec::IntegerType(value) => ZodSchema::Primitive(match coercion {
-            ZodCoercion::Strict => integer_schema_primitive(value),
-            ZodCoercion::Coerce => integer_coerced_schema_primitive(value),
-        }),
-        hir::TypeSpec::FloatingPtType => ZodSchema::Primitive(
-            match coercion {
-                ZodCoercion::Strict => "number()",
-                ZodCoercion::Coerce => "coerce.number()",
-            }
-            .to_string(),
-        ),
+        hir::TypeSpec::IntegerType(value) => match coercion {
+            ZodCoercion::Strict => ZodSchema::Primitive(integer_schema_primitive(value)),
+            ZodCoercion::Coerce => ZodSchema::CoercedNumber {
+                integer: true,
+                unsigned: matches!(
+                    value,
+                    hir::IntegerType::U64
+                        | hir::IntegerType::U32
+                        | hir::IntegerType::U16
+                        | hir::IntegerType::U8
+                        | hir::IntegerType::UChar
+                        | hir::IntegerType::Octet
+                ),
+            },
+        },
+        hir::TypeSpec::FloatingPtType => match coercion {
+            ZodCoercion::Strict => ZodSchema::Primitive("number()".to_string()),
+            ZodCoercion::Coerce => ZodSchema::CoercedNumber {
+                integer: false,
+                unsigned: false,
+            },
+        },
         hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => {
             ZodSchema::Primitive("string()".to_string())
         }

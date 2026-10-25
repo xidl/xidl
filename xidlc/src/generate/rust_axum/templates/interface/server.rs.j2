@@ -132,6 +132,25 @@ T: {{ ident }} + Send + Sync + 'static,
                 {% for param in method.query_params %}
                     let {{ param.name }}: {{ param.ty }} = {{ param.in_expr }};
                 {% endfor %}
+                {% for param in method.query_params %}
+                    {% if param.is_floating %}
+                        {% if param.is_sequence %}
+                            if {{ param.name }}.iter().any(|value| !value.is_finite()) {
+                                return Err(::xidl_rust_axum::Error::new(400, concat!("non-finite value for query parameter ", {{ param.wire_name | tojson }})));
+                            }
+                        {% elif param.optional %}
+                            if let Some(value) = &{{ param.name }} {
+                                if !value.is_finite() {
+                                    return Err(::xidl_rust_axum::Error::new(400, concat!("non-finite value for query parameter ", {{ param.wire_name | tojson }})));
+                                }
+                            }
+                        {% else %}
+                            if !{{ param.name }}.is_finite() {
+                                return Err(::xidl_rust_axum::Error::new(400, concat!("non-finite value for query parameter ", {{ param.wire_name | tojson }})));
+                            }
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
             {% endif %}
             {% if method.is_server_stream or method.is_client_stream or method.is_bidi_stream or method.is_upgrade %}
                 {% set request_headers = "headers" %}

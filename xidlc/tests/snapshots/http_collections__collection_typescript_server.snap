@@ -22,6 +22,8 @@ export interface CollectionInputs {
     
         search(term: types.transport.Label | undefined): Awaitable<types.Search>;
     
+        numbers(count: number, ratio: number, units: number, threshold: number | undefined): Awaitable<types.Numbers>;
+    
         stream(values: Array<number> | undefined): Awaitable<AsyncIterable<types.StreamValues>>;
     
 }
@@ -91,6 +93,41 @@ export const CollectionInputsOperations = {
             headers: [],
             cookies: [],
             schema: ifaceSchemas.models.SearchSchema,
+            stream: false,
+            
+        },
+        security: [],
+        
+    }),
+    
+        numbers: defineOperation<CollectionInputs, "numbers">({
+            handler: "numbers",
+            method: "GET",
+            path: "/numbers",
+            paths: ["/numbers"],
+            request: {
+                kind: "object",
+                args: ["count", "ratio", "units", "threshold"],
+                schema: ifaceSchemas.CollectionInputsNumbersRequestSchema,
+                path: [],
+                query: [{ wireName: "count", key: "count", multi: false, optional: false }, { wireName: "threshold", key: "threshold", multi: false, optional: true }],
+                headers: [{ wireName: "ratio", key: "ratio", multi: false, optional: false }],
+                cookies: [{ wireName: "units", key: "units", multi: false, optional: false }],
+                body: {
+                    kind: "none",
+                    contentType: "",
+                    fields: [],
+                    
+            },
+        },
+        response: {
+            status: 200,
+            contentType: "application/json",
+            bodyMode: "return",
+            bodyFields: [{ wireName: "return", key: "return" }],
+            headers: [],
+            cookies: [],
+            schema: ifaceSchemas.models.NumbersSchema,
             stream: false,
             
         },

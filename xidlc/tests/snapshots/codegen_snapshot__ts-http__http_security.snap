@@ -178,7 +178,7 @@ import { xjson } from "xidl-typescript-codec";
 
     
 export const HttpSecurityServiceGetUserRequestSchema = z.object({
-        id: z.coerce.number().int().nonnegative(),
+        id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
     });
 export type HttpSecurityServiceGetUserRequest = z.infer<typeof HttpSecurityServiceGetUserRequestSchema>;
 

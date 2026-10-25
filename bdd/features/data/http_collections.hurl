@@ -44,6 +44,126 @@ jsonpath "$.labels[1]" == "second"
 GET {{base_url}}/collections?values=1&values=invalid
 HTTP 400
 
+# Empty numeric elements stay invalid even beside an explicit zero.
+GET {{base_url}}/collections?values=&values=2
+HTTP 400
+
+GET {{base_url}}/collections?values=0&values=%20
+HTTP 400
+
+GET {{base_url}}/collections?values=0%0A
+HTTP 400
+
+GET {{base_url}}/collections?values=0x10
+HTTP 400
+
+GET {{base_url}}/collections?values=1e2
+HTTP 400
+
+GET {{base_url}}/collections?values=1.0
+HTTP 400
+
+# Scalar aliases and numeric header/cookie inputs use the same decimal grammar.
+GET {{base_url}}/numbers?count=0
+ratio: 0
+Cookie: units=0
+HTTP 200
+[Asserts]
+jsonpath "$.count" == 0
+jsonpath "$.ratio" == 0
+jsonpath "$.units" == 0
+jsonpath "$.threshold" not exists
+
+GET {{base_url}}/numbers?count=%2B2&threshold=0
+ratio: -.5e2
+Cookie: units=%2B2
+HTTP 200
+[Asserts]
+jsonpath "$.count" == 2
+jsonpath "$.ratio" == -50
+jsonpath "$.units" == 2
+jsonpath "$.threshold" == 0
+
+GET {{base_url}}/numbers?count=
+ratio: 0
+Cookie: units=0
+HTTP 400
+
+GET {{base_url}}/numbers?count=%20
+ratio: 0
+Cookie: units=0
+HTTP 400
+
+GET {{base_url}}/numbers?count=0&threshold=
+ratio: 0
+Cookie: units=0
+HTTP 400
+
+GET {{base_url}}/numbers?count=0&threshold=%09
+ratio: 0
+Cookie: units=0
+HTTP 400
+
+GET {{base_url}}/numbers?count=0
+ratio:
+Cookie: units=0
+HTTP 400
+
+GET {{base_url}}/numbers?count=0
+ratio: 0x10
+Cookie: units=0
+HTTP 400
+
+GET {{base_url}}/numbers?count=0
+ratio: 0
+Cookie: units=
+HTTP 400
+
+GET {{base_url}}/numbers?count=0
+ratio: 0
+Cookie: units=-1
+HTTP 400
+
+GET {{base_url}}/numbers?count=0
+ratio: 0
+Cookie: units=-0
+HTTP 400
+
+# Non-finite float text stays invalid on both servers: JSON cannot carry it
+# and a committed inf would serialize as null downstream.
+GET {{base_url}}/numbers?count=0
+ratio: inf
+Cookie: units=0
+HTTP 400
+
+GET {{base_url}}/numbers?count=0
+ratio: NaN
+Cookie: units=0
+HTTP 400
+
+GET {{base_url}}/numbers?count=0
+ratio: 1e400
+Cookie: units=0
+HTTP 400
+
+# A scalar query parameter rejects repeated occurrences instead of taking
+# the first value.
+GET {{base_url}}/numbers?count=0&count=1
+ratio: 0
+Cookie: units=0
+HTTP 400
+
+# Malformed cookie pairs fail extraction; invalid numeric values fail parsing.
+GET {{base_url}}/numbers?count=0
+ratio: 0
+Cookie: garbage
+HTTP 400
+
+GET {{base_url}}/numbers?count=0
+ratio: 0
+Cookie: units=100%
+HTTP 400
+
 # Missing optional text is distinct from a supplied empty string.
 GET {{base_url}}/search
 HTTP 200
@@ -72,4 +192,7 @@ HTTP 200
 body contains "\"values\":[0,2]"
 
 GET {{base_url}}/stream?values=invalid
+HTTP 400
+
+GET {{base_url}}/stream?values=
 HTTP 400

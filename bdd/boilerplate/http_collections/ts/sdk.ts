@@ -24,6 +24,13 @@ for (const term of [undefined, '', 'a&b 雪']) {
     term === undefined ? {} : { term },
   );
 }
+const numbers = await client.numbers(2, -50, 2, 0);
+assert.equal(numbers.count, 2);
+assert.equal(numbers.ratio, -50);
+assert.equal(numbers.units, 2);
+assert.equal(numbers.threshold, 0);
+const absent = await client.numbers(0, 0, 0, undefined);
+assert.equal(absent.threshold, undefined);
 for (const tag of ['one,two', ' leading', 'trailing ']) {
   await assert.rejects(
     client.read([], [tag], [], undefined),
