@@ -58,7 +58,7 @@ struct ReportApiGetReportRequestOutQuery {
     #[serde(default)]
     lang: Option<String>,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct ReportApiGetReportRequestInQuery {
     #[serde(default)]
     lang: Option<String>,
@@ -111,7 +111,14 @@ where
                         ))?;
                     header_str.to_string()
                 }
-                None => ::core::default::Default::default(),
+                None => {
+                    return Err(
+                        ::xidl_rust_axum::Error::new(
+                            400,
+                            concat!("missing required header parameter ", "X-Trace-Id"),
+                        ),
+                    );
+                }
             };
             Ok(Self { id, lang, trace_id })
         }

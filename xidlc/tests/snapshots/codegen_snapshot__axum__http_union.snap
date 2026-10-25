@@ -196,9 +196,8 @@ struct FilesGetMetaRequestOutQuery {
     #[serde(default)]
     path: String,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct FilesGetMetaRequestInQuery {
-    #[serde(default)]
     path: String,
 }
 #[derive(::serde::Deserialize)]
@@ -238,9 +237,8 @@ struct FilesGetFileRequestOutQuery {
     #[serde(default)]
     path: String,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct FilesGetFileRequestInQuery {
-    #[serde(default)]
     path: String,
 }
 #[derive(::serde::Deserialize)]

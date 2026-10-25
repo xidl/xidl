@@ -61,10 +61,9 @@ struct HttpEdgeCasesServiceHealthRequestOutQuery {
     #[serde(default)]
     trace: String,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpEdgeCasesServiceHealthRequestInQuery {
     #[serde(rename = "trace_id")]
-    #[serde(default)]
     trace: String,
 }
 #[derive(::serde::Deserialize)]
@@ -111,10 +110,9 @@ struct HttpEdgeCasesServiceGetUserRequestOutQuery {
     #[serde(default)]
     locale: String,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpEdgeCasesServiceGetUserRequestInQuery {
     #[serde(rename = "lang")]
-    #[serde(default)]
     locale: String,
 }
 #[derive(::serde::Deserialize)]
@@ -243,12 +241,10 @@ struct HttpEdgeCasesServiceLookupRequestOutQuery {
     #[serde(default)]
     page_size: u32,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpEdgeCasesServiceLookupRequestInQuery {
-    #[serde(default)]
     keyword: String,
     #[serde(rename = "limit")]
-    #[serde(default)]
     page_size: u32,
 }
 #[derive(::serde::Deserialize)]

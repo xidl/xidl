@@ -64,7 +64,7 @@ struct HttpSecurityServiceGetUserRequestOutQuery {
     #[serde(default)]
     locale: Option<String>,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpSecurityServiceGetUserRequestInQuery {
     #[serde(default)]
     locale: Option<String>,
@@ -118,7 +118,14 @@ where
                         ))?;
                     header_str.to_string()
                 }
-                None => ::core::default::Default::default(),
+                None => {
+                    return Err(
+                        ::xidl_rust_axum::Error::new(
+                            400,
+                            concat!("missing required header parameter ", "X-Trace-Id"),
+                        ),
+                    );
+                }
             };
             Ok(Self { id, locale, trace_id })
         }
