@@ -1,0 +1,11 @@
+// Import keeps this contract in a separate unit. Spell out the module's version.
+import "contracts/versioned_inheritance.idl@v1";
+
+module readers {
+    interface Addresses {
+        @get(path = "/tenants/{tenant}/addresses/{id}")
+        versioned_inheritance::v1::shipping::Address read(@path string tenant, @path string id);
+        @patch(path = "/tenants/{tenant}/addresses/{id}")
+        versioned_inheritance::v1::shipping::Address update(@path string tenant, @path string id, @body versioned_inheritance::v1::shipping::Change patch);
+    };
+};

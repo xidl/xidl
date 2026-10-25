@@ -1,0 +1,4 @@
+{% for prefix in imports -%}
+import * as {{ prefix }} from "./{{ prefix }}{{ import_suffix }}";
+export { {{ prefix }} };
+{% endfor -%}

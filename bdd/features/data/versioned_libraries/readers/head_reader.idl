@@ -1,0 +1,11 @@
+import "contracts/versioned_inheritance.idl@v3";
+
+// A local DTO also uses the imported type and its validator.
+struct SavedAddress { versioned_inheritance::v3::shipping::Address address; };
+
+module readers {
+    interface Addresses {
+        @get(path = "/tenants/{tenant}/addresses/{id}")
+        versioned_inheritance::v3::shipping::Address read(@path string tenant, @path string id);
+    };
+};

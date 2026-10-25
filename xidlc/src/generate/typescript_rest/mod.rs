@@ -68,7 +68,7 @@ pub fn generate(
         }));
     }
     let non_interface = strip_interfaces(spec);
-    if !non_interface.0.is_empty() {
+    if !non_interface.0.is_empty() || !renderer.imported_units().is_empty() {
         artifacts.push(Artifact::new_hir(ArtifactHir {
             lang: "typescript".into(),
             hir: non_interface,

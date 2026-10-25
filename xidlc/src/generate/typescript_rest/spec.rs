@@ -90,7 +90,8 @@ pub(crate) fn render_spec(
     rest_hir: &RestHirDocument,
 ) -> IdlcResult<TsHttpOutput> {
     let blocks = render_defs(&spec.0, &[], renderer, rest_hir)?;
-    let model_exports = ZodImportCollector::collect_exported_names(spec);
+    let mut model_exports = ZodImportCollector::collect_exported_names(spec);
+    model_exports.extend(renderer.imported_units());
     let mut zod_imports = Vec::new();
     let mut type_imports = Vec::new();
     for name in model_exports {
