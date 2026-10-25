@@ -54,6 +54,10 @@ pub(crate) enum TsType {
 #[serde(tag = "kind", content = "data")]
 pub(crate) enum ZodSchema {
     Primitive(String),
+    CoercedNumber {
+        integer: bool,
+        nonnegative: bool,
+    },
     ScopedName(String),
     Array {
         element: Box<ZodSchema>,

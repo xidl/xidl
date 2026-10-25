@@ -14,12 +14,21 @@ struct Collections {
 };
 struct Search { @optional string term; };
 struct StreamValues { @optional sequence<long> values; };
+struct Numbers {
+    long count;
+    double ratio;
+    unsigned long units;
+    @optional long threshold;
+};
 
 interface CollectionInputs {
     @get(path="/collections")
     Collections read(@query transport::Counts values, @header transport::Selection tags,
                      @cookie transport::Selection names, @query @optional transport::Selection labels);
     @get(path="/search") Search search(@query @optional transport::Label term);
+    @get(path="/numbers")
+    Numbers numbers(@query transport::Count count, @header double ratio,
+                    @cookie unsigned long units, @query @optional long threshold);
     @server_stream @get(path="/stream")
     StreamValues stream(@query @optional sequence<long> values);
 };

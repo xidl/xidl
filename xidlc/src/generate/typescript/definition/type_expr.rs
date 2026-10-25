@@ -2,10 +2,7 @@ use xidl_parser::hir;
 
 use super::contexts::{FieldTypeContext, FieldZodContext, TsType, ZodSchema};
 use super::method::TypeRefTarget;
-use super::names::{
-    declarator_name, integer_schema_primitive, ts_ident, ts_prop_name, ts_scoped_name,
-    zod_schema_ref,
-};
+use super::names::{declarator_name, ts_ident, ts_prop_name, ts_scoped_name, zod_schema_ref};
 
 pub(crate) fn ts_type_for_decl(
     ty: &hir::TypeSpec,
@@ -255,8 +252,22 @@ fn zod_schema_for_type_spec_impl(
     prefix: Option<&str>,
 ) -> ZodSchema {
     match ty {
-        hir::TypeSpec::IntegerType(value) => ZodSchema::Primitive(integer_schema_primitive(value)),
-        hir::TypeSpec::FloatingPtType => ZodSchema::Primitive("coerce.number()".to_string()),
+        hir::TypeSpec::IntegerType(value) => ZodSchema::CoercedNumber {
+            integer: true,
+            nonnegative: matches!(
+                value,
+                hir::IntegerType::U64
+                    | hir::IntegerType::U32
+                    | hir::IntegerType::U16
+                    | hir::IntegerType::U8
+                    | hir::IntegerType::UChar
+                    | hir::IntegerType::Octet
+            ),
+        },
+        hir::TypeSpec::FloatingPtType => ZodSchema::CoercedNumber {
+            integer: false,
+            nonnegative: false,
+        },
         hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => {
             ZodSchema::Primitive("string()".to_string())
         }

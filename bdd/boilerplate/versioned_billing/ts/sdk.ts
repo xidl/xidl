@@ -1,7 +1,32 @@
 import assert from 'node:assert/strict';
 import { v1 } from './v1/versioned_billing.client.js';
 import { Conflict, Rejected } from './v1/versioned_billing.errors.js';
+import { v1 as firstSchemas } from './v1/versioned_billing.iface.zod.js';
 import { v2 } from './v2/versioned_billing.client.js';
+import { v2 as currentSchemas } from './v2/versioned_billing.iface.zod.js';
+
+// These schemas are generated independently from each pinned API contract.
+for (const schemas of [firstSchemas, currentSchemas]) {
+  for (const limit of [undefined, '', ' ', '\t', '0\n', '0x0', '0e0', '0.0']) {
+    assert.equal(
+      schemas.InvoicesListRequestSchema.safeParse({ limit, tenant: 'acme' })
+        .success,
+      false,
+      `invalid page size ${JSON.stringify(limit)}`,
+    );
+  }
+  for (const limit of [0, '0', '+0', '-0']) {
+    assert(
+      schemas.InvoicesListRequestSchema.parse({ limit, tenant: 'acme' })
+        .limit === 0,
+    );
+  }
+  assert.equal(
+    schemas.InvoicesListRequestSchema.parse({ limit: '-1', tenant: 'acme' })
+      .limit,
+    -1,
+  );
+}
 
 const base = process.argv[2];
 assert(base);

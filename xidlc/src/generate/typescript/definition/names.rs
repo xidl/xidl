@@ -85,18 +85,6 @@ pub(crate) fn zod_schema_ref(
     }
 }
 
-pub(crate) fn integer_schema_primitive(value: &hir::IntegerType) -> String {
-    match value {
-        hir::IntegerType::U64
-        | hir::IntegerType::U32
-        | hir::IntegerType::U16
-        | hir::IntegerType::U8
-        | hir::IntegerType::UChar
-        | hir::IntegerType::Octet => "coerce.number().int().nonnegative()".to_string(),
-        _ => "coerce.number().int()".to_string(),
-    }
-}
-
 pub(crate) fn ts_ident(value: &str) -> String {
     let mut out = String::new();
     for (idx, ch) in value.chars().enumerate() {

@@ -3,7 +3,8 @@ Feature: Collection wire occurrences agree with SDKs and OpenAPI
 
   Named query, header and cookie collections use the same wire encoding as
   direct sequences. Chained typedefs retain empty elements and optional absence;
-  the direct server-stream sequence remains an independent transport control.
+  numeric text rejects empty or nondecimal values while preserving explicit zero.
+  The direct server-stream sequence remains an independent transport control.
 
   Scenario Outline: named collections retain empty elements and logical optionality
     Given a REST IDL file "bdd/features/data/http_collections.idl"

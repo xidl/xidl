@@ -24,8 +24,8 @@ import { xjson } from "xidl-typescript-codec";
     
     export const SkipStructSchema = z.object({
         
-            a: z.coerce.number().int(),
+            a: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
         
-            c: z.coerce.number().int()
+            c: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int())
         
     });

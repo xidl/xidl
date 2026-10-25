@@ -52,7 +52,7 @@ import { xjson } from "xidl-typescript-codec";
     
     export const A1Schema = z.object({
         
-            a: z.coerce.number().int()
+            a: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int())
         
     });
 
@@ -66,14 +66,14 @@ import { xjson } from "xidl-typescript-codec";
     
     export const BSchema = z.object({
         
-            value: z.coerce.number().int()
+            value: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int())
         
     });
 
     
     export const A3Schema = z.object({
         
-            value: z.coerce.number().int()
+            value: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int())
         
     });
 

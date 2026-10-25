@@ -54,7 +54,7 @@ export const FooSeqSchema: z.ZodType<import("./misc").FooSeq> = z.lazy(() => z.a
     
 export const FooSchema: z.ZodType<import("./misc").Foo> = z.lazy(() => z.object({
     
-        value: z.coerce.number().int(),
+        value: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
     
         chain: FooSeqSchema
     
@@ -64,7 +64,7 @@ export const FooSchema: z.ZodType<import("./misc").Foo> = z.lazy(() => z.object(
 export const BarSeqSchema: z.ZodType<import("./misc").BarSeq> = z.lazy(() => z.array(BarSchema));
 
     
-export const BarSchema: z.ZodType<import("./misc").Bar> = z.lazy(() => z.union([z.object({ l_mem: z.coerce.number().int() }), z.object({ s_mem: z.object({ d_mem: z.coerce.number(), nested: BarSeqSchema }) })]));
+export const BarSchema: z.ZodType<import("./misc").Bar> = z.lazy(() => z.union([z.object({ l_mem: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()) }), z.object({ s_mem: z.object({ d_mem: z.union([z.number(), z.string().regex(/^[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?(?![\s\S])/).transform(Number)]).pipe(z.number()), nested: BarSeqSchema }) })]));
 
     export namespace M {
     export const SizeSchema = z.enum(["small", "medium", "large"]);

@@ -13,6 +13,22 @@ X-Billing-Version: 2025-01-01
 Cookie: tenant=acme
 HTTP 400
 
+# A malformed page size must not be turned into a successful empty invoice list.
+GET {{base_url}}/invoices?limit=
+X-Billing-Version: 2025-01-01
+Cookie: tenant=acme
+HTTP 400
+
+GET {{base_url}}/invoices?limit=%20
+X-Billing-Version: 2025-04-01
+Cookie: tenant=acme
+HTTP 400
+
+GET {{base_url}}/invoices?limit=0x0
+X-Billing-Version: 2025-04-01
+Cookie: tenant=acme
+HTTP 400
+
 POST {{base_url}}/payments
 Content-Type: application/json
 Cookie: tenant=acme
@@ -267,6 +283,14 @@ Cookie: tenant=acme
 HTTP 422
 [Asserts]
 jsonpath "$.type_path" == "Invoice.payment_intent"
+
+# Explicit zero still selects no invoices after partial payments make legacy reads fail.
+GET {{base_url}}/invoices?limit=0
+X-Billing-Version: 2025-01-01
+Cookie: tenant=acme
+HTTP 200
+[Asserts]
+jsonpath "$" count == 0
 
 GET {{base_url}}/invoices?limit=100
 X-Billing-Version: 2025-08-01

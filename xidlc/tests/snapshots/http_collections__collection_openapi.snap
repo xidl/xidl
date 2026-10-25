@@ -58,6 +58,34 @@ expression: document
         ],
         "type": "object"
       },
+      "Numbers": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ratio": {
+            "format": "double",
+            "type": "number"
+          },
+          "threshold": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "units": {
+            "format": "int64",
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count",
+          "ratio",
+          "units"
+        ],
+        "type": "object"
+      },
       "Search": {
         "properties": {
           "term": {
@@ -164,6 +192,86 @@ expression: document
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Collections"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "CollectionInputs"
+        ]
+      }
+    },
+    "/numbers": {
+      "get": {
+        "operationId": "CollectionInputs.numbers",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "count",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "threshold",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "ratio",
+            "required": true,
+            "schema": {
+              "format": "double",
+              "type": "number"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "units",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "maximum": 4294967295,
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Numbers"
                 }
               }
             },

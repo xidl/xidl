@@ -84,4 +84,10 @@ fn named_collection_server_extracts_all_wire_occurrences() {
         .find(|file| file.path().ends_with(".server.ts"))
         .expect("collection server output");
     insta::assert_snapshot!("collection_typescript_server", server.content());
+    let schemas = files
+        .iter()
+        .filter(|file| file.path().ends_with(".zod.ts"))
+        .map(|file| (file.path(), file.content()))
+        .collect::<std::collections::BTreeMap<_, _>>();
+    insta::assert_json_snapshot!("collection_zod", schemas);
 }

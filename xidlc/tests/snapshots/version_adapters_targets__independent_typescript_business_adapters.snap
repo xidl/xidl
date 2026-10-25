@@ -744,7 +744,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["count"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.number().int()),
+            ["count"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int())),
         
     })).transform((value) => ({
         
@@ -1366,7 +1366,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["count"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.number().int()),
+            ["count"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int())),
         
     })).transform((value) => ({
         

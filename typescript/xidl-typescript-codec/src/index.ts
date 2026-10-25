@@ -87,7 +87,7 @@ function isArraySchema(schema: any): boolean {
   return defTypeOf(schema) === 'array';
 }
 
-function unwrapSchema(schema: XidlSchema): any {
+function unwrapSchema(schema: XidlSchema, direction: 'input' | 'output'): any {
   let current: any = schema;
   while (true) {
     if (isArraySchema(current)) break;
@@ -96,6 +96,8 @@ function unwrapSchema(schema: XidlSchema): any {
       current = current.unwrap();
     } else if (defOf(current)?.innerType) {
       current = defOf(current).innerType;
+    } else if (defTypeOf(current) === 'pipe') {
+      current = direction === 'input' ? defOf(current).in : defOf(current).out;
     } else {
       break;
     }
@@ -133,7 +135,7 @@ function transformRecordValues(
 
 function isZeroValue(val: any, schema: XidlSchema): boolean {
   if (val === null || val === undefined) return true;
-  const unwrapped = unwrapSchema(schema);
+  const unwrapped = unwrapSchema(schema, 'output');
   const kind = defTypeOf(unwrapped);
   if (kind === 'string') {
     return val === '';
@@ -178,7 +180,7 @@ export function serializeZodObject(obj: any, schema: XidlSchema): any {
       continue;
     }
 
-    const unwrapped = unwrapSchema(fieldSchema);
+    const unwrapped = unwrapSchema(fieldSchema, 'output');
 
     if (meta.flatten) {
       if (isObjectSchema(unwrapped)) {
@@ -236,7 +238,7 @@ export function serializeZodObject(obj: any, schema: XidlSchema): any {
 /** Serialize a value using attached {@link XidlJsonMeta}. */
 export function serialize(value: any, schema: XidlSchema): any {
   if (value === null || value === undefined) return value;
-  const unwrapped = unwrapSchema(schema);
+  const unwrapped = unwrapSchema(schema, 'output');
 
   if (isObjectSchema(unwrapped)) {
     return serializeZodObject(value, unwrapped);
@@ -271,7 +273,7 @@ export function deserializeZodObject(jsonObj: any, schema: XidlSchema): any {
     const meta = getMeta(fieldSchema) || {};
     if (meta.ignore) continue;
 
-    const unwrapped = unwrapSchema(fieldSchema);
+    const unwrapped = unwrapSchema(fieldSchema, 'input');
 
     if (meta.flatten) {
       if (isObjectSchema(unwrapped)) {
@@ -321,7 +323,7 @@ export function deserializeZodObject(jsonObj: any, schema: XidlSchema): any {
 /** Deserialize a value using attached {@link XidlJsonMeta}. */
 export function deserialize(value: any, schema: XidlSchema): any {
   if (value === null || value === undefined) return value;
-  const unwrapped = unwrapSchema(schema);
+  const unwrapped = unwrapSchema(schema, 'input');
 
   if (isObjectSchema(unwrapped)) {
     return deserializeZodObject(value, unwrapped);
@@ -346,7 +348,7 @@ function getExpectedJsonKeys(schema: XidlSchema): Set<string> {
     const meta = getMeta(fieldSchema) || {};
     if (meta.ignore) continue;
 
-    const unwrapped = unwrapSchema(fieldSchema);
+    const unwrapped = unwrapSchema(fieldSchema, 'input');
 
     if (meta.flatten) {
       if (isObjectSchema(unwrapped)) {

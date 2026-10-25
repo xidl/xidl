@@ -28,6 +28,16 @@ pub struct StreamValues {
     pub values: Option<Vec<i32>>,
 }
 impl StreamValues {}
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
+pub struct Numbers {
+    pub count: i32,
+    pub ratio: f64,
+    pub units: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub threshold: Option<i32>,
+}
+impl Numbers {}
 #[allow(
     non_snake_case,
     unused_attributes,
@@ -49,6 +59,13 @@ pub trait CollectionInputs {
         &self,
         term: Option<transport::Label>,
     ) -> ::xidl_rust_axum::Result<Search>;
+    async fn numbers(
+        &self,
+        count: transport::Count,
+        ratio: f64,
+        units: u32,
+        threshold: Option<i32>,
+    ) -> ::xidl_rust_axum::Result<Numbers>;
     async fn stream(
         &self,
         req: ::xidl_rust_axum::Request<CollectionInputsStreamRequest>,
@@ -84,6 +101,36 @@ pub(super) mod __xidl_in_CollectionInputs {
                 tags: value.tags.into_iter().collect(),
                 names: value.names.into_iter().collect(),
                 labels: value.labels.map(|value| value.into_iter().collect()),
+            }
+        }
+    }
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub struct Numbers {
+        pub count: i32,
+        pub ratio: f64,
+        pub units: u32,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        pub threshold: Option<i32>,
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<super::Numbers> for Numbers {
+        fn from(value: super::Numbers) -> Self {
+            Self {
+                count: value.count,
+                ratio: value.ratio,
+                units: value.units,
+                threshold: value.threshold,
+            }
+        }
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<Numbers> for super::Numbers {
+        fn from(value: Numbers) -> Self {
+            Self {
+                count: value.count,
+                ratio: value.ratio,
+                units: value.units,
+                threshold: value.threshold,
             }
         }
     }
@@ -156,6 +203,36 @@ pub(super) mod __xidl_out_CollectionInputs {
                 tags: value.tags.into_iter().collect(),
                 names: value.names.into_iter().collect(),
                 labels: value.labels.map(|value| value.into_iter().collect()),
+            }
+        }
+    }
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub struct Numbers {
+        pub count: i32,
+        pub ratio: f64,
+        pub units: u32,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        pub threshold: Option<i32>,
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<super::Numbers> for Numbers {
+        fn from(value: super::Numbers) -> Self {
+            Self {
+                count: value.count,
+                ratio: value.ratio,
+                units: value.units,
+                threshold: value.threshold,
+            }
+        }
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<Numbers> for super::Numbers {
+        fn from(value: Numbers) -> Self {
+            Self {
+                count: value.count,
+                ratio: value.ratio,
+                units: value.units,
+                threshold: value.threshold,
             }
         }
     }
@@ -343,6 +420,130 @@ where
     }
 }
 #[derive(::serde::Serialize, ::core::default::Default)]
+struct CollectionInputsNumbersRequestOutQuery {
+    #[serde(default)]
+    count: i32,
+    #[serde(default)]
+    threshold: Option<i32>,
+}
+#[derive(::serde::Deserialize)]
+struct CollectionInputsNumbersRequestInQuery {
+    count: i32,
+    #[serde(default)]
+    #[serde(
+        deserialize_with = "::xidl_rust_axum::DeserializeFactory::deserialize_present"
+    )]
+    threshold: Option<i32>,
+}
+#[derive(::serde::Deserialize)]
+struct CollectionInputsNumbersRequest {
+    count: i32,
+    ratio: f64,
+    units: u32,
+    threshold: Option<i32>,
+}
+#[allow(clippy::manual_async_fn, unused_mut)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for CollectionInputsNumbersRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
+            let ::xidl_rust_axum::axum_extra::extract::Query(xidl_query) = <::xidl_rust_axum::axum_extra::extract::Query<
+                CollectionInputsNumbersRequestInQuery,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let CollectionInputsNumbersRequestInQuery { count, threshold } = xidl_query;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
+            let ratio: f64 = match xidl_headers.get("ratio") {
+                Some(header_value) => {
+                    let header_str = header_value
+                        .to_str()
+                        .map_err(|err| ::xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?;
+                    header_str
+                        .parse()
+                        .map_err(|err| ::xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?
+                }
+                None => {
+                    return Err(
+                        ::xidl_rust_axum::Error::new(
+                            400,
+                            concat!("missing required header parameter ", "ratio"),
+                        ),
+                    );
+                }
+            };
+            let mut cookie_map: ::std::collections::HashMap<String, Vec<String>> = ::std::collections::HashMap::new();
+            for header_value in xidl_headers.get_all("cookie").iter() {
+                let cookie_str = header_value
+                    .to_str()
+                    .map_err(|err| ::xidl_rust_axum::Error::new(
+                        400,
+                        format!("{err:?}"),
+                    ))?;
+                for cookie in xidl_rust_axum::cookie::Cookie::split_parse_encoded(
+                    cookie_str,
+                ) {
+                    let cookie = cookie
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            400,
+                            format!("request cookie: {err}"),
+                        ))?;
+                    cookie_map
+                        .entry(cookie.name().to_string())
+                        .or_default()
+                        .push(cookie.value().to_string());
+                }
+            }
+            let units: u32 = match cookie_map
+                .get("units")
+                .and_then(|values| values.first())
+            {
+                Some(value) => {
+                    value
+                        .parse()
+                        .map_err(|err| ::xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?
+                }
+                None => {
+                    return Err(
+                        ::xidl_rust_axum::Error::new(
+                            400,
+                            concat!("missing required cookie parameter ", "units"),
+                        ),
+                    );
+                }
+            };
+            Ok(Self {
+                count,
+                ratio,
+                units,
+                threshold,
+            })
+        }
+    }
+}
+#[derive(::serde::Serialize, ::core::default::Default)]
 struct CollectionInputsStreamRequestOutQuery {
     #[serde(default)]
     values: Option<Vec<i32>>,
@@ -380,6 +581,7 @@ where
         xidl_rust_axum::axum::Router::new()
             .route("/collections", xidl_rust_axum::axum::routing::get(Self::read))
             .route("/search", xidl_rust_axum::axum::routing::get(Self::search))
+            .route("/numbers", xidl_rust_axum::axum::routing::get(Self::numbers))
             .route("/stream", xidl_rust_axum::axum::routing::get(Self::stream))
             .with_state(_svc)
     }
@@ -468,6 +670,63 @@ where
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: __xidl_out_CollectionInputs::Search = resp_value
+                        .into();
+                    let _ = &body_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(
+                            ::xidl_rust_axum::axum::http::StatusCode::from_u16(200)
+                                .unwrap(),
+                        )
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
+    async fn numbers(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
+        request: CollectionInputsNumbersRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let CollectionInputsNumbersRequest { count, ratio, units, threshold } = request;
+        let count: transport::Count = count;
+        let ratio: f64 = ratio;
+        let units: u32 = units;
+        let threshold: Option<i32> = threshold;
+        let mut resp = match svc.numbers(count, ratio, units, threshold).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: __xidl_out_CollectionInputs::Numbers = resp_value
                         .into();
                     let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
@@ -729,6 +988,107 @@ impl CollectionInputsClient {
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
             let body: __xidl_in_CollectionInputs::Search = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
+    pub async fn numbers(
+        &self,
+        count: transport::Count,
+        ratio: f64,
+        units: u32,
+        threshold: Option<i32>,
+    ) -> Result<Numbers, xidl_rust_axum::Error> {
+        let xidl_path = "/numbers".to_string();
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
+                "ratio".as_bytes(),
+            )
+            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+        let header_value_str = ratio.to_string();
+        let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                &header_value_str,
+            )
+            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+        req.headers_mut().insert(header_name, header_value);
+        let mut cookie_pairs: Vec<String> = Vec::new();
+        let value_str = units.to_string();
+        cookie_pairs
+            .push(
+                xidl_rust_axum::cookie::Cookie::new("units", value_str)
+                    .encoded()
+                    .to_string(),
+            );
+        if !cookie_pairs.is_empty() {
+            let cookie_value = cookie_pairs.join("; ");
+            let cookie_name = xidl_rust_axum::reqwest::header::HeaderName::from_static(
+                "cookie",
+            );
+            let merged = match req.headers().get(&cookie_name) {
+                Some(existing) => {
+                    let existing = existing
+                        .to_str()
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?;
+                    if existing.is_empty() {
+                        cookie_value
+                    } else {
+                        format!("{existing}; {cookie_value}")
+                    }
+                }
+                None => cookie_value,
+            };
+            let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                    &merged,
+                )
+                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            req.headers_mut().insert(cookie_name, header_value);
+        }
+        let query = CollectionInputsNumbersRequestOutQuery {
+            count,
+            threshold,
+        };
+        let query = xidl_rust_axum::serde_html_form::to_string(&query)
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if !query.is_empty() {
+            req.url_mut().set_query(Some(&query));
+        }
+        let auth_target = &self.client;
+        let _ = auth_target;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: __xidl_in_CollectionInputs::Numbers = xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
                 .from_slice(&body)?;

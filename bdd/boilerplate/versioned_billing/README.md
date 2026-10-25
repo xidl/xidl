@@ -24,6 +24,13 @@ cannot represent two payment intents, so the application returns its declared
 snapshot; they cannot capture the payment twice. Replaying the first payment
 after later changes still returns that first payment's original outcome.
 
+Pagination distinguishes an absent or malformed page size from the explicit
+integer zero. Empty, whitespace and hexadecimal query values fail with 400; zero
+returns an empty list even after a partial-payment invoice cannot be projected
+to the legacy shape. The independently selected TypeScript request validators
+exercise the same distinction for both pinned versions. These are fixture
+pagination rules; Stripe's own list limits are defined in its API.
+
 Rust and TypeScript clients are generated independently with `--api-version v1`
 and `--api-version v2`. They call the same running endpoint. Concurrent initial
 requests share an idempotency key across versions and must produce one commit.

@@ -105,7 +105,7 @@ import { xjson } from "xidl-typescript-codec";
     
 export const HttpClientStreamServiceUploadChunkRequestSchema = z.object({
         file_id: z.coerce.string(),
-        chunk: z.array(z.coerce.number().int().nonnegative()),
+        chunk: z.array(z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative())),
     });
 export type HttpClientStreamServiceUploadChunkRequest = z.infer<typeof HttpClientStreamServiceUploadChunkRequestSchema>;
 ===============

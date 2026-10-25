@@ -337,7 +337,7 @@ import { xjson } from "xidl-typescript-codec";
 
     
 export const HttpAnnoServiceGetUserRequestSchema = z.object({
-        id: z.coerce.number().int().nonnegative(),
+        id: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
         lang: z.coerce.string(),
     });
 export type HttpAnnoServiceGetUserRequest = z.infer<typeof HttpAnnoServiceGetUserRequestSchema>;
@@ -345,7 +345,7 @@ export type HttpAnnoServiceGetUserRequest = z.infer<typeof HttpAnnoServiceGetUse
     
 export const HttpAnnoServiceCreateUserRequestSchema = z.object({
         name: z.coerce.string(),
-        age: z.coerce.number().int().nonnegative(),
+        age: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
     });
 export type HttpAnnoServiceCreateUserRequest = z.infer<typeof HttpAnnoServiceCreateUserRequestSchema>;
 
@@ -358,47 +358,47 @@ export type HttpAnnoServiceGetNameRequest = z.infer<typeof HttpAnnoServiceGetNam
     
 export const HttpAnnoServiceSearchUserRequestSchema = z.object({
         keyword: z.coerce.string(),
-        page: z.coerce.number().int().nonnegative(),
+        page: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
     });
 export type HttpAnnoServiceSearchUserRequest = z.infer<typeof HttpAnnoServiceSearchUserRequestSchema>;
 
     
 export const HttpAnnoServiceGetUserAliasRequestSchema = z.object({
-        user_id: z.coerce.number().int().nonnegative(),
+        user_id: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
         locale: z.coerce.string(),
     });
 export type HttpAnnoServiceGetUserAliasRequest = z.infer<typeof HttpAnnoServiceGetUserAliasRequestSchema>;
 
     
 export const HttpAnnoServiceAddRequestSchema = z.object({
-        a: z.coerce.number().int(),
-        b: z.coerce.number().int(),
+        a: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
+        b: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
     });
 export type HttpAnnoServiceAddRequest = z.infer<typeof HttpAnnoServiceAddRequestSchema>;
 
     
 export const HttpAnnoServiceAddResponseSchema = z.object({
-        return: z.coerce.number().int(),
-        sum: z.coerce.number().int(),
+        return: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
+        sum: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
     });
 export type HttpAnnoServiceAddResponse = z.infer<typeof HttpAnnoServiceAddResponseSchema>;
 
     
 export const HttpAnnoServiceBumpRequestSchema = z.object({
-        value: z.coerce.number().int(),
+        value: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
     });
 export type HttpAnnoServiceBumpRequest = z.infer<typeof HttpAnnoServiceBumpRequestSchema>;
 
     
 export const HttpAnnoServiceBumpResponseSchema = z.object({
-        return: z.coerce.number().int(),
-        value: z.coerce.number().int(),
+        return: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
+        value: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
     });
 export type HttpAnnoServiceBumpResponse = z.infer<typeof HttpAnnoServiceBumpResponseSchema>;
 
     
 export const HttpAnnoServiceGetCountResponseSchema = z.object({
-        count: z.coerce.number().int(),
+        count: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
     });
 export type HttpAnnoServiceGetCountResponse = z.infer<typeof HttpAnnoServiceGetCountResponseSchema>;
 ===============

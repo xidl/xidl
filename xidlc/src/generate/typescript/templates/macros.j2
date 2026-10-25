@@ -15,8 +15,10 @@
     {%- endif -%}
 {% endmacro %}
 
+{# JavaScript's $ also matches before a final newline; require the actual end. #}
 {% macro render_zod(schema) -%}
     {%- if schema.kind == "Primitive" -%}z.{{ schema.data }}
+    {%- elif schema.kind == "CoercedNumber" -%}z.union([z.number(), z.string().regex(/{% if schema.data.integer %}^[+-]?[0-9]+{% else %}^[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?{% endif %}(?![\s\S])/).transform(Number)]).pipe(z.number(){% if schema.data.integer %}.int(){% endif %}{% if schema.data.nonnegative %}.nonnegative(){% endif %})
     {%- elif schema.kind == "ScopedName" -%}{{ schema.data }}
     {%- elif schema.kind == "Array" -%}z.array({{ render_zod(schema.data.element) }}){% if schema.data.length is not none %}.length({{ schema.data.length }}){% endif %}
     {%- elif schema.kind == "Record" -%}z.record(z.string(), {{ render_zod(schema.data) }})

@@ -253,7 +253,7 @@ export type BodyShapeDocumentResponse = z.infer<typeof BodyShapeDocumentResponse
 export const BodyShapeScalarResponseSchema = z.object({
         return: z.coerce.string(),
         etag: z.coerce.string(),
-        count: z.coerce.number().int().nonnegative(),
+        count: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
         cached: z.coerce.boolean(),
     });
 export type BodyShapeScalarResponse = z.infer<typeof BodyShapeScalarResponseSchema>;
@@ -514,6 +514,6 @@ import { xjson } from "xidl-typescript-codec";
         
             media_type: z.coerce.string(),
         
-            size: z.coerce.number().int().nonnegative()
+            size: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative())
         
     });
