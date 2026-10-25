@@ -20,7 +20,9 @@ not claim that Shopify removed either field on those dates.
 local priority. An empty marker and recursive prior anchors exercise base
 construction. The PATCH hierarchy changes independently and uses the generated
 stored bag. The shadowing `shipping::Identifier` is numeric; the inherited id
-remains a string.
+remains a string. The shared library uses local `Identifier` and recursive
+`Anchor` references; inheritance preserves their declaring scope through package
+mounts, independent SDK selection and imported consumers.
 
 `VersionedMode` belongs to the example application. Chain uses generated JSON
 dispatchers. Route selects one of three ordinary generated `AddressesServer`
@@ -45,10 +47,6 @@ Current ordinary-target boundaries remain explicit:
 - Rust ordinary routers ignore unknown JSON members; adapter wire decoders
   reject them. The mode-boundary step verifies both results and verifies that
   hidden fields do not change Head or history.
-- Cross-module inherited names are qualified in this executable fixture because
-  ordinary TS schemas currently lose ancestor lexical scope
-  ([#406](https://github.com/xidl/xidl/issues/406)). Adapter snapshots also
-  generate the unqualified spelling and require byte-identical output.
 - Recursive anchors use a sequence. Direct optional recursion currently fails in
   ordinary Rust REST wire codecs
   ([#407](https://github.com/xidl/xidl/issues/407)).
