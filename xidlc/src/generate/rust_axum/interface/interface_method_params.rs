@@ -5,13 +5,14 @@ use crate::generate::rust_axum::interface::{
     interface_annotations::serde_rename,
     interface_method_support::{param_source_code, path_param_template_name, transport_param_type},
     interface_types::{
-        cookie_is_multi, cookie_item_is_primitive, cookie_item_is_string, header_is_multi,
-        header_item_is_primitive, header_item_is_string,
+        cookie_item_is_primitive, cookie_item_is_string, header_item_is_primitive,
+        header_item_is_string,
     },
 };
 use crate::generate::rust_axum::transport::{
     TransportDirection, TransportTracker, decode_expr, encode_expr,
 };
+use xidl_parser::hir::TypeSpec;
 use xidl_parser::rest_hir::{
     HttpOperation, HttpOutputSource, HttpRequestBodyShape, HttpSignatureParam,
 };
@@ -282,11 +283,10 @@ fn build_param_context(
         )?,
         source: param_source_code(input.source),
         serde_rename: input.serde_name,
-        header_is_multi: header_is_multi(&input.sig_param.ty),
+        is_sequence: matches!(&input.sig_param.ty, TypeSpec::SequenceType(_)),
         header_item_ty: env.header_item_ty(&input.sig_param.ty),
         header_item_is_string: header_item_is_string(&input.sig_param.ty),
         header_item_is_primitive: header_item_is_primitive(&input.sig_param.ty),
-        cookie_is_multi: cookie_is_multi(&input.sig_param.ty),
         cookie_item_ty: env.cookie_item_ty(&input.sig_param.ty),
         cookie_item_is_string: cookie_item_is_string(&input.sig_param.ty),
         cookie_item_is_primitive: cookie_item_is_primitive(&input.sig_param.ty),

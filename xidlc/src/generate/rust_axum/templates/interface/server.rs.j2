@@ -234,7 +234,7 @@ T: {{ ident }} + Send + Sync + 'static,
                                 {% if method.response_header_params | length > 0 or method.response_cookie_params | length > 0 %}
                                     {% for param in method.response_header_params %}
                                         {% if method.response_struct %}
-                                            {% if param.header_is_multi %}
+                                            {% if param.is_sequence %}
                                                 let {{ param.name }}_header_values: Vec<String> = {
                                                     let values = &resp_value.{{ param.name }};
                                                     values.iter().map(|value| {
@@ -257,7 +257,7 @@ T: {{ ident }} + Send + Sync + 'static,
                                                 };
                                             {% endif %}
                                         {% elif method.response_params | length == 1 and not method.response_include_return %}
-                                            {% if param.header_is_multi %}
+                                            {% if param.is_sequence %}
                                                 let {{ param.name }}_header_values: Vec<String> = {
                                                     let values = &resp_value;
                                                     values.iter().map(|value| {
@@ -283,7 +283,7 @@ T: {{ ident }} + Send + Sync + 'static,
                                     {% endfor %}
                                     {% for param in method.response_cookie_params %}
                                         {% if method.response_struct %}
-                                            {% if param.cookie_is_multi %}
+                                            {% if param.is_sequence %}
                                                 let {{ param.name }}_cookie_values: Vec<String> = {
                                                     let values = &resp_value.{{ param.name }};
                                                     values.iter().map(|value| {
@@ -299,7 +299,7 @@ T: {{ ident }} + Send + Sync + 'static,
                                                 };
                                             {% endif %}
                                         {% elif method.response_params | length == 1 and not method.response_include_return %}
-                                            {% if param.cookie_is_multi %}
+                                            {% if param.is_sequence %}
                                                 let {{ param.name }}_cookie_values: Vec<String> = {
                                                     let values = &resp_value;
                                                     values.iter().map(|value| {
@@ -394,7 +394,7 @@ T: {{ ident }} + Send + Sync + 'static,
                                             let header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
                                             "{{ param.wire_name }}".as_bytes(),
                                             ).map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-                                            {% if param.header_is_multi %}
+                                            {% if param.is_sequence %}
                                                 for value_str in {{ param.name }}_header_values {
                                                     let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&value_str)
                                                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
@@ -415,7 +415,7 @@ T: {{ ident }} + Send + Sync + 'static,
                                     {% endif %}
                                     {% if method.response_cookie_params | length > 0 %}
                                         {% for param in method.response_cookie_params %}
-                                            {% if param.cookie_is_multi %}
+                                            {% if param.is_sequence %}
                                                 for value_str in {{ param.name }}_cookie_values {
                                                     let cookie_str = xidl_rust_axum::cookie::Cookie::new("{{ param.wire_name }}", value_str).encoded().to_string();
                                                     let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&cookie_str)

@@ -64,10 +64,6 @@ fn rust_integer_type(value: &hir::IntegerType) -> String {
     }
 }
 
-pub(crate) fn header_is_multi(ty: &hir::TypeSpec) -> bool {
-    matches!(ty, hir::TypeSpec::SequenceType(_))
-}
-
 pub(crate) fn header_item_is_string(ty: &hir::TypeSpec) -> bool {
     match ty {
         hir::TypeSpec::SequenceType(seq) => header_item_is_string(&seq.ty),
@@ -84,10 +80,6 @@ pub(crate) fn header_item_is_primitive(ty: &hir::TypeSpec) -> bool {
         }
         _ => false,
     }
-}
-
-pub(crate) fn cookie_is_multi(ty: &hir::TypeSpec) -> bool {
-    header_is_multi(ty)
 }
 
 pub(crate) fn cookie_item_is_string(ty: &hir::TypeSpec) -> bool {
