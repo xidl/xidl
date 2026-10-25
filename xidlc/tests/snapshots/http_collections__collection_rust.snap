@@ -41,12 +41,15 @@ impl StreamValues {}
 pub trait CollectionInputs {
     async fn read(
         &self,
-        values: Vec<i32>,
-        tags: Vec<String>,
-        names: Vec<String>,
-        labels: Option<Vec<String>>,
+        values: transport::Counts,
+        tags: transport::Selection,
+        names: transport::Selection,
+        labels: Option<transport::Selection>,
     ) -> ::xidl_rust_axum::Result<Collections>;
-    async fn search(&self, term: Option<String>) -> ::xidl_rust_axum::Result<Search>;
+    async fn search(
+        &self,
+        term: Option<transport::Label>,
+    ) -> ::xidl_rust_axum::Result<Search>;
     async fn stream(
         &self,
         req: ::xidl_rust_axum::Request<CollectionInputsStreamRequest>,
@@ -415,10 +418,10 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let CollectionInputsReadRequest { values, tags, names, labels } = request;
-        let values: Vec<i32> = values.into_iter().collect();
-        let tags: Vec<String> = tags.into_iter().collect();
-        let names: Vec<String> = names.into_iter().collect();
-        let labels: Option<Vec<String>> = labels
+        let values: transport::Counts = values.into_iter().collect();
+        let tags: transport::Selection = tags.into_iter().collect();
+        let names: transport::Selection = names.into_iter().collect();
+        let labels: Option<transport::Selection> = labels
             .map(|value| value.into_iter().collect());
         let mut resp = match svc.read(values, tags, names, labels).await {
             Ok(resp_value) => {
@@ -473,7 +476,7 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let CollectionInputsSearchRequest { term } = request;
-        let term: Option<String> = term;
+        let term: Option<transport::Label> = term;
         let mut resp = match svc.search(term).await {
             Ok(resp_value) => {
                 let mut resp = {
@@ -582,10 +585,10 @@ impl CollectionInputsClient {
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn read(
         &self,
-        values: Vec<i32>,
-        tags: Vec<String>,
-        names: Vec<String>,
-        labels: Option<Vec<String>>,
+        values: transport::Counts,
+        tags: transport::Selection,
+        names: transport::Selection,
+        labels: Option<transport::Selection>,
     ) -> Result<Collections, xidl_rust_axum::Error> {
         let xidl_path = "/collections".to_string();
         let mut req = self
@@ -700,7 +703,7 @@ impl CollectionInputsClient {
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn search(
         &self,
-        term: Option<String>,
+        term: Option<transport::Label>,
     ) -> Result<Search, xidl_rust_axum::Error> {
         let xidl_path = "/search".to_string();
         let mut req = self
@@ -781,4 +784,12 @@ impl CollectionInputsClient {
         let _ = auth_target;
         xidl_rust_axum::stream::open_sse::<StreamValues>(self.client.http(), req).await
     }
+}
+#[allow(clippy::too_many_arguments, clippy::large_enum_variant)]
+pub mod transport {
+    pub type Count = i32;
+    pub type Label = String;
+    pub type Counts = Vec<Count>;
+    pub type Labels = Vec<Label>;
+    pub type Selection = Labels;
 }

@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 
 mod document;
 mod references;
+mod types;
 
 #[cfg(test)]
 mod tests;
@@ -175,6 +176,7 @@ pub struct HttpOperationSignature {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HttpSignatureParam {
     pub name: String,
+    /// Declared type with named references resolved to their full IDL path.
     pub ty: hir::TypeSpec,
     pub direction: HttpSignatureParamDirection,
     pub is_optional: bool,
@@ -222,6 +224,8 @@ pub struct HttpRequestMapping {
 pub struct HttpInputBinding {
     pub source_param: String,
     pub wire_name: String,
+    /// Wire type; query/header/cookie bindings expand transparent typedefs.
+    /// The operation signature retains the declared named type.
     pub ty: hir::TypeSpec,
     pub optional: bool,
 }

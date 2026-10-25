@@ -4,7 +4,7 @@ use crate::hir;
 
 impl TypeDeclarations<'_> {
     /// IDL references support HTTP discriminators, not external runtime value types.
-    pub(in crate::rest_hir::unions) fn validate_runtime_references(
+    pub(in crate::rest_hir) fn validate_runtime_references(
         &self,
         definitions: &[hir::Definition],
         scope: &[String],

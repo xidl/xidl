@@ -121,6 +121,24 @@ expression: documents
             "media"
           ],
           "type": "object"
+        },
+        "v1.filters.MediaSelection": {
+          "$ref": "#/components/schemas/v1.filters.MediaTypes"
+        },
+        "v1.filters.MediaType": {
+          "type": "string"
+        },
+        "v1.filters.MediaTypes": {
+          "items": {
+            "$ref": "#/components/schemas/v1.filters.MediaType"
+          },
+          "type": "array"
+        },
+        "v1.filters.Tenant": {
+          "$ref": "#/components/schemas/v1.filters.TenantId"
+        },
+        "v1.filters.TenantId": {
+          "type": "string"
         }
       }
     },
@@ -378,6 +396,24 @@ expression: documents
             "media"
           ],
           "type": "object"
+        },
+        "v2.filters.MediaSelection": {
+          "$ref": "#/components/schemas/v2.filters.MediaTypes"
+        },
+        "v2.filters.MediaType": {
+          "type": "string"
+        },
+        "v2.filters.MediaTypes": {
+          "items": {
+            "$ref": "#/components/schemas/v2.filters.MediaType"
+          },
+          "type": "array"
+        },
+        "v2.filters.Tenant": {
+          "$ref": "#/components/schemas/v2.filters.TenantId"
+        },
+        "v2.filters.TenantId": {
+          "type": "string"
         }
       }
     },

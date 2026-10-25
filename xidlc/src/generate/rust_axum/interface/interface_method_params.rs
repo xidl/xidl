@@ -39,6 +39,7 @@ pub(crate) struct MethodParams {
 
 struct ParamBuildInput<'a> {
     sig_param: &'a HttpSignatureParam,
+    wire_ty: &'a TypeSpec,
     name: &'a str,
     wire_name: &'a str,
     path_template_name: String,
@@ -99,6 +100,16 @@ pub(crate) fn collect_method_params(
             let ctx = build_param_context(
                 ParamBuildInput {
                     sig_param: p,
+                    wire_ty: http_op
+                        .http
+                        .request
+                        .query
+                        .iter()
+                        .chain(&http_op.http.request.header)
+                        .chain(&http_op.http.request.cookie)
+                        .find(|binding| binding.source_param == p.name)
+                        .map(|binding| &binding.ty)
+                        .unwrap_or(&p.ty),
                     name: &name,
                     wire_name: &wire_name,
                     path_template_name: path_param_template_name(path, source_enum, &wire_name),
@@ -133,6 +144,7 @@ pub(crate) fn collect_method_params(
             let response_ctx = build_param_context(
                 ParamBuildInput {
                     sig_param: p,
+                    wire_ty: &p.ty,
                     name: &name,
                     wire_name: &wire_name,
                     path_template_name: String::new(),
@@ -290,13 +302,13 @@ fn build_param_context(
         )?,
         source: param_source_code(input.source),
         serde_rename: input.serde_name,
-        is_sequence: matches!(&input.sig_param.ty, TypeSpec::SequenceType(_)),
-        header_item_ty: env.header_item_ty(&input.sig_param.ty),
-        header_item_is_string: header_item_is_string(&input.sig_param.ty),
-        header_item_is_primitive: header_item_is_primitive(&input.sig_param.ty),
-        cookie_item_ty: env.cookie_item_ty(&input.sig_param.ty),
-        cookie_item_is_string: cookie_item_is_string(&input.sig_param.ty),
-        cookie_item_is_primitive: cookie_item_is_primitive(&input.sig_param.ty),
+        is_sequence: matches!(input.wire_ty, TypeSpec::SequenceType(_)),
+        header_item_ty: env.header_item_ty(input.wire_ty),
+        header_item_is_string: header_item_is_string(input.wire_ty),
+        header_item_is_primitive: header_item_is_primitive(input.wire_ty),
+        cookie_item_ty: env.cookie_item_ty(input.wire_ty),
+        cookie_item_is_string: cookie_item_is_string(input.wire_ty),
+        cookie_item_is_primitive: cookie_item_is_primitive(input.wire_ty),
         optional: input.optional,
         inner_ty: input.inner_ty.to_string(),
         flatten: input.flatten,

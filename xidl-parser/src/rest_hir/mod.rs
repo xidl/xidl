@@ -8,6 +8,7 @@ mod route;
 pub mod semantics;
 #[cfg(test)]
 mod tests;
+mod types;
 mod unions;
 mod validate;
 

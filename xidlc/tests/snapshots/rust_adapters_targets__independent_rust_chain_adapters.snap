@@ -1,5 +1,6 @@
 ---
 source: xidlc/tests/rust_adapters_targets.rs
+assertion_line: 82
 expression: "&files[0].1"
 ---
 /// Pure version projections. The application owns routing and side effects.
@@ -712,7 +713,7 @@ pub mod version_adapters {
                 .ok_or_else(|| "expected an array".to_string())?;
             let values = array
                 .iter()
-                .map(|item| decode_wire_v_2026_10_01_agenda_entry(item))
+                .map(decode_wire_v_2026_10_01_agenda_entry)
                 .collect::<Result<Vec<_>, String>>()?;
             Ok::<_, String>(values)
         })()?;
@@ -837,7 +838,7 @@ pub mod version_adapters {
                 .ok_or_else(|| "expected an array".to_string())?;
             let values = array
                 .iter()
-                .map(|item| decode_wire_v_2027_01_01_agenda_entry(item))
+                .map(decode_wire_v_2027_01_01_agenda_entry)
                 .collect::<Result<Vec<_>, String>>()?;
             Ok::<_, String>(values)
         })()?;
