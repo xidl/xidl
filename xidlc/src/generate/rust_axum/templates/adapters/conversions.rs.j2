@@ -4,7 +4,7 @@
     {%- elif plan.kind == "Sequence" -%}map_sequence({{ source }}, |item| {{ value(plan.data, "item") }})
     {%- elif plan.kind == "Array" -%}map_array({{ source }}, |item| {{ value(plan.data, "item") }}, refusal)
     {%- elif plan.kind == "Map" -%}map_record({{ source }}, |key| {{ value(plan.data.key, "key") }}, |item| {{ value(plan.data.value, "item") }}, refusal)
-    {%- elif plan.kind == "Optional" -%}({{ source }}).as_ref().map(|item| {{ value(plan.data, "item") }}).transpose()
+    {%- elif plan.kind == "Optional" -%}::std::option::Option::as_ref({{ source }}).map(|item| {{ value(plan.data, "item") }}).transpose()
 {%- elif plan.kind == "Boxed" -%}{{ value(plan.data.value, "(" ~ source ~ ").as_ref()" if plan.data.source else source) }}{% if plan.data.target %}.map(Box::new){% endif %}
 {%- endif -%}
 {%- endmacro %}

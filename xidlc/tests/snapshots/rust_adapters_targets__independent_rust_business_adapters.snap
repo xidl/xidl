@@ -670,8 +670,7 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.name))?;
-        let projected_1 = (&source.children)
-            .as_ref()
+        let projected_1 = ::std::option::Option::as_ref(&source.children)
             .map(|item| map_sequence(item, |item| node_upcast_from_v_1(item, adapters)))
             .transpose()?;
         Ok(v2::Node {
@@ -694,8 +693,7 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.name))?;
-        let projected_1 = (&source.children)
-            .as_ref()
+        let projected_1 = ::std::option::Option::as_ref(&source.children)
             .map(|item| map_sequence(item, |item| node_downcast_to_v_1(item, adapters)))
             .transpose()?;
         Ok(v1::Node {
@@ -1834,8 +1832,7 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.name))?;
-        let projected_1 = (&source.children)
-            .as_ref()
+        let projected_1 = ::std::option::Option::as_ref(&source.children)
             .map(|item| map_sequence(item, |item| node_upcast_from_v_2(item, adapters)))
             .transpose()?;
         Ok(v3::Node {
@@ -1858,8 +1855,7 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.name))?;
-        let projected_1 = (&source.children)
-            .as_ref()
+        let projected_1 = ::std::option::Option::as_ref(&source.children)
             .map(|item| map_sequence(item, |item| node_downcast_to_v_2(item, adapters)))
             .transpose()?;
         Ok(v2::Node {
@@ -1937,8 +1933,7 @@ pub mod version_adapters {
             type_path: "OptionalChange".into(),
             reason: reason.into(),
         };
-        let projected_0 = (&source.note)
-            .as_ref()
+        let projected_0 = ::std::option::Option::as_ref(&source.note)
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
         Ok(v3::OptionalChange {
@@ -1956,8 +1951,7 @@ pub mod version_adapters {
             type_path: "OptionalChange".into(),
             reason: reason.into(),
         };
-        let projected_0 = (&source.note)
-            .as_ref()
+        let projected_0 = ::std::option::Option::as_ref(&source.note)
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
         Ok(v2::OptionalChange {
@@ -1988,8 +1982,7 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.carrier))?;
-        let projected_3 = (&source.note)
-            .as_ref()
+        let projected_3 = ::std::option::Option::as_ref(&source.note)
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
         let projected_4 = address_upcast_from_v_2(&source.address, adapters)?;
@@ -2044,8 +2037,7 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.carrier))?;
-        let projected_3 = (&source.note)
-            .as_ref()
+        let projected_3 = ::std::option::Option::as_ref(&source.note)
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
         let projected_4 = address_downcast_to_v_2(&source.address, adapters)?;

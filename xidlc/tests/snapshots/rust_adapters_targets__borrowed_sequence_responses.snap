@@ -312,20 +312,21 @@ pub mod version_adapters {
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn responses_optional_response_downcast_to_v_1(
-        source: &[v2::Item],
+        source: &v2::ResponsesOptionalResponse,
         adapters: &dyn VersionAdapters,
-    ) -> VersionedResult<Vec<v1::Item>> {
+    ) -> VersionedResult<v1::ResponsesOptionalResponse> {
         let refusal = |reason: &str| UnsupportedProjection {
             version: "v2".into(),
             direction: Direction::Downcast,
             type_path: "ResponsesOptionalResponse".into(),
             reason: reason.into(),
         };
-        let projected_0 = map_sequence(
-            source,
-            |item| item_downcast_to_v_1(item, adapters),
-        )?;
-        Ok(projected_0)
+        let projected_0 = ::std::option::Option::as_ref(&source.values)
+            .map(|item| map_sequence(item, |item| item_downcast_to_v_1(item, adapters)))
+            .transpose()?;
+        Ok(v1::ResponsesOptionalResponse {
+            values: projected_0,
+        })
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn responses_retired_header_request_upcast_from_v_1(
@@ -827,7 +828,10 @@ pub mod version_adapters {
         Ok(downcast_responses_matrix_from_v_1_outcome(head, adapters))
     }
     /// The complete typed result of this operation in one frozen contract.
-    pub type ResponsesOptionalResultV1 = Result<Vec<v1::Item>, ::xidl_rust_axum::Error>;
+    pub type ResponsesOptionalResultV1 = Result<
+        v1::ResponsesOptionalResponse,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_responses_optional_from_v_1(
         wire: ::serde_json::Value,
@@ -1260,7 +1264,10 @@ pub mod version_adapters {
         Ok(downcast_responses_matrix_from_v_2_outcome(head, adapters))
     }
     /// The complete typed result of this operation in one frozen contract.
-    pub type ResponsesOptionalResultV2 = Result<Vec<v2::Item>, ::xidl_rust_axum::Error>;
+    pub type ResponsesOptionalResultV2 = Result<
+        v2::ResponsesOptionalResponse,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_responses_optional_from_v_2(
         wire: ::serde_json::Value,

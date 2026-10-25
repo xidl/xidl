@@ -10,6 +10,19 @@ from behave import then
 @then("the emitted Rust library passes strict clippy")
 def emitted_rust_clippy(context):
     root = Path.cwd()
+    lint = subprocess.run(
+        [
+            str(root / "target/debug/xidlc"),
+            "lint",
+            "--deny",
+            "warnings",
+            context.idl_file,
+        ],
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    assert lint.returncode == 0, lint.stdout + lint.stderr
     directory = Path(context.lang_dir)
     files = sorted(directory.glob("*.rs"))
     assert files, "Rust generation produced no library artifacts"
