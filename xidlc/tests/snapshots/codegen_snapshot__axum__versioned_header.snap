@@ -9,6 +9,23 @@ versioned_header.rs
 
 #[allow(clippy::too_many_arguments, clippy::large_enum_variant)]
 pub mod v1 {
+    #[derive(
+        Debug,
+        Clone,
+        PartialEq,
+        ::serde::Serialize,
+        ::serde::Deserialize,
+        Copy,
+        Eq,
+        Default,
+    )]
+    pub enum ApiVersions {
+        #[serde(rename = "2025-01")]
+        #[default]
+        v1,
+        #[serde(rename = "2025-06")]
+        v2,
+    }
     #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
     #[derive(Default)]
     pub struct Item {
@@ -492,6 +509,23 @@ pub mod v1 {
 }
 #[allow(clippy::too_many_arguments, clippy::large_enum_variant)]
 pub mod v2 {
+    #[derive(
+        Debug,
+        Clone,
+        PartialEq,
+        ::serde::Serialize,
+        ::serde::Deserialize,
+        Copy,
+        Eq,
+        Default,
+    )]
+    pub enum ApiVersions {
+        #[serde(rename = "2025-01")]
+        #[default]
+        v1,
+        #[serde(rename = "2025-06")]
+        v2,
+    }
     #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
     #[derive(Default)]
     pub struct Item {
