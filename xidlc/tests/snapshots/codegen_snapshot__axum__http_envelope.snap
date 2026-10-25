@@ -9,6 +9,12 @@ http_envelope.rs
 
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
+pub struct FileMeta {
+    pub wrong: String,
+}
+impl FileMeta {}
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
 pub struct NotModified {
     #[serde(rename = "ETag")]
     #[serde(skip)]
