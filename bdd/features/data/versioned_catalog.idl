@@ -27,5 +27,17 @@ struct Page { sequence<Product> products; sequence<Message> messages; };
 
 interface Catalog {
     @get(path = "/catalog")
-    Page search(@query filters::MediaSelection media, @cookie filters::Tenant tenant) raises(Denied);
+    Page search(
+        @query filters::MediaSelection media,
+        @cookie filters::Tenant tenant,
+        @query @optional string remember,
+        @cookie @optional out string bookmark
+    ) raises(Denied);
+
+    @put(path = "/catalog/preference")
+    void remember(
+        @cookie filters::Tenant tenant,
+        @query @optional string media,
+        @cookie @optional out string bookmark
+    ) raises(Denied);
 };

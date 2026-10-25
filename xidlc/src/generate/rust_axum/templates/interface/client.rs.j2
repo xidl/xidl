@@ -66,7 +66,12 @@
                         let {{ param.name }} = if {{ param.name }}.is_empty() { None } else { Some({{ param.name }}) };
                     {% endif %}
                 {% else %}
-                    {% if param.optional %}
+                    {% if param.optional and param.cookie_item_is_string %}
+                        let {{ param.name }}: {{ param.ty }} = cookie_map
+                        .get("{{ param.wire_name }}")
+                        .and_then(|values| values.first())
+                        .cloned();
+                    {% elif param.optional %}
                         let {{ param.name }}: {{ param.ty }} = match cookie_map
                         .get("{{ param.wire_name }}")
                         .and_then(|values| values.first()) {

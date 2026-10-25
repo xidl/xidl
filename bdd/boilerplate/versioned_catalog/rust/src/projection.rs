@@ -25,3 +25,9 @@ impl From<UnsupportedProjection> for v1::CatalogSearchError {
         Self::Framework(xidl_rust_axum::Error::new(500, error.reason))
     }
 }
+
+impl From<UnsupportedProjection> for v1::CatalogRememberError {
+    fn from(error: UnsupportedProjection) -> Self {
+        Self::Framework(xidl_rust_axum::Error::new(500, error.reason))
+    }
+}

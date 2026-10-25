@@ -164,6 +164,14 @@ expression: documents
               }
             },
             {
+              "in": "query",
+              "name": "remember",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
               "description": "API version; this document describes 2026-07-01.",
               "in": "header",
               "name": "X-Catalog-Version",
@@ -195,6 +203,129 @@ expression: documents
               },
               "description": "OK",
               "headers": {
+                "Set-Cookie": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Catalog-Version": {
+                  "schema": {
+                    "enum": [
+                      "2026-07-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Bad Request",
+              "headers": {
+                "X-Catalog-Version": {
+                  "schema": {
+                    "enum": [
+                      "2026-07-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "403": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v1.Denied"
+                  }
+                }
+              },
+              "description": "Error: Denied",
+              "headers": {
+                "X-Catalog-Version": {
+                  "schema": {
+                    "enum": [
+                      "2026-07-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "500": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Internal Server Error",
+              "headers": {
+                "X-Catalog-Version": {
+                  "schema": {
+                    "enum": [
+                      "2026-07-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "Catalog"
+          ]
+        }
+      },
+      "/catalog/preference": {
+        "put": {
+          "operationId": "v1.Catalog.remember",
+          "parameters": [
+            {
+              "in": "query",
+              "name": "media",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "description": "API version; this document describes 2026-07-01.",
+              "in": "header",
+              "name": "X-Catalog-Version",
+              "required": false,
+              "schema": {
+                "enum": [
+                  "2026-07-01"
+                ],
+                "type": "string"
+              }
+            },
+            {
+              "in": "cookie",
+              "name": "tenant",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "OK",
+              "headers": {
+                "Set-Cookie": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
                 "X-Catalog-Version": {
                   "schema": {
                     "enum": [
@@ -439,6 +570,14 @@ expression: documents
               }
             },
             {
+              "in": "query",
+              "name": "remember",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
               "description": "API version; this document describes 2026-10-01.",
               "in": "header",
               "name": "X-Catalog-Version",
@@ -470,6 +609,129 @@ expression: documents
               },
               "description": "OK",
               "headers": {
+                "Set-Cookie": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Catalog-Version": {
+                  "schema": {
+                    "enum": [
+                      "2026-10-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Bad Request",
+              "headers": {
+                "X-Catalog-Version": {
+                  "schema": {
+                    "enum": [
+                      "2026-10-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "403": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/v2.Denied"
+                  }
+                }
+              },
+              "description": "Error: Denied",
+              "headers": {
+                "X-Catalog-Version": {
+                  "schema": {
+                    "enum": [
+                      "2026-10-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "500": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Internal Server Error",
+              "headers": {
+                "X-Catalog-Version": {
+                  "schema": {
+                    "enum": [
+                      "2026-10-01"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "Catalog"
+          ]
+        }
+      },
+      "/catalog/preference": {
+        "put": {
+          "operationId": "v2.Catalog.remember",
+          "parameters": [
+            {
+              "in": "query",
+              "name": "media",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "description": "API version; this document describes 2026-10-01.",
+              "in": "header",
+              "name": "X-Catalog-Version",
+              "required": false,
+              "schema": {
+                "enum": [
+                  "2026-10-01"
+                ],
+                "type": "string"
+              }
+            },
+            {
+              "in": "cookie",
+              "name": "tenant",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "OK",
+              "headers": {
+                "Set-Cookie": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
                 "X-Catalog-Version": {
                   "schema": {
                     "enum": [
