@@ -53,8 +53,8 @@ function mapRecord<S, T>(source: Record<string, S>, convert: (value: S) => Versi
     }
     return ok(Object.fromEntries(entries));
 }
-function mapOptional<S, T>(source: S | undefined, convert: (value: S) => VersionedResult<T>, path: string): VersionedResult<T | undefined> {
-    return source === undefined ? ok(undefined) : locate(convert(source), path);
+function mapOptional<S, T>(source: S | undefined, convert: (value: S) => VersionedResult<T>): VersionedResult<T | undefined> {
+    return source === undefined ? ok(undefined) : convert(source);
 }
 
 {% include "http/adapters_wire.ts.j2" %}
@@ -101,7 +101,7 @@ export interface VersionAdapters {
     {%- elif value.kind == "Named" -%}{{ value.data.name }}({{ source }}{% if value.data.current %}, current{% endif %}{% if value.data.stored %}, stored{% endif %}, adapters)
     {%- elif value.kind == "Sequence" -%}mapSequence({{ source }}, (item) => {{ convert(value.data, "item", path) }}, {{ path | tojson }})
     {%- elif value.kind == "Map" -%}mapRecord({{ source }}, (item) => {{ convert(value.data, "item", path) }}, {{ path | tojson }})
-    {%- elif value.kind == "Optional" -%}mapOptional({{ source }}, (item) => {{ convert(value.data, "item", path) }}, {{ path | tojson }})
+    {%- elif value.kind == "Optional" -%}mapOptional({{ source }}, (item) => {{ convert(value.data, "item", path) }})
 {%- endif -%}
 {%- endmacro %}
 
