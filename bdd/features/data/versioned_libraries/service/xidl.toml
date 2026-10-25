@@ -1,0 +1,8 @@
+name = "address-service"
+version = "1.0.0"
+files = ["versioned_inheritance.idl"]
+
+[dependencies]
+"contracts/calendar" = { path = "../calendar" }
+"contracts/identity" = { path = "../identity" }
+"contracts/shipping" = { path = "../shipping" }

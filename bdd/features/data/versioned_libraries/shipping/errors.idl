@@ -1,0 +1,3 @@
+@http(404) exception Missing { string reason; };
+@http(422) exception Projection { string type_path; string reason; };
+@http(403) exception Forbidden { string reason; };

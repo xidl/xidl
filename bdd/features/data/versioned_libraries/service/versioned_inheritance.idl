@@ -1,0 +1,4 @@
+// Same wire contract as ../../versioned_inheritance.idl, assembled from libraries.
+#include "contracts/calendar/versions.idl"
+#include "contracts/identity/lib.idl"
+#include "contracts/shipping/lib.idl"
