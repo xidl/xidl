@@ -53,6 +53,37 @@ pub async fn run() {
     assert_eq!(*choice.choice.as_count(), 7);
     assert!(decode_and_upcast_depot_choose(Version::V1, json!({"choice":{"tag":"1", "data":7}}), &hooks).is_err());
     assert!(decode_and_upcast_depot_choose(Version::V2, json!({"choice":{"tag":"1", "data":7, "extra":1}}), &hooks).is_err());
+    // The newest union variant still answers the oldest caller: the count the
+    // oldest contract never declared reaches it as text through the hook, the
+    // declared variant passes mechanically, and a refusal keeps the Head.
+    let counted = choice.choice.clone();
+    let choices_before = hooks.choices.load(Ordering::SeqCst);
+    match downcast_choice(Version::V1, counted.clone(), &hooks).unwrap() {
+        ChoiceProjection::V1(text) => assert_eq!(text.as_text(), "7"),
+        _ => panic!("the count variant must project through the hook"),
+    }
+    match downcast_choice(Version::V1, v3::Choice::new_text("kept".into()), &hooks).unwrap() {
+        ChoiceProjection::V1(text) => assert_eq!(text.as_text(), "kept"),
+        _ => panic!("the declared variant must project mechanically"),
+    }
+    assert_eq!(hooks.choices.load(Ordering::SeqCst), choices_before + 1,
+        "the mechanical variant never consults the hook");
+    let refusing = Hooks { reject_choice: true, ..Hooks::default() };
+    match dispatch_depot_choose(Version::V1, json!({"choice":{"tag":"0", "data":"seed"}}), |_, _| async {
+        Ok(counted.clone())
+    }, &refusing).await.unwrap() {
+        ProjectionOutcome::Unsupported { head: Ok(original), error } => {
+            assert_eq!(*original.as_count(), 7, "the refusal retains the committed Head outcome");
+            assert_eq!(error.type_path, "Choice");
+        },
+        _ => panic!("a refusing union hook must not project"),
+    }
+    match dispatch_depot_choose(Version::V1, json!({"choice":{"tag":"0", "data":"seed"}}), |_, _| async {
+        Ok(v3::Choice::new_count(7))
+    }, &hooks).await.unwrap() {
+        ProjectionOutcome::Projected(DepotChooseOutcome::V1(Ok(text))) => assert_eq!(text.as_text(), "7"),
+        _ => panic!("the dispatched count variant must project to the oldest text"),
+    }
     let contact = decode_and_upcast_depot_contact(Version::V1, json!({"contact":{"zip_code":"123", "team":"ops"}}), &hooks).unwrap();
     assert_eq!(contact.contact.address.zip, "123"); assert_eq!(contact.contact.tags["team"], "ops");
     assert!(decode_and_upcast_depot_contact(Version::V1, json!({"contact":{"zip_code":"123", "zone":"future"}}), &hooks).is_err());
