@@ -596,7 +596,7 @@ export interface VersionAdapters {
                 const converted2 = mapSequence(source["roster"], (item) => ok(item), "Booking.roster");
                 if (!converted2.ok) return converted2;
             
-                const converted3 = mapOptional(source["owner"], (item) => ok(item), "Booking.owner");
+                const converted3 = mapOptional(source["owner"], (item) => ok(item));
                 if (!converted3.ok) return converted3;
             
             return ok({
@@ -627,7 +627,7 @@ export interface VersionAdapters {
                 const converted2 = mapSequence(source["roster"], (item) => ok(item), "Booking.roster");
                 if (!converted2.ok) return converted2;
             
-                const converted3 = mapOptional(source["owner"], (item) => ok(item), "Booking.owner");
+                const converted3 = mapOptional(source["owner"], (item) => ok(item));
                 if (!converted3.ok) return converted3;
             
             return ok({
@@ -771,7 +771,7 @@ export interface VersionAdapters {
                 const converted2 = mapSequence(source["items"], (item) => upcastAgendaEntryFromV20261001(item, adapters), "Booking.items");
                 if (!converted2.ok) return converted2;
             
-                const converted3 = mapOptional(source["owner"], (item) => ok(item), "Booking.owner");
+                const converted3 = mapOptional(source["owner"], (item) => ok(item));
                 if (!converted3.ok) return converted3;
             
             return ok({
@@ -801,7 +801,7 @@ export interface VersionAdapters {
                 const converted2 = mapSequence(source["items"], (item) => downcastAgendaEntryToV20261001(item, adapters), "Booking.items");
                 if (!converted2.ok) return converted2;
             
-                const converted3 = mapOptional(source["organizer"], (item) => ok(item), "Booking.organizer");
+                const converted3 = mapOptional(source["organizer"], (item) => ok(item));
                 if (!converted3.ok) return converted3;
             
             return ok({

@@ -3599,7 +3599,7 @@ export interface VersionAdapters {
                 const converted3 = mapOptional(source["note"], (item) => ok(item));
                 if (!converted3.ok) return converted3;
             
-                const converted4 = mapOptional(source["courier_note"], (item) => ok(item), "Parcel.courier_note");
+                const converted4 = mapOptional(source["courier_note"], (item) => ok(item));
                 if (!converted4.ok) return converted4;
             
                 const converted5 = upcastAddressFromV2(source["address"], adapters);
@@ -3651,7 +3651,7 @@ export interface VersionAdapters {
                 const converted3 = mapOptional(source["note"], (item) => ok(item));
                 if (!converted3.ok) return converted3;
             
-                const converted4 = mapOptional(source["courier_remark"], (item) => ok(item), "Parcel.courier_remark");
+                const converted4 = mapOptional(source["courier_remark"], (item) => ok(item));
                 if (!converted4.ok) return converted4;
             
                 const converted5 = downcastAddressToV2(source["address"], stored, adapters);
