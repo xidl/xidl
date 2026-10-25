@@ -207,13 +207,16 @@ export async function runStoredJourney(
       'the refusal names the map element’s member',
     );
   }
-  // The derived type keeps one flattened wire shape: the whole conversion is
-  // a single explicit decision, so the hook reads storage itself and an
-  // unarchived label omits the retired member instead of inventing one.
+  // A derived retirement uses its own reader; all remaining members convert mechanically.
+  assert.deepEqual(a.NEEDS.Signed, {
+    '2026-01': ['tag'],
+    '2026-04': ['tag'],
+    '2026-07': [],
+  });
   const receipt = async (outcome: types.v3.Signed) => {
     const served = await a.dispatchDepotReceiptFromV1(
       { parcel: wireParcel },
-      async () => ({ ok: true as const, value: outcome }),
+      async () => ({ ok: true as const, stored: storedValues, value: outcome }),
       hooks,
     );
     assert(served.dispatched && served.projected && served.value.ok);
@@ -230,6 +233,7 @@ export async function runStoredJourney(
   );
   const sealedHead = {
     ok: true as const,
+    stored: storedValues,
     value: { label: 'sealed-label', signature: 'sig-3' } as types.v3.Signed,
   };
   const sealed = await a.dispatchDepotReceiptFromV1(

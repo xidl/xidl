@@ -284,15 +284,17 @@ pub async fn run() {
         ), "{version:?} must reject the invalid update envelope");
     }
     assert_eq!(update_writes.load(Ordering::SeqCst), 3);
-    // The derived type keeps one flattened wire shape: the whole conversion
-    // is a single explicit decision, so the hook reads storage itself and an
-    // unarchived label omits the retired member instead of inventing one.
-    hooks.signed_tags.lock().unwrap().insert("proof".into(), "archived".into());
+    // A derived retirement uses its own reader; all remaining members convert mechanically.
+    let mut signed_storage = storage.clone();
+    signed_storage.signed_tags.insert("proof".into(), "archived".into());
+    assert_eq!(NEEDS.iter().find(|(key, _)| *key == "Signed").map(|(_, needs)| *needs),
+        Some(&[("2026-07", &[][..]), ("2026-04", &["tag"][..]), ("2026-01", &["tag"][..])][..]));
     let receipt = |outcome: v3::Signed| {
         let hooks = &hooks;
+        let stored = signed_storage.clone();
         async move {
             match dispatch_depot_receipt(Version::V1, json!({"parcel": parcel()}), |_, _| async {
-                Ok(outcome)
+                HeadOutcome { outcome: Ok(outcome), stored }
             }, hooks).await.unwrap() {
                 ProjectionOutcome::Projected(DepotReceiptOutcome::V1(Ok(value))) => value,
                 _ => panic!("the v1 receipt must project"),
@@ -307,7 +309,7 @@ pub async fn run() {
     assert_eq!(hooks.signed.load(Ordering::SeqCst), 2);
     let sealed = v3::Signed { base: v3::Labelled { label: "sealed-label".into() }, signature: "sig-3".into() };
     match dispatch_depot_receipt(Version::V1, json!({"parcel": parcel()}), |_, _| async {
-        Ok(sealed)
+        HeadOutcome { outcome: Ok(sealed), stored: signed_storage }
     }, &hooks).await.unwrap() {
         ProjectionOutcome::Unsupported { head: Ok(original), error } => {
             assert_eq!(original.base.label, "sealed-label", "the refusal retains the committed Head outcome");

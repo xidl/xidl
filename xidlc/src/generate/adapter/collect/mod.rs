@@ -1,5 +1,6 @@
 //! Collect complete typed shapes without inferring cross-version changes.
 
+mod inheritance;
 mod operations;
 
 use super::model::*;
@@ -11,7 +12,11 @@ use xidl_parser::rest_hir::{
 };
 use xidl_parser::versioning::map::VersionMap;
 
-pub(super) struct SurfaceCollector;
+#[derive(Default)]
+pub(super) struct SurfaceCollector {
+    types: BTreeMap<String, TypeShape>,
+    parents: BTreeMap<String, (Vec<String>, hir::ScopedName)>,
+}
 
 impl SurfaceCollector {
     pub(super) fn collect(
@@ -36,8 +41,13 @@ impl SurfaceCollector {
                         map.contract, version.id
                     ))
                 })?;
-            let mut surface = VersionSurface::default();
-            Self::definitions(&module.definition, &[], &mut surface.types);
+            let mut collector = Self::default();
+            collector.definitions(&module.definition, &[]);
+            collector.inherit(&version.id)?;
+            let mut surface = VersionSurface {
+                types: collector.types,
+                ..VersionSurface::default()
+            };
             for interface in &http.interfaces {
                 if interface.module_path.first() != Some(&version.id) {
                     continue;
@@ -56,22 +66,18 @@ impl SurfaceCollector {
         Ok(result)
     }
 
-    fn definitions(
-        definitions: &[hir::Definition],
-        scope: &[String],
-        types: &mut BTreeMap<String, TypeShape>,
-    ) {
+    fn definitions(&mut self, definitions: &[hir::Definition], scope: &[String]) {
         for definition in definitions {
             match definition {
                 hir::Definition::ModuleDcl(module) => {
                     let mut nested = scope.to_vec();
                     nested.push(module.ident.clone());
-                    Self::definitions(&module.definition, &nested, types);
+                    self.definitions(&module.definition, &nested);
                 }
-                hir::Definition::ConstrTypeDcl(constr) => Self::constr(constr, scope, types),
-                hir::Definition::TypeDcl(decl) => Self::type_decl(decl, scope, types),
+                hir::Definition::ConstrTypeDcl(constr) => self.constr(constr, scope),
+                hir::Definition::TypeDcl(decl) => self.type_decl(decl, scope),
                 hir::Definition::ExceptDcl(decl) => {
-                    types.insert(
+                    self.types.insert(
                         Self::join(scope, &decl.ident),
                         TypeShape::Struct(Self::members(&decl.member, &decl.annotations, scope)),
                     );
@@ -85,9 +91,9 @@ impl SurfaceCollector {
                     if let Some(body) = &def.interface_body {
                         for export in &body.0 {
                             match export {
-                                hir::Export::TypeDcl(decl) => Self::type_decl(decl, &nested, types),
+                                hir::Export::TypeDcl(decl) => self.type_decl(decl, &nested),
                                 hir::Export::ExceptDcl(decl) => {
-                                    types.insert(
+                                    self.types.insert(
                                         Self::join(&nested, &decl.ident),
                                         TypeShape::Struct(Self::members(
                                             &decl.member,
@@ -106,9 +112,9 @@ impl SurfaceCollector {
         }
     }
 
-    fn type_decl(decl: &hir::TypeDcl, scope: &[String], types: &mut BTreeMap<String, TypeShape>) {
+    fn type_decl(&mut self, decl: &hir::TypeDcl, scope: &[String]) {
         match decl {
-            hir::TypeDcl::ConstrTypeDcl(constr) => Self::constr(constr, scope, types),
+            hir::TypeDcl::ConstrTypeDcl(constr) => self.constr(constr, scope),
             hir::TypeDcl::TypedefDcl(alias) => {
                 for declarator in &alias.decl {
                     let name = Self::declarator_name(declarator);
@@ -125,11 +131,11 @@ impl SurfaceCollector {
                             TypeShape::Unsupported("inline typedef".into())
                         }
                     };
-                    types.insert(Self::join(scope, name), shape);
+                    self.types.insert(Self::join(scope, name), shape);
                 }
             }
             hir::TypeDcl::NativeDcl(native) => {
-                types.insert(
+                self.types.insert(
                     Self::join(scope, &native.decl.0),
                     TypeShape::Unsupported("native".into()),
                 );
@@ -137,18 +143,16 @@ impl SurfaceCollector {
         }
     }
 
-    fn constr(
-        decl: &hir::ConstrTypeDcl,
-        scope: &[String],
-        types: &mut BTreeMap<String, TypeShape>,
-    ) {
+    fn constr(&mut self, decl: &hir::ConstrTypeDcl, scope: &[String]) {
         let shape = match decl {
             hir::ConstrTypeDcl::StructDcl(value) => {
-                if !value.parent.is_empty() {
-                    TypeShape::Unsupported("struct inheritance".into())
-                } else {
-                    TypeShape::Struct(Self::members(&value.member, &value.annotations, scope))
+                if let Some(parent) = value.parent.first() {
+                    self.parents.insert(
+                        Self::join(scope, &value.ident),
+                        (scope.to_vec(), parent.clone()),
+                    );
                 }
+                TypeShape::Struct(Self::members(&value.member, &value.annotations, scope))
             }
             hir::ConstrTypeDcl::EnumDcl(value) => TypeShape::Enum(
                 value
@@ -166,6 +170,7 @@ impl SurfaceCollector {
                             key: wire.clone(),
                             wire,
                             flatten: false,
+                            path: Vec::new(),
                             value: None,
                         }
                     })
@@ -221,6 +226,7 @@ impl SurfaceCollector {
                             key: wire.clone(),
                             wire,
                             flatten: false,
+                            path: Vec::new(),
                             value: Some(TypeUse {
                                 ty,
                                 scope: scope.to_vec(),
@@ -251,7 +257,7 @@ impl SurfaceCollector {
             hir::ConstrTypeDcl::BitsetDcl(value) => &value.ident,
             hir::ConstrTypeDcl::BitmaskDcl(value) => &value.ident,
         };
-        types.insert(Self::join(scope, ident), shape);
+        self.types.insert(Self::join(scope, ident), shape);
     }
 
     fn members(
@@ -275,6 +281,7 @@ impl SurfaceCollector {
                     name,
                     key: wire.clone(),
                     wire,
+                    path: Vec::new(),
                     flatten: member.annotations.iter().any(|annotation| {
                         hir::annotation_name(annotation)
                             .is_some_and(|name| name.eq_ignore_ascii_case("flatten"))

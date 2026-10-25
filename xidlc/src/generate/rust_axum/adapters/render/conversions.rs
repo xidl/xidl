@@ -34,6 +34,7 @@ impl AdapterRenderer<'_> {
             copies: Vec::new(),
             assignments: Vec::new(),
             absences: Vec::new(),
+            construction: None,
             variants: Vec::new(),
             changed: Vec::new(),
             changed_type: format!(
@@ -85,19 +86,17 @@ impl AdapterRenderer<'_> {
             for copy in &members.copies {
                 let boxed = match input.declaration {
                     Some(key) => (
-                        self.layout.recursive(
-                            &format!("{}::{key}", input.source.version),
-                            &copy.source.name,
-                        )?,
-                        self.layout.recursive(
-                            &format!("{}::{key}", input.target.version),
-                            &copy.target.name,
-                        )?,
+                        self.member_recursive(&copy.source, input.source, key)?,
+                        self.member_recursive(&copy.target, input.target, key)?,
                     ),
                     None => (false, false),
                 };
                 output.copies.push(Copy {
                     source: rust_ident(&copy.source.name),
+                    access: std::iter::repeat_n("base".to_string(), copy.source.path.len())
+                        .chain(std::iter::once(rust_ident(&copy.source.name)))
+                        .collect::<Vec<_>>()
+                        .join("."),
                     target: rust_ident(&copy.target.name),
                     value: input.target.field_value(&copy.value, boxed),
                 });
@@ -108,6 +107,18 @@ impl AdapterRenderer<'_> {
                 .map(|member| rust_ident(&member.name))
                 .collect();
             self.decision(members, &input, &mark, &mut output, file)?;
+            if matches!(input.target_shape, Shape::Struct) {
+                let fields = output.construction_fields();
+                output.construction = Some(match input.declaration {
+                    Some(key) => self
+                        .layout
+                        .construction(&format!("{}::{key}", input.target.version), fields)?,
+                    None => super::super::construction::Construction::flat(
+                        output.target.clone(),
+                        fields,
+                    ),
+                });
+            }
         }
         file.conversions.push(output);
         Ok(())

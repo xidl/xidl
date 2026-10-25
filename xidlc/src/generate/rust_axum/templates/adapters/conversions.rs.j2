@@ -1,3 +1,4 @@
+{% from "adapters/construction.rs.j2" import construct %}
 {% macro value(plan, source, path) -%}
     {%- if plan.kind == "Identity" -%}Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone({{ source }}))
     {%- elif plan.kind == "Named" -%}{{ plan.data.name }}({{ source }}{% if plan.data.current %}, current{% endif %}{% if plan.data.stored %}, stored{% endif %}, adapters)
@@ -52,7 +53,7 @@
                     {% else %}
                         {% if conversion.hook %}let decision = adapters.{{ conversion.hook }}(source{% if conversion.hook_current %}, current{% endif %}{% if conversion.hook_stored %}, stored{% endif %})?;{% endif %}
                             {% for copy in conversion.copies %}
-                                let projected_{{ loop.index0 }} = {{ value(copy.value, "source" if conversion.source_shape == "direct" else "&source." ~ copy.source, conversion.type_path ~ "." ~ copy.source) }}?;
+                                let projected_{{ loop.index0 }} = {{ value(copy.value, "source" if conversion.source_shape == "direct" else "&source." ~ copy.access, conversion.type_path ~ "." ~ copy.source) }}?;
                             {% endfor %}
                             {% if conversion.pair %}
                                 {% set ns = namespace(stored = conversion.stored_type ~ "::default()") %}
@@ -65,13 +66,7 @@
                                     {% set ns.stored = ns.stored ~ ".merge(decision.stored)" %}
                                 {% endif %}
                                 Ok(Upcast {
-                                    value: {{ conversion.target }} {
-                                        {% for copy in conversion.copies %}
-                                            {% set unwrapped = ".value" if copy.value.kind == "Named" and copy.value.data.pair else "" %}
-                                            {{ copy.target }}: projected_{{ loop.index0 }}{{ unwrapped }},
-                                        {% endfor %}
-                                        {% for assignment in conversion.assignments %}{{ assignment.name }}: {% if assignment.wrap %}Some(decision.{{ assignment.name }}){% else %}decision.{{ assignment.name }}{% endif %},{% endfor %}
-                                    },
+                                    value: {{ construct(conversion.construction, conversion) }},
                                     stored: {{ ns.stored }},
                                 })
                             {% elif conversion.target_shape == "unit" %}
@@ -79,11 +74,7 @@
                             {% elif conversion.target_shape == "direct" %}
                                 {% if conversion.copies %}Ok(projected_0){% elif conversion.assignments %}Ok({% if conversion.assignments[0].wrap %}Some(decision.{{ conversion.assignments[0].name }}){% else %}decision.{{ conversion.assignments[0].name }}{% endif %}){% else %}Ok(None){% endif %}
                                 {% else %}
-                                    Ok({{ conversion.target }} {
-                                        {% for copy in conversion.copies %}{{ copy.target }}: projected_{{ loop.index0 }},{% endfor %}
-                                            {% for assignment in conversion.assignments %}{{ assignment.name }}: {% if assignment.wrap %}Some(decision.{{ assignment.name }}){% else %}decision.{{ assignment.name }}{% endif %},{% endfor %}
-                                                {% for absent in conversion.absences %}{{ absent }}: None,{% endfor %}
-                                                })
+                                    Ok({{ construct(conversion.construction, conversion) }})
                                             {% endif %}
                                         {% endif %}
                                     }

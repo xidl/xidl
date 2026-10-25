@@ -31,6 +31,7 @@ impl AdapterRenderer<'_> {
             let new = self.union_case(target, &copy.target.name)?;
             output.copies.push(Copy {
                 source: self.union_case_name(old, is_http)?,
+                access: self.union_case_name(old, is_http)?,
                 target: self.union_case_name(new, is_http)?,
                 value: input
                     .target

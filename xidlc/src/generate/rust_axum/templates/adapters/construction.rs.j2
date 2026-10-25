@@ -1,0 +1,17 @@
+{% macro construct(plan, conversion=none) -%}
+    {{ plan.ty }} {
+        {% if plan.base %}base: {{ construct(plan.base, conversion) }},{% endif %}
+        {% for field in plan.fields %}
+            {{ field.name }}:
+            {%- if field.value.kind == "Projected" -%}
+                projected_{{ field.value.data.index }}
+                {%- set copy = conversion.copies[field.value.data.index] -%}
+                {%- if conversion.pair and copy.value.kind == "Named" and copy.value.data.pair -%}.value{% endif %}
+            {%- elif field.value.kind == "Decision" -%}
+                {% if field.value.data.wrap %}Some({% endif %}decision.{{ field.value.data.name }}{% if field.value.data.wrap %}){% endif %}
+            {%- elif field.value.kind == "Absent" -%}None
+            {%- elif field.value.kind == "Decoded" -%}value_{{ field.value.data.index }}
+            {%- endif -%},
+        {% endfor %}
+    }
+{%- endmacro %}
