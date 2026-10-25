@@ -85,9 +85,10 @@ Specification(
                                             ty: ScopedName(
                                                 ScopedName {
                                                     name: [
+                                                        "v2",
                                                         "Item",
                                                     ],
-                                                    is_root: false,
+                                                    is_root: true,
                                                 },
                                             ),
                                             ident: [

@@ -213,6 +213,18 @@ def inherited_sdks(context):
 def inherited_mode_boundary(context):
     base = context.inherited_base
     before = requests.get(base + "/audit", timeout=5).json()
+    # The root string alias wins over geo's numeric alias in both request fronts.
+    response = requests.patch(
+        base + "/tenants/acme/addresses/a1",
+        json={"deliveryReference": 42},
+        headers={
+            "x-address-version": "2026-01-01",
+            "authorization": "Bearer test-acme",
+        },
+        timeout=5,
+    )
+    assert response.status_code == 400, response.text
+    assert requests.get(base + "/audit", timeout=5).json() == before
     # Ordinary serde routers currently ignore unknown fields. The adapter wire
     # decoder rejects them before hooks. Neither may persist the hidden value.
     for version, patch in [

@@ -1,3 +1,5 @@
+// This unrelated local alias must not rebind ::DeliveryReference.
+typedef long DeliveryReference;
 typedef string Identifier;
 enum Country { US, CA };
 struct Marker {};
@@ -7,14 +9,14 @@ struct Anchor : Marker { @optional sequence<Anchor> previous; };
 struct Identity : Anchor {
     Identifier id;
     string tenant;
-    @removed(Versions::v3) string delivery_reference;
+    @removed(Versions::v3) ::DeliveryReference delivery_reference;
     @removed(Versions::v3) @optional string delivery_note;
     @added(Versions::v3) @optional @default(true) boolean signature_required;
 };
 
 @rename_all("camelCase")
 struct Change {
-    @removed(Versions::v3) @optional string delivery_reference;
+    @removed(Versions::v3) @optional ::DeliveryReference delivery_reference;
     @removed(Versions::v3) @optional string delivery_note;
     @added(Versions::v3) @optional @default(true) boolean signature_required;
 };

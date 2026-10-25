@@ -2,6 +2,7 @@ use crate::hir;
 use serde::{Deserialize, Serialize};
 
 mod document;
+mod references;
 
 #[cfg(test)]
 mod tests;

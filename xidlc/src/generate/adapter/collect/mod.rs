@@ -2,6 +2,7 @@
 
 mod inheritance;
 mod operations;
+mod references;
 
 use super::model::*;
 use crate::error::{IdlcError, IdlcResult};
@@ -61,6 +62,7 @@ impl SurfaceCollector {
                     );
                 }
             }
+            surface.localize_references(&version.id);
             result.insert(version.id.clone(), surface);
         }
         Ok(result)
