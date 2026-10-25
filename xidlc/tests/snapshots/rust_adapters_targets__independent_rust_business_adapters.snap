@@ -3875,7 +3875,7 @@ pub mod version_adapters {
                     .ok_or_else(|| "expected an array".to_string())?;
                 let values = array
                     .iter()
-                    .map(|item| decode_wire_v_1_node(item))
+                    .map(decode_wire_v_1_node)
                     .collect::<Result<Vec<_>, String>>()?;
                 Ok::<_, String>(values)
             })()
@@ -4029,7 +4029,7 @@ pub mod version_adapters {
                 .ok_or_else(|| "expected an array".to_string())?;
             let values = array
                 .iter()
-                .map(|item| decode_wire_v_1_address(item))
+                .map(decode_wire_v_1_address)
                 .collect::<Result<Vec<_>, String>>()?;
             Ok::<_, String>(values)
         })()?;
@@ -4437,7 +4437,7 @@ pub mod version_adapters {
                     .ok_or_else(|| "expected an array".to_string())?;
                 let values = array
                     .iter()
-                    .map(|item| decode_wire_v_2_node(item))
+                    .map(decode_wire_v_2_node)
                     .collect::<Result<Vec<_>, String>>()?;
                 Ok::<_, String>(values)
             })()
@@ -4616,7 +4616,7 @@ pub mod version_adapters {
                 .ok_or_else(|| "expected an array".to_string())?;
             let values = array
                 .iter()
-                .map(|item| decode_wire_v_2_address(item))
+                .map(decode_wire_v_2_address)
                 .collect::<Result<Vec<_>, String>>()?;
             Ok::<_, String>(values)
         })()?;
@@ -5036,7 +5036,7 @@ pub mod version_adapters {
                     .ok_or_else(|| "expected an array".to_string())?;
                 let values = array
                     .iter()
-                    .map(|item| decode_wire_v_3_node(item))
+                    .map(decode_wire_v_3_node)
                     .collect::<Result<Vec<_>, String>>()?;
                 Ok::<_, String>(values)
             })()
@@ -5231,7 +5231,7 @@ pub mod version_adapters {
                 .ok_or_else(|| "expected an array".to_string())?;
             let values = array
                 .iter()
-                .map(|item| decode_wire_v_3_address(item))
+                .map(decode_wire_v_3_address)
                 .collect::<Result<Vec<_>, String>>()?;
             Ok::<_, String>(values)
         })()?;
