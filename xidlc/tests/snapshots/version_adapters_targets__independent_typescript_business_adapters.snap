@@ -56,8 +56,8 @@ function mapRecord<S, T>(source: Record<string, S>, convert: (value: S) => Versi
     }
     return ok(Object.fromEntries(entries));
 }
-function mapOptional<S, T>(source: S | undefined, convert: (value: S) => VersionedResult<T>, path: string): VersionedResult<T | undefined> {
-    return source === undefined ? ok(undefined) : locate(convert(source), path);
+function mapOptional<S, T>(source: S | undefined, convert: (value: S) => VersionedResult<T>): VersionedResult<T | undefined> {
+    return source === undefined ? ok(undefined) : convert(source);
 }
 
 
@@ -2547,7 +2547,7 @@ export interface VersionAdapters {
                 const converted0 = ok(source["zip"]);
                 if (!converted0.ok) return converted0;
             
-                const converted1 = mapOptional(source["gate"], (item) => ok(item), "Address.gate");
+                const converted1 = mapOptional(source["gate"], (item) => ok(item));
                 if (!converted1.ok) return converted1;
             
             return ok({
@@ -2566,7 +2566,7 @@ export interface VersionAdapters {
                 const converted0 = ok(source["zip"]);
                 if (!converted0.ok) return converted0;
             
-                const converted1 = mapOptional(source["gate"], (item) => ok(item), "Address.gate");
+                const converted1 = mapOptional(source["gate"], (item) => ok(item));
                 if (!converted1.ok) return converted1;
             
             return ok({
@@ -2692,7 +2692,7 @@ export interface VersionAdapters {
                 const converted0 = ok(source["name"]);
                 if (!converted0.ok) return converted0;
             
-                const converted1 = mapOptional(source["children"], (item) => mapSequence(item, (item) => upcastNodeFromV1(item, adapters), "Node.children"), "Node.children");
+                const converted1 = mapOptional(source["children"], (item) => mapSequence(item, (item) => upcastNodeFromV1(item, adapters), "Node.children"));
                 if (!converted1.ok) return converted1;
             
             return ok({
@@ -2711,7 +2711,7 @@ export interface VersionAdapters {
                 const converted0 = ok(source["name"]);
                 if (!converted0.ok) return converted0;
             
-                const converted1 = mapOptional(source["children"], (item) => mapSequence(item, (item) => downcastNodeToV1(item, adapters), "Node.children"), "Node.children");
+                const converted1 = mapOptional(source["children"], (item) => mapSequence(item, (item) => downcastNodeToV1(item, adapters), "Node.children"));
                 if (!converted1.ok) return converted1;
             
             return ok({
@@ -2778,7 +2778,7 @@ export interface VersionAdapters {
                 const converted0 = ok(source["id"]);
                 if (!converted0.ok) return converted0;
             
-                const converted1 = mapOptional(source["handling_note"], (item) => ok(item), "Parcel.handling_note");
+                const converted1 = mapOptional(source["handling_note"], (item) => ok(item));
                 if (!converted1.ok) return converted1;
             
                 const converted2 = upcastAddressFromV1(source["address"], adapters);
@@ -2819,7 +2819,7 @@ export interface VersionAdapters {
                 const converted0 = ok(source["id"]);
                 if (!converted0.ok) return converted0;
             
-                const converted1 = mapOptional(source["handling_note"], (item) => ok(item), "Parcel.handling_note");
+                const converted1 = mapOptional(source["handling_note"], (item) => ok(item));
                 if (!converted1.ok) return converted1;
             
                 const converted2 = downcastAddressToV1(source["address"], adapters);
@@ -2852,10 +2852,10 @@ export interface VersionAdapters {
         
             
             
-                const converted0 = mapOptional(source["note"], (item) => ok(item), "ParcelPatch.note");
+                const converted0 = mapOptional(source["note"], (item) => ok(item));
                 if (!converted0.ok) return converted0;
             
-                const converted1 = mapOptional(source["handling_note"], (item) => ok(item), "ParcelPatch.handling_note");
+                const converted1 = mapOptional(source["handling_note"], (item) => ok(item));
                 if (!converted1.ok) return converted1;
             
             return ok({
@@ -3481,7 +3481,7 @@ export interface VersionAdapters {
                 const converted0 = ok(source["name"]);
                 if (!converted0.ok) return converted0;
             
-                const converted1 = mapOptional(source["children"], (item) => mapSequence(item, (item) => upcastNodeFromV2(item, adapters), "Node.children"), "Node.children");
+                const converted1 = mapOptional(source["children"], (item) => mapSequence(item, (item) => upcastNodeFromV2(item, adapters), "Node.children"));
                 if (!converted1.ok) return converted1;
             
             return ok({
@@ -3500,7 +3500,7 @@ export interface VersionAdapters {
                 const converted0 = ok(source["name"]);
                 if (!converted0.ok) return converted0;
             
-                const converted1 = mapOptional(source["children"], (item) => mapSequence(item, (item) => downcastNodeToV2(item, adapters), "Node.children"), "Node.children");
+                const converted1 = mapOptional(source["children"], (item) => mapSequence(item, (item) => downcastNodeToV2(item, adapters), "Node.children"));
                 if (!converted1.ok) return converted1;
             
             return ok({
@@ -3531,7 +3531,7 @@ export interface VersionAdapters {
         
             
             
-                const converted0 = mapOptional(source["note"], (item) => ok(item), "OptionalChange.note");
+                const converted0 = mapOptional(source["note"], (item) => ok(item));
                 if (!converted0.ok) return converted0;
             
             return ok({
@@ -3546,7 +3546,7 @@ export interface VersionAdapters {
         
             
             
-                const converted0 = mapOptional(source["note"], (item) => ok(item), "OptionalChange.note");
+                const converted0 = mapOptional(source["note"], (item) => ok(item));
                 if (!converted0.ok) return converted0;
             
             return ok({
@@ -3573,7 +3573,7 @@ export interface VersionAdapters {
                 const converted2 = ok(source["carrier"]);
                 if (!converted2.ok) return converted2;
             
-                const converted3 = mapOptional(source["note"], (item) => ok(item), "Parcel.note");
+                const converted3 = mapOptional(source["note"], (item) => ok(item));
                 if (!converted3.ok) return converted3;
             
                 const converted4 = upcastAddressFromV2(source["address"], adapters);
@@ -3621,7 +3621,7 @@ export interface VersionAdapters {
                 const converted2 = ok(source["carrier"]);
                 if (!converted2.ok) return converted2;
             
-                const converted3 = mapOptional(source["note"], (item) => ok(item), "Parcel.note");
+                const converted3 = mapOptional(source["note"], (item) => ok(item));
                 if (!converted3.ok) return converted3;
             
                 const converted4 = downcastAddressToV2(source["address"], stored, adapters);
@@ -3659,7 +3659,7 @@ export interface VersionAdapters {
                 if (!decision.ok) return decision;
             
             
-                const converted0 = mapOptional(source["note"], (item) => ok(item), "ParcelPatch.note");
+                const converted0 = mapOptional(source["note"], (item) => ok(item));
                 if (!converted0.ok) return converted0;
             
                 return ok({
