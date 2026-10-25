@@ -6,7 +6,8 @@
     {%- elif schema.kind == "Sequence" or schema.kind == "Array" -%}(|| {
         let array = ({{ source }}).as_array().ok_or_else(|| "expected an array".to_string())?;
         {% if schema.kind == "Array" %}if array.len() != ({{ schema.data.length }}) as usize { return Err("fixed array length differs".into()); }{% endif %}
-            let values = array.iter().map(|item| {{ decode(schema.data.inner if schema.kind == "Array" else schema.data, "item") }}).collect::<Result<Vec<_>, String>>()?;
+            {% set inner = schema.data.inner if schema.kind == "Array" else schema.data %}
+            let values = array.iter().map({% if inner.kind == "Named" %}{{ inner.data }}{% else %}|item| {{ decode(inner, "item") }}{% endif %}).collect::<Result<Vec<_>, String>>()?;
             {% if schema.kind == "Array" %}values.try_into().map_err(|_: Vec<_>| "fixed array length differs".to_string()){% else %}Ok::<_, String>(values){% endif %}
             })()
             {%- elif schema.kind == "Map" -%}(|| {
