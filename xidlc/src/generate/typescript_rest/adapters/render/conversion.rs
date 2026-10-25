@@ -15,6 +15,7 @@ impl AdapterRenderer<'_> {
         let mut context = Conversion {
             name: target.function(key),
             kind: "struct",
+            path: key.to_owned(),
             source: input.source_type.clone(),
             target: input.target_type.clone(),
             hook: None,

@@ -160,18 +160,25 @@ impl Value {
         match self {
             Self::Sequence(value) => {
                 used.insert("sequence");
+                used.insert("locate");
                 value.helpers(used);
             }
             Self::Array(value) => {
                 used.insert("array");
+                used.insert("locate");
                 value.helpers(used);
             }
             Self::Map { key, value } => {
                 used.insert("record");
+                used.insert("locate");
                 key.helpers(used);
                 value.helpers(used);
             }
-            Self::Optional(value) | Self::Boxed { value, .. } => value.helpers(used),
+            Self::Optional(value) => {
+                used.insert("locate");
+                value.helpers(used);
+            }
+            Self::Boxed { value, .. } => value.helpers(used),
             Self::Identity | Self::Named(_) => {}
         }
     }
