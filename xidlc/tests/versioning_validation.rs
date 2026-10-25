@@ -91,6 +91,39 @@ fn versioned_documents_carry_their_version() {
     assert!(v1["paths"].get("/items").is_none());
 }
 
+#[test]
+fn versioned_go_http_responses_reference_the_declared_model() {
+    let (path, source) = versioned_fixture("openapi", "versioned_petstore");
+    for selected in [None, Some("v1"), Some("v2")] {
+        let mut props = HashMap::from([
+            ("enable_client".into(), true.into()),
+            ("enable_server".into(), true.into()),
+        ]);
+        if let Some(version) = selected {
+            props.insert("api_version".into(), version.into());
+        }
+        let files = xidlc::driver::Generator::new("go-rest".into())
+            .generate_from_idl(&source, &path, props)
+            .expect("versioned Go REST generation");
+        let http = files
+            .iter()
+            .find(|file| file.path().ends_with("_http.go"))
+            .expect("Go HTTP output");
+        let models = files
+            .iter()
+            .find(|file| !file.path().ends_with("_http.go"))
+            .expect("Go model output");
+        for (version, model) in [("v1", "V1Pet"), ("v2", "V2Pet")] {
+            if selected.is_none_or(|selected| selected == version) {
+                assert!(models.content().contains(&format!("type {model} struct")));
+                assert!(http.content().contains(&format!("Return {model} ")));
+            }
+        }
+        assert!(!http.content().contains("V1V1"));
+        assert!(!http.content().contains("V2V2"));
+    }
+}
+
 fn panic_message(payload: Box<dyn std::any::Any + Send>) -> String {
     if let Some(message) = payload.downcast_ref::<&'static str>() {
         (*message).to_string()
