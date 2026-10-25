@@ -21,6 +21,8 @@ pub(crate) struct TypesFileContext {
     pub(crate) blocks: Vec<String>,
     pub(crate) imports: Vec<String>,
     pub(crate) import_suffix: String,
+    pub(crate) root_import: bool,
+    pub(crate) file_stem: String,
 }
 
 #[derive(Serialize)]

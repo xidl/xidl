@@ -109,8 +109,8 @@ fn inherited_requests_and_responses_share_member_decisions_and_storage_needs() {
         files,
         render(
             &source
-                .replace("geo::Identifier id", "Identifier id")
-                .replace("geo::Anchor previous", "Anchor previous"),
+                .replace("Identifier id", "geo::Identifier id")
+                .replace("sequence<Anchor>", "sequence<geo::Anchor>"),
             "inheritance.idl"
         )
     );

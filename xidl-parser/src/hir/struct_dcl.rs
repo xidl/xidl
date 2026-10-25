@@ -14,8 +14,8 @@ pub struct StructDcl {
     pub ident: String,
     pub parent: Vec<ScopedName>,
     pub member: Vec<Member>,
-    /// Members inherited from the single base struct, flattened into this
-    /// struct's wire shape. Populated by semantic analysis.
+    /// Members inherited from the single base struct, with wire names and known
+    /// references bound in their declaring scope. Populated by semantic analysis.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub inherited: Vec<Member>,
 }
