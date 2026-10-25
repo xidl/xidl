@@ -2399,7 +2399,7 @@
           {
             "name": "q",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "array",
               "items": {
@@ -2410,7 +2410,7 @@
           {
             "name": "b",
             "in": "cookie",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "array",
               "items": {

@@ -6,11 +6,11 @@ Feature: Independently versioned SDKs share one authoritative billing ledger
   Chain dispatch and generated version routers share the same Head service.
 
   Scenario Outline: partial payments preserve contracts and committed replays
-    Given the versioned billing application in "<mode>" mode
-    When I generate independently selected billing SDKs and start the application
-    Then the shared billing Hurl journey preserves validation and committed payments
-    And every billing Hurl response matches its generated OpenAPI contract
-    And independent Rust and TypeScript billing SDKs use the same versioned endpoint
+    Given the versioned "billing" application in "<mode>" mode
+    When I generate independently selected SDKs and start the versioned application
+    Then the shared versioned Hurl journey succeeds
+    And every versioned Hurl response matches its generated OpenAPI contract
+    And independent Rust and TypeScript SDKs use the same versioned endpoint
 
     Examples:
       | mode  |

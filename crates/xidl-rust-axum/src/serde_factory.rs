@@ -1,6 +1,6 @@
 use crate::{Error, Result};
-use serde::Serialize;
 use serde::de::DeserializeOwned;
+use serde::{Deserialize, Deserializer, Serialize};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum SerdeKind {
@@ -65,6 +65,20 @@ impl SerializeFactory {
 }
 
 impl DeserializeFactory {
+    /// Deserializes a present optional field without interpreting empty text as absence.
+    ///
+    /// Generated query fields combine this with `serde(default)` so omission alone
+    /// produces `None`; present strings and collection elements retain empty values.
+    pub fn deserialize_present<'de, D, T>(
+        deserializer: D,
+    ) -> std::result::Result<Option<T>, D::Error>
+    where
+        D: Deserializer<'de>,
+        T: Deserialize<'de>,
+    {
+        T::deserialize(deserializer).map(Some)
+    }
+
     /// Creates a deserializer for a supported MIME type.
     pub const fn new(mime: &'static str) -> Self {
         Self {

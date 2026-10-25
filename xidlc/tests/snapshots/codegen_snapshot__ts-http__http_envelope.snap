@@ -465,7 +465,7 @@ export const EnvelopeApiOperations = {
                 args: ["key"],
                 schema: ifaceSchemas.EnvelopeApiGetFileRequestSchema,
                 path: [],
-                query: [{ wireName: "key", key: "key", multi: false }],
+                query: [{ wireName: "key", key: "key", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -520,7 +520,7 @@ export const EnvelopeApiOperations = {
                 args: ["key"],
                 schema: ifaceSchemas.EnvelopeApiHeadFileRequestSchema,
                 path: [],
-                query: [{ wireName: "key", key: "key", multi: false }],
+                query: [{ wireName: "key", key: "key", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -619,7 +619,7 @@ export const EnvelopeApiOperations = {
                 schema: ifaceSchemas.EnvelopeApiDeleteFileRequestSchema,
                 path: [],
                 query: [],
-                headers: [{ wireName: "If-Match", key: "if_match", multi: false }],
+                headers: [{ wireName: "If-Match", key: "if_match", multi: false, optional: false }],
                 cookies: [],
                 body: {
                     kind: "none",

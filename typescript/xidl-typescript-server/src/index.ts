@@ -13,6 +13,7 @@ export type {
   OperationResponseSpec,
   PathBinding,
   RequestBodySpec,
+  RequestValueBinding,
   RouteParams,
   SecurityRequirement,
   ServerContext,

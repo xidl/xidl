@@ -1,0 +1,23 @@
+#pragma xidlc package versioned_catalog
+
+@version(in = "header", name = "X-Catalog-Version")
+enum ApiVersion {
+    @rename("2026-07-01") v1,
+    @rename("2026-10-01") v2,
+};
+
+struct Image { string url; };
+struct Media { string kind; string url; };
+struct Product {
+    string id;
+    @removed(ApiVersion::v2) @rename("media") sequence<Image> images;
+    @added(ApiVersion::v2) @rename("media") sequence<Media> assets;
+};
+struct Message { string code; string value; };
+struct Page { sequence<Product> products; sequence<Message> messages; };
+@http(403) exception Denied { string reason; };
+
+interface Catalog {
+    @get(path = "/catalog")
+    Page search(@query sequence<string> media, @cookie string tenant) raises(Denied);
+};

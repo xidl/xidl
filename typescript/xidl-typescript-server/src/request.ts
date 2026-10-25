@@ -10,8 +10,8 @@ import { byteRequestStream, ndjsonRequestStream } from './stream.ts';
 import type {
   HttpCodec,
   OperationDescriptor,
+  RequestValueBinding,
   RouteParams,
-  ValueBinding,
 } from './types.ts';
 
 export async function decodeOperationRequest<TService>(
@@ -49,7 +49,7 @@ export async function decodeOperationRequest<TService>(
   }
   for (const binding of operation.request.headers) {
     const value = request.headers.get(binding.wireName);
-    payload[binding.key] = readHeader(value, binding.multi);
+    payload[binding.key] = readHeader(value, binding);
   }
   const cookies = readRequestCookies(request.headers);
   for (const binding of operation.request.cookies) {
@@ -104,18 +104,21 @@ export async function decodeOperationRequest<TService>(
   );
 }
 
-function readValues(values: string[], binding: ValueBinding): unknown {
+function readValues(values: string[], binding: RequestValueBinding): unknown {
   if (values.length === 0) {
-    return binding.multi ? [] : undefined;
+    return binding.multi && !binding.optional ? [] : undefined;
   }
   return binding.multi ? values : (values[0] as string);
 }
 
-function readHeader(value: string | null, multi: boolean): unknown {
+function readHeader(
+  value: string | null,
+  binding: RequestValueBinding,
+): unknown {
   if (value === null) {
-    return multi ? [] : undefined;
+    return binding.multi && !binding.optional ? [] : undefined;
   }
-  if (!multi) {
+  if (!binding.multi) {
     return value;
   }
   return value.split(',').map(item => item.trim());

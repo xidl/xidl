@@ -382,7 +382,7 @@ interface PanelApi {
 
     // Server binding keys must use the schema field name, not the TS-escaped ident.
     assert!(
-        output.contains("{ wireName: \"from\", key: \"from\", multi: false }"),
+        output.contains("wireName: \"from\", key: \"from\""),
         "server query binding should keep schema key from:\n{output}"
     );
     assert!(
@@ -431,7 +431,7 @@ interface PanelApi {
     );
 
     assert!(
-        output.contains("{ wireName: \"from\", key: \"from\", multi: false }"),
+        output.contains("wireName: \"from\", key: \"from\""),
         "server query binding should keep schema key from:\n{output}"
     );
     assert!(

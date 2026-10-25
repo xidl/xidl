@@ -448,6 +448,9 @@ pub mod legacy {
     #[derive(::serde::Deserialize)]
     struct MessagesGetRequestInQuery {
         #[serde(default)]
+        #[serde(
+            deserialize_with = "::xidl_rust_axum::DeserializeFactory::deserialize_present"
+        )]
         fields: Option<String>,
     }
     #[derive(::serde::Deserialize)]
@@ -477,7 +480,7 @@ pub mod legacy {
                     .await
                     .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
                 let MessagesGetPath { id } = xidl_path;
-                let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
+                let ::xidl_rust_axum::axum_extra::extract::Query(xidl_query) = <::xidl_rust_axum::axum_extra::extract::Query<
                     MessagesGetRequestInQuery,
                 > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                     S,
@@ -656,7 +659,7 @@ pub mod legacy {
             let query = MessagesGetRequestOutQuery {
                 fields,
             };
-            let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+            let query = xidl_rust_axum::serde_html_form::to_string(&query)
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
             if !query.is_empty() {
                 req.url_mut().set_query(Some(&query));

@@ -1,6 +1,5 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
-assertion_line: 145
 expression: output
 ---
 ===============
@@ -150,7 +149,7 @@ openapi_http_header.json
           {
             "in": "header",
             "name": "X-Flags",
-            "required": true,
+            "required": false,
             "schema": {
               "items": {
                 "type": "string"
@@ -180,7 +179,7 @@ openapi_http_header.json
           {
             "in": "cookie",
             "name": "pref",
-            "required": true,
+            "required": false,
             "schema": {
               "items": {
                 "type": "string"

@@ -22,6 +22,11 @@ export interface ValueBinding {
   wireName: string;
 }
 
+/** Request bindings retain logical optionality when wire occurrences are absent. */
+export interface RequestValueBinding extends ValueBinding {
+  optional: boolean;
+}
+
 export interface PathBinding extends ValueBinding {
   catchAll: boolean;
   parameter: string;
@@ -43,11 +48,11 @@ export interface RequestBodySpec {
 export interface OperationRequestSpec {
   args: string[];
   body: RequestBodySpec;
-  cookies: ValueBinding[];
-  headers: ValueBinding[];
+  cookies: RequestValueBinding[];
+  headers: RequestValueBinding[];
   kind: 'none' | 'object' | 'stream';
   path: PathBinding[];
-  query: ValueBinding[];
+  query: RequestValueBinding[];
   schema?: XidlSchema;
 }
 

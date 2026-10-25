@@ -217,7 +217,7 @@ export const HttpCatchAllServiceOperations = {
                 args: ["key", "version"],
                 schema: ifaceSchemas.HttpCatchAllServiceReadAssetRequestSchema,
                 path: [{ parameter: "key", wireName: "key", key: "key", multi: false, catchAll: true }],
-                query: [{ wireName: "v", key: "version", multi: false }],
+                query: [{ wireName: "v", key: "version", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {

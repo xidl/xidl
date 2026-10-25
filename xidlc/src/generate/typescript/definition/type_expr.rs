@@ -260,6 +260,14 @@ pub(crate) fn zod_coerced_schema_for_type_spec(
     zod_schema_for_type_spec_impl(ty, module_path, None, ZodCoercion::Coerce)
 }
 
+pub(crate) fn zod_coerced_schema_for_type_spec_with_prefix(
+    ty: &hir::TypeSpec,
+    module_path: &[String],
+    prefix: Option<&str>,
+) -> ZodSchema {
+    zod_schema_for_type_spec_impl(ty, module_path, prefix, ZodCoercion::Coerce)
+}
+
 /// Whether a schema position may coerce text into the declared type.
 #[derive(Clone, Copy)]
 pub(crate) enum ZodCoercion {

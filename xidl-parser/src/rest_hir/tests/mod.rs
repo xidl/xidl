@@ -1,3 +1,4 @@
+mod collection_presence;
 mod version_parameter;
 
 use std::collections::HashMap;

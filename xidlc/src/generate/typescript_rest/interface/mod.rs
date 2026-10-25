@@ -10,10 +10,11 @@ use xidl_parser::rest_hir::RestHirDocument;
 
 mod client;
 mod exceptions;
-mod helpers;
+pub(super) mod helpers;
 mod method;
 mod render_types;
 mod representations;
+pub(crate) mod text_aliases;
 mod websocket_helpers;
 
 pub(crate) fn render_interface(
@@ -21,6 +22,7 @@ pub(crate) fn render_interface(
     module_path: &[String],
     renderer: &TypescriptRenderer,
     rest_hir: &RestHirDocument,
+    text_aliases: &text_aliases::TextAliases,
 ) -> IdlcResult<TsHttpBlocks> {
     let hir::InterfaceDclInner::InterfaceDef(def) = &interface.decl else {
         return Ok(TsHttpBlocks::default());
@@ -39,6 +41,7 @@ pub(crate) fn render_interface(
                 op,
                 exceptions: &rest_hir.document.exceptions,
                 union_idents: &unions,
+                text_aliases,
             })
         })
         .collect::<IdlcResult<Vec<_>>>()?;

@@ -64,7 +64,7 @@ pub mod upgrade;
 /// Re-export of `axum` so generated code can depend on a single runtime crate.
 pub use axum;
 #[cfg(feature = "router")]
-/// Re-export of `axum-extra` for typed header support.
+/// Re-export of `axum-extra` for typed headers and repeated query values.
 pub use axum_extra;
 /// Cookie encoding shared by generated HTTP clients and servers.
 pub use cookie;
@@ -75,6 +75,8 @@ pub use futures_util;
 pub use reqwest;
 /// Re-export of `serde` for generated request/response models.
 pub use serde;
+/// Re-export of the repeated-value query serializer used by generated clients.
+pub use serde_html_form;
 /// Re-export of `serde_json` for generated JSON handling.
 pub use serde_json;
 /// Re-export of `serde_urlencoded` for generated form handling.
