@@ -105,7 +105,8 @@ impl OpenApiContext {
                             scope.schema_for_constr_type(constr)
                         }
                     };
-                    self.schemas.insert(name, schema);
+                    self.schemas
+                        .insert(name, SchemaScope::apply_declarator(schema, decl));
                 }
             }
             hir::TypeDcl::ConstrTypeDcl(constr) => self.collect_constr_type(constr, scope)?,

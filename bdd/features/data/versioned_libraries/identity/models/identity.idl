@@ -2,6 +2,8 @@
 typedef long DeliveryReference;
 typedef string Identifier;
 enum Country { US, CA };
+typedef double Coordinates[2], Bounds[4];
+typedef Coordinates MapPosition;
 struct Marker {};
 struct Anchor : Marker {
     @optional string checkpoint;

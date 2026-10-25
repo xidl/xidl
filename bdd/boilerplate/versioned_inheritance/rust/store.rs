@@ -52,6 +52,7 @@ impl Store {
                                 signature_required: Some(true),
                             },
                             street: "Shared street".into(),
+                            coordinates: Some([12.5, -7.25]),
                             country_code_v2: v3::geo::Country::US,
                         },
                         priority: 1,
@@ -97,6 +98,9 @@ impl Store {
         let patch = input.patch;
         if let Some(parent) = patch.base.base.parent {
             row.head.base.base.base.parent = Some(Box::new(parent));
+        }
+        if let Some(coordinates) = patch.base.coordinates {
+            row.head.base.coordinates = Some(coordinates);
         }
         if let Some(street) = patch.base.street.or(bag.line) {
             row.head.base.street = street;

@@ -26,6 +26,8 @@ pub async fn run(base: &str) {
     let head = head::v3::shipping::AddressesClient::with_http(base, http);
     let old = first.read("acme".into(), "a2".into()).await.unwrap();
     assert_eq!(old.base.base.id, "a2");
+    let coordinates: first::v1::geo::MapPosition = old.base.coordinates.unwrap();
+    assert_eq!(coordinates, [12.5, -7.25]);
     assert!(old.base.base.base.previous.as_ref().unwrap()[0]
         .previous
         .is_none());
@@ -36,7 +38,7 @@ pub async fn run(base: &str) {
         Some("packed")
     );
     assert!(parent.parent.as_deref().unwrap().parent.is_none());
-    let patch = serde_json::from_value(json!({"deliveryReference":"R-SDK","deliveryNote":"","line":"SDK street","countryCode":"CA","priority":0,"parent":{"checkpoint":"Rust reroute","parent":{"checkpoint":"Rust original"}}})).unwrap();
+    let patch = serde_json::from_value(json!({"coordinates":[0,-90],"deliveryReference":"R-SDK","deliveryNote":"","line":"SDK street","countryCode":"CA","priority":0,"parent":{"checkpoint":"Rust reroute","parent":{"checkpoint":"Rust original"}}})).unwrap();
     let written = first
         .update("acme".into(), "a2".into(), patch)
         .await
@@ -44,6 +46,7 @@ pub async fn run(base: &str) {
     assert_eq!(written.base.base.delivery_reference, "R-SDK");
     assert_eq!(written.base.base.delivery_note.as_deref(), Some(""));
     assert_eq!(written.priority, 0);
+    assert_eq!(written.base.coordinates, Some([0.0, -90.0]));
     assert_eq!(
         written.base.base.base.parent.as_deref().unwrap().checkpoint.as_deref(),
         Some("Rust reroute")
@@ -51,6 +54,7 @@ pub async fn run(base: &str) {
     let current = head.read("acme".into(), "a2".into()).await.unwrap();
     assert_eq!(current.base.base.signature_required, Some(true));
     assert_eq!(current.base.street, "SDK street");
+    assert_eq!(current.base.coordinates, written.base.coordinates);
     assert_eq!(
         current.base.base.base.parent.as_deref().unwrap().parent.as_deref().unwrap().checkpoint.as_deref(),
         Some("Rust original")

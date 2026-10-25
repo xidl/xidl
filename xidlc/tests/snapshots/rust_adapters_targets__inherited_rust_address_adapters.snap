@@ -242,6 +242,20 @@ pub mod version_adapters {
     ) -> VersionedResult<Vec<T>> {
         source.iter().map(|item| locate(convert(item), path)).collect()
     }
+    fn map_array<S, T, const N: usize>(
+        source: &[S; N],
+        convert: impl Fn(&S) -> VersionedResult<T>,
+        refusal: impl Fn(&str) -> UnsupportedProjection,
+        path: &str,
+    ) -> VersionedResult<[T; N]> {
+        let values = source
+            .iter()
+            .map(|item| locate(convert(item), path))
+            .collect::<VersionedResult<Vec<_>>>()?;
+        values
+            .try_into()
+            .map_err(|_: Vec<T>| refusal("array projection changed its length"))
+    }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn delivery_reference_upcast_from_v_1(
         source: &v1::DeliveryReference,
@@ -341,6 +355,42 @@ pub mod version_adapters {
         })
     }
     /// Projects one adjacent declaration by borrowing its source value.
+    pub fn geo_coordinates_upcast_from_v_1(
+        source: &v1::geo::Coordinates,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2::geo::Coordinates> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v1".into(),
+            direction: Direction::Upcast,
+            type_path: "geo::Coordinates".into(),
+            reason: reason.into(),
+        };
+        map_array(
+            source,
+            |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
+            refusal,
+            "geo::Coordinates",
+        )
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn geo_coordinates_downcast_to_v_1(
+        source: &v2::geo::Coordinates,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v1::geo::Coordinates> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "geo::Coordinates".into(),
+            reason: reason.into(),
+        };
+        map_array(
+            source,
+            |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
+            refusal,
+            "geo::Coordinates",
+        )
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
     pub fn geo_identifier_downcast_to_v_1(
         source: &v2::geo::Identifier,
         adapters: &dyn VersionAdapters,
@@ -352,6 +402,32 @@ pub mod version_adapters {
             reason: reason.into(),
         };
         Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(source))
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn geo_map_position_upcast_from_v_1(
+        source: &v1::geo::MapPosition,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2::geo::MapPosition> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v1".into(),
+            direction: Direction::Upcast,
+            type_path: "geo::MapPosition".into(),
+            reason: reason.into(),
+        };
+        geo_coordinates_upcast_from_v_1(source, adapters)
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn geo_map_position_downcast_to_v_1(
+        source: &v2::geo::MapPosition,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v1::geo::MapPosition> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "geo::MapPosition".into(),
+            reason: reason.into(),
+        };
+        geo_coordinates_downcast_to_v_1(source, adapters)
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn shipping_address_downcast_to_v_1(
@@ -400,7 +476,11 @@ pub mod version_adapters {
             .as_ref()
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
-        let projected_7 = Ok::<
+        let projected_7 = (&source.base.coordinates)
+            .as_ref()
+            .map(|item| geo_map_position_downcast_to_v_1(item, adapters))
+            .transpose()?;
+        let projected_8 = Ok::<
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.priority))?;
@@ -418,10 +498,11 @@ pub mod version_adapters {
                     delivery_reference: projected_5,
                     delivery_note: projected_6,
                 },
+                coordinates: projected_7,
                 line: decision.line,
                 country_code: decision.country_code,
             },
-            priority: projected_7,
+            priority: projected_8,
         })
     }
     /// Projects one adjacent declaration by borrowing its source value.
@@ -449,7 +530,11 @@ pub mod version_adapters {
             .as_ref()
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
-        let projected_3 = (&source.priority)
+        let projected_3 = (&source.base.coordinates)
+            .as_ref()
+            .map(|item| geo_map_position_upcast_from_v_1(item, adapters))
+            .transpose()?;
+        let projected_4 = (&source.priority)
             .as_ref()
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
@@ -461,10 +546,11 @@ pub mod version_adapters {
                         delivery_reference: projected_1,
                         delivery_note: projected_2,
                     },
+                    coordinates: projected_3,
                     street: decision.street,
                     country_code_v2: decision.country_code_v2,
                 },
-                priority: projected_3,
+                priority: projected_4,
             },
             stored: ShippingAddressesUpdateStored::default().merge(decision.stored),
         })
@@ -694,6 +780,42 @@ pub mod version_adapters {
         })
     }
     /// Projects one adjacent declaration by borrowing its source value.
+    pub fn geo_coordinates_upcast_from_v_2(
+        source: &v2::geo::Coordinates,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v3::geo::Coordinates> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Upcast,
+            type_path: "geo::Coordinates".into(),
+            reason: reason.into(),
+        };
+        map_array(
+            source,
+            |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
+            refusal,
+            "geo::Coordinates",
+        )
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn geo_coordinates_downcast_to_v_2(
+        source: &v3::geo::Coordinates,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2::geo::Coordinates> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v3".into(),
+            direction: Direction::Downcast,
+            type_path: "geo::Coordinates".into(),
+            reason: reason.into(),
+        };
+        map_array(
+            source,
+            |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
+            refusal,
+            "geo::Coordinates",
+        )
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
     pub fn geo_country_upcast_from_v_2(
         source: &v2::geo::Country,
         adapters: &dyn VersionAdapters,
@@ -739,6 +861,32 @@ pub mod version_adapters {
         Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(source))
     }
     /// Projects one adjacent declaration by borrowing its source value.
+    pub fn geo_map_position_upcast_from_v_2(
+        source: &v2::geo::MapPosition,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v3::geo::MapPosition> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Upcast,
+            type_path: "geo::MapPosition".into(),
+            reason: reason.into(),
+        };
+        geo_coordinates_upcast_from_v_2(source, adapters)
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn geo_map_position_downcast_to_v_2(
+        source: &v3::geo::MapPosition,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2::geo::MapPosition> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v3".into(),
+            direction: Direction::Downcast,
+            type_path: "geo::MapPosition".into(),
+            reason: reason.into(),
+        };
+        geo_coordinates_downcast_to_v_2(source, adapters)
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
     pub fn shipping_address_downcast_to_v_2(
         source: &v3::shipping::Address,
         stored: &dyn StoredValues,
@@ -777,15 +925,19 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.base.base.tenant))?;
-        let projected_5 = Ok::<
+        let projected_5 = (&source.base.coordinates)
+            .as_ref()
+            .map(|item| geo_map_position_downcast_to_v_2(item, adapters))
+            .transpose()?;
+        let projected_6 = Ok::<
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.base.street))?;
-        let projected_6 = geo_country_downcast_to_v_2(
+        let projected_7 = geo_country_downcast_to_v_2(
             &source.base.country_code_v2,
             adapters,
         )?;
-        let projected_7 = Ok::<
+        let projected_8 = Ok::<
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.priority))?;
@@ -803,10 +955,11 @@ pub mod version_adapters {
                     delivery_reference: decision.delivery_reference,
                     delivery_note: decision.delivery_note,
                 },
-                street: projected_5,
-                country_code_v2: projected_6,
+                coordinates: projected_5,
+                street: projected_6,
+                country_code_v2: projected_7,
             },
-            priority: projected_7,
+            priority: projected_8,
         })
     }
     /// Projects one adjacent declaration by borrowing its source value.
@@ -826,15 +979,19 @@ pub mod version_adapters {
             .as_ref()
             .map(|item| geo_anchor_upcast_from_v_2(item, adapters))
             .transpose()?;
-        let projected_1 = (&source.base.street)
+        let projected_1 = (&source.base.coordinates)
+            .as_ref()
+            .map(|item| geo_map_position_upcast_from_v_2(item, adapters))
+            .transpose()?;
+        let projected_2 = (&source.base.street)
             .as_ref()
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
-        let projected_2 = (&source.base.country_code_v2)
+        let projected_3 = (&source.base.country_code_v2)
             .as_ref()
             .map(|item| geo_country_upcast_from_v_2(item, adapters))
             .transpose()?;
-        let projected_3 = (&source.priority)
+        let projected_4 = (&source.priority)
             .as_ref()
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
@@ -845,10 +1002,11 @@ pub mod version_adapters {
                         parent: projected_0,
                         signature_required: Some(decision.signature_required),
                     },
-                    street: projected_1,
-                    country_code_v2: projected_2,
+                    coordinates: projected_1,
+                    street: projected_2,
+                    country_code_v2: projected_3,
                 },
-                priority: projected_3,
+                priority: projected_4,
             },
             stored: ShippingAddressesUpdateStored::default().merge(decision.stored),
         })
@@ -1104,6 +1262,7 @@ pub mod version_adapters {
             .as_object()
             .ok_or_else(|| "expected a served-version object".to_string())?;
         let keys: &[&str] = &[
+            "coordinates",
             "countryCode",
             "deliveryNote",
             "deliveryReference",
@@ -1139,15 +1298,13 @@ pub mod version_adapters {
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
-        let raw_3 = object.get("line").unwrap_or(&::serde_json::Value::Null);
-        let value_3: Option<String> = if (raw_3).is_null() {
+        let raw_3 = object.get("coordinates").unwrap_or(&::serde_json::Value::Null);
+        let value_3: Option<v1::geo::MapPosition> = if (raw_3).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_3).clone())
-                .map_err(|error| error.to_string())
-                .map(Some)
+            decode_wire_v_1_geo_map_position(raw_3).map(Some)
         }?;
-        let raw_4 = object.get("countryCode").unwrap_or(&::serde_json::Value::Null);
+        let raw_4 = object.get("line").unwrap_or(&::serde_json::Value::Null);
         let value_4: Option<String> = if (raw_4).is_null() {
             Ok::<_, String>(None)
         } else {
@@ -1155,11 +1312,19 @@ pub mod version_adapters {
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
-        let raw_5 = object.get("priority").unwrap_or(&::serde_json::Value::Null);
-        let value_5: Option<i32> = if (raw_5).is_null() {
+        let raw_5 = object.get("countryCode").unwrap_or(&::serde_json::Value::Null);
+        let value_5: Option<String> = if (raw_5).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<i32>((raw_5).clone())
+            ::serde_json::from_value::<String>((raw_5).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
+        let raw_6 = object.get("priority").unwrap_or(&::serde_json::Value::Null);
+        let value_6: Option<i32> = if (raw_6).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<i32>((raw_6).clone())
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -1170,10 +1335,11 @@ pub mod version_adapters {
                     delivery_reference: value_1,
                     delivery_note: value_2,
                 },
-                line: value_3,
-                country_code: value_4,
+                coordinates: value_3,
+                line: value_4,
+                country_code: value_5,
             },
-            priority: value_5,
+            priority: value_6,
         })
     }
     fn decode_wire_v_1_delivery_reference(
@@ -1232,6 +1398,33 @@ pub mod version_adapters {
             previous: value_2,
         })
     }
+    fn decode_wire_v_1_geo_map_position(
+        wire: &::serde_json::Value,
+    ) -> Result<v1::geo::MapPosition, String> {
+        decode_wire_v_1_geo_coordinates(wire)
+    }
+    fn decode_wire_v_1_geo_coordinates(
+        wire: &::serde_json::Value,
+    ) -> Result<v1::geo::Coordinates, String> {
+        (|| {
+            let array = (wire)
+                .as_array()
+                .ok_or_else(|| "expected an array".to_string())?;
+            if array.len() != (2) as usize {
+                return Err("fixed array length differs".into());
+            }
+            let values = array
+                .iter()
+                .map(|item| {
+                    ::serde_json::from_value::<f64>((item).clone())
+                        .map_err(|error| error.to_string())
+                })
+                .collect::<Result<Vec<_>, String>>()?;
+            values
+                .try_into()
+                .map_err(|_: Vec<_>| "fixed array length differs".to_string())
+        })()
+    }
     fn decode_wire_v_2_shipping_change(
         wire: &::serde_json::Value,
     ) -> Result<v2::shipping::Change, String> {
@@ -1239,6 +1432,7 @@ pub mod version_adapters {
             .as_object()
             .ok_or_else(|| "expected a served-version object".to_string())?;
         let keys: &[&str] = &[
+            "coordinates",
             "countryCodeV2",
             "deliveryNote",
             "deliveryReference",
@@ -1274,25 +1468,31 @@ pub mod version_adapters {
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
-        let raw_3 = object.get("street").unwrap_or(&::serde_json::Value::Null);
-        let value_3: Option<String> = if (raw_3).is_null() {
+        let raw_3 = object.get("coordinates").unwrap_or(&::serde_json::Value::Null);
+        let value_3: Option<v2::geo::MapPosition> = if (raw_3).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_3).clone())
+            decode_wire_v_2_geo_map_position(raw_3).map(Some)
+        }?;
+        let raw_4 = object.get("street").unwrap_or(&::serde_json::Value::Null);
+        let value_4: Option<String> = if (raw_4).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_4).clone())
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
-        let raw_4 = object.get("countryCodeV2").unwrap_or(&::serde_json::Value::Null);
-        let value_4: Option<v2::geo::Country> = if (raw_4).is_null() {
+        let raw_5 = object.get("countryCodeV2").unwrap_or(&::serde_json::Value::Null);
+        let value_5: Option<v2::geo::Country> = if (raw_5).is_null() {
             Ok::<_, String>(None)
         } else {
-            decode_wire_v_2_geo_country(raw_4).map(Some)
+            decode_wire_v_2_geo_country(raw_5).map(Some)
         }?;
-        let raw_5 = object.get("priority").unwrap_or(&::serde_json::Value::Null);
-        let value_5: Option<i32> = if (raw_5).is_null() {
+        let raw_6 = object.get("priority").unwrap_or(&::serde_json::Value::Null);
+        let value_6: Option<i32> = if (raw_6).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<i32>((raw_5).clone())
+            ::serde_json::from_value::<i32>((raw_6).clone())
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -1303,10 +1503,11 @@ pub mod version_adapters {
                     delivery_reference: value_1,
                     delivery_note: value_2,
                 },
-                street: value_3,
-                country_code_v2: value_4,
+                coordinates: value_3,
+                street: value_4,
+                country_code_v2: value_5,
             },
-            priority: value_5,
+            priority: value_6,
         })
     }
     fn decode_wire_v_2_delivery_reference(
@@ -1370,6 +1571,33 @@ pub mod version_adapters {
     ) -> Result<v2::geo::Country, String> {
         ::serde_json::from_value(wire.clone()).map_err(|error| error.to_string())
     }
+    fn decode_wire_v_2_geo_map_position(
+        wire: &::serde_json::Value,
+    ) -> Result<v2::geo::MapPosition, String> {
+        decode_wire_v_2_geo_coordinates(wire)
+    }
+    fn decode_wire_v_2_geo_coordinates(
+        wire: &::serde_json::Value,
+    ) -> Result<v2::geo::Coordinates, String> {
+        (|| {
+            let array = (wire)
+                .as_array()
+                .ok_or_else(|| "expected an array".to_string())?;
+            if array.len() != (2) as usize {
+                return Err("fixed array length differs".into());
+            }
+            let values = array
+                .iter()
+                .map(|item| {
+                    ::serde_json::from_value::<f64>((item).clone())
+                        .map_err(|error| error.to_string())
+                })
+                .collect::<Result<Vec<_>, String>>()?;
+            values
+                .try_into()
+                .map_err(|_: Vec<_>| "fixed array length differs".to_string())
+        })()
+    }
     fn decode_wire_v_3_shipping_change(
         wire: &::serde_json::Value,
     ) -> Result<v3::shipping::Change, String> {
@@ -1377,6 +1605,7 @@ pub mod version_adapters {
             .as_object()
             .ok_or_else(|| "expected a served-version object".to_string())?;
         let keys: &[&str] = &[
+            "coordinates",
             "countryCodeV2",
             "parent",
             "priority",
@@ -1410,25 +1639,31 @@ pub mod version_adapters {
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
-        let raw_2 = object.get("street").unwrap_or(&::serde_json::Value::Null);
-        let value_2: Option<String> = if (raw_2).is_null() {
+        let raw_2 = object.get("coordinates").unwrap_or(&::serde_json::Value::Null);
+        let value_2: Option<v3::geo::MapPosition> = if (raw_2).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_2).clone())
+            decode_wire_v_3_geo_map_position(raw_2).map(Some)
+        }?;
+        let raw_3 = object.get("street").unwrap_or(&::serde_json::Value::Null);
+        let value_3: Option<String> = if (raw_3).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_3).clone())
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
-        let raw_3 = object.get("countryCodeV2").unwrap_or(&::serde_json::Value::Null);
-        let value_3: Option<v3::geo::Country> = if (raw_3).is_null() {
+        let raw_4 = object.get("countryCodeV2").unwrap_or(&::serde_json::Value::Null);
+        let value_4: Option<v3::geo::Country> = if (raw_4).is_null() {
             Ok::<_, String>(None)
         } else {
-            decode_wire_v_3_geo_country(raw_3).map(Some)
+            decode_wire_v_3_geo_country(raw_4).map(Some)
         }?;
-        let raw_4 = object.get("priority").unwrap_or(&::serde_json::Value::Null);
-        let value_4: Option<i32> = if (raw_4).is_null() {
+        let raw_5 = object.get("priority").unwrap_or(&::serde_json::Value::Null);
+        let value_5: Option<i32> = if (raw_5).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<i32>((raw_4).clone())
+            ::serde_json::from_value::<i32>((raw_5).clone())
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -1438,10 +1673,11 @@ pub mod version_adapters {
                     parent: value_0,
                     signature_required: value_1,
                 },
-                street: value_2,
-                country_code_v2: value_3,
+                coordinates: value_2,
+                street: value_3,
+                country_code_v2: value_4,
             },
-            priority: value_4,
+            priority: value_5,
         })
     }
     fn decode_wire_v_3_geo_anchor(
@@ -1498,6 +1734,33 @@ pub mod version_adapters {
         wire: &::serde_json::Value,
     ) -> Result<v3::geo::Country, String> {
         ::serde_json::from_value(wire.clone()).map_err(|error| error.to_string())
+    }
+    fn decode_wire_v_3_geo_map_position(
+        wire: &::serde_json::Value,
+    ) -> Result<v3::geo::MapPosition, String> {
+        decode_wire_v_3_geo_coordinates(wire)
+    }
+    fn decode_wire_v_3_geo_coordinates(
+        wire: &::serde_json::Value,
+    ) -> Result<v3::geo::Coordinates, String> {
+        (|| {
+            let array = (wire)
+                .as_array()
+                .ok_or_else(|| "expected an array".to_string())?;
+            if array.len() != (2) as usize {
+                return Err("fixed array length differs".into());
+            }
+            let values = array
+                .iter()
+                .map(|item| {
+                    ::serde_json::from_value::<f64>((item).clone())
+                        .map_err(|error| error.to_string())
+                })
+                .collect::<Result<Vec<_>, String>>()?;
+            values
+                .try_into()
+                .map_err(|_: Vec<_>| "fixed array length differs".to_string())
+        })()
     }
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_shipping_addresses_read_from_v_1(
@@ -2340,6 +2603,34 @@ pub mod version_adapters {
         }
     }
     /// The caller-selected version's projected model type.
+    pub enum GeoCoordinatesProjection {
+        V1(v1::geo::Coordinates),
+        V2(v2::geo::Coordinates),
+        V3(v3::geo::Coordinates),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_geo_coordinates(
+        version: Version,
+        head: v3::geo::Coordinates,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<GeoCoordinatesProjection> {
+        match version {
+            Version::V1 => {
+                let source = geo_coordinates_downcast_to_v_2(&head, adapters)?;
+                let source = geo_coordinates_downcast_to_v_1(&source, adapters)?;
+                Ok(GeoCoordinatesProjection::V1(source))
+            }
+            Version::V2 => {
+                let source = geo_coordinates_downcast_to_v_2(&head, adapters)?;
+                Ok(GeoCoordinatesProjection::V2(source))
+            }
+            Version::V3 => {
+                let source = head;
+                Ok(GeoCoordinatesProjection::V3(source))
+            }
+        }
+    }
+    /// The caller-selected version's projected model type.
     pub enum GeoCountryProjection {
         V2(v2::geo::Country),
         V3(v3::geo::Country),
@@ -2394,6 +2685,34 @@ pub mod version_adapters {
             Version::V3 => {
                 let source = head;
                 Ok(GeoIdentifierProjection::V3(source))
+            }
+        }
+    }
+    /// The caller-selected version's projected model type.
+    pub enum GeoMapPositionProjection {
+        V1(v1::geo::MapPosition),
+        V2(v2::geo::MapPosition),
+        V3(v3::geo::MapPosition),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_geo_map_position(
+        version: Version,
+        head: v3::geo::MapPosition,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<GeoMapPositionProjection> {
+        match version {
+            Version::V1 => {
+                let source = geo_map_position_downcast_to_v_2(&head, adapters)?;
+                let source = geo_map_position_downcast_to_v_1(&source, adapters)?;
+                Ok(GeoMapPositionProjection::V1(source))
+            }
+            Version::V2 => {
+                let source = geo_map_position_downcast_to_v_2(&head, adapters)?;
+                Ok(GeoMapPositionProjection::V2(source))
+            }
+            Version::V3 => {
+                let source = head;
+                Ok(GeoMapPositionProjection::V3(source))
             }
         }
     }

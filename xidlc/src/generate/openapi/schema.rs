@@ -292,9 +292,16 @@ impl SchemaScope<'_> {
         ty: &hir::TypeSpec,
         decl: &hir::Declarator,
     ) -> IdlcResult<RefOr<Schema>> {
-        let mut schema = self.schema_for_type(ty)?;
+        Ok(Self::apply_declarator(self.schema_for_type(ty)?, decl))
+    }
+
+    /// Applies fixed-array dimensions with the first declaration dimension outermost.
+    pub(super) fn apply_declarator(
+        mut schema: RefOr<Schema>,
+        decl: &hir::Declarator,
+    ) -> RefOr<Schema> {
         if let hir::Declarator::ArrayDeclarator(array) = decl {
-            for len in &array.len {
+            for len in array.len.iter().rev() {
                 let mut array_schema = ArrayBuilder::new().items(schema);
                 if let Some(size) =
                     xidl_parser::hir::const_expr_to_i64(&len.0).filter(|size| *size >= 0)
@@ -305,7 +312,7 @@ impl SchemaScope<'_> {
                 schema = RefOr::T(Schema::from(array_schema));
             }
         }
-        Ok(schema)
+        schema
     }
 
     pub(crate) fn schema_for_type(self, ty: &hir::TypeSpec) -> IdlcResult<RefOr<Schema>> {

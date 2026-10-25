@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { ZodError } from 'zod';
 import { verifyImportedReaders } from './imports';
 import { v1 } from './v1/versioned_inheritance.client';
 import { Projection } from './v1/versioned_inheritance.errors';
@@ -7,9 +8,11 @@ import { v3 } from './v3/versioned_inheritance.client';
 
 const base = process.argv[2];
 assert(base);
+let fetches = 0;
 const checkedFetch =
   (expected: string): typeof fetch =>
   async (input, init) => {
+    fetches++;
     const request = new Request(input, init);
     assert.equal(request.headers.get('x-address-version'), expected);
     request.headers.set('authorization', 'Bearer test-acme');
@@ -27,6 +30,7 @@ const head = new v3.shipping.AddressesClient(base, {
   fetch: checkedFetch('2026-07-01'),
 });
 const written = await first.update('acme', 'a2', {
+  coordinates: [0, -90],
   country_code: 'CA',
   delivery_note: '',
   delivery_reference: 'T-SDK',
@@ -38,6 +42,22 @@ assert.equal(written.id, 'a2');
 assert.equal(written.delivery_reference, 'T-SDK');
 assert.equal(written.delivery_note, '');
 assert.equal(written.priority, 0);
+assert.deepEqual(written.coordinates, [0, -90]);
+const beforeInvalid = fetches;
+for (const coordinates of [[], [1], [1, 2, 3]]) {
+  await assert.rejects(
+    first.update('acme', 'a2', {
+      coordinates,
+      delivery_reference: 'must-not-persist',
+    }),
+    ZodError,
+  );
+}
+assert.equal(
+  fetches,
+  beforeInvalid,
+  'wrong arity is refused before network I/O',
+);
 const parent = written.parent;
 assert(parent);
 assert.equal(parent.checkpoint, 'TS reroute');
@@ -50,6 +70,7 @@ const latest = await head.update('acme', 'a2', {
 });
 assert.equal(Object.hasOwn(latest, 'delivery_reference'), false);
 assert.deepEqual(latest.parent, written.parent);
+assert.deepEqual(latest.coordinates, written.coordinates);
 const view = await middle.read('acme', 'a2');
 assert.equal(view.delivery_reference, 'T-SDK');
 assert.equal(view.delivery_note, '');
