@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { verifyImportedReaders } from './imports';
 import { v1 } from './v1/versioned_inheritance.client';
 import { Projection } from './v1/versioned_inheritance.errors';
 import { v2 } from './v2/versioned_inheritance.client';
@@ -55,4 +56,5 @@ await assert.rejects(
   Projection,
 );
 assert.deepEqual(await head.read('acme', 'a2'), latest);
+await verifyImportedReaders(base);
 console.log('PASS: independent TypeScript address SDKs');

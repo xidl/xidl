@@ -1,0 +1,6 @@
+@version(in = "header", name = "X-Address-Version")
+enum Versions {
+    @rename("2026-01-01") v1,
+    @rename("2026-04-01") v2,
+    @rename("2026-07-01") v3,
+};

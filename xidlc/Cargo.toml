@@ -91,6 +91,10 @@ path = "tests/codegen_snapshot.rs"
 name = "http_validation"
 path = "tests/http_validation.rs"
 
+[[test]]
+name = "versioned_libraries"
+path = "tests/versioned_libraries/mod.rs"
+
 [dev-dependencies]
 insta = { workspace = true, features = ["json", "redactions"] }
 tempfile.workspace = true
