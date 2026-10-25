@@ -38,6 +38,13 @@ pub struct UdpStatsResponse {
 impl UdpStatsResponse {}
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
+pub struct CreateTcpReverseRequest {
+    pub local_addr: String,
+    pub remote_port: u16,
+}
+impl CreateTcpReverseRequest {}
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
 pub struct CreateSimpleResponse {
     pub id: u32,
 }
