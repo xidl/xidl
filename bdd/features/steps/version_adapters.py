@@ -70,7 +70,12 @@ def prepare_application(context, script, boilerplate_name="versioned_adapters"):
     shutil.copy(boilerplate / "tsconfig.json", output)
     shutil.copy(boilerplate / script, output)
     companions = {
-        "business.ts": ["business_http.ts", "business_stored.ts", "business_update.ts"],
+        "business.ts": [
+            "business_dispatch.ts",
+            "business_http.ts",
+            "business_stored.ts",
+            "business_update.ts",
+        ],
         "chain.ts": ["chain_http.ts", "chain_app.ts"],
     }
     for name in companions.get(script, []):

@@ -10,6 +10,7 @@ pub async fn run() {
     let storage = Storage {
         handling_notes: BTreeMap::from([("p1".to_string(), "fragile".to_string())]),
         traces: BTreeMap::from([("p1".to_string(), "trace-1".to_string())]),
+        ..Storage::default()
     };
     let head = decode_and_upcast_depot_ship(Version::V1, json!({"parcel":parcel()}), &hooks).unwrap().parcel;
     let bad_hooks = Hooks { reject_downcast: true, ..Hooks::default() };
@@ -85,6 +86,70 @@ pub async fn run() {
         ParcelProjection::V3(value) => assert_eq!(value.audit, "checked"),
         _ => panic!("explicit Head model projection must use the identity branch"),
     }
+    // A member added inside the element type leaves every older view with the
+    // element count and keys intact: the sequence, the map and the fixed
+    // array all drop the newest member per element instead of failing.
+    let zoned = v3::Parcel {
+        address: v3::Address { zone: Some("dock-3".into()), ..head.address.clone() },
+        stops: head.stops.iter().cloned()
+            .map(|stop| v3::Address { zone: Some("gate-2".into()), ..stop }).collect(),
+        by_tag: head.by_tag.iter()
+            .map(|(tag, stop)| (tag.clone(), v3::Address { zone: Some("rear".into()), ..stop.clone() }))
+            .collect(),
+        ..head.clone()
+    };
+    for version in [Version::V1, Version::V2] {
+        let wire = match downcast_parcel(version, zoned.clone(), &storage, &hooks).unwrap() {
+            ParcelProjection::V1(value) => serde_json::to_value(serde_json::json!({
+                "zip": value.address.zip, "stops": value.stops, "by_tag": value.by_tag,
+            })).unwrap(),
+            ParcelProjection::V2(value) => serde_json::to_value(serde_json::json!({
+                "zip": value.address.zip, "stops": value.stops, "by_tag": value.by_tag,
+            })).unwrap(),
+            _ => panic!("the zoned parcel must project"),
+        };
+        assert_eq!(wire["zip"], "10001");
+        assert_eq!(wire["stops"].as_array().map(Vec::len), Some(1));
+        assert_eq!(wire["by_tag"].as_object().map(|map| map.len()), Some(1));
+        assert!(!wire.to_string().contains("zone"), "{version:?}: no element leaks the newest member");
+    }
+    // A member retired inside every container element returns per element
+    // from storage, an element without its row omits the member, and a
+    // business refusal surfaces the full container path.
+    let element = |zip: &str| v3::Address { zip: zip.into(), ..head.address.clone() };
+    let gated_storage = Storage {
+        gates: BTreeMap::from([("20002".to_string(), "B-12".to_string())]),
+        ..storage.clone()
+    };
+    let gated = v3::Parcel {
+        stops: vec![element("20002")],
+        by_tag: BTreeMap::from([("dock".to_string(), element("30003"))]),
+        ..head.clone()
+    };
+    for version in [Version::V1, Version::V2] {
+        let (stop_gate, dock_gate) = match downcast_parcel(version, gated.clone(), &gated_storage, &hooks).unwrap() {
+            ParcelProjection::V1(value) => (value.stops[0].gate.clone(), value.by_tag["dock"].gate.clone()),
+            ParcelProjection::V2(value) => (value.stops[0].gate.clone(), value.by_tag["dock"].gate.clone()),
+            _ => panic!("the gated parcel must project"),
+        };
+        assert_eq!(stop_gate.as_deref(), Some("B-12"));
+        assert_eq!(dock_gate, None, "storage without the element row omits the member");
+    }
+    let refused = v3::Parcel { stops: vec![element("20002"), element("90001")], ..gated.clone() };
+    match downcast_parcel(Version::V2, refused, &gated_storage, &hooks) {
+        Err(error) => assert_eq!(error.type_path, "Parcel.stops.Address.gate",
+            "the refusal names the sequence element's member"),
+        Ok(_) => panic!("a gated dock must refuse the whole projection"),
+    }
+    let refused = v3::Parcel {
+        by_tag: BTreeMap::from([("dock".to_string(), element("90001"))]),
+        ..gated.clone()
+    };
+    match downcast_parcel(Version::V2, refused, &gated_storage, &hooks) {
+        Err(error) => assert_eq!(error.type_path, "Parcel.by_tag.Address.gate",
+            "the refusal names the map element's member"),
+        Ok(_) => panic!("a gated dock must refuse the whole projection"),
+    }
     // Dispatch hands the handler's stored values to the whole downcast chain.
     let served_head = head.clone();
     let served = dispatch_depot_get(Version::V1, json!({"id":"p1"}), |_, _| async move {
@@ -118,7 +183,7 @@ pub async fn run() {
         };
         update_notes.lock().unwrap().insert(request.id.clone(), stored.handling_note.clone().unwrap());
         update_writes.fetch_add(1, Ordering::SeqCst);
-        let stored = Storage { handling_notes: update_notes.lock().unwrap().clone(), traces: BTreeMap::new() };
+        let stored = Storage { handling_notes: update_notes.lock().unwrap().clone(), ..Storage::default() };
         async move { HeadOutcome { outcome: Ok::<_, v3::DepotUpdateError>(patched), stored } }
     }, &hooks).await.unwrap() {
         ProjectionOutcome::Projected(DepotUpdateOutcome::V2(Ok(parcel))) => {
@@ -141,7 +206,7 @@ pub async fn run() {
         };
         update_notes.lock().unwrap().insert(request.id.clone(), stored.handling_note.unwrap_or_default());
         update_writes.fetch_add(1, Ordering::SeqCst);
-        let stored = Storage { handling_notes: update_notes.lock().unwrap().clone(), traces: BTreeMap::new() };
+        let stored = Storage { handling_notes: update_notes.lock().unwrap().clone(), ..Storage::default() };
         async move { HeadOutcome { outcome: Ok::<_, v3::DepotUpdateError>(patched), stored } }
     }, &hooks).await.unwrap();
     match unchanged {
@@ -158,7 +223,7 @@ pub async fn run() {
         assert!(stored.handling_note.is_none(), "Head callers must carry an empty bag");
         update_writes.fetch_add(1, Ordering::SeqCst);
         let patched = resource.lock().unwrap().clone();
-        let stored = Storage { handling_notes: update_notes.lock().unwrap().clone(), traces: BTreeMap::new() };
+        let stored = Storage { handling_notes: update_notes.lock().unwrap().clone(), ..Storage::default() };
         async move { HeadOutcome { outcome: Ok::<_, v3::DepotUpdateError>(patched), stored } }
     }, &hooks).await.unwrap() {
         ProjectionOutcome::Projected(DepotUpdateOutcome::V3(Ok(_))) => {},
