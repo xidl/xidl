@@ -1,6 +1,36 @@
-#![cfg(any(feature = "gen-rust-axum", feature = "gen-openapi"))]
+#![cfg(any(
+    feature = "gen-rust-axum",
+    feature = "gen-openapi",
+    feature = "gen-typescript-rest"
+))]
 
 use std::{collections::HashMap, path::Path};
+
+#[test]
+#[cfg(feature = "gen-typescript-rest")]
+fn typescript_validators_resolve_constant_dimensions_in_the_declaring_scope() {
+    let files = xidlc::driver::Generator::new("typescript-rest".into())
+        .generate_from_idl(
+            include_str!("shared/typedef_arrays_http.idl"),
+            Path::new("typedef_arrays.idl"),
+            HashMap::new(),
+        )
+        .expect("constant-sized arrays in TypeScript REST contracts");
+    let output = files
+        .iter()
+        .find(|file| file.path().ends_with("typedef_arrays.zod.ts"))
+        .expect("generated Zod validators")
+        .content();
+    for schema in [
+        "PairSchema = z.array(LabelSchema).length(2)",
+        "TripleSchema = z.array(LabelSchema).length(3)",
+        "CoordinatesSchema = z.array(z.coerce.number()).length(2)",
+        "BoundsSchema = z.array(z.coerce.number()).length(4)",
+        "slots: z.array(ImportedPairSchema).length(2)",
+    ] {
+        assert!(output.contains(schema), "missing {schema}");
+    }
+}
 
 #[test]
 #[cfg(feature = "gen-rust-axum")]
