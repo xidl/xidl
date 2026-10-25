@@ -3,7 +3,11 @@ typedef long DeliveryReference;
 typedef string Identifier;
 enum Country { US, CA };
 struct Marker {};
-struct Anchor : Marker { @optional sequence<Anchor> previous; };
+struct Anchor : Marker {
+    @optional string checkpoint;
+    @optional Anchor parent;
+    @optional sequence<Anchor> previous;
+};
 
 @rename_all("camelCase")
 struct Identity : Anchor {
@@ -16,6 +20,7 @@ struct Identity : Anchor {
 
 @rename_all("camelCase")
 struct Change {
+    @optional Anchor parent;
     @removed(Versions::v3) @optional ::DeliveryReference delivery_reference;
     @removed(Versions::v3) @optional string delivery_note;
     @added(Versions::v3) @optional @default(true) boolean signature_required;

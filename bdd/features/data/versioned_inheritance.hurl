@@ -13,6 +13,10 @@ jsonpath "$.base" not exists
 jsonpath "$.previous" exists
 jsonpath "$.previous[0].previous" not exists
 jsonpath "$.previous[0].base" not exists
+jsonpath "$.checkpoint" == "dispatch"
+jsonpath "$.parent.checkpoint" == "handover"
+jsonpath "$.parent.parent.checkpoint" == "packed"
+jsonpath "$.parent.parent.parent" not exists
 jsonpath "$.signatureRequired" not exists
 jsonpath "$.deliveryNote" not exists
 
@@ -21,13 +25,17 @@ PATCH {{base_url}}/tenants/acme/addresses/a1
 Authorization: Bearer test-acme
 X-Address-Version: 2026-01-01
 Content-Type: application/json
-{"deliveryReference":"A-NEW","deliveryNote":"","line":"New street","countryCode":"CA","priority":0}
+{"deliveryReference":"A-NEW","deliveryNote":"","line":"New street","countryCode":"CA","priority":0,"parent":{"checkpoint":"rerouted","parent":{"checkpoint":"","parent":{}}}}
 HTTP 200
 [Asserts]
 jsonpath "$.deliveryReference" == "A-NEW"
 jsonpath "$.deliveryNote" == ""
 jsonpath "$.line" == "New street"
 jsonpath "$.priority" == 0
+jsonpath "$.parent.checkpoint" == "rerouted"
+jsonpath "$.parent.parent.checkpoint" == ""
+jsonpath "$.parent.parent.parent.checkpoint" not exists
+jsonpath "$.parent.parent.parent.parent" not exists
 
 GET {{base_url}}/tenants/acme/addresses/a1
 Authorization: Bearer test-acme
@@ -40,6 +48,7 @@ jsonpath "$.signatureRequired" == true
 jsonpath "$.deliveryReference" not exists
 jsonpath "$.deliveryNote" not exists
 jsonpath "$.line" not exists
+jsonpath "$.parent.checkpoint" == "rerouted"
 
 # A newer write changes current facts while retaining earlier delivery history.
 PATCH {{base_url}}/tenants/acme/addresses/a1
@@ -61,6 +70,7 @@ jsonpath "$.deliveryReference" == "A-NEW"
 jsonpath "$.deliveryNote" == ""
 jsonpath "$.countryCodeV2" == "CA"
 jsonpath "$.signatureRequired" not exists
+jsonpath "$.parent.parent.checkpoint" == ""
 
 # Capture the whole Head + history before restating the narrow view.
 GET {{base_url}}/audit
@@ -77,7 +87,7 @@ PATCH {{base_url}}/tenants/acme/addresses/a1
 Authorization: Bearer test-acme
 X-Address-Version: 2026-01-01
 Content-Type: application/json
-{"deliveryReference":"A-NEW","deliveryNote":"","line":"Head street","countryCode":"CA","priority":0}
+{"deliveryReference":"A-NEW","deliveryNote":"","line":"Head street","countryCode":"CA","priority":0,"parent":{"checkpoint":"rerouted","parent":{"checkpoint":"","parent":{}}}}
 HTTP 200
 [Asserts]
 jsonpath "$.deliveryNote" == ""
@@ -137,7 +147,7 @@ PATCH {{base_url}}/tenants/other/addresses/a1
 Authorization: Bearer test-acme
 X-Address-Version: 2026-07-01
 Content-Type: application/json
-{"street":"unauthorized","signatureRequired":false}
+{"street":"unauthorized","signatureRequired":false,"parent":{"checkpoint":"unauthorized"}}
 HTTP 403
 [Asserts]
 jsonpath "$.reason" == "tenant access denied"

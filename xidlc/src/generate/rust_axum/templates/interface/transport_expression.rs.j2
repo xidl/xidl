@@ -1,0 +1,5 @@
+{%- if kind == "map" -%}
+{{ source }}.map(|value| {{ converted }})
+{%- else -%}
+Box::new({{ converted }})
+{%- endif -%}

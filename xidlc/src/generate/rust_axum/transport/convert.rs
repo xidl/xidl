@@ -19,7 +19,12 @@ pub(crate) fn decode_expr(
     convert_expr(expr, ty, scope)
 }
 
-fn convert_expr(expr: &str, ty: &hir::TypeSpec, scope: TypeScope<'_>) -> IdlcResult<String> {
+/// Converts the unwrapped value; the destination determines the `Into` target.
+pub(super) fn convert_expr(
+    expr: &str,
+    ty: &hir::TypeSpec,
+    scope: TypeScope<'_>,
+) -> IdlcResult<String> {
     Ok(match ty {
         hir::TypeSpec::SequenceType(seq) => {
             let inner = convert_expr("value", &seq.ty, scope)?;

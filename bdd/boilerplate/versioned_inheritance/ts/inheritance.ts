@@ -22,6 +22,7 @@ const refusal = (
 let current: types.v3.shipping.Address = {
   country_code_v2: 'US',
   id: 'a1',
+  parent: { checkpoint: 'handover', parent: { checkpoint: 'packed' } },
   previous: [{}],
   priority: 1,
   signature_required: true,
@@ -119,6 +120,7 @@ const first = await a.dispatchshipping_AddressesUpdateFromV1(
     deliveryNote: '',
     deliveryReference: 'A-NEW',
     line: 'New street',
+    parent: { checkpoint: 'rerouted', parent: { checkpoint: 'confirmed' } },
     priority: 0,
   }),
   current,
@@ -131,6 +133,8 @@ assert.equal(first.value.value.delivery_reference, 'A-NEW');
 assert.equal(first.value.value.line, 'New street');
 assert.equal(first.value.value.priority, 0);
 assert.deepEqual(first.value.value.previous, [{}]);
+assert.deepEqual(first.value.value.parent, current.parent);
+assert.equal(current.parent?.parent?.checkpoint, 'confirmed');
 assert.equal(current.signature_required, true);
 assert.equal(Object.hasOwn(current, 'delivery_reference'), false);
 assert.deepEqual(
@@ -152,6 +156,7 @@ const restated = await a.dispatchshipping_AddressesUpdateFromV1(
     deliveryNote: view.delivery_note,
     deliveryReference: view.delivery_reference,
     line: view.line,
+    parent: view.parent,
     priority: view.priority,
   }),
   current,
@@ -178,6 +183,7 @@ for (const patch of [
   { countryCodeV2: 'Atlantis' },
   { signatureRequired: false },
   { base: { deliveryNote: 'hidden' } },
+  { deliveryNote: 'must-not-persist', parent: { parent: [] } },
 ]) {
   const result = a.decodeAndUpcastshipping_AddressesUpdateFromV2(
     envelope(patch),
