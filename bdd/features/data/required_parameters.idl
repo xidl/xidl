@@ -1,0 +1,15 @@
+struct Inputs { long count; boolean active; string label; @optional string note; };
+
+interface RequiredParameters {
+    @get(path = "/query")
+    Inputs query(@query long count, @query boolean active, @query string label);
+    @get(path = "/header")
+    Inputs header(@header long count, @header boolean active, @header string label);
+    @get(path = "/cookie")
+    Inputs cookie(@cookie long count, @cookie boolean active, @cookie string label);
+    @get(path = "/optional")
+    Inputs optional(@query @optional long count, @header @optional boolean active,
+                    @cookie @optional string label);
+    @server_stream @get(path = "/stream")
+    Inputs stream(@query long count, @header boolean active, @cookie string label);
+};

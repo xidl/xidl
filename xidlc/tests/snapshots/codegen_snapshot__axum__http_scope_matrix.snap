@@ -1828,7 +1828,14 @@ where
                         ))?;
                     header_str.to_string()
                 }
-                None => ::core::default::Default::default(),
+                None => {
+                    return Err(
+                        ::xidl_rust_axum::Error::new(
+                            400,
+                            concat!("missing required header parameter ", "x_trace_id"),
+                        ),
+                    );
+                }
             };
             Ok(Self { id, x_trace_id })
         }
@@ -1907,7 +1914,7 @@ struct HttpSecurityMatrixServiceAlternativeSecurityRequestOutQuery {
     #[serde(default)]
     locale: Option<String>,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpSecurityMatrixServiceAlternativeSecurityRequestInQuery {
     #[serde(default)]
     locale: Option<String>,

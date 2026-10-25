@@ -104,7 +104,7 @@ struct HttpStreamSseBindingsServiceWatchProjectRequestOutQuery {
     #[serde(default)]
     cursor: Option<String>,
 }
-#[derive(::serde::Deserialize, ::core::default::Default)]
+#[derive(::serde::Deserialize)]
 struct HttpStreamSseBindingsServiceWatchProjectRequestInQuery {
     #[serde(default)]
     cursor: Option<String>,
@@ -184,7 +184,14 @@ where
                     ))?;
                 header_str.to_string()
             }
-            None => ::core::default::Default::default(),
+            None => {
+                return Err(
+                    ::xidl_rust_axum::Error::new(
+                        400,
+                        concat!("missing required header parameter ", "X-Trace-Id"),
+                    ),
+                );
+            }
         };
         let data = HttpStreamSseBindingsServiceWatchProjectRequest {
             project_id,
