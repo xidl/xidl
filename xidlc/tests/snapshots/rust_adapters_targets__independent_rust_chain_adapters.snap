@@ -199,10 +199,16 @@ pub mod version_adapters {
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
             "Booking.roster",
         )?;
-        let projected_3 = (&source.owner)
-            .as_ref()
-            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
-            .transpose()?;
+        let projected_3 = locate(
+            (&source.owner)
+                .as_ref()
+                .map(|item| Ok::<
+                    _,
+                    UnsupportedProjection,
+                >(::std::clone::Clone::clone(item)))
+                .transpose(),
+            "Booking.owner",
+        )?;
         Ok(v2026_10_01::Booking {
             id: projected_0,
             title: projected_1,
@@ -237,10 +243,16 @@ pub mod version_adapters {
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
             "Booking.roster",
         )?;
-        let projected_3 = (&source.owner)
-            .as_ref()
-            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
-            .transpose()?;
+        let projected_3 = locate(
+            (&source.owner)
+                .as_ref()
+                .map(|item| Ok::<
+                    _,
+                    UnsupportedProjection,
+                >(::std::clone::Clone::clone(item)))
+                .transpose(),
+            "Booking.owner",
+        )?;
         Ok(v2026_06_01::Booking {
             id: projected_0,
             title: projected_1,
@@ -406,10 +418,16 @@ pub mod version_adapters {
             |item| agenda_entry_upcast_from_v_2026_10_01(item, adapters),
             "Booking.items",
         )?;
-        let projected_3 = (&source.owner)
-            .as_ref()
-            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
-            .transpose()?;
+        let projected_3 = locate(
+            (&source.owner)
+                .as_ref()
+                .map(|item| Ok::<
+                    _,
+                    UnsupportedProjection,
+                >(::std::clone::Clone::clone(item)))
+                .transpose(),
+            "Booking.owner",
+        )?;
         Ok(v2027_01_01::Booking {
             id: projected_0,
             title: projected_1,
@@ -443,10 +461,16 @@ pub mod version_adapters {
             |item| agenda_entry_downcast_to_v_2026_10_01(item, adapters),
             "Booking.items",
         )?;
-        let projected_3 = (&source.organizer)
-            .as_ref()
-            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
-            .transpose()?;
+        let projected_3 = locate(
+            (&source.organizer)
+                .as_ref()
+                .map(|item| Ok::<
+                    _,
+                    UnsupportedProjection,
+                >(::std::clone::Clone::clone(item)))
+                .transpose(),
+            "Booking.organizer",
+        )?;
         Ok(v2026_10_01::Booking {
             id: projected_0,
             title: projected_1,
