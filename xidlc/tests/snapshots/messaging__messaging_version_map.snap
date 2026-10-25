@@ -2187,7 +2187,7 @@ expression: "all[0].content()"
           "change": "added",
           "kind": "union",
           "details": {
-            "switch_type": "ContentType"
+            "switch_type": "::ContentType"
           }
         },
         "Relay::TranscriptJson": {
@@ -2207,7 +2207,7 @@ expression: "all[0].content()"
                 "location": "path",
                 "name": "space_id",
                 "optional": false,
-                "type": "Relay::SpaceId",
+                "type": "::Relay::SpaceId",
                 "wire_name": "space_id"
               }
             },
@@ -2227,7 +2227,7 @@ expression: "all[0].content()"
                   "source_param": "space_id",
                   "ty": {
                     "ScopedName": {
-                      "is_root": false,
+                      "is_root": true,
                       "name": [
                         "Relay",
                         "SpaceId"
@@ -2352,7 +2352,6 @@ expression: "all[0].content()"
                     "ScopedName": {
                       "is_root": true,
                       "name": [
-                        "v2026_09",
                         "Relay",
                         "TranscriptJson"
                       ]
@@ -3860,15 +3859,15 @@ expression: "all[0].content()"
           "change": "changed",
           "kind": "union",
           "details": {
-            "switch_type": "ContentType"
+            "switch_type": "::ContentType"
           },
           "from": {
             "kind": "union",
-            "switch_type": "ContentType"
+            "switch_type": "::ContentType"
           },
           "to": {
             "kind": "union",
-            "switch_type": "ContentType"
+            "switch_type": "::ContentType"
           },
           "members": {
             "text": {
@@ -3879,7 +3878,7 @@ expression: "all[0].content()"
                   {
                     "Value": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
                           "ContentType",
                           "Text"
@@ -4246,7 +4245,6 @@ expression: "all[0].content()"
                     "ScopedName": {
                       "is_root": true,
                       "name": [
-                        "v2026_09",
                         "Relay",
                         "TranscriptJson"
                       ]
@@ -4343,7 +4341,6 @@ expression: "all[0].content()"
                     "ScopedName": {
                       "is_root": true,
                       "name": [
-                        "v2026_11",
                         "Relay",
                         "TranscriptJson"
                       ]
