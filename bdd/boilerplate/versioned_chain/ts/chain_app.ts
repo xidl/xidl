@@ -23,8 +23,8 @@ const isCalendarDate = (value: string): boolean => {
 };
 
 /**
- * Runtime base one: the application resolves the version header. An absent
- * header serves Head; a date resolves to the newest served release not later
+ * Example policy owned by this application: an absent header serves Head;
+ * a date resolves to the newest served release not later
  * than it; anything earlier, malformed or calendar-impossible is a 400, never
  * a guess.
  */
