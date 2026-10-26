@@ -2,8 +2,6 @@
 //! idempotency, storage and behaviour claims the TypeScript journey pins,
 //! driven through the generated Rust dispatchers on an axum server.
 
-use crate::gen::v2027_01_01;
-use crate::gen::version_adapters::SchedulerBookRequestV20270101;
 use crate::http_app::{booking_router, AppState};
 use axum::http::StatusCode;
 use serde_json::{json, Value};
@@ -131,6 +129,7 @@ pub async fn run_http_journey() {
         json!({
             "id": "b1",
             "items": [{ "minutes": 60, "title": "Kickoff" }],
+            "owner": "user-9",
             "roster": ["ignored-by-the-chain"],
             "title": "Kickoff",
         }),

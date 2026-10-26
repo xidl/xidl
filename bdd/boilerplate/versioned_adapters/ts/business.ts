@@ -42,6 +42,7 @@ const storedValues: a.StoredValues = {
   // The trace header left the Head response; storage keeps it per traced id.
   depotTraceResponseTraceId: ({ return: id }) => storage.traces.get(id),
   optionalChangeNote: source => storage.optionalNotes.get(source.note ?? ''),
+  parcelCourierNote: source => source.courier_remark,
   parcelHandlingNote: source => storage.handlingNotes.get(source.id),
   // Never stored: the hook derives the retired reference from the tracking number.
   parcelLegacy: () => undefined,
@@ -92,7 +93,10 @@ const hooks: a.VersionAdapters = {
     ok({ ignored$note: a.IGNORED, note: source.note }),
   parcelDowncastToV1: source => ok({ legacy: source.tracking }),
   parcelDowncastToV2: (source, stored) =>
-    ok({ handling_note: stored.parcelHandlingNote(source) ?? a.OMIT }),
+    ok({
+      courier_note: stored.parcelCourierNote(source) ?? a.OMIT,
+      handling_note: stored.parcelHandlingNote(source) ?? a.OMIT,
+    }),
   parcelPatchUpcastFromV2: source =>
     ok({
       handling_note: a.IGNORED,
@@ -102,11 +106,18 @@ const hooks: a.VersionAdapters = {
     hookCalls++;
     return ok({
       carrier: 'postal',
+      courier_note: undefined,
       legacy: a.IGNORED,
       tracking: source.legacy,
     });
   },
-  parcelUpcastFromV2: () => ok({ audit: 'checked', handling_note: a.IGNORED }),
+  parcelUpcastFromV2: source =>
+    ok({
+      audit: 'checked',
+      courier_note: a.IGNORED,
+      courier_remark: source.courier_note,
+      handling_note: a.IGNORED,
+    }),
   signedDowncastToV1: source =>
     ok({
       label: source.label,

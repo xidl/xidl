@@ -540,7 +540,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }).strict()
     
         .superRefine((wire, context) => {
-            for (const key of ["audit","carrier","inspected","note"]) {
+            for (const key of ["audit","carrier","courier_note","courier_remark","inspected","note"]) {
                 if (Object.hasOwn(wire, key)) context.addIssue({ code: "custom", path: [key], message: "field is not available in served version" });
             }
         })
@@ -1281,6 +1281,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["carrier"]: z.unknown().optional(),
         
+            ["courier_note"]: z.unknown().optional(),
+        
             ["fixed"]: z.unknown().optional(),
         
             ["handling_note"]: z.unknown().optional(),
@@ -1296,7 +1298,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }).strict()
     
         .superRefine((wire, context) => {
-            for (const key of ["audit","inspected"]) {
+            for (const key of ["audit","courier_remark","inspected"]) {
                 if (Object.hasOwn(wire, key)) context.addIssue({ code: "custom", path: [key], message: "field is not available in served version" });
             }
         })
@@ -1312,6 +1314,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
             ["note"]: wire["note"],
         
             ["handling_note"]: wire["handling_note"],
+        
+            ["courier_note"]: wire["courier_note"],
         
             ["address"]: wire["address"],
         
@@ -1333,6 +1337,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
             ["note"]: z.string().nullish().transform((value) => value ?? undefined),
         
             ["handling_note"]: z.string().nullish().transform((value) => value ?? undefined),
+        
+            ["courier_note"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
         
             ["address"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType12Schema),
         
@@ -1362,6 +1368,10 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             
                 ...(value["handling_note"] === undefined ? {} : { ["handling_note"]: value["handling_note"] }),
+            
+        
+            
+                ...(value["courier_note"] === undefined ? {} : { ["courier_note"]: value["courier_note"] }),
             
         
             
@@ -2076,6 +2086,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["carrier"]: z.unknown().optional(),
         
+            ["courier_remark"]: z.unknown().optional(),
+        
             ["fixed"]: z.unknown().optional(),
         
             ["id"]: z.unknown().optional(),
@@ -2091,7 +2103,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }).strict()
     
         .superRefine((wire, context) => {
-            for (const key of ["handling_note"]) {
+            for (const key of ["courier_note","handling_note"]) {
                 if (Object.hasOwn(wire, key)) context.addIssue({ code: "custom", path: [key], message: "field is not available in served version" });
             }
         })
@@ -2109,6 +2121,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
             ["inspected"]: wire["inspected"],
         
             ["audit"]: wire["audit"],
+        
+            ["courier_remark"]: wire["courier_remark"],
         
             ["address"]: wire["address"],
         
@@ -2132,6 +2146,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
             ["inspected"]: z.string().nullish().transform((value) => value ?? undefined),
         
             ["audit"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
+        
+            ["courier_remark"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
         
             ["address"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType25Schema),
         
@@ -2165,6 +2181,10 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             
                 ["audit"]: value["audit"],
+            
+        
+            
+                ...(value["courier_remark"] === undefined ? {} : { ["courier_remark"]: value["courier_remark"] }),
             
         
             
@@ -2399,7 +2419,7 @@ export interface VersionAdapters {
     
         parcelUpcastFromV2: (source: types.v2.Parcel) => VersionedResult<ParcelUpcastDecisionFromV2>;
     
-        parcelDowncastToV2: (source: types.v3.Parcel, stored: Pick<StoredValues, "parcelHandlingNote">) => VersionedResult<ParcelDowncastDecisionToV2>;
+        parcelDowncastToV2: (source: types.v3.Parcel, stored: Pick<StoredValues, "parcelHandlingNote" | "parcelCourierNote">) => VersionedResult<ParcelDowncastDecisionToV2>;
     
         parcelPatchUpcastFromV2: (source: types.v2.ParcelPatch, current: types.v3.Parcel) => VersionedResult<ParcelPatchUpcastDecisionFromV2>;
     
@@ -2434,6 +2454,9 @@ export interface VersionAdapters {
             /** wire `handling_note`, last served by v2 */
             parcelHandlingNote(source: types.v3.Parcel): string | undefined;
         
+            /** wire `courier_note`, last served by v2 */
+            parcelCourierNote(source: types.v3.Parcel): string | undefined;
+        
             /** wire `trace_id`, last served by v2 */
             depotTraceResponseTraceId(source: { "return": string }): string | undefined;
         
@@ -2447,7 +2470,7 @@ export interface VersionAdapters {
         
             "OptionalChange": { "2026-07": [], "2026-04": [], "2026-01": ["note"] },
         
-            "Parcel": { "2026-07": [], "2026-04": ["handling_note"], "2026-01": ["handling_note", "reference"] },
+            "Parcel": { "2026-07": [], "2026-04": ["courier_note", "handling_note"], "2026-01": ["courier_note", "handling_note", "reference"] },
         
     } as const;
 
@@ -2473,6 +2496,8 @@ export interface VersionAdapters {
             carrier: string;
         
             note?: string;
+        
+            courier_note?: string;
         
             legacy: Ignored;
         
@@ -2504,13 +2529,19 @@ export interface VersionAdapters {
         
             audit: string;
         
+            courier_remark?: string;
+        
             handling_note: Ignored;
+        
+            courier_note: Ignored;
         
     }
 
     export interface ParcelDowncastDecisionToV2 {
         
             handling_note: string | Omitted;
+        
+            courier_note: string | Omitted;
         
     }
 
@@ -2805,6 +2836,7 @@ export interface VersionAdapters {
                         ["tracking"]: decision.value["tracking"],
                         ["carrier"]: decision.value["carrier"],
                         ...(decision.value["note"] === undefined ? {} : { ["note"]: decision.value["note"] }),
+                        ...(decision.value["courier_note"] === undefined ? {} : { ["courier_note"]: decision.value["courier_note"] }),
             });
         
     }
@@ -3601,6 +3633,7 @@ export interface VersionAdapters {
                 
                         ...(decision.value["inspected"] === undefined ? {} : { ["inspected"]: decision.value["inspected"] }),
                         ["audit"]: decision.value["audit"],
+                        ...(decision.value["courier_remark"] === undefined ? {} : { ["courier_remark"]: decision.value["courier_remark"] }),
             });
         
     }
@@ -3648,6 +3681,7 @@ export interface VersionAdapters {
                         ["fixed"]: converted7.value,
                 
                         ...(decision.value["handling_note"] === OMIT ? {} : { ["handling_note"]: decision.value["handling_note"] }),
+                        ...(decision.value["courier_note"] === OMIT ? {} : { ["courier_note"]: decision.value["courier_note"] }),
             });
         
     }

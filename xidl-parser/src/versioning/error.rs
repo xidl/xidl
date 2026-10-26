@@ -145,10 +145,12 @@ impl fmt::Display for VersioningError {
             ),
             Self::UnsupportedVersionAnnotation { name, decl } => {
                 write!(f, "xidl versioning: {name} on {decl} is not supported; ")?;
-                if name.eq_ignore_ascii_case("@renamedFrom") {
+                if name.eq_ignore_ascii_case("@renamedFrom")
+                    || name.eq_ignore_ascii_case("@replaces")
+                {
                     write!(
                         f,
-                        "use @rename(\"wire_name\") for the serialized name; use @added/@removed declarations for changes between versions"
+                        "use @rename(\"wire_name\") for the serialized name; use @added/@removed declarations and application hooks for changes between versions"
                     )
                 } else {
                     write!(

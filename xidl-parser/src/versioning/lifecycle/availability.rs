@@ -7,9 +7,10 @@ use crate::hir::{Annotation, Enumerator, ScopedName};
 use crate::lint::AnnotationKind;
 
 /// Rejected versioning annotations, rather than promises of future syntax.
-pub(super) const UNSUPPORTED_ANNOTATIONS: [&str; 7] = [
+pub(super) const UNSUPPORTED_ANNOTATIONS: [&str; 8] = [
     "versioned",
     "renamedfrom",
+    "replaces",
     "madeoptional",
     "maderequired",
     "typechangedfrom",
