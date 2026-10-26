@@ -59,6 +59,15 @@ Feature: API versioning
     Given a versioned REST IDL file "bdd/features/data/versioning_renamed_from.idl"
     When I generate rust code for the IDL and expect failure containing "use @rename"
 
+  Scenario Outline: replacement links are rejected before code generation
+    Given a versioned REST IDL file "bdd/features/data/versioning_replaces_<timeline>.idl"
+    When I generate rust code for the IDL and expect failure containing "application hooks"
+
+    Examples:
+      | timeline  |
+      | versioned |
+      | plain     |
+
   Scenario: lint protects lifecycle spelling independently of generation
     Given a versioned contract with annotation mistakes
       """

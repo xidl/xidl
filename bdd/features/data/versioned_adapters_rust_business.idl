@@ -22,6 +22,10 @@ struct Parcel {
     @added(Versions::v3) string audit;
     // Retired without a successor: v1 and v2 clients still read it, so storage keeps it.
     @removed(Versions::v3) @optional string handling_note;
+    // Renamed at Head: v2 clients still write the earlier wire name, and the
+    // application hooks explicitly move its value between the two declarations.
+    @added(Versions::v2) @removed(Versions::v3) @optional string courier_note;
+    @added(Versions::v3) @optional string courier_remark;
     Address address;
     sequence<Address> stops;
     map<string, Address> by_tag;

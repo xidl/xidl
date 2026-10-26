@@ -25,6 +25,8 @@ fn main() {
         _ => panic!("a booking without its agenda is not valid v2026-06-01 wire data"),
     };
     assert!(invalid, "validation precedes every hook");
-    assert_eq!(hooks.up_from_v1.load(std::sync::atomic::Ordering::SeqCst), 2);
+    // Two upcasts read the corpus booking; a third proves the rename also
+    // runs for a caller who omitted the optional owner.
+    assert_eq!(hooks.up_from_v1.load(std::sync::atomic::Ordering::SeqCst), 3);
     println!("PASS: booking chain keeps storage facts and pure conversions");
 }

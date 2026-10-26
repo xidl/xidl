@@ -156,34 +156,40 @@ fn rejects_version_selection_on_unversioned_contracts() {
 }
 
 #[test]
-fn renamed_from_diagnostic_recommends_supported_contracts_on_every_http_target() {
-    for marker in ["@version", ""] {
-        let source = format!(
-            r#"{marker} enum V {{ v1, v2 }};
-        struct Pet {{ @renamedFrom(V::v2, "old") string name; }};"#
-        );
-        for target in ["openapi", "rust-axum", "typescript-rest", "go-rest"] {
-            let Err(error) = xidlc::driver::Generator::new(target.into()).generate_from_idl(
-                &source,
-                Path::new("renamed.idl"),
-                HashMap::new(),
-            ) else {
-                panic!("{target}: unsupported rename must fail before generation");
-            };
-            let error = error.to_string();
-            assert!(
-                error.contains("@renamedFrom on Pet::name is not supported"),
-                "{target}: {error}"
+fn unsupported_replacement_diagnostic_recommends_supported_contracts_on_every_http_target() {
+    for annotation in [
+        "renamedFrom(V::v2, \"old\")",
+        "replaces(old)",
+        "replaces(first, last)",
+    ] {
+        for marker in ["@version", ""] {
+            let source = format!(
+                r#"{marker} enum V {{ v1, v2 }};
+        struct Pet {{ @{annotation} string name; }};"#
             );
-            assert!(
-                error.contains("use @rename(\"wire_name\")"),
-                "{target}: {error}"
-            );
-            assert!(
-                error.contains("@added/@removed declarations"),
-                "{target}: {error}"
-            );
-            assert!(!error.contains("yet"), "{target}: {error}");
+            for target in ["openapi", "rust-axum", "typescript-rest", "go-rest"] {
+                let Err(error) = xidlc::driver::Generator::new(target.into()).generate_from_idl(
+                    &source,
+                    Path::new("renamed.idl"),
+                    HashMap::new(),
+                ) else {
+                    panic!("{target}: unsupported rename must fail before generation");
+                };
+                let error = error.to_string();
+                assert!(
+                    error.contains("on Pet::name is not supported"),
+                    "{target}: {error}"
+                );
+                assert!(
+                    error.contains("use @rename(\"wire_name\")"),
+                    "{target}: {error}"
+                );
+                assert!(
+                    error.contains("@added/@removed declarations"),
+                    "{target}: {error}"
+                );
+                assert!(!error.contains("yet"), "{target}: {error}");
+            }
         }
     }
 }

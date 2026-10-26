@@ -2,7 +2,7 @@
 Feature: versioned booking chain
   A three-release booking contract exercising the walkthrough's chain shape:
   an uninvertible packaging change, a retired attendee roster served from
-  storage, a mechanically linked organizer rename and an implied default.
+  storage, an application-owned organizer rename and an implied default.
   The application owns version negotiation, cross-release idempotency and
   the behaviour switch; xidl owns the conversions and their refusals.
 

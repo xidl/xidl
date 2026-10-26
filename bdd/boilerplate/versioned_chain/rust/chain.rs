@@ -14,8 +14,8 @@ pub fn assert_needs_table() {
     let per_release = NEEDS[0].1;
     assert_eq!(per_release.len(), 3);
     assert_eq!(per_release[0], ("2027-01-01", &[][..]));
-    assert_eq!(per_release[1], ("2026-10-01", &["roster"][..]));
-    assert_eq!(per_release[2], ("2026-06-01", &["agenda", "roster"][..]));
+    assert_eq!(per_release[1], ("2026-10-01", &["owner", "roster"][..]));
+    assert_eq!(per_release[2], ("2026-06-01", &["agenda", "owner", "roster"][..]));
 }
 
 pub fn head() -> v2027_01_01::Booking {
@@ -23,6 +23,7 @@ pub fn head() -> v2027_01_01::Booking {
         id: "b1".into(),
         title: "Kickoff".into(),
         items: vec![v2027_01_01::AgendaEntry { title: "Kickoff".into(), minutes: 60 }],
+        organizer: Some("user-9".into()),
     }
 }
 
@@ -34,13 +35,15 @@ pub fn storage() -> Storage {
 }
 
 pub fn assert_conversions(hooks: &Hooks, storage: &Storage) {
-    // Head -> 2026-10-01: the roster returns from storage.
+    // Head -> 2026-10-01: the roster returns from storage; organizer keeps the
+    // role under its older source name through the application hook.
     let to_v2 = downcast_booking(Version::V20261001, head(), storage, hooks).unwrap();
     let BookingProjection::V20261001(value) = to_v2 else {
         panic!("v2026_10_01 projects to its own module");
     };
     assert_eq!(value.roster, vec!["user-1".to_string(), "user-2".to_string()]);
-    assert_eq!(hooks.down_to_v2.load(Ordering::SeqCst), 1, "only the roster decision ran");
+    assert_eq!(value.owner.as_deref(), Some("user-9"));
+    assert_eq!(hooks.down_to_v2.load(Ordering::SeqCst), 1, "one aggregate owner/roster decision ran");
     assert_eq!(hooks.up_from_v1.load(Ordering::SeqCst) + hooks.up_from_v2.load(Ordering::SeqCst), 0);
 
     // Head -> 2026-06-01 walks both steps in one call.
@@ -50,6 +53,7 @@ pub fn assert_conversions(hooks: &Hooks, storage: &Storage) {
     };
     assert_eq!(value.agenda, "Kickoff;60", "the oldest release reads the stored agenda");
     assert_eq!(value.roster, vec!["user-1".to_string(), "user-2".to_string()]);
+    assert_eq!(value.owner.as_deref(), Some("user-9"));
     assert_eq!(hooks.down_to_v1.load(Ordering::SeqCst), 1);
 
     // A row that storage never kept cannot be served: information only gets
@@ -77,14 +81,31 @@ pub fn assert_conversions(hooks: &Hooks, storage: &Storage) {
         title: "Kickoff".into(),
         agenda: "Kickoff;60".into(),
         roster: vec!["user-1".into(), "user-2".into()],
+        owner: Some("user-9".into()),
     };
     let to_v2 = booking_upcast_from_v_2026_06_01(&v1, hooks).unwrap();
     assert_eq!(hooks.up_from_v1.load(Ordering::SeqCst), 1);
     assert_eq!(to_v2.items.len(), 1);
     assert_eq!(to_v2.items[0].title, "Kickoff");
     assert_eq!(to_v2.items[0].minutes, 60);
+    assert_eq!(to_v2.owner.as_deref(), Some("user-9"));
     assert_eq!(to_v2.roster, vec!["user-1".to_string(), "user-2".to_string()]);
     let to_head = booking_upcast_from_v_2026_10_01(&to_v2, hooks).unwrap();
+    assert_eq!(to_head.organizer.as_deref(), Some("user-9"));
+
+    // An absent optional predecessor stays absent: the rename copies what is
+    // there and invents nothing when the caller omitted it.
+    let ownerless = v2026_06_01::Booking { owner: None, ..v1.clone() };
+    let ownerless_v2 = booking_upcast_from_v_2026_06_01(&ownerless, hooks).unwrap();
+    assert_eq!(
+        ownerless_v2.owner, None,
+        "the rename carries absence, never a fabricated owner"
+    );
+    let ownerless_head = booking_upcast_from_v_2026_10_01(&ownerless_v2, hooks).unwrap();
+    assert_eq!(
+        ownerless_head.organizer, None,
+        "Head sees no organizer when no owner was ever named"
+    );
 
     // An ambiguous text block is refused, not guessed: the sample encoding
     // cannot represent a title that contains the separator.

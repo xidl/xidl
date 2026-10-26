@@ -33,6 +33,9 @@ impl StoredValues for Storage {
     }
     /// Never stored: the hook derives the retired reference from the tracking number.
     fn parcel_legacy(&self, _: &v2::Parcel) -> Option<String> { None }
+    fn parcel_courier_note(&self, source: &v3::Parcel) -> Option<String> {
+        source.courier_remark.clone()
+    }
     fn parcel_handling_note(&self, source: &v3::Parcel) -> Option<String> {
         self.handling_notes.get(&source.id).cloned()
     }
@@ -100,7 +103,8 @@ impl VersionAdapters for Hooks {
     fn parcel_upcast_from_v_1(&self, source: &v1::Parcel) -> VersionedResult<ParcelUpcastFromV1Decision> {
         self.calls.fetch_add(1, Ordering::SeqCst);
         Ok(ParcelUpcastFromV1Decision {
-            tracking: source.legacy.clone(), carrier: "postal".into(), note: None, legacy: IGNORED,
+            tracking: source.legacy.clone(), carrier: "postal".into(), note: None,
+            courier_note: None, legacy: IGNORED,
         })
     }
     fn parcel_downcast_to_v_1(&self, source: &v2::Parcel, _: &dyn StoredValues) -> VersionedResult<ParcelDowncastToV1Decision> {
@@ -108,7 +112,7 @@ impl VersionAdapters for Hooks {
         Ok(ParcelDowncastToV1Decision { legacy: source.tracking.clone() })
     }
     fn parcel_downcast_to_v_2(&self, source: &v3::Parcel, stored: &dyn StoredValues) -> VersionedResult<ParcelDowncastToV2Decision> {
-        Ok(ParcelDowncastToV2Decision { handling_note: stored.parcel_handling_note(source) })
+        Ok(ParcelDowncastToV2Decision { courier_note: stored.parcel_courier_note(source), handling_note: stored.parcel_handling_note(source) })
     }
     fn depot_trace_response_downcast_to_v_2(&self, source: &String, stored: &dyn StoredValues) -> VersionedResult<DepotTraceResponseDowncastToV2Decision> {
         // v1 and v2 declare the header required: a missing row refuses instead of inventing one.
@@ -117,7 +121,7 @@ impl VersionAdapters for Hooks {
     }
     fn parcel_upcast_from_v_2(&self, source: &v2::Parcel) -> VersionedResult<ParcelUpcastFromV2Decision> {
         if source.tracking == "reject-v2" { return Err(refusal("2026-04", Direction::Upcast, "Parcel")); }
-        Ok(ParcelUpcastFromV2Decision { inspected: None, audit: "checked".into(), handling_note: IGNORED })
+        Ok(ParcelUpcastFromV2Decision { inspected: None, audit: "checked".into(), courier_note: IGNORED, courier_remark: source.courier_note.clone(), handling_note: IGNORED })
     }
     fn parcel_patch_upcast_from_v_2(&self, source: &v2::ParcelPatch, _current: &v3::Parcel) -> VersionedResult<ParcelPatchUpcastFromV2Decision> {
         if self.reject_patch { return Err(refusal("2026-04", Direction::Upcast, "ParcelPatch")); }
