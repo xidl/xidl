@@ -29,6 +29,28 @@ fn chain_target_snapshots_the_retirement_surface_of_the_booking_corpus() {
     let files = render(source, "chain.idl");
     assert_eq!(files, render(source, "chain.idl"));
     assert_eq!(files.len(), 1);
+    let binding = r#"@version(in = "header", name = "X-Booking-Version")"#;
+    assert_eq!(source.matches(binding).count(), 1);
+    for declaration in [
+        r#"@version(in = "header", name = "X-Application-Version")"#,
+        r#"@version(in = "query", name = "api_revision")"#,
+        r#"@version(in = "cookie", name = "api_revision")"#,
+    ] {
+        let contract = source.replacen(binding, declaration, 1);
+        assert_eq!(files, render(&contract, "chain.idl"), "{declaration}");
+    }
+    for policy in [
+        "X-Booking-Version",
+        "request.headers",
+        "headers.get(",
+        "resolveVersion(",
+    ] {
+        assert!(!files[0].1.contains(policy), "application policy: {policy}");
+    }
+    let code = files[0].1.split_whitespace().collect::<Vec<_>>().join(" ");
+    assert!(code.contains(
+        "export async function dispatchSchedulerBook( version: \"v2026_06_01\" | \"v2026_10_01\" | \"v2027_01_01\","
+    ));
     insta::assert_snapshot!("independent_typescript_chain_adapters", &files[0].1);
 }
 

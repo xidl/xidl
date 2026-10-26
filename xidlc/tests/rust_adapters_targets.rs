@@ -27,6 +27,32 @@ fn rust_chain_target_snapshots_storage_backed_retirement() {
     let files = render(source);
     assert_eq!(files, render(source));
     assert_eq!(files.len(), 1);
+    let binding = r#"@version(in = "header", name = "X-Booking-Version")"#;
+    assert_eq!(source.matches(binding).count(), 1);
+    for declaration in [
+        r#"@version(in = "header", name = "X-Application-Version")"#,
+        r#"@version(in = "query", name = "api_revision")"#,
+        r#"@version(in = "cookie", name = "api_revision")"#,
+    ] {
+        let contract = source.replacen(binding, declaration, 1);
+        assert_eq!(files, render(&contract), "{declaration}");
+    }
+    for policy in [
+        "X-Booking-Version",
+        "HeaderMap",
+        "headers.get(",
+        "resolve_version(",
+    ] {
+        assert!(!files[0].1.contains(policy), "application policy: {policy}");
+    }
+    let code = files[0].1.split_whitespace().collect::<Vec<_>>().join(" ");
+    assert!(code.contains("pub fn decode_and_upcast_scheduler_book( version: Version,"));
+    let dispatch = code
+        .split("pub async fn dispatch_scheduler_book<")
+        .nth(1)
+        .expect("the booking dispatcher is generated");
+    let (_, parameters) = dispatch.split_once(">(").expect("dispatcher parameters");
+    assert!(parameters.starts_with(" version: Version,"));
     insta::assert_snapshot!("independent_rust_chain_adapters", &files[0].1);
 }
 

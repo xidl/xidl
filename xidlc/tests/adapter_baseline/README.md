@@ -1,7 +1,7 @@
 These complete artifact manifests pin ordinary target output for the adapter
-fixtures. Generate them with `XIDLC_VERSION=0.0.1 XIDLC_GIT_HASH=snapshot` and both
-client and server generation enabled. The tests compare paths and contents byte
-for byte; adapter generation is never involved in producing the baseline.
+fixtures. Generate them with `XIDLC_VERSION=0.0.1 XIDLC_GIT_HASH=snapshot` and
+both client and server generation enabled. The tests compare paths and contents
+byte for byte; adapter generation is never involved in producing the baseline.
 
 To regenerate after an intentional change to ordinary output, build `xidlc` in a
 clean checkout of the new baseline, then run for each target and fixture:
