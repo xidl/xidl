@@ -63,8 +63,8 @@ fn is_calendar_date(value: &str) -> bool {
     day <= days[(month - 1) as usize]
 }
 
-/// Runtime base one: absent header serves Head; a date resolves to the newest
-/// served release not later than it; anything else is unresolved, never a guess.
+/// This application's example policy: absent header serves Head; a date resolves
+/// to the newest served release not later than it; anything else is unresolved.
 fn resolve_version(header: Option<&str>) -> Option<Version> {
     let Some(header) = header else {
         return Some(Version::V20270101);

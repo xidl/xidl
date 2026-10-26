@@ -2,9 +2,11 @@
 Feature: versioned booking chain
   A three-release booking contract exercising the walkthrough's chain shape:
   an uninvertible packaging change, a retired attendee roster served from
-  storage, a mechanically linked organizer rename and an implied default.
-  The application owns version negotiation, cross-release idempotency and
-  the behaviour switch; xidl owns the conversions and their refusals.
+  storage and cross-release idempotency.
+  This application's example policy serves Head for a missing version header,
+  selects the latest served release not later than the requested calendar date,
+  and rejects invalid or too-early dates. The application passes the resolved version to xidl,
+  which owns the conversions and their refusals.
 
   Scenario: the booking chain keeps storage facts and pure conversions
     Given a versioned REST IDL file "bdd/features/data/versioned_chain.idl"

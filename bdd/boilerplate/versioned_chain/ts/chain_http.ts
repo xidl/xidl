@@ -58,9 +58,8 @@ export async function runChainHttpJourney(): Promise<void> {
     ).json()) as types.v2027_01_01.Booking;
     assert.deepEqual(asHead.items, [{ minutes: 60, title: 'Kickoff' }]);
 
-    // Negotiation: a mid-patch date resolves to the newest release not later
-    // than it. Anything earlier, malformed, calendar-impossible or badly
-    // shaped is a 400, never a guess.
+    // This application's example policy: a mid-patch date resolves to the newest
+    // release not later than it. Invalid or too-early headers return 400.
     const negotiation: Array<[string | undefined, string, number]> = [
       [undefined, '2027-01-01', 404],
       ['2026-08-15', '2026-06-01', 404],

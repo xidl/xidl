@@ -80,8 +80,8 @@ pub async fn run_http_journey() {
     let head_view: Value = get(None, "b1").await.json().await.unwrap();
     assert_eq!(head_view["items"], json!([{ "minutes": 60, "title": "Kickoff" }]));
 
-    // Negotiation: mid-patch dates resolve down; earlier, malformed or
-    // calendar-impossible headers are a 400, never a guess.
+    // This application's example policy: mid-patch dates resolve down;
+    // earlier, malformed or calendar-impossible headers are a 400.
     let negotiation: Vec<(Option<&str>, &str, u16)> = vec![
         (None, "2027-01-01", 404),
         (Some("2026-08-15"), "2026-06-01", 404),
