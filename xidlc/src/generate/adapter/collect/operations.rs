@@ -23,6 +23,9 @@ impl SurfaceCollector {
                         parameter.name.clone(),
                     )),
                     optional: parameter.is_optional,
+                    // A parameter default would need rest_hir to carry it; the
+                    // issue covers struct members, where the fact already lives.
+                    defaulted: false,
                     representation: ValueRepresentation::Model,
                 }),
             };
@@ -67,6 +70,7 @@ impl SurfaceCollector {
                             "return".into(),
                         )),
                         optional: false,
+                        defaulted: false,
                         representation: ValueRepresentation::Model,
                     }),
                 },

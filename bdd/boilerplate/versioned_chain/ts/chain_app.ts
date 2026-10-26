@@ -108,6 +108,7 @@ export const hooks: a.VersionAdapters = {
       value: {
         agenda: a.IGNORED,
         items: [{ minutes: duration, title }],
+        locked: false,
       },
     };
   },
@@ -256,7 +257,22 @@ export function createBookingApp(state: BookingAppState) {
         async (input, _context) => {
           // A replay answers before any behaviour gate: the original decision
           // stands regardless of when the retry arrives.
-          const fingerprint = JSON.stringify(input);
+          // Equivalent Head commands may acquire different object insertion
+          // orders while passing through application hooks. Sort object keys;
+          // array order and absent/empty values retain their business meaning.
+          const fingerprint = JSON.stringify(input, (_key, value: unknown) => {
+            if (
+              value === null ||
+              typeof value !== 'object' ||
+              Array.isArray(value)
+            )
+              return value;
+            return Object.fromEntries(
+              Object.entries(value).sort(([left], [right]) =>
+                left < right ? -1 : left > right ? 1 : 0,
+              ),
+            );
+          });
           const cached = state.ledger.get(key);
           if (cached) {
             return cached.fingerprint === fingerprint

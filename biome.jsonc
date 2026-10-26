@@ -56,6 +56,21 @@
   "overrides": [
     {
       "includes": ["**/*.astro"]
+    },
+    {
+      // Generated server shims implement interfaces whose members carry the
+      // IDL `any` type; the implementations must spell it to conform.
+      "includes": ["bdd/boilerplate/**/ts/server.ts"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedFunctionParameters": "off"
+          },
+          "suspicious": {
+            "noExplicitAny": "off"
+          }
+        }
+      }
     }
   ],
   "vcs": {

@@ -540,7 +540,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }).strict()
     
         .superRefine((wire, context) => {
-            for (const key of ["audit","carrier","courier_note","courier_remark","inspected","note"]) {
+            for (const key of ["audit","carrier","courier_note","courier_remark","inspected","note","signature_required"]) {
                 if (Object.hasOwn(wire, key)) context.addIssue({ code: "custom", path: [key], message: "field is not available in served version" });
             }
         })
@@ -1298,7 +1298,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }).strict()
     
         .superRefine((wire, context) => {
-            for (const key of ["audit","courier_remark","inspected"]) {
+            for (const key of ["audit","courier_remark","inspected","signature_required"]) {
                 if (Object.hasOwn(wire, key)) context.addIssue({ code: "custom", path: [key], message: "field is not available in served version" });
             }
         })
@@ -2098,6 +2098,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["reference"]: z.unknown().optional(),
         
+            ["signature_required"]: z.unknown().optional(),
+        
             ["stops"]: z.unknown().optional(),
         
     }).strict()
@@ -2121,6 +2123,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
             ["inspected"]: wire["inspected"],
         
             ["audit"]: wire["audit"],
+        
+            ["signature_required"]: wire["signature_required"],
         
             ["courier_remark"]: wire["courier_remark"],
         
@@ -2146,6 +2150,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
             ["inspected"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
         
             ["audit"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.coerce.string()),
+        
+            ["signature_required"]: z.coerce.boolean().nullish().transform((value) => value ?? undefined),
         
             ["courier_remark"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
         
@@ -2181,6 +2187,10 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             
                 ["audit"]: value["audit"],
+            
+        
+            
+                ...(value["signature_required"] === undefined ? {} : { ["signature_required"]: value["signature_required"] }),
             
         
             
@@ -2528,6 +2538,8 @@ export interface VersionAdapters {
             inspected?: string;
         
             audit: string;
+        
+            signature_required: boolean;
         
             courier_remark?: string;
         
@@ -3633,6 +3645,7 @@ export interface VersionAdapters {
                 
                         ...(decision.value["inspected"] === undefined ? {} : { ["inspected"]: decision.value["inspected"] }),
                         ["audit"]: decision.value["audit"],
+                        ["signature_required"]: decision.value["signature_required"],
                         ...(decision.value["courier_remark"] === undefined ? {} : { ["courier_remark"]: decision.value["courier_remark"] }),
             });
         

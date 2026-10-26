@@ -1,0 +1,1424 @@
+---
+source: xidlc/tests/rust_adapters_targets.rs
+expression: "&files[0].1"
+---
+/// Pure version projections. The application owns routing and side effects.
+#[allow(unused_imports, unused_variables, non_snake_case, non_camel_case_types)]
+pub mod version_adapters {
+    use super::{v2026_01_01, v2026_04_01, v2026_07_01};
+    /// Direction of an unsupported projection.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum Direction {
+        Upcast,
+        Downcast,
+    }
+    /// The application renders a refusal using its own frozen error vocabulary.
+    #[derive(Debug, Clone)]
+    pub struct UnsupportedProjection {
+        pub version: String,
+        pub direction: Direction,
+        pub type_path: String,
+        pub reason: String,
+    }
+    /// A projection either succeeds or requires an unsupported business choice.
+    pub type VersionedResult<T> = Result<T, UnsupportedProjection>;
+    /// Explicit acknowledgement that a source value is intentionally discarded.
+    #[derive(Debug, Clone, Copy)]
+    pub struct Ignored {
+        _private: (),
+    }
+    /// The acknowledgement hooks return for an intentionally retired member.
+    pub const IGNORED: Ignored = Ignored { _private: () };
+    /// A version resolved by the application before calling an adapter.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum Version {
+        V20260101,
+        V20260401,
+        V20260701,
+    }
+    impl Version {
+        /// Original contract identifier.
+        pub fn id(self) -> &'static str {
+            match self {
+                Self::V20260101 => "v2026_01_01",
+                Self::V20260401 => "v2026_04_01",
+                Self::V20260701 => "v2026_07_01",
+            }
+        }
+        /// Original contract version value.
+        pub fn value(self) -> &'static str {
+            match self {
+                Self::V20260101 => "2026-01-01",
+                Self::V20260401 => "2026-04-01",
+                Self::V20260701 => "2026-07-01",
+            }
+        }
+    }
+    /// Context for application business policy; adapters do not select versions.
+    #[derive(Debug, Clone, Copy)]
+    pub struct VersionContext {
+        pub original_version: Version,
+    }
+    /// A failed response projection retains the original committed Head outcome.
+    pub enum ProjectionOutcome<T, H> {
+        Projected(T),
+        Unsupported { head: H, error: UnsupportedProjection },
+    }
+    /// Invalid served-version wire data is distinct from a business refusal.
+    #[derive(Debug)]
+    pub enum AdaptationError {
+        Validation(String),
+        Unsupported(UnsupportedProjection),
+    }
+    impl From<UnsupportedProjection> for AdaptationError {
+        fn from(value: UnsupportedProjection) -> Self {
+            Self::Unsupported(value)
+        }
+    }
+    /// Hooks remain synchronous, pure, deterministic, and mandatory.
+    pub trait VersionAdapters {
+        fn event_kind_upcast_from_v_2026_04_01(
+            &self,
+            source: &EventKindUpcastFromV20260401Changes,
+        ) -> VersionedResult<v2026_07_01::EventKind>;
+        fn event_kind_downcast_to_v_2026_04_01(
+            &self,
+            source: &EventKindDowncastToV20260401Changes,
+        ) -> VersionedResult<v2026_04_01::EventKind>;
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct NotifierEmitRequestV20260101 {
+        pub event: v2026_01_01::Event,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct NotifierFeedRequestV20260101 {}
+    /// Public model parameters for one served version's operation.
+    pub struct NotifierEmitRequestV20260401 {
+        pub event: v2026_04_01::Event,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct NotifierFeedRequestV20260401 {}
+    /// Public model parameters for one served version's operation.
+    pub struct NotifierEmitRequestV20260701 {
+        pub event: v2026_07_01::Event,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct NotifierFeedRequestV20260701 {}
+    fn locate<T>(result: VersionedResult<T>, path: &str) -> VersionedResult<T> {
+        result
+            .map_err(|error| UnsupportedProjection {
+                type_path: format!("{path}.{}", error.type_path),
+                ..error
+            })
+    }
+    fn map_sequence<S, T>(
+        source: &[S],
+        convert: impl Fn(&S) -> VersionedResult<T>,
+        path: &str,
+    ) -> VersionedResult<Vec<T>> {
+        source.iter().map(|item| locate(convert(item), path)).collect()
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn event_upcast_from_v_2026_01_01(
+        source: &v2026_01_01::Event,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_04_01::Event> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_01_01".into(),
+            direction: Direction::Upcast,
+            type_path: "Event".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        let projected_1 = event_kind_upcast_from_v_2026_01_01(&source.kind, adapters)?;
+        let projected_2 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.payload))?;
+        Ok(v2026_04_01::Event {
+            id: projected_0,
+            kind: projected_1,
+            payload: projected_2,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn event_downcast_to_v_2026_01_01(
+        source: &v2026_04_01::Event,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_01_01::Event> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_04_01".into(),
+            direction: Direction::Downcast,
+            type_path: "Event".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        let projected_1 = event_kind_downcast_to_v_2026_01_01(&source.kind, adapters)?;
+        let projected_2 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.payload))?;
+        Ok(v2026_01_01::Event {
+            id: projected_0,
+            kind: projected_1,
+            payload: projected_2,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn event_kind_upcast_from_v_2026_01_01(
+        source: &v2026_01_01::EventKind,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_04_01::EventKind> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_01_01".into(),
+            direction: Direction::Upcast,
+            type_path: "EventKind".into(),
+            reason: reason.into(),
+        };
+        match source {
+            v2026_01_01::EventKind::updated => Ok(v2026_04_01::EventKind::updated),
+        }
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn event_kind_downcast_to_v_2026_01_01(
+        source: &v2026_04_01::EventKind,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_01_01::EventKind> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_04_01".into(),
+            direction: Direction::Downcast,
+            type_path: "EventKind".into(),
+            reason: reason.into(),
+        };
+        match source {
+            v2026_04_01::EventKind::updated => Ok(v2026_01_01::EventKind::updated),
+        }
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn notifier_emit_request_upcast_from_v_2026_01_01(
+        source: &NotifierEmitRequestV20260101,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<NotifierEmitRequestV20260401> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_01_01".into(),
+            direction: Direction::Upcast,
+            type_path: "NotifierEmitRequest".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = event_upcast_from_v_2026_01_01(&source.event, adapters)?;
+        Ok(NotifierEmitRequestV20260401 {
+            event: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn notifier_emit_response_downcast_to_v_2026_01_01(
+        source: &v2026_04_01::Event,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_01_01::Event> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_04_01".into(),
+            direction: Direction::Downcast,
+            type_path: "NotifierEmitResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = event_downcast_to_v_2026_01_01(source, adapters)?;
+        Ok(projected_0)
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn notifier_feed_request_upcast_from_v_2026_01_01(
+        source: &NotifierFeedRequestV20260101,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<NotifierFeedRequestV20260401> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_01_01".into(),
+            direction: Direction::Upcast,
+            type_path: "NotifierFeedRequest".into(),
+            reason: reason.into(),
+        };
+        Ok(NotifierFeedRequestV20260401 {})
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn notifier_feed_response_downcast_to_v_2026_01_01(
+        source: &Vec<v2026_04_01::Event>,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<Vec<v2026_01_01::Event>> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_04_01".into(),
+            direction: Direction::Downcast,
+            type_path: "NotifierFeedResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = map_sequence(
+            source,
+            |item| event_downcast_to_v_2026_01_01(item, adapters),
+            "NotifierFeedResponse.r#return",
+        )?;
+        Ok(projected_0)
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn event_upcast_from_v_2026_04_01(
+        source: &v2026_04_01::Event,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_07_01::Event> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_04_01".into(),
+            direction: Direction::Upcast,
+            type_path: "Event".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        let projected_1 = event_kind_upcast_from_v_2026_04_01(&source.kind, adapters)?;
+        let projected_2 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.payload))?;
+        Ok(v2026_07_01::Event {
+            id: projected_0,
+            kind: projected_1,
+            payload: projected_2,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn event_downcast_to_v_2026_04_01(
+        source: &v2026_07_01::Event,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_04_01::Event> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_07_01".into(),
+            direction: Direction::Downcast,
+            type_path: "Event".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.id))?;
+        let projected_1 = event_kind_downcast_to_v_2026_04_01(&source.kind, adapters)?;
+        let projected_2 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.payload))?;
+        Ok(v2026_04_01::Event {
+            id: projected_0,
+            kind: projected_1,
+            payload: projected_2,
+        })
+    }
+    /// Only source alternatives requiring an application decision.
+    pub enum EventKindUpcastFromV20260401Changes {
+        updated,
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn event_kind_upcast_from_v_2026_04_01(
+        source: &v2026_04_01::EventKind,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_07_01::EventKind> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_04_01".into(),
+            direction: Direction::Upcast,
+            type_path: "EventKind".into(),
+            reason: reason.into(),
+        };
+        match source {
+            v2026_04_01::EventKind::updated => {
+                adapters
+                    .event_kind_upcast_from_v_2026_04_01(
+                        &EventKindUpcastFromV20260401Changes::updated,
+                    )
+            }
+        }
+    }
+    /// Only source alternatives requiring an application decision.
+    pub enum EventKindDowncastToV20260401Changes {
+        delivered,
+        read,
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn event_kind_downcast_to_v_2026_04_01(
+        source: &v2026_07_01::EventKind,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_04_01::EventKind> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_07_01".into(),
+            direction: Direction::Downcast,
+            type_path: "EventKind".into(),
+            reason: reason.into(),
+        };
+        match source {
+            v2026_07_01::EventKind::delivered => {
+                adapters
+                    .event_kind_downcast_to_v_2026_04_01(
+                        &EventKindDowncastToV20260401Changes::delivered,
+                    )
+            }
+            v2026_07_01::EventKind::read => {
+                adapters
+                    .event_kind_downcast_to_v_2026_04_01(
+                        &EventKindDowncastToV20260401Changes::read,
+                    )
+            }
+        }
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn notifier_emit_request_upcast_from_v_2026_04_01(
+        source: &NotifierEmitRequestV20260401,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<NotifierEmitRequestV20260701> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_04_01".into(),
+            direction: Direction::Upcast,
+            type_path: "NotifierEmitRequest".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = event_upcast_from_v_2026_04_01(&source.event, adapters)?;
+        Ok(NotifierEmitRequestV20260701 {
+            event: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn notifier_emit_response_downcast_to_v_2026_04_01(
+        source: &v2026_07_01::Event,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2026_04_01::Event> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_07_01".into(),
+            direction: Direction::Downcast,
+            type_path: "NotifierEmitResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = event_downcast_to_v_2026_04_01(source, adapters)?;
+        Ok(projected_0)
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn notifier_feed_request_upcast_from_v_2026_04_01(
+        source: &NotifierFeedRequestV20260401,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<NotifierFeedRequestV20260701> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_04_01".into(),
+            direction: Direction::Upcast,
+            type_path: "NotifierFeedRequest".into(),
+            reason: reason.into(),
+        };
+        Ok(NotifierFeedRequestV20260701 {})
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn notifier_feed_response_downcast_to_v_2026_04_01(
+        source: &Vec<v2026_07_01::Event>,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<Vec<v2026_04_01::Event>> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2026_07_01".into(),
+            direction: Direction::Downcast,
+            type_path: "NotifierFeedResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = map_sequence(
+            source,
+            |item| event_downcast_to_v_2026_04_01(item, adapters),
+            "NotifierFeedResponse.r#return",
+        )?;
+        Ok(projected_0)
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_notifier_emit_error_to_v_2026_01_01(
+        source: &::xidl_rust_axum::Error,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<::xidl_rust_axum::Error> {
+        Ok(source.clone())
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_notifier_feed_error_to_v_2026_01_01(
+        source: &::xidl_rust_axum::Error,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<::xidl_rust_axum::Error> {
+        Ok(source.clone())
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_notifier_emit_error_to_v_2026_04_01(
+        source: &::xidl_rust_axum::Error,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<::xidl_rust_axum::Error> {
+        Ok(source.clone())
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_notifier_feed_error_to_v_2026_04_01(
+        source: &::xidl_rust_axum::Error,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<::xidl_rust_axum::Error> {
+        Ok(source.clone())
+    }
+    fn decode_wire_v_2026_01_01_event(
+        wire: &::serde_json::Value,
+    ) -> Result<v2026_01_01::Event, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &["id", "kind", "payload"];
+        let forbidden: &[&str] = &[];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object
+            .get("id")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "id").to_string()
+            })?;
+        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_1 = object
+            .get("kind")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "kind").to_string()
+            })?;
+        let value_1: v2026_01_01::EventKind = decode_wire_v_2026_01_01_event_kind(
+            raw_1,
+        )?;
+        let raw_2 = object
+            .get("payload")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "payload").to_string()
+            })?;
+        let value_2: String = ::serde_json::from_value::<String>((raw_2).clone())
+            .map_err(|error| error.to_string())?;
+        Ok(v2026_01_01::Event {
+            id: value_0,
+            kind: value_1,
+            payload: value_2,
+        })
+    }
+    fn decode_wire_v_2026_01_01_event_kind(
+        wire: &::serde_json::Value,
+    ) -> Result<v2026_01_01::EventKind, String> {
+        ::serde_json::from_value(wire.clone()).map_err(|error| error.to_string())
+    }
+    fn decode_wire_v_2026_04_01_event(
+        wire: &::serde_json::Value,
+    ) -> Result<v2026_04_01::Event, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &["id", "kind", "payload"];
+        let forbidden: &[&str] = &[];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object
+            .get("id")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "id").to_string()
+            })?;
+        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_1 = object
+            .get("kind")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "kind").to_string()
+            })?;
+        let value_1: v2026_04_01::EventKind = decode_wire_v_2026_04_01_event_kind(
+            raw_1,
+        )?;
+        let raw_2 = object
+            .get("payload")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "payload").to_string()
+            })?;
+        let value_2: String = ::serde_json::from_value::<String>((raw_2).clone())
+            .map_err(|error| error.to_string())?;
+        Ok(v2026_04_01::Event {
+            id: value_0,
+            kind: value_1,
+            payload: value_2,
+        })
+    }
+    fn decode_wire_v_2026_04_01_event_kind(
+        wire: &::serde_json::Value,
+    ) -> Result<v2026_04_01::EventKind, String> {
+        ::serde_json::from_value(wire.clone()).map_err(|error| error.to_string())
+    }
+    fn decode_wire_v_2026_07_01_event(
+        wire: &::serde_json::Value,
+    ) -> Result<v2026_07_01::Event, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &["id", "kind", "payload"];
+        let forbidden: &[&str] = &[];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object
+            .get("id")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "id").to_string()
+            })?;
+        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+            .map_err(|error| error.to_string())?;
+        let raw_1 = object
+            .get("kind")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "kind").to_string()
+            })?;
+        let value_1: v2026_07_01::EventKind = decode_wire_v_2026_07_01_event_kind(
+            raw_1,
+        )?;
+        let raw_2 = object
+            .get("payload")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "payload").to_string()
+            })?;
+        let value_2: String = ::serde_json::from_value::<String>((raw_2).clone())
+            .map_err(|error| error.to_string())?;
+        Ok(v2026_07_01::Event {
+            id: value_0,
+            kind: value_1,
+            payload: value_2,
+        })
+    }
+    fn decode_wire_v_2026_07_01_event_kind(
+        wire: &::serde_json::Value,
+    ) -> Result<v2026_07_01::EventKind, String> {
+        ::serde_json::from_value(wire.clone()).map_err(|error| error.to_string())
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_notifier_emit_from_v_2026_01_01(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<NotifierEmitRequestV20260701, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["event"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("event")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "event").into(),
+            ))?;
+        let value_0: v2026_01_01::Event = decode_wire_v_2026_01_01_event(&raw_0)
+            .map_err(AdaptationError::Validation)?;
+        let source = NotifierEmitRequestV20260101 {
+            event: value_0,
+        };
+        let source = notifier_emit_request_upcast_from_v_2026_01_01(&source, adapters)?;
+        let source = notifier_emit_request_upcast_from_v_2026_04_01(&source, adapters)?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_notifier_emit_from_v_2026_01_01_outcome(
+        head: Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<v2026_01_01::Event, ::xidl_rust_axum::Error>,
+        Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
+    > {
+        match &head {
+            Ok(source) => {
+                let source = match notifier_emit_response_downcast_to_v_2026_04_01(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                let source = match notifier_emit_response_downcast_to_v_2026_01_01(
+                    &source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_notifier_emit_error_to_v_2026_04_01(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                let source = match downcast_notifier_emit_error_to_v_2026_01_01(
+                    &source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_notifier_emit_from_v_2026_01_01<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<v2026_01_01::Event, ::xidl_rust_axum::Error>,
+            Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(NotifierEmitRequestV20260701, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
+        >,
+    {
+        let input = decode_and_upcast_notifier_emit_from_v_2026_01_01(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V20260101,
+                },
+            )
+            .await;
+        Ok(downcast_notifier_emit_from_v_2026_01_01_outcome(head, adapters))
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_notifier_feed_from_v_2026_01_01(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<NotifierFeedRequestV20260701, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &[];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let source = NotifierFeedRequestV20260101 {};
+        let source = notifier_feed_request_upcast_from_v_2026_01_01(&source, adapters)?;
+        let source = notifier_feed_request_upcast_from_v_2026_04_01(&source, adapters)?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_notifier_feed_from_v_2026_01_01_outcome(
+        head: Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<Vec<v2026_01_01::Event>, ::xidl_rust_axum::Error>,
+        Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
+    > {
+        match &head {
+            Ok(source) => {
+                let source = match notifier_feed_response_downcast_to_v_2026_04_01(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                let source = match notifier_feed_response_downcast_to_v_2026_01_01(
+                    &source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_notifier_feed_error_to_v_2026_04_01(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                let source = match downcast_notifier_feed_error_to_v_2026_01_01(
+                    &source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_notifier_feed_from_v_2026_01_01<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<Vec<v2026_01_01::Event>, ::xidl_rust_axum::Error>,
+            Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(NotifierFeedRequestV20260701, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
+        >,
+    {
+        let input = decode_and_upcast_notifier_feed_from_v_2026_01_01(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V20260101,
+                },
+            )
+            .await;
+        Ok(downcast_notifier_feed_from_v_2026_01_01_outcome(head, adapters))
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_notifier_emit_from_v_2026_04_01(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<NotifierEmitRequestV20260701, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["event"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("event")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "event").into(),
+            ))?;
+        let value_0: v2026_04_01::Event = decode_wire_v_2026_04_01_event(&raw_0)
+            .map_err(AdaptationError::Validation)?;
+        let source = NotifierEmitRequestV20260401 {
+            event: value_0,
+        };
+        let source = notifier_emit_request_upcast_from_v_2026_04_01(&source, adapters)?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_notifier_emit_from_v_2026_04_01_outcome(
+        head: Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<v2026_04_01::Event, ::xidl_rust_axum::Error>,
+        Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
+    > {
+        match &head {
+            Ok(source) => {
+                let source = match notifier_emit_response_downcast_to_v_2026_04_01(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_notifier_emit_error_to_v_2026_04_01(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_notifier_emit_from_v_2026_04_01<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<v2026_04_01::Event, ::xidl_rust_axum::Error>,
+            Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(NotifierEmitRequestV20260701, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
+        >,
+    {
+        let input = decode_and_upcast_notifier_emit_from_v_2026_04_01(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V20260401,
+                },
+            )
+            .await;
+        Ok(downcast_notifier_emit_from_v_2026_04_01_outcome(head, adapters))
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_notifier_feed_from_v_2026_04_01(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<NotifierFeedRequestV20260701, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &[];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let source = NotifierFeedRequestV20260401 {};
+        let source = notifier_feed_request_upcast_from_v_2026_04_01(&source, adapters)?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_notifier_feed_from_v_2026_04_01_outcome(
+        head: Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<Vec<v2026_04_01::Event>, ::xidl_rust_axum::Error>,
+        Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
+    > {
+        match &head {
+            Ok(source) => {
+                let source = match notifier_feed_response_downcast_to_v_2026_04_01(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_notifier_feed_error_to_v_2026_04_01(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_notifier_feed_from_v_2026_04_01<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<Vec<v2026_04_01::Event>, ::xidl_rust_axum::Error>,
+            Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(NotifierFeedRequestV20260701, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
+        >,
+    {
+        let input = decode_and_upcast_notifier_feed_from_v_2026_04_01(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V20260401,
+                },
+            )
+            .await;
+        Ok(downcast_notifier_feed_from_v_2026_04_01_outcome(head, adapters))
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_notifier_emit_from_v_2026_07_01(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<NotifierEmitRequestV20260701, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["event"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("event")
+            .cloned()
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "event").into(),
+            ))?;
+        let value_0: v2026_07_01::Event = decode_wire_v_2026_07_01_event(&raw_0)
+            .map_err(AdaptationError::Validation)?;
+        let source = NotifierEmitRequestV20260701 {
+            event: value_0,
+        };
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_notifier_emit_from_v_2026_07_01_outcome(
+        head: Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
+        Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
+    > {
+        ProjectionOutcome::Projected(head)
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_notifier_emit_from_v_2026_07_01<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
+            Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(NotifierEmitRequestV20260701, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
+        >,
+    {
+        let input = decode_and_upcast_notifier_emit_from_v_2026_07_01(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V20260701,
+                },
+            )
+            .await;
+        Ok(downcast_notifier_emit_from_v_2026_07_01_outcome(head, adapters))
+    }
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_notifier_feed_from_v_2026_07_01(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<NotifierFeedRequestV20260701, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &[];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let source = NotifierFeedRequestV20260701 {};
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_notifier_feed_from_v_2026_07_01_outcome(
+        head: Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
+        Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
+    > {
+        ProjectionOutcome::Projected(head)
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_notifier_feed_from_v_2026_07_01<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
+            Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(NotifierFeedRequestV20260701, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
+        >,
+    {
+        let input = decode_and_upcast_notifier_feed_from_v_2026_07_01(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V20260701,
+                },
+            )
+            .await;
+        Ok(downcast_notifier_feed_from_v_2026_07_01_outcome(head, adapters))
+    }
+    /// The caller-selected version's projected model type.
+    pub enum EventProjection {
+        V20260101(v2026_01_01::Event),
+        V20260401(v2026_04_01::Event),
+        V20260701(v2026_07_01::Event),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_event(
+        version: Version,
+        head: v2026_07_01::Event,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<EventProjection> {
+        match version {
+            Version::V20260101 => {
+                let source = event_downcast_to_v_2026_04_01(&head, adapters)?;
+                let source = event_downcast_to_v_2026_01_01(&source, adapters)?;
+                Ok(EventProjection::V20260101(source))
+            }
+            Version::V20260401 => {
+                let source = event_downcast_to_v_2026_04_01(&head, adapters)?;
+                Ok(EventProjection::V20260401(source))
+            }
+            Version::V20260701 => {
+                let source = head;
+                Ok(EventProjection::V20260701(source))
+            }
+        }
+    }
+    /// The caller-selected version's projected model type.
+    pub enum EventKindProjection {
+        V20260101(v2026_01_01::EventKind),
+        V20260401(v2026_04_01::EventKind),
+        V20260701(v2026_07_01::EventKind),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_event_kind(
+        version: Version,
+        head: v2026_07_01::EventKind,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<EventKindProjection> {
+        match version {
+            Version::V20260101 => {
+                let source = event_kind_downcast_to_v_2026_04_01(&head, adapters)?;
+                let source = event_kind_downcast_to_v_2026_01_01(&source, adapters)?;
+                Ok(EventKindProjection::V20260101(source))
+            }
+            Version::V20260401 => {
+                let source = event_kind_downcast_to_v_2026_04_01(&head, adapters)?;
+                Ok(EventKindProjection::V20260401(source))
+            }
+            Version::V20260701 => {
+                let source = head;
+                Ok(EventKindProjection::V20260701(source))
+            }
+        }
+    }
+    /// Outcome in the caller's explicitly selected contract version.
+    pub enum NotifierEmitOutcome {
+        V20260101(Result<v2026_01_01::Event, ::xidl_rust_axum::Error>),
+        V20260401(Result<v2026_04_01::Event, ::xidl_rust_axum::Error>),
+        V20260701(Result<v2026_07_01::Event, ::xidl_rust_axum::Error>),
+    }
+    /// Decode a request using an application-resolved version before any hook.
+    pub fn decode_and_upcast_notifier_emit(
+        version: Version,
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<NotifierEmitRequestV20260701, AdaptationError> {
+        match version {
+            Version::V20260101 => {
+                decode_and_upcast_notifier_emit_from_v_2026_01_01(wire, adapters)
+            }
+            Version::V20260401 => {
+                decode_and_upcast_notifier_emit_from_v_2026_04_01(wire, adapters)
+            }
+            Version::V20260701 => {
+                decode_and_upcast_notifier_emit_from_v_2026_07_01(wire, adapters)
+            }
+        }
+    }
+    /// Retain the original owned Head outcome when any projection refuses.
+    pub fn downcast_notifier_emit_outcome(
+        version: Version,
+        head: Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        NotifierEmitOutcome,
+        Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
+    > {
+        match version {
+            Version::V20260101 => {
+                match downcast_notifier_emit_from_v_2026_01_01_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            NotifierEmitOutcome::V20260101(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V20260401 => {
+                match downcast_notifier_emit_from_v_2026_04_01_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            NotifierEmitOutcome::V20260401(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V20260701 => {
+                match downcast_notifier_emit_from_v_2026_07_01_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            NotifierEmitOutcome::V20260701(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /// Execute a Head handler once; the application supplies version resolution.
+    pub async fn dispatch_notifier_emit<F, Fut>(
+        version: Version,
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            NotifierEmitOutcome,
+            Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(NotifierEmitRequestV20260701, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
+        >,
+    {
+        let input = decode_and_upcast_notifier_emit(version, wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: version,
+                },
+            )
+            .await;
+        Ok(downcast_notifier_emit_outcome(version, head, adapters))
+    }
+    /// Outcome in the caller's explicitly selected contract version.
+    pub enum NotifierFeedOutcome {
+        V20260101(Result<Vec<v2026_01_01::Event>, ::xidl_rust_axum::Error>),
+        V20260401(Result<Vec<v2026_04_01::Event>, ::xidl_rust_axum::Error>),
+        V20260701(Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>),
+    }
+    /// Decode a request using an application-resolved version before any hook.
+    pub fn decode_and_upcast_notifier_feed(
+        version: Version,
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<NotifierFeedRequestV20260701, AdaptationError> {
+        match version {
+            Version::V20260101 => {
+                decode_and_upcast_notifier_feed_from_v_2026_01_01(wire, adapters)
+            }
+            Version::V20260401 => {
+                decode_and_upcast_notifier_feed_from_v_2026_04_01(wire, adapters)
+            }
+            Version::V20260701 => {
+                decode_and_upcast_notifier_feed_from_v_2026_07_01(wire, adapters)
+            }
+        }
+    }
+    /// Retain the original owned Head outcome when any projection refuses.
+    pub fn downcast_notifier_feed_outcome(
+        version: Version,
+        head: Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<
+        NotifierFeedOutcome,
+        Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
+    > {
+        match version {
+            Version::V20260101 => {
+                match downcast_notifier_feed_from_v_2026_01_01_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            NotifierFeedOutcome::V20260101(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V20260401 => {
+                match downcast_notifier_feed_from_v_2026_04_01_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            NotifierFeedOutcome::V20260401(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V20260701 => {
+                match downcast_notifier_feed_from_v_2026_07_01_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(
+                            NotifierFeedOutcome::V20260701(value),
+                        )
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /// Execute a Head handler once; the application supplies version resolution.
+    pub async fn dispatch_notifier_feed<F, Fut>(
+        version: Version,
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<
+            NotifierFeedOutcome,
+            Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
+        >,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(NotifierFeedRequestV20260701, VersionContext) -> Fut,
+        Fut: ::std::future::Future<
+            Output = Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
+        >,
+    {
+        let input = decode_and_upcast_notifier_feed(version, wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: version,
+                },
+            )
+            .await;
+        Ok(downcast_notifier_feed_outcome(version, head, adapters))
+    }
+}

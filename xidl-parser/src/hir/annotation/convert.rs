@@ -274,7 +274,7 @@ pub(super) fn apply_rename_rule(raw_name: &str, rule: RenameRule) -> String {
     }
 }
 
-pub(super) fn render_annotation_const_expr(expr: &ConstExpr) -> String {
+pub(crate) fn render_annotation_const_expr(expr: &ConstExpr) -> String {
     match expr {
         ConstExpr::ScopedName(value) => {
             let prefix = if value.is_root { "::" } else { "" };

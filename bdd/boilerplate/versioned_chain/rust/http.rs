@@ -129,6 +129,7 @@ pub async fn run_http_journey() {
         json!({
             "id": "b1",
             "items": [{ "minutes": 60, "title": "Kickoff" }],
+            "locked": false,
             "owner": "user-9",
             "roster": ["ignored-by-the-chain"],
             "title": "Kickoff",
@@ -178,7 +179,7 @@ pub async fn run_http_journey() {
     );
     let blank_replay = post(
         Some("2027-01-01"),
-        json!({ "id": "b-blank", "items": [{ "minutes": 0, "title": " " }], "title": "   " }),
+        json!({ "id": "b-blank", "items": [{ "minutes": 0, "title": " " }], "locked": false, "title": "   " }),
         Some("blank-v1"),
     )
     .await;
@@ -266,6 +267,41 @@ pub async fn run_http_journey() {
     let dupe_v1: Value = get(Some("2026-06-01"), "b-dupe").await.json().await.unwrap();
     assert_eq!(dupe_v1["agenda"], json!("First;10"));
     assert_eq!(dupe_v1["roster"], json!([]));
+
+    // A current-release caller that omits the lockable flag keeps it absent:
+    // the implied value is only for callers who cannot state it yet, and a
+    // caller who owns the field keeps exactly what it sent.
+    let unlocked = post(
+        Some("2026-10-01"),
+        json!({
+            "id": "b-unlocked",
+            "items": [{ "minutes": 5, "title": "Open" }],
+            "roster": [],
+            "title": "Open",
+        }),
+        Some("unlocked"),
+    )
+    .await;
+    assert_eq!(unlocked.status(), StatusCode::OK);
+    let unlocked_view: Value = unlocked.json().await.unwrap();
+    assert!(unlocked_view.get("locked").is_none());
+    let sealed = post(
+        Some("2026-10-01"),
+        json!({
+            "id": "b-locked",
+            "items": [{ "minutes": 6, "title": "Sealed" }],
+            "locked": true,
+            "roster": [],
+            "title": "Sealed",
+        }),
+        Some("locked"),
+    )
+    .await;
+    assert_eq!(sealed.status(), StatusCode::OK);
+    let sealed_view: Value = sealed.json().await.unwrap();
+    assert_eq!(sealed_view["locked"], json!(true));
+    let sealed_head: Value = get(None, "b-locked").await.json().await.unwrap();
+    assert_eq!(sealed_head["locked"], json!(true));
 
     stop.send(()).unwrap();
     server.await.unwrap();
