@@ -46,6 +46,13 @@ export async function runStoredJourney(
     ),
     false,
   );
+  // A defaulted addition keeps the value older callers implied.
+  assert.equal(
+    head.signature_required,
+    false,
+    'old callers keep their implied value',
+  );
+
   // The application owns this rename. Its reader obtains the retired fact
   // from the Head field; NEEDS reports the old wire contract, not a DB schema.
   const renamedHead = take(

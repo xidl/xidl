@@ -132,7 +132,16 @@ impl AdapterRenderer<'_> {
         for member in &plan.assignments {
             let name = rust_ident(&member.name);
             keys.insert(name.clone());
-            let ty = self.field_type(member, input.target, input.declaration)?;
+            let optional = member.value.as_ref().is_some_and(|value| value.optional);
+            // Only upcast additions state an implied value; a downcast removal
+            // keeps its Option so storage can answer OMIT.
+            let defaulted =
+                input.target.upward && member.value.as_ref().is_some_and(|value| value.defaulted);
+            let ty = if defaulted {
+                self.bare_field_type(member, input.target)?
+            } else {
+                self.field_type(member, input.target, input.declaration)?
+            };
             if downward {
                 let optional = member.value.as_ref().is_some_and(|value| value.optional);
                 file.readers.push(Reader {
@@ -151,7 +160,10 @@ impl AdapterRenderer<'_> {
                 name: name.clone(),
                 ty,
             });
-            output.assignments.push(name);
+            output.assignments.push(Assignment {
+                name,
+                wrap: optional && defaulted,
+            });
         }
         for member in &plan.ignored {
             let name = rust_ident(&member.name);

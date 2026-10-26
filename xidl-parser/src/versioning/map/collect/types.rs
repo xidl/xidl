@@ -334,6 +334,9 @@ fn collect_members(
             let mut facts = declarator_facts(declarator);
             facts.insert("type".to_string(), Value::String(render_type(&member.ty)));
             facts.insert("optional".to_string(), Value::Bool(member.is_optional()));
+            if let Some(default) = member.default_value() {
+                facts.insert("default".to_string(), Value::String(default));
+            }
             (wire, facts)
         })
         .collect::<BTreeMap<_, _>>()

@@ -78,6 +78,11 @@ def prepare_application(context, script, boilerplate_name="versioned_adapters"):
             "business_update.ts",
         ],
         "chain.ts": ["chain_http.ts", "chain_app.ts"],
+        "transforms.ts": [
+            "transforms_http.ts",
+            "transforms_app.ts",
+            "transforms_hooks.ts",
+        ],
     }
     for name in companions.get(script, []):
         shutil.copy(boilerplate / name, output)
@@ -147,6 +152,17 @@ def real_business_journey(context):
     )
     expect_tsc_failure(
         output,
+        "implied-default.ts",
+        f'import type {{ VersionAdapters }} from "{adapters}";\n'
+        "export const partial: Pick<VersionAdapters, 'parcelUpcastFromV2'> = {\n"
+        "  parcelUpcastFromV2: () =>\n"
+        "    ({ ok: true, value: { audit: 'checked', handling_note: 'xidl.ignored' as const } }),\n"
+        "};\n",
+        "signature_required",
+        "a defaulted addition needs the value older versions implied",
+    )
+    expect_tsc_failure(
+        output,
         "missing-persist.ts",
         f'import type {{ VersionAdapters }} from "{adapters}";\n'
         "import type * as types from './versioned_adapters_business';\n"
@@ -202,6 +218,17 @@ def prepare_rust_application(context, script, boilerplate_name="versioned_adapte
         "versioned_adapters": {"main.rs": ["hooks.rs", "journey.rs", "wire.rs"]},
         "versioned_chain": {
             "main.rs": ["hooks.rs", "chain.rs", "http.rs", "http_app.rs"]
+        },
+        "versioned_events": {"main.rs": ["events.rs"]},
+        "versioned_transforms": {
+            "main.rs": [
+                "hooks.rs",
+                "transforms.rs",
+                "http.rs",
+                "http_app.rs",
+                "http_roster.rs",
+                "routes.rs",
+            ]
         },
     }
     for name in companions.get(boilerplate_name, {}).get(script, []):
@@ -275,6 +302,13 @@ def rust_business_journey(context):
     expect_cargo_check_failure(
         output,
         hooks,
+        hooks.read_text().replace(", signature_required: false", ""),
+        "missing field `signature_required`",
+        "a defaulted addition needs the value older versions implied",
+    )
+    expect_cargo_check_failure(
+        output,
+        hooks,
         hooks.read_text().replace(
             "stored: DepotUpdateStored { handling_note: source.handling_note.clone() },",
             "",
@@ -329,3 +363,39 @@ def rust_versioned_chain_journey(context):
     )
     result = run(["cargo", "run", "--quiet"], cwd=output)
     assert "PASS: booking chain" in result.stdout
+
+
+@then("the versioned event split keeps old names, distinct ids and one stated half")
+def versioned_events_journey(context):
+    output = prepare_application(
+        context, "events.ts", boilerplate_name="versioned_events"
+    )
+    result = run(["pnpm", "exec", "tsx", "events.ts"], cwd=output)
+    assert "PASS: event split" in result.stdout
+
+
+@then("the Rust versioned event split keeps the same promises")
+def rust_versioned_events_journey(context):
+    output = prepare_rust_application(
+        context, "main.rs", boilerplate_name="versioned_events"
+    )
+    result = run(["cargo", "run", "--quiet"], cwd=output)
+    assert "PASS: event split" in result.stdout
+
+
+@then("the versioned transform shapes upcast, downcast and round-trip")
+def versioned_transforms_journey(context):
+    output = prepare_application(
+        context, "transforms.ts", boilerplate_name="versioned_transforms"
+    )
+    result = run(["pnpm", "exec", "tsx", "transforms.ts"], cwd=output)
+    assert "PASS: transform shapes" in result.stdout
+
+
+@then("the Rust versioned transform shapes keep the same promises")
+def rust_versioned_transforms_journey(context):
+    output = prepare_rust_application(
+        context, "main.rs", boilerplate_name="versioned_transforms"
+    )
+    result = run(["cargo", "run", "--quiet"], cwd=output)
+    assert "PASS: transform shapes" in result.stdout

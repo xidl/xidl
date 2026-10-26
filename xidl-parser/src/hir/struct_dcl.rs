@@ -75,6 +75,22 @@ impl fmt::Debug for Member {
 pub struct Default(pub ConstExpr);
 
 impl Member {
+    /// The declared default value, from either the `@default` annotation or
+    /// the grammar's member default, rendered as it appears in source.
+    pub fn default_value(&self) -> Option<String> {
+        self.annotations
+            .iter()
+            .find_map(|annotation| match annotation {
+                Annotation::Default { value } => Some(value.clone()),
+                _ => None,
+            })
+            .or_else(|| {
+                self.default
+                    .as_ref()
+                    .map(|default| render_annotation_const_expr(&default.0))
+            })
+    }
+
     pub fn is_optional(&self) -> bool {
         self.annotations.iter().any(|annotation| match annotation {
             Annotation::Optional { .. } => true,

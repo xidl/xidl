@@ -121,7 +121,8 @@ impl VersionAdapters for Hooks {
     }
     fn parcel_upcast_from_v_2(&self, source: &v2::Parcel) -> VersionedResult<ParcelUpcastFromV2Decision> {
         if source.tracking == "reject-v2" { return Err(refusal("2026-04", Direction::Upcast, "Parcel")); }
-        Ok(ParcelUpcastFromV2Decision { inspected: None, audit: "checked".into(), courier_note: IGNORED, courier_remark: source.courier_note.clone(), handling_note: IGNORED })
+        // v2 callers never asked for a signature: the implied value, not the default.
+        Ok(ParcelUpcastFromV2Decision { inspected: None, audit: "checked".into(), courier_note: IGNORED, courier_remark: source.courier_note.clone(), handling_note: IGNORED, signature_required: false })
     }
     fn parcel_patch_upcast_from_v_2(&self, source: &v2::ParcelPatch, _current: &v3::Parcel) -> VersionedResult<ParcelPatchUpcastFromV2Decision> {
         if self.reject_patch { return Err(refusal("2026-04", Direction::Upcast, "ParcelPatch")); }

@@ -24,6 +24,28 @@ fn independent_typescript_target_snapshots_wire_validation_and_business_decision
 }
 
 #[test]
+fn transforms_target_snapshots_every_change_shape_of_the_catalogue() {
+    let source = include_str!("../../bdd/features/data/versioned_transforms.idl");
+    let files = render(source, "transforms.idl");
+    assert_eq!(files, render(source, "transforms.idl"));
+    assert_eq!(files.len(), 1);
+    assert!(files[0].1.contains("routeProtocolDowncastToV20260401"));
+    assert!(files[0].1.contains("profileUpcastFromV20260101"));
+    insta::assert_snapshot!("independent_typescript_transforms_adapters", &files[0].1);
+}
+
+#[test]
+fn events_target_snapshots_the_split_event_surface() {
+    let source = include_str!("../../bdd/features/data/versioned_events.idl");
+    let files = render(source, "events.idl");
+    assert_eq!(files, render(source, "events.idl"));
+    assert_eq!(files.len(), 1);
+    assert!(files[0].1.contains("eventKindDowncastToV20260401"));
+    assert!(files[0].1.contains("eventKindUpcastFromV20260401"));
+    insta::assert_snapshot!("independent_typescript_events_adapters", &files[0].1);
+}
+
+#[test]
 fn chain_target_snapshots_the_retirement_surface_of_the_booking_corpus() {
     let source = include_str!("../../bdd/features/data/versioned_chain.idl");
     let files = render(source, "chain.idl");
@@ -159,6 +181,91 @@ fn generated_symbols_reject_normalized_versions_scopes_and_cross_category_collis
         assert!(error.contains("ambiguous"), "{error}");
         assert!(error.contains("collision"), "{error}");
     }
+}
+
+#[test]
+fn field_replacements_require_explicit_application_decisions_and_readers() {
+    let source = r#"
+        @version enum V { v1, v2 };
+        struct Message {
+            string id;
+            @removed(V::v2) string text;
+            @added(V::v2) string body;
+            @removed(V::v2) @optional string subject;
+        };
+        interface Messages {
+            @get(path = "/messages/{id}") Message get(@path string id);
+            @post(path = "/messages") Message send(@body Message message);
+        };"#;
+    let files = render(source, "renamed.idl");
+    let adapters = &files[0].1;
+    assert!(adapters.contains("MessageUpcastDecisionFromV1"));
+    assert!(adapters.contains("messageText"));
+    insta::assert_snapshot!("explicit_field_replacement_typescript_adapters", adapters);
+}
+
+#[test]
+fn defaulted_additions_require_the_implied_value_in_the_upcast_decision() {
+    let source = r#"
+        @version enum V { v1, v2 };
+        struct SendMessageRequest {
+            string to;
+            @added(V::v2) @optional @default(false) boolean fallback_to_sms;
+            @added(V::v2) @optional string note;
+        };
+        struct Message { string id; };
+        interface Messages {
+            @post(path = "/messages") Message send(@body SendMessageRequest request);
+        };"#;
+    let files = render(source, "defaults.idl");
+    let adapters = &files[0].1;
+    assert!(
+        adapters.contains("fallback_to_sms: boolean;"),
+        "a defaulted addition is a required decision: {adapters}"
+    );
+    assert!(
+        !adapters.contains("fallback_to_sms?:"),
+        "the decision must not fall back to the new default: {adapters}"
+    );
+    assert!(
+        !adapters.contains("note?: string;"),
+        "an optional addition without a default stays absent: {adapters}"
+    );
+    assert!(
+        adapters.contains("[\"fallback_to_sms\"]: decision.value[\"fallback_to_sms\"]"),
+        "the conversion assigns the stated value: {adapters}"
+    );
+    // A removed member keeps deciding through OMIT, never through an implied
+    // value: the defaulted rendering belongs to upcast additions only.
+    let removals = render(
+        r#"
+        @version enum V { v1, v2 };
+        struct SendMessageRequest {
+            string to;
+            @removed(V::v2) @optional @default(false) boolean legacy_flag;
+        };
+        struct Message { string id; };
+        interface Messages {
+            @post(path = "/messages") Message send(@body SendMessageRequest request);
+            @get(path = "/messages/{id}") SendMessageRequest get(@path string id);
+        };"#,
+        "removals.idl",
+    );
+    let adapters = &removals[0].1;
+    assert!(
+        adapters.contains("legacy_flag: boolean | Omitted"),
+        "the downcast decision keeps the OMIT escape hatch: {adapters}"
+    );
+    assert!(
+        adapters.contains(
+            "sendMessageRequestLegacyFlag(source: types.v2.SendMessageRequest): boolean | undefined;"
+        ),
+        "the stored reader keeps its absent case for a defaulted removal: {adapters}"
+    );
+    assert!(
+        !adapters.contains("legacy_flag: boolean;"),
+        "a removed member never states an implied value: {adapters}"
+    );
 }
 
 #[test]
