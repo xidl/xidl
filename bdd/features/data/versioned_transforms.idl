@@ -1,0 +1,80 @@
+#pragma xidlc package versioned_transforms
+
+@version(in = "header", name = "X-Transform-Version")
+enum ApiVersion {
+    @rename("2026-01-01") v2026_01_01,
+    @rename("2026-04-01") v2026_04_01,
+    @rename("2026-07-01") v2026_07_01,
+};
+
+// A routing protocol whose value set grew: the newest value cannot be
+// represented in the release that predates it.
+enum RouteProtocol {
+    sms,
+    relay,
+    @added(ApiVersion::v2026_07_01) chat,
+};
+
+struct Route {
+    string handle;
+    @added(ApiVersion::v2026_04_01) @optional RouteProtocol protocol;
+};
+
+struct Note {
+    string text;
+};
+
+struct Profile {
+    string id;
+    string title;
+    // A precision change: epoch seconds became RFC 3339 with milliseconds.
+    // Upward is deterministic; downward floors and is declared lossy.
+    @removed(ApiVersion::v2026_07_01) long created_at;
+    @added(ApiVersion::v2026_07_01) string created_at_utc;
+    // Two fields merged into one. Splitting a display name back apart is
+    // ambiguous, so the pieces stay in storage until the merge retires.
+    @removed(ApiVersion::v2026_07_01) string first_name;
+    @removed(ApiVersion::v2026_07_01) string last_name;
+    @added(ApiVersion::v2026_07_01) string display_name;
+    // One optional note became a list. Reading an older release serves the
+    // first entry by declaration; writing preserves what it cannot see.
+    @removed(ApiVersion::v2026_07_01) @optional Note note;
+    @added(ApiVersion::v2026_07_01) sequence<Note> notes;
+    // The default flipped: older callers' behaviour matched true, while the
+    // new member defaults to false.
+    @added(ApiVersion::v2026_04_01) @optional @default(false) boolean fallback;
+    // A flat string became a structured route; the route's value set grew
+    // one release later.
+    @removed(ApiVersion::v2026_04_01) string recipient;
+    @added(ApiVersion::v2026_04_01) Route to;
+    // An enum value retired into a timestamp: "read" is derivable from
+    // read_at, but a read time can never be invented backwards.
+    @removed(ApiVersion::v2026_07_01) string status;
+    @added(ApiVersion::v2026_07_01) @optional string read_at;
+    // A required member arrives at Head: callers who cannot state it yet
+    // depend on the upcast decision, never on a default.
+    @added(ApiVersion::v2026_07_01) string tier;
+};
+
+@http(404) exception Missing {
+    string id;
+};
+
+// A refinement the oldest contracts cannot name: the profile exists but is
+// sealed, which must never be translated into a missing profile.
+@added(ApiVersion::v2026_07_01) @http(409) exception Sealed {
+    string id;
+};
+
+interface Directory {
+    @post(path = "/profiles")
+    Profile publish(@body Profile profile);
+
+    @get(path = "/profiles/{id}")
+    Profile profile(@path string id) raises(Missing, Sealed);
+
+    // The whole roster in one read: every element projects through the same
+    // retirement surface, served from storage row by row.
+    @get(path = "/roster")
+    sequence<Profile> roster();
+};

@@ -28,5 +28,5 @@ fn main() {
     // Two upcasts read the corpus booking; a third proves the rename also
     // runs for a caller who omitted the optional owner.
     assert_eq!(hooks.up_from_v1.load(std::sync::atomic::Ordering::SeqCst), 3);
-    println!("PASS: booking chain keeps storage facts and pure conversions");
+    println!("PASS: booking chain keeps storage facts, pure conversions and implied defaults");
 }

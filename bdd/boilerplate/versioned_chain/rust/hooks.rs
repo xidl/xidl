@@ -64,6 +64,7 @@ impl VersionAdapters for Hooks {
                 title: title.into(),
                 minutes,
             }],
+            locked: false,
             agenda: IGNORED,
         })
     }

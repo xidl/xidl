@@ -2,7 +2,8 @@
 Feature: versioned booking chain
   A three-release booking contract exercising the walkthrough's chain shape:
   an uninvertible packaging change, a retired attendee roster served from
-  storage, an application-owned organizer rename and cross-release idempotency.
+  storage, an application-owned organizer rename, explicit implied defaults
+  and cross-release idempotency.
   This application's example policy serves Head for a missing version header,
   selects the latest served release not later than the requested calendar date,
   and rejects invalid or too-early dates. The application passes the resolved version to xidl,

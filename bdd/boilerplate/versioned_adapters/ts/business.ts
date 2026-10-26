@@ -117,6 +117,8 @@ const hooks: a.VersionAdapters = {
       courier_note: a.IGNORED,
       courier_remark: source.courier_note,
       handling_note: a.IGNORED,
+      // v2 callers never asked for a signature: the implied value, not the default.
+      signature_required: false,
     }),
   signedDowncastToV1: source =>
     ok({
@@ -314,9 +316,12 @@ assert.equal(
   }).ok,
   false,
 );
-for (const version of ['V1', 'V2', 'V3'] as const) {
-  const decode = a[`decodeAndUpcastDepotOptionalChangeFrom${version}`];
-  const absent = take(decode({ value: {} }, hooks)).value;
+for (const decoder of [
+  a.decodeAndUpcastDepotOptionalChangeFromV1,
+  a.decodeAndUpcastDepotOptionalChangeFromV2,
+  a.decodeAndUpcastDepotOptionalChangeFromV3,
+]) {
+  const absent = take(decoder({ value: {} }, hooks)).value;
   assert.equal(Object.hasOwn(absent, 'note'), false);
 }
 const headNode = take(

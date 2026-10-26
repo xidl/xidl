@@ -355,7 +355,14 @@ keys are rejected before Zod can discard them.
 Implement the generated `VersionAdapters` interface with pure decisions. Missing
 hooks fail TypeScript compilation. Removed input members require `IGNORED`;
 optional additions remain absent unless a simultaneous removal/addition requires
-an explicit replacement decision. Conversion follows every adjacent step to
+an explicit replacement decision. An addition that declares `@default` is the
+other exception: the Head handler would otherwise apply the new default to
+every older request, so the upcast decision requires the value each older
+version implied, as a plain (non-optional) field. When that value equals the
+new default the hook returns the default - the equality is a product fact and
+stays visible in code. The version map records every declared default on its
+member descriptor, so a default that changes between versions shows up as a
+fact rather than as silent behaviour drift. Conversion follows every adjacent step to
 Head, short-circuiting on refusal. Handlers receive both the original version id
 and its declared display value. Typed exceptions downgrade through every step;
 framework errors preserve their identity.

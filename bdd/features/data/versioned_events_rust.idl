@@ -1,0 +1,30 @@
+#pragma xidlc package notice_board
+
+@version(in = "header", name = "X-Event-Version")
+enum ApiVersion {
+    @rename("2026-01-01") v2026_01_01,
+    @rename("2026-04-01") v2026_04_01,
+    @rename("2026-07-01") v2026_07_01,
+};
+
+// E11: one broad event kind splits into two precise ones. Old subscribers
+// keep receiving "updated" for both halves; each push keeps its own id.
+enum EventKind {
+    @removed(ApiVersion::v2026_07_01) updated,
+    @added(ApiVersion::v2026_07_01) delivered,
+    @added(ApiVersion::v2026_07_01) read,
+};
+
+struct Event {
+    string id;
+    EventKind kind;
+    string payload;
+};
+
+interface Notifier {
+    @post(path = "/events")
+    Event emit(@body Event event);
+
+    @get(path = "/events")
+    sequence<Event> feed();
+};
