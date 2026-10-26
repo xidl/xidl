@@ -28,6 +28,9 @@ pub(crate) struct TypeUse {
     pub scope: Vec<String>,
     pub declarator: hir::Declarator,
     pub optional: bool,
+    /// The declaration states `@default`, so an older version's implied value
+    /// is a required upcast decision instead of a silent absence.
+    pub defaulted: bool,
     pub representation: ValueRepresentation,
 }
 

@@ -130,6 +130,7 @@ pub mod version_adapters {
     /// Explicit business assignments and discarded-value acknowledgements.
     pub struct BookingUpcastFromV20260601Decision {
         pub items: Vec<v2026_10_01::AgendaEntry>,
+        pub locked: bool,
         pub agenda: Ignored,
     }
     /// Explicit business assignments and discarded-value acknowledgements.
@@ -220,6 +221,7 @@ pub mod version_adapters {
             roster: projected_2,
             owner: projected_3,
             items: decision.items,
+            locked: Some(decision.locked),
         })
     }
     /// Projects one adjacent declaration by borrowing its source value.
@@ -417,10 +419,15 @@ pub mod version_adapters {
             |item| agenda_entry_upcast_from_v_2026_10_01(item, adapters),
             "Booking.items",
         )?;
+        let projected_3 = (&source.locked)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
         Ok(v2027_01_01::Booking {
             id: projected_0,
             title: projected_1,
             items: projected_2,
+            locked: projected_3,
             organizer: decision.organizer,
         })
     }
@@ -450,10 +457,15 @@ pub mod version_adapters {
             |item| agenda_entry_downcast_to_v_2026_10_01(item, adapters),
             "Booking.items",
         )?;
+        let projected_3 = (&source.locked)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
         Ok(v2026_10_01::Booking {
             id: projected_0,
             title: projected_1,
             items: projected_2,
+            locked: projected_3,
             roster: decision.roster,
             owner: decision.owner,
         })
@@ -593,7 +605,7 @@ pub mod version_adapters {
             .as_object()
             .ok_or_else(|| "expected a served-version object".to_string())?;
         let keys: &[&str] = &["agenda", "id", "owner", "roster", "title"];
-        let forbidden: &[&str] = &["items", "organizer"];
+        let forbidden: &[&str] = &["items", "locked", "organizer"];
         for key in object.keys() {
             if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
                 return Err(format!("field {key} is not declared in served version"));
@@ -660,7 +672,7 @@ pub mod version_adapters {
         let object = wire
             .as_object()
             .ok_or_else(|| "expected a served-version object".to_string())?;
-        let keys: &[&str] = &["id", "items", "owner", "roster", "title"];
+        let keys: &[&str] = &["id", "items", "locked", "owner", "roster", "title"];
         let forbidden: &[&str] = &["agenda", "organizer"];
         for key in object.keys() {
             if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
@@ -722,12 +734,21 @@ pub mod version_adapters {
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
+        let raw_5 = object.get("locked").unwrap_or(&::serde_json::Value::Null);
+        let value_5: Option<bool> = if (raw_5).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<bool>((raw_5).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
         Ok(v2026_10_01::Booking {
             id: value_0,
             title: value_1,
             items: value_2,
             roster: value_3,
             owner: value_4,
+            locked: value_5,
         })
     }
     fn decode_wire_v_2026_10_01_agenda_entry(
@@ -768,7 +789,7 @@ pub mod version_adapters {
         let object = wire
             .as_object()
             .ok_or_else(|| "expected a served-version object".to_string())?;
-        let keys: &[&str] = &["id", "items", "organizer", "title"];
+        let keys: &[&str] = &["id", "items", "locked", "organizer", "title"];
         let forbidden: &[&str] = &["agenda", "owner", "roster"];
         for key in object.keys() {
             if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
@@ -812,11 +833,20 @@ pub mod version_adapters {
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
+        let raw_4 = object.get("locked").unwrap_or(&::serde_json::Value::Null);
+        let value_4: Option<bool> = if (raw_4).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<bool>((raw_4).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
         Ok(v2027_01_01::Booking {
             id: value_0,
             title: value_1,
             items: value_2,
             organizer: value_3,
+            locked: value_4,
         })
     }
     fn decode_wire_v_2027_01_01_agenda_entry(

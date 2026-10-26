@@ -24,6 +24,8 @@ struct Booking {
     // The organizer kept the role, the source name moved. Application-owned.
     @removed(ApiVersion::v2027_01_01) @optional string owner;
     @added(ApiVersion::v2027_01_01) @optional string organizer;
+    // Bookings became lockable; older callers state the implied value.
+    @added(ApiVersion::v2026_10_01) @optional @default(false) boolean locked;
 };
 
 @http(404) exception NotFound { string id; };
