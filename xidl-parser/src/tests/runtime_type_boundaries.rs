@@ -19,7 +19,7 @@ fn compiler_http_types_cannot_escape_into_user_values_bounds_or_exceptions() {
         "interface Api { attribute string text setraises(ContentType); };",
     ] {
         let source = format!(
-            "@http union Payload switch(ContentType) {{ case Json: string value; }}; {declaration}"
+            "@http union Payload switch(ContentType) {{ case ContentType::Json: string value; }}; {declaration}"
         );
         let ast = parser_text(&source).unwrap_or_else(|error| panic!("{declaration}: {error}"));
         let error = hir::Specification::from_typed_ast_with_properties_and_path(

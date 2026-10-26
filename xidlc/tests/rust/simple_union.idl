@@ -3,6 +3,6 @@ enum Tag {
     B,
 };
 union SimpleUnion switch (Tag) {
-    case A: int a;
-    case B: int b;
+    case Tag::A: int a;
+    case Tag::B: int b;
 };

@@ -59,6 +59,11 @@ Feature: API versioning
     Given a versioned REST IDL file "bdd/features/data/versioning_renamed_from.idl"
     When I generate rust code for the IDL and expect failure containing "use @rename"
 
+  Scenario: source validation rejects bare enum labels before emitting API versions
+    Given a versioned REST IDL file "bdd/features/data/union_unqualified_case.idl"
+    When I generate rust code for the IDL and expect failure containing "case label 'mms' must be qualified as Enum::member"
+    And I generate typescript-rest code for the IDL and expect failure containing "case label 'mms' must be qualified as Enum::member"
+
   Scenario: lint protects lifecycle spelling independently of generation
     Given a versioned contract with annotation mistakes
       """

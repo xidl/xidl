@@ -20,7 +20,7 @@ struct FileMeta {
 union FileResponse switch (ContentType) {
     case ::ContentType::Json: FileMeta meta;
     case ContentType::OctetStream: sequence<octet> raw;
-    case Text: string text;
+    case ContentType::Text: string text;
 };
 
 };

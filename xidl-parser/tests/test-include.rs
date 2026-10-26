@@ -171,11 +171,11 @@ fn http_includes_share_compiler_builtins_without_adding_runtime_models() {
     write_file(&main, "#include \"first.idl\"\n#include \"second.idl\"\n");
     write_file(
         &root.join("first.idl"),
-        "@http union First switch(ContentType) { case Json: string value; };",
+        "@http union First switch(ContentType) { case ContentType::Json: string value; };",
     );
     write_file(
         &root.join("second.idl"),
-        "@http union Second switch(ContentType) { case Text: string value; };",
+        "@http union Second switch(ContentType) { case ContentType::Text: string value; };",
     );
     let spec = parse_hir(&main).expect("two included HTTP unions");
     assert_eq!(spec.0.len(), 2, "only user declarations are retained");

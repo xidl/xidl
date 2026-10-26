@@ -1,0 +1,21 @@
+enum Kind {
+    Text,
+    Number,
+    Flag,
+};
+const Kind FLAG = Kind::Flag;
+typedef Kind Discriminant;
+
+// Enum members include their owner; declared constants keep their own names.
+union Labels switch (Kind) {
+    case Kind::Text: string text;
+    case Kind::Number: int64 number;
+    case FLAG: boolean flag;
+};
+
+// Aliasing the switch type does not change the explicitly written case labels.
+union Aliased switch (Discriminant) {
+    case Kind::Text: string text;
+    case Kind::Number: int64 number;
+    default: boolean other;
+};

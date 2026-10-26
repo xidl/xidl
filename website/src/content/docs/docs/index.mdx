@@ -104,21 +104,26 @@ enum Color {
     Blue
 };
 
+struct Coordinates {
+    uint32 x;
+    uint32 y;
+};
+
 union ColorPoint switch(Color) {
-    case Red:
-        uint32 red_x;
-        uint32 red_y;
-    case Green:
-        uint32 green_x;
-        uint32 green_y;
-    case Blue:
-        uint32 blue_x;
-        uint32 blue_y;
+    case Color::Red:
+        Coordinates red;
+    case Color::Green:
+        Coordinates green;
+    case Color::Blue:
+        Coordinates blue;
     default:
-        uint32 default_x;
-        uint32 default_y;
+        Coordinates other;
 };
 ```
+
+Enum case labels must include the enum name, such as `Color::Red`. Declared
+constants can be referenced directly. Each case has one payload; use a struct
+when it needs multiple fields.
 
 ## Annotations
 

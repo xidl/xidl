@@ -14,8 +14,8 @@ exception NotFound {
 
 @http
 union FileResponse switch (ContentType) {
-    case Json: FileMeta meta;
-    case OctetStream: sequence<octet> raw;
+    case ContentType::Json: FileMeta meta;
+    case ContentType::OctetStream: sequence<octet> raw;
 };
 
 @no_security

@@ -250,9 +250,9 @@ module Photon {
         @added(ApiVersion::v2026_09) EMPHASIZE,
     };
     union Reaction switch (ReactionKind) {
-        case LIKE: string like_by;
-        case LOVE: string love_by;
-        case EMPHASIZE: @added(ApiVersion::v2026_09) string emphasize_by;
+        case ReactionKind::LIKE: string like_by;
+        case ReactionKind::LOVE: string love_by;
+        case ReactionKind::EMPHASIZE: @added(ApiVersion::v2026_09) string emphasize_by;
     };
 
     // T13 exception with a header member, added mid-timeline

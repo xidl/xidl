@@ -57,8 +57,8 @@ fn rust_target_rejects_public_layouts_without_an_explicit_construction_contract(
         r#"@version enum V { only }; struct Item { @skip string hidden; }; interface Store { @get(path="/items") Item read(); };"#,
         r#"@version enum V { only }; enum State { visible, @skip hidden }; interface Store { @post(path="/state") State save(@body State state); };"#,
         r#"@version enum V { v1,v2 }; enum State { visible, @skip hidden }; interface Store { @post(path="/state") State save(@body State state); };"#,
-        r#"@version enum V { only }; @http union U switch(ContentType) { case Json: string visible; case Text: @skip string hidden; }; interface Store { @post(path="/u") U save(@body U value); };"#,
-        r#"@version enum V { v1,v2 }; @http union U switch(ContentType) { case Json: string visible; case Text: @skip string hidden; }; interface Store { @post(path="/u") U save(@body U value); };"#,
+        r#"@version enum V { only }; @http union U switch(ContentType) { case ContentType::Json: string visible; case ContentType::Text: @skip string hidden; }; interface Store { @post(path="/u") U save(@body U value); };"#,
+        r#"@version enum V { v1,v2 }; @http union U switch(ContentType) { case ContentType::Json: string visible; case ContentType::Text: @skip string hidden; }; interface Store { @post(path="/u") U save(@body U value); };"#,
         r#"@version enum V { v1,v2 }; struct Item { @skip string hidden; }; interface Store { @added(V::v2) @get(path="/items") Item read(); };"#,
     ] {
         let error = xidlc::driver::Generator::new("rust-axum-adapters".into())

@@ -4,6 +4,6 @@ enum Tag {
 };
 
 union DefaultUnion switch (Tag) {
-    case A: int a;
+    case Tag::A: int a;
     default: string fallback;
 };
