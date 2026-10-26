@@ -108,6 +108,8 @@ pub mod version_adapters {
         fn booking_agenda(&self, source: &v2026_10_01::Booking) -> Option<String>;
         /// wire `roster`, last served by v2026_10_01
         fn booking_roster(&self, source: &v2027_01_01::Booking) -> Option<Vec<String>>;
+        /// wire `owner`, last served by v2026_10_01
+        fn booking_owner(&self, source: &v2027_01_01::Booking) -> Option<String>;
     }
     /// Wire names each served version still reads from storage, by type; Head reads nothing.
     pub const NEEDS: &[(&str, &[(&str, &[&str])])] = &[
@@ -115,8 +117,8 @@ pub mod version_adapters {
             "Booking",
             &[
                 ("2027-01-01", &[]),
-                ("2026-10-01", &["roster"]),
-                ("2026-06-01", &["agenda", "roster"]),
+                ("2026-10-01", &["owner", "roster"]),
+                ("2026-06-01", &["agenda", "owner", "roster"]),
             ],
         ),
     ];
@@ -136,11 +138,14 @@ pub mod version_adapters {
     }
     /// Explicit business assignments and discarded-value acknowledgements.
     pub struct BookingUpcastFromV20261001Decision {
+        pub organizer: Option<String>,
         pub roster: Ignored,
+        pub owner: Ignored,
     }
     /// Explicit business assignments and discarded-value acknowledgements.
     pub struct BookingDowncastToV20261001Decision {
         pub roster: Vec<String>,
+        pub owner: Option<String>,
     }
     /// Public model parameters for one served version's operation.
     pub struct SchedulerBookRequestV20260601 {
@@ -205,10 +210,15 @@ pub mod version_adapters {
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
             "Booking.roster",
         )?;
+        let projected_3 = (&source.owner)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
         Ok(v2026_10_01::Booking {
             id: projected_0,
             title: projected_1,
             roster: projected_2,
+            owner: projected_3,
             items: decision.items,
         })
     }
@@ -238,10 +248,15 @@ pub mod version_adapters {
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
             "Booking.roster",
         )?;
+        let projected_3 = (&source.owner)
+            .as_ref()
+            .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
+            .transpose()?;
         Ok(v2026_06_01::Booking {
             id: projected_0,
             title: projected_1,
             roster: projected_2,
+            owner: projected_3,
             agenda: decision.agenda,
         })
     }
@@ -406,6 +421,7 @@ pub mod version_adapters {
             id: projected_0,
             title: projected_1,
             items: projected_2,
+            organizer: decision.organizer,
         })
     }
     /// Projects one adjacent declaration by borrowing its source value.
@@ -439,6 +455,7 @@ pub mod version_adapters {
             title: projected_1,
             items: projected_2,
             roster: decision.roster,
+            owner: decision.owner,
         })
     }
     /// Projects one adjacent declaration by borrowing its source value.
@@ -575,8 +592,8 @@ pub mod version_adapters {
         let object = wire
             .as_object()
             .ok_or_else(|| "expected a served-version object".to_string())?;
-        let keys: &[&str] = &["agenda", "id", "roster", "title"];
-        let forbidden: &[&str] = &["items"];
+        let keys: &[&str] = &["agenda", "id", "owner", "roster", "title"];
+        let forbidden: &[&str] = &["items", "organizer"];
         for key in object.keys() {
             if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
                 return Err(format!("field {key} is not declared in served version"));
@@ -621,11 +638,20 @@ pub mod version_adapters {
                 .collect::<Result<Vec<_>, String>>()?;
             Ok::<_, String>(values)
         })()?;
+        let raw_4 = object.get("owner").unwrap_or(&::serde_json::Value::Null);
+        let value_4: Option<String> = if (raw_4).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_4).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
         Ok(v2026_06_01::Booking {
             id: value_0,
             title: value_1,
             agenda: value_2,
             roster: value_3,
+            owner: value_4,
         })
     }
     fn decode_wire_v_2026_10_01_booking(
@@ -634,8 +660,8 @@ pub mod version_adapters {
         let object = wire
             .as_object()
             .ok_or_else(|| "expected a served-version object".to_string())?;
-        let keys: &[&str] = &["id", "items", "roster", "title"];
-        let forbidden: &[&str] = &["agenda"];
+        let keys: &[&str] = &["id", "items", "owner", "roster", "title"];
+        let forbidden: &[&str] = &["agenda", "organizer"];
         for key in object.keys() {
             if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
                 return Err(format!("field {key} is not declared in served version"));
@@ -688,11 +714,20 @@ pub mod version_adapters {
                 .collect::<Result<Vec<_>, String>>()?;
             Ok::<_, String>(values)
         })()?;
+        let raw_4 = object.get("owner").unwrap_or(&::serde_json::Value::Null);
+        let value_4: Option<String> = if (raw_4).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_4).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
         Ok(v2026_10_01::Booking {
             id: value_0,
             title: value_1,
             items: value_2,
             roster: value_3,
+            owner: value_4,
         })
     }
     fn decode_wire_v_2026_10_01_agenda_entry(
@@ -733,8 +768,8 @@ pub mod version_adapters {
         let object = wire
             .as_object()
             .ok_or_else(|| "expected a served-version object".to_string())?;
-        let keys: &[&str] = &["id", "items", "title"];
-        let forbidden: &[&str] = &["agenda", "roster"];
+        let keys: &[&str] = &["id", "items", "organizer", "title"];
+        let forbidden: &[&str] = &["agenda", "owner", "roster"];
         for key in object.keys() {
             if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
                 return Err(format!("field {key} is not declared in served version"));
@@ -769,10 +804,19 @@ pub mod version_adapters {
                 .collect::<Result<Vec<_>, String>>()?;
             Ok::<_, String>(values)
         })()?;
+        let raw_3 = object.get("organizer").unwrap_or(&::serde_json::Value::Null);
+        let value_3: Option<String> = if (raw_3).is_null() {
+            Ok::<_, String>(None)
+        } else {
+            ::serde_json::from_value::<String>((raw_3).clone())
+                .map_err(|error| error.to_string())
+                .map(Some)
+        }?;
         Ok(v2027_01_01::Booking {
             id: value_0,
             title: value_1,
             items: value_2,
+            organizer: value_3,
         })
     }
     fn decode_wire_v_2027_01_01_agenda_entry(

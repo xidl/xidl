@@ -64,6 +64,15 @@ Feature: API versioning
     When I generate rust code for the IDL and expect failure containing "case label 'mms' must be qualified as Enum::member"
     And I generate typescript-rest code for the IDL and expect failure containing "case label 'mms' must be qualified as Enum::member"
 
+  Scenario Outline: replacement links are rejected before code generation
+    Given a versioned REST IDL file "bdd/features/data/versioning_replaces_<timeline>.idl"
+    When I generate rust code for the IDL and expect failure containing "application hooks"
+
+    Examples:
+      | timeline  |
+      | versioned |
+      | plain     |
+
   Scenario: lint protects lifecycle spelling independently of generation
     Given a versioned contract with annotation mistakes
       """

@@ -70,7 +70,10 @@ export const hooks: a.VersionAdapters = {
           },
           ok: false,
         }
-      : { ok: true, value: { roster } };
+      : {
+          ok: true,
+          value: { owner: storedValues.bookingOwner(source) ?? a.OMIT, roster },
+        };
   },
   bookingUpcastFromV20260601: source => {
     // One separator only: the rest after the first ';' is the whole duration,
@@ -108,9 +111,9 @@ export const hooks: a.VersionAdapters = {
       },
     };
   },
-  bookingUpcastFromV20261001: () => ({
+  bookingUpcastFromV20261001: source => ({
     ok: true,
-    value: { roster: a.IGNORED },
+    value: { organizer: source.owner, owner: a.IGNORED, roster: a.IGNORED },
   }),
 };
 
@@ -132,6 +135,7 @@ export interface BookingAppState {
 export function createBookingApp(state: BookingAppState) {
   const stored: a.StoredValues = {
     bookingAgenda: source => state.rows.get(source.id)?.agenda,
+    bookingOwner: source => source.organizer,
     bookingRoster: source => state.rows.get(source.id)?.roster,
   };
   return createServer(async (request, response) => {

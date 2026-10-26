@@ -158,7 +158,7 @@ Rules:
   declaration: projection rewrites them relative to the version module, so they
   resolve inside `module <version>` rather than at the file root.
 
-Unsupported versioning annotations (`@versioned`, `@renamedFrom`,
+Unsupported versioning annotations (`@versioned`, `@renamedFrom`, `@replaces`,
 `@madeOptional`, `@madeRequired`, `@typeChangedFrom`,
 `@returnTypeChangedFrom`, `@defaultVersion`) are rejected with an explicit
 error instead of being silently ignored. These names do not imply planned
@@ -166,9 +166,9 @@ support. Use `@rename("wire_name")` to select a serialized name; it does not
 describe a rename at a particular version. Changes between versions use the
 disjoint declarations described below.
 
-### Renames and other changes in phase 1
+### Renames and shape changes
 
-Phase 1 implements `@added` and `@removed` only. A rename or a shape change is
+A rename or a shape change is
 written as a **new member with a disjoint interval**; `@rename` keeps the wire
 name stable when needed:
 
@@ -183,6 +183,36 @@ struct Pet {
     int32 age2_;
 };
 ```
+
+The compiler does not infer links between removed and added fields, even when
+only their names differ. Application hooks explicitly assign the new value and
+acknowledge the old input with `IGNORED`. The downcast hook obtains old facts
+from `StoredValues`, or returns `OMIT` for an absent optional fact. `NEEDS`
+continues to report the old wire name while a supported version reads it; a
+reader may obtain that fact directly from Head when the application knows the
+two fields have identical meaning.
+
+```idl
+struct Parcel {
+    @removed(Versions::v3) @optional string courier_note;
+    @added(Versions::v3) @optional string courier_remark;
+};
+```
+
+```ts
+// Parts of the application's generated VersionAdapters / StoredValues contract.
+parcelUpcastFromV2: source => ok({
+  courier_remark: source.courier_note,
+  courier_note: a.IGNORED,
+}),
+parcelDowncastToV2: (source, stored) => ok({
+  courier_note: stored.parcelCourierNote(source) ?? a.OMIT,
+}),
+parcelCourierNote: source => source.courier_remark,
+```
+
+Both a supplied value and its absence survive this application's round trip.
+The assignments are business decisions, not a generated matching rule.
 
 ## Generated output
 

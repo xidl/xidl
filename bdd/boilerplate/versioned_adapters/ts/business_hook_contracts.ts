@@ -71,7 +71,7 @@ export const narrowReader: Pick<a.VersionAdapters, 'parcelDowncastToV2'> = {
   parcelDowncastToV2: (
     _source: Head,
     _stored: { parcelHandlingNote(source: Head): string },
-  ) => ({ ok: true, value: { handling_note: a.OMIT } }),
+  ) => ({ ok: true, value: { courier_note: a.OMIT, handling_note: a.OMIT } }),
 };
 export const narrowError: Pick<
   a.VersionAdapters,
