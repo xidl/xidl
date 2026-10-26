@@ -1,0 +1,26 @@
+name: check-pr-target
+
+on:
+  pull_request_target:
+    types: [opened, reopened, edited, synchronize]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  enforce-master-target:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate target branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE_REF: ${{ github.base_ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          if [ "$BASE_REF" != "master" ]; then
+            echo "::error::Pull requests MUST target 'master'. Target branch '$BASE_REF' is forbidden."
+            gh pr comment "$PR_NUMBER" --body "❌ **Pull Request Rejected**: All pull requests must target \`master\` as specified in \`AGENTS.md\` and \`agents/pr.md\`. Target branch \`$BASE_REF\` is not allowed." || true
+            gh pr close "$PR_NUMBER" || true
+            exit 1
+          fi
+          echo "Target branch is valid: $BASE_REF"
