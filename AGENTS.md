@@ -87,3 +87,8 @@
 
 - Authors MUST consult `agents/issue.md` before filing or editing an issue.
 - Issues MUST follow the specifications defined in `agents/issue.md`.
+
+## Pull Requests
+
+- Authors MUST consult `agents/pr.md` before opening or editing a pull request.
+- Pull requests MUST follow the specifications defined in `agents/pr.md`.
