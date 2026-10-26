@@ -2123,6 +2123,7 @@ expression: "all[0].content()"
                       "ScopedName": {
                         "is_root": false,
                         "name": [
+                          "ReactionKind",
                           "EMPHASIZE"
                         ]
                       }
