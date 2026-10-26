@@ -100,7 +100,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     );
 
 
-/** Hooks are required application decisions. Keep them pure and deterministic. */
+/** Required pure application decisions. Use strictFunctionTypes to reject narrower inputs. */
 export interface VersionAdapters {
     
 }

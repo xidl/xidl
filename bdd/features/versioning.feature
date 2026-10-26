@@ -104,7 +104,7 @@ Feature: API versioning
     When I generate TypeScript with the independent adapter target
     Then one TypeScript Head implementation passes the unchanged adapter Hurl contracts
 
-  Scenario: three-version business decisions preserve validation and committed outcomes
+  Scenario: strict business hooks preserve validation and committed outcomes across three versions
     Given a versioned REST IDL file "bdd/features/data/versioned_adapters_business.idl"
     When I generate TypeScript with the independent adapter target
     Then the three-version TypeScript application enforces wire and business boundaries

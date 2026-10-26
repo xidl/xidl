@@ -72,6 +72,7 @@ def prepare_application(context, script, boilerplate_name="versioned_adapters"):
     companions = {
         "business.ts": [
             "business_dispatch.ts",
+            "business_hook_contracts.ts",
             "business_http.ts",
             "business_stored.ts",
             "business_update.ts",
