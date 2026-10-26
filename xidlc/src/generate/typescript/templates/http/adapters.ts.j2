@@ -59,10 +59,10 @@ function mapOptional<S, T>(source: S | undefined, convert: (value: S) => Version
 
 {% include "http/adapters_wire.ts.j2" %}
 
-/** Hooks are required application decisions. Keep them pure and deterministic. */
+/** Required pure application decisions. Use strictFunctionTypes to reject narrower inputs. */
 export interface VersionAdapters {
     {% for hook in hooks %}
-        {{ hook.name }}(source: {{ m.render_type(hook.input) }}{% if hook.current %}, current: {{ m.render_type(hook.current) }}{% endif %}{% if hook.stored %}, stored: Pick<StoredValues, {% for reader in hook.stored %}{{ reader | tojson }}{% if not loop.last %} | {% endif %}{% endfor %}>{% endif %}): VersionedResult<{{ m.render_type(hook.output) }}>;
+        {{ hook.name }}: (source: {{ m.render_type(hook.input) }}{% if hook.current %}, current: {{ m.render_type(hook.current) }}{% endif %}{% if hook.stored %}, stored: Pick<StoredValues, {% for reader in hook.stored %}{{ reader | tojson }}{% if not loop.last %} | {% endif %}{% endfor %}>{% endif %}) => VersionedResult<{{ m.render_type(hook.output) }}>;
     {% endfor %}
 }
 {% if readers %}

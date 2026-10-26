@@ -179,12 +179,12 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     );
 
 
-/** Hooks are required application decisions. Keep them pure and deterministic. */
+/** Required pure application decisions. Use strictFunctionTypes to reject narrower inputs. */
 export interface VersionAdapters {
     
-        itemUpcastFromV1(source: types.v1.Item): VersionedResult<ItemUpcastDecisionFromV1>;
+        itemUpcastFromV1: (source: types.v1.Item) => VersionedResult<ItemUpcastDecisionFromV1>;
     
-        itemDowncastToV1(source: types.v2.Item, stored: Pick<StoredValues, "itemValue">): VersionedResult<ItemDowncastDecisionToV1>;
+        itemDowncastToV1: (source: types.v2.Item, stored: Pick<StoredValues, "itemValue">) => VersionedResult<ItemDowncastDecisionToV1>;
     
 }
 

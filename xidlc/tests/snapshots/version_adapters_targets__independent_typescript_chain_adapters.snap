@@ -488,16 +488,16 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     );
 
 
-/** Hooks are required application decisions. Keep them pure and deterministic. */
+/** Required pure application decisions. Use strictFunctionTypes to reject narrower inputs. */
 export interface VersionAdapters {
     
-        bookingUpcastFromV20260601(source: types.v2026_06_01.Booking): VersionedResult<BookingUpcastDecisionFromV20260601>;
+        bookingUpcastFromV20260601: (source: types.v2026_06_01.Booking) => VersionedResult<BookingUpcastDecisionFromV20260601>;
     
-        bookingDowncastToV20260601(source: types.v2026_10_01.Booking, stored: Pick<StoredValues, "bookingAgenda">): VersionedResult<BookingDowncastDecisionToV20260601>;
+        bookingDowncastToV20260601: (source: types.v2026_10_01.Booking, stored: Pick<StoredValues, "bookingAgenda">) => VersionedResult<BookingDowncastDecisionToV20260601>;
     
-        bookingUpcastFromV20261001(source: types.v2026_10_01.Booking): VersionedResult<BookingUpcastDecisionFromV20261001>;
+        bookingUpcastFromV20261001: (source: types.v2026_10_01.Booking) => VersionedResult<BookingUpcastDecisionFromV20261001>;
     
-        bookingDowncastToV20261001(source: types.v2027_01_01.Booking, stored: Pick<StoredValues, "bookingRoster">): VersionedResult<BookingDowncastDecisionToV20261001>;
+        bookingDowncastToV20261001: (source: types.v2027_01_01.Booking, stored: Pick<StoredValues, "bookingRoster">) => VersionedResult<BookingDowncastDecisionToV20261001>;
     
 }
 
