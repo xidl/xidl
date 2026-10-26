@@ -1,0 +1,13 @@
+@version enum ApiVersion { v1, v2 };
+
+enum Channel { sms, mms };
+
+union Payload switch(Channel) {
+    case Channel::sms: string text;
+    case mms: string media_url;
+};
+
+interface Notifications {
+    @post(path="/notifications")
+    Payload publish(@body Payload payload);
+};

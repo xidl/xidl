@@ -200,6 +200,7 @@ impl Specification {
         let mut definitions = Vec::new();
         collect_defs(value.0, &mut definitions, includes)?;
         let spec = Self(definitions);
+        semantic::UnionCaseLabels::validate(&spec.0)?;
         // All source targets share HTTP declaration validation; builtins belong
         // to its temporary type environment, not the generated user models.
         rest_hir::HttpUnion::validate_source(&spec.0)?;

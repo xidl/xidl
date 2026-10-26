@@ -16,8 +16,8 @@ struct Shape {
 };
 
 union Area switch (ShapeKind) {
-    case KindRound: uint8 circle;
-    case KindSquare: uint8 square;
+    case ShapeKind::kind_round: uint8 circle;
+    case ShapeKind::kind_square: uint8 square;
     default: uint8 fallback;
 };
 

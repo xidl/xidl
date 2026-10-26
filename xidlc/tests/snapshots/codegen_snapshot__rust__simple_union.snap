@@ -34,12 +34,12 @@ impl Drop for SimpleUnion {
     #[allow(unreachable_patterns)]
     fn drop(&mut self) {
         match self.tag {
-            A => {
+            Tag::A => {
                 unsafe {
                     core::mem::ManuallyDrop::drop(&mut self.data.a);
                 }
             }
-            B => {
+            Tag::B => {
                 unsafe {
                     core::mem::ManuallyDrop::drop(&mut self.data.b);
                 }
@@ -53,8 +53,8 @@ impl Clone for SimpleUnion {
     #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
         match self.tag {
-            A => Self::new_a(self.as_a().clone()),
-            B => Self::new_b(self.as_b().clone()),
+            Tag::A => Self::new_a(self.as_a().clone()),
+            Tag::B => Self::new_b(self.as_b().clone()),
             _ => unreachable!(),
         }
     }
@@ -65,10 +65,10 @@ impl core::fmt::Debug for SimpleUnion {
         let mut d = f.debug_struct("SimpleUnion");
         d.field("tag", &self.tag);
         match self.tag {
-            A => {
+            Tag::A => {
                 d.field("a", self.as_a());
             }
-            B => {
+            Tag::B => {
                 d.field("b", self.as_b());
             }
             _ => {}
@@ -83,8 +83,8 @@ impl PartialEq for SimpleUnion {
             return false;
         }
         match self.tag {
-            A => self.as_a() == other.as_a(),
-            B => self.as_b() == other.as_b(),
+            Tag::A => self.as_a() == other.as_a(),
+            Tag::B => self.as_b() == other.as_b(),
             _ => false,
         }
     }
@@ -92,14 +92,14 @@ impl PartialEq for SimpleUnion {
 impl SimpleUnion {
     pub fn new_a(value: int) -> Self {
         Self {
-            tag: A,
+            tag: Tag::A,
             data: SimpleUnionData {
                 a: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_a(&self) -> bool {
-        matches!(self.tag, A)
+        matches!(self.tag, Tag::A)
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_a(&self) -> &int {
@@ -120,14 +120,14 @@ impl SimpleUnion {
     }
     pub fn new_b(value: int) -> Self {
         Self {
-            tag: B,
+            tag: Tag::B,
             data: SimpleUnionData {
                 b: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_b(&self) -> bool {
-        matches!(self.tag, B)
+        matches!(self.tag, Tag::B)
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_b(&self) -> &int {
@@ -153,7 +153,7 @@ impl SimpleUnion {
 impl Default for SimpleUnion {
     fn default() -> Self {
         Self {
-            tag: A,
+            tag: Tag::A,
             data: SimpleUnionData {
                 a: core::mem::ManuallyDrop::new(int::default()),
             },
@@ -179,14 +179,14 @@ impl serde::Serialize for SimpleUnion {
         __S: serde::Serializer,
     {
         let helper = match self.tag {
-            A => {
+            Tag::A => {
                 let tag = "A";
                 SimpleUnionSerdeRef {
                     tag,
                     data: SimpleUnionSerdeRefData::Case0(self.as_a()),
                 }
             }
-            B => {
+            Tag::B => {
                 let tag = "B";
                 SimpleUnionSerdeRef {
                     tag,
@@ -218,7 +218,7 @@ impl<'de> serde::Deserialize<'de> for SimpleUnion {
                         ),
                     ))?;
                 Ok(Self {
-                    tag: A,
+                    tag: Tag::A,
                     data: SimpleUnionData {
                         a: core::mem::ManuallyDrop::new(value),
                     },
@@ -232,7 +232,7 @@ impl<'de> serde::Deserialize<'de> for SimpleUnion {
                         ),
                     ))?;
                 Ok(Self {
-                    tag: B,
+                    tag: Tag::B,
                     data: SimpleUnionData {
                         b: core::mem::ManuallyDrop::new(value),
                     },

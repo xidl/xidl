@@ -109,22 +109,22 @@ export namespace legacy {
 
         export const MessageSchema = z.object({
             
-                id: z.coerce.string(),
+                id: z.string(),
             
-                subject: z.coerce.string()
+                subject: z.string()
             
         });
     export const ChannelSchema = z.enum(["sms", "mms"]);
 
         export const GoneSchema = z.object({
             
-                reason: z.coerce.string(),
+                reason: z.string(),
             
-                replacement: z.coerce.string()
+                replacement: z.string()
             
         });
 
-        export const PayloadSchema = z.union([z.object({ text: z.coerce.string() }), z.object({ media: MessageSchema })]);
+        export const PayloadSchema = z.union([z.object({ text: z.string() }), z.object({ media: MessageSchema })]);
 
         export const EnvelopeSchema = z.object({
             
@@ -143,7 +143,7 @@ export namespace legacy {
 
             export const DeepSchema = z.object({
                 
-                    id: z.coerce.string()
+                    id: z.string()
                 
             });
     }
@@ -163,7 +163,7 @@ export namespace legacy {
 
             export const MarkedSchema = z.object({
                 
-                    id: z.coerce.string()
+                    id: z.string()
                 
             });
     }
@@ -171,7 +171,7 @@ export namespace legacy {
 
             export const QuietSchema = z.object({
                 
-                    id: z.coerce.string()
+                    id: z.string()
                 
             });
     }

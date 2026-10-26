@@ -91,7 +91,7 @@ export namespace legacy {
             async throwGetError(resp: Response): Promise<never> {
                 const status = resp.status;
                 if (status === 410) {
-                    const bodySchema = z.object({ "reason": z.coerce.string(),  });
+                    const bodySchema = z.object({ "reason": z.string(),  });
                     const rawBody = await resp.clone().json().catch(() => undefined);
                     if (rawBody == null || rawBody["reason"] === undefined) throw await parseXidlError(resp);
                     const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
@@ -618,18 +618,18 @@ export namespace legacy {
 
         export const MessageSchema = z.object({
             
-                id: z.coerce.string(),
+                id: z.string(),
             
-                subject: z.coerce.string()
+                subject: z.string()
             
         });
     export const ChannelSchema = z.enum(["sms", "mms"]);
 
-        export const PayloadSchema = z.union([z.object({ text: z.coerce.string() }), z.object({ media: MessageSchema })]);
+        export const PayloadSchema = z.union([z.object({ text: z.string() }), z.object({ media: MessageSchema })]);
 
         export const GoneSchema = z.object({
             
-                reason: z.coerce.string()
+                reason: z.string()
             
         });
 }
@@ -642,7 +642,7 @@ export namespace legacy {
             
                 message: legacy.MessageSchema,
             
-                attempts: z.coerce.number().int()
+                attempts: z.number().int()
             
         });
     export const KindSchema = z.enum(["plain", "rich"]);
@@ -656,7 +656,7 @@ export namespace legacy {
 
             export const DeepSchema = z.object({
                 
-                    id: z.coerce.string()
+                    id: z.string()
                 
             });
     }
@@ -676,7 +676,7 @@ export namespace legacy {
 
             export const MarkedSchema = z.object({
                 
-                    id: z.coerce.string()
+                    id: z.string()
                 
             });
     }
@@ -684,7 +684,7 @@ export namespace legacy {
 
             export const QuietSchema = z.object({
                 
-                    id: z.coerce.string()
+                    id: z.string()
                 
             });
     }

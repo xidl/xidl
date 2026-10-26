@@ -33,7 +33,7 @@ union DefaultUnionData {
 impl Drop for DefaultUnion {
     #[allow(unreachable_patterns)]
     fn drop(&mut self) {
-        if matches!(self.tag, A) {
+        if matches!(self.tag, Tag::A) {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.a);
             }
@@ -48,7 +48,7 @@ impl Clone for DefaultUnion {
     #[allow(clippy::clone_on_copy)]
     #[allow(unreachable_patterns)]
     fn clone(&self) -> Self {
-        if matches!(self.tag, A) {
+        if matches!(self.tag, Tag::A) {
             Self::new_a(self.as_a().clone())
         } else {
             Self::new_fallback(self.as_fallback().clone())
@@ -60,7 +60,7 @@ impl core::fmt::Debug for DefaultUnion {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("DefaultUnion");
         d.field("tag", &self.tag);
-        if matches!(self.tag, A) {
+        if matches!(self.tag, Tag::A) {
             d.field("a", self.as_a());
         } else {
             d.field("fallback", self.as_fallback());
@@ -74,7 +74,7 @@ impl PartialEq for DefaultUnion {
         if self.tag != other.tag {
             return false;
         }
-        if matches!(self.tag, A) {
+        if matches!(self.tag, Tag::A) {
             self.as_a() == other.as_a()
         } else {
             self.as_fallback() == other.as_fallback()
@@ -84,14 +84,14 @@ impl PartialEq for DefaultUnion {
 impl DefaultUnion {
     pub fn new_a(value: int) -> Self {
         Self {
-            tag: A,
+            tag: Tag::A,
             data: DefaultUnionData {
                 a: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_a(&self) -> bool {
-        matches!(self.tag, A)
+        matches!(self.tag, Tag::A)
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_a(&self) -> &int {
@@ -170,7 +170,7 @@ impl serde::Serialize for DefaultUnion {
     where
         __S: serde::Serializer,
     {
-        let helper = if matches!(self.tag, A) {
+        let helper = if matches!(self.tag, Tag::A) {
             let tag = "A";
             DefaultUnionSerdeRef {
                 tag,
@@ -206,7 +206,7 @@ impl<'de> serde::Deserialize<'de> for DefaultUnion {
                         ),
                     ))?;
                 Ok(Self {
-                    tag: A,
+                    tag: Tag::A,
                     data: DefaultUnionData {
                         a: core::mem::ManuallyDrop::new(value),
                     },

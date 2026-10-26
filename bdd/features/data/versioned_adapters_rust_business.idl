@@ -64,13 +64,13 @@ struct NumericIndex { map<long, Address> addresses; };
 struct ShortPayload { string id; };
 struct FullPayload { string id; string extra; };
 @http union Representation switch(ContentType) {
-    case Json: ShortPayload short_value;
-    case Text: FullPayload full_value;
+    case ContentType::Json: ShortPayload short_value;
+    case ContentType::Text: FullPayload full_value;
 };
 
 @http union AmbiguousRepresentation switch(ContentType) {
-    case Json: ShortPayload short_json;
-    case Text: ShortPayload short_text;
+    case ContentType::Json: ShortPayload short_json;
+    case ContentType::Text: ShortPayload short_text;
 };
 
 interface Depot {

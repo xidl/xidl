@@ -300,7 +300,7 @@ fn http_union_rejects_extra_body_outputs() {
     for parameter in ["out uint32 count", "inout uint32 count"] {
         let spec = parse(&format!(
             r#"
-            @http union Payload switch (ContentType) {{ case Json: string value; }};
+            @http union Payload switch (ContentType) {{ case ContentType::Json: string value; }};
             interface Files {{ @get(path="/file") Payload read({parameter}); }};
             "#,
         ));
@@ -317,7 +317,7 @@ fn http_union_rejects_extra_body_outputs() {
 fn http_union_rejects_array_case_declarators() {
     let typed = crate::parser::parser_text(
         r#"
-        @http union Payload switch (ContentType) { case Json: uint32 values[3]; };
+        @http union Payload switch (ContentType) { case ContentType::Json: uint32 values[3]; };
         interface Files { @get(path="/file") Payload read(); };
         "#,
     )
@@ -340,7 +340,7 @@ fn http_union_rejects_unprojected_case_metadata() {
     let typed = crate::parser::parser_text(
         r#"
         struct Envelope { @header string etag; string value; };
-        @http union Payload switch (ContentType) { case Json: @flatten Envelope value; };
+        @http union Payload switch (ContentType) { case ContentType::Json: @flatten Envelope value; };
         interface Files { @get(path="/file") Payload read(); };
         "#,
     )

@@ -226,11 +226,11 @@ fn http_union_rules_are_shared_by_source_generation_targets() {
     ] {
         for (source, expected) in [
             (
-                "@http union Payload switch(ContentType) { case Json: string value; }; struct Meta { ContentType media; };",
+                "@http union Payload switch(ContentType) { case ContentType::Json: string value; }; struct Meta { ContentType media; };",
                 "ordinary IDL values cannot reference runtime types",
             ),
             (
-                "enum Mime { Json, }; @http union Payload switch(Mime) { case Json: string value; };",
+                "enum Mime { Json, }; @http union Payload switch(Mime) { case Mime::Json: string value; };",
                 "must resolve to the built-in ::ContentType",
             ),
             (
@@ -238,7 +238,7 @@ fn http_union_rules_are_shared_by_source_generation_targets() {
                 "no default",
             ),
             (
-                "@http union Payload switch(ContentType) { case Json: string a; case Json: string b; };",
+                "@http union Payload switch(ContentType) { case ContentType::Json: string a; case ContentType::Json: string b; };",
                 "duplicate ContentType case",
             ),
             (
