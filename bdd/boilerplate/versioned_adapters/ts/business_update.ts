@@ -1,4 +1,8 @@
 import assert from 'node:assert/strict';
+import {
+  structurallyCompatible,
+  updatePolicy,
+} from './business_hook_contracts';
 import type * as types from './versioned_adapters_business';
 import * as a from './versioned_adapters_business.adapters';
 
@@ -66,7 +70,7 @@ export async function runUpdateJourney(
     { id: 'p1', patch: { handling_note: 'keep cold', note: 'fragile-two' } },
     current,
     handler,
-    hooks,
+    { ...hooks, parcelPatchUpcastFromV2: updatePolicy.parcelPatchUpcastFromV2 },
   );
   assert.equal(written.dispatched, true);
   assert.equal(written.projected, true);
@@ -89,7 +93,7 @@ export async function runUpdateJourney(
     },
     current,
     handler,
-    hooks,
+    { ...hooks, ...structurallyCompatible },
   );
   assert.equal(same.dispatched && same.projected && same.value.ok, true);
   if (same.dispatched && same.projected && same.value.ok) {

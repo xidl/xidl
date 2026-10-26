@@ -2372,50 +2372,50 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     );
 
 
-/** Hooks are required application decisions. Keep them pure and deterministic. */
+/** Required pure application decisions. Use strictFunctionTypes to reject narrower inputs. */
 export interface VersionAdapters {
     
-        choiceDowncastToV1(source: { count: number }): VersionedResult<types.v1.Choice>;
+        choiceDowncastToV1: (source: { count: number }) => VersionedResult<types.v1.Choice>;
     
-        optionalChangeUpcastFromV1(source: types.v1.OptionalChange): VersionedResult<OptionalChangeUpcastDecisionFromV1>;
+        optionalChangeUpcastFromV1: (source: types.v1.OptionalChange) => VersionedResult<OptionalChangeUpcastDecisionFromV1>;
     
-        optionalChangeDowncastToV1(source: types.v2.OptionalChange, stored: Pick<StoredValues, "optionalChangeNote">): VersionedResult<OptionalChangeDowncastDecisionToV1>;
+        optionalChangeDowncastToV1: (source: types.v2.OptionalChange, stored: Pick<StoredValues, "optionalChangeNote">) => VersionedResult<OptionalChangeDowncastDecisionToV1>;
     
-        parcelUpcastFromV1(source: types.v1.Parcel): VersionedResult<ParcelUpcastDecisionFromV1>;
+        parcelUpcastFromV1: (source: types.v1.Parcel) => VersionedResult<ParcelUpcastDecisionFromV1>;
     
-        parcelDowncastToV1(source: types.v2.Parcel, stored: Pick<StoredValues, "parcelLegacy">): VersionedResult<ParcelDowncastDecisionToV1>;
+        parcelDowncastToV1: (source: types.v2.Parcel, stored: Pick<StoredValues, "parcelLegacy">) => VersionedResult<ParcelDowncastDecisionToV1>;
     
-        signedDowncastToV1(source: types.v2.Signed): VersionedResult<types.v1.Signed>;
+        signedDowncastToV1: (source: types.v2.Signed) => VersionedResult<types.v1.Signed>;
     
-        stateDowncastToV1(source: "shipping"): VersionedResult<types.v1.State>;
+        stateDowncastToV1: (source: "shipping") => VersionedResult<types.v1.State>;
     
-        depotGetBusyErrorDowncastToV1(source: errors.v2$Busy): VersionedResult<errors.v1$NotFound | FrameworkError>;
+        depotGetBusyErrorDowncastToV1: (source: errors.v2$Busy) => VersionedResult<errors.v1$NotFound | FrameworkError>;
     
-        depotUpdateBusyErrorDowncastToV1(source: errors.v2$Busy): VersionedResult<errors.v1$NotFound | FrameworkError>;
+        depotUpdateBusyErrorDowncastToV1: (source: errors.v2$Busy) => VersionedResult<errors.v1$NotFound | FrameworkError>;
     
-        addressUpcastFromV2(source: types.v2.Address): VersionedResult<AddressUpcastDecisionFromV2>;
+        addressUpcastFromV2: (source: types.v2.Address) => VersionedResult<AddressUpcastDecisionFromV2>;
     
-        addressDowncastToV2(source: types.v3.Address, stored: Pick<StoredValues, "addressGate">): VersionedResult<AddressDowncastDecisionToV2>;
+        addressDowncastToV2: (source: types.v3.Address, stored: Pick<StoredValues, "addressGate">) => VersionedResult<AddressDowncastDecisionToV2>;
     
-        parcelUpcastFromV2(source: types.v2.Parcel): VersionedResult<ParcelUpcastDecisionFromV2>;
+        parcelUpcastFromV2: (source: types.v2.Parcel) => VersionedResult<ParcelUpcastDecisionFromV2>;
     
-        parcelDowncastToV2(source: types.v3.Parcel, stored: Pick<StoredValues, "parcelHandlingNote">): VersionedResult<ParcelDowncastDecisionToV2>;
+        parcelDowncastToV2: (source: types.v3.Parcel, stored: Pick<StoredValues, "parcelHandlingNote">) => VersionedResult<ParcelDowncastDecisionToV2>;
     
-        parcelPatchUpcastFromV2(source: types.v2.ParcelPatch, current: types.v3.Parcel): VersionedResult<ParcelPatchUpcastDecisionFromV2>;
+        parcelPatchUpcastFromV2: (source: types.v2.ParcelPatch, current: types.v3.Parcel) => VersionedResult<ParcelPatchUpcastDecisionFromV2>;
     
-        signedDowncastToV2(source: types.v3.Signed): VersionedResult<types.v2.Signed>;
+        signedDowncastToV2: (source: types.v3.Signed) => VersionedResult<types.v2.Signed>;
     
-        stateDowncastToV2(source: "delivered"): VersionedResult<types.v2.State>;
+        stateDowncastToV2: (source: "delivered") => VersionedResult<types.v2.State>;
     
-        depotGetFrameworkErrorDowncastToV2(source: errors.Framework): VersionedResult<errors.v2$NotFound | errors.v2$Busy | FrameworkError>;
+        depotGetFrameworkErrorDowncastToV2: (source: errors.Framework) => VersionedResult<errors.v2$NotFound | errors.v2$Busy | FrameworkError>;
     
-        depotGetDeniedErrorDowncastToV2(source: errors.Denied): VersionedResult<errors.v2$NotFound | errors.v2$Busy | FrameworkError>;
+        depotGetDeniedErrorDowncastToV2: (source: errors.Denied) => VersionedResult<errors.v2$NotFound | errors.v2$Busy | FrameworkError>;
     
-        depotTraceResponseDowncastToV2(source: { "return": string }, stored: Pick<StoredValues, "depotTraceResponseTraceId">): VersionedResult<DepotTraceResponseDowncastDecisionToV2>;
+        depotTraceResponseDowncastToV2: (source: { "return": string }, stored: Pick<StoredValues, "depotTraceResponseTraceId">) => VersionedResult<DepotTraceResponseDowncastDecisionToV2>;
     
-        depotUpdateFrameworkErrorDowncastToV2(source: errors.Framework): VersionedResult<errors.v2$NotFound | errors.v2$Busy | FrameworkError>;
+        depotUpdateFrameworkErrorDowncastToV2: (source: errors.Framework) => VersionedResult<errors.v2$NotFound | errors.v2$Busy | FrameworkError>;
     
-        depotUpdateDeniedErrorDowncastToV2(source: errors.Denied): VersionedResult<errors.v2$NotFound | errors.v2$Busy | FrameworkError>;
+        depotUpdateDeniedErrorDowncastToV2: (source: errors.Denied) => VersionedResult<errors.v2$NotFound | errors.v2$Busy | FrameworkError>;
     
 }
 
