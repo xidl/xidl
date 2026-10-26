@@ -38,7 +38,7 @@ pub async fn run() {
     }
     // A retired member reaches only the versions that still declare it; nothing is fabricated.
     assert_eq!(NEEDS.iter().find(|(key, _)| *key == "Parcel").map(|(_, needs)| *needs),
-        Some(&[("2026-07", &[][..]), ("2026-04", &["handling_note"][..]), ("2026-01", &["handling_note", "reference"][..])][..]));
+        Some(&[("2026-07", &[][..]), ("2026-04", &["courier_note", "handling_note"][..]), ("2026-01", &["courier_note", "handling_note", "reference"][..])][..]));
     // Operation responses are keyed by their version-map operation.
     assert_eq!(NEEDS.iter().find(|(key, _)| *key == "Depot.trace").map(|(_, needs)| *needs),
         Some(&[("2026-07", &[][..]), ("2026-04", &["trace_id"][..]), ("2026-01", &["trace_id"][..])][..]));
@@ -46,6 +46,40 @@ pub async fn run() {
         ParcelProjection::V2(value) => assert_eq!(value.handling_note.as_deref(), Some("fragile")),
         _ => panic!("v2 still declares the retired member"),
     }
+    // The application owns the rename and its reader recovers the old fact
+    // from Head. NEEDS reports the wire contract, not duplicate database columns.
+    let mut renamed_wire = parcel();
+    renamed_wire["carrier"] = json!("postal");
+    renamed_wire["courier_note"] = json!("leave at desk");
+    let renamed = decode_and_upcast_depot_ship(Version::V2, json!({"parcel": renamed_wire.clone()}), &hooks)
+        .unwrap()
+        .parcel;
+    assert_eq!(renamed.courier_remark.as_deref(), Some("leave at desk"));
+    let renamed_view = match downcast_parcel(Version::V2, renamed, &storage, &hooks).unwrap() {
+        ParcelProjection::V2(value) => value.courier_note,
+        _ => panic!("the renamed member projects back to v2"),
+    };
+    assert_eq!(renamed_view.as_deref(), Some("leave at desk"));
+    for courier_note in [None, Some("")] {
+        let mut wire = parcel();
+        wire["carrier"] = json!("postal");
+        if let Some(note) = courier_note { wire["courier_note"] = json!(note); }
+        let value = decode_and_upcast_depot_ship(Version::V2, json!({"parcel": wire}), &hooks).unwrap().parcel;
+        assert_eq!(value.courier_remark.as_deref(), courier_note);
+        let view = match downcast_parcel(Version::V2, value, &storage, &hooks).unwrap() {
+            ParcelProjection::V2(value) => value,
+            _ => panic!("the application rename must project to v2"),
+        };
+        assert_eq!(view.courier_note.as_deref(), courier_note);
+        assert_eq!(serde_json::to_value(view).unwrap().get("courier_note").is_some(), courier_note.is_some());
+    }
+    let mut retired_wire = parcel();
+    retired_wire["audit"] = json!("checked");
+    retired_wire["courier_note"] = json!("older");
+    assert!(matches!(
+        decode_and_upcast_depot_ship(Version::V3, json!({"parcel": retired_wire}), &hooks),
+        Err(AdaptationError::Validation(_))
+    ));
     let unknown = v3::Parcel { id: "unknown".into(), ..head.clone() };
     match downcast_parcel(Version::V2, unknown, &storage, &hooks).unwrap() {
         ParcelProjection::V2(value) => assert_eq!(value.handling_note, None, "storage without the row omits the member"),

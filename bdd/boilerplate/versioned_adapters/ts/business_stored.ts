@@ -22,10 +22,11 @@ export async function runStoredJourney(
 ): Promise<void> {
   // A retired member reaches only the versions that still declare it, from storage.
   assert.deepEqual(a.NEEDS.Parcel, {
-    '2026-01': ['handling_note', 'reference'],
-    '2026-04': ['handling_note'],
+    '2026-01': ['courier_note', 'handling_note', 'reference'],
+    '2026-04': ['courier_note', 'handling_note'],
     '2026-07': [],
   });
+  // v1 also runs the v3 -> v2 step, so its report includes that reader.
   // Operation responses are keyed by their version-map operation.
   assert.deepEqual(a.NEEDS['Depot.trace'], {
     '2026-01': ['trace_id'],
@@ -45,6 +46,64 @@ export async function runStoredJourney(
     ),
     false,
   );
+  // The application owns this rename. Its reader obtains the retired fact
+  // from the Head field; NEEDS reports the old wire contract, not a DB schema.
+  const renamedHead = take(
+    a.decodeAndUpcastDepotShipFromV2(
+      {
+        parcel: {
+          ...wireParcel,
+          carrier: 'postal',
+          courier_note: 'leave at desk',
+        },
+      },
+      hooks,
+    ),
+  ).parcel;
+  assert.equal(renamedHead.courier_remark, 'leave at desk');
+  assert.equal(Object.hasOwn(renamedHead, 'courier_note'), false);
+  assert.equal(
+    take(a.downcastParcel('v2', renamedHead, storedValues, hooks)).courier_note,
+    'leave at desk',
+  );
+  assert.equal(
+    Object.hasOwn(
+      take(a.downcastParcel('v1', renamedHead, storedValues, hooks)),
+      'courier_note',
+    ),
+    false,
+  );
+  assert.equal(
+    a.decodeAndUpcastDepotShipFromV3(
+      { parcel: { ...wireParcel, audit: 'checked', courier_note: 'older' } },
+      hooks,
+    ).ok,
+    false,
+    'the Head contract no longer declares the earlier wire name',
+  );
+
+  for (const courierNote of [undefined, '']) {
+    const value = take(
+      a.decodeAndUpcastDepotShipFromV2(
+        {
+          parcel: {
+            ...wireParcel,
+            carrier: 'postal',
+            courier_note: courierNote,
+          },
+        },
+        hooks,
+      ),
+    ).parcel;
+    assert.equal(value.courier_remark, courierNote);
+    const view = take(a.downcastParcel('v2', value, storedValues, hooks));
+    assert.equal(view.courier_note, courierNote);
+    assert.equal(
+      Object.hasOwn(view, 'courier_note'),
+      courierNote !== undefined,
+    );
+  }
+
   // Storage without the row leaves the member absent: OMIT, never a fabricated value.
   const unknownHead = { ...head, id: 'unknown' };
   assert.equal(

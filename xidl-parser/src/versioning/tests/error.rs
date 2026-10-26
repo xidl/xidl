@@ -2,7 +2,7 @@ use crate::versioning::VersioningError;
 
 #[test]
 fn rejected_renames_offer_wire_names_without_promising_versioned_aliases() {
-    for name in ["@renamedFrom", "@RENAMEDFROM"] {
+    for name in ["@renamedFrom", "@RENAMEDFROM", "@replaces", "@REPLACES"] {
         let message = VersioningError::UnsupportedVersionAnnotation {
             name: name.into(),
             decl: "Pet.name".into(),

@@ -24,6 +24,9 @@ impl StoredValues for Storage {
     fn booking_agenda(&self, source: &v2026_10_01::Booking) -> Option<String> {
         self.agenda_texts.get(&source.id).cloned()
     }
+    fn booking_owner(&self, source: &v2027_01_01::Booking) -> Option<String> {
+        source.organizer.clone()
+    }
     fn booking_roster(&self, source: &v2027_01_01::Booking) -> Option<Vec<String>> {
         self.rosters.get(&source.id).cloned()
     }
@@ -84,10 +87,10 @@ impl VersionAdapters for Hooks {
 
     fn booking_upcast_from_v_2026_10_01(
         &self,
-        _source: &v2026_10_01::Booking,
+        source: &v2026_10_01::Booking,
     ) -> VersionedResult<BookingUpcastFromV20261001Decision> {
         self.up_from_v2.fetch_add(1, Ordering::SeqCst);
-        Ok(BookingUpcastFromV20261001Decision { roster: IGNORED })
+        Ok(BookingUpcastFromV20261001Decision { organizer: source.owner.clone(), owner: IGNORED, roster: IGNORED })
     }
 
     fn booking_downcast_to_v_2026_10_01(
@@ -104,6 +107,6 @@ impl VersionAdapters for Hooks {
                 reason: format!("no stored roster for booking {}", source.id),
             });
         };
-        Ok(BookingDowncastToV20261001Decision { roster })
+        Ok(BookingDowncastToV20261001Decision { owner: stored.booking_owner(source), roster })
     }
 }
