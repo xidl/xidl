@@ -1338,7 +1338,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["handling_note"]: z.string().nullish().transform((value) => value ?? undefined),
         
-            ["courier_note"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
+            ["courier_note"]: z.string().nullish().transform((value) => value ?? undefined),
         
             ["address"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType12Schema),
         
@@ -2147,7 +2147,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["audit"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
-            ["courier_remark"]: z.coerce.string().nullish().transform((value) => value ?? undefined),
+            ["courier_remark"]: z.string().nullish().transform((value) => value ?? undefined),
         
             ["address"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType25Schema),
         
