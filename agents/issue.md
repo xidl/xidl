@@ -1,7 +1,7 @@
 # Issue Writing Guide
 
-This document defines the categorization, title conventions, body structure, and
-writing style for issues.
+This document defines the categorization, title conventions, body structure,
+terminology rules, and writing style for issues.
 
 ## 1. Classify the Issue
 
@@ -37,11 +37,21 @@ Describe the problem using this exact sentence pattern:
 > Under [specific condition or input], expected behavior is [expected outcome].
 > Actual result is [actual outcome].
 
+The problem statement MUST adhere to these rules:
+
+- State ONLY the observed incorrect phenomenon.
+- Describing root causes, underlying explanations, or implementation mechanics
+  is FORBIDDEN.
+- Describing portions of the input or behavior that are valid, expected, or
+  logical is FORBIDDEN.
+- Describing the post-fix result, repaired outcome, or future state after
+  resolution is FORBIDDEN.
+
 ### 3.2 Reproduction Steps and Concrete Examples
 
 Provide concise reproduction steps immediately after the first paragraph.
-Include concrete code snippets (such as IDL definitions and divergent outputs)
-to prevent abstract descriptions:
+Include concrete code snippets (such as IDL definitions and observed incorrect
+outputs) to prevent abstract descriptions:
 
 ```text
 Steps to reproduce:
@@ -50,7 +60,26 @@ Steps to reproduce:
 3. Observe divergent outputs between targets.
 ```
 
-### 3.3 Optional Closing: Recommendations
+### 3.3 Code Snippet Constraints
+
+Code snippets in issues MUST adhere to these rules:
+
+- Inlining or quoting code within prose sentences is FORBIDDEN.
+- Quoted code snippets MUST precisely pinpoint the issue.
+- A quoted code snippet MUST NOT exceed 20 lines.
+
+**Pattern (correct):**
+
+> Given the following IDL contract, the generated code fails to compile because
+> line 12 in the output block contains unresolved symbol `Foo`.
+
+**Pattern (forbidden):**
+
+> Given the following IDL contract, `Foo` is logical, code `Bar` inside code
+> `Baz` indirectly references `Qux` resulting in error E0072. After fixing, the
+> generated code compiles cleanly.
+
+### 3.4 Optional Closing: Recommendations
 
 Suggest follow-up actions at the end when helpful:
 
@@ -80,7 +109,16 @@ approaches:
 - Current design limitations.
 - Alternative implementation approaches.
 
-## 5. Style and Grammar Rules
+## 5. Terminology and Error Rules
+
+All issues MUST adhere to these terminology and error rules:
+
+- Authors MUST ONLY use terminology and error descriptions that appear in
+  repository code.
+- Downstream compiler or runtime error codes (such as `E0072`) are FORBIDDEN.
+- Placing downstream, third-party, or user error codes into issues is FORBIDDEN.
+
+## 6. Style and Grammar Rules
 
 All issues must adhere to these writing rules:
 
@@ -92,7 +130,7 @@ All issues must adhere to these writing rules:
 - **Use affirmative declarative sentences**: Express facts primarily through
   affirmative declarative statements.
 
-## 6. Placement of Proposed Solutions
+## 7. Placement of Proposed Solutions
 
 Proposals for bugs and feature requests follow these rules:
 

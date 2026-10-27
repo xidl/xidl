@@ -1,7 +1,7 @@
 # PR Writing Guide
 
-This document defines the requirements, target branch rules, structure, and
-character limits for pull requests.
+This document defines the requirements, target branch rules, structure,
+terminology rules, and character limits for pull requests.
 
 ## 1. Classify the PR
 
@@ -77,6 +77,13 @@ State the problem in one or two sentences using this pattern:
 > When [specific condition], [component] [incorrect behavior] instead of
 > [correct behavior].
 
+The problem statement MUST adhere to these rules:
+
+- State ONLY the observed incorrect phenomenon.
+- Describing root causes or underlying explanations is FORBIDDEN.
+- Describing portions of input or behavior that are valid, expected, or logical
+  is FORBIDDEN.
+
 #### Solution
 
 State the fix in one sentence:
@@ -118,7 +125,26 @@ Summary:
 > [Action verb] [what was refactored, documented, or updated] to [benefit or
 > purpose].
 
-## 5. Review Communication
+### 4.5 Code Snippet Constraints
+
+Code snippets in pull request descriptions MUST adhere to these rules:
+
+- Inlining or quoting code within prose sentences is FORBIDDEN.
+- Quoted code snippets MUST precisely pinpoint the issue.
+- A quoted code snippet MUST NOT exceed 20 lines.
+
+## 5. Terminology and Error Rules
+
+All pull requests MUST adhere to these terminology and error rules across
+titles, descriptions, and review comments:
+
+- Authors MUST ONLY use terminology and error descriptions that appear in
+  repository code.
+- Downstream compiler or runtime error codes (such as `E0072`) are FORBIDDEN.
+- Placing downstream, third-party, or user error codes into pull requests is
+  FORBIDDEN.
+
+## 6. Review Communication
 
 When responding to review comments on a pull request:
 
@@ -131,16 +157,21 @@ When responding to review comments on a pull request:
 - When a reviewer requests an architectural change, the author MUST confirm the
   revised design approach in comments before pushing major rewrites.
 
-## 6. Forbidden Content
+## 7. Forbidden Content
 
 The PR description MUST NOT contain:
 
+- Downstream compiler or runtime error codes (such as `E0072`).
+- Downstream, third-party, or user error codes.
+- Inlined code within prose sentences.
+- Quoted code snippets exceeding 20 lines.
+- Descriptions of portions of input or behavior that are valid or logical.
 - Reasoning, trade-off analysis, or design rationale.
 - Business-domain terminology or product-specific context.
 - Verification results such as "all tests pass" or benchmark numbers.
 - Descriptions of intermediate implementation steps.
 - Anything outside the designated structure.
 
-## 7. Character Limit
+## 8. Character Limit
 
 The PR description MUST NOT exceed 800 characters.
