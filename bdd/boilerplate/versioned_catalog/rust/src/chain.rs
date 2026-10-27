@@ -50,7 +50,12 @@ impl Chain {
         let outcome = dispatch_catalog_search(
             version,
             wire,
-            |input, _| async move { catalog.search(input) },
+            |input, _| async move {
+                HeadOutcome {
+                    outcome: catalog.search(input),
+                    stored: Hooks,
+                }
+            },
             &Hooks,
         )
         .await;
