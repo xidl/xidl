@@ -62,10 +62,14 @@
                 {% endif %}
             {% else %}
                 {% if param.optional %}
+                    {% if param.cookie_item_is_string %}
+                    let {{ param.name }}: {{ param.ty }} = cookie_map.get("{{ param.wire_name }}").and_then(|values| values.first()).cloned();
+                    {% else %}
                     let {{ param.name }}: {{ param.ty }} = match cookie_map.get("{{ param.wire_name }}").and_then(|values| values.first()) {
                         Some(value) => Some({% if param.cookie_item_is_string %}value.to_string(){% elif param.cookie_item_is_primitive %}value.parse().map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% else %}::xidl_rust_axum::serde_json::from_str(value).map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}),
                         None => None,
                     };
+                    {% endif %}
                 {% else %}
                     let {{ param.name }}: {{ param.ty }} = match cookie_map.get("{{ param.wire_name }}").and_then(|values| values.first()) {
                         Some(value) => {% if param.cookie_item_is_string %}value.to_string(){% elif param.cookie_item_is_primitive %}value.parse().map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% else %}::xidl_rust_axum::serde_json::from_str(value).map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %},

@@ -111,8 +111,10 @@ pub mod version_adapters {
         /// wire `owner`, last served by v2026_10_01
         fn booking_owner(&self, source: &v2027_01_01::Booking) -> Option<String>;
     }
+    /// Storage wire names served by one version of one declared type.
+    pub type StoredNeedsEntry = (&str, &[(&str, &[&str])]);
     /// Wire names each served version still reads from storage, by type; Head reads nothing.
-    pub const NEEDS: &[(&str, &[(&str, &[&str])])] = &[
+    pub const NEEDS: &[StoredNeedsEntry] = &[
         (
             "Booking",
             &[
@@ -211,8 +213,7 @@ pub mod version_adapters {
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
             "Booking.roster",
         )?;
-        let projected_3 = (&source.owner)
-            .as_ref()
+        let projected_3 = ::std::option::Option::as_ref(&source.owner)
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
         Ok(v2026_10_01::Booking {
@@ -250,8 +251,7 @@ pub mod version_adapters {
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
             "Booking.roster",
         )?;
-        let projected_3 = (&source.owner)
-            .as_ref()
+        let projected_3 = ::std::option::Option::as_ref(&source.owner)
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
         Ok(v2026_06_01::Booking {
@@ -419,8 +419,7 @@ pub mod version_adapters {
             |item| agenda_entry_upcast_from_v_2026_10_01(item, adapters),
             "Booking.items",
         )?;
-        let projected_3 = (&source.locked)
-            .as_ref()
+        let projected_3 = ::std::option::Option::as_ref(&source.locked)
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
         Ok(v2027_01_01::Booking {
@@ -457,8 +456,7 @@ pub mod version_adapters {
             |item| agenda_entry_downcast_to_v_2026_10_01(item, adapters),
             "Booking.items",
         )?;
-        let projected_3 = (&source.locked)
-            .as_ref()
+        let projected_3 = ::std::option::Option::as_ref(&source.locked)
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
         Ok(v2026_10_01::Booking {
@@ -616,21 +614,27 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "id").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object
             .get("title")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "title").to_string()
             })?;
-        let value_1: String = ::serde_json::from_value::<String>((raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())?;
         let raw_2 = object
             .get("agenda")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "agenda").to_string()
             })?;
-        let value_2: String = ::serde_json::from_value::<String>((raw_2).clone())
+        let value_2: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_2))
             .map_err(|error| error.to_string())?;
         let raw_3 = object
             .get("roster")
@@ -644,7 +648,7 @@ pub mod version_adapters {
             let values = array
                 .iter()
                 .map(|item| {
-                    ::serde_json::from_value::<String>((item).clone())
+                    ::serde_json::from_value::<String>(::std::clone::Clone::clone(item))
                         .map_err(|error| error.to_string())
                 })
                 .collect::<Result<Vec<_>, String>>()?;
@@ -654,7 +658,7 @@ pub mod version_adapters {
         let value_4: Option<String> = if (raw_4).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_4).clone())
+            ::serde_json::from_value::<String>(::std::clone::Clone::clone(raw_4))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -684,14 +688,18 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "id").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object
             .get("title")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "title").to_string()
             })?;
-        let value_1: String = ::serde_json::from_value::<String>((raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())?;
         let raw_2 = object
             .get("items")
@@ -720,7 +728,7 @@ pub mod version_adapters {
             let values = array
                 .iter()
                 .map(|item| {
-                    ::serde_json::from_value::<String>((item).clone())
+                    ::serde_json::from_value::<String>(::std::clone::Clone::clone(item))
                         .map_err(|error| error.to_string())
                 })
                 .collect::<Result<Vec<_>, String>>()?;
@@ -730,7 +738,7 @@ pub mod version_adapters {
         let value_4: Option<String> = if (raw_4).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_4).clone())
+            ::serde_json::from_value::<String>(::std::clone::Clone::clone(raw_4))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -738,7 +746,7 @@ pub mod version_adapters {
         let value_5: Option<bool> = if (raw_5).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<bool>((raw_5).clone())
+            ::serde_json::from_value::<bool>(::std::clone::Clone::clone(raw_5))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -769,14 +777,18 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "title").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object
             .get("minutes")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "minutes").to_string()
             })?;
-        let value_1: i32 = ::serde_json::from_value::<i32>((raw_1).clone())
+        let value_1: i32 = ::serde_json::from_value::<
+            i32,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())?;
         Ok(v2026_10_01::AgendaEntry {
             title: value_0,
@@ -801,14 +813,18 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "id").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object
             .get("title")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "title").to_string()
             })?;
-        let value_1: String = ::serde_json::from_value::<String>((raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())?;
         let raw_2 = object
             .get("items")
@@ -829,7 +845,7 @@ pub mod version_adapters {
         let value_3: Option<String> = if (raw_3).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_3).clone())
+            ::serde_json::from_value::<String>(::std::clone::Clone::clone(raw_3))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -837,7 +853,7 @@ pub mod version_adapters {
         let value_4: Option<bool> = if (raw_4).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<bool>((raw_4).clone())
+            ::serde_json::from_value::<bool>(::std::clone::Clone::clone(raw_4))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -867,20 +883,29 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "title").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object
             .get("minutes")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "minutes").to_string()
             })?;
-        let value_1: i32 = ::serde_json::from_value::<i32>((raw_1).clone())
+        let value_1: i32 = ::serde_json::from_value::<
+            i32,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())?;
         Ok(v2027_01_01::AgendaEntry {
             title: value_0,
             minutes: value_1,
         })
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type SchedulerBookResultV20260601 = Result<
+        v2026_06_01::Booking,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_scheduler_book_from_v_2026_06_01(
         wire: ::serde_json::Value,
@@ -899,11 +924,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("booking")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "booking").into(),
             ))?;
-        let value_0: v2026_06_01::Booking = decode_wire_v_2026_06_01_booking(&raw_0)
+        let value_0: v2026_06_01::Booking = decode_wire_v_2026_06_01_booking(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = SchedulerBookRequestV20260601 {
             booking: value_0,
@@ -914,13 +938,10 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_scheduler_book_from_v_2026_06_01_outcome(
-        head: Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
+        head: SchedulerBookResultV20270101,
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v2026_06_01::Booking, ::xidl_rust_axum::Error>,
-        Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<SchedulerBookResultV20260601, SchedulerBookResultV20270101> {
         match &head {
             Ok(source) => {
                 let source = match scheduler_book_response_downcast_to_v_2026_10_01(
@@ -986,10 +1007,7 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v2026_06_01::Booking, ::xidl_rust_axum::Error>,
-            Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<SchedulerBookResultV20260601, SchedulerBookResultV20270101>,
         AdaptationError,
     >
     where
@@ -1015,6 +1033,11 @@ pub mod version_adapters {
             ),
         )
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type SchedulerGetResultV20260601 = Result<
+        v2026_06_01::Booking,
+        v2026_06_01::SchedulerGetError,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_scheduler_get_from_v_2026_06_01(
         wire: ::serde_json::Value,
@@ -1033,11 +1056,12 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("id")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "id").into(),
             ))?;
-        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let source = SchedulerGetRequestV20260601 {
@@ -1049,13 +1073,10 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_scheduler_get_from_v_2026_06_01_outcome(
-        head: Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
+        head: SchedulerGetResultV20270101,
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v2026_06_01::Booking, v2026_06_01::SchedulerGetError>,
-        Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
-    > {
+    ) -> ProjectionOutcome<SchedulerGetResultV20260601, SchedulerGetResultV20270101> {
         match &head {
             Ok(source) => {
                 let source = match scheduler_get_response_downcast_to_v_2026_10_01(
@@ -1121,10 +1142,7 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v2026_06_01::Booking, v2026_06_01::SchedulerGetError>,
-            Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
-        >,
+        ProjectionOutcome<SchedulerGetResultV20260601, SchedulerGetResultV20270101>,
         AdaptationError,
     >
     where
@@ -1150,6 +1168,11 @@ pub mod version_adapters {
             ),
         )
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type SchedulerBookResultV20261001 = Result<
+        v2026_10_01::Booking,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_scheduler_book_from_v_2026_10_01(
         wire: ::serde_json::Value,
@@ -1168,11 +1191,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("booking")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "booking").into(),
             ))?;
-        let value_0: v2026_10_01::Booking = decode_wire_v_2026_10_01_booking(&raw_0)
+        let value_0: v2026_10_01::Booking = decode_wire_v_2026_10_01_booking(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = SchedulerBookRequestV20261001 {
             booking: value_0,
@@ -1182,13 +1204,10 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_scheduler_book_from_v_2026_10_01_outcome(
-        head: Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
+        head: SchedulerBookResultV20270101,
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v2026_10_01::Booking, ::xidl_rust_axum::Error>,
-        Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<SchedulerBookResultV20261001, SchedulerBookResultV20270101> {
         match &head {
             Ok(source) => {
                 let source = match scheduler_book_response_downcast_to_v_2026_10_01(
@@ -1229,10 +1248,7 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v2026_10_01::Booking, ::xidl_rust_axum::Error>,
-            Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<SchedulerBookResultV20261001, SchedulerBookResultV20270101>,
         AdaptationError,
     >
     where
@@ -1258,6 +1274,11 @@ pub mod version_adapters {
             ),
         )
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type SchedulerGetResultV20261001 = Result<
+        v2026_10_01::Booking,
+        v2026_10_01::SchedulerGetError,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_scheduler_get_from_v_2026_10_01(
         wire: ::serde_json::Value,
@@ -1276,11 +1297,12 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("id")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "id").into(),
             ))?;
-        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let source = SchedulerGetRequestV20261001 {
@@ -1291,13 +1313,10 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_scheduler_get_from_v_2026_10_01_outcome(
-        head: Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
+        head: SchedulerGetResultV20270101,
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v2026_10_01::Booking, v2026_10_01::SchedulerGetError>,
-        Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
-    > {
+    ) -> ProjectionOutcome<SchedulerGetResultV20261001, SchedulerGetResultV20270101> {
         match &head {
             Ok(source) => {
                 let source = match scheduler_get_response_downcast_to_v_2026_10_01(
@@ -1338,10 +1357,7 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v2026_10_01::Booking, v2026_10_01::SchedulerGetError>,
-            Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
-        >,
+        ProjectionOutcome<SchedulerGetResultV20261001, SchedulerGetResultV20270101>,
         AdaptationError,
     >
     where
@@ -1367,6 +1383,11 @@ pub mod version_adapters {
             ),
         )
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type SchedulerBookResultV20270101 = Result<
+        v2027_01_01::Booking,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_scheduler_book_from_v_2027_01_01(
         wire: ::serde_json::Value,
@@ -1385,11 +1406,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("booking")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "booking").into(),
             ))?;
-        let value_0: v2027_01_01::Booking = decode_wire_v_2027_01_01_booking(&raw_0)
+        let value_0: v2027_01_01::Booking = decode_wire_v_2027_01_01_booking(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = SchedulerBookRequestV20270101 {
             booking: value_0,
@@ -1398,12 +1418,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_scheduler_book_from_v_2027_01_01_outcome(
-        head: Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
+        head: SchedulerBookResultV20270101,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
-        Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<SchedulerBookResultV20270101, SchedulerBookResultV20270101> {
         ProjectionOutcome::Projected(head)
     }
     /// Execute a caller-supplied Head handler once after successful adaptation.
@@ -1412,17 +1429,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
-            Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<SchedulerBookResultV20270101, SchedulerBookResultV20270101>,
         AdaptationError,
     >
     where
         F: FnOnce(SchedulerBookRequestV20270101, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = SchedulerBookResultV20270101>,
     {
         let input = decode_and_upcast_scheduler_book_from_v_2027_01_01(wire, adapters)?;
         let head = handler(
@@ -1434,6 +1446,11 @@ pub mod version_adapters {
             .await;
         Ok(downcast_scheduler_book_from_v_2027_01_01_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type SchedulerGetResultV20270101 = Result<
+        v2027_01_01::Booking,
+        v2027_01_01::SchedulerGetError,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_scheduler_get_from_v_2027_01_01(
         wire: ::serde_json::Value,
@@ -1452,11 +1469,12 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("id")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "id").into(),
             ))?;
-        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let source = SchedulerGetRequestV20270101 {
@@ -1466,12 +1484,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_scheduler_get_from_v_2027_01_01_outcome(
-        head: Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
+        head: SchedulerGetResultV20270101,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
-        Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
-    > {
+    ) -> ProjectionOutcome<SchedulerGetResultV20270101, SchedulerGetResultV20270101> {
         ProjectionOutcome::Projected(head)
     }
     /// Execute a caller-supplied Head handler once after successful adaptation.
@@ -1480,17 +1495,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
-            Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
-        >,
+        ProjectionOutcome<SchedulerGetResultV20270101, SchedulerGetResultV20270101>,
         AdaptationError,
     >
     where
         F: FnOnce(SchedulerGetRequestV20270101, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
-        >,
+        Fut: ::std::future::Future<Output = SchedulerGetResultV20270101>,
     {
         let input = decode_and_upcast_scheduler_get_from_v_2027_01_01(wire, adapters)?;
         let head = handler(
@@ -1595,9 +1605,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum SchedulerBookOutcome {
-        V20260601(Result<v2026_06_01::Booking, ::xidl_rust_axum::Error>),
-        V20261001(Result<v2026_10_01::Booking, ::xidl_rust_axum::Error>),
-        V20270101(Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>),
+        V20260601(SchedulerBookResultV20260601),
+        V20261001(SchedulerBookResultV20261001),
+        V20270101(SchedulerBookResultV20270101),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_scheduler_book(
@@ -1620,13 +1630,10 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_scheduler_book_outcome(
         version: Version,
-        head: Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
+        head: SchedulerBookResultV20270101,
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        SchedulerBookOutcome,
-        Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<SchedulerBookOutcome, SchedulerBookResultV20270101> {
         match version {
             Version::V20260601 => {
                 match downcast_scheduler_book_from_v_2026_06_01_outcome(
@@ -1690,10 +1697,7 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            SchedulerBookOutcome,
-            Result<v2027_01_01::Booking, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<SchedulerBookOutcome, SchedulerBookResultV20270101>,
         AdaptationError,
     >
     where
@@ -1722,9 +1726,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum SchedulerGetOutcome {
-        V20260601(Result<v2026_06_01::Booking, v2026_06_01::SchedulerGetError>),
-        V20261001(Result<v2026_10_01::Booking, v2026_10_01::SchedulerGetError>),
-        V20270101(Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>),
+        V20260601(SchedulerGetResultV20260601),
+        V20261001(SchedulerGetResultV20261001),
+        V20270101(SchedulerGetResultV20270101),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_scheduler_get(
@@ -1747,13 +1751,10 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_scheduler_get_outcome(
         version: Version,
-        head: Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
+        head: SchedulerGetResultV20270101,
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        SchedulerGetOutcome,
-        Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
-    > {
+    ) -> ProjectionOutcome<SchedulerGetOutcome, SchedulerGetResultV20270101> {
         match version {
             Version::V20260601 => {
                 match downcast_scheduler_get_from_v_2026_06_01_outcome(
@@ -1817,10 +1818,7 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            SchedulerGetOutcome,
-            Result<v2027_01_01::Booking, v2027_01_01::SchedulerGetError>,
-        >,
+        ProjectionOutcome<SchedulerGetOutcome, SchedulerGetResultV20270101>,
         AdaptationError,
     >
     where
