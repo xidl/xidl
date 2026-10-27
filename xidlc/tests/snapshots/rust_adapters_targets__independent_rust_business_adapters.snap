@@ -193,8 +193,10 @@ pub mod version_adapters {
         /// wire `trace_id`, last served by v2
         fn depot_trace_response_trace_id(&self, source: &String) -> Option<String>;
     }
+    /// Wire names one served version still reads from storage.
+    pub type VersionNeeds = (&'static str, &'static [&'static str]);
     /// Storage wire names served by one version of one declared type.
-    pub type StoredNeedsEntry = (&str, &[(&str, &[&str])]);
+    pub type StoredNeedsEntry = (&'static str, &'static [VersionNeeds]);
     /// Wire names each served version still reads from storage, by type; Head reads nothing.
     pub const NEEDS: &[StoredNeedsEntry] = &[
         ("Address", &[("2026-07", &[]), ("2026-04", &["gate"]), ("2026-01", &["gate"])]),
