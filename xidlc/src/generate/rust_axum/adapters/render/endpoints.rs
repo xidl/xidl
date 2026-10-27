@@ -134,6 +134,8 @@ impl AdapterRenderer<'_> {
                     head_response: self.response_type(head_operation, &head_names)?.0,
                     error: self.error_type(operation, &names),
                     head_error: self.error_type(head_operation, &head_names),
+                    result: self.result_type(operation, names.version),
+                    head_result: self.result_type(head_operation, head_names.version),
                     upcast,
                     downcast,
                     downcast_error,
@@ -203,8 +205,7 @@ impl AdapterRenderer<'_> {
                     stored: stored_endpoints.contains(&variant_prefix),
                     current: current_endpoints.contains(&variant_prefix),
                     prefix: variant_prefix,
-                    response: self.response_type(served, &names)?.0,
-                    error: self.error_type(served, &names),
+                    result: self.result_type(served, names.version),
                 });
             }
             let threads = variants
@@ -217,6 +218,7 @@ impl AdapterRenderer<'_> {
                 request: self.request_type(operation, names.version),
                 response: self.response_type(operation, &names)?.0,
                 error: self.error_type(operation, &names),
+                head_result: self.result_type(operation, names.version),
                 exhaustive: variants.len() == self.plan.versions.len(),
                 variants,
                 stored: threads,

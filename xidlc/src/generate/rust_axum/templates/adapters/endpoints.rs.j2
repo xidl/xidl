@@ -1,5 +1,8 @@
 {% from "adapters/wire.rs.j2" import decode %}
 {% for endpoint in endpoints %}
+    /// The complete typed result of this operation in one frozen contract.
+    pub type {{ endpoint.result }} = Result<{{ endpoint.response }}, {{ endpoint.error }}>;
+
     /// Validate the served request before executing any business conversion.
     {% if endpoint.current or endpoint.stored_type %}
         pub fn decode_and_upcast_{{ endpoint.prefix }}(
@@ -12,8 +15,8 @@
         let keys: &[&str] = &[{% for field in endpoint.parameters %}{{ field.wire | tojson }},{% endfor %}];
         if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) { return Err(AdaptationError::Validation(format!("unknown source parameter {key}"))); }
         {% for field in endpoint.parameters %}
-            let raw_{{ loop.index0 }} = object.get({{ field.wire | tojson }}).cloned(){% if field.optional %}.unwrap_or(::serde_json::Value::Null){% else %}.ok_or_else(|| AdaptationError::Validation(concat!("missing source parameter ", {{ field.wire | tojson }}).into()))?{% endif %};
-            let value_{{ loop.index0 }}: {{ field.ty }} = {{ decode(field.schema, "&raw_" ~ loop.index0) }}.map_err(AdaptationError::Validation)?;
+            let raw_{{ loop.index0 }} = object.get({{ field.wire | tojson }}){% if field.optional %}.unwrap_or(&::serde_json::Value::Null){% else %}.ok_or_else(|| AdaptationError::Validation(concat!("missing source parameter ", {{ field.wire | tojson }}).into()))?{% endif %};
+            let value_{{ loop.index0 }}: {{ field.ty }} = {{ decode(field.schema, "raw_" ~ loop.index0) }}.map_err(AdaptationError::Validation)?;
         {% endfor %}
         let source = {{ endpoint.request }} { {% for field in endpoint.parameters %}{{ field.name }}: value_{{ loop.index0 }},{% endfor %} };
         {% if endpoint.stored_type %}
@@ -36,8 +39,8 @@
 
         /// Project an owned Head result and retain it unchanged on any refusal.
         pub fn downcast_{{ endpoint.prefix }}_outcome(
-        head: Result<{{ endpoint.head_response }}, {{ endpoint.head_error }}>, {% if endpoint.stored %}stored: &dyn StoredValues, {% endif %}adapters: &dyn VersionAdapters,
-        ) -> ProjectionOutcome<Result<{{ endpoint.response }}, {{ endpoint.error }}>, Result<{{ endpoint.head_response }}, {{ endpoint.head_error }}>> {
+        head: {{ endpoint.head_result }}, {% if endpoint.stored %}stored: &dyn StoredValues, {% endif %}adapters: &dyn VersionAdapters,
+        ) -> ProjectionOutcome<{{ endpoint.result }}, {{ endpoint.head_result }}> {
             {% if not endpoint.downcast %}
                 ProjectionOutcome::Projected(head)
             {% else %}
@@ -61,7 +64,7 @@
         {% if endpoint.stored and endpoint.stored_type %}
             /// Execute a caller-supplied Head handler once; it persists the upcast members and returns the stored values this version still reads.
             pub async fn dispatch_{{ endpoint.prefix }}<F, Fut, R>(wire: ::serde_json::Value, {% if endpoint.current %}current: {{ endpoint.current_type }}, {% endif %}handler: F, adapters: &(dyn VersionAdapters + Sync))
-            -> Result<ProjectionOutcome<Result<{{ endpoint.response }}, {{ endpoint.error }}>, Result<{{ endpoint.head_response }}, {{ endpoint.head_error }}>>, AdaptationError>
+            -> Result<ProjectionOutcome<{{ endpoint.result }}, {{ endpoint.head_result }}>, AdaptationError>
             where F: FnOnce({{ endpoint.head_request }}, VersionContext, {{ endpoint.stored_type }}) -> Fut,
             Fut: ::std::future::Future<Output = HeadOutcome<{{ endpoint.head_response }}, {{ endpoint.head_error }}, R>>,
             R: StoredValues,
@@ -73,7 +76,7 @@
         {% elif endpoint.stored %}
             /// Execute a caller-supplied Head handler once; it returns the stored values this version still reads.
             pub async fn dispatch_{{ endpoint.prefix }}<F, Fut, R>(wire: ::serde_json::Value, {% if endpoint.current %}current: {{ endpoint.current_type }}, {% endif %}handler: F, adapters: &(dyn VersionAdapters + Sync))
-            -> Result<ProjectionOutcome<Result<{{ endpoint.response }}, {{ endpoint.error }}>, Result<{{ endpoint.head_response }}, {{ endpoint.head_error }}>>, AdaptationError>
+            -> Result<ProjectionOutcome<{{ endpoint.result }}, {{ endpoint.head_result }}>, AdaptationError>
             where F: FnOnce({{ endpoint.head_request }}, VersionContext) -> Fut,
             Fut: ::std::future::Future<Output = HeadOutcome<{{ endpoint.head_response }}, {{ endpoint.head_error }}, R>>,
             R: StoredValues,
@@ -85,9 +88,9 @@
         {% elif endpoint.stored_type %}
             /// Execute a caller-supplied Head handler once; it persists the upcast members.
             pub async fn dispatch_{{ endpoint.prefix }}<F, Fut>(wire: ::serde_json::Value, {% if endpoint.current %}current: {{ endpoint.current_type }}, {% endif %}handler: F, adapters: &(dyn VersionAdapters + Sync))
-            -> Result<ProjectionOutcome<Result<{{ endpoint.response }}, {{ endpoint.error }}>, Result<{{ endpoint.head_response }}, {{ endpoint.head_error }}>>, AdaptationError>
+            -> Result<ProjectionOutcome<{{ endpoint.result }}, {{ endpoint.head_result }}>, AdaptationError>
             where F: FnOnce({{ endpoint.head_request }}, VersionContext, {{ endpoint.stored_type }}) -> Fut,
-            Fut: ::std::future::Future<Output = Result<{{ endpoint.head_response }}, {{ endpoint.head_error }}>>,
+            Fut: ::std::future::Future<Output = {{ endpoint.head_result }}>,
             {
                 let input = decode_and_upcast_{{ endpoint.prefix }}(wire, {% if endpoint.current %}current, {% endif %}adapters)?;
                 let head = handler(input.value, VersionContext { original_version: Version::{{ endpoint.version_id }} }, input.stored).await;
@@ -96,9 +99,9 @@
         {% else %}
             /// Execute a caller-supplied Head handler once after successful adaptation.
             pub async fn dispatch_{{ endpoint.prefix }}<F, Fut>(wire: ::serde_json::Value, {% if endpoint.current %}current: {{ endpoint.current_type }}, {% endif %}handler: F, adapters: &(dyn VersionAdapters + Sync))
-            -> Result<ProjectionOutcome<Result<{{ endpoint.response }}, {{ endpoint.error }}>, Result<{{ endpoint.head_response }}, {{ endpoint.head_error }}>>, AdaptationError>
+            -> Result<ProjectionOutcome<{{ endpoint.result }}, {{ endpoint.head_result }}>, AdaptationError>
             where F: FnOnce({{ endpoint.head_request }}, VersionContext) -> Fut,
-            Fut: ::std::future::Future<Output = Result<{{ endpoint.head_response }}, {{ endpoint.head_error }}>>,
+            Fut: ::std::future::Future<Output = {{ endpoint.head_result }}>,
             {
                 let input = decode_and_upcast_{{ endpoint.prefix }}(wire, {% if endpoint.current %}current, {% endif %}adapters)?;
                 let head = handler(input, VersionContext { original_version: Version::{{ endpoint.version_id }} }).await;
@@ -127,7 +130,7 @@
                 {% for dispatch in dispatches %}
                     /// Outcome in the caller's explicitly selected contract version.
                     pub enum {{ dispatch.outcome }} {
-                        {% for variant in dispatch.variants %}{{ variant.id }}(Result<{{ variant.response }}, {{ variant.error }}>),{% endfor %}
+                        {% for variant in dispatch.variants %}{{ variant.id }}({{ variant.result }}),{% endfor %}
                         }
                         /// Decode a request using an application-resolved version before any hook.
                         {% if dispatch.current or dispatch.stored_type %}
@@ -146,8 +149,8 @@
                                 }
                             }
                             /// Retain the original owned Head outcome when any projection refuses.
-                            pub fn downcast_{{ dispatch.prefix }}_outcome(version: Version, head: Result<{{ dispatch.response }}, {{ dispatch.error }}>, {% if dispatch.stored %}stored: &dyn StoredValues, {% endif %}adapters: &dyn VersionAdapters)
-                            -> ProjectionOutcome<{{ dispatch.outcome }}, Result<{{ dispatch.response }}, {{ dispatch.error }}>> {
+                            pub fn downcast_{{ dispatch.prefix }}_outcome(version: Version, head: {{ dispatch.head_result }}, {% if dispatch.stored %}stored: &dyn StoredValues, {% endif %}adapters: &dyn VersionAdapters)
+                            -> ProjectionOutcome<{{ dispatch.outcome }}, {{ dispatch.head_result }}> {
                                 match version {
                                     {% for variant in dispatch.variants %}
                                         Version::{{ variant.id }} => match downcast_{{ variant.prefix }}_outcome(head, {% if variant.stored %}stored, {% endif %}adapters) {
@@ -164,7 +167,7 @@
                             {% if dispatch.stored and dispatch.stored_type %}
                                 /// Execute a Head handler once; it persists the upcast members and returns the stored values older versions still read.
                                 pub async fn dispatch_{{ dispatch.prefix }}<F, Fut, R>(version: Version, wire: ::serde_json::Value, {% if dispatch.current %}current: {{ dispatch.current_type }}, {% endif %}handler: F, adapters: &(dyn VersionAdapters + Sync))
-                                -> Result<ProjectionOutcome<{{ dispatch.outcome }}, Result<{{ dispatch.response }}, {{ dispatch.error }}>>, AdaptationError>
+                                -> Result<ProjectionOutcome<{{ dispatch.outcome }}, {{ dispatch.head_result }}>, AdaptationError>
                                 where F: FnOnce({{ dispatch.request }}, VersionContext, {{ dispatch.stored_type }}) -> Fut,
                                 Fut: ::std::future::Future<Output = HeadOutcome<{{ dispatch.response }}, {{ dispatch.error }}, R>>,
                                 R: StoredValues,
@@ -176,7 +179,7 @@
                             {% elif dispatch.stored %}
                                 /// Execute a Head handler once; it returns the stored values older versions still read.
                                 pub async fn dispatch_{{ dispatch.prefix }}<F, Fut, R>(version: Version, wire: ::serde_json::Value, {% if dispatch.current %}current: {{ dispatch.current_type }}, {% endif %}handler: F, adapters: &(dyn VersionAdapters + Sync))
-                                -> Result<ProjectionOutcome<{{ dispatch.outcome }}, Result<{{ dispatch.response }}, {{ dispatch.error }}>>, AdaptationError>
+                                -> Result<ProjectionOutcome<{{ dispatch.outcome }}, {{ dispatch.head_result }}>, AdaptationError>
                                 where F: FnOnce({{ dispatch.request }}, VersionContext) -> Fut,
                                 Fut: ::std::future::Future<Output = HeadOutcome<{{ dispatch.response }}, {{ dispatch.error }}, R>>,
                                 R: StoredValues,
@@ -188,9 +191,9 @@
                             {% elif dispatch.stored_type %}
                                 /// Execute a Head handler once; it persists the upcast members.
                                 pub async fn dispatch_{{ dispatch.prefix }}<F, Fut>(version: Version, wire: ::serde_json::Value, {% if dispatch.current %}current: {{ dispatch.current_type }}, {% endif %}handler: F, adapters: &(dyn VersionAdapters + Sync))
-                                -> Result<ProjectionOutcome<{{ dispatch.outcome }}, Result<{{ dispatch.response }}, {{ dispatch.error }}>>, AdaptationError>
+                                -> Result<ProjectionOutcome<{{ dispatch.outcome }}, {{ dispatch.head_result }}>, AdaptationError>
                                 where F: FnOnce({{ dispatch.request }}, VersionContext, {{ dispatch.stored_type }}) -> Fut,
-                                Fut: ::std::future::Future<Output = Result<{{ dispatch.response }}, {{ dispatch.error }}>>,
+                                Fut: ::std::future::Future<Output = {{ dispatch.head_result }}>,
                                 {
                                     let input = decode_and_upcast_{{ dispatch.prefix }}(version, wire, {% if dispatch.current %}current, {% endif %}adapters)?;
                                     let head = handler(input.value, VersionContext { original_version: version }, input.stored).await;
@@ -199,9 +202,9 @@
                             {% else %}
                                 /// Execute a Head handler once; the application supplies version resolution.
                                 pub async fn dispatch_{{ dispatch.prefix }}<F, Fut>(version: Version, wire: ::serde_json::Value, {% if dispatch.current %}current: {{ dispatch.current_type }}, {% endif %}handler: F, adapters: &(dyn VersionAdapters + Sync))
-                                -> Result<ProjectionOutcome<{{ dispatch.outcome }}, Result<{{ dispatch.response }}, {{ dispatch.error }}>>, AdaptationError>
+                                -> Result<ProjectionOutcome<{{ dispatch.outcome }}, {{ dispatch.head_result }}>, AdaptationError>
                                 where F: FnOnce({{ dispatch.request }}, VersionContext) -> Fut,
-                                Fut: ::std::future::Future<Output = Result<{{ dispatch.response }}, {{ dispatch.error }}>>,
+                                Fut: ::std::future::Future<Output = {{ dispatch.head_result }}>,
                                 {
                                     let input = decode_and_upcast_{{ dispatch.prefix }}(version, wire, {% if dispatch.current %}current, {% endif %}adapters)?;
                                     let head = handler(input, VersionContext { original_version: version }).await;

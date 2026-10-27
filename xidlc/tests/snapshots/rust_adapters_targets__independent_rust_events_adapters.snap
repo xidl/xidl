@@ -251,7 +251,7 @@ pub mod version_adapters {
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn notifier_feed_response_downcast_to_v_2026_01_01(
-        source: &Vec<v2026_04_01::Event>,
+        source: &[v2026_04_01::Event],
         adapters: &dyn VersionAdapters,
     ) -> VersionedResult<Vec<v2026_01_01::Event>> {
         let refusal = |reason: &str| UnsupportedProjection {
@@ -419,7 +419,7 @@ pub mod version_adapters {
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn notifier_feed_response_downcast_to_v_2026_04_01(
-        source: &Vec<v2026_07_01::Event>,
+        source: &[v2026_07_01::Event],
         adapters: &dyn VersionAdapters,
     ) -> VersionedResult<Vec<v2026_04_01::Event>> {
         let refusal = |reason: &str| UnsupportedProjection {
@@ -481,7 +481,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "id").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object
             .get("kind")
@@ -496,7 +498,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "payload").to_string()
             })?;
-        let value_2: String = ::serde_json::from_value::<String>((raw_2).clone())
+        let value_2: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_2))
             .map_err(|error| error.to_string())?;
         Ok(v2026_01_01::Event {
             id: value_0,
@@ -527,7 +531,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "id").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object
             .get("kind")
@@ -542,7 +548,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "payload").to_string()
             })?;
-        let value_2: String = ::serde_json::from_value::<String>((raw_2).clone())
+        let value_2: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_2))
             .map_err(|error| error.to_string())?;
         Ok(v2026_04_01::Event {
             id: value_0,
@@ -573,7 +581,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "id").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object
             .get("kind")
@@ -588,7 +598,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "payload").to_string()
             })?;
-        let value_2: String = ::serde_json::from_value::<String>((raw_2).clone())
+        let value_2: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_2))
             .map_err(|error| error.to_string())?;
         Ok(v2026_07_01::Event {
             id: value_0,
@@ -601,6 +613,11 @@ pub mod version_adapters {
     ) -> Result<v2026_07_01::EventKind, String> {
         ::serde_json::from_value(wire.clone()).map_err(|error| error.to_string())
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type NotifierEmitResultV20260101 = Result<
+        v2026_01_01::Event,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_notifier_emit_from_v_2026_01_01(
         wire: ::serde_json::Value,
@@ -619,11 +636,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("event")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "event").into(),
             ))?;
-        let value_0: v2026_01_01::Event = decode_wire_v_2026_01_01_event(&raw_0)
+        let value_0: v2026_01_01::Event = decode_wire_v_2026_01_01_event(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = NotifierEmitRequestV20260101 {
             event: value_0,
@@ -634,12 +650,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_notifier_emit_from_v_2026_01_01_outcome(
-        head: Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
+        head: NotifierEmitResultV20260701,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v2026_01_01::Event, ::xidl_rust_axum::Error>,
-        Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<NotifierEmitResultV20260101, NotifierEmitResultV20260701> {
         match &head {
             Ok(source) => {
                 let source = match notifier_emit_response_downcast_to_v_2026_04_01(
@@ -703,17 +716,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v2026_01_01::Event, ::xidl_rust_axum::Error>,
-            Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<NotifierEmitResultV20260101, NotifierEmitResultV20260701>,
         AdaptationError,
     >
     where
         F: FnOnce(NotifierEmitRequestV20260701, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = NotifierEmitResultV20260701>,
     {
         let input = decode_and_upcast_notifier_emit_from_v_2026_01_01(wire, adapters)?;
         let head = handler(
@@ -725,6 +733,11 @@ pub mod version_adapters {
             .await;
         Ok(downcast_notifier_emit_from_v_2026_01_01_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type NotifierFeedResultV20260101 = Result<
+        Vec<v2026_01_01::Event>,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_notifier_feed_from_v_2026_01_01(
         wire: ::serde_json::Value,
@@ -748,12 +761,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_notifier_feed_from_v_2026_01_01_outcome(
-        head: Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
+        head: NotifierFeedResultV20260701,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<Vec<v2026_01_01::Event>, ::xidl_rust_axum::Error>,
-        Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<NotifierFeedResultV20260101, NotifierFeedResultV20260701> {
         match &head {
             Ok(source) => {
                 let source = match notifier_feed_response_downcast_to_v_2026_04_01(
@@ -817,17 +827,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<Vec<v2026_01_01::Event>, ::xidl_rust_axum::Error>,
-            Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<NotifierFeedResultV20260101, NotifierFeedResultV20260701>,
         AdaptationError,
     >
     where
         F: FnOnce(NotifierFeedRequestV20260701, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = NotifierFeedResultV20260701>,
     {
         let input = decode_and_upcast_notifier_feed_from_v_2026_01_01(wire, adapters)?;
         let head = handler(
@@ -839,6 +844,11 @@ pub mod version_adapters {
             .await;
         Ok(downcast_notifier_feed_from_v_2026_01_01_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type NotifierEmitResultV20260401 = Result<
+        v2026_04_01::Event,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_notifier_emit_from_v_2026_04_01(
         wire: ::serde_json::Value,
@@ -857,11 +867,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("event")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "event").into(),
             ))?;
-        let value_0: v2026_04_01::Event = decode_wire_v_2026_04_01_event(&raw_0)
+        let value_0: v2026_04_01::Event = decode_wire_v_2026_04_01_event(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = NotifierEmitRequestV20260401 {
             event: value_0,
@@ -871,12 +880,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_notifier_emit_from_v_2026_04_01_outcome(
-        head: Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
+        head: NotifierEmitResultV20260701,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v2026_04_01::Event, ::xidl_rust_axum::Error>,
-        Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<NotifierEmitResultV20260401, NotifierEmitResultV20260701> {
         match &head {
             Ok(source) => {
                 let source = match notifier_emit_response_downcast_to_v_2026_04_01(
@@ -916,17 +922,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v2026_04_01::Event, ::xidl_rust_axum::Error>,
-            Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<NotifierEmitResultV20260401, NotifierEmitResultV20260701>,
         AdaptationError,
     >
     where
         F: FnOnce(NotifierEmitRequestV20260701, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = NotifierEmitResultV20260701>,
     {
         let input = decode_and_upcast_notifier_emit_from_v_2026_04_01(wire, adapters)?;
         let head = handler(
@@ -938,6 +939,11 @@ pub mod version_adapters {
             .await;
         Ok(downcast_notifier_emit_from_v_2026_04_01_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type NotifierFeedResultV20260401 = Result<
+        Vec<v2026_04_01::Event>,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_notifier_feed_from_v_2026_04_01(
         wire: ::serde_json::Value,
@@ -960,12 +966,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_notifier_feed_from_v_2026_04_01_outcome(
-        head: Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
+        head: NotifierFeedResultV20260701,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<Vec<v2026_04_01::Event>, ::xidl_rust_axum::Error>,
-        Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<NotifierFeedResultV20260401, NotifierFeedResultV20260701> {
         match &head {
             Ok(source) => {
                 let source = match notifier_feed_response_downcast_to_v_2026_04_01(
@@ -1005,17 +1008,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<Vec<v2026_04_01::Event>, ::xidl_rust_axum::Error>,
-            Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<NotifierFeedResultV20260401, NotifierFeedResultV20260701>,
         AdaptationError,
     >
     where
         F: FnOnce(NotifierFeedRequestV20260701, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = NotifierFeedResultV20260701>,
     {
         let input = decode_and_upcast_notifier_feed_from_v_2026_04_01(wire, adapters)?;
         let head = handler(
@@ -1027,6 +1025,11 @@ pub mod version_adapters {
             .await;
         Ok(downcast_notifier_feed_from_v_2026_04_01_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type NotifierEmitResultV20260701 = Result<
+        v2026_07_01::Event,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_notifier_emit_from_v_2026_07_01(
         wire: ::serde_json::Value,
@@ -1045,11 +1048,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("event")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "event").into(),
             ))?;
-        let value_0: v2026_07_01::Event = decode_wire_v_2026_07_01_event(&raw_0)
+        let value_0: v2026_07_01::Event = decode_wire_v_2026_07_01_event(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = NotifierEmitRequestV20260701 {
             event: value_0,
@@ -1058,12 +1060,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_notifier_emit_from_v_2026_07_01_outcome(
-        head: Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
+        head: NotifierEmitResultV20260701,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
-        Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<NotifierEmitResultV20260701, NotifierEmitResultV20260701> {
         ProjectionOutcome::Projected(head)
     }
     /// Execute a caller-supplied Head handler once after successful adaptation.
@@ -1072,17 +1071,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
-            Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<NotifierEmitResultV20260701, NotifierEmitResultV20260701>,
         AdaptationError,
     >
     where
         F: FnOnce(NotifierEmitRequestV20260701, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = NotifierEmitResultV20260701>,
     {
         let input = decode_and_upcast_notifier_emit_from_v_2026_07_01(wire, adapters)?;
         let head = handler(
@@ -1094,6 +1088,11 @@ pub mod version_adapters {
             .await;
         Ok(downcast_notifier_emit_from_v_2026_07_01_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type NotifierFeedResultV20260701 = Result<
+        Vec<v2026_07_01::Event>,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_notifier_feed_from_v_2026_07_01(
         wire: ::serde_json::Value,
@@ -1115,12 +1114,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_notifier_feed_from_v_2026_07_01_outcome(
-        head: Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
+        head: NotifierFeedResultV20260701,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
-        Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<NotifierFeedResultV20260701, NotifierFeedResultV20260701> {
         ProjectionOutcome::Projected(head)
     }
     /// Execute a caller-supplied Head handler once after successful adaptation.
@@ -1129,17 +1125,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
-            Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<NotifierFeedResultV20260701, NotifierFeedResultV20260701>,
         AdaptationError,
     >
     where
         F: FnOnce(NotifierFeedRequestV20260701, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = NotifierFeedResultV20260701>,
     {
         let input = decode_and_upcast_notifier_feed_from_v_2026_07_01(wire, adapters)?;
         let head = handler(
@@ -1209,9 +1200,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum NotifierEmitOutcome {
-        V20260101(Result<v2026_01_01::Event, ::xidl_rust_axum::Error>),
-        V20260401(Result<v2026_04_01::Event, ::xidl_rust_axum::Error>),
-        V20260701(Result<v2026_07_01::Event, ::xidl_rust_axum::Error>),
+        V20260101(NotifierEmitResultV20260101),
+        V20260401(NotifierEmitResultV20260401),
+        V20260701(NotifierEmitResultV20260701),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_notifier_emit(
@@ -1234,12 +1225,9 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_notifier_emit_outcome(
         version: Version,
-        head: Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
+        head: NotifierEmitResultV20260701,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        NotifierEmitOutcome,
-        Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<NotifierEmitOutcome, NotifierEmitResultV20260701> {
         match version {
             Version::V20260101 => {
                 match downcast_notifier_emit_from_v_2026_01_01_outcome(head, adapters) {
@@ -1295,17 +1283,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            NotifierEmitOutcome,
-            Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<NotifierEmitOutcome, NotifierEmitResultV20260701>,
         AdaptationError,
     >
     where
         F: FnOnce(NotifierEmitRequestV20260701, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v2026_07_01::Event, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = NotifierEmitResultV20260701>,
     {
         let input = decode_and_upcast_notifier_emit(version, wire, adapters)?;
         let head = handler(
@@ -1319,9 +1302,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum NotifierFeedOutcome {
-        V20260101(Result<Vec<v2026_01_01::Event>, ::xidl_rust_axum::Error>),
-        V20260401(Result<Vec<v2026_04_01::Event>, ::xidl_rust_axum::Error>),
-        V20260701(Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>),
+        V20260101(NotifierFeedResultV20260101),
+        V20260401(NotifierFeedResultV20260401),
+        V20260701(NotifierFeedResultV20260701),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_notifier_feed(
@@ -1344,12 +1327,9 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_notifier_feed_outcome(
         version: Version,
-        head: Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
+        head: NotifierFeedResultV20260701,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        NotifierFeedOutcome,
-        Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<NotifierFeedOutcome, NotifierFeedResultV20260701> {
         match version {
             Version::V20260101 => {
                 match downcast_notifier_feed_from_v_2026_01_01_outcome(head, adapters) {
@@ -1405,17 +1385,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            NotifierFeedOutcome,
-            Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<NotifierFeedOutcome, NotifierFeedResultV20260701>,
         AdaptationError,
     >
     where
         F: FnOnce(NotifierFeedRequestV20260701, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<Vec<v2026_07_01::Event>, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = NotifierFeedResultV20260701>,
     {
         let input = decode_and_upcast_notifier_feed(version, wire, adapters)?;
         let head = handler(
