@@ -1,0 +1,13 @@
+[package]
+name = "integer-constants"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+
+[[bin]]
+name = "integer-constants"
+path = "main.rs"

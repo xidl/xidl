@@ -198,7 +198,7 @@ fn invalid_dimensions_report_the_declaration_and_underlying_contract() {
         (
             "typedef long Size[2]; const Size WIDTH = 2;",
             "WIDTH",
-            "not an integral alias",
+            "not integral",
         ),
         ("const short WIDTH = 65536;", "WIDTH", "16-bit signed"),
         (

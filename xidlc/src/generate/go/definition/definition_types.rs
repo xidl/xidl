@@ -47,6 +47,11 @@ pub(crate) fn render_const_expr(
         expr,
         &|value| go_scoped_name(value, packages),
         &go_literal,
+        &|operator| match operator {
+            hir::UnaryOperator::Add => "+",
+            hir::UnaryOperator::Sub => "-",
+            hir::UnaryOperator::Not => "~",
+        },
     ))
 }
 

@@ -1,0 +1,6 @@
+import "core.idl";
+
+const core::Word COPIED = core::LOW;
+const unsigned long ZERO = ~core::MASK32;
+const unsigned long AXES = +core::AXES;
+const core::Channel PINNED = core::PINNED;

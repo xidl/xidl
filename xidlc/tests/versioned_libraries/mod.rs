@@ -169,7 +169,7 @@ fn invalid_shared_dimension_fails_before_any_version_is_emitted() {
     let source = fs::read_to_string(&identity).expect("shared coordinate constants");
     fs::write(
         identity,
-        source.replace("COORDINATE_AXES = 2", "COORDINATE_AXES = 0"),
+        source.replace("COORDINATE_AXES = ~0xfffffffd", "COORDINATE_AXES = 0"),
     )
     .expect("invalidate the shared dimension in the editable library");
     let output = libraries.path("invalid-dimension");

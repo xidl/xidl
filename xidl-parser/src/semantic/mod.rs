@@ -1,4 +1,5 @@
 mod arrays;
+mod constants;
 mod deprecation;
 mod inheritance;
 mod recursive;
@@ -7,6 +8,7 @@ mod union_cases;
 
 use crate::error::ParserResult;
 
+pub(crate) use constants::IntegerDeclarations;
 pub(crate) use union_cases::UnionCaseLabels;
 
 pub(crate) fn analyze(spec: &mut crate::hir::Specification) -> ParserResult<()> {

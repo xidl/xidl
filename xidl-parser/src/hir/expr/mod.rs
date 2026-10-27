@@ -86,10 +86,10 @@ pub fn const_expr_to_i64(expr: &ConstExpr) -> Option<i64> {
 }
 
 fn parse_int_literal(value: &IntegerLiteral) -> Option<i64> {
-    parse_radix(&value.0, 10)
+    parse_radix(&value.0, 10).and_then(|value| i64::try_from(value).ok())
 }
 
-fn parse_radix(value: &str, radix: u32) -> Option<i64> {
+fn parse_radix(value: &str, radix: u32) -> Option<u64> {
     let cleaned = value.replace('_', "");
     let trimmed = cleaned.trim();
     let stripped = match radix {
@@ -104,7 +104,7 @@ fn parse_radix(value: &str, radix: u32) -> Option<i64> {
             .or_else(|| trimmed.strip_prefix("0X")),
         _ => None,
     };
-    i64::from_str_radix(stripped.unwrap_or(trimmed), radix).ok()
+    u64::from_str_radix(stripped.unwrap_or(trimmed), radix).ok()
 }
 
 impl From<crate::typed_ast::ConstExpr> for ConstExpr {
@@ -248,14 +248,18 @@ impl From<crate::typed_ast::Literal> for Literal {
 
 impl From<crate::typed_ast::IntegerLiteral> for IntegerLiteral {
     fn from(value: crate::typed_ast::IntegerLiteral) -> Self {
-        let parsed = match value {
-            crate::typed_ast::IntegerLiteral::BinNumber(value) => parse_radix(&value, 2),
-            crate::typed_ast::IntegerLiteral::OctNumber(value) => parse_radix(&value, 8),
-            crate::typed_ast::IntegerLiteral::DecNumber(value) => parse_radix(&value, 10),
-            crate::typed_ast::IntegerLiteral::HexNumber(value) => parse_radix(&value, 16),
-        }
-        .expect("typed_ast integer literal should parse");
-        Self(parsed.to_string())
+        let (literal, radix) = match value {
+            crate::typed_ast::IntegerLiteral::BinNumber(value) => (value, 2),
+            crate::typed_ast::IntegerLiteral::OctNumber(value) => (value, 8),
+            crate::typed_ast::IntegerLiteral::DecNumber(value) => (value, 10),
+            crate::typed_ast::IntegerLiteral::HexNumber(value) => (value, 16),
+        };
+        // Range errors belong to checked semantic evaluation, not AST lowering.
+        Self(
+            parse_radix(&literal, radix)
+                .map(|value| value.to_string())
+                .unwrap_or(literal),
+        )
     }
 }
 

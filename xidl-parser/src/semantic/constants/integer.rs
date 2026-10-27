@@ -1,8 +1,8 @@
-//! IDL integer precision and checked operations for array dimensions.
+//! IDL integer precision and checked operations.
 //! See OMG IDL 4.2 section 7.4.1.4.3: https://www.omg.org/spec/IDL/4.2/PDF.
 
 use crate::error::{ParseError, ParserResult};
-use crate::hir::{BinaryOperator, IntegerType, UnaryOperator};
+use crate::hir::{BinaryOperator, ConstExpr, IntegerLiteral, IntegerType, Literal, UnaryOperator};
 
 /// The declared range of an IDL integer constant.
 #[derive(Clone, Copy)]
@@ -43,7 +43,7 @@ impl IntegerKind {
         let maximum = (1_i128 << (self.bits - u32::from(self.signed))) - 1;
         if !(minimum..=maximum).contains(&value) {
             return Err(ParseError::Message(format!(
-                "array size value {value} exceeds {}-bit {} integer range",
+                "integer constant value {value} exceeds {}-bit {} integer range",
                 self.bits,
                 if self.signed { "signed" } else { "unsigned" }
             )));
@@ -97,7 +97,9 @@ impl Integer {
     /// Integer literals default to unsigned long or unsigned long long.
     pub(super) fn literal(value: &str, precision: Option<u32>) -> ParserResult<Self> {
         let value = value.parse::<u64>().map_err(|_| {
-            ParseError::Message(format!("array size literal '{value}' is not an integer"))
+            ParseError::Message(format!(
+                "integer constant literal '{value}' is not an integer"
+            ))
         })?;
         let bits = precision.unwrap_or(if value > u64::from(u32::MAX) { 64 } else { 32 });
         IntegerKind {
@@ -163,10 +165,22 @@ impl Integer {
         }
         .ok_or_else(|| {
             ParseError::Message(format!(
-                "array size operation '{left} {operator:?} {right}' is invalid or overflows"
+                "integer constant operation '{left} {operator:?} {right}' is invalid or overflows"
             ))
         })?;
         kind.check(value)
+    }
+
+    /// Retains the HIR distinction between a positive literal and unary minus.
+    pub(super) fn expression(self) -> ConstExpr {
+        let literal = ConstExpr::Literal(Literal::IntegerLiteral(IntegerLiteral(
+            self.value.abs().to_string(),
+        )));
+        if self.value < 0 {
+            ConstExpr::UnaryExpr(UnaryOperator::Sub, Box::new(literal))
+        } else {
+            literal
+        }
     }
 
     /// Keeps normalized dimensions readable by every existing HIR consumer.
