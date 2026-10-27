@@ -266,7 +266,7 @@ X-Billing-Version: 2025-01-01
 Cookie: tenant=acme
 HTTP 422
 [Asserts]
-jsonpath "$.type_path" == "Invoice.payment_intent"
+jsonpath "$.type_path" == "InvoicesListResponse.r#return.Invoice.payment_intent"
 
 GET {{base_url}}/invoices?limit=100
 X-Billing-Version: 2025-08-01

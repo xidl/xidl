@@ -6,6 +6,7 @@ impl VersionAdapters for Hooks {
     fn invoice_downcast_to_v_1(
         &self,
         source: &v2::Invoice,
+        _stored: &dyn StoredValues,
     ) -> VersionedResult<InvoiceDowncastToV1Decision> {
         let payment_intent = match source.payments.as_slice() {
             [] => None,
@@ -20,6 +21,12 @@ impl VersionAdapters for Hooks {
             }
         };
         Ok(InvoiceDowncastToV1Decision { payment_intent })
+    }
+}
+
+impl StoredValues for Hooks {
+    fn invoice_payment_intent(&self, source: &v2::Invoice) -> Option<String> {
+        source.payments.first().map(|payment| payment.payment_intent.clone())
     }
 }
 

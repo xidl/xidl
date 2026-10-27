@@ -27,6 +27,7 @@ impl v1::Invoices for VersionRoute {
         Hooks::project(downcast_invoices_pay_from_v_1_outcome(
             self.0.pay(input),
             &Hooks,
+            &Hooks,
         ))
     }
 
@@ -35,6 +36,7 @@ impl v1::Invoices for VersionRoute {
             invoices_get_request_upcast_from_v_1(&InvoicesGetRequestV1 { id, tenant }, &Hooks)?;
         Hooks::project(downcast_invoices_get_from_v_1_outcome(
             self.0.get(input),
+            &Hooks,
             &Hooks,
         ))
     }
@@ -50,6 +52,7 @@ impl v1::Invoices for VersionRoute {
         )?;
         Hooks::project(downcast_invoices_list_from_v_1_outcome(
             self.0.list(input),
+            &Hooks,
             &Hooks,
         ))
     }

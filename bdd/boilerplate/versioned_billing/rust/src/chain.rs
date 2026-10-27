@@ -96,7 +96,12 @@ impl Chain {
                     dispatch_invoices_pay(
                         version,
                         wire,
-                        |input, _| async move { ledger.pay(input) },
+                        |input, _| async move {
+                            HeadOutcome {
+                                outcome: ledger.pay(input),
+                                stored: Hooks,
+                            }
+                        },
                         &Hooks
                     )
                     .await,
@@ -113,7 +118,12 @@ impl Chain {
                     dispatch_invoices_list(
                         version,
                         wire,
-                        |input, _| async move { ledger.list(input) },
+                        |input, _| async move {
+                            HeadOutcome {
+                                outcome: ledger.list(input),
+                                stored: Hooks,
+                            }
+                        },
                         &Hooks
                     )
                     .await,
@@ -138,7 +148,12 @@ impl Chain {
                     dispatch_invoices_get(
                         version,
                         wire,
-                        |input, _| async move { ledger.get(input) },
+                        |input, _| async move {
+                            HeadOutcome {
+                                outcome: ledger.get(input),
+                                stored: Hooks,
+                            }
+                        },
                         &Hooks
                     )
                     .await,
