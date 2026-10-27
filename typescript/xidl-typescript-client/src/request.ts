@@ -31,7 +31,7 @@ export function appendHeader(
   headers: Headers,
   key: string,
   value: unknown,
-  optional: boolean,
+  _optional: boolean,
   isMulti: boolean,
 ): void {
   if (value === undefined || value === null) {
@@ -50,7 +50,7 @@ export function appendCookie(
   cookies: string[],
   key: string,
   value: unknown,
-  optional: boolean,
+  _optional: boolean,
   isMulti: boolean,
 ): void {
   if (value === undefined || value === null) {
