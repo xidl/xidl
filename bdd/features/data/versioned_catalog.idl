@@ -1,0 +1,43 @@
+#pragma xidlc package versioned_catalog
+
+@version(in = "header", name = "X-Catalog-Version")
+enum ApiVersion {
+    @rename("2026-07-01") v1,
+    @rename("2026-10-01") v2,
+};
+
+module filters {
+    typedef string MediaType;
+    typedef sequence<MediaType> MediaTypes;
+    typedef MediaTypes MediaSelection;
+    typedef string TenantId;
+    typedef TenantId Tenant;
+};
+
+struct Image { string url; };
+struct Media { string kind; string url; };
+struct Product {
+    string id;
+    @removed(ApiVersion::v2) @rename("media") sequence<Image> images;
+    @added(ApiVersion::v2) @rename("media") sequence<Media> assets;
+};
+struct Message { string code; string value; };
+struct Page { sequence<Product> products; sequence<Message> messages; };
+@http(403) exception Denied { string reason; };
+
+interface Catalog {
+    @get(path = "/catalog")
+    Page search(
+        @query filters::MediaSelection media,
+        @cookie filters::Tenant tenant,
+        @query @optional string remember,
+        @cookie @optional out string bookmark
+    ) raises(Denied);
+
+    @put(path = "/catalog/preference")
+    void remember(
+        @cookie filters::Tenant tenant,
+        @query @optional string media,
+        @cookie @optional out string bookmark
+    ) raises(Denied);
+};

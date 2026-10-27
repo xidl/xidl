@@ -1,5 +1,6 @@
 ---
 source: xidlc/tests/rust_adapters_targets.rs
+assertion_line: 120
 expression: output
 ---
 /// Pure version projections. The application owns routing and side effects.
@@ -132,8 +133,12 @@ pub mod version_adapters {
             source: &v3::shipping::Address,
         ) -> Option<String>;
     }
+    /// Wire names one served version still reads from storage.
+    pub type VersionNeeds = (&'static str, &'static [&'static str]);
+    /// Storage wire names served by one version of one declared type.
+    pub type StoredNeedsEntry = (&'static str, &'static [VersionNeeds]);
     /// Wire names each served version still reads from storage, by type; Head reads nothing.
-    pub const NEEDS: &[(&str, &[(&str, &[&str])])] = &[
+    pub const NEEDS: &[StoredNeedsEntry] = &[
         (
             "shipping::Address",
             &[
@@ -293,18 +298,15 @@ pub mod version_adapters {
             type_path: "geo::Anchor".into(),
             reason: reason.into(),
         };
-        let projected_0 = (&source.checkpoint)
-            .as_ref()
+        let projected_0 = ::std::option::Option::as_ref(&source.checkpoint)
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
-        let projected_1 = (&source.parent)
-            .as_ref()
+        let projected_1 = ::std::option::Option::as_ref(&source.parent)
             .map(|item| {
                 geo_anchor_upcast_from_v_1((item).as_ref(), adapters).map(Box::new)
             })
             .transpose()?;
-        let projected_2 = (&source.previous)
-            .as_ref()
+        let projected_2 = ::std::option::Option::as_ref(&source.previous)
             .map(|item| map_sequence(
                 item,
                 |item| geo_anchor_upcast_from_v_1(item, adapters),
@@ -329,18 +331,15 @@ pub mod version_adapters {
             type_path: "geo::Anchor".into(),
             reason: reason.into(),
         };
-        let projected_0 = (&source.checkpoint)
-            .as_ref()
+        let projected_0 = ::std::option::Option::as_ref(&source.checkpoint)
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
-        let projected_1 = (&source.parent)
-            .as_ref()
+        let projected_1 = ::std::option::Option::as_ref(&source.parent)
             .map(|item| {
                 geo_anchor_downcast_to_v_1((item).as_ref(), adapters).map(Box::new)
             })
             .transpose()?;
-        let projected_2 = (&source.previous)
-            .as_ref()
+        let projected_2 = ::std::option::Option::as_ref(&source.previous)
             .map(|item| map_sequence(
                 item,
                 |item| geo_anchor_downcast_to_v_1(item, adapters),
@@ -442,18 +441,17 @@ pub mod version_adapters {
             reason: reason.into(),
         };
         let decision = adapters.shipping_address_downcast_to_v_1(source, stored)?;
-        let projected_0 = (&source.base.base.base.checkpoint)
-            .as_ref()
+        let projected_0 = ::std::option::Option::as_ref(
+                &source.base.base.base.checkpoint,
+            )
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
-        let projected_1 = (&source.base.base.base.parent)
-            .as_ref()
+        let projected_1 = ::std::option::Option::as_ref(&source.base.base.base.parent)
             .map(|item| {
                 geo_anchor_downcast_to_v_1((item).as_ref(), adapters).map(Box::new)
             })
             .transpose()?;
-        let projected_2 = (&source.base.base.base.previous)
-            .as_ref()
+        let projected_2 = ::std::option::Option::as_ref(&source.base.base.base.previous)
             .map(|item| map_sequence(
                 item,
                 |item| geo_anchor_downcast_to_v_1(item, adapters),
@@ -472,12 +470,10 @@ pub mod version_adapters {
             &source.base.base.delivery_reference,
             adapters,
         )?;
-        let projected_6 = (&source.base.base.delivery_note)
-            .as_ref()
+        let projected_6 = ::std::option::Option::as_ref(&source.base.base.delivery_note)
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
-        let projected_7 = (&source.base.coordinates)
-            .as_ref()
+        let projected_7 = ::std::option::Option::as_ref(&source.base.coordinates)
             .map(|item| geo_map_position_downcast_to_v_1(item, adapters))
             .transpose()?;
         let projected_8 = Ok::<
@@ -518,24 +514,21 @@ pub mod version_adapters {
             reason: reason.into(),
         };
         let decision = adapters.shipping_change_upcast_from_v_1(source, current)?;
-        let projected_0 = (&source.base.base.parent)
-            .as_ref()
+        let projected_0 = ::std::option::Option::as_ref(&source.base.base.parent)
             .map(|item| geo_anchor_upcast_from_v_1(item, adapters))
             .transpose()?;
-        let projected_1 = (&source.base.base.delivery_reference)
-            .as_ref()
+        let projected_1 = ::std::option::Option::as_ref(
+                &source.base.base.delivery_reference,
+            )
             .map(|item| delivery_reference_upcast_from_v_1(item, adapters))
             .transpose()?;
-        let projected_2 = (&source.base.base.delivery_note)
-            .as_ref()
+        let projected_2 = ::std::option::Option::as_ref(&source.base.base.delivery_note)
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
-        let projected_3 = (&source.base.coordinates)
-            .as_ref()
+        let projected_3 = ::std::option::Option::as_ref(&source.base.coordinates)
             .map(|item| geo_map_position_upcast_from_v_1(item, adapters))
             .transpose()?;
-        let projected_4 = (&source.priority)
-            .as_ref()
+        let projected_4 = ::std::option::Option::as_ref(&source.priority)
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
         Ok(Upcast {
@@ -718,18 +711,15 @@ pub mod version_adapters {
             type_path: "geo::Anchor".into(),
             reason: reason.into(),
         };
-        let projected_0 = (&source.checkpoint)
-            .as_ref()
+        let projected_0 = ::std::option::Option::as_ref(&source.checkpoint)
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
-        let projected_1 = (&source.parent)
-            .as_ref()
+        let projected_1 = ::std::option::Option::as_ref(&source.parent)
             .map(|item| {
                 geo_anchor_upcast_from_v_2((item).as_ref(), adapters).map(Box::new)
             })
             .transpose()?;
-        let projected_2 = (&source.previous)
-            .as_ref()
+        let projected_2 = ::std::option::Option::as_ref(&source.previous)
             .map(|item| map_sequence(
                 item,
                 |item| geo_anchor_upcast_from_v_2(item, adapters),
@@ -754,18 +744,15 @@ pub mod version_adapters {
             type_path: "geo::Anchor".into(),
             reason: reason.into(),
         };
-        let projected_0 = (&source.checkpoint)
-            .as_ref()
+        let projected_0 = ::std::option::Option::as_ref(&source.checkpoint)
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
-        let projected_1 = (&source.parent)
-            .as_ref()
+        let projected_1 = ::std::option::Option::as_ref(&source.parent)
             .map(|item| {
                 geo_anchor_downcast_to_v_2((item).as_ref(), adapters).map(Box::new)
             })
             .transpose()?;
-        let projected_2 = (&source.previous)
-            .as_ref()
+        let projected_2 = ::std::option::Option::as_ref(&source.previous)
             .map(|item| map_sequence(
                 item,
                 |item| geo_anchor_downcast_to_v_2(item, adapters),
@@ -899,18 +886,17 @@ pub mod version_adapters {
             reason: reason.into(),
         };
         let decision = adapters.shipping_address_downcast_to_v_2(source, stored)?;
-        let projected_0 = (&source.base.base.base.checkpoint)
-            .as_ref()
+        let projected_0 = ::std::option::Option::as_ref(
+                &source.base.base.base.checkpoint,
+            )
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
-        let projected_1 = (&source.base.base.base.parent)
-            .as_ref()
+        let projected_1 = ::std::option::Option::as_ref(&source.base.base.base.parent)
             .map(|item| {
                 geo_anchor_downcast_to_v_2((item).as_ref(), adapters).map(Box::new)
             })
             .transpose()?;
-        let projected_2 = (&source.base.base.base.previous)
-            .as_ref()
+        let projected_2 = ::std::option::Option::as_ref(&source.base.base.base.previous)
             .map(|item| map_sequence(
                 item,
                 |item| geo_anchor_downcast_to_v_2(item, adapters),
@@ -925,8 +911,7 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.base.base.tenant))?;
-        let projected_5 = (&source.base.coordinates)
-            .as_ref()
+        let projected_5 = ::std::option::Option::as_ref(&source.base.coordinates)
             .map(|item| geo_map_position_downcast_to_v_2(item, adapters))
             .transpose()?;
         let projected_6 = Ok::<
@@ -975,24 +960,19 @@ pub mod version_adapters {
             reason: reason.into(),
         };
         let decision = adapters.shipping_change_upcast_from_v_2(source, current)?;
-        let projected_0 = (&source.base.base.parent)
-            .as_ref()
+        let projected_0 = ::std::option::Option::as_ref(&source.base.base.parent)
             .map(|item| geo_anchor_upcast_from_v_2(item, adapters))
             .transpose()?;
-        let projected_1 = (&source.base.coordinates)
-            .as_ref()
+        let projected_1 = ::std::option::Option::as_ref(&source.base.coordinates)
             .map(|item| geo_map_position_upcast_from_v_2(item, adapters))
             .transpose()?;
-        let projected_2 = (&source.base.street)
-            .as_ref()
+        let projected_2 = ::std::option::Option::as_ref(&source.base.street)
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
-        let projected_3 = (&source.base.country_code_v2)
-            .as_ref()
+        let projected_3 = ::std::option::Option::as_ref(&source.base.country_code_v2)
             .map(|item| geo_country_upcast_from_v_2(item, adapters))
             .transpose()?;
-        let projected_4 = (&source.priority)
-            .as_ref()
+        let projected_4 = ::std::option::Option::as_ref(&source.priority)
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
         Ok(Upcast {
@@ -1294,7 +1274,7 @@ pub mod version_adapters {
         let value_2: Option<String> = if (raw_2).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_2).clone())
+            ::serde_json::from_value::<String>(::std::clone::Clone::clone(raw_2))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -1308,7 +1288,7 @@ pub mod version_adapters {
         let value_4: Option<String> = if (raw_4).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_4).clone())
+            ::serde_json::from_value::<String>(::std::clone::Clone::clone(raw_4))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -1316,7 +1296,7 @@ pub mod version_adapters {
         let value_5: Option<String> = if (raw_5).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_5).clone())
+            ::serde_json::from_value::<String>(::std::clone::Clone::clone(raw_5))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -1324,7 +1304,7 @@ pub mod version_adapters {
         let value_6: Option<i32> = if (raw_6).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<i32>((raw_6).clone())
+            ::serde_json::from_value::<i32>(::std::clone::Clone::clone(raw_6))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -1345,7 +1325,7 @@ pub mod version_adapters {
     fn decode_wire_v_1_delivery_reference(
         wire: &::serde_json::Value,
     ) -> Result<v1::DeliveryReference, String> {
-        ::serde_json::from_value::<String>((wire).clone())
+        ::serde_json::from_value::<String>(::std::clone::Clone::clone(wire))
             .map_err(|error| error.to_string())
     }
     fn decode_wire_v_1_geo_anchor(
@@ -1365,7 +1345,7 @@ pub mod version_adapters {
         let value_0: Option<String> = if (raw_0).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_0).clone())
+            ::serde_json::from_value::<String>(::std::clone::Clone::clone(raw_0))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -1385,7 +1365,7 @@ pub mod version_adapters {
                     .ok_or_else(|| "expected an array".to_string())?;
                 let values = array
                     .iter()
-                    .map(|item| decode_wire_v_1_geo_anchor(item))
+                    .map(decode_wire_v_1_geo_anchor)
                     .collect::<Result<Vec<_>, String>>()?;
                 Ok::<_, String>(values)
             })()
@@ -1416,7 +1396,7 @@ pub mod version_adapters {
             let values = array
                 .iter()
                 .map(|item| {
-                    ::serde_json::from_value::<f64>((item).clone())
+                    ::serde_json::from_value::<f64>(::std::clone::Clone::clone(item))
                         .map_err(|error| error.to_string())
                 })
                 .collect::<Result<Vec<_>, String>>()?;
@@ -1464,7 +1444,7 @@ pub mod version_adapters {
         let value_2: Option<String> = if (raw_2).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_2).clone())
+            ::serde_json::from_value::<String>(::std::clone::Clone::clone(raw_2))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -1478,7 +1458,7 @@ pub mod version_adapters {
         let value_4: Option<String> = if (raw_4).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_4).clone())
+            ::serde_json::from_value::<String>(::std::clone::Clone::clone(raw_4))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -1492,7 +1472,7 @@ pub mod version_adapters {
         let value_6: Option<i32> = if (raw_6).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<i32>((raw_6).clone())
+            ::serde_json::from_value::<i32>(::std::clone::Clone::clone(raw_6))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -1513,7 +1493,7 @@ pub mod version_adapters {
     fn decode_wire_v_2_delivery_reference(
         wire: &::serde_json::Value,
     ) -> Result<v2::DeliveryReference, String> {
-        ::serde_json::from_value::<String>((wire).clone())
+        ::serde_json::from_value::<String>(::std::clone::Clone::clone(wire))
             .map_err(|error| error.to_string())
     }
     fn decode_wire_v_2_geo_anchor(
@@ -1533,7 +1513,7 @@ pub mod version_adapters {
         let value_0: Option<String> = if (raw_0).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_0).clone())
+            ::serde_json::from_value::<String>(::std::clone::Clone::clone(raw_0))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -1553,7 +1533,7 @@ pub mod version_adapters {
                     .ok_or_else(|| "expected an array".to_string())?;
                 let values = array
                     .iter()
-                    .map(|item| decode_wire_v_2_geo_anchor(item))
+                    .map(decode_wire_v_2_geo_anchor)
                     .collect::<Result<Vec<_>, String>>()?;
                 Ok::<_, String>(values)
             })()
@@ -1589,7 +1569,7 @@ pub mod version_adapters {
             let values = array
                 .iter()
                 .map(|item| {
-                    ::serde_json::from_value::<f64>((item).clone())
+                    ::serde_json::from_value::<f64>(::std::clone::Clone::clone(item))
                         .map_err(|error| error.to_string())
                 })
                 .collect::<Result<Vec<_>, String>>()?;
@@ -1635,7 +1615,7 @@ pub mod version_adapters {
         let value_1: Option<bool> = if (raw_1).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<bool>((raw_1).clone())
+            ::serde_json::from_value::<bool>(::std::clone::Clone::clone(raw_1))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -1649,7 +1629,7 @@ pub mod version_adapters {
         let value_3: Option<String> = if (raw_3).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_3).clone())
+            ::serde_json::from_value::<String>(::std::clone::Clone::clone(raw_3))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -1663,7 +1643,7 @@ pub mod version_adapters {
         let value_5: Option<i32> = if (raw_5).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<i32>((raw_5).clone())
+            ::serde_json::from_value::<i32>(::std::clone::Clone::clone(raw_5))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -1697,7 +1677,7 @@ pub mod version_adapters {
         let value_0: Option<String> = if (raw_0).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_0).clone())
+            ::serde_json::from_value::<String>(::std::clone::Clone::clone(raw_0))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -1717,7 +1697,7 @@ pub mod version_adapters {
                     .ok_or_else(|| "expected an array".to_string())?;
                 let values = array
                     .iter()
-                    .map(|item| decode_wire_v_3_geo_anchor(item))
+                    .map(decode_wire_v_3_geo_anchor)
                     .collect::<Result<Vec<_>, String>>()?;
                 Ok::<_, String>(values)
             })()
@@ -1753,7 +1733,7 @@ pub mod version_adapters {
             let values = array
                 .iter()
                 .map(|item| {
-                    ::serde_json::from_value::<f64>((item).clone())
+                    ::serde_json::from_value::<f64>(::std::clone::Clone::clone(item))
                         .map_err(|error| error.to_string())
                 })
                 .collect::<Result<Vec<_>, String>>()?;
@@ -1762,6 +1742,11 @@ pub mod version_adapters {
                 .map_err(|_: Vec<_>| "fixed array length differs".to_string())
         })()
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type ShippingAddressesReadResultV1 = Result<
+        v1::shipping::Address,
+        v1::shipping::AddressesReadError,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_shipping_addresses_read_from_v_1(
         wire: ::serde_json::Value,
@@ -1780,20 +1765,22 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("tenant")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "tenant").into(),
             ))?;
-        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let raw_1 = object
             .get("id")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "id").into(),
             ))?;
-        let value_1: String = ::serde_json::from_value::<String>((&raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let source = ShippingAddressesReadRequestV1 {
@@ -1806,12 +1793,12 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_shipping_addresses_read_from_v_1_outcome(
-        head: Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
+        head: ShippingAddressesReadResultV3,
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
-        Result<v1::shipping::Address, v1::shipping::AddressesReadError>,
-        Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
+        ShippingAddressesReadResultV1,
+        ShippingAddressesReadResultV3,
     > {
         match &head {
             Ok(source) => {
@@ -1878,10 +1865,7 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v1::shipping::Address, v1::shipping::AddressesReadError>,
-            Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
-        >,
+        ProjectionOutcome<ShippingAddressesReadResultV1, ShippingAddressesReadResultV3>,
         AdaptationError,
     >
     where
@@ -1911,6 +1895,11 @@ pub mod version_adapters {
             ),
         )
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type ShippingAddressesUpdateResultV1 = Result<
+        v1::shipping::Address,
+        v1::shipping::AddressesUpdateError,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_shipping_addresses_update_from_v_1(
         wire: ::serde_json::Value,
@@ -1933,29 +1922,30 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("tenant")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "tenant").into(),
             ))?;
-        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let raw_1 = object
             .get("id")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "id").into(),
             ))?;
-        let value_1: String = ::serde_json::from_value::<String>((&raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let raw_2 = object
             .get("patch")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "patch").into(),
             ))?;
-        let value_2: v1::shipping::Change = decode_wire_v_1_shipping_change(&raw_2)
+        let value_2: v1::shipping::Change = decode_wire_v_1_shipping_change(raw_2)
             .map_err(AdaptationError::Validation)?;
         let source = ShippingAddressesUpdateRequestV1 {
             tenant: value_0,
@@ -1981,12 +1971,12 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_shipping_addresses_update_from_v_1_outcome(
-        head: Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+        head: ShippingAddressesUpdateResultV3,
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
-        Result<v1::shipping::Address, v1::shipping::AddressesUpdateError>,
-        Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+        ShippingAddressesUpdateResultV1,
+        ShippingAddressesUpdateResultV3,
     > {
         match &head {
             Ok(source) => {
@@ -2055,8 +2045,8 @@ pub mod version_adapters {
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
         ProjectionOutcome<
-            Result<v1::shipping::Address, v1::shipping::AddressesUpdateError>,
-            Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+            ShippingAddressesUpdateResultV1,
+            ShippingAddressesUpdateResultV3,
         >,
         AdaptationError,
     >
@@ -2096,6 +2086,11 @@ pub mod version_adapters {
             ),
         )
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type ShippingAddressesReadResultV2 = Result<
+        v2::shipping::Address,
+        v2::shipping::AddressesReadError,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_shipping_addresses_read_from_v_2(
         wire: ::serde_json::Value,
@@ -2114,20 +2109,22 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("tenant")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "tenant").into(),
             ))?;
-        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let raw_1 = object
             .get("id")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "id").into(),
             ))?;
-        let value_1: String = ::serde_json::from_value::<String>((&raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let source = ShippingAddressesReadRequestV2 {
@@ -2139,12 +2136,12 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_shipping_addresses_read_from_v_2_outcome(
-        head: Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
+        head: ShippingAddressesReadResultV3,
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
-        Result<v2::shipping::Address, v2::shipping::AddressesReadError>,
-        Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
+        ShippingAddressesReadResultV2,
+        ShippingAddressesReadResultV3,
     > {
         match &head {
             Ok(source) => {
@@ -2186,10 +2183,7 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v2::shipping::Address, v2::shipping::AddressesReadError>,
-            Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
-        >,
+        ProjectionOutcome<ShippingAddressesReadResultV2, ShippingAddressesReadResultV3>,
         AdaptationError,
     >
     where
@@ -2219,6 +2213,11 @@ pub mod version_adapters {
             ),
         )
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type ShippingAddressesUpdateResultV2 = Result<
+        v2::shipping::Address,
+        v2::shipping::AddressesUpdateError,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_shipping_addresses_update_from_v_2(
         wire: ::serde_json::Value,
@@ -2241,29 +2240,30 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("tenant")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "tenant").into(),
             ))?;
-        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let raw_1 = object
             .get("id")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "id").into(),
             ))?;
-        let value_1: String = ::serde_json::from_value::<String>((&raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let raw_2 = object
             .get("patch")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "patch").into(),
             ))?;
-        let value_2: v2::shipping::Change = decode_wire_v_2_shipping_change(&raw_2)
+        let value_2: v2::shipping::Change = decode_wire_v_2_shipping_change(raw_2)
             .map_err(AdaptationError::Validation)?;
         let source = ShippingAddressesUpdateRequestV2 {
             tenant: value_0,
@@ -2282,12 +2282,12 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_shipping_addresses_update_from_v_2_outcome(
-        head: Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+        head: ShippingAddressesUpdateResultV3,
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
-        Result<v2::shipping::Address, v2::shipping::AddressesUpdateError>,
-        Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+        ShippingAddressesUpdateResultV2,
+        ShippingAddressesUpdateResultV3,
     > {
         match &head {
             Ok(source) => {
@@ -2331,8 +2331,8 @@ pub mod version_adapters {
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
         ProjectionOutcome<
-            Result<v2::shipping::Address, v2::shipping::AddressesUpdateError>,
-            Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+            ShippingAddressesUpdateResultV2,
+            ShippingAddressesUpdateResultV3,
         >,
         AdaptationError,
     >
@@ -2372,6 +2372,11 @@ pub mod version_adapters {
             ),
         )
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type ShippingAddressesReadResultV3 = Result<
+        v3::shipping::Address,
+        v3::shipping::AddressesReadError,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_shipping_addresses_read_from_v_3(
         wire: ::serde_json::Value,
@@ -2390,20 +2395,22 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("tenant")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "tenant").into(),
             ))?;
-        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let raw_1 = object
             .get("id")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "id").into(),
             ))?;
-        let value_1: String = ::serde_json::from_value::<String>((&raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let source = ShippingAddressesReadRequestV3 {
@@ -2414,11 +2421,11 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_shipping_addresses_read_from_v_3_outcome(
-        head: Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
+        head: ShippingAddressesReadResultV3,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
-        Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
-        Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
+        ShippingAddressesReadResultV3,
+        ShippingAddressesReadResultV3,
     > {
         ProjectionOutcome::Projected(head)
     }
@@ -2428,17 +2435,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
-            Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
-        >,
+        ProjectionOutcome<ShippingAddressesReadResultV3, ShippingAddressesReadResultV3>,
         AdaptationError,
     >
     where
         F: FnOnce(ShippingAddressesReadRequestV3, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
-        >,
+        Fut: ::std::future::Future<Output = ShippingAddressesReadResultV3>,
     {
         let input = decode_and_upcast_shipping_addresses_read_from_v_3(wire, adapters)?;
         let head = handler(
@@ -2450,6 +2452,11 @@ pub mod version_adapters {
             .await;
         Ok(downcast_shipping_addresses_read_from_v_3_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type ShippingAddressesUpdateResultV3 = Result<
+        v3::shipping::Address,
+        v3::shipping::AddressesUpdateError,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_shipping_addresses_update_from_v_3(
         wire: ::serde_json::Value,
@@ -2471,29 +2478,30 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("tenant")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "tenant").into(),
             ))?;
-        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let raw_1 = object
             .get("id")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "id").into(),
             ))?;
-        let value_1: String = ::serde_json::from_value::<String>((&raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let raw_2 = object
             .get("patch")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "patch").into(),
             ))?;
-        let value_2: v3::shipping::Change = decode_wire_v_3_shipping_change(&raw_2)
+        let value_2: v3::shipping::Change = decode_wire_v_3_shipping_change(raw_2)
             .map_err(AdaptationError::Validation)?;
         let source = ShippingAddressesUpdateRequestV3 {
             tenant: value_0,
@@ -2505,11 +2513,11 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_shipping_addresses_update_from_v_3_outcome(
-        head: Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+        head: ShippingAddressesUpdateResultV3,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
-        Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
-        Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+        ShippingAddressesUpdateResultV3,
+        ShippingAddressesUpdateResultV3,
     > {
         ProjectionOutcome::Projected(head)
     }
@@ -2520,8 +2528,8 @@ pub mod version_adapters {
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
         ProjectionOutcome<
-            Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
-            Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+            ShippingAddressesUpdateResultV3,
+            ShippingAddressesUpdateResultV3,
         >,
         AdaptationError,
     >
@@ -2531,9 +2539,7 @@ pub mod version_adapters {
             VersionContext,
             ShippingAddressesUpdateStored,
         ) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
-        >,
+        Fut: ::std::future::Future<Output = ShippingAddressesUpdateResultV3>,
     {
         let input = decode_and_upcast_shipping_addresses_update_from_v_3(
             wire,
@@ -2835,9 +2841,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum ShippingAddressesReadOutcome {
-        V1(Result<v1::shipping::Address, v1::shipping::AddressesReadError>),
-        V2(Result<v2::shipping::Address, v2::shipping::AddressesReadError>),
-        V3(Result<v3::shipping::Address, v3::shipping::AddressesReadError>),
+        V1(ShippingAddressesReadResultV1),
+        V2(ShippingAddressesReadResultV2),
+        V3(ShippingAddressesReadResultV3),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_shipping_addresses_read(
@@ -2860,13 +2866,10 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_shipping_addresses_read_outcome(
         version: Version,
-        head: Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
+        head: ShippingAddressesReadResultV3,
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        ShippingAddressesReadOutcome,
-        Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
-    > {
+    ) -> ProjectionOutcome<ShippingAddressesReadOutcome, ShippingAddressesReadResultV3> {
         match version {
             Version::V1 => {
                 match downcast_shipping_addresses_read_from_v_1_outcome(
@@ -2930,10 +2933,7 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            ShippingAddressesReadOutcome,
-            Result<v3::shipping::Address, v3::shipping::AddressesReadError>,
-        >,
+        ProjectionOutcome<ShippingAddressesReadOutcome, ShippingAddressesReadResultV3>,
         AdaptationError,
     >
     where
@@ -2966,9 +2966,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum ShippingAddressesUpdateOutcome {
-        V1(Result<v1::shipping::Address, v1::shipping::AddressesUpdateError>),
-        V2(Result<v2::shipping::Address, v2::shipping::AddressesUpdateError>),
-        V3(Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>),
+        V1(ShippingAddressesUpdateResultV1),
+        V2(ShippingAddressesUpdateResultV2),
+        V3(ShippingAddressesUpdateResultV3),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_shipping_addresses_update(
@@ -3003,12 +3003,12 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_shipping_addresses_update_outcome(
         version: Version,
-        head: Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+        head: ShippingAddressesUpdateResultV3,
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
         ShippingAddressesUpdateOutcome,
-        Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+        ShippingAddressesUpdateResultV3,
     > {
         match version {
             Version::V1 => {
@@ -3079,7 +3079,7 @@ pub mod version_adapters {
     ) -> Result<
         ProjectionOutcome<
             ShippingAddressesUpdateOutcome,
-            Result<v3::shipping::Address, v3::shipping::AddressesUpdateError>,
+            ShippingAddressesUpdateResultV3,
         >,
         AdaptationError,
     >

@@ -61,6 +61,11 @@ pub(crate) enum ZodSchema {
     Primitive(String),
     /// A complete schema expression rendered verbatim.
     Raw(String),
+    /// Numeric scalar text validates a strict decimal grammar before coercing.
+    CoercedNumber {
+        integer: bool,
+        unsigned: bool,
+    },
     ScopedName(String),
     Array {
         element: Box<ZodSchema>,

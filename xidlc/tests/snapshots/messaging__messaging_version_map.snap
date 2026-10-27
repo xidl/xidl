@@ -1,5 +1,6 @@
 ---
 source: xidlc/tests/messaging.rs
+assertion_line: 103
 expression: "all[0].content()"
 ---
 {
@@ -168,7 +169,7 @@ expression: "all[0].content()"
                 "location": "body",
                 "name": "content",
                 "optional": false,
-                "type": "TextContent",
+                "type": "::Relay::TextContent",
                 "wire_name": "content"
               },
               "path:id": {
@@ -194,8 +195,9 @@ expression: "all[0].content()"
                     "source_param": "content",
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "TextContent"
                         ]
                       }
@@ -228,8 +230,9 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "Message"
                         ]
                       }
@@ -242,7 +245,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "Message",
+            "return_type": "::Relay::Message",
             "route": "/messages/{id}",
             "routes": [
               {
@@ -312,8 +315,9 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "Message"
                         ]
                       }
@@ -326,7 +330,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "Message",
+            "return_type": "::Relay::Message",
             "route": "/messages/{id}",
             "routes": [
               {
@@ -417,8 +421,9 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "Message"
                         ]
                       }
@@ -431,7 +436,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "Message",
+            "return_type": "::Relay::Message",
             "route": "/messages/{id}",
             "routes": [
               {
@@ -462,7 +467,7 @@ expression: "all[0].content()"
                 "location": "body",
                 "name": "envelope",
                 "optional": false,
-                "type": "LegacyEnvelope",
+                "type": "::Relay::LegacyEnvelope",
                 "wire_name": "envelope"
               }
             },
@@ -478,8 +483,9 @@ expression: "all[0].content()"
                     "source_param": "envelope",
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "LegacyEnvelope"
                         ]
                       }
@@ -501,8 +507,9 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "Message"
                         ]
                       }
@@ -515,7 +522,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "Message",
+            "return_type": "::Relay::Message",
             "route": "/messages/legacy",
             "routes": [
               {
@@ -541,7 +548,7 @@ expression: "all[0].content()"
                 "location": "body",
                 "name": "envelope",
                 "optional": false,
-                "type": "LegacyEnvelope",
+                "type": "::Relay::LegacyEnvelope",
                 "wire_name": "envelope"
               }
             },
@@ -557,8 +564,9 @@ expression: "all[0].content()"
                     "source_param": "envelope",
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "LegacyEnvelope"
                         ]
                       }
@@ -580,8 +588,9 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "Message"
                         ]
                       }
@@ -594,7 +603,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "Message",
+            "return_type": "::Relay::Message",
             "route": "/messages/legacy",
             "routes": [
               {
@@ -928,7 +937,7 @@ expression: "all[0].content()"
                 "location": "body",
                 "name": "chunk",
                 "optional": false,
-                "type": "stream<UploadChunk>",
+                "type": "stream<::Relay::UploadChunk>",
                 "wire_name": "chunk"
               }
             },
@@ -943,8 +952,9 @@ expression: "all[0].content()"
                     "codec": "Ndjson",
                     "item_ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "UploadChunk"
                         ]
                       }
@@ -967,8 +977,9 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "UploadSummary"
                         ]
                       }
@@ -981,7 +992,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "UploadSummary",
+            "return_type": "::Relay::UploadSummary",
             "route": "/uploads",
             "routes": [
               {
@@ -1010,7 +1021,7 @@ expression: "all[0].content()"
                 "location": "body",
                 "name": "envelope",
                 "optional": false,
-                "type": "LegacyEnvelope",
+                "type": "::Relay::LegacyEnvelope",
                 "wire_name": "envelope"
               }
             },
@@ -1026,8 +1037,9 @@ expression: "all[0].content()"
                     "source_param": "envelope",
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "LegacyEnvelope"
                         ]
                       }
@@ -1049,8 +1061,9 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "Message"
                         ]
                       }
@@ -1063,7 +1076,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "Message",
+            "return_type": "::Relay::Message",
             "route": "/messages/legacy",
             "routes": [
               {
@@ -1092,7 +1105,7 @@ expression: "all[0].content()"
                 "location": "path",
                 "name": "space_id",
                 "optional": false,
-                "type": "SpaceId",
+                "type": "::Relay::SpaceId",
                 "wire_name": "space_id"
               }
             },
@@ -1112,8 +1125,9 @@ expression: "all[0].content()"
                   "source_param": "space_id",
                   "ty": {
                     "ScopedName": {
-                      "is_root": false,
+                      "is_root": true,
                       "name": [
+                        "Relay",
                         "SpaceId"
                       ]
                     }
@@ -1135,8 +1149,9 @@ expression: "all[0].content()"
                         "len": null,
                         "ty": {
                           "ScopedName": {
-                            "is_root": false,
+                            "is_root": true,
                             "name": [
+                              "Relay",
                               "Message"
                             ]
                           }
@@ -1151,7 +1166,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "sequence<Message>",
+            "return_type": "sequence<::Relay::Message>",
             "route": "/spaces/{space_id}/messages",
             "routes": [
               {
@@ -1179,7 +1194,7 @@ expression: "all[0].content()"
                 "location": "path",
                 "name": "space_id",
                 "optional": false,
-                "type": "SpaceId",
+                "type": "::Relay::SpaceId",
                 "wire_name": "space_id"
               },
               "query:cursor": {
@@ -1215,8 +1230,9 @@ expression: "all[0].content()"
                   "source_param": "space_id",
                   "ty": {
                     "ScopedName": {
-                      "is_root": false,
+                      "is_root": true,
                       "name": [
+                        "Relay",
                         "SpaceId"
                       ]
                     }
@@ -1252,8 +1268,9 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "MessagePage"
                         ]
                       }
@@ -1266,7 +1283,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "MessagePage",
+            "return_type": "::Relay::MessagePage",
             "route": "/spaces/{space_id}/messages",
             "routes": [
               {
@@ -1305,7 +1322,7 @@ expression: "all[0].content()"
                 "location": "path",
                 "name": "space_id",
                 "optional": false,
-                "type": "SpaceId",
+                "type": "::Relay::SpaceId",
                 "wire_name": "space_id"
               }
             },
@@ -1335,8 +1352,9 @@ expression: "all[0].content()"
                   "source_param": "space_id",
                   "ty": {
                     "ScopedName": {
-                      "is_root": false,
+                      "is_root": true,
                       "name": [
+                        "Relay",
                         "SpaceId"
                       ]
                     }
@@ -1355,8 +1373,9 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "Message"
                         ]
                       }
@@ -1369,7 +1388,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "Message",
+            "return_type": "::Relay::Message",
             "route": "/spaces/{space_id}/messages",
             "routes": [
               {
@@ -1397,7 +1416,7 @@ expression: "all[0].content()"
                 "location": "body",
                 "name": "content",
                 "optional": false,
-                "type": "Content",
+                "type": "::Relay::Content",
                 "wire_name": "content"
               },
               "path:space_id": {
@@ -1405,7 +1424,7 @@ expression: "all[0].content()"
                 "location": "path",
                 "name": "space_id",
                 "optional": false,
-                "type": "SpaceId",
+                "type": "::Relay::SpaceId",
                 "wire_name": "space_id"
               }
             },
@@ -1421,8 +1440,9 @@ expression: "all[0].content()"
                     "source_param": "content",
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "Content"
                         ]
                       }
@@ -1438,8 +1458,9 @@ expression: "all[0].content()"
                   "source_param": "space_id",
                   "ty": {
                     "ScopedName": {
-                      "is_root": false,
+                      "is_root": true,
                       "name": [
+                        "Relay",
                         "SpaceId"
                       ]
                     }
@@ -1458,8 +1479,9 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "Message"
                         ]
                       }
@@ -1472,7 +1494,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "Message",
+            "return_type": "::Relay::Message",
             "route": "/spaces/{space_id}/messages",
             "routes": [
               {
@@ -1542,8 +1564,9 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "Participant"
                         ]
                       }
@@ -1556,7 +1579,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "Participant",
+            "return_type": "::Relay::Participant",
             "route": "/users/{id}",
             "routes": [
               {
@@ -1624,8 +1647,9 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "Participant"
                         ]
                       }
@@ -1638,7 +1662,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "Participant",
+            "return_type": "::Relay::Participant",
             "route": "/users/{id}",
             "routes": [
               {
@@ -1772,8 +1796,9 @@ expression: "all[0].content()"
                         "len": null,
                         "ty": {
                           "ScopedName": {
-                            "is_root": false,
+                            "is_root": true,
                             "name": [
+                              "Relay",
                               "Participant"
                             ]
                           }
@@ -1788,7 +1813,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "sequence<Participant>",
+            "return_type": "sequence<::Relay::Participant>",
             "route": "/users",
             "routes": [
               {
@@ -1871,8 +1896,9 @@ expression: "all[0].content()"
                         "len": null,
                         "ty": {
                           "ScopedName": {
-                            "is_root": false,
+                            "is_root": true,
                             "name": [
+                              "Relay",
                               "Participant"
                             ]
                           }
@@ -1887,7 +1913,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "sequence<Participant>",
+            "return_type": "sequence<::Relay::Participant>",
             "route": "/users",
             "routes": [
               {
@@ -1916,7 +1942,7 @@ expression: "all[0].content()"
                 "location": "body",
                 "name": "input",
                 "optional": false,
-                "type": "WebhookDestinationInput",
+                "type": "::Relay::WebhookDestinationInput",
                 "wire_name": "input"
               }
             },
@@ -1932,8 +1958,9 @@ expression: "all[0].content()"
                     "source_param": "input",
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "WebhookDestinationInput"
                         ]
                       }
@@ -1955,8 +1982,9 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "WebhookDestination"
                         ]
                       }
@@ -1969,7 +1997,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "WebhookDestination",
+            "return_type": "::Relay::WebhookDestination",
             "route": "/webhooks",
             "routes": [
               {
@@ -2248,8 +2276,10 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
+                          "Admin",
                           "Quota"
                         ]
                       }
@@ -2262,7 +2292,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "Quota",
+            "return_type": "::Relay::Admin::Quota",
             "route": "/admin/quotas/{space_id}",
             "routes": [
               {
@@ -2293,7 +2323,7 @@ expression: "all[0].content()"
                 "location": "path",
                 "name": "space_id",
                 "optional": false,
-                "type": "SpaceId",
+                "type": "::Relay::SpaceId",
                 "wire_name": "space_id"
               }
             },
@@ -2313,8 +2343,9 @@ expression: "all[0].content()"
                   "source_param": "space_id",
                   "ty": {
                     "ScopedName": {
-                      "is_root": false,
+                      "is_root": true,
                       "name": [
+                        "Relay",
                         "SpaceId"
                       ]
                     }
@@ -2333,8 +2364,9 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "Transcript"
                         ]
                       }
@@ -2361,7 +2393,7 @@ expression: "all[0].content()"
               ],
               "status": "200"
             },
-            "return_type": "Transcript",
+            "return_type": "::Relay::Transcript",
             "route": "/spaces/{space_id}/transcript",
             "routes": [
               {
@@ -2466,7 +2498,7 @@ expression: "all[0].content()"
                 "location": "body",
                 "name": "content",
                 "optional": false,
-                "type": "TextContent",
+                "type": "::Relay::TextContent",
                 "wire_name": "content"
               },
               "path:id": {
@@ -2492,8 +2524,9 @@ expression: "all[0].content()"
                     "source_param": "content",
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "TextContent"
                         ]
                       }
@@ -2526,8 +2559,9 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "Message"
                         ]
                       }
@@ -2540,7 +2574,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "Message",
+            "return_type": "::Relay::Message",
             "route": "/messages/{id}",
             "routes": [
               {
@@ -2568,7 +2602,7 @@ expression: "all[0].content()"
                 "location": "body",
                 "name": "content",
                 "optional": false,
-                "type": "TextContent",
+                "type": "::Relay::TextContent",
                 "wire_name": "content"
               },
               "header:Idempotency-Key": {
@@ -2603,8 +2637,9 @@ expression: "all[0].content()"
                     "source_param": "content",
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "TextContent"
                         ]
                       }
@@ -2648,8 +2683,9 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "Message"
                         ]
                       }
@@ -2662,7 +2698,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "Message",
+            "return_type": "::Relay::Message",
             "route": "/messages/{id}",
             "routes": [
               {
@@ -2733,8 +2769,9 @@ expression: "all[0].content()"
                         "len": null,
                         "ty": {
                           "ScopedName": {
-                            "is_root": false,
+                            "is_root": true,
                             "name": [
+                              "Relay",
                               "Message"
                             ]
                           }
@@ -2749,7 +2786,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "sequence<Message>",
+            "return_type": "sequence<::Relay::Message>",
             "route": "/messages/search",
             "routes": [
               {
@@ -2778,7 +2815,7 @@ expression: "all[0].content()"
                 "location": "path",
                 "name": "space_id",
                 "optional": false,
-                "type": "SpaceId",
+                "type": "::Relay::SpaceId",
                 "wire_name": "space_id"
               },
               "query:cursor": {
@@ -2814,8 +2851,9 @@ expression: "all[0].content()"
                   "source_param": "space_id",
                   "ty": {
                     "ScopedName": {
-                      "is_root": false,
+                      "is_root": true,
                       "name": [
+                        "Relay",
                         "SpaceId"
                       ]
                     }
@@ -2851,8 +2889,9 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "MessagePage"
                         ]
                       }
@@ -2865,7 +2904,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "MessagePage",
+            "return_type": "::Relay::MessagePage",
             "route": "/spaces/{space_id}/messages",
             "routes": [
               {
@@ -2893,7 +2932,7 @@ expression: "all[0].content()"
                 "location": "path",
                 "name": "space_id",
                 "optional": false,
-                "type": "SpaceId",
+                "type": "::Relay::SpaceId",
                 "wire_name": "space_id"
               },
               "query:cursor": {
@@ -2921,8 +2960,9 @@ expression: "all[0].content()"
                   "source_param": "space_id",
                   "ty": {
                     "ScopedName": {
-                      "is_root": false,
+                      "is_root": true,
                       "name": [
+                        "Relay",
                         "SpaceId"
                       ]
                     }
@@ -2952,8 +2992,9 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "MessagePage"
                         ]
                       }
@@ -2966,7 +3007,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "MessagePage",
+            "return_type": "::Relay::MessagePage",
             "route": "/spaces/{space_id}/messages",
             "routes": [
               {
@@ -3126,8 +3167,9 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "MessagePage"
                         ]
                       }
@@ -3140,7 +3182,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "MessagePage",
+            "return_type": "::Relay::MessagePage",
             "route": "/messages/search",
             "routes": [
               {
@@ -3169,7 +3211,7 @@ expression: "all[0].content()"
                 "location": "path",
                 "name": "space_id",
                 "optional": false,
-                "type": "SpaceId",
+                "type": "::Relay::SpaceId",
                 "wire_name": "space_id"
               }
             },
@@ -3189,8 +3231,9 @@ expression: "all[0].content()"
                   "source_param": "space_id",
                   "ty": {
                     "ScopedName": {
-                      "is_root": false,
+                      "is_root": true,
                       "name": [
+                        "Relay",
                         "SpaceId"
                       ]
                     }
@@ -3211,8 +3254,9 @@ expression: "all[0].content()"
                     "item_source": "ReturnValue",
                     "item_ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "Message"
                         ]
                       }
@@ -3225,7 +3269,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "Message",
+            "return_type": "::Relay::Message",
             "route": "/spaces/{space_id}/messages/watch",
             "routes": [
               {
@@ -3454,8 +3498,9 @@ expression: "all[0].content()"
                         "len": null,
                         "ty": {
                           "ScopedName": {
-                            "is_root": false,
+                            "is_root": true,
                             "name": [
+                              "Relay",
                               "Participant"
                             ]
                           }
@@ -3470,7 +3515,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "sequence<Participant>",
+            "return_type": "sequence<::Relay::Participant>",
             "route": "/users",
             "routes": [
               {
@@ -3534,8 +3579,9 @@ expression: "all[0].content()"
                         "len": null,
                         "ty": {
                           "ScopedName": {
-                            "is_root": false,
+                            "is_root": true,
                             "name": [
+                              "Relay",
                               "Participant"
                             ]
                           }
@@ -3550,7 +3596,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "sequence<Participant>",
+            "return_type": "sequence<::Relay::Participant>",
             "route": "/users",
             "routes": [
               {
@@ -3985,8 +4031,9 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Analytics",
                           "UsageReport"
                         ]
                       }
@@ -3999,7 +4046,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "UsageReport",
+            "return_type": "::Analytics::UsageReport",
             "route": "/analytics/usage",
             "routes": [
               {
@@ -4070,8 +4117,9 @@ expression: "all[0].content()"
                         "len": null,
                         "ty": {
                           "ScopedName": {
-                            "is_root": false,
+                            "is_root": true,
                             "name": [
+                              "Relay",
                               "Message"
                             ]
                           }
@@ -4086,7 +4134,7 @@ expression: "all[0].content()"
               "representations": [],
               "status": "200"
             },
-            "return_type": "sequence<Message>",
+            "return_type": "sequence<::Relay::Message>",
             "route": "/poll",
             "routes": [
               {
@@ -4186,7 +4234,7 @@ expression: "all[0].content()"
                 "location": "path",
                 "name": "space_id",
                 "optional": false,
-                "type": "SpaceId",
+                "type": "::Relay::SpaceId",
                 "wire_name": "space_id"
               }
             },
@@ -4206,8 +4254,9 @@ expression: "all[0].content()"
                   "source_param": "space_id",
                   "ty": {
                     "ScopedName": {
-                      "is_root": false,
+                      "is_root": true,
                       "name": [
+                        "Relay",
                         "SpaceId"
                       ]
                     }
@@ -4226,8 +4275,9 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "Transcript"
                         ]
                       }
@@ -4254,7 +4304,7 @@ expression: "all[0].content()"
               ],
               "status": "200"
             },
-            "return_type": "Transcript",
+            "return_type": "::Relay::Transcript",
             "route": "/spaces/{space_id}/transcript",
             "routes": [
               {
@@ -4282,7 +4332,7 @@ expression: "all[0].content()"
                 "location": "path",
                 "name": "space_id",
                 "optional": false,
-                "type": "SpaceId",
+                "type": "::Relay::SpaceId",
                 "wire_name": "space_id"
               }
             },
@@ -4302,8 +4352,9 @@ expression: "all[0].content()"
                   "source_param": "space_id",
                   "ty": {
                     "ScopedName": {
-                      "is_root": false,
+                      "is_root": true,
                       "name": [
+                        "Relay",
                         "SpaceId"
                       ]
                     }
@@ -4322,8 +4373,9 @@ expression: "all[0].content()"
                   "ReturnOnly": {
                     "ty": {
                       "ScopedName": {
-                        "is_root": false,
+                        "is_root": true,
                         "name": [
+                          "Relay",
                           "Transcript"
                         ]
                       }
@@ -4359,7 +4411,7 @@ expression: "all[0].content()"
               ],
               "status": "200"
             },
-            "return_type": "Transcript",
+            "return_type": "::Relay::Transcript",
             "route": "/spaces/{space_id}/transcript",
             "routes": [
               {

@@ -5,7 +5,7 @@
     {%- elif plan.kind == "Sequence" -%}map_sequence({{ source }}, |item| {{ value(plan.data, "item", path) }}, {{ path | tojson }})
     {%- elif plan.kind == "Array" -%}map_array({{ source }}, |item| {{ value(plan.data, "item", path) }}, refusal, {{ path | tojson }})
     {%- elif plan.kind == "Map" -%}map_record({{ source }}, |key| {{ value(plan.data.key, "key", path) }}, |item| {{ value(plan.data.value, "item", path) }}, refusal, {{ path | tojson }})
-    {%- elif plan.kind == "Optional" -%}({{ source }}).as_ref().map(|item| {{ value(plan.data, "item", path) }}).transpose()
+    {%- elif plan.kind == "Optional" -%}::std::option::Option::as_ref({{ source }}).map(|item| {{ value(plan.data, "item", path) }}).transpose()
 {%- elif plan.kind == "Boxed" -%}{{ value(plan.data.value, "(" ~ source ~ ").as_ref()" if plan.data.source else source, path) }}{% if plan.data.target %}.map(Box::new){% endif %}
 {%- endif -%}
 {%- endmacro %}

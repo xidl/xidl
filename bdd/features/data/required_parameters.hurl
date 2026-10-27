@@ -67,6 +67,7 @@ HTTP 400
 GET {{base_url}}/optional
 HTTP 200
 [Asserts]
+jsonpath "$.note" not exists
 jsonpath "$.count" == 0
 jsonpath "$.active" == false
 jsonpath "$.label" == ""
@@ -79,6 +80,20 @@ HTTP 200
 jsonpath "$.count" == 8
 jsonpath "$.active" == true
 jsonpath "$.label" == "explicit"
+jsonpath "$.note" == "explicit"
+
+# Optional string cookies retain presence and select the first repeated value.
+GET {{base_url}}/optional
+Cookie: label=
+HTTP 200
+[Asserts]
+jsonpath "$.note" == ""
+
+GET {{base_url}}/optional
+Cookie: label=first; label=second
+HTTP 200
+[Asserts]
+jsonpath "$.note" == "first"
 
 # Streaming handshakes use the same presence contract as unary requests.
 GET {{base_url}}/stream?count=0

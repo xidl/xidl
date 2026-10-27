@@ -1,0 +1,416 @@
+---
+source: xidlc/tests/http_collections.rs
+expression: document
+---
+{
+  "components": {
+    "schemas": {
+      "Collections": {
+        "properties": {
+          "labels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "values": {
+            "items": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "values",
+          "tags",
+          "names"
+        ],
+        "type": "object"
+      },
+      "Error": {
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "msg"
+        ],
+        "type": "object"
+      },
+      "Numbers": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ratio": {
+            "format": "double",
+            "type": "number"
+          },
+          "threshold": {
+            "format": "double",
+            "type": "number"
+          },
+          "units": {
+            "format": "int64",
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count",
+          "ratio",
+          "units"
+        ],
+        "type": "object"
+      },
+      "Search": {
+        "properties": {
+          "term": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StreamValues": {
+        "properties": {
+          "values": {
+            "items": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "transport.Count": {
+        "format": "int32",
+        "type": "integer"
+      },
+      "transport.Counts": {
+        "items": {
+          "$ref": "#/components/schemas/transport.Count"
+        },
+        "type": "array"
+      },
+      "transport.Label": {
+        "type": "string"
+      },
+      "transport.Labels": {
+        "items": {
+          "$ref": "#/components/schemas/transport.Label"
+        },
+        "type": "array"
+      },
+      "transport.Selection": {
+        "$ref": "#/components/schemas/transport.Labels"
+      }
+    }
+  },
+  "info": {
+    "title": "xidl",
+    "version": "0.1.0"
+  },
+  "openapi": "3.2.0",
+  "paths": {
+    "/collections": {
+      "get": {
+        "operationId": "CollectionInputs.read",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "values",
+            "required": false,
+            "schema": {
+              "items": {
+                "format": "int32",
+                "type": "integer"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "labels",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "header",
+            "name": "tags",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "names",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Collections"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "CollectionInputs"
+        ]
+      }
+    },
+    "/numbers": {
+      "get": {
+        "operationId": "CollectionInputs.numbers",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "count",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "threshold",
+            "required": false,
+            "schema": {
+              "format": "double",
+              "type": "number"
+            }
+          },
+          {
+            "in": "header",
+            "name": "ratio",
+            "required": true,
+            "schema": {
+              "format": "double",
+              "type": "number"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "units",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "maximum": 4294967295,
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Numbers"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "CollectionInputs"
+        ]
+      }
+    },
+    "/search": {
+      "get": {
+        "operationId": "CollectionInputs.search",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "term",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Search"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "CollectionInputs"
+        ]
+      }
+    },
+    "/stream": {
+      "get": {
+        "operationId": "CollectionInputs.stream",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "values",
+            "required": false,
+            "schema": {
+              "items": {
+                "format": "int32",
+                "type": "integer"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {
+                "itemSchema": {
+                  "$ref": "#/components/schemas/StreamValues"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "CollectionInputs"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "CollectionInputs"
+    }
+  ]
+}

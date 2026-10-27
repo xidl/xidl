@@ -432,7 +432,7 @@ export namespace legacy {
                     args: ["id", "fields"],
                     schema: ifaceSchemas.legacy.MessagesGetRequestSchema,
                     path: [{ parameter: "id", wireName: "id", key: "id", multi: false, catchAll: false }],
-                    query: [{ wireName: "fields", key: "fields", multi: false }],
+                    query: [{ wireName: "fields", key: "fields", multi: false, optional: true }],
                     headers: [],
                     cookies: [],
                     body: {
@@ -542,7 +542,7 @@ export namespace legacy {
                     schema: ifaceSchemas.current.MailFetchRequestSchema,
                     path: [{ parameter: "id", wireName: "id", key: "id", multi: false, catchAll: false }],
                     query: [],
-                    headers: [{ wireName: "X-Trace", key: "trace", multi: false }],
+                    headers: [{ wireName: "X-Trace", key: "trace", multi: false, optional: true }],
                     cookies: [],
                     body: {
                         kind: "none",

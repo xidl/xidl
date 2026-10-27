@@ -53,9 +53,10 @@ the separate fix in [PR #391](https://github.com/xidl/xidl/pull/391). A missing
 path segment is a routing 404. Rust inbound query deserialization defaults
 optional members and sequences; an empty sequence contributes no parameter
 occurrences. Header/cookie sequences also decode zero occurrences as empty
-lists. OpenAPI presence declarations and empty-list serialization need the
-separate cross-target contract decision tracked in
-[issue #393](https://github.com/xidl/xidl/issues/393).
+lists. The shared collection contract and actual Rust/TypeScript SDK coverage
+are documented in [http_collections](../http_collections/README.md), including
+optional empty-list normalization and the limits of comma-separated header
+elements.
 
 OpenAPI schema validation checks declared fields, media types and response
 headers. The generated object schemas permit additional properties. Hurl
@@ -63,7 +64,6 @@ therefore explicitly checks the absence of `payments` in legacy successes and
 the absence of `payment_intent` in current successes to prove that versions do
 not leak each other's fields.
 
-The generator crate passes strict clippy. Compiling emitted Rust artifacts with
-the same lint gate currently exposes generator warnings tracked in
-[issue #394](https://github.com/xidl/xidl/issues/394); normal generated builds
-and the HTTP/SDK journeys pass.
+Both the generator crate and the emitted billing libraries pass strict clippy.
+The generated-code BDD compiles and lints the real libraries independently of
+the compiler's own checks, including their nested list result signatures.

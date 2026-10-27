@@ -17,9 +17,9 @@ export const {{ service_name }}Operations = {
                 args: [{% for param in method.params %}"{{ param.key_name }}"{% if not loop.last %}, {% endif %}{% endfor %}],
                 {% if method.request_schema_ref %}schema: ifaceSchemas.{{ method.request_schema_ref }}Schema,
                 {% endif %}path: [{% for param in method.path_params %}{ parameter: "{{ param.template_name }}", wireName: "{{ param.template_name }}", key: "{{ param.key_name }}", multi: false, catchAll: {{ param.catch_all | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}],
-                query: [{% for param in method.query_params %}{ wireName: "{{ param.raw_name }}", key: "{{ param.key_name }}", multi: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}],
-                headers: [{% for param in method.header_params %}{ wireName: "{{ param.raw_name }}", key: "{{ param.key_name }}", multi: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}],
-                cookies: [{% for param in method.cookie_params %}{ wireName: "{{ param.raw_name }}", key: "{{ param.key_name }}", multi: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}],
+                query: [{% for param in method.query_params %}{ wireName: "{{ param.raw_name }}", key: "{{ param.key_name }}", multi: {{ param.is_multi | lower }}, optional: {{ param.optional | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}],
+                headers: [{% for param in method.header_params %}{ wireName: "{{ param.raw_name }}", key: "{{ param.key_name }}", multi: {{ param.is_multi | lower }}, optional: {{ param.optional | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}],
+                cookies: [{% for param in method.cookie_params %}{ wireName: "{{ param.raw_name }}", key: "{{ param.key_name }}", multi: {{ param.is_multi | lower }}, optional: {{ param.optional | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}],
                 body: {
                     kind: "{% if method.is_client_stream %}stream{% elif method.body_entries | length > 0 %}value{% else %}none{% endif %}",
                     contentType: "{{ method.request_content_type }}",

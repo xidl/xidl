@@ -1,0 +1,34 @@
+module transport {
+    typedef long Count;
+    typedef string Label;
+    typedef sequence<Count> Counts;
+    typedef sequence<Label> Labels;
+    typedef Labels Selection;
+};
+
+struct Collections {
+    sequence<long> values;
+    sequence<string> tags;
+    sequence<string> names;
+    @optional sequence<string> labels;
+};
+struct Search { @optional string term; };
+struct Numbers {
+    long count;
+    double ratio;
+    unsigned long units;
+    @optional double threshold;
+};
+struct StreamValues { @optional sequence<long> values; };
+
+interface CollectionInputs {
+    @get(path="/collections")
+    Collections read(@query transport::Counts values, @header transport::Selection tags,
+                     @cookie transport::Selection names, @query @optional transport::Selection labels);
+    @get(path="/search") Search search(@query @optional transport::Label term);
+    @get(path="/numbers")
+    Numbers numbers(@query long count, @header double ratio,
+                    @cookie unsigned long units, @query @optional double threshold);
+    @server_stream @get(path="/stream")
+    StreamValues stream(@query @optional sequence<long> values);
+};

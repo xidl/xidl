@@ -1,6 +1,16 @@
-use super::{HttpDocumentMetadata, HttpInterface, RestHirDocument};
+use super::{HttpDocumentMetadata, HttpInterface};
 use crate::error::{ParseError, ParserResult};
 use crate::hir;
+use serde::{Deserialize, Serialize};
+
+/// The projected HTTP document: source specification, document metadata and
+/// the interfaces participating in version selection.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RestHirDocument {
+    pub spec: hir::Specification,
+    pub document: HttpDocumentMetadata,
+    pub interfaces: Vec<HttpInterface>,
+}
 
 impl RestHirDocument {
     /// Reads the projected HTTP document from parser properties.

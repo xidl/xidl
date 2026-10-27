@@ -11,7 +11,8 @@ use crate::generate::typescript::definition::TypeRefTarget;
 use crate::generate::typescript::definition::contexts::{ParamDeclContext, TsType, ZodSchema};
 use crate::generate::typescript::definition::names::{method_struct_prefix, scoped_name, ts_ident};
 use crate::generate::typescript::definition::type_expr::{
-    ts_type_for_type_spec, zod_coerced_schema_for_type_spec, zod_schema_for_type_spec_with_prefix,
+    ts_type_for_type_spec, zod_coerced_schema_for_type_spec_with_prefix,
+    zod_schema_for_type_spec_with_prefix,
 };
 use xidl_parser::hir;
 use xidl_parser::rest_hir::{
@@ -27,6 +28,8 @@ pub(super) struct OperationModelInput<'a> {
     pub(super) exceptions: &'a [xidl_parser::rest_hir::HttpException],
     /// Switched-union idents; their schemas keep raw response passthrough.
     pub(super) union_idents: &'a std::collections::BTreeSet<String>,
+    /// Typedef shapes behind scalar transport positions.
+    pub(super) text_aliases: &'a super::text_aliases::TextAliases,
 }
 
 impl MethodModel {
@@ -37,6 +40,7 @@ impl MethodModel {
             op,
             exceptions,
             union_idents,
+            text_aliases,
         }: OperationModelInput<'_>,
     ) -> IdlcResult<MethodModel> {
         validate_stream_support(op)?;
@@ -78,7 +82,8 @@ impl MethodModel {
                 schema: if byte_body_param == Some(p.name.as_str()) {
                     ZodSchema::Primitive("instanceof(Uint8Array)".into())
                 } else if stringly.contains(&p.name) {
-                    zod_coerced_schema_for_type_spec(&p.ty, module_path)
+                    let ty = text_aliases.expand(&p.ty, module_path);
+                    zod_coerced_schema_for_type_spec_with_prefix(&ty, module_path, Some("models"))
                 } else {
                     zod_schema_for_type_spec_with_prefix(&p.ty, module_path, Some("models"))
                 },

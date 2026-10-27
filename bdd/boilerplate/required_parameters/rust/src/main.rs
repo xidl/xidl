@@ -38,11 +38,13 @@ impl gen::RequiredParameters for Parameters {
         active: Option<bool>,
         label: Option<String>,
     ) -> Result<gen::Inputs> {
-        Ok(Self::inputs(
+        let mut inputs = Self::inputs(
             count.unwrap_or_default(),
             active.unwrap_or_default(),
-            label.unwrap_or_default(),
-        ))
+            label.clone().unwrap_or_default(),
+        );
+        inputs.note = label;
+        Ok(inputs)
     }
 
     async fn stream(

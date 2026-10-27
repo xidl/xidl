@@ -468,9 +468,9 @@ export type HttpDefaultsServiceGetNameRequest = z.infer<typeof HttpDefaultsServi
 
     
 export const HttpDefaultsServiceListOrdersRequestSchema = z.object({
-        user_id: z.coerce.number().int().nonnegative(),
-        page: z.coerce.number().int().nonnegative(),
-        size: z.coerce.number().int().nonnegative(),
+        user_id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        page: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        size: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
     });
 export type HttpDefaultsServiceListOrdersRequest = z.infer<typeof HttpDefaultsServiceListOrdersRequestSchema>;
 
@@ -501,42 +501,42 @@ export type HttpDefaultsServicePreviewUserRequest = z.infer<typeof HttpDefaultsS
 
     
 export const HttpDefaultsServiceGetUserRequestSchema = z.object({
-        id: z.coerce.number().int().nonnegative(),
+        id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
         lang: z.coerce.string(),
     });
 export type HttpDefaultsServiceGetUserRequest = z.infer<typeof HttpDefaultsServiceGetUserRequestSchema>;
 
     
 export const HttpDefaultsServiceGetUserAliasRequestSchema = z.object({
-        user_id: z.coerce.number().int().nonnegative(),
+        user_id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
         locale: z.coerce.string(),
     });
 export type HttpDefaultsServiceGetUserAliasRequest = z.infer<typeof HttpDefaultsServiceGetUserAliasRequestSchema>;
 
     
 export const HttpDefaultsServiceDeleteUserRequestSchema = z.object({
-        id: z.coerce.number().int().nonnegative(),
-        revision: z.coerce.number().int().nonnegative(),
+        id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        revision: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
     });
 export type HttpDefaultsServiceDeleteUserRequest = z.infer<typeof HttpDefaultsServiceDeleteUserRequestSchema>;
 
     
 export const HttpDefaultsServiceProbeUserRequestSchema = z.object({
-        id: z.coerce.number().int().nonnegative(),
-        revision: z.coerce.number().int().nonnegative(),
+        id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        revision: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
     });
 export type HttpDefaultsServiceProbeUserRequest = z.infer<typeof HttpDefaultsServiceProbeUserRequestSchema>;
 
     
 export const HttpDefaultsServiceUserOptionsRequestSchema = z.object({
-        id: z.coerce.number().int().nonnegative(),
-        revision: z.coerce.number().int().nonnegative(),
+        id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        revision: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
     });
 export type HttpDefaultsServiceUserOptionsRequest = z.infer<typeof HttpDefaultsServiceUserOptionsRequestSchema>;
 
     
 export const HttpDefaultsServiceReplaceUserRequestSchema = z.object({
-        user_id: z.coerce.number().int().nonnegative(),
+        user_id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
         name: z.string(),
         age: z.number().int().nonnegative(),
     });
@@ -544,7 +544,7 @@ export type HttpDefaultsServiceReplaceUserRequest = z.infer<typeof HttpDefaultsS
 
     
 export const HttpDefaultsServicePatchUserRequestSchema = z.object({
-        user_id: z.coerce.number().int().nonnegative(),
+        user_id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
         name: z.string(),
         age: z.number().int().nonnegative(),
     });
@@ -608,7 +608,7 @@ export const HttpDefaultsServiceOperations = {
                 args: ["name"],
                 schema: ifaceSchemas.HttpDefaultsServiceGetNameRequestSchema,
                 path: [],
-                query: [{ wireName: "name", key: "name", multi: false }],
+                query: [{ wireName: "name", key: "name", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -642,7 +642,7 @@ export const HttpDefaultsServiceOperations = {
                 args: ["user_id", "page", "size"],
                 schema: ifaceSchemas.HttpDefaultsServiceListOrdersRequestSchema,
                 path: [{ parameter: "uid", wireName: "uid", key: "user_id", multi: false, catchAll: false }],
-                query: [{ wireName: "page", key: "page", multi: false }, { wireName: "size", key: "size", multi: false }],
+                query: [{ wireName: "page", key: "page", multi: false, optional: false }, { wireName: "size", key: "size", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -819,7 +819,7 @@ export const HttpDefaultsServiceOperations = {
                 args: ["id", "lang"],
                 schema: ifaceSchemas.HttpDefaultsServiceGetUserRequestSchema,
                 path: [{ parameter: "id", wireName: "id", key: "id", multi: false, catchAll: false }],
-                query: [{ wireName: "lang", key: "lang", multi: false }],
+                query: [{ wireName: "lang", key: "lang", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -853,7 +853,7 @@ export const HttpDefaultsServiceOperations = {
                 args: ["user_id", "locale"],
                 schema: ifaceSchemas.HttpDefaultsServiceGetUserAliasRequestSchema,
                 path: [{ parameter: "id", wireName: "id", key: "user_id", multi: false, catchAll: false }],
-                query: [{ wireName: "lang", key: "locale", multi: false }],
+                query: [{ wireName: "lang", key: "locale", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -887,7 +887,7 @@ export const HttpDefaultsServiceOperations = {
                 args: ["id", "revision"],
                 schema: ifaceSchemas.HttpDefaultsServiceDeleteUserRequestSchema,
                 path: [],
-                query: [{ wireName: "id", key: "id", multi: false }, { wireName: "revision", key: "revision", multi: false }],
+                query: [{ wireName: "id", key: "id", multi: false, optional: false }, { wireName: "revision", key: "revision", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -921,7 +921,7 @@ export const HttpDefaultsServiceOperations = {
                 args: ["id", "revision"],
                 schema: ifaceSchemas.HttpDefaultsServiceProbeUserRequestSchema,
                 path: [],
-                query: [{ wireName: "id", key: "id", multi: false }, { wireName: "revision", key: "revision", multi: false }],
+                query: [{ wireName: "id", key: "id", multi: false, optional: false }, { wireName: "revision", key: "revision", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -955,7 +955,7 @@ export const HttpDefaultsServiceOperations = {
                 args: ["id", "revision"],
                 schema: ifaceSchemas.HttpDefaultsServiceUserOptionsRequestSchema,
                 path: [],
-                query: [{ wireName: "id", key: "id", multi: false }, { wireName: "revision", key: "revision", multi: false }],
+                query: [{ wireName: "id", key: "id", multi: false, optional: false }, { wireName: "revision", key: "revision", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {

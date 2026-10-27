@@ -10,8 +10,8 @@ import { byteRequestStream, ndjsonRequestStream } from './stream.ts';
 import type {
   HttpCodec,
   OperationDescriptor,
+  RequestValueBinding,
   RouteParams,
-  ValueBinding,
 } from './types.ts';
 
 export async function decodeOperationRequest<TService>(
@@ -45,17 +45,19 @@ export async function decodeOperationRequest<TService>(
     payload[binding.key] = readValues(
       url.searchParams.getAll(binding.wireName),
       binding,
+      'query',
     );
   }
   for (const binding of operation.request.headers) {
     const value = request.headers.get(binding.wireName);
-    payload[binding.key] = readHeader(value, binding.multi);
+    payload[binding.key] = readHeader(value, binding);
   }
   const cookies = readRequestCookies(request.headers);
   for (const binding of operation.request.cookies) {
     payload[binding.key] = readValues(
       cookies.get(binding.wireName) ?? [],
       binding,
+      'cookie',
     );
   }
 
@@ -104,21 +106,48 @@ export async function decodeOperationRequest<TService>(
   );
 }
 
-function readValues(values: string[], binding: ValueBinding): unknown {
+function readValues(
+  values: string[],
+  binding: RequestValueBinding,
+  source: 'query' | 'header' | 'cookie',
+): unknown {
   if (values.length === 0) {
-    return binding.multi ? [] : undefined;
+    return binding.multi && !binding.optional ? [] : undefined;
+  }
+  // Only query extraction rejects duplicates; the Rust target's header and
+  // cookie maps keep the first occurrence for scalar bindings.
+  if (source === 'query' && !binding.multi && values.length > 1) {
+    throw new XidlServerError(
+      400,
+      `duplicate value for parameter ${binding.wireName}`,
+    );
   }
   return binding.multi ? values : (values[0] as string);
 }
 
-function readHeader(value: string | null, multi: boolean): unknown {
+function readHeader(
+  value: string | null,
+  binding: RequestValueBinding,
+): unknown {
   if (value === null) {
-    return multi ? [] : undefined;
+    return binding.multi && !binding.optional ? [] : undefined;
   }
-  if (!multi) {
+  if (!headerValueIsVisibleAscii(value)) {
+    throw new XidlServerError(
+      400,
+      `header ${binding.wireName} contains non-ASCII bytes`,
+    );
+  }
+  if (!binding.multi) {
     return value;
   }
   return value.split(',').map(item => item.trim());
+}
+
+// The Rust target extracts headers through HeaderValue::to_str, which only
+// accepts visible ASCII plus space and tab; mirror that acceptance here.
+function headerValueIsVisibleAscii(value: string): boolean {
+  return /^[\t\x20-\x7E]*$/.test(value);
 }
 
 async function decodeRequestBody(

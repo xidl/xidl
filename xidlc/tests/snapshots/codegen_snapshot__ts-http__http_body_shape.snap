@@ -467,7 +467,7 @@ export const BodyShapeOperations = {
                 schema: ifaceSchemas.BodyShapeUploadRequestSchema,
                 path: [],
                 query: [],
-                headers: [{ wireName: "Content-Type", key: "media_type", multi: false }],
+                headers: [{ wireName: "Content-Type", key: "media_type", multi: false, optional: true }],
                 cookies: [],
                 body: {
                     kind: "value",

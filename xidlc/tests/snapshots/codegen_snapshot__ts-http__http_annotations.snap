@@ -337,7 +337,7 @@ import { xjson } from "xidl-typescript-codec";
 
     
 export const HttpAnnoServiceGetUserRequestSchema = z.object({
-        id: z.coerce.number().int().nonnegative(),
+        id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
         lang: z.coerce.string(),
     });
 export type HttpAnnoServiceGetUserRequest = z.infer<typeof HttpAnnoServiceGetUserRequestSchema>;
@@ -358,13 +358,13 @@ export type HttpAnnoServiceGetNameRequest = z.infer<typeof HttpAnnoServiceGetNam
     
 export const HttpAnnoServiceSearchUserRequestSchema = z.object({
         keyword: z.coerce.string(),
-        page: z.coerce.number().int().nonnegative(),
+        page: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
     });
 export type HttpAnnoServiceSearchUserRequest = z.infer<typeof HttpAnnoServiceSearchUserRequestSchema>;
 
     
 export const HttpAnnoServiceGetUserAliasRequestSchema = z.object({
-        user_id: z.coerce.number().int().nonnegative(),
+        user_id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
         locale: z.coerce.string(),
     });
 export type HttpAnnoServiceGetUserAliasRequest = z.infer<typeof HttpAnnoServiceGetUserAliasRequestSchema>;
@@ -452,7 +452,7 @@ export const HttpAnnoServiceOperations = {
                 args: ["id", "lang"],
                 schema: ifaceSchemas.HttpAnnoServiceGetUserRequestSchema,
                 path: [{ parameter: "id", wireName: "id", key: "id", multi: false, catchAll: false }],
-                query: [{ wireName: "lang", key: "lang", multi: false }],
+                query: [{ wireName: "lang", key: "lang", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -521,7 +521,7 @@ export const HttpAnnoServiceOperations = {
                 args: ["name"],
                 schema: ifaceSchemas.HttpAnnoServiceGetNameRequestSchema,
                 path: [],
-                query: [{ wireName: "name", key: "name", multi: false }],
+                query: [{ wireName: "name", key: "name", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -555,7 +555,7 @@ export const HttpAnnoServiceOperations = {
                 args: ["keyword", "page"],
                 schema: ifaceSchemas.HttpAnnoServiceSearchUserRequestSchema,
                 path: [],
-                query: [{ wireName: "keyword", key: "keyword", multi: false }, { wireName: "page", key: "page", multi: false }],
+                query: [{ wireName: "keyword", key: "keyword", multi: false, optional: false }, { wireName: "page", key: "page", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -589,7 +589,7 @@ export const HttpAnnoServiceOperations = {
                 args: ["user_id", "locale"],
                 schema: ifaceSchemas.HttpAnnoServiceGetUserAliasRequestSchema,
                 path: [{ parameter: "id", wireName: "id", key: "user_id", multi: false, catchAll: false }],
-                query: [{ wireName: "lang", key: "locale", multi: false }],
+                query: [{ wireName: "lang", key: "locale", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {

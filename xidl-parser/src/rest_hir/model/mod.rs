@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 
 mod document;
 mod references;
+mod types;
 
 #[cfg(test)]
 mod tests;
@@ -175,6 +176,7 @@ pub struct HttpOperationSignature {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HttpSignatureParam {
     pub name: String,
+    /// Declared type with named references resolved to their full IDL path.
     pub ty: hir::TypeSpec,
     pub direction: HttpSignatureParamDirection,
     pub is_optional: bool,
@@ -222,8 +224,23 @@ pub struct HttpRequestMapping {
 pub struct HttpInputBinding {
     pub source_param: String,
     pub wire_name: String,
+    /// Wire type; query/header/cookie bindings expand transparent typedefs.
+    /// The operation signature retains the declared named type.
     pub ty: hir::TypeSpec,
     pub optional: bool,
+}
+
+impl HttpInputBinding {
+    /// Whether this binding requires at least one wire occurrence.
+    ///
+    /// Unbounded non-path sequences encode an empty list with zero occurrences.
+    /// This does not make the logical signature parameter optional. Other input
+    /// shapes retain their existing presence declaration.
+    pub fn requires_presence(&self, location: HttpParamKind) -> bool {
+        location == HttpParamKind::Path
+            || (!self.optional
+                && !matches!(&self.ty, hir::TypeSpec::SequenceType(sequence) if sequence.len.is_none()))
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -378,9 +395,4 @@ pub struct HttpInterface {
     pub operations: Vec<HttpOperation>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RestHirDocument {
-    pub spec: hir::Specification,
-    pub document: HttpDocumentMetadata,
-    pub interfaces: Vec<HttpInterface>,
-}
+pub use document::RestHirDocument;

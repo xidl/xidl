@@ -224,28 +224,28 @@ export type HttpEdgeCasesServiceHealthRequest = z.infer<typeof HttpEdgeCasesServ
 
     
 export const HttpEdgeCasesServiceGetUserRequestSchema = z.object({
-        uid: z.coerce.number().int().nonnegative(),
+        uid: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
         locale: z.coerce.string(),
     });
 export type HttpEdgeCasesServiceGetUserRequest = z.infer<typeof HttpEdgeCasesServiceGetUserRequestSchema>;
 
     
 export const HttpEdgeCasesServiceDedupUserRequestSchema = z.object({
-        id: z.coerce.number().int().nonnegative(),
+        id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
     });
 export type HttpEdgeCasesServiceDedupUserRequest = z.infer<typeof HttpEdgeCasesServiceDedupUserRequestSchema>;
 
     
 export const HttpEdgeCasesServiceGetItemRequestSchema = z.object({
-        order_id: z.coerce.number().int().nonnegative(),
-        item_id: z.coerce.number().int().nonnegative(),
+        order_id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        item_id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
     });
 export type HttpEdgeCasesServiceGetItemRequest = z.infer<typeof HttpEdgeCasesServiceGetItemRequestSchema>;
 
     
 export const HttpEdgeCasesServiceLookupRequestSchema = z.object({
         keyword: z.coerce.string(),
-        page_size: z.coerce.number().int().nonnegative(),
+        page_size: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
     });
 export type HttpEdgeCasesServiceLookupRequest = z.infer<typeof HttpEdgeCasesServiceLookupRequestSchema>;
 ===============
@@ -291,7 +291,7 @@ export const HttpEdgeCasesServiceOperations = {
                 args: ["trace"],
                 schema: ifaceSchemas.HttpEdgeCasesServiceHealthRequestSchema,
                 path: [],
-                query: [{ wireName: "trace_id", key: "trace", multi: false }],
+                query: [{ wireName: "trace_id", key: "trace", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -325,7 +325,7 @@ export const HttpEdgeCasesServiceOperations = {
                 args: ["uid", "locale"],
                 schema: ifaceSchemas.HttpEdgeCasesServiceGetUserRequestSchema,
                 path: [{ parameter: "id", wireName: "id", key: "uid", multi: false, catchAll: false }],
-                query: [{ wireName: "lang", key: "locale", multi: false }],
+                query: [{ wireName: "lang", key: "locale", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {
@@ -427,7 +427,7 @@ export const HttpEdgeCasesServiceOperations = {
                 args: ["keyword", "page_size"],
                 schema: ifaceSchemas.HttpEdgeCasesServiceLookupRequestSchema,
                 path: [],
-                query: [{ wireName: "keyword", key: "keyword", multi: false }, { wireName: "limit", key: "page_size", multi: false }],
+                query: [{ wireName: "keyword", key: "keyword", multi: false, optional: false }, { wireName: "limit", key: "page_size", multi: false, optional: false }],
                 headers: [],
                 cookies: [],
                 body: {

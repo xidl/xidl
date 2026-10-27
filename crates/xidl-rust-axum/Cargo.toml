@@ -47,6 +47,7 @@ thiserror.workspace = true
 futures-util.workspace = true
 base64 = "0.23"
 serde_urlencoded = "0.7"
+serde_html_form = "0.2"
 serde_plain = "1.0"
 
 axum = { version = "0.8", default-features = false, features = [
@@ -58,7 +59,10 @@ axum = { version = "0.8", default-features = false, features = [
   "original-uri",
   "tracing",
 ], optional = true }
-axum-extra = { version = "0.12", features = ["typed-header"], optional = true }
+axum-extra = { version = "0.12", features = [
+  "typed-header",
+  "query",
+], optional = true }
 tower-http = { version = "0.7", features = ["cors"], optional = true }
 hyper = { version = "1.8", features = ["server", "client"], optional = true }
 hyper-util = { version = "0.1", features = ["tokio"], optional = true }

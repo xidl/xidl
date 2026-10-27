@@ -51,6 +51,7 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: 1.92.0
+          components: clippy
 
       - name: Cache Rust
         uses: Swatinem/rust-cache@v2

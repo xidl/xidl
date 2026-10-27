@@ -1,5 +1,6 @@
 ---
 source: xidlc/tests/rust_adapters_targets.rs
+assertion_line: 36
 expression: "&files[0].1"
 ---
 /// Pure version projections. The application owns routing and side effects.
@@ -128,8 +129,12 @@ pub mod version_adapters {
         /// wire `status`, last served by v2026_04_01
         fn profile_status(&self, source: &v2026_07_01::Profile) -> Option<String>;
     }
+    /// Wire names one served version still reads from storage.
+    pub type VersionNeeds = (&'static str, &'static [&'static str]);
+    /// Storage wire names served by one version of one declared type.
+    pub type StoredNeedsEntry = (&'static str, &'static [VersionNeeds]);
     /// Wire names each served version still reads from storage, by type; Head reads nothing.
-    pub const NEEDS: &[(&str, &[(&str, &[&str])])] = &[
+    pub const NEEDS: &[StoredNeedsEntry] = &[
         (
             "Profile",
             &[
@@ -321,8 +326,7 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.last_name))?;
-        let projected_5 = (&source.note)
-            .as_ref()
+        let projected_5 = ::std::option::Option::as_ref(&source.note)
             .map(|item| note_upcast_from_v_2026_01_01(item, adapters))
             .transpose()?;
         let projected_6 = Ok::<
@@ -374,8 +378,7 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.last_name))?;
-        let projected_5 = (&source.note)
-            .as_ref()
+        let projected_5 = ::std::option::Option::as_ref(&source.note)
             .map(|item| note_downcast_to_v_2026_01_01(item, adapters))
             .transpose()?;
         let projected_6 = Ok::<
@@ -473,7 +476,7 @@ pub mod version_adapters {
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn directory_roster_response_downcast_to_v_2026_01_01(
-        source: &Vec<v2026_04_01::Profile>,
+        source: &[v2026_04_01::Profile],
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> VersionedResult<Vec<v2026_01_01::Profile>> {
@@ -529,8 +532,7 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.title))?;
-        let projected_2 = (&source.fallback)
-            .as_ref()
+        let projected_2 = ::std::option::Option::as_ref(&source.fallback)
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
         let projected_3 = route_upcast_from_v_2026_04_01(&source.to, adapters)?;
@@ -567,8 +569,7 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.title))?;
-        let projected_2 = (&source.fallback)
-            .as_ref()
+        let projected_2 = ::std::option::Option::as_ref(&source.fallback)
             .map(|item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)))
             .transpose()?;
         let projected_3 = route_downcast_to_v_2026_04_01(&source.to, adapters)?;
@@ -599,8 +600,7 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.handle))?;
-        let projected_1 = (&source.protocol)
-            .as_ref()
+        let projected_1 = ::std::option::Option::as_ref(&source.protocol)
             .map(|item| route_protocol_upcast_from_v_2026_04_01(item, adapters))
             .transpose()?;
         Ok(v2026_07_01::Route {
@@ -623,8 +623,7 @@ pub mod version_adapters {
             _,
             UnsupportedProjection,
         >(::std::clone::Clone::clone(&source.handle))?;
-        let projected_1 = (&source.protocol)
-            .as_ref()
+        let projected_1 = ::std::option::Option::as_ref(&source.protocol)
             .map(|item| route_protocol_downcast_to_v_2026_04_01(item, adapters))
             .transpose()?;
         Ok(v2026_04_01::Route {
@@ -754,7 +753,7 @@ pub mod version_adapters {
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn directory_roster_response_downcast_to_v_2026_04_01(
-        source: &Vec<v2026_07_01::Profile>,
+        source: &[v2026_07_01::Profile],
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> VersionedResult<Vec<v2026_04_01::Profile>> {
@@ -867,35 +866,45 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "id").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object
             .get("title")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "title").to_string()
             })?;
-        let value_1: String = ::serde_json::from_value::<String>((raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())?;
         let raw_2 = object
             .get("created_at")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "created_at").to_string()
             })?;
-        let value_2: i32 = ::serde_json::from_value::<i32>((raw_2).clone())
+        let value_2: i32 = ::serde_json::from_value::<
+            i32,
+        >(::std::clone::Clone::clone(raw_2))
             .map_err(|error| error.to_string())?;
         let raw_3 = object
             .get("first_name")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "first_name").to_string()
             })?;
-        let value_3: String = ::serde_json::from_value::<String>((raw_3).clone())
+        let value_3: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_3))
             .map_err(|error| error.to_string())?;
         let raw_4 = object
             .get("last_name")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "last_name").to_string()
             })?;
-        let value_4: String = ::serde_json::from_value::<String>((raw_4).clone())
+        let value_4: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_4))
             .map_err(|error| error.to_string())?;
         let raw_5 = object.get("note").unwrap_or(&::serde_json::Value::Null);
         let value_5: Option<v2026_01_01::Note> = if (raw_5).is_null() {
@@ -908,14 +917,18 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "recipient").to_string()
             })?;
-        let value_6: String = ::serde_json::from_value::<String>((raw_6).clone())
+        let value_6: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_6))
             .map_err(|error| error.to_string())?;
         let raw_7 = object
             .get("status")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "status").to_string()
             })?;
-        let value_7: String = ::serde_json::from_value::<String>((raw_7).clone())
+        let value_7: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_7))
             .map_err(|error| error.to_string())?;
         Ok(v2026_01_01::Profile {
             id: value_0,
@@ -946,7 +959,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "text").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         Ok(v2026_01_01::Note { text: value_0 })
     }
@@ -985,35 +1000,45 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "id").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object
             .get("title")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "title").to_string()
             })?;
-        let value_1: String = ::serde_json::from_value::<String>((raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())?;
         let raw_2 = object
             .get("created_at")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "created_at").to_string()
             })?;
-        let value_2: i32 = ::serde_json::from_value::<i32>((raw_2).clone())
+        let value_2: i32 = ::serde_json::from_value::<
+            i32,
+        >(::std::clone::Clone::clone(raw_2))
             .map_err(|error| error.to_string())?;
         let raw_3 = object
             .get("first_name")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "first_name").to_string()
             })?;
-        let value_3: String = ::serde_json::from_value::<String>((raw_3).clone())
+        let value_3: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_3))
             .map_err(|error| error.to_string())?;
         let raw_4 = object
             .get("last_name")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "last_name").to_string()
             })?;
-        let value_4: String = ::serde_json::from_value::<String>((raw_4).clone())
+        let value_4: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_4))
             .map_err(|error| error.to_string())?;
         let raw_5 = object.get("note").unwrap_or(&::serde_json::Value::Null);
         let value_5: Option<v2026_04_01::Note> = if (raw_5).is_null() {
@@ -1025,7 +1050,7 @@ pub mod version_adapters {
         let value_6: Option<bool> = if (raw_6).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<bool>((raw_6).clone())
+            ::serde_json::from_value::<bool>(::std::clone::Clone::clone(raw_6))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -1040,7 +1065,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "status").to_string()
             })?;
-        let value_8: String = ::serde_json::from_value::<String>((raw_8).clone())
+        let value_8: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_8))
             .map_err(|error| error.to_string())?;
         Ok(v2026_04_01::Profile {
             id: value_0,
@@ -1072,7 +1099,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "text").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         Ok(v2026_04_01::Note { text: value_0 })
     }
@@ -1094,7 +1123,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "handle").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object.get("protocol").unwrap_or(&::serde_json::Value::Null);
         let value_1: Option<v2026_04_01::RouteProtocol> = if (raw_1).is_null() {
@@ -1147,28 +1178,36 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "id").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object
             .get("title")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "title").to_string()
             })?;
-        let value_1: String = ::serde_json::from_value::<String>((raw_1).clone())
+        let value_1: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_1))
             .map_err(|error| error.to_string())?;
         let raw_2 = object
             .get("created_at_utc")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "created_at_utc").to_string()
             })?;
-        let value_2: String = ::serde_json::from_value::<String>((raw_2).clone())
+        let value_2: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_2))
             .map_err(|error| error.to_string())?;
         let raw_3 = object
             .get("display_name")
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "display_name").to_string()
             })?;
-        let value_3: String = ::serde_json::from_value::<String>((raw_3).clone())
+        let value_3: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_3))
             .map_err(|error| error.to_string())?;
         let raw_4 = object
             .get("notes")
@@ -1181,7 +1220,7 @@ pub mod version_adapters {
                 .ok_or_else(|| "expected an array".to_string())?;
             let values = array
                 .iter()
-                .map(|item| decode_wire_v_2026_07_01_note(item))
+                .map(decode_wire_v_2026_07_01_note)
                 .collect::<Result<Vec<_>, String>>()?;
             Ok::<_, String>(values)
         })()?;
@@ -1189,7 +1228,7 @@ pub mod version_adapters {
         let value_5: Option<bool> = if (raw_5).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<bool>((raw_5).clone())
+            ::serde_json::from_value::<bool>(::std::clone::Clone::clone(raw_5))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -1203,7 +1242,7 @@ pub mod version_adapters {
         let value_7: Option<String> = if (raw_7).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_7).clone())
+            ::serde_json::from_value::<String>(::std::clone::Clone::clone(raw_7))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -1212,7 +1251,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "tier").to_string()
             })?;
-        let value_8: String = ::serde_json::from_value::<String>((raw_8).clone())
+        let value_8: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_8))
             .map_err(|error| error.to_string())?;
         Ok(v2026_07_01::Profile {
             id: value_0,
@@ -1244,7 +1285,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "text").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         Ok(v2026_07_01::Note { text: value_0 })
     }
@@ -1266,7 +1309,9 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "handle").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object.get("protocol").unwrap_or(&::serde_json::Value::Null);
         let value_1: Option<v2026_07_01::RouteProtocol> = if (raw_1).is_null() {
@@ -1284,6 +1329,11 @@ pub mod version_adapters {
     ) -> Result<v2026_07_01::RouteProtocol, String> {
         ::serde_json::from_value(wire.clone()).map_err(|error| error.to_string())
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DirectoryProfileResultV20260101 = Result<
+        v2026_01_01::Profile,
+        v2026_01_01::DirectoryProfileError,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_directory_profile_from_v_2026_01_01(
         wire: ::serde_json::Value,
@@ -1302,11 +1352,12 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("id")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "id").into(),
             ))?;
-        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let source = DirectoryProfileRequestV20260101 {
@@ -1324,12 +1375,12 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_directory_profile_from_v_2026_01_01_outcome(
-        head: Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+        head: DirectoryProfileResultV20260701,
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
-        Result<v2026_01_01::Profile, v2026_01_01::DirectoryProfileError>,
-        Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+        DirectoryProfileResultV20260101,
+        DirectoryProfileResultV20260701,
     > {
         match &head {
             Ok(source) => {
@@ -1397,8 +1448,8 @@ pub mod version_adapters {
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
         ProjectionOutcome<
-            Result<v2026_01_01::Profile, v2026_01_01::DirectoryProfileError>,
-            Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+            DirectoryProfileResultV20260101,
+            DirectoryProfileResultV20260701,
         >,
         AdaptationError,
     >
@@ -1432,6 +1483,11 @@ pub mod version_adapters {
             ),
         )
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DirectoryPublishResultV20260101 = Result<
+        v2026_01_01::Profile,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_directory_publish_from_v_2026_01_01(
         wire: ::serde_json::Value,
@@ -1450,11 +1506,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("profile")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "profile").into(),
             ))?;
-        let value_0: v2026_01_01::Profile = decode_wire_v_2026_01_01_profile(&raw_0)
+        let value_0: v2026_01_01::Profile = decode_wire_v_2026_01_01_profile(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DirectoryPublishRequestV20260101 {
             profile: value_0,
@@ -1471,12 +1526,12 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_directory_publish_from_v_2026_01_01_outcome(
-        head: Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+        head: DirectoryPublishResultV20260701,
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
-        Result<v2026_01_01::Profile, ::xidl_rust_axum::Error>,
-        Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+        DirectoryPublishResultV20260101,
+        DirectoryPublishResultV20260701,
     > {
         match &head {
             Ok(source) => {
@@ -1544,8 +1599,8 @@ pub mod version_adapters {
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
         ProjectionOutcome<
-            Result<v2026_01_01::Profile, ::xidl_rust_axum::Error>,
-            Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+            DirectoryPublishResultV20260101,
+            DirectoryPublishResultV20260701,
         >,
         AdaptationError,
     >
@@ -1575,6 +1630,11 @@ pub mod version_adapters {
             ),
         )
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DirectoryRosterResultV20260101 = Result<
+        Vec<v2026_01_01::Profile>,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_directory_roster_from_v_2026_01_01(
         wire: ::serde_json::Value,
@@ -1604,12 +1664,12 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_directory_roster_from_v_2026_01_01_outcome(
-        head: Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+        head: DirectoryRosterResultV20260701,
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
-        Result<Vec<v2026_01_01::Profile>, ::xidl_rust_axum::Error>,
-        Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+        DirectoryRosterResultV20260101,
+        DirectoryRosterResultV20260701,
     > {
         match &head {
             Ok(source) => {
@@ -1677,8 +1737,8 @@ pub mod version_adapters {
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
         ProjectionOutcome<
-            Result<Vec<v2026_01_01::Profile>, ::xidl_rust_axum::Error>,
-            Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+            DirectoryRosterResultV20260101,
+            DirectoryRosterResultV20260701,
         >,
         AdaptationError,
     >
@@ -1708,6 +1768,11 @@ pub mod version_adapters {
             ),
         )
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DirectoryProfileResultV20260401 = Result<
+        v2026_04_01::Profile,
+        v2026_04_01::DirectoryProfileError,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_directory_profile_from_v_2026_04_01(
         wire: ::serde_json::Value,
@@ -1726,11 +1791,12 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("id")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "id").into(),
             ))?;
-        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let source = DirectoryProfileRequestV20260401 {
@@ -1744,12 +1810,12 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_directory_profile_from_v_2026_04_01_outcome(
-        head: Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+        head: DirectoryProfileResultV20260701,
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
-        Result<v2026_04_01::Profile, v2026_04_01::DirectoryProfileError>,
-        Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+        DirectoryProfileResultV20260401,
+        DirectoryProfileResultV20260701,
     > {
         match &head {
             Ok(source) => {
@@ -1792,8 +1858,8 @@ pub mod version_adapters {
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
         ProjectionOutcome<
-            Result<v2026_04_01::Profile, v2026_04_01::DirectoryProfileError>,
-            Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+            DirectoryProfileResultV20260401,
+            DirectoryProfileResultV20260701,
         >,
         AdaptationError,
     >
@@ -1827,6 +1893,11 @@ pub mod version_adapters {
             ),
         )
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DirectoryPublishResultV20260401 = Result<
+        v2026_04_01::Profile,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_directory_publish_from_v_2026_04_01(
         wire: ::serde_json::Value,
@@ -1845,11 +1916,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("profile")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "profile").into(),
             ))?;
-        let value_0: v2026_04_01::Profile = decode_wire_v_2026_04_01_profile(&raw_0)
+        let value_0: v2026_04_01::Profile = decode_wire_v_2026_04_01_profile(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DirectoryPublishRequestV20260401 {
             profile: value_0,
@@ -1862,12 +1932,12 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_directory_publish_from_v_2026_04_01_outcome(
-        head: Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+        head: DirectoryPublishResultV20260701,
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
-        Result<v2026_04_01::Profile, ::xidl_rust_axum::Error>,
-        Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+        DirectoryPublishResultV20260401,
+        DirectoryPublishResultV20260701,
     > {
         match &head {
             Ok(source) => {
@@ -1910,8 +1980,8 @@ pub mod version_adapters {
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
         ProjectionOutcome<
-            Result<v2026_04_01::Profile, ::xidl_rust_axum::Error>,
-            Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+            DirectoryPublishResultV20260401,
+            DirectoryPublishResultV20260701,
         >,
         AdaptationError,
     >
@@ -1941,6 +2011,11 @@ pub mod version_adapters {
             ),
         )
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DirectoryRosterResultV20260401 = Result<
+        Vec<v2026_04_01::Profile>,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_directory_roster_from_v_2026_04_01(
         wire: ::serde_json::Value,
@@ -1966,12 +2041,12 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_directory_roster_from_v_2026_04_01_outcome(
-        head: Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+        head: DirectoryRosterResultV20260701,
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
-        Result<Vec<v2026_04_01::Profile>, ::xidl_rust_axum::Error>,
-        Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+        DirectoryRosterResultV20260401,
+        DirectoryRosterResultV20260701,
     > {
         match &head {
             Ok(source) => {
@@ -2014,8 +2089,8 @@ pub mod version_adapters {
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
         ProjectionOutcome<
-            Result<Vec<v2026_04_01::Profile>, ::xidl_rust_axum::Error>,
-            Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+            DirectoryRosterResultV20260401,
+            DirectoryRosterResultV20260701,
         >,
         AdaptationError,
     >
@@ -2045,6 +2120,11 @@ pub mod version_adapters {
             ),
         )
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DirectoryProfileResultV20260701 = Result<
+        v2026_07_01::Profile,
+        v2026_07_01::DirectoryProfileError,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_directory_profile_from_v_2026_07_01(
         wire: ::serde_json::Value,
@@ -2063,11 +2143,12 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("id")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "id").into(),
             ))?;
-        let value_0: String = ::serde_json::from_value::<String>((&raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())
             .map_err(AdaptationError::Validation)?;
         let source = DirectoryProfileRequestV20260701 {
@@ -2077,11 +2158,11 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_directory_profile_from_v_2026_07_01_outcome(
-        head: Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+        head: DirectoryProfileResultV20260701,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
-        Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
-        Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+        DirectoryProfileResultV20260701,
+        DirectoryProfileResultV20260701,
     > {
         ProjectionOutcome::Projected(head)
     }
@@ -2092,16 +2173,14 @@ pub mod version_adapters {
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
         ProjectionOutcome<
-            Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
-            Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+            DirectoryProfileResultV20260701,
+            DirectoryProfileResultV20260701,
         >,
         AdaptationError,
     >
     where
         F: FnOnce(DirectoryProfileRequestV20260701, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
-        >,
+        Fut: ::std::future::Future<Output = DirectoryProfileResultV20260701>,
     {
         let input = decode_and_upcast_directory_profile_from_v_2026_07_01(
             wire,
@@ -2116,6 +2195,11 @@ pub mod version_adapters {
             .await;
         Ok(downcast_directory_profile_from_v_2026_07_01_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DirectoryPublishResultV20260701 = Result<
+        v2026_07_01::Profile,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_directory_publish_from_v_2026_07_01(
         wire: ::serde_json::Value,
@@ -2134,11 +2218,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("profile")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "profile").into(),
             ))?;
-        let value_0: v2026_07_01::Profile = decode_wire_v_2026_07_01_profile(&raw_0)
+        let value_0: v2026_07_01::Profile = decode_wire_v_2026_07_01_profile(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = DirectoryPublishRequestV20260701 {
             profile: value_0,
@@ -2147,11 +2230,11 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_directory_publish_from_v_2026_07_01_outcome(
-        head: Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+        head: DirectoryPublishResultV20260701,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
-        Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
-        Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+        DirectoryPublishResultV20260701,
+        DirectoryPublishResultV20260701,
     > {
         ProjectionOutcome::Projected(head)
     }
@@ -2162,16 +2245,14 @@ pub mod version_adapters {
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
         ProjectionOutcome<
-            Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
-            Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+            DirectoryPublishResultV20260701,
+            DirectoryPublishResultV20260701,
         >,
         AdaptationError,
     >
     where
         F: FnOnce(DirectoryPublishRequestV20260701, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DirectoryPublishResultV20260701>,
     {
         let input = decode_and_upcast_directory_publish_from_v_2026_07_01(
             wire,
@@ -2186,6 +2267,11 @@ pub mod version_adapters {
             .await;
         Ok(downcast_directory_publish_from_v_2026_07_01_outcome(head, adapters))
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type DirectoryRosterResultV20260701 = Result<
+        Vec<v2026_07_01::Profile>,
+        ::xidl_rust_axum::Error,
+    >;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_directory_roster_from_v_2026_07_01(
         wire: ::serde_json::Value,
@@ -2207,11 +2293,11 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_directory_roster_from_v_2026_07_01_outcome(
-        head: Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+        head: DirectoryRosterResultV20260701,
         adapters: &dyn VersionAdapters,
     ) -> ProjectionOutcome<
-        Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
-        Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+        DirectoryRosterResultV20260701,
+        DirectoryRosterResultV20260701,
     > {
         ProjectionOutcome::Projected(head)
     }
@@ -2222,16 +2308,14 @@ pub mod version_adapters {
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
         ProjectionOutcome<
-            Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
-            Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+            DirectoryRosterResultV20260701,
+            DirectoryRosterResultV20260701,
         >,
         AdaptationError,
     >
     where
         F: FnOnce(DirectoryRosterRequestV20260701, VersionContext) -> Fut,
-        Fut: ::std::future::Future<
-            Output = Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
-        >,
+        Fut: ::std::future::Future<Output = DirectoryRosterResultV20260701>,
     {
         let input = decode_and_upcast_directory_roster_from_v_2026_07_01(
             wire,
@@ -2419,9 +2503,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum DirectoryProfileOutcome {
-        V20260101(Result<v2026_01_01::Profile, v2026_01_01::DirectoryProfileError>),
-        V20260401(Result<v2026_04_01::Profile, v2026_04_01::DirectoryProfileError>),
-        V20260701(Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>),
+        V20260101(DirectoryProfileResultV20260101),
+        V20260401(DirectoryProfileResultV20260401),
+        V20260701(DirectoryProfileResultV20260701),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_directory_profile(
@@ -2444,13 +2528,10 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_directory_profile_outcome(
         version: Version,
-        head: Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
+        head: DirectoryProfileResultV20260701,
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        DirectoryProfileOutcome,
-        Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
-    > {
+    ) -> ProjectionOutcome<DirectoryProfileOutcome, DirectoryProfileResultV20260701> {
         match version {
             Version::V20260101 => {
                 match downcast_directory_profile_from_v_2026_01_01_outcome(
@@ -2517,10 +2598,7 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            DirectoryProfileOutcome,
-            Result<v2026_07_01::Profile, v2026_07_01::DirectoryProfileError>,
-        >,
+        ProjectionOutcome<DirectoryProfileOutcome, DirectoryProfileResultV20260701>,
         AdaptationError,
     >
     where
@@ -2553,9 +2631,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum DirectoryPublishOutcome {
-        V20260101(Result<v2026_01_01::Profile, ::xidl_rust_axum::Error>),
-        V20260401(Result<v2026_04_01::Profile, ::xidl_rust_axum::Error>),
-        V20260701(Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>),
+        V20260101(DirectoryPublishResultV20260101),
+        V20260401(DirectoryPublishResultV20260401),
+        V20260701(DirectoryPublishResultV20260701),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_directory_publish(
@@ -2578,13 +2656,10 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_directory_publish_outcome(
         version: Version,
-        head: Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
+        head: DirectoryPublishResultV20260701,
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        DirectoryPublishOutcome,
-        Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DirectoryPublishOutcome, DirectoryPublishResultV20260701> {
         match version {
             Version::V20260101 => {
                 match downcast_directory_publish_from_v_2026_01_01_outcome(
@@ -2651,10 +2726,7 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            DirectoryPublishOutcome,
-            Result<v2026_07_01::Profile, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DirectoryPublishOutcome, DirectoryPublishResultV20260701>,
         AdaptationError,
     >
     where
@@ -2683,9 +2755,9 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum DirectoryRosterOutcome {
-        V20260101(Result<Vec<v2026_01_01::Profile>, ::xidl_rust_axum::Error>),
-        V20260401(Result<Vec<v2026_04_01::Profile>, ::xidl_rust_axum::Error>),
-        V20260701(Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>),
+        V20260101(DirectoryRosterResultV20260101),
+        V20260401(DirectoryRosterResultV20260401),
+        V20260701(DirectoryRosterResultV20260701),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_directory_roster(
@@ -2708,13 +2780,10 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_directory_roster_outcome(
         version: Version,
-        head: Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
+        head: DirectoryRosterResultV20260701,
         stored: &dyn StoredValues,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        DirectoryRosterOutcome,
-        Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
-    > {
+    ) -> ProjectionOutcome<DirectoryRosterOutcome, DirectoryRosterResultV20260701> {
         match version {
             Version::V20260101 => {
                 match downcast_directory_roster_from_v_2026_01_01_outcome(
@@ -2781,10 +2850,7 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            DirectoryRosterOutcome,
-            Result<Vec<v2026_07_01::Profile>, ::xidl_rust_axum::Error>,
-        >,
+        ProjectionOutcome<DirectoryRosterOutcome, DirectoryRosterResultV20260701>,
         AdaptationError,
     >
     where

@@ -1005,19 +1005,19 @@ import { xjson } from "xidl-typescript-codec";
     export namespace business {
 
         export const StoreGetRequestSchema = z.object({
-                id: z.coerce.number().int(),
+                id: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
                 search: z.coerce.string(),
                 theme: z.coerce.string(),
             });
         export type StoreGetRequest = z.infer<typeof StoreGetRequestSchema>;
 
         export const StoreRemoveRequestSchema = z.object({
-                id: z.coerce.number().int(),
+                id: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
             });
         export type StoreRemoveRequest = z.infer<typeof StoreRemoveRequestSchema>;
 
         export const StoreFailRequestSchema = z.object({
-                id: z.coerce.number().int(),
+                id: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
             });
         export type StoreFailRequest = z.infer<typeof StoreFailRequestSchema>;
 
@@ -1053,19 +1053,19 @@ import { xjson } from "xidl-typescript-codec";
     export namespace business {
 
         export const StoreGetRequestSchema = z.object({
-                id: z.coerce.number().int(),
+                id: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
                 search: z.coerce.string(),
                 theme: z.coerce.string(),
             });
         export type StoreGetRequest = z.infer<typeof StoreGetRequestSchema>;
 
         export const StoreRemoveRequestSchema = z.object({
-                id: z.coerce.number().int(),
+                id: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
             });
         export type StoreRemoveRequest = z.infer<typeof StoreRemoveRequestSchema>;
 
         export const StoreFailRequestSchema = z.object({
-                id: z.coerce.number().int(),
+                id: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
             });
         export type StoreFailRequest = z.infer<typeof StoreFailRequestSchema>;
 
@@ -1159,9 +1159,9 @@ import {
                         args: ["id", "search", "theme"],
                         schema: ifaceSchemas.v1.business.StoreGetRequestSchema,
                         path: [{ parameter: "id", wireName: "id", key: "id", multi: false, catchAll: false }],
-                        query: [{ wireName: "search", key: "search", multi: false }],
+                        query: [{ wireName: "search", key: "search", multi: false, optional: false }],
                         headers: [],
-                        cookies: [{ wireName: "theme", key: "theme", multi: false }],
+                        cookies: [{ wireName: "theme", key: "theme", multi: false, optional: false }],
                         body: {
                             kind: "none",
                             contentType: "",
@@ -1283,7 +1283,7 @@ import {
                         args: ["room", "text"],
                         schema: ifaceSchemas.v1.business.StoreChatRequestSchema,
                         path: [],
-                        query: [{ wireName: "room", key: "room", multi: false }],
+                        query: [{ wireName: "room", key: "room", multi: false, optional: false }],
                         headers: [],
                         cookies: [],
                         body: {
@@ -1625,9 +1625,9 @@ import {
                         args: ["id", "search", "theme"],
                         schema: ifaceSchemas.v2.business.StoreGetRequestSchema,
                         path: [{ parameter: "id", wireName: "id", key: "id", multi: false, catchAll: false }],
-                        query: [{ wireName: "search", key: "search", multi: false }],
+                        query: [{ wireName: "search", key: "search", multi: false, optional: false }],
                         headers: [],
-                        cookies: [{ wireName: "theme", key: "theme", multi: false }],
+                        cookies: [{ wireName: "theme", key: "theme", multi: false, optional: false }],
                         body: {
                             kind: "none",
                             contentType: "",
@@ -1749,7 +1749,7 @@ import {
                         args: ["room", "text"],
                         schema: ifaceSchemas.v2.business.StoreChatRequestSchema,
                         path: [],
-                        query: [{ wireName: "room", key: "room", multi: false }],
+                        query: [{ wireName: "room", key: "room", multi: false, optional: false }],
                         headers: [],
                         cookies: [],
                         body: {

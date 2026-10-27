@@ -98,13 +98,15 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "id").to_string()
             })?;
-        let value_0: String = ::serde_json::from_value::<String>((raw_0).clone())
+        let value_0: String = ::serde_json::from_value::<
+            String,
+        >(::std::clone::Clone::clone(raw_0))
             .map_err(|error| error.to_string())?;
         let raw_1 = object.get("note").unwrap_or(&::serde_json::Value::Null);
         let value_1: Option<String> = if (raw_1).is_null() {
             Ok::<_, String>(None)
         } else {
-            ::serde_json::from_value::<String>((raw_1).clone())
+            ::serde_json::from_value::<String>(::std::clone::Clone::clone(raw_1))
                 .map_err(|error| error.to_string())
                 .map(Some)
         }?;
@@ -113,6 +115,8 @@ pub mod version_adapters {
             note: value_1,
         })
     }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type StoreSaveResultOnly = Result<only::Item, only::StoreSaveError>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_store_save_from_only(
         wire: ::serde_json::Value,
@@ -131,11 +135,10 @@ pub mod version_adapters {
         }
         let raw_0 = object
             .get("item")
-            .cloned()
             .ok_or_else(|| AdaptationError::Validation(
                 concat!("missing source parameter ", "item").into(),
             ))?;
-        let value_0: only::Item = decode_wire_only_item(&raw_0)
+        let value_0: only::Item = decode_wire_only_item(raw_0)
             .map_err(AdaptationError::Validation)?;
         let source = StoreSaveRequestOnly {
             item: value_0,
@@ -144,12 +147,9 @@ pub mod version_adapters {
     }
     /// Project an owned Head result and retain it unchanged on any refusal.
     pub fn downcast_store_save_from_only_outcome(
-        head: Result<only::Item, only::StoreSaveError>,
+        head: StoreSaveResultOnly,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<
-        Result<only::Item, only::StoreSaveError>,
-        Result<only::Item, only::StoreSaveError>,
-    > {
+    ) -> ProjectionOutcome<StoreSaveResultOnly, StoreSaveResultOnly> {
         ProjectionOutcome::Projected(head)
     }
     /// Execute a caller-supplied Head handler once after successful adaptation.
@@ -158,15 +158,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<
-            Result<only::Item, only::StoreSaveError>,
-            Result<only::Item, only::StoreSaveError>,
-        >,
+        ProjectionOutcome<StoreSaveResultOnly, StoreSaveResultOnly>,
         AdaptationError,
     >
     where
         F: FnOnce(StoreSaveRequestOnly, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<only::Item, only::StoreSaveError>>,
+        Fut: ::std::future::Future<Output = StoreSaveResultOnly>,
     {
         let input = decode_and_upcast_store_save_from_only(wire, adapters)?;
         let head = handler(
@@ -214,7 +211,7 @@ pub mod version_adapters {
     }
     /// Outcome in the caller's explicitly selected contract version.
     pub enum StoreSaveOutcome {
-        Only(Result<only::Item, only::StoreSaveError>),
+        Only(StoreSaveResultOnly),
     }
     /// Decode a request using an application-resolved version before any hook.
     pub fn decode_and_upcast_store_save(
@@ -229,9 +226,9 @@ pub mod version_adapters {
     /// Retain the original owned Head outcome when any projection refuses.
     pub fn downcast_store_save_outcome(
         version: Version,
-        head: Result<only::Item, only::StoreSaveError>,
+        head: StoreSaveResultOnly,
         adapters: &dyn VersionAdapters,
-    ) -> ProjectionOutcome<StoreSaveOutcome, Result<only::Item, only::StoreSaveError>> {
+    ) -> ProjectionOutcome<StoreSaveOutcome, StoreSaveResultOnly> {
         match version {
             Version::Only => {
                 match downcast_store_save_from_only_outcome(head, adapters) {
@@ -255,12 +252,12 @@ pub mod version_adapters {
         handler: F,
         adapters: &(dyn VersionAdapters + Sync),
     ) -> Result<
-        ProjectionOutcome<StoreSaveOutcome, Result<only::Item, only::StoreSaveError>>,
+        ProjectionOutcome<StoreSaveOutcome, StoreSaveResultOnly>,
         AdaptationError,
     >
     where
         F: FnOnce(StoreSaveRequestOnly, VersionContext) -> Fut,
-        Fut: ::std::future::Future<Output = Result<only::Item, only::StoreSaveError>>,
+        Fut: ::std::future::Future<Output = StoreSaveResultOnly>,
     {
         let input = decode_and_upcast_store_save(version, wire, adapters)?;
         let head = handler(

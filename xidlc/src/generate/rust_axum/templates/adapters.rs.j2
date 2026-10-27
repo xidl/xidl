@@ -68,8 +68,12 @@
                     fn {{ reader.name }}(&self, source: &{{ reader.source }}) -> {{ reader.output }};
                 {% endfor %}
             }
+            /// Wire names one served version still reads from storage.
+            pub type VersionNeeds = (&'static str, &'static [&'static str]);
+            /// Storage wire names served by one version of one declared type.
+            pub type StoredNeedsEntry = (&'static str, &'static [VersionNeeds]);
             /// Wire names each served version still reads from storage, by type; Head reads nothing.
-            pub const NEEDS: &[(&str, &[(&str, &[&str])])] = &[
+            pub const NEEDS: &[StoredNeedsEntry] = &[
                 {% for need in needs %}
                     ({{ need.key | tojson }}, &[{% for entry in need.entries %}({{ entry[0] | tojson }}, &[{% for wire in entry[1] %}{{ wire | tojson }}, {% endfor %}]), {% endfor %}]),
                 {% endfor %}

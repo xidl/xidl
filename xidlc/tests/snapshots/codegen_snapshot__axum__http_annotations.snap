@@ -108,7 +108,7 @@ where
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
             let HttpAnnoServiceGetUserPath { id } = xidl_path;
-            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
+            let ::xidl_rust_axum::axum_extra::extract::Query(xidl_query) = <::xidl_rust_axum::axum_extra::extract::Query<
                 HttpAnnoServiceGetUserRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
@@ -209,7 +209,7 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
+            let ::xidl_rust_axum::axum_extra::extract::Query(xidl_query) = <::xidl_rust_axum::axum_extra::extract::Query<
                 HttpAnnoServiceGetNameRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
@@ -255,7 +255,7 @@ where
             let (mut parts, body) = req.into_parts();
             let _ = &body;
             let _ = state;
-            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
+            let ::xidl_rust_axum::axum_extra::extract::Query(xidl_query) = <::xidl_rust_axum::axum_extra::extract::Query<
                 HttpAnnoServiceSearchUserRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
@@ -313,7 +313,7 @@ where
                 .await
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
             let HttpAnnoServiceGetUserAliasPath { user_id } = xidl_path;
-            let ::xidl_rust_axum::axum::extract::Query(xidl_query) = <::xidl_rust_axum::axum::extract::Query<
+            let ::xidl_rust_axum::axum_extra::extract::Query(xidl_query) = <::xidl_rust_axum::axum_extra::extract::Query<
                 HttpAnnoServiceGetUserAliasRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
                 S,
@@ -1068,7 +1068,7 @@ impl HttpAnnoServiceClient {
         let query = HttpAnnoServiceGetUserRequestOutQuery {
             lang,
         };
-        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        let query = xidl_rust_axum::serde_html_form::to_string(&query)
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         if !query.is_empty() {
             req.url_mut().set_query(Some(&query));
@@ -1169,7 +1169,7 @@ impl HttpAnnoServiceClient {
         let query = HttpAnnoServiceGetNameRequestOutQuery {
             name,
         };
-        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        let query = xidl_rust_axum::serde_html_form::to_string(&query)
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         if !query.is_empty() {
             req.url_mut().set_query(Some(&query));
@@ -1219,7 +1219,7 @@ impl HttpAnnoServiceClient {
             keyword,
             page,
         };
-        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        let query = xidl_rust_axum::serde_html_form::to_string(&query)
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         if !query.is_empty() {
             req.url_mut().set_query(Some(&query));
@@ -1269,7 +1269,7 @@ impl HttpAnnoServiceClient {
         let query = HttpAnnoServiceGetUserAliasRequestOutQuery {
             locale,
         };
-        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        let query = xidl_rust_axum::serde_html_form::to_string(&query)
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         if !query.is_empty() {
             req.url_mut().set_query(Some(&query));
