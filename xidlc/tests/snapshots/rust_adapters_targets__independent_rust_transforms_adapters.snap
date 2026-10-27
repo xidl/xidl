@@ -128,8 +128,10 @@ pub mod version_adapters {
         /// wire `status`, last served by v2026_04_01
         fn profile_status(&self, source: &v2026_07_01::Profile) -> Option<String>;
     }
+    /// Wire names one served version still reads from storage.
+    pub type VersionNeeds = (&'static str, &'static [&'static str]);
     /// Storage wire names served by one version of one declared type.
-    pub type StoredNeedsEntry = (&str, &[(&str, &[&str])]);
+    pub type StoredNeedsEntry = (&'static str, &'static [VersionNeeds]);
     /// Wire names each served version still reads from storage, by type; Head reads nothing.
     pub const NEEDS: &[StoredNeedsEntry] = &[
         (
