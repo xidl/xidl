@@ -6,6 +6,7 @@ impl VersionAdapters for Hooks {
     fn product_downcast_to_v_1(
         &self,
         source: &v2::Product,
+        _stored: &dyn StoredValues,
     ) -> VersionedResult<ProductDowncastToV1Decision> {
         Ok(ProductDowncastToV1Decision {
             images: source
@@ -17,6 +18,21 @@ impl VersionAdapters for Hooks {
                 })
                 .collect(),
         })
+    }
+}
+
+impl StoredValues for Hooks {
+    fn product_images(&self, source: &v2::Product) -> Option<Vec<v1::Image>> {
+        Some(
+            source
+                .assets
+                .iter()
+                .filter(|asset| asset.kind == "image")
+                .map(|asset| v1::Image {
+                    url: asset.url.clone(),
+                })
+                .collect(),
+        )
     }
 }
 

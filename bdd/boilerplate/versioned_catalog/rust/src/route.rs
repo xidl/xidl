@@ -19,7 +19,7 @@ impl v1::Catalog for VersionRoute {
             &CatalogSearchRequestV1 { media, tenant },
             &Hooks,
         )?;
-        match downcast_catalog_search_from_v_1_outcome(self.0.search(input), &Hooks) {
+        match downcast_catalog_search_from_v_1_outcome(self.0.search(input), &Hooks, &Hooks) {
             ProjectionOutcome::Projected(result) => result,
             ProjectionOutcome::Unsupported { error, .. } => Err(error.into()),
         }
