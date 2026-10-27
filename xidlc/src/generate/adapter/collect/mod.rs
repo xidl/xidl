@@ -7,7 +7,7 @@ mod references;
 use super::model::*;
 use crate::error::{IdlcError, IdlcResult};
 use std::collections::BTreeMap;
-use xidl_parser::hir::{self, effective_wire_name, is_skipped, VisitScopedNames};
+use xidl_parser::hir::{self, VisitScopedNames, effective_wire_name, is_skipped};
 use xidl_parser::rest_hir::{
     HttpOperation, HttpRequestBodyShape, HttpSignatureParamDirection, RestHirDocument,
 };
