@@ -112,8 +112,10 @@ pub mod version_adapters {
         /// wire `owner`, last served by v2026_10_01
         fn booking_owner(&self, source: &v2027_01_01::Booking) -> Option<String>;
     }
+    /// Wire names one served version still reads from storage.
+    pub type VersionNeeds = (&'static str, &'static [&'static str]);
     /// Storage wire names served by one version of one declared type.
-    pub type StoredNeedsEntry = (&str, &[(&str, &[&str])]);
+    pub type StoredNeedsEntry = (&'static str, &'static [VersionNeeds]);
     /// Wire names each served version still reads from storage, by type; Head reads nothing.
     pub const NEEDS: &[StoredNeedsEntry] = &[
         (
