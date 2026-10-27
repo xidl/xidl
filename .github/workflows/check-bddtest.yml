@@ -60,6 +60,9 @@ jobs:
         with:
           tool: just
 
+      - name: Install libxml2 for hurl
+        run: sudo apt-get update && sudo apt-get install -y libxml2
+
       - name: BDD test
         env:
           XIDL_BDD_PORT_BASE: ${{ matrix.port-base }}
