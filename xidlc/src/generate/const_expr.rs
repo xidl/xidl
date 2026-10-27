@@ -1,24 +1,26 @@
 use xidl_parser::hir;
 
-pub fn render_const_expr<FScoped, FLit>(
+/// Renders expressions with the names, literals and unary syntax of a target.
+pub fn render_const_expr<FScoped, FLit, FUnary>(
     expr: &hir::ConstExpr,
     scoped_name: &FScoped,
     literal: &FLit,
+    unary: &FUnary,
 ) -> String
 where
     FScoped: Fn(&hir::ScopedName) -> String,
     FLit: Fn(&hir::Literal) -> String,
+    FUnary: Fn(&hir::UnaryOperator) -> &'static str,
 {
     match expr {
         hir::ConstExpr::ScopedName(value) => scoped_name(value),
         hir::ConstExpr::Literal(value) => literal(value),
         hir::ConstExpr::UnaryExpr(op, value) => {
-            let op = match op {
-                hir::UnaryOperator::Add => "+",
-                hir::UnaryOperator::Sub => "-",
-                hir::UnaryOperator::Not => "~",
-            };
-            format!("({op}{})", render_const_expr(value, scoped_name, literal))
+            let op = unary(op);
+            format!(
+                "({op}{})",
+                render_const_expr(value, scoped_name, literal, unary)
+            )
         }
         hir::ConstExpr::BinaryExpr(op, left, right) => {
             let op = match op {
@@ -35,8 +37,8 @@ where
             };
             format!(
                 "({} {op} {})",
-                render_const_expr(left, scoped_name, literal),
-                render_const_expr(right, scoped_name, literal)
+                render_const_expr(left, scoped_name, literal, unary),
+                render_const_expr(right, scoped_name, literal, unary)
             )
         }
     }

@@ -1,11 +1,8 @@
 //! Resolve fixed-array dimensions before targets consume the shared HIR.
 
-mod constants;
-mod integer;
-
+use super::constants::IntegerConstants;
 use crate::error::{ParseError, ParserResult};
 use crate::hir;
-use constants::IntegerConstants;
 
 /// Normalizes array sizes without changing public constant declarations.
 pub(super) struct ArrayDimensions {

@@ -103,7 +103,7 @@ impl Specification {
             if let Some(selection) = &selection {
                 return Err(versioning::unversioned_selection_error(selection));
             }
-            let spec = Self::finalize(source, expand)?;
+            let spec = Self::finalize_projection(source, expand)?;
             return Ok(vec![VersionedProjection {
                 versions: Vec::new(),
                 version: None,
@@ -126,7 +126,7 @@ impl Specification {
                     .collect::<Vec<_>>();
                 let values = version_values(&selected);
                 let spec = record.merge(&source, &versions)?;
-                let spec = Self::finalize(spec, expand)?;
+                let spec = Self::finalize_projection(spec, expand)?;
                 Ok(vec![VersionedProjection {
                     versions: selected,
                     version: None,
@@ -137,7 +137,7 @@ impl Specification {
                 let mut projections = Vec::new();
                 for version in versions {
                     let spec = record.project(&source, version)?;
-                    let spec = Self::finalize(spec, expand)?;
+                    let spec = Self::finalize_projection(spec, expand)?;
                     let definition = record.timeline().get(version).cloned();
                     let values = definition
                         .iter()
@@ -205,6 +205,12 @@ impl Specification {
         // to its temporary type environment, not the generated user models.
         rest_hir::HttpUnion::validate_source(&spec.0)?;
         Ok(spec)
+    }
+
+    /// Evaluates selected source constants before interface expansion.
+    fn finalize_projection(mut spec: Self, expand: bool) -> crate::error::ParserResult<Self> {
+        semantic::IntegerDeclarations::normalize(&mut spec)?;
+        Self::finalize(spec, expand)
     }
 
     /// Runs interface expansion and semantic analysis on an already lowered spec.

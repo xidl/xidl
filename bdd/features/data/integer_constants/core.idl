@@ -1,0 +1,29 @@
+const unsigned long MASK32 = 0xffffffff;
+const unsigned long ZERO32 = ~MASK32;
+const long SIGNED_ZERO = ~0xffffffff;
+const unsigned long ALL32 = ~0;
+const unsigned long long ALL64 = ~0;
+const long long ZERO64 = ~0xffffffffffffffff;
+const long long NEGATIVE = -2;
+const long long COMPLEMENT_NEGATIVE = ~NEGATIVE;
+const long long MINIMUM = -9223372036854775808;
+const unsigned long long LOGICAL_SHIFT = NEGATIVE >> 63;
+const octet FLAGS = ~0xffffff00;
+const unsigned long AXES = +2;
+typedef unsigned long Word;
+const Word LOW = ~0xfffffff0;
+typedef long Slots[LOW];
+
+module policy {
+    const unsigned long MASK32 = 0xfffffffd;
+    const unsigned long LOCAL = ~MASK32;
+    const unsigned long ROOT = ~::MASK32;
+};
+
+typedef double Rate;
+const Rate PRICE = 1.5;
+enum Channel { sms, chat };
+const Channel PINNED = Channel::sms;
+const string TEXT = "~keep!";
+const char SYMBOL = '~';
+const boolean ENABLED = TRUE;

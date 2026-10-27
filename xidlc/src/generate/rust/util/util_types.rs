@@ -133,8 +133,18 @@ pub fn rust_literal(value: &hir::Literal) -> String {
     }
 }
 
+/// Renders retained constant expressions using Rust unary syntax.
 pub fn render_const(expr: &hir::ConstExpr) -> String {
-    render_const_expr(expr, &rust_scoped_name, &rust_literal)
+    render_const_expr(
+        expr,
+        &rust_scoped_name,
+        &rust_literal,
+        &|operator| match operator {
+            hir::UnaryOperator::Add => "",
+            hir::UnaryOperator::Sub => "-",
+            hir::UnaryOperator::Not => "!",
+        },
+    )
 }
 
 pub fn bitfield_type(value: &hir::BitFieldType) -> String {

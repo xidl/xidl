@@ -10,7 +10,7 @@ enum Versions {
 
 // Stored delivery references remain strings in every published version.
 typedef string DeliveryReference;
-const long COORDINATE_AXES = 2;
+const long COORDINATE_AXES = ~0xfffffffd;
 const long BOUND_COMPONENTS = COORDINATE_AXES * 2;
 
 module geo {
