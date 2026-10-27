@@ -8,6 +8,7 @@ const take = <T>(result: a.VersionedResult<T>): T => {
   return result.value;
 };
 const refusal = (
+  version: '2026-01-01' | '2026-04-01',
   direction: 'upcast' | 'downcast',
   typePath: string,
 ): a.VersionedResult<never> => ({
@@ -15,7 +16,7 @@ const refusal = (
     direction,
     reason: 'address has no faithful representation',
     typePath,
-    version: '2026-01-01',
+    version,
   },
   ok: false,
 });
@@ -50,16 +51,20 @@ const hooks: a.VersionAdapters = {
   shippingAddressDowncastToV1: (source, readers) => {
     const line = readers.shippingAddressLine(source);
     if (line === undefined)
-      return refusal('downcast', 'shipping::Address.line');
+      return refusal('2026-01-01', 'downcast', 'shipping::Address.line');
     const country = readers.shippingAddressCountryCode(source);
     if (country === undefined)
-      return refusal('downcast', 'shipping::Address.countryCode');
+      return refusal('2026-01-01', 'downcast', 'shipping::Address.countryCode');
     return ok({ country_code: country, line });
   },
   shippingAddressDowncastToV2: (source, readers) => {
     const reference = readers.shippingAddressDeliveryReference(source);
     if (reference === undefined)
-      return refusal('downcast', 'shipping::Address.deliveryReference');
+      return refusal(
+        '2026-04-01',
+        'downcast',
+        'shipping::Address.deliveryReference',
+      );
     return ok({
       delivery_note: readers.shippingAddressDeliveryNote(source) ?? a.OMIT,
       delivery_reference: reference,
@@ -68,7 +73,7 @@ const hooks: a.VersionAdapters = {
   shippingChangeUpcastFromV1: source => {
     const code = source.country_code;
     if (code !== undefined && code !== 'US' && code !== 'CA')
-      return refusal('upcast', 'shipping::Change.countryCode');
+      return refusal('2026-01-01', 'upcast', 'shipping::Change.countryCode');
     return ok({
       country_code: a.IGNORED,
       country_code_v2: code,

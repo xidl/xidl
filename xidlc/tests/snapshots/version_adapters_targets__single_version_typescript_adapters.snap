@@ -24,6 +24,19 @@ export type ProjectionOutcome<T, Head> =
 | { projected: true; value: T }
 | { projected: false; head: Head; error: UnsupportedProjection };
 export interface FrameworkError { kind: "Framework"; error: unknown }
+/** Merges stored bags with Rust `Option::or` semantics: the first defined
+ * value for a key wins, and a later explicit `undefined` never overwrites. */
+function mergeStored<T extends object>(...parts: (T | undefined)[]): T {
+    const merged: Record<string, unknown> = {};
+    for (const part of parts) {
+        for (const [key, value] of Object.entries(part ?? {})) {
+            if (value !== undefined && merged[key] === undefined) {
+                merged[key] = value;
+            }
+        }
+    }
+    return merged as T;
+}
 export const IGNORED = "xidl.ignored";
 export type Ignored = typeof IGNORED;
 /** A downcast decision leaves a removed optional member absent only by saying so. */

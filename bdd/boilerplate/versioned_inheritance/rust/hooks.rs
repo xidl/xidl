@@ -46,9 +46,9 @@ impl StoredValues for Readers {
 pub struct Hooks;
 
 impl Hooks {
-    pub fn refusal(direction: Direction, path: &str) -> UnsupportedProjection {
+    pub fn refusal(version: &str, direction: Direction, path: &str) -> UnsupportedProjection {
         UnsupportedProjection {
-            version: "2026-01-01".into(),
+            version: version.into(),
             direction,
             type_path: path.into(),
             reason: "address has no faithful representation".into(),
@@ -64,12 +64,12 @@ impl VersionAdapters for Hooks {
     ) -> VersionedResult<ShippingAddressDowncastToV1Decision> {
         Ok(ShippingAddressDowncastToV1Decision {
             line: stored.shipping_address_line(source).ok_or_else(|| {
-                Self::refusal(Direction::Downcast, "shipping::Address.line")
+                Self::refusal("2026-01-01", Direction::Downcast, "shipping::Address.line")
             })?,
             country_code: stored
                 .shipping_address_country_code(source)
                 .ok_or_else(|| {
-                    Self::refusal(Direction::Downcast, "shipping::Address.countryCode")
+                    Self::refusal("2026-01-01", Direction::Downcast, "shipping::Address.countryCode")
                 })?,
         })
     }
@@ -82,7 +82,7 @@ impl VersionAdapters for Hooks {
             delivery_reference: stored
                 .shipping_address_delivery_reference(source)
                 .ok_or_else(|| {
-                    Self::refusal(Direction::Downcast, "shipping::Address.deliveryReference")
+                    Self::refusal("2026-04-01", Direction::Downcast, "shipping::Address.deliveryReference")
                 })?,
             delivery_note: stored.shipping_address_delivery_note(source),
         })
@@ -100,6 +100,7 @@ impl VersionAdapters for Hooks {
                 "US" => Ok(v2::geo::Country::US),
                 "CA" => Ok(v2::geo::Country::CA),
                 _ => Err(Self::refusal(
+                    "2026-01-01",
                     Direction::Upcast,
                     "shipping::Change.countryCode",
                 )),
