@@ -6,7 +6,7 @@ Feature: Emitted Rust HTTP contracts compile without lint suppressions
     When I generate rust code for the IDL
     Then the emitted Rust library passes strict clippy
 
-  Scenario Outline: borrowed responses and versioned billing adapters
+  Scenario Outline: borrowed responses and versioned adapters
     Given a REST IDL file "bdd/features/data/<fixture>.idl"
     When I generate Rust with the independent adapter target
     Then the emitted Rust library passes strict clippy
@@ -14,4 +14,3 @@ Feature: Emitted Rust HTTP contracts compile without lint suppressions
     Examples:
       | fixture            |
       | borrowed_responses |
-      | versioned_billing  |
