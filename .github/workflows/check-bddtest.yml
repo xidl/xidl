@@ -10,7 +10,7 @@ on:
 jobs:
   bddtest-shard:
     name: bddtest (${{ matrix.shard }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -34,6 +34,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxml2
 
       - name: Install pnpm
         uses: pnpm/action-setup@v6.1.0
@@ -63,7 +68,7 @@ jobs:
 
   bddtest:
     name: bddtest
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: bddtest-shard
     if: ${{ always() }}
     steps:
