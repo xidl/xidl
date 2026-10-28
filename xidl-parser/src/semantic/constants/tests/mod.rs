@@ -1,5 +1,6 @@
 mod declarations;
 mod history;
+mod imports;
 
 use crate::hir::{ParserProperties, Specification};
 use crate::rest_hir::ProjectedHir;

@@ -13,12 +13,11 @@ pub(crate) fn render_spec(
     properties: &xidl_parser::hir::ParserProperties,
 ) -> IdlcResult<String> {
     let renderer = GoRestRenderer::new()?;
-    let packages = crate::generate::go::GoPackages::of(properties);
     let context = GoRestRenderContext {
         renderer: &renderer,
         rest_hir,
         mode: GoRestRenderMode::from_properties(properties)?,
-        packages: packages.clone(),
+        packages: crate::generate::go::GoPackages::of(properties),
         versioned_modules: properties
             .get(xidl_parser::versioning::API_VERSION_MODULES_PROPERTY)
             .and_then(serde_json::Value::as_array)
@@ -41,7 +40,7 @@ pub(crate) fn render_spec(
         package_name: package_name.to_string(),
         blocks,
         opt: template_properties,
-        imports: packages.imports(),
+        imports: context.packages.imports(),
     })
 }
 

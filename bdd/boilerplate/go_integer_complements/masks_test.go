@@ -15,6 +15,8 @@ func TestUnsignedMaskBounds(t *testing.T) {
 		{"remaining64", REMAINING64, 0},
 		{"maximum32", uint64(MAXIMUM32), 4294967295},
 		{"maximum64", MAXIMUM64, 18446744073709551615},
+		{"imported_width", REST, 4294967296},
+		{"complement_width", WIDE, 18446744069414584320},
 		{"included32", uint64(masks.ZERO32), 0},
 		{"included64", masks.ALL64, 18446744073709551615},
 		{"included_octet", uint64(masks.FLAGS), 255},

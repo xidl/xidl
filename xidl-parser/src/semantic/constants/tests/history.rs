@@ -26,7 +26,8 @@ fn source_history_is_preserved_until_a_version_is_selected() {
         let selected = record.resolve_version(version).expect("known API version");
         let projection = record.project(&raw, selected).expect("project raw source");
         let mut projection = projection;
-        super::super::IntegerDeclarations::normalize(&mut projection).expect("selected constants");
+        super::super::IntegerDeclarations::normalize(&mut projection, &Default::default())
+            .expect("selected constants");
         assert_eq!(values(&projection)["WIDTH"], integer(expected));
         let properties = [(
             crate::versioning::API_VERSION_PROPERTY.into(),

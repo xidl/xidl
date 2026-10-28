@@ -29,6 +29,8 @@ fn main() {
     assert_eq!(api::COPIED, 15);
     assert_eq!(api::ZERO, 0);
     assert_eq!(api::AXES, 2);
+    assert_eq!(api::REST, 4_294_967_296);
+    assert_eq!(api::WIDE, 18_446_744_069_414_584_320);
     assert!(matches!(api::PINNED, core::Channel::sms));
     println!("PASS: integer constants");
 }

@@ -1,88 +1,60 @@
 //! Scoped integer constants shared by declarations and fixed-array dimensions.
 
 use crate::error::{ParseError, ParserResult};
-use crate::hir::{self, DeclarationNames};
+use crate::hir;
 use std::collections::{BTreeMap, BTreeSet};
 
+use super::declarations::IntegerIndex;
+use super::imports::{IntegerImports, IntegerOrigin, IntegerScope};
 use super::integer::{Integer, IntegerKind};
 
-/// Resolves constant expressions in their declaration's lexical scope.
+/// Resolves integer expressions in the unit and version that declared them.
 pub(in crate::semantic) struct IntegerConstants {
-    names: DeclarationNames,
-    declarations: BTreeMap<String, hir::ConstDcl>,
-    aliases: BTreeMap<String, hir::TypeSpec>,
-    values: BTreeMap<String, Integer>,
-    active: BTreeSet<String>,
+    local: IntegerIndex,
+    imports: IntegerImports,
+    values: BTreeMap<IntegerScope, Integer>,
+    active: BTreeSet<IntegerScope>,
 }
 
 impl IntegerConstants {
-    /// Collects declarations before evaluating references in lexical scope.
-    pub(in crate::semantic) fn collect(spec: &hir::Specification) -> Self {
-        let mut constants = Self {
-            names: DeclarationNames::collect(&spec.0),
-            declarations: BTreeMap::new(),
-            aliases: BTreeMap::new(),
+    /// Adds immutable imported source declarations to the shared resolver.
+    pub(in crate::semantic) fn with_imports(
+        spec: &hir::Specification,
+        imports: &IntegerImports,
+    ) -> Self {
+        Self {
+            local: IntegerIndex::collect(spec),
+            imports: imports.clone(),
             values: BTreeMap::new(),
             active: BTreeSet::new(),
-        };
-        constants.definitions(&spec.0, &[]);
-        constants
-    }
-
-    fn definitions(&mut self, definitions: &[hir::Definition], scope: &[String]) {
-        for definition in definitions {
-            match definition {
-                hir::Definition::ModuleDcl(module) => {
-                    let mut nested = scope.to_vec();
-                    nested.push(module.ident.clone());
-                    self.definitions(&module.definition, &nested);
-                }
-                hir::Definition::ConstDcl(constant) => self.insert(constant, scope),
-                hir::Definition::TypeDcl(decl) => self.alias(decl, scope),
-                hir::Definition::InterfaceDcl(interface) => {
-                    if let hir::InterfaceDclInner::InterfaceDef(def) = &interface.decl
-                        && let Some(body) = &def.interface_body
-                    {
-                        let mut nested = scope.to_vec();
-                        nested.push(def.header.ident.clone());
-                        for export in &body.0 {
-                            match export {
-                                hir::Export::ConstDcl(constant) => self.insert(constant, &nested),
-                                hir::Export::TypeDcl(decl) => self.alias(decl, &nested),
-                                _ => {}
-                            }
-                        }
-                    }
-                }
-                _ => {}
-            }
         }
     }
 
-    fn key(scope: &[String], name: &str) -> String {
-        scope
-            .iter()
-            .map(String::as_str)
-            .chain([name])
-            .collect::<Vec<_>>()
-            .join("::")
-    }
-
-    fn insert(&mut self, constant: &hir::ConstDcl, scope: &[String]) {
-        self.declarations
-            .insert(Self::key(scope, &constant.ident), constant.clone());
-    }
-
-    fn alias(&mut self, decl: &hir::TypeDcl, scope: &[String]) {
-        if let hir::TypeDcl::TypedefDcl(alias) = decl
-            && let hir::TypedefType::TypeSpec(ty) = &alias.ty
-        {
-            for declarator in &alias.decl {
-                if let hir::Declarator::SimpleDeclarator(name) = declarator {
-                    self.aliases.insert(Self::key(scope, &name.0), ty.clone());
-                }
-            }
+    fn index(&self, scope: &IntegerScope) -> ParserResult<&IntegerIndex> {
+        match &scope.origin {
+            IntegerOrigin::Local => Ok(&self.local),
+            _ => self.imports.index(&scope.origin).ok_or_else(|| {
+                ParseError::Message(format!(
+                    "integer declaration context '{}' does not resolve",
+                    scope.qualified()
+                ))
+            }),
         }
+    }
+
+    fn binding(
+        &self,
+        name: &hir::ScopedName,
+        scope: &IntegerScope,
+    ) -> ParserResult<Option<IntegerScope>> {
+        let index = self.index(scope)?;
+        if let Some(resolved) = index.names.resolve(&scope.path, name) {
+            return Ok(Some(IntegerScope {
+                origin: scope.origin.clone(),
+                path: resolved.name,
+            }));
+        }
+        Ok(self.imports.resolve(&scope.origin, name))
     }
 
     /// Evaluates a dimension using IDL integer precision and checked operations.
@@ -91,7 +63,8 @@ impl IntegerConstants {
         expression: &hir::ConstExpr,
         scope: &[String],
     ) -> ParserResult<i64> {
-        self.evaluate(expression, scope, None)?.dimension()
+        self.evaluate(expression, &IntegerScope::local(scope), None)?
+            .dimension()
     }
 
     /// Keeps non-integral declarations intact and lowers integral values once.
@@ -100,46 +73,46 @@ impl IntegerConstants {
         constant: &mut hir::ConstDcl,
         scope: &[String],
     ) -> ParserResult<()> {
-        if self.kind(&constant.ty, scope)?.is_none()
-            || !self.is_local(&constant.value, scope, &mut BTreeSet::new())?
+        let scope = IntegerScope::local(scope);
+        if self.kind(&constant.ty, &scope)?.is_none()
+            || !self.is_known(&constant.value, &scope, &mut BTreeSet::new())?
         {
             return Ok(());
         }
-        let value = self.constant(constant, scope).map_err(|error| {
-            ParseError::Message(format!(
-                "constant '{}': {error}",
-                Self::key(scope, &constant.ident)
-            ))
+        let value = self.constant(constant, &scope).map_err(|error| {
+            let mut declaration = scope.clone();
+            declaration.path.push(constant.ident.clone());
+            ParseError::Message(format!("constant '{}': {error}", declaration.qualified()))
         })?;
         constant.value = value.expression();
         Ok(())
     }
 
-    fn is_local(
+    fn is_known(
         &mut self,
         expression: &hir::ConstExpr,
-        scope: &[String],
-        visited: &mut BTreeSet<String>,
+        scope: &IntegerScope,
+        visited: &mut BTreeSet<IntegerScope>,
     ) -> ParserResult<bool> {
         match expression {
             hir::ConstExpr::ScopedName(name) => {
-                let Some(resolved) = self.names.resolve(scope, name) else {
+                let Some(resolved) = self.binding(name, scope)? else {
                     return Ok(false);
                 };
-                let key = resolved.name.join("::");
-                let Some(constant) = self.declarations.get(&key).cloned() else {
+                let key = resolved.path.join("::");
+                let Some(constant) = self.index(&resolved)?.declarations.get(&key).cloned() else {
                     return Ok(false);
                 };
-                if !visited.insert(key) {
+                if !visited.insert(resolved.clone()) {
                     return Ok(true);
                 }
-                let parent = &resolved.name[..resolved.name.len() - 1];
-                Ok(self.kind(&constant.ty, parent)?.is_some()
-                    && self.is_local(&constant.value, parent, visited)?)
+                let parent = resolved.parent();
+                Ok(self.kind(&constant.ty, &parent)?.is_some()
+                    && self.is_known(&constant.value, &parent, visited)?)
             }
-            hir::ConstExpr::UnaryExpr(_, inner) => self.is_local(inner, scope, visited),
+            hir::ConstExpr::UnaryExpr(_, inner) => self.is_known(inner, scope, visited),
             hir::ConstExpr::BinaryExpr(_, left, right) => {
-                Ok(self.is_local(left, scope, visited)? && self.is_local(right, scope, visited)?)
+                Ok(self.is_known(left, scope, visited)? && self.is_known(right, scope, visited)?)
             }
             hir::ConstExpr::Literal(_) => Ok(true),
         }
@@ -148,7 +121,7 @@ impl IntegerConstants {
     fn evaluate(
         &mut self,
         expression: &hir::ConstExpr,
-        scope: &[String],
+        scope: &IntegerScope,
         precision: Option<u32>,
     ) -> ParserResult<Integer> {
         match expression {
@@ -172,8 +145,8 @@ impl IntegerConstants {
         }
     }
 
-    fn resolve(&self, name: &hir::ScopedName, scope: &[String]) -> ParserResult<hir::ScopedName> {
-        self.names.resolve(scope, name).ok_or_else(|| {
+    fn resolve(&self, name: &hir::ScopedName, scope: &IntegerScope) -> ParserResult<IntegerScope> {
+        self.binding(name, scope)?.ok_or_else(|| {
             ParseError::Message(format!(
                 "integer constant reference '{}' does not resolve",
                 name.name.join("::")
@@ -181,38 +154,50 @@ impl IntegerConstants {
         })
     }
 
-    fn enter(&mut self, key: &str) -> ParserResult<()> {
-        if self.active.insert(key.to_owned()) {
+    fn enter(&mut self, key: &IntegerScope) -> ParserResult<()> {
+        if self.active.insert(key.clone()) {
             Ok(())
         } else {
             Err(ParseError::Message(format!(
-                "integer constant/type cycle includes '{key}'"
+                "integer constant/type cycle includes '{}'",
+                key.qualified()
             )))
         }
     }
 
-    fn reference(&mut self, name: &hir::ScopedName, scope: &[String]) -> ParserResult<Integer> {
+    fn reference(&mut self, name: &hir::ScopedName, scope: &IntegerScope) -> ParserResult<Integer> {
         let resolved = self.resolve(name, scope)?;
-        let key = resolved.name.join("::");
-        if let Some(value) = self.values.get(&key) {
+        if let Some(value) = self.values.get(&resolved) {
             return Ok(*value);
         }
-        let constant = self.declarations.get(&key).cloned().ok_or_else(|| {
-            ParseError::Message(format!(
-                "integer constant reference '{key}' is not a constant"
-            ))
-        })?;
-        self.enter(&key)?;
-        let parent = &resolved.name[..resolved.name.len() - 1];
-        let result = self.constant(&constant, parent);
-        self.active.remove(&key);
+        let key = resolved.path.join("::");
+        let constant = self
+            .index(&resolved)?
+            .declarations
+            .get(&key)
+            .cloned()
+            .ok_or_else(|| {
+                ParseError::Message(format!(
+                    "integer constant reference '{}' is not a constant",
+                    resolved.qualified()
+                ))
+            })?;
+        self.enter(&resolved)?;
+        let result = self.constant(&constant, &resolved.parent());
+        self.active.remove(&resolved);
         if let Ok(value) = result {
-            self.values.insert(key.clone(), value);
+            self.values.insert(resolved.clone(), value);
         }
-        result.map_err(|error| ParseError::Message(format!("constant '{key}': {error}")))
+        result.map_err(|error| {
+            ParseError::Message(format!("constant '{}': {error}", resolved.qualified()))
+        })
     }
 
-    fn constant(&mut self, constant: &hir::ConstDcl, scope: &[String]) -> ParserResult<Integer> {
+    fn constant(
+        &mut self,
+        constant: &hir::ConstDcl,
+        scope: &IntegerScope,
+    ) -> ParserResult<Integer> {
         let kind = self.kind(&constant.ty, scope)?.ok_or_else(|| {
             ParseError::Message(format!(
                 "integer constant '{}' is not integral",
@@ -223,7 +208,11 @@ impl IntegerConstants {
             .assign(kind)
     }
 
-    fn kind(&mut self, ty: &hir::ConstType, scope: &[String]) -> ParserResult<Option<IntegerKind>> {
+    fn kind(
+        &mut self,
+        ty: &hir::ConstType,
+        scope: &IntegerScope,
+    ) -> ParserResult<Option<IntegerKind>> {
         match ty {
             hir::ConstType::IntegerType(kind) => Ok(Some(IntegerKind::from_hir(kind))),
             hir::ConstType::OctetType => Ok(Some(IntegerKind::from_hir(&hir::IntegerType::Octet))),
@@ -235,24 +224,22 @@ impl IntegerConstants {
     fn named_kind(
         &mut self,
         name: &hir::ScopedName,
-        scope: &[String],
+        scope: &IntegerScope,
     ) -> ParserResult<Option<IntegerKind>> {
-        let Some(resolved) = self.names.resolve(scope, name) else {
+        let Some(resolved) = self.binding(name, scope)? else {
             return Ok(None);
         };
-        let key = resolved.name.join("::");
-        let Some(ty) = self.aliases.get(&key).cloned() else {
+        let key = resolved.path.join("::");
+        let Some(ty) = self.index(&resolved)?.aliases.get(&key).cloned() else {
             return Ok(None);
         };
-        self.enter(&key)?;
+        self.enter(&resolved)?;
         let result = match &ty {
             hir::TypeSpec::IntegerType(kind) => Ok(Some(IntegerKind::from_hir(kind))),
-            hir::TypeSpec::ScopedName(name) => {
-                self.named_kind(name, &resolved.name[..resolved.name.len() - 1])
-            }
+            hir::TypeSpec::ScopedName(name) => self.named_kind(name, &resolved.parent()),
             _ => Ok(None),
         };
-        self.active.remove(&key);
+        self.active.remove(&resolved);
         result
     }
 }

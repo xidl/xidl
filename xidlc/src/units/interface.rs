@@ -4,6 +4,7 @@ use super::error::ImportError;
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 use xidl_parser::hir;
+use xidl_parser::semantic::IntegerExports;
 use xidl_parser::versioning::VersioningRecord;
 
 /// What one compilation unit exposes to its importers.
@@ -16,6 +17,7 @@ pub struct UnitInterface {
     per_version: BTreeMap<String, BTreeSet<String>>,
     aliases: BTreeMap<String, String>,
     unversioned: Option<BTreeSet<String>>,
+    integer_exports: IntegerExports,
 }
 
 impl UnitInterface {
@@ -32,19 +34,23 @@ impl UnitInterface {
     ) -> Result<Self, ImportError> {
         let spec = Self::lower(source, path, mounts)?;
         let record = VersioningRecord::analyze(&spec).map_err(|err| Self::error(path, err))?;
+        let mut integer_exports = IntegerExports::default();
         let Some(record) = record else {
+            integer_exports.record(&spec, None);
             return Ok(Self {
                 per_version: BTreeMap::new(),
                 aliases: BTreeMap::new(),
                 unversioned: Some(Self::names(&spec.0)),
+                integer_exports,
             });
         };
         let mut per_version = BTreeMap::new();
         let mut aliases = BTreeMap::new();
         for (id, definition) in record.timeline().iter() {
             let projected = record
-                .project(&spec, id)
+                .project_source(&spec, id)
                 .map_err(|err| Self::error(path, err))?;
+            integer_exports.record(&projected, Some(definition));
             per_version.insert(definition.ident.clone(), Self::names(&projected.0));
             aliases.insert(definition.value.clone(), definition.ident.clone());
         }
@@ -52,7 +58,61 @@ impl UnitInterface {
             per_version,
             aliases,
             unversioned: None,
+            integer_exports,
         })
+    }
+
+    /// Checks one reference against the interface of the unit it names.
+    pub(super) fn check(
+        &self,
+        unit: &super::spec::Unit,
+        target: &super::spec::Unit,
+        reference: &super::refs::UnitRef,
+    ) -> Result<(), ImportError> {
+        let importer = unit.file().to_path_buf();
+        let referenced = target.file().to_path_buf();
+        let written = reference.qualified();
+        let declared = |version: Option<&str>| self.declares(version, reference.name());
+        match reference.version() {
+            Some(version) if !self.is_versioned() => Err(ImportError::UnexpectedVersion {
+                importer,
+                unit: referenced,
+                reference: written,
+                version: version.to_string(),
+            }),
+            Some(version) if !self.knows_version(version) => Err(ImportError::UnknownVersion {
+                importer,
+                unit: referenced,
+                reference: written,
+                version: version.to_string(),
+                versions: self.versions(),
+            }),
+            Some(version) if !declared(Some(version)) => Err(ImportError::UnknownType {
+                importer,
+                unit: referenced,
+                reference: written,
+                version: Some(version.to_string()),
+            }),
+            Some(_) => Ok(()),
+            None if self.is_versioned() => Err(ImportError::MissingVersion {
+                importer,
+                unit: referenced,
+                reference: written,
+                versions: self.versions(),
+            }),
+            None if !declared(None) => Err(ImportError::UnknownType {
+                importer,
+                unit: referenced,
+                reference: written,
+                version: None,
+            }),
+            None => Ok(()),
+        }
+    }
+
+    /// Source declarations remain unevaluated until a consumer selects a version.
+    pub(super) fn integer_exports(&self) -> &IntegerExports {
+        &self.integer_exports
     }
 
     /// Whether the unit declares an API version timeline.
@@ -105,14 +165,9 @@ impl UnitInterface {
         let typed =
             xidl_parser::parser::parser_text_with_resolver(source, path.to_str(), &mut *resolver)
                 .map_err(|err| Self::error(path, err))?;
-        let mut properties = hir::ParserProperties::new();
-        // The interface lists what the author wrote, without the RPC wrapper
-        // declarations an expanded interface adds.
-        properties.insert(
-            "expand_interface".to_string(),
-            serde_json::Value::Bool(false),
-        );
-        hir::Specification::from_typed_ast_with_properties_and_path(typed, properties, path)
+        // An export index needs source declarations, before selected constants
+        // or array dimensions are evaluated during compilation.
+        hir::Specification::source_from_typed_ast_with_resolver(typed, path, &mut *resolver)
             .map_err(|err| Self::error(path, err))
     }
 

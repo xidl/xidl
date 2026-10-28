@@ -1,6 +1,6 @@
 //! Resolve fixed-array dimensions before targets consume the shared HIR.
 
-use super::constants::IntegerConstants;
+use super::constants::{IntegerConstants, IntegerImports};
 use crate::error::{ParseError, ParserResult};
 use crate::hir;
 
@@ -11,9 +11,12 @@ pub(super) struct ArrayDimensions {
 
 impl ArrayDimensions {
     /// Computes dimensions in the selected projection before inheritance copies them.
-    pub(super) fn normalize(spec: &mut hir::Specification) -> ParserResult<()> {
+    pub(super) fn normalize(
+        spec: &mut hir::Specification,
+        imports: &IntegerImports,
+    ) -> ParserResult<()> {
         let mut dimensions = Self {
-            constants: IntegerConstants::collect(spec),
+            constants: IntegerConstants::with_imports(spec, imports),
         };
         dimensions.definitions(&mut spec.0, &[])
     }

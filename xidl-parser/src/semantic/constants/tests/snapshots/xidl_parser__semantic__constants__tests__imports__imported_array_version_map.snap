@@ -1,0 +1,78 @@
+---
+source: xidl-parser/src/semantic/constants/tests/imports.rs
+expression: map
+---
+VersionMap {
+    format: 2,
+    contract: "arrays.idl",
+    versions: [
+        MapVersion {
+            id: "v1",
+            value: "v1",
+        },
+        MapVersion {
+            id: "v2",
+            value: "v2",
+        },
+    ],
+    steps: [
+        MapStep {
+            from: "v1",
+            to: "v2",
+            types: {
+                "cfg::Slots": TypeChange {
+                    change: Changed,
+                    kind: Some(
+                        "typedef",
+                    ),
+                    details: Some(
+                        {
+                            "declarators": Array [
+                                Object {
+                                    "array": Bool(true),
+                                    "lengths": Array [
+                                        String("3"),
+                                    ],
+                                    "name": String("Slots"),
+                                },
+                            ],
+                            "type": String("long"),
+                        },
+                    ),
+                    from: Some(
+                        {
+                            "declarators": Array [
+                                Object {
+                                    "array": Bool(true),
+                                    "lengths": Array [
+                                        String("2"),
+                                    ],
+                                    "name": String("Slots"),
+                                },
+                            ],
+                            "kind": String("typedef"),
+                            "type": String("long"),
+                        },
+                    ),
+                    to: Some(
+                        {
+                            "declarators": Array [
+                                Object {
+                                    "array": Bool(true),
+                                    "lengths": Array [
+                                        String("3"),
+                                    ],
+                                    "name": String("Slots"),
+                                },
+                            ],
+                            "kind": String("typedef"),
+                            "type": String("long"),
+                        },
+                    ),
+                    members: {},
+                },
+            },
+            operations: {},
+        },
+    ],
+}

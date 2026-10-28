@@ -9,10 +9,21 @@ mod model;
 use super::{VersionId, VersioningRecord};
 use crate::error::ParserResult;
 use crate::hir::Specification;
+use crate::semantic::IntegerImports;
 use serde_json;
 use std::collections::BTreeMap;
 
 pub use model::{Change, ChangeKind, MapStep, MapVersion, TypeChange, VersionMap};
+
+/// Source context used while comparing fully projected version contracts.
+pub struct MapOptions {
+    /// Contract name recorded in the artifact.
+    pub contract: String,
+    /// Whether the contract exposes HTTP operations.
+    pub include_http_operations: bool,
+    /// Immutable dependency declarations used by array dimensions.
+    pub integer_imports: IntegerImports,
+}
 
 /// Computes the complete, unselected version map for a validated contract.
 pub fn from_spec(
@@ -20,7 +31,15 @@ pub fn from_spec(
     record: &VersioningRecord,
     contract: impl Into<String>,
 ) -> ParserResult<VersionMap> {
-    from_spec_with_http(spec, record, contract, true)
+    from_spec_with_http(
+        spec,
+        record,
+        MapOptions {
+            contract: contract.into(),
+            include_http_operations: true,
+            integer_imports: IntegerImports::default(),
+        },
+    )
 }
 
 /// Computes a version map while optionally collecting REST operation facts.
@@ -31,8 +50,7 @@ pub fn from_spec(
 pub fn from_spec_with_http(
     spec: &Specification,
     record: &VersioningRecord,
-    contract: impl Into<String>,
-    include_http_operations: bool,
+    options: MapOptions,
 ) -> ParserResult<VersionMap> {
     let versions = record
         .timeline()
@@ -44,18 +62,27 @@ pub fn from_spec_with_http(
         .collect::<Vec<_>>();
     let mut steps = Vec::new();
     let declarations = declarations::SourceDeclarations::collect(spec, record.timeline())?;
+    let projections = record
+        .timeline()
+        .iter()
+        .map(|(id, _)| {
+            let mut projected = record.project_source(spec, id)?;
+            crate::semantic::analyze(&mut projected, &options.integer_imports)?;
+            Ok(projected)
+        })
+        .collect::<ParserResult<Vec<_>>>()?;
     for index in 0..versions.len().saturating_sub(1) {
+        let from = &projections[index];
+        let to = &projections[index + 1];
+        let mut from_types = collect::collect_types(from);
+        let mut to_types = collect::collect_types(to);
         let from_id = VersionId::from_index(index);
         let to_id = VersionId::from_index(index + 1);
-        let from = record.project(spec, from_id)?;
-        let to = record.project(spec, to_id)?;
-        let mut from_types = collect::collect_types(&from);
-        let mut to_types = collect::collect_types(&to);
         declarations.stamp_types(&mut from_types, from_id)?;
         declarations.stamp_types(&mut to_types, to_id)?;
-        let operations = if include_http_operations {
-            let mut from_operations = collect::collect_operations(&from)?;
-            let mut to_operations = collect::collect_operations(&to)?;
+        let operations = if options.include_http_operations {
+            let mut from_operations = collect::collect_operations(from)?;
+            let mut to_operations = collect::collect_operations(to)?;
             declarations.stamp_operations(&mut from_operations, from_id)?;
             declarations.stamp_operations(&mut to_operations, to_id)?;
             compare::compare_operations(&from_operations, &to_operations)
@@ -71,7 +98,7 @@ pub fn from_spec_with_http(
     }
     Ok(VersionMap {
         format: 2,
-        contract: contract.into(),
+        contract: options.contract,
         versions,
         steps,
     })
