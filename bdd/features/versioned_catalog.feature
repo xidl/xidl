@@ -1,4 +1,4 @@
-@bdd_rest-versioning
+@bdd_rest-versioning-apps
 Feature: Media filters run on Head facts before historical catalog projection
 
   The Shopify-inspired catalog adds rich media while its old contract keeps

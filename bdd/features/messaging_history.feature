@@ -1,4 +1,4 @@
-@bdd_rest-versioning
+@bdd_rest-versioning-core
 Feature: A released messaging API keeps five explicit contracts
 
   Scenario: releases generate deterministic artifacts and detect historical edits

@@ -29,8 +29,16 @@ jobs:
             port-base: 17000
           - shard: rest-serialization
             port-base: 18000
-          - shard: rest-versioning
+          - shard: rest-versioning-core
             port-base: 19000
+          - shard: rest-versioning-servers
+            port-base: 20000
+          - shard: rest-versioning-adapters
+            port-base: 21000
+          - shard: rest-versioning-apps
+            port-base: 22000
+          - shard: rest-versioning-http
+            port-base: 23000
     steps:
       - name: Checkout
         uses: actions/checkout@v7

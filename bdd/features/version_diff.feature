@@ -1,4 +1,4 @@
-@bdd_rest-versioning
+@bdd_rest-versioning-core
 Feature: version diff
 
   Scenario: version diff exposes contract changes with stable headers

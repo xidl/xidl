@@ -1,4 +1,4 @@
-@bdd_rest-versioning
+@bdd_rest-versioning-apps
 Feature: Split address libraries keep historical delivery facts
   A stable Head address and append-only delivery history serve every supported
   version. Only the decoding front end differs between a chain and version routers.
