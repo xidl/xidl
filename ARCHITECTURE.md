@@ -379,7 +379,6 @@ Important subtrees:
 - `xidl-jsonrpc/`: runtime and transport support for generated JSON-RPC clients
   and servers (not used by the xidlc compiler itself)
 - `xidl-rust-axum/`: runtime support for generated Rust Axum code
-- `xidl-typeobject/`: type-object related assets and generation targets
 
 These crates exist to support generated code and transport/runtime behavior.
 They are not alternate compilers.

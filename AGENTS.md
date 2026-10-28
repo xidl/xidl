@@ -4,10 +4,10 @@
 
 - This file MUST govern handwritten source files under `xidl-build/src/`,
   `xidl-jsonrpc/src/`, `xidl-parser/src/`, `xidl-parser-derive/src/`,
-  `xidl-rust-axum/src/`, `xidl-typeobject/src/`, and `xidlc/src/`.
+  `xidl-rust-axum/src/`, and `xidlc/src/`.
 - This file MUST govern handwritten test files under `xidl-jsonrpc/tests/`,
-  `xidl-parser/tests/`, `xidl-rust-axum/tests/`, `xidl-typeobject/tests/`,
-  `xidlc/tests/`, and `python/tests/`.
+  `xidl-parser/tests/`, `xidl-rust-axum/tests/`, `xidl-parser/tests/`,
+  `xidl-rust-axum/tests/`, `xidlc/tests/`, and `python/tests/`.
 - This file MUST govern generator templates under
   `xidlc/src/generate/**/templates/` and `xidl-parser/src/hir/templates/`.
 

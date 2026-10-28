@@ -81,10 +81,6 @@ test-xidl-jsonrpc-coverage:
 fmt-jinja:
     python3 scripts/fmt_jinja.py -i $(find xidlc -type f -name '*.j2' | sort)
 
-# Build xtypes
-build-xtypes:
-    cargo r -p xidlc -F cli -- gen --out-dir ./xidl-typeobject/src/ rust ./xidl-typeobject/idl/dds_xtypes_typeobject.idl
-
 # Download release binaries into the npm platform packages
 npm-fetch-binaries:
     node packages/scripts/fetch-binaries.mjs

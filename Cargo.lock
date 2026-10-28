@@ -3629,15 +3629,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "xidl-typeobject"
-version = "0.107.0"
-dependencies = [
- "md5",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "xidlc"
 version = "0.107.0"
 dependencies = [
