@@ -1,9 +1,11 @@
+use crate::error::IdlcError;
 use crate::error::IdlcResult;
 use crate::generate::rust::bitset_dcl::render_bitset_with_config;
 use crate::generate::rust::struct_dcl::render_struct_with_config;
 use crate::generate::rust::type_dcl::render_typedef_with_config;
 use crate::generate::rust::union_def::render_union_with_config;
 use crate::generate::rust::util::rust_deprecated_attr;
+use crate::generate::rust::util::rust_ident;
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use std::collections::HashMap;
 use xidl_parser::hir;
@@ -31,10 +33,22 @@ impl RustRender for hir::Definition {
             hir::Definition::TypeDcl(type_dcl) => type_dcl.render(renderer),
             hir::Definition::ConstDcl(const_dcl) => const_dcl.render(renderer),
             hir::Definition::ExceptDcl(except_dcl) => except_dcl.render(renderer),
-            hir::Definition::InterfaceDcl(interface) => interface.render(renderer),
+            hir::Definition::InterfaceDcl(interface) => Err(unsupported_interface_error(interface)),
             hir::Definition::Pragma(_) => Ok(RustRenderOutput::empty()),
         }
     }
+}
+
+/// Returns an error because the legacy Rust target emits DDS-style request/reply
+/// plumbing for interfaces, which is no longer supported.
+fn unsupported_interface_error(interface: &hir::InterfaceDcl) -> IdlcError {
+    let ident = match &interface.decl {
+        hir::InterfaceDclInner::InterfaceForwardDcl(forward) => rust_ident(&forward.ident),
+        hir::InterfaceDclInner::InterfaceDef(def) => rust_ident(&def.header.ident),
+    };
+    IdlcError::fmt(format!(
+        "rust target does not support the `interface {ident}` declaration; use the rust-axum target for HTTP services"
+    ))
 }
 
 pub(crate) fn render_module_body(

@@ -13,16 +13,3 @@ struct Pet {
     @removed(ApiVersions::v2)
     string color;
 };
-
-interface Pets {
-    @get(path = "/pets/{id}")
-    Pet get(@path string id);
-
-    @added(ApiVersions::v2)
-    @get(path = "/pets")
-    sequence<Pet> list();
-
-    @removed(ApiVersions::v2)
-    @get(path = "/legacy")
-    string legacy();
-};
