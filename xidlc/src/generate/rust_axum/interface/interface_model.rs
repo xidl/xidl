@@ -119,6 +119,10 @@ pub(crate) struct RepresentationContext {
     pub(crate) variant: String,
     pub(crate) content_type: String,
     pub(crate) ty: String,
+    pub(crate) wire_ty: String,
+    pub(crate) encode_expr: String,
+    pub(crate) decode_expr: String,
+    pub(crate) maximum: Option<i64>,
     pub(crate) is_byte: bool,
 }
 
@@ -129,6 +133,7 @@ pub(crate) struct RaisesContext {
     pub(crate) variant: String,
     /// Exception struct path as written in the IDL (resolves in-module).
     pub(crate) ty: String,
+    pub(crate) wire_ty: String,
     pub(crate) status: u16,
     pub(crate) headers: Vec<ExceptionMemberContext>,
     pub(crate) cookies: Vec<ExceptionMemberContext>,
@@ -150,6 +155,7 @@ pub(crate) struct ExceptionMemberContext {
     pub(crate) item_is_primitive: bool,
     /// `@optional`: the field is `Option<_>`; absent means no header.
     pub(crate) optional: bool,
+    pub(crate) maximum: Option<i64>,
 }
 
 #[derive(Serialize, Clone)]
@@ -165,10 +171,13 @@ pub(crate) struct ParamContext {
     pub(crate) serde_rename: Option<String>,
     /// Sequences encode an empty list with zero parameter occurrences.
     pub(crate) is_sequence: bool,
+    pub(crate) maximum: Option<i64>,
     /// A float arrives directly or as the sequence element: non-finite text
     /// (`inf`, `NaN`) must fail extraction instead of reaching the handler.
     pub(crate) is_floating: bool,
     pub(crate) header_item_ty: String,
+    pub(crate) in_item_ty: String,
+    pub(crate) out_item_ty: String,
     pub(crate) header_item_is_string: bool,
     pub(crate) header_item_is_primitive: bool,
     pub(crate) cookie_item_ty: String,

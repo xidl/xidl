@@ -82,6 +82,7 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for FilesGetMetaError {
                 ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
             }
             Self::NotFound(err) => {
+                let err: __xidl_out_Files::NotFound = err.into();
                 let body = match xidl_rust_axum::serde_json::to_vec(&err) {
                     Ok(body) => body,
                     Err(err) => {
@@ -144,6 +145,7 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for FilesGetFileError {
                 ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
             }
             Self::NotFound(err) => {
+                let err: __xidl_out_Files::NotFound = err.into();
                 let body = match xidl_rust_axum::serde_json::to_vec(&err) {
                     Ok(body) => body,
                     Err(err) => {
@@ -190,6 +192,62 @@ pub(super) mod __xidl_in_Files {
 )]
 pub(super) mod __xidl_out_Files {
     use super::*;
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub struct FileMeta {
+        pub id: String,
+        pub etag: String,
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<super::FileMeta> for FileMeta {
+        fn from(value: super::FileMeta) -> Self {
+            Self {
+                id: value.id,
+                etag: value.etag,
+            }
+        }
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<FileMeta> for super::FileMeta {
+        fn from(value: FileMeta) -> Self {
+            Self {
+                id: value.id,
+                etag: value.etag,
+            }
+        }
+    }
+    impl Default for FileMeta {
+        fn default() -> Self {
+            super::FileMeta::default().into()
+        }
+    }
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub struct NotFound {
+        pub code: u32,
+        pub msg: String,
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<super::NotFound> for NotFound {
+        fn from(value: super::NotFound) -> Self {
+            Self {
+                code: value.code,
+                msg: value.msg,
+            }
+        }
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<NotFound> for super::NotFound {
+        fn from(value: NotFound) -> Self {
+            Self {
+                code: value.code,
+                msg: value.msg,
+            }
+        }
+    }
+    impl Default for NotFound {
+        fn default() -> Self {
+            super::NotFound::default().into()
+        }
+    }
 }
 #[derive(::serde::Serialize, ::core::default::Default)]
 struct FilesGetMetaRequestOutQuery {
@@ -350,6 +408,7 @@ where
                             ) {
                                 return Err(xidl_rust_axum::Error::not_acceptable());
                             }
+                            let payload: __xidl_out_Files::FileMeta = payload.into();
                             let body = xidl_rust_axum::SerializeFactory::new(
                                     xidl_rust_axum::http::ContentType::Json.as_str(),
                                 )
@@ -423,8 +482,12 @@ where
         let path: String = path;
         let mut resp = match svc.get_file(path).await {
             Ok(resp_value) => {
+                let etag_wire: String = {
+                    let etag = resp_value.etag.clone();
+                    etag
+                };
                 let etag_header_value: String = {
-                    let value = &resp_value.etag;
+                    let value = &etag_wire;
                     value.clone()
                 };
                 let mut resp = {
@@ -438,6 +501,7 @@ where
                             ) {
                                 return Err(xidl_rust_axum::Error::not_acceptable());
                             }
+                            let payload: __xidl_out_Files::FileMeta = payload.into();
                             let body = xidl_rust_axum::SerializeFactory::new(
                                     xidl_rust_axum::http::ContentType::Json.as_str(),
                                 )
@@ -484,11 +548,11 @@ where
                 let header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
                         "ETag".as_bytes(),
                     )
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
                         &etag_header_value,
                     )
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 resp.headers_mut().insert(header_name, header_value);
                 resp
             }
@@ -579,10 +643,11 @@ impl FilesClient {
                     .bytes()
                     .await
                     .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-                let payload: FileMeta = xidl_rust_axum::DeserializeFactory::new(
+                let payload: __xidl_out_Files::FileMeta = xidl_rust_axum::DeserializeFactory::new(
                         xidl_rust_axum::http::ContentType::Json.as_str(),
                     )
                     .from_slice(&body)?;
+                let payload: FileMeta = payload.into();
                 return Ok(FileResponse::Json(payload));
             }
             if xidl_rust_axum::http::media_type_eq(
@@ -607,14 +672,14 @@ impl FilesClient {
             let status = resp.status();
             if status.as_u16() == 404 {
                 let headers = resp.headers().clone();
-                let mut value: NotFound = resp
-                    .json::<NotFound>()
+                let mut value: __xidl_out_Files::NotFound = resp
+                    .json::<__xidl_out_Files::NotFound>()
                     .await
                     .map_err(|err| xidl_rust_axum::Error::new(
                         status.as_u16(),
                         format!("exception NotFound body: {err}"),
                     ))?;
-                return Err(FilesGetMetaError::NotFound(value));
+                return Err(FilesGetMetaError::NotFound(value.into()));
             }
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(
@@ -680,6 +745,7 @@ impl FilesClient {
                 }
                 None => ::core::default::Default::default(),
             };
+            let etag: String = etag;
             if xidl_rust_axum::http::media_type_eq(
                 &content_type,
                 xidl_rust_axum::http::ContentType::Json.as_str(),
@@ -688,10 +754,11 @@ impl FilesClient {
                     .bytes()
                     .await
                     .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-                let payload: FileMeta = xidl_rust_axum::DeserializeFactory::new(
+                let payload: __xidl_out_Files::FileMeta = xidl_rust_axum::DeserializeFactory::new(
                         xidl_rust_axum::http::ContentType::Json.as_str(),
                     )
                     .from_slice(&body)?;
+                let payload: FileMeta = payload.into();
                 return Ok(FilesGetFileResponse {
                     r#return: FileResponse::Json(payload),
                     etag,
@@ -722,14 +789,14 @@ impl FilesClient {
             let status = resp.status();
             if status.as_u16() == 404 {
                 let headers = resp.headers().clone();
-                let mut value: NotFound = resp
-                    .json::<NotFound>()
+                let mut value: __xidl_out_Files::NotFound = resp
+                    .json::<__xidl_out_Files::NotFound>()
                     .await
                     .map_err(|err| xidl_rust_axum::Error::new(
                         status.as_u16(),
                         format!("exception NotFound body: {err}"),
                     ))?;
-                return Err(FilesGetFileError::NotFound(value));
+                return Err(FilesGetFileError::NotFound(value.into()));
             }
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(

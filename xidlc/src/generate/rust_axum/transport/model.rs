@@ -6,6 +6,7 @@ use xidl_parser::hir;
 #[derive(Clone)]
 pub enum TransportTypeDef {
     Struct(hir::StructDcl),
+    Exception(hir::ExceptDcl),
     Enum(hir::EnumDcl),
     Typedef {
         ty: hir::TypedefType,
@@ -66,6 +67,24 @@ pub struct TransportFieldContext {
     pub serde_rename: Option<String>,
     pub optional: bool,
     pub flatten: bool,
+    pub serde_skip: bool,
     pub encode_expr: String,
     pub decode_expr: String,
+}
+
+impl TransportTypeDef {
+    /// Shares record projection without changing exception declaration ownership.
+    pub(super) fn record(&self) -> Option<std::borrow::Cow<'_, hir::StructDcl>> {
+        match self {
+            Self::Struct(def) => Some(std::borrow::Cow::Borrowed(def)),
+            Self::Exception(def) => Some(std::borrow::Cow::Owned(hir::StructDcl {
+                annotations: def.annotations.clone(),
+                ident: def.ident.clone(),
+                parent: Vec::new(),
+                member: def.member.clone(),
+                inherited: Vec::new(),
+            })),
+            _ => None,
+        }
+    }
 }

@@ -2,6 +2,7 @@ use super::interface_types::{header_item_is_primitive, header_item_is_string};
 use super::{ExceptionMemberContext, RaisesContext, RenderEnv};
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::rust::util::rust_ident;
+use crate::generate::rust_axum::transport::{TransportDirection, TransportTracker};
 use convert_case::Casing;
 use xidl_parser::rest_hir::HttpOperation;
 
@@ -12,6 +13,7 @@ impl RaisesContext {
     pub(super) fn for_operation(
         http_op: &HttpOperation,
         env: RenderEnv<'_>,
+        transport: &mut TransportTracker,
     ) -> IdlcResult<Vec<RaisesContext>> {
         if http_op.meta.raises.is_empty() {
             return Ok(Vec::new());
@@ -35,30 +37,63 @@ impl RaisesContext {
             let members = |source: &Vec<xidl_parser::rest_hir::HttpExceptionMember>| {
                 source
                     .iter()
-                    .map(|member| ExceptionMemberContext {
-                        field: rust_ident(&member.field),
-                        wire_name: member.wire_name.clone(),
-                        ty: if member.is_multi {
-                            format!("Vec<{}>", member_env.header_item_ty(&member.ty))
-                        } else if member.optional {
-                            format!("Option<{}>", member_env.axum_type(&member.ty))
-                        } else {
-                            member_env.axum_type(&member.ty)
-                        },
-                        is_multi: member.is_multi,
-                        item_ty: member_env.header_item_ty(&member.ty),
-                        item_is_string: header_item_is_string(&member.ty),
-                        item_is_primitive: header_item_is_primitive(&member.ty),
-                        optional: member.optional,
+                    .map(|member| {
+                        let item = match &member.ty {
+                            xidl_parser::hir::TypeSpec::SequenceType(sequence) => {
+                                sequence.ty.as_ref()
+                            }
+                            ty => ty,
+                        };
+                        let item_ty = transport.map_type(
+                            item,
+                            TransportDirection::Out,
+                            member_env.scope(),
+                        )?;
+                        let wire_ty = transport.map_type(
+                            &member.ty,
+                            TransportDirection::Out,
+                            member_env.scope(),
+                        )?;
+                        Ok(ExceptionMemberContext {
+                            field: rust_ident(&member.field),
+                            wire_name: member.wire_name.clone(),
+                            ty: if member.is_multi {
+                                format!("Vec<{item_ty}>")
+                            } else if member.optional {
+                                format!("Option<{wire_ty}>")
+                            } else {
+                                wire_ty
+                            },
+                            is_multi: member.is_multi,
+                            item_ty,
+                            item_is_string: header_item_is_string(&member.ty),
+                            item_is_primitive: header_item_is_primitive(&member.ty),
+                            optional: member.optional,
+                            maximum: member_env.scope().sequence_maximum(&member.ty),
+                        })
                     })
-                    .collect()
+                    .collect::<IdlcResult<Vec<_>>>()
             };
+            let mut members = members;
+            let headers = members(&exception.headers)?;
+            let cookies = members(&exception.cookies)?;
+            let mut name = refer.module_path.clone();
+            name.push(refer.ident.clone());
+            let wire_ty = transport.map_type(
+                &xidl_parser::hir::TypeSpec::ScopedName(xidl_parser::hir::ScopedName {
+                    is_root: true,
+                    name,
+                }),
+                TransportDirection::Out,
+                env.scope(),
+            )?;
             out.push(RaisesContext {
                 variant,
                 ty: env.relative_type_path(&refer.module_path, &refer.ident),
+                wire_ty,
                 status: exception.status,
-                headers: members(&exception.headers),
-                cookies: members(&exception.cookies),
+                headers,
+                cookies,
                 has_body: !exception.body.is_empty(),
                 deprecated: exception.deprecated.is_some(),
             });

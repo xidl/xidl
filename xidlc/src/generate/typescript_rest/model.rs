@@ -125,6 +125,7 @@ impl TsRaisesContext {
 
 #[derive(Clone, Serialize)]
 pub(super) struct TsExceptionMemberContext {
+    pub(super) schema: ZodSchema,
     pub(super) item_is_string: bool,
     pub(super) field: String,
     pub(super) wire_name: String,
@@ -175,6 +176,7 @@ pub(super) struct ClientMethodContext {
     pub(super) body_entries: Vec<RequestPayloadEntry>,
     pub(super) body_single: Option<String>,
     pub(super) response_schema_ref: Option<String>,
+    pub(super) response_value_schema: Option<ZodSchema>,
     /// The response schema is a bare model schema, so the body parses without
     /// response wrapping.
     pub(super) response_schema_is_model: bool,
@@ -213,6 +215,7 @@ pub(super) struct ServerMethodContext {
     pub(super) request_schema_ref: Option<String>,
     pub(super) body_schema_ref: Option<String>,
     pub(super) response_schema_ref: Option<String>,
+    pub(super) response_value_schema: Option<ZodSchema>,
     pub(super) path: String,
     pub(super) paths: Vec<String>,
     pub(super) http_method: String,
@@ -253,6 +256,7 @@ pub(super) struct MethodModel {
     pub(super) request_payload: Vec<RequestPayloadEntry>,
     pub(super) response_name: Option<String>,
     pub(super) response_schema_ref: Option<String>,
+    pub(super) response_value_schema: Option<ZodSchema>,
     pub(super) request_content_type: String,
     pub(super) response_content_type: String,
     pub(super) path: String,
@@ -314,6 +318,7 @@ impl MethodModel {
             body_entries: self.body_entries,
             body_single: self.body_single,
             response_schema_ref: self.response_schema_ref.clone(),
+            response_value_schema: self.response_value_schema.clone(),
             response_schema_is_model: self
                 .response_schema_ref
                 .as_deref()
@@ -357,6 +362,7 @@ impl MethodModel {
             request_schema_ref: self.request_schema_ref,
             body_schema_ref: self.body_schema_ref,
             response_schema_ref: self.response_schema_ref,
+            response_value_schema: self.response_value_schema,
             path: self.path,
             paths: self.paths,
             http_method: self.http_method,

@@ -364,6 +364,7 @@ impl ReportApiClient {
         lang: Option<String>,
         trace_id: String,
     ) -> Result<String, xidl_rust_axum::Error> {
+        let trace_id: String = trace_id;
         let xidl_path = "/reports/{id}".to_string();
         let xidl_path = xidl_path.replace("{id}", &id.to_string());
         let mut req = self

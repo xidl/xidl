@@ -1,3 +1,4 @@
+{% from "interface/sequence_limits.rs.j2" import check as check_sequence %}
 pub struct {{ ident }}Server<T> {
     inner: ::std::sync::Arc<T>,
 }
@@ -251,51 +252,59 @@ T: {{ ident }} + Send + Sync + 'static,
                         ).await {
                             Ok(resp_value) => {
                                 {% if method.response_header_params | length > 0 or method.response_cookie_params | length > 0 %}
+                                    {% for param in method.response_header_params + method.response_cookie_params %}
+                                        {% set sequence_value = "resp_value." ~ param.name if method.response_struct else "resp_value" %}
+                                        let {{ param.name }}_wire: {{ param.out_ty }} = {
+                                            let {{ param.name }} = {{ sequence_value }}.clone();
+                                            {{ param.out_expr }}
+                                        };
+                                        {{ check_sequence(param.name ~ "_wire", param.maximum, 500, param.optional) }}
+                                    {% endfor %}
                                     {% for param in method.response_header_params %}
                                         {% if method.response_struct %}
                                             {% if param.is_sequence %}
                                                 let {{ param.name }}_header_values: Vec<String> = {
-                                                    let values = &resp_value.{{ param.name }};
+                                                    let values = &{{ param.name }}_wire;
                                                     values.iter().map(|value| {
                                                         {% if param.header_item_is_string %}value.clone(){% elif param.header_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
-                                                        .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+                                                        .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?{% endif %}
                                                     }).collect()
                                                 };
                                             {% elif param.optional %}
                                                 let {{ param.name }}_header_value: Option<String> = {
-                                                    let value = &resp_value.{{ param.name }};
+                                                    let value = &{{ param.name }}_wire;
                                                     {% if param.header_item_is_string %}value.clone(){% elif param.header_item_is_primitive %}value.as_ref().map(|value| value.to_string()){% else %}value.as_ref().map(|value| xidl_rust_axum::serde_json::to_string(value))
                                                     .transpose()
-                                                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+                                                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?{% endif %}
                                                 };
                                             {% else %}
                                                 let {{ param.name }}_header_value: String = {
-                                                    let value = &resp_value.{{ param.name }};
+                                                    let value = &{{ param.name }}_wire;
                                                     {% if param.header_item_is_string %}value.clone(){% elif param.header_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
-                                                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+                                                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?{% endif %}
                                                 };
                                             {% endif %}
                                         {% elif method.response_params | length == 1 and not method.response_include_return %}
                                             {% if param.is_sequence %}
                                                 let {{ param.name }}_header_values: Vec<String> = {
-                                                    let values = &resp_value;
+                                                    let values = &{{ param.name }}_wire;
                                                     values.iter().map(|value| {
                                                         {% if param.header_item_is_string %}value.clone(){% elif param.header_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
-                                                        .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+                                                        .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?{% endif %}
                                                     }).collect()
                                                 };
                                             {% elif param.optional %}
                                                 let {{ param.name }}_header_value: Option<String> = {
-                                                    let value = &resp_value;
+                                                    let value = &{{ param.name }}_wire;
                                                     {% if param.header_item_is_string %}value.clone(){% elif param.header_item_is_primitive %}value.as_ref().map(|value| value.to_string()){% else %}value.as_ref().map(|value| xidl_rust_axum::serde_json::to_string(value))
                                                     .transpose()
-                                                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+                                                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?{% endif %}
                                                 };
                                             {% else %}
                                                 let {{ param.name }}_header_value: String = {
-                                                    let value = &resp_value;
+                                                    let value = &{{ param.name }}_wire;
                                                     {% if param.header_item_is_string %}value.clone(){% elif param.header_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
-                                                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+                                                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?{% endif %}
                                                 };
                                             {% endif %}
                                         {% endif %}
@@ -304,24 +313,24 @@ T: {{ ident }} + Send + Sync + 'static,
                                         {% if method.response_struct or (method.response_params | length == 1 and not method.response_include_return) %}
                                             {% if param.is_sequence %}
                                                 let {{ param.name }}_cookie_values: Vec<String> = {
-                                                    let values = &resp_value{% if method.response_struct %}.{{ param.name }}{% endif %};
+                                                    let values = &{{ param.name }}_wire;
                                                     values.iter().map(|value| {
                                                         {% if param.cookie_item_is_string %}value.clone(){% elif param.cookie_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
-                                                        .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+                                                        .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?{% endif %}
                                                     }).collect()
                                                 };
                                             {% elif param.optional %}
                                                 let {{ param.name }}_cookie_value: Option<String> = {
-                                                    let value = &resp_value{% if method.response_struct %}.{{ param.name }}{% endif %};
+                                                    let value = &{{ param.name }}_wire;
                                                     {% if param.cookie_item_is_string %}value.clone(){% elif param.cookie_item_is_primitive %}value.as_ref().map(|value| value.to_string()){% else %}value.as_ref().map(xidl_rust_axum::serde_json::to_string)
                                                     .transpose()
-                                                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+                                                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?{% endif %}
                                                 };
                                             {% else %}
                                                 let {{ param.name }}_cookie_value: String = {
-                                                    let value = &resp_value{% if method.response_struct %}.{{ param.name }}{% endif %};
+                                                    let value = &{{ param.name }}_wire;
                                                     {% if param.cookie_item_is_string %}value.clone(){% elif param.cookie_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
-                                                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+                                                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?{% endif %}
                                                 };
                                             {% endif %}
                                         {% endif %}
@@ -344,6 +353,7 @@ T: {{ ident }} + Send + Sync + 'static,
                                                         return Err(xidl_rust_axum::Error::not_acceptable());
                                                     }
                                                     {% if repr.is_byte %}
+                                                        {{ check_sequence("payload", repr.maximum, 500) }}
                                                         ::xidl_rust_axum::axum::response::Response::builder()
                                                         .status(::xidl_rust_axum::axum::http::StatusCode::from_u16({{ method.response_status }}).unwrap())
                                                         .header(
@@ -353,6 +363,7 @@ T: {{ ident }} + Send + Sync + 'static,
                                                         .body(::xidl_rust_axum::axum::body::Body::from(payload))
                                                         .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?
                                                     {% else %}
+                                                        let payload: {{ repr.wire_ty }} = {{ repr.encode_expr }};
                                                         let body = xidl_rust_axum::SerializeFactory::new(xidl_rust_axum::http::ContentType::{{ repr.variant }}.as_str())
                                                         .to_vec(&payload)?;
                                                         ::xidl_rust_axum::axum::response::Response::builder()
@@ -403,22 +414,22 @@ T: {{ ident }} + Send + Sync + 'static,
                                         {% for param in method.response_header_params %}
                                             let header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
                                             "{{ param.wire_name }}".as_bytes(),
-                                            ).map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                                            ).map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                                             {% if param.is_sequence %}
                                                 for value_str in {{ param.name }}_header_values {
                                                     let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&value_str)
-                                                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                                                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                                                     resp.headers_mut().append(header_name.clone(), header_value);
                                                 }
                                             {% elif param.optional %}
                                                 if let Some(value_str) = &{{ param.name }}_header_value {
                                                     let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(value_str)
-                                                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                                                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                                                     resp.headers_mut().insert(header_name, header_value);
                                                 }
                                             {% else %}
                                                 let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&{{ param.name }}_header_value)
-                                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                                                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                                                 resp.headers_mut().insert(header_name, header_value);
                                             {% endif %}
                                         {% endfor %}
@@ -429,20 +440,20 @@ T: {{ ident }} + Send + Sync + 'static,
                                                 for value_str in {{ param.name }}_cookie_values {
                                                     let cookie_str = xidl_rust_axum::cookie::Cookie::new("{{ param.wire_name }}", value_str).encoded().to_string();
                                                     let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&cookie_str)
-                                                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                                                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                                                     resp.headers_mut().append(::xidl_rust_axum::axum::http::header::SET_COOKIE, header_value);
                                                 }
                                             {% elif param.optional %}
                                                 if let Some(value_str) = {{ param.name }}_cookie_value {
                                                     let cookie_str = xidl_rust_axum::cookie::Cookie::new("{{ param.wire_name }}", value_str).encoded().to_string();
                                                     let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&cookie_str)
-                                                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                                                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                                                     resp.headers_mut().append(::xidl_rust_axum::axum::http::header::SET_COOKIE, header_value);
                                                 }
                                             {% else %}
                                                 let cookie_str = xidl_rust_axum::cookie::Cookie::new("{{ param.wire_name }}", {{ param.name }}_cookie_value).encoded().to_string();
                                                 let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&cookie_str)
-                                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                                                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                                                 resp.headers_mut().append(::xidl_rust_axum::axum::http::header::SET_COOKIE, header_value);
                                             {% endif %}
                                         {% endfor %}

@@ -101,6 +101,7 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for EnvelopeApiGetFileError 
                 ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
             }
             Self::NotFound(err) => {
+                let err: __xidl_out_EnvelopeApi::NotFound = err.into();
                 let body = match xidl_rust_axum::serde_json::to_vec(&err) {
                     Ok(body) => body,
                     Err(err) => {
@@ -163,6 +164,7 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for EnvelopeApiHeadFileError
                 ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
             }
             Self::HeadMissing(err) => {
+                let err: __xidl_out_EnvelopeApi::HeadMissing = err.into();
                 let headers = (|| -> xidl_rust_axum::Result<
                     ::xidl_rust_axum::axum::http::HeaderMap,
                 > {
@@ -236,6 +238,7 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for EnvelopeApiGetFreshError
                 ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
             }
             Self::NotModified(err) => {
+                let err: __xidl_out_EnvelopeApi::NotModified = err.into();
                 let headers = (|| -> xidl_rust_axum::Result<
                     ::xidl_rust_axum::axum::http::HeaderMap,
                 > {
@@ -309,6 +312,7 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for EnvelopeApiDeleteFileErr
                 ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
             }
             Self::PreconditionFailed(err) => {
+                let err: __xidl_out_EnvelopeApi::PreconditionFailed = err.into();
                 let headers = (|| -> xidl_rust_axum::Result<
                     ::xidl_rust_axum::axum::http::HeaderMap,
                 > {
@@ -382,6 +386,171 @@ pub(super) mod __xidl_in_EnvelopeApi {
 )]
 pub(super) mod __xidl_out_EnvelopeApi {
     use super::*;
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub struct HeadMissing {
+        #[serde(skip)]
+        #[serde(rename = "X-Error-Code")]
+        pub code: String,
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<super::HeadMissing> for HeadMissing {
+        fn from(value: super::HeadMissing) -> Self {
+            Self { code: value.code }
+        }
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<HeadMissing> for super::HeadMissing {
+        fn from(value: HeadMissing) -> Self {
+            Self { code: value.code }
+        }
+    }
+    impl Default for HeadMissing {
+        fn default() -> Self {
+            super::HeadMissing::default().into()
+        }
+    }
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub struct NotFound {
+        pub code: u32,
+        pub msg: String,
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<super::NotFound> for NotFound {
+        fn from(value: super::NotFound) -> Self {
+            Self {
+                code: value.code,
+                msg: value.msg,
+            }
+        }
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<NotFound> for super::NotFound {
+        fn from(value: NotFound) -> Self {
+            Self {
+                code: value.code,
+                msg: value.msg,
+            }
+        }
+    }
+    impl Default for NotFound {
+        fn default() -> Self {
+            super::NotFound::default().into()
+        }
+    }
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub struct NotModified {
+        #[serde(skip)]
+        #[serde(rename = "ETag")]
+        pub etag: String,
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<super::NotModified> for NotModified {
+        fn from(value: super::NotModified) -> Self {
+            Self { etag: value.etag }
+        }
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<NotModified> for super::NotModified {
+        fn from(value: NotModified) -> Self {
+            Self { etag: value.etag }
+        }
+    }
+    impl Default for NotModified {
+        fn default() -> Self {
+            super::NotModified::default().into()
+        }
+    }
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub struct PreconditionFailed {
+        #[serde(skip)]
+        #[serde(rename = "ETag")]
+        pub etag: String,
+        pub code: u32,
+        pub msg: String,
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<super::PreconditionFailed> for PreconditionFailed {
+        fn from(value: super::PreconditionFailed) -> Self {
+            Self {
+                etag: value.etag,
+                code: value.code,
+                msg: value.msg,
+            }
+        }
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<PreconditionFailed> for super::PreconditionFailed {
+        fn from(value: PreconditionFailed) -> Self {
+            Self {
+                etag: value.etag,
+                code: value.code,
+                msg: value.msg,
+            }
+        }
+    }
+    impl Default for PreconditionFailed {
+        fn default() -> Self {
+            super::PreconditionFailed::default().into()
+        }
+    }
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub struct representations_FileDetails {
+        pub label: String,
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<super::representations::FileDetails> for representations_FileDetails {
+        fn from(value: super::representations::FileDetails) -> Self {
+            Self { label: value.label }
+        }
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<representations_FileDetails> for super::representations::FileDetails {
+        fn from(value: representations_FileDetails) -> Self {
+            Self { label: value.label }
+        }
+    }
+    impl Default for representations_FileDetails {
+        fn default() -> Self {
+            super::representations::FileDetails::default().into()
+        }
+    }
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub struct representations_FileMeta {
+        #[serde(rename = "wire_id")]
+        pub id: String,
+        pub etag: String,
+        #[serde(flatten)]
+        pub details: __xidl_out_EnvelopeApi::representations_FileDetails,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        pub note: Option<String>,
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<super::representations::FileMeta> for representations_FileMeta {
+        fn from(value: super::representations::FileMeta) -> Self {
+            Self {
+                id: value.id,
+                etag: value.etag,
+                details: value.details.into(),
+                note: value.note,
+            }
+        }
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<representations_FileMeta> for super::representations::FileMeta {
+        fn from(value: representations_FileMeta) -> Self {
+            Self {
+                id: value.id,
+                etag: value.etag,
+                details: value.details.into(),
+                note: value.note,
+            }
+        }
+    }
+    impl Default for representations_FileMeta {
+        fn default() -> Self {
+            super::representations::FileMeta::default().into()
+        }
+    }
 }
 #[derive(::serde::Serialize, ::core::default::Default)]
 struct EnvelopeApiGetFileRequestOutQuery {
@@ -585,16 +754,28 @@ where
         let key: String = key;
         let mut resp = match svc.get_file(key).await {
             Ok(resp_value) => {
+                let etag_wire: String = {
+                    let etag = resp_value.etag.clone();
+                    etag
+                };
+                let tags_wire: Vec<String> = {
+                    let tags = resp_value.tags.clone();
+                    tags.into_iter().collect()
+                };
+                let cached_wire: bool = {
+                    let cached = resp_value.cached.clone();
+                    cached
+                };
                 let etag_header_value: String = {
-                    let value = &resp_value.etag;
+                    let value = &etag_wire;
                     value.clone()
                 };
                 let tags_header_values: Vec<String> = {
-                    let values = &resp_value.tags;
+                    let values = &tags_wire;
                     values.iter().map(|value| { value.clone() }).collect()
                 };
                 let cached_cookie_value: String = {
-                    let value = &resp_value.cached;
+                    let value = &cached_wire;
                     value.to_string()
                 };
                 let mut resp = {
@@ -608,6 +789,8 @@ where
                             ) {
                                 return Err(xidl_rust_axum::Error::not_acceptable());
                             }
+                            let payload: __xidl_out_EnvelopeApi::representations_FileMeta = payload
+                                .into();
                             let body = xidl_rust_axum::SerializeFactory::new(
                                     xidl_rust_axum::http::ContentType::Json.as_str(),
                                 )
@@ -656,6 +839,7 @@ where
                             ) {
                                 return Err(xidl_rust_axum::Error::not_acceptable());
                             }
+                            let payload: String = payload;
                             let body = xidl_rust_axum::SerializeFactory::new(
                                     xidl_rust_axum::http::ContentType::Text.as_str(),
                                 )
@@ -680,22 +864,22 @@ where
                 let header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
                         "ETag".as_bytes(),
                     )
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
                         &etag_header_value,
                     )
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 resp.headers_mut().insert(header_name, header_value);
                 let header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
                         "X-Tag".as_bytes(),
                     )
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 for value_str in tags_header_values {
                     let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
                             &value_str,
                         )
                         .map_err(|err| xidl_rust_axum::Error::new(
-                            400,
+                            500,
                             format!("{err:?}"),
                         ))?;
                     resp.headers_mut().append(header_name.clone(), header_value);
@@ -709,7 +893,7 @@ where
                 let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
                         &cookie_str,
                     )
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 resp.headers_mut()
                     .append(
                         ::xidl_rust_axum::axum::http::header::SET_COOKIE,
@@ -745,16 +929,28 @@ where
         let key: String = key;
         let mut resp = match svc.head_file(key).await {
             Ok(resp_value) => {
+                let etag_wire: String = {
+                    let etag = resp_value.etag.clone();
+                    etag
+                };
+                let size_wire: u64 = {
+                    let size = resp_value.size.clone();
+                    size
+                };
+                let cached_wire: bool = {
+                    let cached = resp_value.cached.clone();
+                    cached
+                };
                 let etag_header_value: String = {
-                    let value = &resp_value.etag;
+                    let value = &etag_wire;
                     value.clone()
                 };
                 let size_header_value: String = {
-                    let value = &resp_value.size;
+                    let value = &size_wire;
                     value.to_string()
                 };
                 let cached_cookie_value: String = {
-                    let value = &resp_value.cached;
+                    let value = &cached_wire;
                     value.to_string()
                 };
                 let mut resp = {
@@ -766,20 +962,20 @@ where
                 let header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
                         "ETag".as_bytes(),
                     )
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
                         &etag_header_value,
                     )
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 resp.headers_mut().insert(header_name, header_value);
                 let header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
                         "X-Size".as_bytes(),
                     )
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
                         &size_header_value,
                     )
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 resp.headers_mut().insert(header_name, header_value);
                 let cookie_str = xidl_rust_axum::cookie::Cookie::new(
                         "cached",
@@ -790,7 +986,7 @@ where
                 let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
                         &cookie_str,
                     )
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 resp.headers_mut()
                     .append(
                         ::xidl_rust_axum::axum::http::header::SET_COOKIE,
@@ -976,6 +1172,7 @@ impl EnvelopeApiClient {
                 }
                 None => ::core::default::Default::default(),
             };
+            let etag: String = etag;
             let mut tags: Vec<String> = Vec::new();
             for header_value in headers.get_all("X-Tag").iter() {
                 let header_str = header_value
@@ -984,6 +1181,7 @@ impl EnvelopeApiClient {
                 let parsed: String = header_str.to_string();
                 tags.push(parsed);
             }
+            let tags: Vec<String> = tags.into_iter().collect();
             let cookie_map = xidl_rust_axum::http::parse_set_cookies(
                 headers.get_all(::xidl_rust_axum::reqwest::header::SET_COOKIE).iter(),
             );
@@ -1001,6 +1199,7 @@ impl EnvelopeApiClient {
                 }
                 None => ::core::default::Default::default(),
             };
+            let cached: bool = cached;
             if xidl_rust_axum::http::media_type_eq(
                 &content_type,
                 xidl_rust_axum::http::ContentType::Json.as_str(),
@@ -1009,10 +1208,11 @@ impl EnvelopeApiClient {
                     .bytes()
                     .await
                     .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-                let payload: representations::FileMeta = xidl_rust_axum::DeserializeFactory::new(
+                let payload: __xidl_out_EnvelopeApi::representations_FileMeta = xidl_rust_axum::DeserializeFactory::new(
                         xidl_rust_axum::http::ContentType::Json.as_str(),
                     )
                     .from_slice(&body)?;
+                let payload: representations::FileMeta = payload.into();
                 return Ok(EnvelopeApiGetFileResponse {
                     r#return: representations::FileResponse::Json(payload),
                     etag,
@@ -1048,6 +1248,7 @@ impl EnvelopeApiClient {
                         xidl_rust_axum::http::ContentType::Text.as_str(),
                     )
                     .from_slice(&body)?;
+                let payload: String = payload;
                 return Ok(EnvelopeApiGetFileResponse {
                     r#return: representations::FileResponse::Text(payload),
                     etag,
@@ -1066,14 +1267,14 @@ impl EnvelopeApiClient {
             let status = resp.status();
             if status.as_u16() == 404 {
                 let headers = resp.headers().clone();
-                let mut value: NotFound = resp
-                    .json::<NotFound>()
+                let mut value: __xidl_out_EnvelopeApi::NotFound = resp
+                    .json::<__xidl_out_EnvelopeApi::NotFound>()
                     .await
                     .map_err(|err| xidl_rust_axum::Error::new(
                         status.as_u16(),
                         format!("exception NotFound body: {err}"),
                     ))?;
-                return Err(EnvelopeApiGetFileError::NotFound(value));
+                return Err(EnvelopeApiGetFileError::NotFound(value.into()));
             }
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(
@@ -1131,6 +1332,7 @@ impl EnvelopeApiClient {
                 }
                 None => ::core::default::Default::default(),
             };
+            let etag: String = etag;
             let size: u64 = match headers.get("X-Size") {
                 Some(header_value) => {
                     let header_str = header_value
@@ -1148,6 +1350,7 @@ impl EnvelopeApiClient {
                 }
                 None => ::core::default::Default::default(),
             };
+            let size: u64 = size;
             let cookie_map = xidl_rust_axum::http::parse_set_cookies(
                 headers.get_all(::xidl_rust_axum::reqwest::header::SET_COOKIE).iter(),
             );
@@ -1165,6 +1368,7 @@ impl EnvelopeApiClient {
                 }
                 None => ::core::default::Default::default(),
             };
+            let cached: bool = cached;
             Ok(EnvelopeApiHeadFileResponse {
                 etag,
                 size,
@@ -1174,7 +1378,8 @@ impl EnvelopeApiClient {
             let status = resp.status();
             if status.as_u16() == 404 {
                 let headers = resp.headers().clone();
-                let mut value: HeadMissing = ::core::default::Default::default();
+                let mut value: __xidl_out_EnvelopeApi::HeadMissing = HeadMissing::default()
+                    .into();
                 value.code = match headers.get("X-Error-Code") {
                     Some(header_value) => {
                         let header_str = header_value
@@ -1187,7 +1392,7 @@ impl EnvelopeApiClient {
                     }
                     None => ::core::default::Default::default(),
                 };
-                return Err(EnvelopeApiHeadFileError::HeadMissing(value));
+                return Err(EnvelopeApiHeadFileError::HeadMissing(value.into()));
             }
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(
@@ -1232,7 +1437,8 @@ impl EnvelopeApiClient {
             let status = resp.status();
             if status.as_u16() == 304 {
                 let headers = resp.headers().clone();
-                let mut value: NotModified = ::core::default::Default::default();
+                let mut value: __xidl_out_EnvelopeApi::NotModified = NotModified::default()
+                    .into();
                 value.etag = match headers.get("ETag") {
                     Some(header_value) => {
                         let header_str = header_value
@@ -1245,7 +1451,7 @@ impl EnvelopeApiClient {
                     }
                     None => ::core::default::Default::default(),
                 };
-                return Err(EnvelopeApiGetFreshError::NotModified(value));
+                return Err(EnvelopeApiGetFreshError::NotModified(value.into()));
             }
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(
@@ -1260,6 +1466,7 @@ impl EnvelopeApiClient {
         &self,
         if_match: String,
     ) -> Result<(), EnvelopeApiDeleteFileError> {
+        let if_match: String = if_match;
         let xidl_path = "/file".to_string();
         let mut req = self
             .client
@@ -1300,8 +1507,8 @@ impl EnvelopeApiClient {
             let status = resp.status();
             if status.as_u16() == 412 {
                 let headers = resp.headers().clone();
-                let mut value: PreconditionFailed = resp
-                    .json::<PreconditionFailed>()
+                let mut value: __xidl_out_EnvelopeApi::PreconditionFailed = resp
+                    .json::<__xidl_out_EnvelopeApi::PreconditionFailed>()
                     .await
                     .map_err(|err| xidl_rust_axum::Error::new(
                         status.as_u16(),
@@ -1319,7 +1526,7 @@ impl EnvelopeApiClient {
                     }
                     None => ::core::default::Default::default(),
                 };
-                return Err(EnvelopeApiDeleteFileError::PreconditionFailed(value));
+                return Err(EnvelopeApiDeleteFileError::PreconditionFailed(value.into()));
             }
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(

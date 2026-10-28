@@ -53,6 +53,9 @@ impl<'a> MemberProjection<'a> {
         };
         Ok(TransportFieldContext {
             flatten: crate::generate::utils::has_annotation(&self.member.annotations, "flatten"),
+            serde_skip: ["header", "cookie"]
+                .iter()
+                .any(|name| crate::generate::utils::has_annotation(&self.member.annotations, name)),
             name: name.clone(),
             ty,
             serde_rename: (wire != name).then_some(wire),

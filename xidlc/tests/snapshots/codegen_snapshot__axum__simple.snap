@@ -99,6 +99,11 @@ pub(super) mod __xidl_in_HttpService {
             Self { id: value.id }
         }
     }
+    impl Default for CreateSimpleResponse {
+        fn default() -> Self {
+            super::CreateSimpleResponse::default().into()
+        }
+    }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub struct HealthResponse {
         pub healthy: bool,
@@ -125,6 +130,11 @@ pub(super) mod __xidl_in_HttpService {
             }
         }
     }
+    impl Default for HealthResponse {
+        fn default() -> Self {
+            super::HealthResponse::default().into()
+        }
+    }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub struct MemoryResponse {
         pub allocated: u64,
@@ -148,6 +158,11 @@ pub(super) mod __xidl_in_HttpService {
             }
         }
     }
+    impl Default for MemoryResponse {
+        fn default() -> Self {
+            super::MemoryResponse::default().into()
+        }
+    }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub struct UdpStatsResponse {
         pub tx: u64,
@@ -163,6 +178,11 @@ pub(super) mod __xidl_in_HttpService {
     impl From<UdpStatsResponse> for super::UdpStatsResponse {
         fn from(value: UdpStatsResponse) -> Self {
             Self { tx: value.tx, rx: value.rx }
+        }
+    }
+    impl Default for UdpStatsResponse {
+        fn default() -> Self {
+            super::UdpStatsResponse::default().into()
         }
     }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
@@ -186,6 +206,11 @@ pub(super) mod __xidl_in_HttpService {
                 short: value.short,
                 long: value.long,
             }
+        }
+    }
+    impl Default for VersionResponse {
+        fn default() -> Self {
+            super::VersionResponse::default().into()
         }
     }
 }
@@ -214,6 +239,11 @@ pub(super) mod __xidl_out_HttpService {
             Self { id: value.id }
         }
     }
+    impl Default for CreateSimpleResponse {
+        fn default() -> Self {
+            super::CreateSimpleResponse::default().into()
+        }
+    }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub struct HealthResponse {
         pub healthy: bool,
@@ -240,6 +270,11 @@ pub(super) mod __xidl_out_HttpService {
             }
         }
     }
+    impl Default for HealthResponse {
+        fn default() -> Self {
+            super::HealthResponse::default().into()
+        }
+    }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub struct MemoryResponse {
         pub allocated: u64,
@@ -263,6 +298,11 @@ pub(super) mod __xidl_out_HttpService {
             }
         }
     }
+    impl Default for MemoryResponse {
+        fn default() -> Self {
+            super::MemoryResponse::default().into()
+        }
+    }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub struct UdpStatsResponse {
         pub tx: u64,
@@ -278,6 +318,11 @@ pub(super) mod __xidl_out_HttpService {
     impl From<UdpStatsResponse> for super::UdpStatsResponse {
         fn from(value: UdpStatsResponse) -> Self {
             Self { tx: value.tx, rx: value.rx }
+        }
+    }
+    impl Default for UdpStatsResponse {
+        fn default() -> Self {
+            super::UdpStatsResponse::default().into()
         }
     }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
@@ -301,6 +346,11 @@ pub(super) mod __xidl_out_HttpService {
                 short: value.short,
                 long: value.long,
             }
+        }
+    }
+    impl Default for VersionResponse {
+        fn default() -> Self {
+            super::VersionResponse::default().into()
         }
     }
 }

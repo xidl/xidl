@@ -10,7 +10,7 @@ import * as ifaceSchemas from "./{{ file_stem }}.iface.zod";
 import { z } from "zod";
 import {
     defineOperation,
-    {% if has_errors %}writeResponseBindings,
+    {% if has_errors %}writeResponseBindings, parseResponse,
     {% endif %}type Awaitable,
 } from "xidl-typescript-server";
 {% for block in blocks %}

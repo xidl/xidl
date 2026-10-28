@@ -97,6 +97,12 @@ fn collect_registry(defs: &[&hir::Definition], module_path: &[String], out: &mut
                 collect_registry(&nested, &next, out);
             }
             hir::Definition::TypeDcl(ty) => collect_type_decl(ty, module_path, out),
+            hir::Definition::ExceptDcl(def) => {
+                out.insert(
+                    canonical_name(module_path, &def.ident),
+                    TransportTypeDef::Exception(def.clone()),
+                );
+            }
             hir::Definition::ConstrTypeDcl(c) => {
                 collect_type_decl(&hir::TypeDcl::ConstrTypeDcl(c.clone()), module_path, out)
             }
@@ -155,12 +161,26 @@ pub(super) fn map_type_inner(
             "::xidl_rust_axum::serde_json::Value".to_string()
         }
         hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => "String".to_string(),
-        hir::TypeSpec::SequenceType(seq) => format!(
-            "Vec<{}>",
-            map_type_inner(&seq.ty, direction, module_name, scope, tracker)?
-        ),
+        hir::TypeSpec::SequenceType(seq) => {
+            let element = map_type_inner(&seq.ty, direction, module_name, scope, tracker)?;
+            match &seq.len {
+                Some(bound) => {
+                    let maximum = hir::const_expr_to_i64(&bound.0).ok_or_else(|| {
+                        IdlcError::rpc("unresolved sequence bound in Rust transport")
+                    })?;
+                    super::render::RustAxumRenderer::new()?
+                        .render_template(
+                            "interface/sequence_type.rs.j2",
+                            &serde_json::json!({ "element": element, "maximum": maximum }),
+                        )?
+                        .trim()
+                        .to_owned()
+                }
+                None => format!("Vec<{element}>"),
+            }
+        }
         hir::TypeSpec::MapType(map) => {
-            let key_ty = map_type_inner(&map.key, direction, module_name, scope, None)?;
+            let key_ty = scope.public_type(&map.key);
             let value_ty = map_type_inner(&map.value, direction, module_name, scope, tracker)?;
             format!("::std::collections::BTreeMap<{key_ty}, {value_ty}>")
         }
@@ -192,7 +212,9 @@ fn map_scoped(
         return Ok(scope.render(value));
     };
     match scope.registry.get(key.as_str()) {
-        Some(TransportTypeDef::Struct(_)) | Some(TransportTypeDef::Enum(_)) => {
+        Some(TransportTypeDef::Struct(_))
+        | Some(TransportTypeDef::Exception(_))
+        | Some(TransportTypeDef::Enum(_)) => {
             if let Some(tracker) = tracker {
                 track_type(key.as_str(), direction, module_name, scope, tracker)?;
             }
@@ -233,7 +255,7 @@ fn track_type(
     if !inserted {
         return Ok(());
     }
-    if let Some(TransportTypeDef::Struct(def)) = scope.registry.get(name) {
+    if let Some(def) = scope.registry.get(name).and_then(TransportTypeDef::record) {
         let mut parent = name.split("::").map(str::to_string).collect::<Vec<_>>();
         parent.pop();
         let scope = scope.in_declaration(&parent);

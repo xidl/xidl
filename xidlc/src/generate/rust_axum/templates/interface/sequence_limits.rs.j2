@@ -1,0 +1,11 @@
+{% macro check(value, maximum, status, optional=false) -%}
+{% if maximum is not none %}
+{% if optional %}if let Some(value) = &{{ value }} {
+    ::xidl_rust_axum::SequenceLimit::check(value.len(), {{ maximum }})
+        .map_err(|error| ::xidl_rust_axum::Error::new({{ status }}, error.to_string()))?;
+}{% else %}
+::xidl_rust_axum::SequenceLimit::check(({{ value }}).len(), {{ maximum }})
+    .map_err(|error| ::xidl_rust_axum::Error::new({{ status }}, error.to_string()))?;
+{% endif %}
+{% endif %}
+{%- endmacro %}

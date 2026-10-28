@@ -16,7 +16,7 @@ const TEST_CASES: &[(&str, &str)] = &[(
         struct Foo; // Forward declaration
         typedef sequence<Foo> FooSeq;
         typedef sequence<Foo, 12> FooSeq;
-        typedef sequence<Foo, red> FooSeq;
+        typedef sequence<Foo, 3> FooSeq;
 
         struct Foo {
             long value;

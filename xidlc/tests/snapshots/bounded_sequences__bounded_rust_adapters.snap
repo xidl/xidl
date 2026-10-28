@@ -1,0 +1,495 @@
+---
+source: xidlc/tests/bounded_sequences.rs
+expression: output
+---
+/// Pure version projections. The application owns routing and side effects.
+#[allow(
+    unused_imports,
+    unused_variables,
+    non_snake_case,
+    non_camel_case_types,
+    deprecated
+)]
+pub mod version_adapters {
+    use super::{v1, v2};
+    /// Direction of an unsupported projection.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum Direction {
+        Upcast,
+        Downcast,
+    }
+    /// The application renders a refusal using its own frozen error vocabulary.
+    #[derive(Debug, Clone)]
+    pub struct UnsupportedProjection {
+        pub version: String,
+        pub direction: Direction,
+        pub type_path: String,
+        pub reason: String,
+    }
+    /// A projection either succeeds or requires an unsupported business choice.
+    pub type VersionedResult<T> = Result<T, UnsupportedProjection>;
+    /// Explicit acknowledgement that a source value is intentionally discarded.
+    #[derive(Debug, Clone, Copy)]
+    pub struct Ignored {
+        _private: (),
+    }
+    /// The acknowledgement hooks return for an intentionally retired member.
+    pub const IGNORED: Ignored = Ignored { _private: () };
+    /// A version resolved by the application before calling an adapter.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum Version {
+        V1,
+        V2,
+    }
+    impl Version {
+        /// Original contract identifier.
+        pub fn id(self) -> &'static str {
+            match self {
+                Self::V1 => "v1",
+                Self::V2 => "v2",
+            }
+        }
+        /// Original contract version value.
+        pub fn value(self) -> &'static str {
+            match self {
+                Self::V1 => "v1",
+                Self::V2 => "v2",
+            }
+        }
+    }
+    /// Context for application business policy; adapters do not select versions.
+    #[derive(Debug, Clone, Copy)]
+    pub struct VersionContext {
+        pub original_version: Version,
+    }
+    /// A failed response projection retains the original committed Head outcome.
+    pub enum ProjectionOutcome<T, H> {
+        Projected(T),
+        Unsupported { head: H, error: UnsupportedProjection },
+    }
+    /// Invalid served-version wire data is distinct from a business refusal.
+    #[derive(Debug)]
+    pub enum AdaptationError {
+        Validation(String),
+        Unsupported(UnsupportedProjection),
+    }
+    impl From<UnsupportedProjection> for AdaptationError {
+        fn from(value: UnsupportedProjection) -> Self {
+            Self::Unsupported(value)
+        }
+    }
+    /// Hooks remain synchronous, pure, deterministic, and mandatory.
+    pub trait VersionAdapters {}
+    /// Public model parameters for one served version's operation.
+    pub struct BatchesReserveRequestV1 {
+        pub batch: v1::Batch,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct BatchesReserveRequestV2 {
+        pub batch: v2::Batch,
+    }
+    fn locate<T>(result: VersionedResult<T>, path: &str) -> VersionedResult<T> {
+        result
+            .map_err(|error| UnsupportedProjection {
+                type_path: format!("{path}.{}", error.type_path),
+                ..error
+            })
+    }
+    fn map_sequence<S, T>(
+        source: &[S],
+        convert: impl Fn(&S) -> VersionedResult<T>,
+        path: &str,
+    ) -> VersionedResult<Vec<T>> {
+        source.iter().map(|item| locate(convert(item), path)).collect()
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn batch_upcast_from_v_1(
+        source: &v1::Batch,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v2::Batch> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v1".into(),
+            direction: Direction::Upcast,
+            type_path: "Batch".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = map_sequence(
+            &source.ids,
+            |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
+            "Batch.ids",
+        )?;
+        Ok(v2::Batch { ids: projected_0 })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn batch_downcast_to_v_1(
+        source: &v2::Batch,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v1::Batch> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "Batch".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = map_sequence(
+            &source.ids,
+            |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
+            "Batch.ids",
+        )?;
+        Ok(v1::Batch { ids: projected_0 })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn batches_reserve_request_upcast_from_v_1(
+        source: &BatchesReserveRequestV1,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<BatchesReserveRequestV2> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v1".into(),
+            direction: Direction::Upcast,
+            type_path: "BatchesReserveRequest".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = batch_upcast_from_v_1(&source.batch, adapters)?;
+        Ok(BatchesReserveRequestV2 {
+            batch: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn batches_reserve_response_downcast_to_v_1(
+        source: &v2::Batch,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<v1::Batch> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "BatchesReserveResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = batch_downcast_to_v_1(source, adapters)?;
+        Ok(projected_0)
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_batches_reserve_error_to_v_1(
+        source: &::xidl_rust_axum::Error,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<::xidl_rust_axum::Error> {
+        Ok(source.clone())
+    }
+    fn decode_wire_v_1_batch(wire: &::serde_json::Value) -> Result<v1::Batch, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &["ids"];
+        let forbidden: &[&str] = &[];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object
+            .get("ids")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "ids").to_string()
+            })?;
+        let value_0: Vec<i32> = (|| {
+            let array = (raw_0)
+                .as_array()
+                .ok_or_else(|| "expected an array".to_string())?;
+            if array.len() > (2) as usize {
+                return Err("sequence maximum length exceeded".into());
+            }
+            let values = array
+                .iter()
+                .map(|item| {
+                    ::serde_json::from_value::<i32>(::std::clone::Clone::clone(item))
+                        .map_err(|error| error.to_string())
+                })
+                .collect::<Result<Vec<_>, String>>()?;
+            Ok::<_, String>(values)
+        })()?;
+        Ok(v1::Batch { ids: value_0 })
+    }
+    fn decode_wire_v_2_batch(wire: &::serde_json::Value) -> Result<v2::Batch, String> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| "expected a served-version object".to_string())?;
+        let keys: &[&str] = &["ids"];
+        let forbidden: &[&str] = &[];
+        for key in object.keys() {
+            if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
+                return Err(format!("field {key} is not declared in served version"));
+            }
+        }
+        let raw_0 = object
+            .get("ids")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "ids").to_string()
+            })?;
+        let value_0: Vec<i32> = (|| {
+            let array = (raw_0)
+                .as_array()
+                .ok_or_else(|| "expected an array".to_string())?;
+            if array.len() > (2) as usize {
+                return Err("sequence maximum length exceeded".into());
+            }
+            let values = array
+                .iter()
+                .map(|item| {
+                    ::serde_json::from_value::<i32>(::std::clone::Clone::clone(item))
+                        .map_err(|error| error.to_string())
+                })
+                .collect::<Result<Vec<_>, String>>()?;
+            Ok::<_, String>(values)
+        })()?;
+        Ok(v2::Batch { ids: value_0 })
+    }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type BatchesReserveResultV1 = Result<v1::Batch, ::xidl_rust_axum::Error>;
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_batches_reserve_from_v_1(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<BatchesReserveRequestV2, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["batch"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("batch")
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "batch").into(),
+            ))?;
+        let value_0: v1::Batch = decode_wire_v_1_batch(raw_0)
+            .map_err(AdaptationError::Validation)?;
+        let source = BatchesReserveRequestV1 {
+            batch: value_0,
+        };
+        let source = batches_reserve_request_upcast_from_v_1(&source, adapters)?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_batches_reserve_from_v_1_outcome(
+        head: BatchesReserveResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<BatchesReserveResultV1, BatchesReserveResultV2> {
+        match &head {
+            Ok(source) => {
+                let source = match batches_reserve_response_downcast_to_v_1(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_batches_reserve_error_to_v_1(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_batches_reserve_from_v_1<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<BatchesReserveResultV1, BatchesReserveResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(BatchesReserveRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = BatchesReserveResultV2>,
+    {
+        let input = decode_and_upcast_batches_reserve_from_v_1(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V1,
+                },
+            )
+            .await;
+        Ok(downcast_batches_reserve_from_v_1_outcome(head, adapters))
+    }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type BatchesReserveResultV2 = Result<v2::Batch, ::xidl_rust_axum::Error>;
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_batches_reserve_from_v_2(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<BatchesReserveRequestV2, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["batch"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("batch")
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "batch").into(),
+            ))?;
+        let value_0: v2::Batch = decode_wire_v_2_batch(raw_0)
+            .map_err(AdaptationError::Validation)?;
+        let source = BatchesReserveRequestV2 {
+            batch: value_0,
+        };
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_batches_reserve_from_v_2_outcome(
+        head: BatchesReserveResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<BatchesReserveResultV2, BatchesReserveResultV2> {
+        ProjectionOutcome::Projected(head)
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_batches_reserve_from_v_2<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<BatchesReserveResultV2, BatchesReserveResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(BatchesReserveRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = BatchesReserveResultV2>,
+    {
+        let input = decode_and_upcast_batches_reserve_from_v_2(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V2,
+                },
+            )
+            .await;
+        Ok(downcast_batches_reserve_from_v_2_outcome(head, adapters))
+    }
+    /// The caller-selected version's projected model type.
+    pub enum BatchProjection {
+        V1(v1::Batch),
+        V2(v2::Batch),
+    }
+    /// Project an owned Head model onto an explicitly resolved version.
+    pub fn downcast_batch(
+        version: Version,
+        head: v2::Batch,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<BatchProjection> {
+        match version {
+            Version::V1 => {
+                let source = batch_downcast_to_v_1(&head, adapters)?;
+                Ok(BatchProjection::V1(source))
+            }
+            Version::V2 => {
+                let source = head;
+                Ok(BatchProjection::V2(source))
+            }
+        }
+    }
+    /// Outcome in the caller's explicitly selected contract version.
+    pub enum BatchesReserveOutcome {
+        V1(BatchesReserveResultV1),
+        V2(BatchesReserveResultV2),
+    }
+    /// Decode a request using an application-resolved version before any hook.
+    pub fn decode_and_upcast_batches_reserve(
+        version: Version,
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<BatchesReserveRequestV2, AdaptationError> {
+        match version {
+            Version::V1 => decode_and_upcast_batches_reserve_from_v_1(wire, adapters),
+            Version::V2 => decode_and_upcast_batches_reserve_from_v_2(wire, adapters),
+        }
+    }
+    /// Retain the original owned Head outcome when any projection refuses.
+    pub fn downcast_batches_reserve_outcome(
+        version: Version,
+        head: BatchesReserveResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<BatchesReserveOutcome, BatchesReserveResultV2> {
+        match version {
+            Version::V1 => {
+                match downcast_batches_reserve_from_v_1_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(BatchesReserveOutcome::V1(value))
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V2 => {
+                match downcast_batches_reserve_from_v_2_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(BatchesReserveOutcome::V2(value))
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /// Execute a Head handler once; the application supplies version resolution.
+    pub async fn dispatch_batches_reserve<F, Fut>(
+        version: Version,
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<BatchesReserveOutcome, BatchesReserveResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(BatchesReserveRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = BatchesReserveResultV2>,
+    {
+        let input = decode_and_upcast_batches_reserve(version, wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: version,
+                },
+            )
+            .await;
+        Ok(downcast_batches_reserve_outcome(version, head, adapters))
+    }
+}

@@ -1,5 +1,5 @@
 {% macro wire_schema(schema) -%}
-    {%- if schema.kind == "Array" -%}z.array({{ wire_schema(schema.data.element) }}){% if schema.data.length is not none %}.length({{ schema.data.length }}){% endif %}
+    {%- if schema.kind == "Array" -%}z.array({{ wire_schema(schema.data.element) }}){% if schema.data.length is not none %}.length({{ schema.data.length }}){% endif %}{% if schema.data.maximum is not none %}.max({{ schema.data.maximum }}){% endif %}
         {%- elif schema.kind == "Record" -%}z.unknown().superRefine(rejectPrototypeKey).pipe(z.record(z.string(), {{ wire_schema(schema.data) }}))
         {%- else -%}{{ m.render_zod(schema) }}
     {%- endif -%}

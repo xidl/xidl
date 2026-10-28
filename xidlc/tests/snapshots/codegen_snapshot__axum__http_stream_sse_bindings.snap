@@ -61,6 +61,11 @@ pub(super) mod __xidl_in_HttpStreamSseBindingsService {
             }
         }
     }
+    impl Default for ProjectEvent {
+        fn default() -> Self {
+            super::ProjectEvent::default().into()
+        }
+    }
 }
 #[allow(
     non_snake_case,
@@ -92,6 +97,11 @@ pub(super) mod __xidl_out_HttpStreamSseBindingsService {
                 id: value.id,
                 payload: value.payload,
             }
+        }
+    }
+    impl Default for ProjectEvent {
+        fn default() -> Self {
+            super::ProjectEvent::default().into()
         }
     }
 }
@@ -252,6 +262,7 @@ impl HttpStreamSseBindingsServiceClient {
         cursor: Option<String>,
         trace_id: String,
     ) -> Result<xidl_rust_axum::stream::Reader<ProjectEvent>, xidl_rust_axum::Error> {
+        let trace_id: String = trace_id;
         let xidl_path = "/projects/{project_id}/events".to_string();
         let xidl_path = xidl_path.replace("{project_id}", &project_id.to_string());
         let mut req = self

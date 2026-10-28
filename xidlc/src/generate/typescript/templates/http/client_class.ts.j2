@@ -46,6 +46,8 @@
         {% if method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs);
         const responsePayload = buildResponsePayload(responseBody, resp, "{{ method.response_body_mode }}", [{% for entry in method.response_body_entries %}{ wireName: "{{ entry.raw_name }}", key: "{{ entry.key_name }}" }{% if not loop.last %}, {% endif %}{% endfor %}], {{ response_value_specs(method.response_header_params) }}, {{ response_value_specs(method.response_cookie_params) }});
         return ifaceSchemas.{{ method.response_schema_ref }}Schema.parse(deserialize(responsePayload, ifaceSchemas.{{ method.response_schema_ref }}Schema)) as {{ render_type(method.return_ty) }};
+        {%- elif method.response_value_schema %}const schema = {{ render_zod(method.response_value_schema) }};
+        return schema.parse(await decodeResponseBody(resp, "{{ method.response_content_type }}", this.codecs, schema)) as {{ render_type(method.return_ty) }};
         {%- elif method.return_ty.kind == "Void" %}return;
         {%- else %}return await decodeResponseBody<{{ render_type(method.return_ty) }}>(resp, "{{ method.response_content_type }}", this.codecs);
         {% endif %}
@@ -67,8 +69,8 @@
             const contentType = (resp.headers.get("Content-Type") ?? "").split(";")[0].trim();
             {%- for repr in method.representations %}
                 if (contentType === "{{ repr.content_type }}") {
-                    {% if not repr.is_byte %}const schema = {{ render_zod(repr.schema) }};
-                {% endif %}const value = {% if repr.is_byte %}new Uint8Array(await resp.arrayBuffer());{% else %}schema.parse(await decodeResponseBody(resp, "{{ repr.content_type }}", this.codecs, schema));{% endif %}
+                    const schema = {{ render_zod(repr.schema) }};
+                const value = {% if repr.is_byte %}schema.parse(new Uint8Array(await resp.arrayBuffer()));{% else %}schema.parse(await decodeResponseBody(resp, "{{ repr.content_type }}", this.codecs, schema));{% endif %}
                 return { kind: "{{ repr.kind }}", value, ...buildResponsePayload(undefined, resp, "none", [], {{ response_value_specs(method.response_header_params) }}, {{ response_value_specs(method.response_cookie_params) }}) } as {{ render_type(method.return_ty) }};
             }
         {%- endfor %}
@@ -78,6 +80,8 @@
         {%- elif method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs);
         const responsePayload = buildResponsePayload(responseBody, resp, "{{ method.response_body_mode }}", [{% for entry in method.response_body_entries %}{ wireName: "{{ entry.raw_name }}", key: "{{ entry.key_name }}" }{% if not loop.last %}, {% endif %}{% endfor %}], {{ response_value_specs(method.response_header_params) }}, {{ response_value_specs(method.response_cookie_params) }});
         return ifaceSchemas.{{ method.response_schema_ref }}Schema.parse(deserialize(responsePayload, ifaceSchemas.{{ method.response_schema_ref }}Schema)) as {{ render_type(method.return_ty) }};
+        {%- elif method.response_value_schema %}const schema = {{ render_zod(method.response_value_schema) }};
+        return schema.parse(await decodeResponseBody(resp, "{{ method.response_content_type }}", this.codecs, schema)) as {{ render_type(method.return_ty) }};
         {%- elif method.return_ty.kind == "Void" %}return;
         {%- else %}return await decodeResponseBody<{{ render_type(method.return_ty) }}>(resp, "{{ method.response_content_type }}", this.codecs);
         {%- endif %}{% endif %}
@@ -93,11 +97,15 @@
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
                 if (!decoded.success) throw await parseXidlError(resp);
                 const body = decoded.data;
-                {% endif %}throw new {{ ex.ident }}({
+                {% endif %}const error = new {{ ex.ident }}({
                     {% for member in ex.headers %}"{{ member.field }}": {% if member.optional %}(readResponseHeader(resp.headers, "{{ member.wire_name }}", {{ member.is_multi | lower }}{% if member.item_is_string %}, value => value{% endif %}) ?? undefined) as never{% else %}readResponseHeader(resp.headers, "{{ member.wire_name }}", {{ member.is_multi | lower }}{% if member.item_is_string %}, value => value{% endif %}) as never{% endif %},
                     {% endfor %}{% for member in ex.cookies %}"{{ member.field }}": {% if member.is_multi %}(readResponseCookies(resp.headers{% if member.item_is_string %}, value => value{% endif %}).get("{{ member.wire_name }}") ?? {% if member.optional %}undefined{% else %}[]{% endif %}) as never{% else %}(readResponseCookies(resp.headers{% if member.item_is_string %}, value => value{% endif %}).get("{{ member.wire_name }}")?.[0]) as never{% endif %},
                     {% endfor %}{% for field in ex.body %}"{{ field.field }}": {% if field.optional %}(body["{{ field.wire_name }}"] ?? undefined){% else %}body["{{ field.wire_name }}"]{% endif %} as never,
                     {% endfor %}});
+                {% for kind in ["headers", "cookies"] %}{% for member in ex[kind] %}
+                    {{ render_zod(member.schema) }}{% if member.optional %}.optional(){% endif %}.parse(error.{{ member.field }});
+                {% endfor %}{% endfor %}
+                throw error;
             }
             {% endfor %}throw await parseXidlError(resp);
         }

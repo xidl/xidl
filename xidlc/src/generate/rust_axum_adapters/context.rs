@@ -364,9 +364,18 @@ pub(super) struct WireDefinition {
 pub(super) enum WireValue {
     Scalar(String),
     Named(String),
-    Sequence(Box<Self>),
-    Map { key: String, value: Box<Self> },
+    Sequence {
+        inner: Box<Self>,
+        maximum: Option<String>,
+    },
+    Map {
+        key: String,
+        value: Box<Self>,
+    },
     Boxed(Box<Self>),
     Optional(Box<Self>),
-    Array { inner: Box<Self>, length: String },
+    Array {
+        inner: Box<Self>,
+        length: String,
+    },
 }

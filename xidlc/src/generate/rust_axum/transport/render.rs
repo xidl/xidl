@@ -25,17 +25,17 @@ pub(super) fn render_module(
         let Some(def) = registry.get(name) else {
             continue;
         };
-        match def {
-            TransportTypeDef::Struct(def) => items.push(render_struct(
+        if let Some(record) = def.record() {
+            items.push(render_struct(
                 name,
-                def,
+                &record,
                 direction,
                 module_name,
                 registry,
                 module_path,
-            )?),
-            TransportTypeDef::Enum(def) => items.push(render_enum(name, def, module_path)),
-            TransportTypeDef::Typedef { .. } | TransportTypeDef::Public => {}
+            )?);
+        } else if let TransportTypeDef::Enum(def) = def {
+            items.push(render_enum(name, def, module_path));
         }
     }
     Ok(TransportModuleContext {
@@ -76,6 +76,7 @@ fn render_struct(
         )?;
         fields.push(TransportFieldContext {
             flatten: true,
+            serde_skip: false,
             name: "base".to_string(),
             ty,
             serde_rename: None,

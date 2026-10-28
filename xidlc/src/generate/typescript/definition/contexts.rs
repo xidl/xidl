@@ -70,6 +70,10 @@ pub(crate) enum ZodSchema {
     Array {
         element: Box<ZodSchema>,
         length: Option<i64>,
+        maximum: Option<i64>,
+    },
+    ByteBuffer {
+        maximum: Option<i64>,
     },
     Record(Box<ZodSchema>),
     Object(Vec<FieldZodContext>),

@@ -69,20 +69,24 @@ export async function executeOperation<
       options.codecs ?? {},
     );
   } catch (error) {
-    const typed = operation.errors?.match(error);
-    if (typed) {
-      const headers = typed.headers ?? new Headers();
-      response = new Response(
-        typed.body === undefined ? null : JSON.stringify(typed.body),
-        {
-          headers,
-          status: typed.status,
-        },
-      );
-    } else if (options.onError) {
-      response = await options.onError(error, context);
-    } else {
-      response = errorResponse(error);
+    try {
+      const typed = operation.errors?.match(error);
+      if (typed) {
+        const headers = typed.headers ?? new Headers();
+        response = new Response(
+          typed.body === undefined ? null : JSON.stringify(typed.body),
+          {
+            headers,
+            status: typed.status,
+          },
+        );
+      } else if (options.onError) {
+        response = await options.onError(error, context);
+      } else {
+        response = errorResponse(error);
+      }
+    } catch (encodingError) {
+      response = errorResponse(encodingError);
     }
   }
   if (!operation.response.fixedHeaders) {

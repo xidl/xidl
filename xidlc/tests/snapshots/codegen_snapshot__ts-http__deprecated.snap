@@ -97,9 +97,11 @@ export namespace legacy {
                     const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
                     if (!decoded.success) throw await parseXidlError(resp);
                     const body = decoded.data;
-                    throw new $xidlErrors.Gone({
+                    const error = new $xidlErrors.Gone({
                         "reason": body["reason"] as never,
                         });
+                    
+                    throw error;
                 }
                 throw await parseXidlError(resp);
             }
@@ -405,7 +407,7 @@ import * as ifaceSchemas from "./deprecated.iface.zod";
 import { z } from "zod";
 import {
     defineOperation,
-    writeResponseBindings,
+    writeResponseBindings, parseResponse,
     type Awaitable,
 } from "xidl-typescript-server";
 
@@ -459,6 +461,10 @@ export namespace legacy {
                     match: (error: unknown) => {
                         
                             if (error instanceof $xidlErrors.Gone) {
+                                parseResponse(error, z.object({
+                                    "reason": z.string(), 
+                                    
+                                }));
                                 const headers = new Headers();
                                 writeResponseBindings(headers, { ...error }, [], false);
                                 writeResponseBindings(headers, { ...error }, [], true);

@@ -280,7 +280,15 @@ fn build_param_context(
     transport: &mut TransportTracker,
     env: RenderEnv<'_>,
 ) -> IdlcResult<ParamContext> {
+    let item = match input.wire_ty {
+        TypeSpec::SequenceType(sequence) => &sequence.ty,
+        ty => ty,
+    };
+    let in_item_ty = transport.map_type(item, TransportDirection::In, env.scope())?;
+    let out_item_ty = transport.map_type(item, TransportDirection::Out, env.scope())?;
     Ok(ParamContext {
+        in_item_ty,
+        out_item_ty,
         name: input.name.to_string(),
         raw_name: input.sig_param.name.clone(),
         wire_name: input.wire_name.to_string(),
@@ -303,6 +311,7 @@ fn build_param_context(
         source: param_source_code(input.source),
         serde_rename: input.serde_name,
         is_sequence: matches!(input.wire_ty, TypeSpec::SequenceType(_)),
+        maximum: env.scope().sequence_maximum(&input.sig_param.ty),
         is_floating: match input.wire_ty {
             TypeSpec::FloatingPtType => true,
             TypeSpec::SequenceType(sequence) => {

@@ -177,9 +177,11 @@ import {
                         const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
                         if (!decoded.success) throw await parseXidlError(resp);
                         const body = decoded.data;
-                        throw new $xidlErrors.v1$business$Conflict({
+                        const error = new $xidlErrors.v1$business$Conflict({
                             "message": body["message"] as never,
                             });
+
+                        throw error;
                     }
                     throw await parseXidlError(resp);
                 }
@@ -582,9 +584,11 @@ import {
                         const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
                         if (!decoded.success) throw await parseXidlError(resp);
                         const body = decoded.data;
-                        throw new $xidlErrors.v2$business$Conflict({
+                        const error = new $xidlErrors.v2$business$Conflict({
                             "message": body["message"] as never,
                             });
+
+                        throw error;
                     }
                     throw await parseXidlError(resp);
                 }
@@ -1110,7 +1114,7 @@ import * as ifaceSchemas from "./version_parameter_header.iface.zod";
 import { z } from "zod";
 import {
     defineOperation,
-    writeResponseBindings,
+    writeResponseBindings, parseResponse,
     type Awaitable,
 } from "xidl-typescript-server";
 
@@ -1258,6 +1262,10 @@ import {
                         match: (error: unknown) => {
                             
                                 if (error instanceof $xidlErrors.v1$business$Conflict) {
+                                    parseResponse(error, z.object({
+                                        "message": z.string(), 
+                                        
+                                    }));
                                     const headers = new Headers();
                                     writeResponseBindings(headers, { ...error }, [], false);
                                     writeResponseBindings(headers, { ...error }, [], true);
@@ -1733,6 +1741,10 @@ import {
                         match: (error: unknown) => {
                             
                                 if (error instanceof $xidlErrors.v2$business$Conflict) {
+                                    parseResponse(error, z.object({
+                                        "message": z.string(), 
+                                        
+                                    }));
                                     const headers = new Headers();
                                     writeResponseBindings(headers, { ...error }, [], false);
                                     writeResponseBindings(headers, { ...error }, [], true);

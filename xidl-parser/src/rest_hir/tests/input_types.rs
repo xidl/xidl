@@ -155,3 +155,38 @@ fn recursive_typedef_input_fails_with_its_operation_and_parameter() {
     assert!(error.to_string().contains("Search.read::values"));
     assert!(error.to_string().contains("typedef cycle includes 'Loop'"));
 }
+
+#[test]
+fn exception_members_preserve_scoped_collection_and_enum_aliases() {
+    let spec = parse(
+        r#"
+        module Codes {
+            enum State { @rename("true") blocked };
+            typedef State RetryState;
+            typedef sequence<long, 2> Values;
+        };
+        module Billing {
+            @http(409) exception Rejected {
+                Codes::Values values;
+                @header Codes::Values retry;
+                @cookie Codes::RetryState state;
+            };
+            interface Batches { @post void submit() raises(Rejected); };
+        };
+        "#,
+    );
+    let document = rest_hir::project(&spec).expect("scoped exception wire types");
+    let exception = &document.document.exceptions[0];
+    for (ty, ident) in [
+        (&exception.body[0].ty, "Values"),
+        (&exception.headers[0].ty, "Values"),
+        (&exception.cookies[0].ty, "RetryState"),
+    ] {
+        assert!(matches!(ty, hir::TypeSpec::ScopedName(name)
+            if name.is_root && name.name == ["Codes", ident]));
+    }
+    assert!(
+        !exception.headers[0].is_multi,
+        "aliases retain their metadata encoding"
+    );
+}

@@ -46,10 +46,10 @@ import { xjson } from "xidl-typescript-codec";
 export const FooSeqSchema: z.ZodType<import("./misc").FooSeq> = z.lazy(() => z.array(FooSchema));
 
     
-export const FooSeqSchema: z.ZodType<import("./misc").FooSeq> = z.lazy(() => z.array(FooSchema).length(12));
+export const FooSeqSchema: z.ZodType<import("./misc").FooSeq> = z.lazy(() => z.array(FooSchema).max(12));
 
     
-export const FooSeqSchema: z.ZodType<import("./misc").FooSeq> = z.lazy(() => z.array(FooSchema));
+export const FooSeqSchema: z.ZodType<import("./misc").FooSeq> = z.lazy(() => z.array(FooSchema).max(3));
 
     
 export const FooSchema: z.ZodType<import("./misc").Foo> = z.lazy(() => z.object({

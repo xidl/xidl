@@ -341,6 +341,7 @@ pub mod legacy {
                     ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
                 }
                 Self::Gone(err) => {
+                    let err: __xidl_out_Messages::legacy_Gone = err.into();
                     let body = match xidl_rust_axum::serde_json::to_vec(&err) {
                         Ok(body) => body,
                         Err(err) => {
@@ -402,6 +403,11 @@ pub mod legacy {
                 }
             }
         }
+        impl Default for legacy_Message {
+            fn default() -> Self {
+                super::Message::default().into()
+            }
+        }
     }
     #[allow(
         non_snake_case,
@@ -412,6 +418,27 @@ pub mod legacy {
     )]
     pub(super) mod __xidl_out_Messages {
         use super::*;
+        #[derive(::serde::Serialize, ::serde::Deserialize)]
+        pub struct legacy_Gone {
+            pub reason: String,
+        }
+        #[allow(unused_variables, unreachable_code)]
+        impl From<super::Gone> for legacy_Gone {
+            fn from(value: super::Gone) -> Self {
+                Self { reason: value.reason }
+            }
+        }
+        #[allow(unused_variables, unreachable_code)]
+        impl From<legacy_Gone> for super::Gone {
+            fn from(value: legacy_Gone) -> Self {
+                Self { reason: value.reason }
+            }
+        }
+        impl Default for legacy_Gone {
+            fn default() -> Self {
+                super::Gone::default().into()
+            }
+        }
         #[derive(::serde::Serialize, ::serde::Deserialize)]
         pub struct legacy_Message {
             pub id: String,
@@ -433,6 +460,11 @@ pub mod legacy {
                     id: value.id,
                     subject: value.subject,
                 }
+            }
+        }
+        impl Default for legacy_Message {
+            fn default() -> Self {
+                super::Message::default().into()
             }
         }
     }
@@ -686,14 +718,14 @@ pub mod legacy {
                 let status = resp.status();
                 if status.as_u16() == 410 {
                     let headers = resp.headers().clone();
-                    let mut value: Gone = resp
-                        .json::<Gone>()
+                    let mut value: __xidl_out_Messages::legacy_Gone = resp
+                        .json::<__xidl_out_Messages::legacy_Gone>()
                         .await
                         .map_err(|err| xidl_rust_axum::Error::new(
                             status.as_u16(),
                             format!("exception Gone body: {err}"),
                         ))?;
-                    return Err(MessagesGetError::Gone(value));
+                    return Err(MessagesGetError::Gone(value.into()));
                 }
                 let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
                 Err(
@@ -798,6 +830,11 @@ pub mod current {
                 }
             }
         }
+        impl Default for current_Envelope {
+            fn default() -> Self {
+                super::Envelope::default().into()
+            }
+        }
         #[derive(::serde::Serialize, ::serde::Deserialize)]
         pub enum current_Kind {
             plain,
@@ -819,6 +856,11 @@ pub mod current {
                     current_Kind::plain => Self::plain,
                     current_Kind::rich => Self::rich,
                 }
+            }
+        }
+        impl Default for current_Kind {
+            fn default() -> Self {
+                super::Kind::default().into()
             }
         }
         #[derive(::serde::Serialize, ::serde::Deserialize)]
@@ -844,6 +886,11 @@ pub mod current {
                 }
             }
         }
+        impl Default for legacy_Channel {
+            fn default() -> Self {
+                super::super::legacy::Channel::default().into()
+            }
+        }
         #[derive(::serde::Serialize, ::serde::Deserialize)]
         pub struct legacy_Message {
             pub id: String,
@@ -865,6 +912,11 @@ pub mod current {
                     id: value.id,
                     subject: value.subject,
                 }
+            }
+        }
+        impl Default for legacy_Message {
+            fn default() -> Self {
+                super::super::legacy::Message::default().into()
             }
         }
     }
@@ -904,6 +956,11 @@ pub mod current {
                 }
             }
         }
+        impl Default for current_Envelope {
+            fn default() -> Self {
+                super::Envelope::default().into()
+            }
+        }
         #[derive(::serde::Serialize, ::serde::Deserialize)]
         pub enum current_Kind {
             plain,
@@ -925,6 +982,11 @@ pub mod current {
                     current_Kind::plain => Self::plain,
                     current_Kind::rich => Self::rich,
                 }
+            }
+        }
+        impl Default for current_Kind {
+            fn default() -> Self {
+                super::Kind::default().into()
             }
         }
         #[derive(::serde::Serialize, ::serde::Deserialize)]
@@ -950,6 +1012,11 @@ pub mod current {
                 }
             }
         }
+        impl Default for legacy_Channel {
+            fn default() -> Self {
+                super::super::legacy::Channel::default().into()
+            }
+        }
         #[derive(::serde::Serialize, ::serde::Deserialize)]
         pub struct legacy_Message {
             pub id: String,
@@ -971,6 +1038,11 @@ pub mod current {
                     id: value.id,
                     subject: value.subject,
                 }
+            }
+        }
+        impl Default for legacy_Message {
+            fn default() -> Self {
+                super::super::legacy::Message::default().into()
             }
         }
     }
@@ -1386,6 +1458,7 @@ pub mod current {
             id: String,
             trace: Option<String>,
         ) -> Result<Envelope, xidl_rust_axum::Error> {
+            let trace: Option<String> = trace;
             let xidl_path = "/mail/{id}".to_string();
             let xidl_path = xidl_path.replace("{id}", &id.to_string());
             let mut req = self

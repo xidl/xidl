@@ -105,6 +105,7 @@ pub mod v1 {
                         )
                     }
                     Self::Conflict(err) => {
+                        let err: __xidl_out_Store::v1_business_Conflict = err.into();
                         let body = match xidl_rust_axum::serde_json::to_vec(&err) {
                             Ok(body) => body,
                             Err(err) => {
@@ -159,6 +160,11 @@ pub mod v1 {
                     Self { id: value.id }
                 }
             }
+            impl Default for v1_business_Item {
+                fn default() -> Self {
+                    super::Item::default().into()
+                }
+            }
         }
         #[allow(
             non_snake_case,
@@ -169,6 +175,27 @@ pub mod v1 {
         )]
         pub(super) mod __xidl_out_Store {
             use super::*;
+            #[derive(::serde::Serialize, ::serde::Deserialize)]
+            pub struct v1_business_Conflict {
+                pub message: String,
+            }
+            #[allow(unused_variables, unreachable_code)]
+            impl From<super::Conflict> for v1_business_Conflict {
+                fn from(value: super::Conflict) -> Self {
+                    Self { message: value.message }
+                }
+            }
+            #[allow(unused_variables, unreachable_code)]
+            impl From<v1_business_Conflict> for super::Conflict {
+                fn from(value: v1_business_Conflict) -> Self {
+                    Self { message: value.message }
+                }
+            }
+            impl Default for v1_business_Conflict {
+                fn default() -> Self {
+                    super::Conflict::default().into()
+                }
+            }
             #[derive(::serde::Serialize, ::serde::Deserialize)]
             pub struct v1_business_Item {
                 pub id: String,
@@ -183,6 +210,11 @@ pub mod v1 {
             impl From<v1_business_Item> for super::Item {
                 fn from(value: v1_business_Item) -> Self {
                     Self { id: value.id }
+                }
+            }
+            impl Default for v1_business_Item {
+                fn default() -> Self {
+                    super::Item::default().into()
                 }
             }
         }
@@ -686,6 +718,7 @@ pub mod v1 {
                 search: String,
                 theme: String,
             ) -> Result<Item, xidl_rust_axum::Error> {
+                let theme: String = theme;
                 let xidl_path = "/items/{id}".to_string();
                 let xidl_path = xidl_path.replace("{id}", &id.to_string());
                 let mut req = self
@@ -909,14 +942,14 @@ pub mod v1 {
                     let status = resp.status();
                     if status.as_u16() == 409 {
                         let headers = resp.headers().clone();
-                        let mut value: Conflict = resp
-                            .json::<Conflict>()
+                        let mut value: __xidl_out_Store::v1_business_Conflict = resp
+                            .json::<__xidl_out_Store::v1_business_Conflict>()
                             .await
                             .map_err(|err| xidl_rust_axum::Error::new(
                                 status.as_u16(),
                                 format!("exception Conflict body: {err}"),
                             ))?;
-                        return Err(StoreFailError::Conflict(value));
+                        return Err(StoreFailError::Conflict(value.into()));
                     }
                     let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
                     Err(
@@ -1271,6 +1304,11 @@ pub mod v1 {
                     Self { id: value.id }
                 }
             }
+            impl Default for v1_business_Item {
+                fn default() -> Self {
+                    super::Item::default().into()
+                }
+            }
         }
         #[allow(
             non_snake_case,
@@ -1295,6 +1333,11 @@ pub mod v1 {
             impl From<v1_business_Item> for super::Item {
                 fn from(value: v1_business_Item) -> Self {
                     Self { id: value.id }
+                }
+            }
+            impl Default for v1_business_Item {
+                fn default() -> Self {
+                    super::Item::default().into()
                 }
             }
         }
@@ -1855,6 +1898,7 @@ pub mod v2 {
                         )
                     }
                     Self::Conflict(err) => {
+                        let err: __xidl_out_Store::v2_business_Conflict = err.into();
                         let body = match xidl_rust_axum::serde_json::to_vec(&err) {
                             Ok(body) => body,
                             Err(err) => {
@@ -1909,6 +1953,11 @@ pub mod v2 {
                     Self { id: value.id }
                 }
             }
+            impl Default for v2_business_Item {
+                fn default() -> Self {
+                    super::Item::default().into()
+                }
+            }
         }
         #[allow(
             non_snake_case,
@@ -1919,6 +1968,27 @@ pub mod v2 {
         )]
         pub(super) mod __xidl_out_Store {
             use super::*;
+            #[derive(::serde::Serialize, ::serde::Deserialize)]
+            pub struct v2_business_Conflict {
+                pub message: String,
+            }
+            #[allow(unused_variables, unreachable_code)]
+            impl From<super::Conflict> for v2_business_Conflict {
+                fn from(value: super::Conflict) -> Self {
+                    Self { message: value.message }
+                }
+            }
+            #[allow(unused_variables, unreachable_code)]
+            impl From<v2_business_Conflict> for super::Conflict {
+                fn from(value: v2_business_Conflict) -> Self {
+                    Self { message: value.message }
+                }
+            }
+            impl Default for v2_business_Conflict {
+                fn default() -> Self {
+                    super::Conflict::default().into()
+                }
+            }
             #[derive(::serde::Serialize, ::serde::Deserialize)]
             pub struct v2_business_Item {
                 pub id: String,
@@ -1933,6 +2003,11 @@ pub mod v2 {
             impl From<v2_business_Item> for super::Item {
                 fn from(value: v2_business_Item) -> Self {
                     Self { id: value.id }
+                }
+            }
+            impl Default for v2_business_Item {
+                fn default() -> Self {
+                    super::Item::default().into()
                 }
             }
         }
@@ -2436,6 +2511,7 @@ pub mod v2 {
                 search: String,
                 theme: String,
             ) -> Result<Item, xidl_rust_axum::Error> {
+                let theme: String = theme;
                 let xidl_path = "/items/{id}".to_string();
                 let xidl_path = xidl_path.replace("{id}", &id.to_string());
                 let mut req = self
@@ -2659,14 +2735,14 @@ pub mod v2 {
                     let status = resp.status();
                     if status.as_u16() == 409 {
                         let headers = resp.headers().clone();
-                        let mut value: Conflict = resp
-                            .json::<Conflict>()
+                        let mut value: __xidl_out_Store::v2_business_Conflict = resp
+                            .json::<__xidl_out_Store::v2_business_Conflict>()
                             .await
                             .map_err(|err| xidl_rust_axum::Error::new(
                                 status.as_u16(),
                                 format!("exception Conflict body: {err}"),
                             ))?;
-                        return Err(StoreFailError::Conflict(value));
+                        return Err(StoreFailError::Conflict(value.into()));
                     }
                     let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
                     Err(
@@ -3021,6 +3097,11 @@ pub mod v2 {
                     Self { id: value.id }
                 }
             }
+            impl Default for v2_business_Item {
+                fn default() -> Self {
+                    super::Item::default().into()
+                }
+            }
         }
         #[allow(
             non_snake_case,
@@ -3045,6 +3126,11 @@ pub mod v2 {
             impl From<v2_business_Item> for super::Item {
                 fn from(value: v2_business_Item) -> Self {
                     Self { id: value.id }
+                }
+            }
+            impl Default for v2_business_Item {
+                fn default() -> Self {
+                    super::Item::default().into()
                 }
             }
         }

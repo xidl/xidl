@@ -6,6 +6,9 @@ pub(super) mod {{ module.name }} {
         {% if item.kind == "struct" %}
             pub struct {{ item.transport_ident }} {
                 {% for field in item.fields %}
+                    {% if field.serde_skip %}
+                        #[serde(skip)]
+                    {% endif %}
                     {% if field.flatten %}
                         #[serde(flatten)]
                     {% endif %}
@@ -76,5 +79,10 @@ pub(super) mod {{ module.name }} {
         }
     {% endif %}
 
+        impl Default for {{ item.transport_ident }} {
+            fn default() -> Self {
+                {{ item.public_path }}::default().into()
+            }
+        }
     {% endfor %}
 }

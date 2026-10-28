@@ -12,7 +12,9 @@ use crate::generate::rust_axum::interface::{
         op_return_ty, request_payload_ty, response_ty,
     },
 };
-use crate::generate::rust_axum::transport::{TransportDirection, TransportTracker};
+use crate::generate::rust_axum::transport::{
+    TransportDirection, TransportTracker, decode_expr, encode_expr,
+};
 use xidl_parser::hir;
 use xidl_parser::rest_hir::{
     HttpOperation, HttpRequestBodyShape, HttpResponseBodyShape, HttpStreamPayloadCodec,
@@ -247,7 +249,7 @@ pub(crate) fn render_op_from_http(
     };
     let response_ty_str = response_ty(http_op, &struct_prefix, &ret);
 
-    let raises = RaisesContext::for_operation(http_op, env)?;
+    let raises = RaisesContext::for_operation(http_op, env, transport)?;
     let error_ty = if http_op.meta.raises.is_empty() {
         None
     } else {
@@ -258,13 +260,19 @@ pub(crate) fn render_op_from_http(
         .response
         .representations
         .iter()
-        .map(|repr| RepresentationContext {
-            variant: repr.content_type.idl_name().to_string(),
-            content_type: repr.content_type.as_str().to_string(),
-            ty: env.axum_type(&repr.ty),
-            is_byte: repr.is_byte,
+        .map(|repr| {
+            Ok(RepresentationContext {
+                variant: repr.content_type.idl_name().to_string(),
+                content_type: repr.content_type.as_str().to_string(),
+                ty: env.axum_type(&repr.ty),
+                wire_ty: transport.map_type(&repr.ty, TransportDirection::Out, env.scope())?,
+                encode_expr: encode_expr("payload", &repr.ty, env.scope())?,
+                decode_expr: decode_expr("payload", &repr.ty, env.scope())?,
+                maximum: env.scope().sequence_maximum(&repr.ty),
+                is_byte: repr.is_byte,
+            })
         })
-        .collect();
+        .collect::<IdlcResult<_>>()?;
     let response_union = if representations.is_empty() {
         String::new()
     } else {

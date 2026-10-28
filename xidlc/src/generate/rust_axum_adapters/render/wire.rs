@@ -136,11 +136,14 @@ impl WireBuilder<'_> {
                     .insert((version.version.id.clone(), key.clone()));
                 Ok(WireValue::Named(Self::symbol(&version.version.id, &key)))
             }
-            hir::TypeSpec::SequenceType(sequence) => Ok(WireValue::Sequence(Box::new(self.ty(
-                &sequence.ty,
-                scope,
-                version,
-            )?))),
+            hir::TypeSpec::SequenceType(sequence) => Ok(WireValue::Sequence {
+                inner: Box::new(self.ty(&sequence.ty, scope, version)?),
+                maximum: sequence
+                    .len
+                    .as_ref()
+                    .map(|bound| self.names(version).bound(bound, scope))
+                    .transpose()?,
+            }),
             hir::TypeSpec::MapType(map) => {
                 self.validate_map_key(&map.key, scope, version)?;
                 Ok(WireValue::Map {
