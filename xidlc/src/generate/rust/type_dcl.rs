@@ -20,8 +20,6 @@ impl RustRender for hir::TypeDcl {
                 let ctx = renderer.enrich_ctx(
                     json!({
                     "name": crate::generate::rust::util::rust_ident(&native.decl.0),
-                    "typeobject_complete": "xidl_typeobject::runtime::build_complete_alias(\"\", 0u32, xidl_typeobject::runtime::type_identifier_none())",
-                    "typeobject_minimal": "xidl_typeobject::runtime::build_minimal_alias(0u32, xidl_typeobject::runtime::type_identifier_none())",
                     "rust_attrs": rust_passthrough_attrs_from_annotations(&native.annotations),
                     }),
                     &doc_lines_from_annotations(&native.annotations),

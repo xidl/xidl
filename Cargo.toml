@@ -9,7 +9,6 @@ members = [
   "crates/xidl-http",
   "xidlc",
   "xidl-parser",
-  "xidl-typeobject",
 ]
 
 [workspace.package]
