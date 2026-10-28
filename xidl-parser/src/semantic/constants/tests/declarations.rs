@@ -17,6 +17,12 @@ fn constants_use_idl_precision_and_repeated_lowering_is_stable() {
             -9_223_372_036_854_775_808,
         ),
         ("const long VALUE = ~(-2);", 1),
+        ("const long VALUE = ~(-0);", -1),
+        ("const long VALUE = ~(-2147483648);", 2_147_483_647),
+        (
+            "const long long VALUE = ~(-9223372036854775808);",
+            9_223_372_036_854_775_807,
+        ),
         ("const octet VALUE = ~0xffffff00;", 255),
         ("const long VALUE = (-2 >> 31);", 1),
         ("const unsigned long VALUE = +2;", 2),
@@ -81,6 +87,8 @@ fn invalid_local_constants_name_the_declaration_and_integer_contract() {
     for (declaration, reason) in [
         ("const short BROKEN = 65536;", "16-bit signed"),
         ("const unsigned long BROKEN = -2;", "32-bit unsigned"),
+        ("const long BROKEN = ~0;", "32-bit signed"),
+        ("const long long BROKEN = ~0;", "64-bit signed"),
         (
             "const long BROKEN = 4294967296 - 4294967294;",
             "32-bit unsigned",

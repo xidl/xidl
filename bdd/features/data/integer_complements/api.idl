@@ -1,0 +1,13 @@
+import "masks/dep.idl";
+
+const unsigned long REMAINING32 = ~dep::MASK32;
+const unsigned long long REMAINING64 = ~dep::ALL64;
+const unsigned long MAXIMUM32 = ~dep::EMPTY32;
+const unsigned long long MAXIMUM64 = ~dep::EMPTY64;
+const long COMPLEMENT32 = ~dep::NEGATIVE32;
+const long long COMPLEMENT64 = ~dep::NEGATIVE;
+const long MAXIMUM_SIGNED32 = ~dep::MINIMUM32;
+const long long MAXIMUM_SIGNED64 = ~dep::MINIMUM;
+const long long RESTORED = ~(~dep::NEGATIVE);
+const unsigned long ALLOWED = ~dep::MASK32 | +dep::AXES;
+const unsigned long DENIED = ~ALLOWED;
