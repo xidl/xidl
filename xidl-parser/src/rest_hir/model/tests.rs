@@ -32,3 +32,23 @@ fn from_props_and_find_interface_cover_success_and_failure_paths() {
             .is_none()
     );
 }
+
+#[test]
+fn projected_version_metadata_preserves_nested_contract_versions() {
+    let mut metadata = HttpDocumentMetadata {
+        version_values: [("v1".into(), "2026-01-01".into())].into_iter().collect(),
+        ..Default::default()
+    };
+    assert_eq!(
+        metadata.api_version(&["v1".into(), "billing".into()]),
+        Some("2026-01-01")
+    );
+    assert_eq!(metadata.api_version(&[]), None);
+    assert_eq!(metadata.api_version(&["missing".into()]), None);
+    metadata.version = Some("2026-04-01".into());
+    assert_eq!(metadata.api_version(&[]), Some("2026-04-01"));
+    assert_eq!(
+        metadata.api_version(&["v1".into(), "billing".into()]),
+        Some("2026-04-01")
+    );
+}
