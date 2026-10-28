@@ -73,6 +73,7 @@ pub(super) mod __xidl_in_HttpClientStreamReportService {
         }
     }
     impl Default for UploadChunk {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::UploadChunk::default().into()
         }
@@ -101,6 +102,7 @@ pub(super) mod __xidl_in_HttpClientStreamReportService {
         }
     }
     impl Default for UploadSummary {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::UploadSummary::default().into()
         }
@@ -139,6 +141,7 @@ pub(super) mod __xidl_out_HttpClientStreamReportService {
         }
     }
     impl Default for UploadChunk {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::UploadChunk::default().into()
         }
@@ -167,6 +170,7 @@ pub(super) mod __xidl_out_HttpClientStreamReportService {
         }
     }
     impl Default for UploadSummary {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::UploadSummary::default().into()
         }

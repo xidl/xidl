@@ -71,6 +71,7 @@ pub(super) mod __xidl_in_Media {
         }
     }
     impl Default for Participant {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::Participant::default().into()
         }
@@ -102,6 +103,7 @@ pub(super) mod __xidl_in_Media {
         }
     }
     impl Default for UserRef {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::UserRef::default().into()
         }
@@ -141,6 +143,7 @@ pub(super) mod __xidl_out_Media {
         }
     }
     impl Default for Participant {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::Participant::default().into()
         }
@@ -172,6 +175,7 @@ pub(super) mod __xidl_out_Media {
         }
     }
     impl Default for UserRef {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::UserRef::default().into()
         }

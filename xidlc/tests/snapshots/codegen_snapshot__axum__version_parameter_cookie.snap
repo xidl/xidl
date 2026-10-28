@@ -161,6 +161,7 @@ pub mod v1 {
                 }
             }
             impl Default for v1_business_Item {
+                #[allow(unreachable_code)]
                 fn default() -> Self {
                     super::Item::default().into()
                 }
@@ -192,6 +193,7 @@ pub mod v1 {
                 }
             }
             impl Default for v1_business_Conflict {
+                #[allow(unreachable_code)]
                 fn default() -> Self {
                     super::Conflict::default().into()
                 }
@@ -213,6 +215,7 @@ pub mod v1 {
                 }
             }
             impl Default for v1_business_Item {
+                #[allow(unreachable_code)]
                 fn default() -> Self {
                     super::Item::default().into()
                 }
@@ -1429,6 +1432,7 @@ pub mod v1 {
                 }
             }
             impl Default for v1_business_Item {
+                #[allow(unreachable_code)]
                 fn default() -> Self {
                     super::Item::default().into()
                 }
@@ -1460,6 +1464,7 @@ pub mod v1 {
                 }
             }
             impl Default for v1_business_Item {
+                #[allow(unreachable_code)]
                 fn default() -> Self {
                     super::Item::default().into()
                 }
@@ -2158,6 +2163,7 @@ pub mod v2 {
                 }
             }
             impl Default for v2_business_Item {
+                #[allow(unreachable_code)]
                 fn default() -> Self {
                     super::Item::default().into()
                 }
@@ -2189,6 +2195,7 @@ pub mod v2 {
                 }
             }
             impl Default for v2_business_Conflict {
+                #[allow(unreachable_code)]
                 fn default() -> Self {
                     super::Conflict::default().into()
                 }
@@ -2210,6 +2217,7 @@ pub mod v2 {
                 }
             }
             impl Default for v2_business_Item {
+                #[allow(unreachable_code)]
                 fn default() -> Self {
                     super::Item::default().into()
                 }
@@ -3431,6 +3439,7 @@ pub mod v2 {
                 }
             }
             impl Default for v2_business_Item {
+                #[allow(unreachable_code)]
                 fn default() -> Self {
                     super::Item::default().into()
                 }
@@ -3462,6 +3471,7 @@ pub mod v2 {
                 }
             }
             impl Default for v2_business_Item {
+                #[allow(unreachable_code)]
                 fn default() -> Self {
                     super::Item::default().into()
                 }

@@ -452,6 +452,7 @@ pub mod left {
                 }
             }
             impl Default for Root {
+                #[allow(unreachable_code)]
                 fn default() -> Self {
                     super::super::super::Root::default().into()
                 }
@@ -488,6 +489,7 @@ pub mod left {
                 }
             }
             impl Default for left_Envelope {
+                #[allow(unreachable_code)]
                 fn default() -> Self {
                     super::super::Envelope::default().into()
                 }
@@ -509,6 +511,7 @@ pub mod left {
                 }
             }
             impl Default for left_Item {
+                #[allow(unreachable_code)]
                 fn default() -> Self {
                     super::super::Item::default().into()
                 }
@@ -530,6 +533,7 @@ pub mod left {
                 }
             }
             impl Default for left_nested_Item {
+                #[allow(unreachable_code)]
                 fn default() -> Self {
                     super::Item::default().into()
                 }
@@ -551,6 +555,7 @@ pub mod left {
                 }
             }
             impl Default for right_Item {
+                #[allow(unreachable_code)]
                 fn default() -> Self {
                     super::super::super::right::Item::default().into()
                 }
@@ -582,6 +587,7 @@ pub mod left {
                 }
             }
             impl Default for Root {
+                #[allow(unreachable_code)]
                 fn default() -> Self {
                     super::super::super::Root::default().into()
                 }
@@ -605,6 +611,7 @@ pub mod left {
                 }
             }
             impl Default for errors_Failure {
+                #[allow(unreachable_code)]
                 fn default() -> Self {
                     super::super::super::errors::Failure::default().into()
                 }
@@ -630,6 +637,7 @@ pub mod left {
                 }
             }
             impl Default for errors_Hint {
+                #[allow(unreachable_code)]
                 fn default() -> Self {
                     super::super::super::errors::Hint::default().into()
                 }
@@ -666,6 +674,7 @@ pub mod left {
                 }
             }
             impl Default for left_Envelope {
+                #[allow(unreachable_code)]
                 fn default() -> Self {
                     super::super::Envelope::default().into()
                 }
@@ -687,6 +696,7 @@ pub mod left {
                 }
             }
             impl Default for left_Item {
+                #[allow(unreachable_code)]
                 fn default() -> Self {
                     super::super::Item::default().into()
                 }
@@ -708,6 +718,7 @@ pub mod left {
                 }
             }
             impl Default for left_nested_Item {
+                #[allow(unreachable_code)]
                 fn default() -> Self {
                     super::Item::default().into()
                 }
@@ -729,6 +740,7 @@ pub mod left {
                 }
             }
             impl Default for right_Item {
+                #[allow(unreachable_code)]
                 fn default() -> Self {
                     super::super::super::right::Item::default().into()
                 }

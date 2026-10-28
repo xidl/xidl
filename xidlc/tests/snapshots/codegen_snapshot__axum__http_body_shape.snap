@@ -69,6 +69,7 @@ pub(super) mod __xidl_in_BodyShape {
         }
     }
     impl Default for Document {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::Document::default().into()
         }
@@ -97,6 +98,7 @@ pub(super) mod __xidl_in_BodyShape {
         }
     }
     impl Default for UploadResult {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::UploadResult::default().into()
         }
@@ -128,6 +130,7 @@ pub(super) mod __xidl_out_BodyShape {
         }
     }
     impl Default for Document {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::Document::default().into()
         }
@@ -156,6 +159,7 @@ pub(super) mod __xidl_out_BodyShape {
         }
     }
     impl Default for UploadResult {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::UploadResult::default().into()
         }
@@ -395,7 +399,7 @@ where
         let mut resp = match svc.document().await {
             Ok(resp_value) => {
                 let etag_wire: String = {
-                    let etag = resp_value.etag.clone();
+                    let etag = ::core::clone::Clone::clone(&resp_value.etag);
                     etag
                 };
                 let etag_header_value: String = {
@@ -462,15 +466,15 @@ where
         let mut resp = match svc.scalar().await {
             Ok(resp_value) => {
                 let etag_wire: String = {
-                    let etag = resp_value.etag.clone();
+                    let etag = ::core::clone::Clone::clone(&resp_value.etag);
                     etag
                 };
                 let count_wire: u32 = {
-                    let count = resp_value.count.clone();
+                    let count = ::core::clone::Clone::clone(&resp_value.count);
                     count
                 };
                 let cached_wire: bool = {
-                    let cached = resp_value.cached.clone();
+                    let cached = ::core::clone::Clone::clone(&resp_value.cached);
                     cached
                 };
                 let etag_header_value: String = {
@@ -572,7 +576,7 @@ where
         let mut resp = match svc.rename(document).await {
             Ok(resp_value) => {
                 let etag_wire: String = {
-                    let etag = resp_value.etag.clone();
+                    let etag = ::core::clone::Clone::clone(&resp_value.etag);
                     etag
                 };
                 let etag_header_value: String = {
@@ -639,7 +643,7 @@ where
         let mut resp = match svc.output().await {
             Ok(resp_value) => {
                 let etag_wire: String = {
-                    let etag = resp_value.etag.clone();
+                    let etag = ::core::clone::Clone::clone(&resp_value.etag);
                     etag
                 };
                 let etag_header_value: String = {

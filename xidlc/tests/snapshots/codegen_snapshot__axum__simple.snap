@@ -100,6 +100,7 @@ pub(super) mod __xidl_in_HttpService {
         }
     }
     impl Default for CreateSimpleResponse {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::CreateSimpleResponse::default().into()
         }
@@ -131,6 +132,7 @@ pub(super) mod __xidl_in_HttpService {
         }
     }
     impl Default for HealthResponse {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::HealthResponse::default().into()
         }
@@ -159,6 +161,7 @@ pub(super) mod __xidl_in_HttpService {
         }
     }
     impl Default for MemoryResponse {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::MemoryResponse::default().into()
         }
@@ -181,6 +184,7 @@ pub(super) mod __xidl_in_HttpService {
         }
     }
     impl Default for UdpStatsResponse {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::UdpStatsResponse::default().into()
         }
@@ -209,6 +213,7 @@ pub(super) mod __xidl_in_HttpService {
         }
     }
     impl Default for VersionResponse {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::VersionResponse::default().into()
         }
@@ -240,6 +245,7 @@ pub(super) mod __xidl_out_HttpService {
         }
     }
     impl Default for CreateSimpleResponse {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::CreateSimpleResponse::default().into()
         }
@@ -271,6 +277,7 @@ pub(super) mod __xidl_out_HttpService {
         }
     }
     impl Default for HealthResponse {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::HealthResponse::default().into()
         }
@@ -299,6 +306,7 @@ pub(super) mod __xidl_out_HttpService {
         }
     }
     impl Default for MemoryResponse {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::MemoryResponse::default().into()
         }
@@ -321,6 +329,7 @@ pub(super) mod __xidl_out_HttpService {
         }
     }
     impl Default for UdpStatsResponse {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::UdpStatsResponse::default().into()
         }
@@ -349,6 +358,7 @@ pub(super) mod __xidl_out_HttpService {
         }
     }
     impl Default for VersionResponse {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::VersionResponse::default().into()
         }

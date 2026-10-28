@@ -237,6 +237,7 @@ pub mod client {
             }
         }
         impl Default for client_Envelope {
+            #[allow(unreachable_code)]
             fn default() -> Self {
                 super::Envelope::default().into()
             }
@@ -258,6 +259,7 @@ pub mod client {
             }
         }
         impl Default for spatial_Label {
+            #[allow(unreachable_code)]
             fn default() -> Self {
                 super::super::spatial::Label::default().into()
             }
@@ -286,6 +288,7 @@ pub mod client {
             }
         }
         impl Default for spatial_Mode {
+            #[allow(unreachable_code)]
             fn default() -> Self {
                 super::super::spatial::Mode::default().into()
             }
@@ -392,6 +395,7 @@ pub mod client {
             }
         }
         impl Default for client_Envelope {
+            #[allow(unreachable_code)]
             fn default() -> Self {
                 super::Envelope::default().into()
             }
@@ -413,6 +417,7 @@ pub mod client {
             }
         }
         impl Default for spatial_Label {
+            #[allow(unreachable_code)]
             fn default() -> Self {
                 super::super::spatial::Label::default().into()
             }
@@ -441,6 +446,7 @@ pub mod client {
             }
         }
         impl Default for spatial_Mode {
+            #[allow(unreachable_code)]
             fn default() -> Self {
                 super::super::spatial::Mode::default().into()
             }

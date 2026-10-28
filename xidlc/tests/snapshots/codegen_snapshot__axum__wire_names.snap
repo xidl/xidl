@@ -83,6 +83,7 @@ pub(super) mod __xidl_in_WireNamesService {
         }
     }
     impl Default for WireNames {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::WireNames::default().into()
         }
@@ -124,6 +125,7 @@ pub(super) mod __xidl_out_WireNamesService {
         }
     }
     impl Default for WireNames {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::WireNames::default().into()
         }

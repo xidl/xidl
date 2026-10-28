@@ -49,6 +49,7 @@ pub(super) mod __xidl_in_Catalog {
         }
     }
     impl Default for Preference {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::Preference::default().into()
         }
@@ -80,6 +81,7 @@ pub(super) mod __xidl_out_Catalog {
         }
     }
     impl Default for Preference {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::Preference::default().into()
         }
@@ -164,19 +166,19 @@ where
         let mut resp = match svc.read().await {
             Ok(resp_value) => {
                 let bookmark_wire: Option<String> = {
-                    let bookmark = resp_value.bookmark.clone();
+                    let bookmark = ::core::clone::Clone::clone(&resp_value.bookmark);
                     bookmark
                 };
                 let consent_wire: Option<bool> = {
-                    let consent = resp_value.consent.clone();
+                    let consent = ::core::clone::Clone::clone(&resp_value.consent);
                     consent
                 };
                 let revision_wire: Option<i64> = {
-                    let revision = resp_value.revision.clone();
+                    let revision = ::core::clone::Clone::clone(&resp_value.revision);
                     revision
                 };
                 let preference_wire: Option<__xidl_out_Catalog::Preference> = {
-                    let preference = resp_value.preference.clone();
+                    let preference = ::core::clone::Clone::clone(&resp_value.preference);
                     preference.map(|value| value.into())
                 };
                 let bookmark_cookie_value: Option<String> = {
@@ -330,7 +332,7 @@ where
         let mut resp = match svc.remember().await {
             Ok(resp_value) => {
                 let bookmark_wire: Option<String> = {
-                    let bookmark = resp_value.bookmark.clone();
+                    let bookmark = ::core::clone::Clone::clone(&resp_value.bookmark);
                     bookmark
                 };
                 let bookmark_cookie_value: Option<String> = {

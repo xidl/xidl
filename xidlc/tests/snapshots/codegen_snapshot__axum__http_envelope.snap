@@ -405,6 +405,7 @@ pub(super) mod __xidl_out_EnvelopeApi {
         }
     }
     impl Default for HeadMissing {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::HeadMissing::default().into()
         }
@@ -433,6 +434,7 @@ pub(super) mod __xidl_out_EnvelopeApi {
         }
     }
     impl Default for NotFound {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::NotFound::default().into()
         }
@@ -456,6 +458,7 @@ pub(super) mod __xidl_out_EnvelopeApi {
         }
     }
     impl Default for NotModified {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::NotModified::default().into()
         }
@@ -489,6 +492,7 @@ pub(super) mod __xidl_out_EnvelopeApi {
         }
     }
     impl Default for PreconditionFailed {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::PreconditionFailed::default().into()
         }
@@ -510,6 +514,7 @@ pub(super) mod __xidl_out_EnvelopeApi {
         }
     }
     impl Default for representations_FileDetails {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::representations::FileDetails::default().into()
         }
@@ -547,6 +552,7 @@ pub(super) mod __xidl_out_EnvelopeApi {
         }
     }
     impl Default for representations_FileMeta {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::representations::FileMeta::default().into()
         }
@@ -755,15 +761,15 @@ where
         let mut resp = match svc.get_file(key).await {
             Ok(resp_value) => {
                 let etag_wire: String = {
-                    let etag = resp_value.etag.clone();
+                    let etag = ::core::clone::Clone::clone(&resp_value.etag);
                     etag
                 };
                 let tags_wire: Vec<String> = {
-                    let tags = resp_value.tags.clone();
+                    let tags = ::core::clone::Clone::clone(&resp_value.tags);
                     tags.into_iter().collect()
                 };
                 let cached_wire: bool = {
-                    let cached = resp_value.cached.clone();
+                    let cached = ::core::clone::Clone::clone(&resp_value.cached);
                     cached
                 };
                 let etag_header_value: String = {
@@ -930,15 +936,15 @@ where
         let mut resp = match svc.head_file(key).await {
             Ok(resp_value) => {
                 let etag_wire: String = {
-                    let etag = resp_value.etag.clone();
+                    let etag = ::core::clone::Clone::clone(&resp_value.etag);
                     etag
                 };
                 let size_wire: u64 = {
-                    let size = resp_value.size.clone();
+                    let size = ::core::clone::Clone::clone(&resp_value.size);
                     size
                 };
                 let cached_wire: bool = {
-                    let cached = resp_value.cached.clone();
+                    let cached = ::core::clone::Clone::clone(&resp_value.cached);
                     cached
                 };
                 let etag_header_value: String = {
