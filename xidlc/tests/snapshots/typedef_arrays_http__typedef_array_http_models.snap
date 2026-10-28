@@ -236,6 +236,11 @@ pub mod client {
                 }
             }
         }
+        impl Default for client_Envelope {
+            fn default() -> Self {
+                super::Envelope::default().into()
+            }
+        }
         #[derive(::serde::Serialize, ::serde::Deserialize)]
         pub struct spatial_Label {
             pub name: String,
@@ -250,6 +255,11 @@ pub mod client {
         impl From<spatial_Label> for super::super::spatial::Label {
             fn from(value: spatial_Label) -> Self {
                 Self { name: value.name }
+            }
+        }
+        impl Default for spatial_Label {
+            fn default() -> Self {
+                super::super::spatial::Label::default().into()
             }
         }
         #[derive(::serde::Serialize, ::serde::Deserialize)]
@@ -273,6 +283,11 @@ pub mod client {
                     spatial_Mode::Foot => Self::Foot,
                     spatial_Mode::Van => Self::Van,
                 }
+            }
+        }
+        impl Default for spatial_Mode {
+            fn default() -> Self {
+                super::super::spatial::Mode::default().into()
             }
         }
     }
@@ -376,6 +391,11 @@ pub mod client {
                 }
             }
         }
+        impl Default for client_Envelope {
+            fn default() -> Self {
+                super::Envelope::default().into()
+            }
+        }
         #[derive(::serde::Serialize, ::serde::Deserialize)]
         pub struct spatial_Label {
             pub name: String,
@@ -390,6 +410,11 @@ pub mod client {
         impl From<spatial_Label> for super::super::spatial::Label {
             fn from(value: spatial_Label) -> Self {
                 Self { name: value.name }
+            }
+        }
+        impl Default for spatial_Label {
+            fn default() -> Self {
+                super::super::spatial::Label::default().into()
             }
         }
         #[derive(::serde::Serialize, ::serde::Deserialize)]
@@ -413,6 +438,11 @@ pub mod client {
                     spatial_Mode::Foot => Self::Foot,
                     spatial_Mode::Van => Self::Van,
                 }
+            }
+        }
+        impl Default for spatial_Mode {
+            fn default() -> Self {
+                super::super::spatial::Mode::default().into()
             }
         }
     }
