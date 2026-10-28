@@ -5,7 +5,6 @@ mod constr_type;
 mod definition;
 mod enum_dcl;
 mod exception_dcl;
-mod interface_dcl;
 mod render;
 mod spec;
 mod struct_dcl;
@@ -89,6 +88,25 @@ mod tests {
 
         assert_eq!(artifacts.len(), 1);
         assert_eq!(artifacts[0].as_file().path, "e2e_test.rs");
+    }
+
+    #[test]
+    fn rejects_interface_declarations() {
+        let spec = hir::Specification(vec![hir::Definition::InterfaceDcl(hir::InterfaceDcl {
+            annotations: Vec::new(),
+            decl: hir::InterfaceDclInner::InterfaceForwardDcl(hir::InterfaceForwardDcl {
+                ident: "Greeter".to_string(),
+            }),
+        })]);
+
+        let error = generate_with_properties(&spec, Path::new("api.idl"), &HashMap::new())
+            .expect_err("the rust target no longer supports interfaces");
+        assert!(
+            error
+                .to_string()
+                .contains("does not support the `interface Greeter`"),
+            "unexpected error: {error}"
+        );
     }
 
     #[test]

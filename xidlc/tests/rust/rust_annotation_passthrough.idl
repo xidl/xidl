@@ -12,9 +12,3 @@ enum Color {
     Red,
     Green
 };
-
-@rust_allow(async_fn_in_trait)
-interface Api {
-    @rust_cfg(feature = "client")
-    void ping();
-};

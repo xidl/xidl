@@ -1,1 +1,15 @@
-#include "../shared/wire_names.idl"
+#pragma xidlc package xidlc
+#pragma xidlc version v1.0.0
+
+@rename_all("camelCase")
+struct WireNames {
+    long user_id;
+    @rename("custom_name") long special;
+    @skip long hidden;
+};
+
+@rename_all("camelCase")
+enum WireState {
+    state_active,
+    @rename("archived") state_old
+};

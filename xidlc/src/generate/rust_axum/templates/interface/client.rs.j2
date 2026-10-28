@@ -334,7 +334,7 @@
                                         for value in {{ param.name }} {
                                             let header_value_str = {% if param.header_item_is_string %}value{% elif param.header_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(&value)
                                             .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %};
-                                            {% if param.header_item_is_string %}
+                                            {% if param.header_item_is_string or param.header_item_is_primitive %}
                                                 if header_value_str.contains(',') || header_value_str.trim() != header_value_str {
                                                     return Err(xidl_rust_axum::Error::new(400, concat!("unrepresentable simple header collection element: ", {{ param.wire_name | tojson }})).into());
                                                 }
