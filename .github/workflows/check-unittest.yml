@@ -27,7 +27,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: 1.92.0
+          toolchain: 1.94.0
           components: rustfmt
 
       - name: Setup Go
@@ -92,7 +92,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: 1.92.0
+          toolchain: 1.94.0
           components: clippy
 
       - name: Cargo clippy
@@ -108,7 +108,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: 1.92.0
+          toolchain: 1.94.0
 
       - name: Install cargo-tarpaulin
         uses: taiki-e/install-action@v2.87.31
@@ -133,7 +133,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: 1.92.0
+          toolchain: 1.94.0
 
       - name: Check release
         run: |
@@ -148,7 +148,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: 1.92.0
+          toolchain: 1.94.0
           targets: wasm32-unknown-unknown
 
       - name: Check wasm compilation

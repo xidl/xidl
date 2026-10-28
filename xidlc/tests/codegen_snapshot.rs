@@ -68,6 +68,13 @@ fn render_output(files: Vec<xidlc::driver::File>) -> String {
     out
 }
 
+fn normalize_typescript_layout(output: &str) -> String {
+    output
+        .split_whitespace()
+        .collect::<String>()
+        .replace('"', "'")
+}
+
 fn case_props(folder: &str, case_name: &str) -> HashMap<String, serde_json::Value> {
     let _ = case_name;
     let mut props = HashMap::from([(String::from("enable_metadata"), true.into())]);
@@ -155,6 +162,41 @@ fn codegen_snapshots_from_idl_folders() {
         insta::assert_snapshot!(snapshot_name, output);
         if let Some(output) = forced_31 {
             insta::assert_snapshot!(v31_name, output);
+        }
+    }
+}
+
+#[test]
+fn typescript_rest_fixtures_are_formattable() {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("ts-http");
+    let mut cases = fs::read_dir(&root)
+        .expect("read ts-http fixtures")
+        .map(|entry| entry.expect("dir entry").path())
+        .filter(|path| path.extension().and_then(|ext| ext.to_str()) == Some("idl"))
+        .collect::<Vec<_>>();
+    cases.sort();
+    assert!(!cases.is_empty(), "no typescript-rest fixtures found");
+
+    for case_path in cases {
+        let source = fs::read_to_string(&case_path).expect("read idl");
+        let mut generator = xidlc::driver::Generator::new(String::from("typescript-rest"));
+        let files = generator
+            .generate_from_idl(
+                &source,
+                case_path
+                    .strip_prefix(env!("CARGO_MANIFEST_DIR"))
+                    .unwrap_or(&case_path),
+                case_props("ts-http", ""),
+            )
+            .expect("generate typescript-rest");
+        for file in files {
+            if !file.path().ends_with(".ts") {
+                continue;
+            }
+            xidlc::fmt::format_typescript_source(file.content())
+                .unwrap_or_else(|error| panic!("format {}: {error}", file.path()));
         }
     }
 }
@@ -379,33 +421,34 @@ interface PanelApi {
 };
 "#,
     );
+    let normalized = normalize_typescript_layout(&output);
 
     // Server binding keys must use the schema field name, not the TS-escaped ident.
     assert!(
-        output.contains("wireName: \"from\", key: \"from\""),
+        normalized.contains("wireName:'from',key:'from'"),
         "server query binding should keep schema key from:\n{output}"
     );
     assert!(
-        !output.contains("key: \"_from\""),
+        !normalized.contains("key:'_from'"),
         "server binding must not escape reserved-word keys:\n{output}"
     );
 
     // args are looked up on the schema-parsed payload.
     assert!(
-        output.contains("args: [\"userId\", \"from\", \"to\"]"),
+        normalized.contains("args:['userId','from','to']"),
         "server args should use schema field names:\n{output}"
     );
 
     // Zod request schema field stays the raw IDL name.
     assert!(
-        output.contains("\"from\": z.coerce.string()")
-            || output.contains("from: z.coerce.string()"),
+        normalized.contains("'from':z.coerce.string()")
+            || normalized.contains("from:z.coerce.string()"),
         "request schema should expose field from:\n{output}"
     );
 
     // Handler parameter remains TS-escaped so generated code compiles.
     assert!(
-        output.contains("userId: string, _from: string, to: string"),
+        normalized.contains("userId:string,_from:string,to:string"),
         "handler signature should escape reserved-word params:\n{output}"
     );
 }
@@ -429,17 +472,18 @@ interface PanelApi {
 };
 "#,
     );
+    let normalized = normalize_typescript_layout(&output);
 
     assert!(
-        output.contains("wireName: \"from\", key: \"from\""),
+        normalized.contains("wireName:'from',key:'from'"),
         "server query binding should keep schema key from:\n{output}"
     );
     assert!(
-        !output.contains("key: \"_from\"") && !output.contains("key: \"_req\""),
+        !normalized.contains("key:'_from'") && !normalized.contains("key:'_req'"),
         "server bindings must not escape reserved-word keys:\n{output}"
     );
     assert!(
-        output.contains("args: [\"from\", \"req\"]"),
+        normalized.contains("args:['from','req']"),
         "server args should use schema field names:\n{output}"
     );
 }
@@ -459,13 +503,14 @@ interface PanelApi {
 };
 "#,
     );
+    let normalized = normalize_typescript_layout(&output);
 
     assert!(
-        !output.contains("key: \"_from\"") && !output.contains("key: \"\"from\""),
+        !normalized.contains("key:'_from'") && !normalized.contains("key:''from'"),
         "response binding keys must be the schema field name:\n{output}"
     );
     assert!(
-        output.contains("key: \"from\""),
+        normalized.contains("key:'from'"),
         "response binding should expose key from:\n{output}"
     );
 }

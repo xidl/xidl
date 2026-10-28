@@ -4,6 +4,13 @@ use std::{collections::HashMap, path::Path};
 
 const CATALOG: &str = include_str!("../../bdd/features/data/versioned_catalog.idl");
 
+fn normalize_typescript_layout(output: &str) -> String {
+    output
+        .split_whitespace()
+        .collect::<String>()
+        .replace('"', "'")
+}
+
 #[test]
 fn generated_collection_contracts_allow_zero_occurrences() {
     let source = include_str!("../../bdd/features/data/http_collections.idl");
@@ -80,20 +87,21 @@ fn text_position_request_schemas_coerce_typedef_collections() {
         .find(|file| file.path().ends_with(".iface.zod.ts"))
         .expect("collection iface schemas");
     let schema = iface.content();
+    let normalized = normalize_typescript_layout(schema);
     // Typedef'd numeric collections expand to per-element text grammars;
     // string typedefs keep their model reference with the models prefix, and
     // the unsigned cookie grammar rejects minus signs before coercion.
     assert!(
-        schema.contains("values: z.array(z.union([z.number(),"),
+        normalized.contains("values:z.array(z.union([z.number(),"),
         "typedef'd numeric query must expand to a coerced element grammar"
     );
     assert!(
-        schema.contains("labels: z.array(z.coerce.string()).optional()"),
+        normalized.contains("labels:z.array(z.coerce.string()).optional()"),
         "string typedefs expand inline; only JSON positions reference models"
     );
     assert!(
-        schema.contains("z.string().regex(/^[+]?[0-9]+")
-            && schema.contains(".pipe(z.number().min(0).max(4294967295)"),
+        normalized.contains("z.string().regex(/^[+]?[0-9]+")
+            && normalized.contains(".pipe(z.number().min(0).max(4294967295)"),
         "unsigned scalar transports must reject minus signs and values outside uint32"
     );
     insta::assert_snapshot!("collection_iface_zod", schema);

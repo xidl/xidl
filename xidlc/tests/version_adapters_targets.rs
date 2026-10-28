@@ -322,6 +322,23 @@ fn render_error(source: &str, name: &str) -> String {
         .to_string()
 }
 
+fn normalize_artifacts(
+    artifacts: std::collections::BTreeMap<String, String>,
+) -> std::collections::BTreeMap<String, String> {
+    artifacts
+        .into_iter()
+        .map(|(path, content)| {
+            let content = if path.ends_with(".ts") {
+                xidlc::fmt::format_typescript_source(&content)
+                    .unwrap_or_else(|error| panic!("format {path}: {error}"))
+            } else {
+                content
+            };
+            (path, content)
+        })
+        .collect()
+}
+
 #[test]
 fn ordinary_targets_match_the_master_artifacts_byte_for_byte() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR"));
@@ -338,24 +355,28 @@ fn ordinary_targets_match_the_master_artifacts_byte_for_byte() {
             "http_body_shape",
         ] {
             let baseline = root.join(format!("tests/adapter_baseline/{target}.{fixture}.json"));
-            let expected: std::collections::BTreeMap<String, String> = serde_json::from_str(
-                &std::fs::read_to_string(&baseline).expect("master baseline snapshot"),
-            )
-            .expect("baseline artifact manifest");
-            let source = root.join(format!("../bdd/features/data/{fixture}.idl"));
-            let generated = xidlc::driver::Generator::new(target.into())
-                .generate_from_idl(
-                    &std::fs::read_to_string(&source).expect("contract"),
-                    &source,
-                    HashMap::from([
-                        ("enable_client".into(), serde_json::json!(true)),
-                        ("enable_server".into(), serde_json::json!(true)),
-                    ]),
+            let expected = normalize_artifacts(
+                serde_json::from_str::<std::collections::BTreeMap<String, String>>(
+                    &std::fs::read_to_string(&baseline).expect("master baseline snapshot"),
                 )
-                .expect("ordinary generation")
-                .into_iter()
-                .map(|file| (file.path().to_string(), file.content().to_string()))
-                .collect::<std::collections::BTreeMap<_, _>>();
+                .expect("baseline artifact manifest"),
+            );
+            let source = root.join(format!("../bdd/features/data/{fixture}.idl"));
+            let generated = normalize_artifacts(
+                xidlc::driver::Generator::new(target.into())
+                    .generate_from_idl(
+                        &std::fs::read_to_string(&source).expect("contract"),
+                        &source,
+                        HashMap::from([
+                            ("enable_client".into(), serde_json::json!(true)),
+                            ("enable_server".into(), serde_json::json!(true)),
+                        ]),
+                    )
+                    .expect("ordinary generation")
+                    .into_iter()
+                    .map(|file| (file.path().to_string(), file.content().to_string()))
+                    .collect::<std::collections::BTreeMap<_, _>>(),
+            );
             assert_eq!(
                 generated, expected,
                 "{target} artifacts for {fixture} differ from the pinned baseline"

@@ -30,10 +30,12 @@ fn generate_fixture_error(
     let (path, source) = versioned_fixture(folder, name);
     match panic::catch_unwind(AssertUnwindSafe(|| {
         let mut generator = xidlc::driver::Generator::new(lang.to_string());
-        generator.generate_from_idl(&source, &path, props)
+        generator
+            .generate_from_idl(&source, &path, props)
+            .map_err(|err| err.to_string())
     })) {
         Ok(Ok(_)) => panic!("{lang} should reject the versioned fixture"),
-        Ok(Err(err)) => err.to_string(),
+        Ok(Err(err)) => err,
         Err(payload) => panic_message(payload),
     }
 }
@@ -137,10 +139,10 @@ fn panic_message(payload: Box<dyn std::any::Any + Send>) -> String {
 fn generate_error(lang: &str, fixture: &str, props: HashMap<String, serde_json::Value>) -> String {
     let source = invalid_case_source(fixture);
     match panic::catch_unwind(AssertUnwindSafe(|| {
-        xidlc::generate_from_source(lang, &source, props)
+        xidlc::generate_from_source(lang, &source, props).map_err(|err| err.to_string())
     })) {
         Ok(Ok(_)) => panic!("fixture {fixture} should fail"),
-        Ok(Err(err)) => err.to_string(),
+        Ok(Err(err)) => err,
         Err(payload) => panic_message(payload),
     }
 }
