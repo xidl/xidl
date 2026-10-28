@@ -4,6 +4,7 @@ mod helpers;
 mod indent;
 #[cfg(test)]
 mod tests;
+mod typescript;
 
 use crate::{
     diagnostic::DiagnosticRunner,
@@ -75,6 +76,11 @@ pub fn format_rust_source(source: &str) -> IdlcResult<String> {
     let syntax_tree = syn::parse_file(source)
         .map_err(|err| IdlcError::Fmt(format!("invalid rust source: {err}")))?;
     Ok(prettyplease::unparse(&syntax_tree))
+}
+
+/// Parses generated TypeScript source and re-prints it with canonical formatting.
+pub fn format_typescript_source(source: &str) -> IdlcResult<String> {
+    typescript::format_typescript_source(source)
 }
 
 fn push_action(actions: &mut HashMap<usize, Vec<InsertKind>>, pos: usize, kind: InsertKind) {

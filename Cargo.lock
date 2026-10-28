@@ -3102,6 +3102,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
 
 [[package]]
+name = "tsv_lang"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f7d0526a2f3ec93bd68f6bb0288a5d8333e1553296a9b1f061692ad4e0feed1a"
+dependencies = [
+ "smallvec",
+ "unicode-ident",
+ "unicode-segmentation",
+ "unicode-width 0.2.2",
+]
+
+[[package]]
+name = "tsv_ts"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ac9810ac881f3f5a0e0e7bf2cd5a7255eabefcbf57d507315e0225a1c3a962c0"
+dependencies = [
+ "bumpalo",
+ "smallvec",
+ "tsv_lang",
+ "unicode-ident",
+]
+
+[[package]]
 name = "tungstenite"
 version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3650,6 +3674,7 @@ dependencies = [
  "tree-sitter",
  "tree-sitter-highlight",
  "tree-sitter-idl",
+ "tsv_ts",
  "xidl-parser",
 ]
 

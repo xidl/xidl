@@ -36,10 +36,10 @@ fn generate_error(lang: &str, fixture: &str) -> String {
     let _guard = test_lock().lock().expect("lock validation tests");
     let (_path, source) = invalid_case_source(fixture);
     match panic::catch_unwind(AssertUnwindSafe(|| {
-        xidlc::generate_from_source(lang, &source, HashMap::new())
+        xidlc::generate_from_source(lang, &source, HashMap::new()).map_err(|err| err.to_string())
     })) {
         Ok(Ok(_)) => panic!("fixture should fail"),
-        Ok(Err(err)) => err.to_string(),
+        Ok(Err(err)) => err,
         Err(payload) => panic_message(payload),
     }
 }

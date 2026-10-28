@@ -37,6 +37,7 @@ pub fn generate(
     renderer.extend(&props);
 
     let output = spec::render_spec(&spec, file_name, &renderer, &rest_hir)?;
+    let output = spec::format_output(output)?;
     let mut artifacts = vec![
         Artifact::new_file(ArtifactFile {
             path: format!("{file_name}.iface.d.ts"),
