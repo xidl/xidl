@@ -1,4 +1,4 @@
-use super::{integer, project, values};
+use super::{plans, project};
 use crate::hir::{ParserProperties, Specification};
 
 #[test]
@@ -22,13 +22,13 @@ fn source_history_is_preserved_until_a_version_is_selected() {
     let record = crate::versioning::VersioningRecord::analyze(&raw)
         .expect("constant timeline")
         .expect("versioned contract");
-    for (version, expected) in [("v1", 2), ("v2", 3)] {
+    for (version, literal) in [("v1", "4294967293"), ("v2", "4294967292")] {
         let selected = record.resolve_version(version).expect("known API version");
         let projection = record.project(&raw, selected).expect("project raw source");
         let mut projection = projection;
         super::super::IntegerDeclarations::normalize(&mut projection, &Default::default())
             .expect("selected constants");
-        assert_eq!(values(&projection)["WIDTH"], integer(expected));
+        assert!(plans(&projection)["WIDTH"].to_string().contains(literal));
         let properties = [(
             crate::versioning::API_VERSION_PROPERTY.into(),
             version.into(),
@@ -36,15 +36,15 @@ fn source_history_is_preserved_until_a_version_is_selected() {
         .into_iter()
         .collect();
         assert_eq!(
-            values(&project(source, properties))["WIDTH"],
-            integer(expected)
+            plans(&project(source, properties))["WIDTH"],
+            plans(&projection)["WIDTH"]
         );
     }
     assert_eq!(serde_json::to_value(&raw).unwrap(), before);
 }
 
 #[test]
-fn folding_cannot_hide_references_to_retired_constants() {
+fn expression_planning_cannot_hide_references_to_retired_constants() {
     let typed = crate::parser::parser_text(
         "@version enum V { v1, v2 };\n\
          @removed(V::v2) module retired { const long EXPIRED = 2; };\n\
@@ -56,7 +56,7 @@ fn folding_cannot_hide_references_to_retired_constants() {
             .into_iter()
             .collect();
     let error = Specification::project_typed_ast_versions(typed, properties, "constants.idl")
-        .expect_err("retired dependencies are checked before folding")
+        .expect_err("retired dependencies are checked before expression planning")
         .to_string();
     assert!(error.contains("EXPIRED"), "{error}");
 }

@@ -54,3 +54,46 @@ def execute_constants(context):
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert result.stdout.strip() == "PASS: integer constants"
+
+
+@when('I generate the integer expression "{declaration}"')
+def generate_invalid_integer(context, declaration):
+    root = Path.cwd()
+    output = Path(context.lang_dir)
+    source_dir = output / "source"
+    source_dir.mkdir()
+    shutil.copy(Path(context.idl_file).parent / "core.idl", source_dir / "core.idl")
+    source = source_dir / "api.idl"
+    source.write_text('import "core.idl";\n' + declaration)
+    cli = root / "target/debug/xidlc"
+    run([str(cli), "lint", "--deny", "warnings", str(source)], cwd=root)
+    for target in ("rust", "go"):
+        run(
+            [str(cli), "gen", "--out-dir", str(output / target), target, str(source)],
+            cwd=root,
+        )
+
+
+@then("Rust and Go reject the generated integer contract")
+def reject_invalid_integer(context):
+    output = Path(context.lang_dir)
+    rust_source = output / "rust/api.rs"
+    commands = [
+        [
+            os.environ.get("RUSTC", "rustc"),
+            "--edition=2024",
+            "--crate-type=lib",
+            str(rust_source),
+            "-o",
+            str(output / "invalid.rlib"),
+        ],
+        ["go", "test", str(output / "go/api.go")],
+    ]
+    env = os.environ.copy()
+    env.update(GOPROXY="off", GOSUMDB="off", GOTOOLCHAIN="local", GOWORK="off")
+    for command in commands:
+        result = subprocess.run(
+            command, cwd=output, env=env, capture_output=True, text=True, timeout=120
+        )
+        assert result.returncode != 0, command
+        assert result.stderr.strip(), result.stdout

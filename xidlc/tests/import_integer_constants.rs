@@ -54,11 +54,9 @@ impl ConstantsGraph {
             .collect()
     }
 
-    fn execute(&self) {
-        let output = self.root.path();
-        fs::write(
-            output.join("main.rs"),
-            r#"
+    fn execute(&self, current: u32) {
+        self.execute_source(
+            &r#"
             #[path="generated/base.rs"] pub mod base;
             #[path="generated/middle.rs"] pub mod middle;
             #[path="generated/api.rs"] pub mod api;
@@ -66,19 +64,24 @@ impl ConstantsGraph {
             #[path="generated/head.rs"] pub mod head;
             fn main() {
                 assert_eq!(api::PUBLISHED, 2);
-                assert_eq!(api::CURRENT, 3);
+                assert_eq!(api::CURRENT, __CURRENT__);
                 assert_eq!(api::ROOTED, 1);
                 assert_eq!(api::PROMOTED, 4294967296);
                 assert_eq!(api::PRICE, 1.5);
                 assert_eq!(old::PUBLISHED, 2);
-                assert_eq!(head::CURRENT, 3);
+                assert_eq!(head::CURRENT, __CURRENT__);
                 let old: middle::OldSlots = [0; 2];
-                let new: middle::NewSlots = [0; 3];
-                assert_eq!(old.len() + new.len(), 5);
+                let new: middle::NewSlots = [0; __CURRENT__];
+                assert_eq!(old.len() + new.len(), 2 + __CURRENT__);
             }
-        "#,
-        )
-        .unwrap();
+        "#
+            .replace("__CURRENT__", &current.to_string()),
+        );
+    }
+
+    fn execute_source(&self, source: &str) {
+        let output = self.root.path();
+        fs::write(output.join("main.rs"), source).unwrap();
         let binary = output.join(format!("constants{}", std::env::consts::EXE_SUFFIX));
         let compiled = Command::new(std::env::var_os("RUSTC").unwrap_or_else(|| "rustc".into()))
             .arg("--edition=2024")
@@ -169,7 +172,7 @@ fn transitive_versioned_constants_compile_and_keep_published_consumers_frozen() 
     let first = graph.generate(&["api.idl", "old.idl", "head.idl"]);
     assert_eq!(first.len(), 5);
     insta::assert_debug_snapshot!("versioned_integer_units", first);
-    graph.execute();
+    graph.execute(3);
 
     fs::write(
         graph.root.path().join("base.idl"),
@@ -179,7 +182,7 @@ fn transitive_versioned_constants_compile_and_keep_published_consumers_frozen() 
     let changed = graph.generate(&["api.idl", "old.idl", "head.idl"]);
     assert_eq!(first["old.rs"], changed["old.rs"]);
     assert_ne!(first["head.rs"], changed["head.rs"]);
-    assert!(changed["head.rs"].contains("pub const CURRENT: u32 = 4;"));
+    graph.execute(4);
     assert!(changed["middle.rs"].contains("pub type NewSlots = [i32; 4];"));
 }
 
@@ -193,6 +196,17 @@ fn local_included_and_imported_constants_share_idl_width_rules() {
     ] {
         let graph = ConstantsGraph::new(&[("dep.idl", dependency), ("api.idl", &source)]);
         let files = graph.generate(&["api.idl"]);
-        assert!(files["api.rs"].contains("pub const REST: u64 = 4294967296;"));
+        assert!(files["api.rs"].contains("pub const REST: u64 = {"));
+        assert!(files["api.rs"].contains(" + "));
+        graph.execute_source(
+            r#"
+            #[path="generated/api.rs"] mod api;
+            fn main() {
+                let value = api::REST;
+                let _: &u64 = &value;
+                assert_eq!(value, 4294967296);
+            }
+        "#,
+        );
     }
 }

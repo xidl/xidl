@@ -5,6 +5,7 @@ mod constr_type;
 mod definition;
 mod enum_dcl;
 mod exception_dcl;
+mod integer;
 mod render;
 mod spec;
 mod struct_dcl;

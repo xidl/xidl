@@ -16,6 +16,11 @@ fn main() {
     assert_eq!(core::LOGICAL_SHIFT, 1);
     assert_eq!(core::FLAGS, u8::MAX);
     assert_eq!(core::AXES, 2);
+    assert_eq!(core::MIXED, 1);
+    assert_eq!(core::MIXED64, u64::MAX - 2);
+    assert_eq!(core::HIGHBIT, 1_u64 << 63);
+    assert_eq!(core::QUOTIENT, 2);
+    assert_eq!(core::REMAINDER, 1);
     assert_eq!(core::LOW, 15);
     let slots: core::Slots = [0; 15];
     assert_eq!(slots, [0; 15]);

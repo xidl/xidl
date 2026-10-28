@@ -34,11 +34,11 @@ fn changing_head_constants_preserves_the_pinned_historical_artifact() {
     let changed = source.replace("0xfffffffc", "0xfffffffb");
     let historical = selected(source, "v1");
     assert_eq!(historical, selected(&changed, "v1"));
-    assert!(historical.contains("pub const WIDTH: i32 = 2;"));
+    assert!(historical.contains("pub const WIDTH: i32 = {"));
     assert!(historical.contains("[i32; 2]"));
     let head = selected(source, "v2");
     let changed_head = selected(&changed, "v2");
     assert_ne!(head, changed_head);
-    assert!(head.contains("pub const WIDTH: i32 = 3;"));
-    assert!(changed_head.contains("pub const WIDTH: i32 = 4;"));
+    assert!(head.contains("[i32; 3]"));
+    assert!(changed_head.contains("[i32; 4]"));
 }

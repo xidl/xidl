@@ -20,22 +20,30 @@ fn project(source: &str, properties: ParserProperties) -> Specification {
 }
 
 fn values(spec: &Specification) -> BTreeMap<String, Value> {
-    fn collect(value: &Value, output: &mut BTreeMap<String, Value>) {
+    facts(spec, "value")
+}
+
+fn plans(spec: &Specification) -> BTreeMap<String, Value> {
+    facts(spec, "integer")
+}
+
+fn facts(spec: &Specification, field: &str) -> BTreeMap<String, Value> {
+    fn collect(value: &Value, field: &str, output: &mut BTreeMap<String, Value>) {
         match value {
             Value::Object(object) => {
                 if let Some(constant) = object.get("ConstDcl") {
                     output.insert(
                         constant["ident"].as_str().expect("constant name").into(),
-                        constant["value"].clone(),
+                        constant[field].clone(),
                     );
                 }
                 for value in object.values() {
-                    collect(value, output);
+                    collect(value, field, output);
                 }
             }
             Value::Array(array) => {
                 for value in array {
-                    collect(value, output);
+                    collect(value, field, output);
                 }
             }
             _ => {}
@@ -44,6 +52,7 @@ fn values(spec: &Specification) -> BTreeMap<String, Value> {
     let mut output = BTreeMap::new();
     collect(
         &serde_json::to_value(spec).expect("constant HIR"),
+        field,
         &mut output,
     );
     output

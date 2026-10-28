@@ -31,7 +31,7 @@ fn imported_complements_use_idl_widths_and_omit_unused_packages() {
     )
     .expect("generate the imported Go constant contract");
     let api = fs::read_to_string(output.path().join("api.go"))
-        .expect("Go importer folds constant expressions");
+        .expect("Go importer retains checked expressions");
     assert!(!api.contains("\"masks\""));
     insta::assert_snapshot!("imported_complements", api);
 }

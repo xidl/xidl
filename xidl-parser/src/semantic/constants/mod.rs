@@ -1,6 +1,7 @@
-//! Lower fully known integer constants in a selected API contract.
+//! Resolve integer expression types and evaluate only required contract dimensions.
 
 mod declarations;
+mod expressions;
 mod imports;
 mod integer;
 mod resolver;
@@ -11,13 +12,13 @@ use crate::hir;
 pub use imports::{INTEGER_IMPORTS_PROPERTY, IntegerExports, IntegerImports};
 pub(super) use resolver::IntegerConstants;
 
-/// Evaluates declarations after projection without changing source history.
+/// Resolves declarations after projection without computing ordinary constants.
 pub(crate) struct IntegerDeclarations {
     constants: IntegerConstants,
 }
 
 impl IntegerDeclarations {
-    /// Resolves values using the selected contract and its imported declarations.
+    /// Resolves types using the selected contract and its imported declarations.
     pub(crate) fn normalize(
         spec: &mut hir::Specification,
         imports: &IntegerImports,

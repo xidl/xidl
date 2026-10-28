@@ -1,0 +1,10 @@
+{% for step in steps -%}
+{% if step.shift -%}
+const _ uint64 = {{ step.shift }}
+const _ uint64 = 63 - {{ step.shift }}
+{% endif -%}
+const {{ step.name }} = {{ step.value }}
+{% if step.check -%}
+const _ {{ step.ty }} = {{ step.name }}
+{% endif -%}
+{% endfor -%}
