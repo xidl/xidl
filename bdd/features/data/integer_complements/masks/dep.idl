@@ -1,0 +1,6 @@
+#include "../../integer_constants/core.idl"
+
+const unsigned long EMPTY32 = 0;
+const unsigned long long EMPTY64 = 0;
+const long NEGATIVE32 = -2;
+const long MINIMUM32 = -2147483648;

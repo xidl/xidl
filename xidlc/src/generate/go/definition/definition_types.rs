@@ -50,7 +50,7 @@ pub(crate) fn render_const_expr(
         &|operator| match operator {
             hir::UnaryOperator::Add => "+",
             hir::UnaryOperator::Sub => "-",
-            hir::UnaryOperator::Not => "~",
+            hir::UnaryOperator::Not => "^",
         },
     ))
 }
