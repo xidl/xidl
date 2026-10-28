@@ -30,7 +30,8 @@ fn constants_use_idl_precision_and_repeated_lowering_is_stable() {
         let mut spec = project(source, ParserProperties::new());
         assert_eq!(values(&spec)["VALUE"], integer(expected), "{source}");
         let before = serde_json::to_value(&spec).unwrap();
-        super::super::IntegerDeclarations::normalize(&mut spec).expect("repeat lowering");
+        super::super::IntegerDeclarations::normalize(&mut spec, &Default::default())
+            .expect("repeat lowering");
         assert_eq!(serde_json::to_value(&spec).unwrap(), before, "{source}");
     }
 }

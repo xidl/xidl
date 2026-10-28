@@ -84,7 +84,7 @@ fn dimensions_use_declaration_scope_and_preserve_constant_declarations() {
         before.to_string().contains("BinaryExpr"),
         "constant RHS remains an expression"
     );
-    crate::semantic::analyze(&mut spec).expect("repeated analysis");
+    crate::semantic::analyze(&mut spec, &Default::default()).expect("repeated analysis");
     assert_eq!(before, serde_json::to_value(&spec).unwrap());
 }
 

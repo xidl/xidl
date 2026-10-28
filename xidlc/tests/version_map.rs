@@ -111,3 +111,53 @@ fn jsonrpc_generation_does_not_invent_http_operations_in_the_map() {
     .expect("version map prop");
     assert!(version_map["steps"][0].get("operations").is_none());
 }
+
+#[test]
+fn unit_graph_integer_facts_reach_the_hir_version_map() {
+    let root = tempfile::tempdir().expect("version map import graph");
+    std::fs::write(
+        root.path().join("dep.idl"),
+        "const unsigned long TWO = 2; const unsigned long THREE = 3;",
+    )
+    .unwrap();
+    let input = root.path().join("api.idl");
+    std::fs::write(
+        &input,
+        r#"
+        import "dep.idl";
+        @version enum V { v1, v2 };
+        @removed(V::v2) module cfg {
+            const unsigned long WIDTH = dep::TWO;
+            typedef long Slots[WIDTH];
+        };
+        @added(V::v2) module cfg {
+            const unsigned long WIDTH = dep::THREE;
+            typedef long Slots[WIDTH];
+        };
+    "#,
+    )
+    .unwrap();
+    let graph = xidlc::units::UnitGraph::build(&[input], &Default::default()).unwrap();
+    let unit = graph.units().last().expect("importing unit");
+    let properties = HashMap::from([
+        ("idl".into(), serde_json::json!(unit.source())),
+        ("target_lang".into(), "rust".into()),
+        (
+            xidl_parser::semantic::INTEGER_IMPORTS_PROPERTY.into(),
+            serde_json::to_value(graph.integer_imports(unit)).unwrap(),
+        ),
+    ]);
+    let artifacts = HirGen
+        .generate(
+            CodegenInput::new_rpc_hir(xidl_parser::hir::Specification(vec![])),
+            unit.generation_input().to_string_lossy().into_owned(),
+            properties,
+        )
+        .expect("HIR with imported array dimensions");
+    let Artifact::Hir(artifact) = &artifacts[0] else {
+        panic!("expected a source HIR artifact");
+    };
+    let change = &artifact.props["version_map"]["steps"][0]["types"]["cfg::Slots"];
+    assert_eq!(change["from"]["declarators"][0]["lengths"][0], "2");
+    assert_eq!(change["to"]["declarators"][0]["lengths"][0], "3");
+}

@@ -167,12 +167,34 @@ impl VersioningRecord {
 
     /// Projects `version` into an ordinary specification.
     pub fn project(&self, spec: &Specification, version: VersionId) -> ParserResult<Specification> {
+        let mut projected = self.project_source(spec, version)?;
+        crate::semantic::analyze(&mut projected, &crate::semantic::IntegerImports::default())?;
+        Ok(projected)
+    }
+
+    /// Projects source declarations before evaluating constants or array sizes.
+    pub fn project_source(
+        &self,
+        spec: &Specification,
+        version: VersionId,
+    ) -> ParserResult<Specification> {
         project::project_version(spec, &self.timeline, version)
     }
 
     /// Projects every selected version into one specification with one module
     /// per version, in timeline order.
     pub fn merge(
+        &self,
+        spec: &Specification,
+        versions: &[VersionId],
+    ) -> ParserResult<Specification> {
+        let mut merged = self.merge_source(spec, versions)?;
+        crate::semantic::analyze(&mut merged, &crate::semantic::IntegerImports::default())?;
+        Ok(merged)
+    }
+
+    /// Merges selected source contracts before their shared semantic analysis.
+    pub fn merge_source(
         &self,
         spec: &Specification,
         versions: &[VersionId],

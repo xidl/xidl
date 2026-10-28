@@ -11,3 +11,5 @@ const long long MAXIMUM_SIGNED64 = ~dep::MINIMUM;
 const long long RESTORED = ~(~dep::NEGATIVE);
 const unsigned long ALLOWED = ~dep::MASK32 | +dep::AXES;
 const unsigned long DENIED = ~ALLOWED;
+const unsigned long long REST = dep::MASK32 + 1;
+const unsigned long long WIDE = ~dep::MASK32;

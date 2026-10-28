@@ -7,7 +7,7 @@ use std::path::Path;
 use xidlc::driver::{ArgsGenerate, Driver};
 
 #[test]
-fn imported_complements_use_go_operators() {
+fn imported_complements_use_idl_widths_and_omit_unused_packages() {
     let output = tempfile::tempdir().expect("Go complement output directory");
     let source = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../bdd/features/data/integer_complements/api.idl");
@@ -31,6 +31,27 @@ fn imported_complements_use_go_operators() {
     )
     .expect("generate the imported Go constant contract");
     let api = fs::read_to_string(output.path().join("api.go"))
-        .expect("Go importer preserves constant expressions");
+        .expect("Go importer folds constant expressions");
+    assert!(!api.contains("\"masks\""));
     insta::assert_snapshot!("imported_complements", api);
+}
+
+#[test]
+fn symbolic_complements_keep_go_operators_without_imported_declarations() {
+    let files = xidlc::driver::Generator::new("go".into())
+        .generate_from_idl(
+            "const unsigned long VALUE = ~dep::MASK;",
+            Path::new("api.idl"),
+            HashMap::from([
+                (
+                    xidlc::units::IMPORT_PROPERTY.into(),
+                    serde_json::json!([{"prefix":"dep","unit":"masks/dep.idl"}]),
+                ),
+                (xidlc::units::UNIT_PATH_PROPERTY.into(), "api.idl".into()),
+            ]),
+        )
+        .expect("symbolic Go constant contract");
+    let api = files.iter().find(|file| file.path() == "api.go").unwrap();
+    assert!(api.content().contains("^masks.MASK"));
+    assert!(api.content().contains("\"masks\""));
 }

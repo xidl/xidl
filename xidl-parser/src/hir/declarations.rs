@@ -5,7 +5,7 @@ use crate::hir::{ConstrTypeDcl, Definition, Export, InterfaceDclInner, TypeDcl, 
 use std::collections::BTreeSet;
 
 /// Names declared in one specification, resolved with IDL lexical scope.
-#[derive(Default)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 pub(crate) struct DeclarationNames(BTreeSet<String>);
 
 impl DeclarationNames {

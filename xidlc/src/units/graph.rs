@@ -4,10 +4,10 @@ use super::path::ImportPath;
 use super::refs::PreparedSource;
 use super::scan::{DeclaredImports, ImportDecl};
 use super::spec::{ImportSpec, Unit};
-use std::collections::BTreeMap;
-use std::collections::btree_map::Entry;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::{Path, PathBuf};
+use xidl_parser::semantic::IntegerImports;
 
 /// Entry file a directory import resolves to.
 const INDEX_FILE: &str = "index.idl";
@@ -17,6 +17,7 @@ const INDEX_FILE: &str = "index.idl";
 pub struct UnitGraph {
     units: Vec<Unit>,
     mounts: BTreeMap<String, PathBuf>,
+    interfaces: BTreeMap<String, UnitInterface>,
 }
 
 impl UnitGraph {
@@ -40,10 +41,12 @@ impl UnitGraph {
         for input in inputs {
             builder.add_root(input)?;
         }
-        let graph = Self {
+        let mut graph = Self {
             units: builder.units,
             mounts: mounts.clone(),
+            interfaces: BTreeMap::new(),
         };
+        graph.collect_interfaces()?;
         graph.validate()?;
         Ok(graph)
     }
@@ -53,13 +56,60 @@ impl UnitGraph {
         &self.units
     }
 
+    /// Supplies only the imported declaration contexts reachable from `unit`.
+    pub fn integer_imports(&self, unit: &Unit) -> IntegerImports {
+        let bindings = unit
+            .imports()
+            .iter()
+            .map(|import| import.prefix().to_owned());
+        let mut reachable: BTreeSet<String> = bindings.clone().collect();
+        let mut imports = IntegerImports::new(bindings);
+        for target in self.units.iter().rev() {
+            if !reachable.contains(target.prefix()) {
+                continue;
+            }
+            reachable.extend(
+                target
+                    .imports()
+                    .iter()
+                    .map(|import| import.prefix().to_owned()),
+            );
+            if let Some(interface) = self.interfaces.get(target.prefix()) {
+                imports.bind(
+                    target.prefix(),
+                    interface.integer_exports(),
+                    target
+                        .imports()
+                        .iter()
+                        .map(|import| import.prefix().to_owned()),
+                );
+            }
+        }
+        imports
+    }
+
+    fn collect_interfaces(&mut self) -> Result<(), ImportError> {
+        let imported: BTreeSet<_> = self
+            .units
+            .iter()
+            .flat_map(|unit| unit.imports().iter().map(|import| import.prefix()))
+            .collect();
+        for target in &self.units {
+            if imported.contains(target.prefix()) {
+                let interface = UnitInterface::of(target.source(), target.file(), &self.mounts)?;
+                self.interfaces
+                    .insert(target.prefix().to_owned(), interface);
+            }
+        }
+        Ok(())
+    }
+
     /// Checks every reference a unit makes against the unit it names.
     ///
     /// A reference into an imported unit must name a version that unit
     /// declares and a declaration that exists at that version, so a stale or
     /// misspelled cross-unit type fails here instead of inside a target.
     fn validate(&self) -> Result<(), ImportError> {
-        let mut interfaces: BTreeMap<String, UnitInterface> = BTreeMap::new();
         for unit in &self.units {
             for reference in unit.refs() {
                 if unit.import(reference.prefix()).is_none() {
@@ -72,68 +122,13 @@ impl UnitGraph {
                 else {
                     continue;
                 };
-                let interface = match interfaces.entry(reference.prefix().to_string()) {
-                    Entry::Occupied(entry) => entry.into_mut(),
-                    Entry::Vacant(entry) => entry.insert(UnitInterface::of(
-                        target.source(),
-                        target.file(),
-                        &self.mounts,
-                    )?),
+                let Some(interface) = self.interfaces.get(reference.prefix()) else {
+                    continue;
                 };
-                Self::check(unit, target, interface, reference)?;
+                interface.check(unit, target, reference)?;
             }
         }
         Ok(())
-    }
-
-    /// Checks one reference against the interface of the unit it names.
-    fn check(
-        unit: &Unit,
-        target: &Unit,
-        interface: &UnitInterface,
-        reference: &super::refs::UnitRef,
-    ) -> Result<(), ImportError> {
-        let importer = unit.file().to_path_buf();
-        let referenced = target.file().to_path_buf();
-        let written = reference.qualified();
-        let declared = |version: Option<&str>| interface.declares(version, reference.name());
-        match reference.version() {
-            Some(version) if !interface.is_versioned() => Err(ImportError::UnexpectedVersion {
-                importer,
-                unit: referenced,
-                reference: written,
-                version: version.to_string(),
-            }),
-            Some(version) if !interface.knows_version(version) => {
-                Err(ImportError::UnknownVersion {
-                    importer,
-                    unit: referenced,
-                    reference: written,
-                    version: version.to_string(),
-                    versions: interface.versions(),
-                })
-            }
-            Some(version) if !declared(Some(version)) => Err(ImportError::UnknownType {
-                importer,
-                unit: referenced,
-                reference: written,
-                version: Some(version.to_string()),
-            }),
-            Some(_) => Ok(()),
-            None if interface.is_versioned() => Err(ImportError::MissingVersion {
-                importer,
-                unit: referenced,
-                reference: written,
-                versions: interface.versions(),
-            }),
-            None if !declared(None) => Err(ImportError::UnknownType {
-                importer,
-                unit: referenced,
-                reference: written,
-                version: None,
-            }),
-            None => Ok(()),
-        }
     }
 }
 

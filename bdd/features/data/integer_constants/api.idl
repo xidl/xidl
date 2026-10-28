@@ -3,4 +3,6 @@ import "core.idl";
 const core::Word COPIED = core::LOW;
 const unsigned long ZERO = ~core::MASK32;
 const unsigned long AXES = +core::AXES;
+const unsigned long long REST = core::MASK32 + 1;
+const unsigned long long WIDE = ~core::MASK32;
 const core::Channel PINNED = core::PINNED;

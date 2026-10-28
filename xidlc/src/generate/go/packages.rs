@@ -1,6 +1,7 @@
 //! Go packages the units a file imports live in.
 
-use std::collections::BTreeMap;
+use std::cell::RefCell;
+use std::collections::{BTreeMap, BTreeSet};
 
 use xidl_parser::hir;
 use xidl_parser::hir::ParserProperties;
@@ -22,9 +23,10 @@ pub(crate) struct GoImport {
 /// A unit generated beside the importing file shares its package, so its types
 /// stay unqualified. Any other unit gets a package named after the directory it
 /// was generated into, which is the directory its IDL path names.
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default)]
 pub(crate) struct GoPackages {
     packages: BTreeMap<String, Option<GoImport>>,
+    referenced: RefCell<BTreeSet<String>>,
 }
 
 impl GoPackages {
@@ -57,7 +59,10 @@ impl GoPackages {
             };
             packages.insert(prefix.to_string(), package);
         }
-        Self { packages }
+        Self {
+            packages,
+            referenced: RefCell::default(),
+        }
     }
 
     /// Reference to `value`, when it names an imported unit.
@@ -71,14 +76,24 @@ impl GoPackages {
             .map(|part| go_capitalize(part))
             .collect::<String>();
         match self.packages.get(first)? {
-            Some(package) => Some(format!("{}.{name}", package.name)),
+            Some(package) => {
+                self.referenced.borrow_mut().insert(package.path.clone());
+                Some(format!("{}.{name}", package.name))
+            }
             None => Some(name),
         }
     }
 
-    /// Packages the file imports, sorted by import path.
+    /// Packages referenced during rendering, sorted by import path.
     pub(crate) fn imports(&self) -> Vec<GoImport> {
-        let mut imports: Vec<GoImport> = self.packages.values().flatten().cloned().collect();
+        let referenced = self.referenced.borrow();
+        let mut imports: Vec<GoImport> = self
+            .packages
+            .values()
+            .flatten()
+            .filter(|package| referenced.contains(&package.path))
+            .cloned()
+            .collect();
         imports.sort_by(|left, right| left.path.cmp(&right.path));
         imports.dedup();
         imports

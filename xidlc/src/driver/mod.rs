@@ -11,6 +11,7 @@ use crate::library::{LibraryLoader, MOUNT_PROPERTY};
 use crate::units::{IMPORT_PROPERTY, UNIT_PATH_PROPERTY, UnitGraph};
 use std::collections::HashMap;
 use std::path::PathBuf;
+use xidl_parser::semantic::INTEGER_IMPORTS_PROPERTY;
 
 /// Generator property selecting the OpenAPI document version.
 ///
@@ -120,6 +121,10 @@ impl Driver {
         for unit in graph.units() {
             let mut unit_props = props.clone();
             unit_props.insert(IMPORT_PROPERTY.to_string(), unit.import_property());
+            unit_props.insert(
+                INTEGER_IMPORTS_PROPERTY.to_owned(),
+                serde_json::to_value(graph.integer_imports(unit))?,
+            );
             unit_props.insert(
                 UNIT_PATH_PROPERTY.to_string(),
                 serde_json::Value::String(unit.path().to_string()),

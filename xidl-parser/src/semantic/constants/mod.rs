@@ -1,11 +1,14 @@
 //! Lower fully known integer constants in a selected API contract.
 
+mod declarations;
+mod imports;
 mod integer;
 mod resolver;
 
 use crate::error::ParserResult;
 use crate::hir;
 
+pub use imports::{INTEGER_IMPORTS_PROPERTY, IntegerExports, IntegerImports};
 pub(super) use resolver::IntegerConstants;
 
 /// Evaluates declarations after projection without changing source history.
@@ -14,10 +17,13 @@ pub(crate) struct IntegerDeclarations {
 }
 
 impl IntegerDeclarations {
-    /// Resolves local values while retaining symbols from independent imports.
-    pub(crate) fn normalize(spec: &mut hir::Specification) -> ParserResult<()> {
+    /// Resolves values using the selected contract and its imported declarations.
+    pub(crate) fn normalize(
+        spec: &mut hir::Specification,
+        imports: &IntegerImports,
+    ) -> ParserResult<()> {
         let mut declarations = Self {
-            constants: IntegerConstants::collect(spec),
+            constants: IntegerConstants::with_imports(spec, imports),
         };
         declarations.definitions(&mut spec.0, &[])
     }

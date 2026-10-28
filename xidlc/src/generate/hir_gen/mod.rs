@@ -96,11 +96,11 @@ impl HirGen {
         props: &ParserProperties,
     ) -> Result<Option<xidl_parser::versioning::map::VersionMap>, crate::jsonrpc::RpcError> {
         let mut map_resolver = include_resolver(props);
-        let map_spec = xidl_parser::hir::Specification::from_typed_ast_with_properties_and_path(
+        let map_spec = xidl_parser::hir::Specification::source_from_typed_ast_with_resolver(
             xidl_parser::parser::parser_text_with_resolver(source, Some(input), &mut *map_resolver)
                 .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?,
-            [("expand_interface".to_string(), false.into())].into(),
             std::path::Path::new(input),
+            &mut *map_resolver,
         )
         .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
         let Some(record) = xidl_parser::versioning::VersioningRecord::analyze(&map_spec)
@@ -115,14 +115,18 @@ impl HirGen {
         xidl_parser::versioning::map::from_spec_with_http(
             &map_spec,
             &record,
-            contract,
-            matches!(
-                props.get("hir_kind").and_then(serde_json::Value::as_str),
-                Some(value) if value.eq_ignore_ascii_case("http")
-            ) || matches!(
-                props.get("target_lang").and_then(serde_json::Value::as_str),
-                Some("version-map" | "version_map")
-            ),
+            xidl_parser::versioning::map::MapOptions {
+                contract: contract.to_owned(),
+                integer_imports: xidl_parser::semantic::IntegerImports::from_properties(props)
+                    .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?,
+                include_http_operations: matches!(
+                    props.get("hir_kind").and_then(serde_json::Value::as_str),
+                    Some(value) if value.eq_ignore_ascii_case("http")
+                ) || matches!(
+                    props.get("target_lang").and_then(serde_json::Value::as_str),
+                    Some("version-map" | "version_map")
+                ),
+            },
         )
         .map(Some)
         .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))
