@@ -28,6 +28,32 @@ impl gen::CollectionInputs for Inputs {
         Ok(gen::Search { term })
     }
 
+    async fn letters(&self, letters: Vec<char>) -> Result<Vec<char>> {
+        Ok(letters)
+    }
+
+    async fn letter_aliases(
+        &self,
+        letters: gen::transport::Letters,
+    ) -> Result<gen::transport::Letters> {
+        Ok(letters)
+    }
+
+    async fn wide_letters(
+        &self,
+        letters: Vec<gen::transport::WideLetter>,
+    ) -> Result<Vec<gen::transport::WideLetter>> {
+        Ok(letters)
+    }
+
+    async fn initial(&self, letter: char) -> Result<char> {
+        Ok(letter)
+    }
+
+    async fn cookie_letters(&self, letters: Vec<char>) -> Result<Vec<char>> {
+        Ok(letters)
+    }
+
     async fn numbers(
         &self,
         count: i32,
@@ -59,7 +85,7 @@ impl gen::CollectionInputs for Inputs {
 #[tokio::main]
 async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     if let Some(base) = std::env::args().nth(1) {
-        let client = gen::CollectionInputsClient::new(base);
+        let client = gen::CollectionInputsClient::new(base.clone());
         for labels in [None, Some(vec![])] {
             assert_eq!(
                 client.read(vec![], vec![], vec![], labels).await?,
@@ -104,6 +130,49 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
             assert!(error
                 .message
                 .contains("unrepresentable simple header collection element: tags"));
+        }
+        for letters in [vec![], vec!['a'], vec!['a', 'b', 'a']] {
+            assert_eq!(client.letters(letters.clone()).await?, letters);
+            assert_eq!(client.letter_aliases(letters.clone()).await?, letters);
+            assert_eq!(client.wide_letters(letters.clone()).await?, letters);
+        }
+        assert_eq!(client.initial('A').await?, 'A');
+        let cookie_letters = vec![',', ' ', '雪'];
+        assert_eq!(
+            client.cookie_letters(cookie_letters.clone()).await?,
+            cookie_letters
+        );
+        for letter in [',', ' '] {
+            let error = client.letters(vec![letter]).await.unwrap_err();
+            assert_eq!(error.code, 400);
+            assert!(error
+                .message
+                .contains("unrepresentable simple header collection element: letters"));
+        }
+        let raw = xidl_rust_axum::reqwest::Client::new();
+        for value in ["", "ab", "a,,b", "\"a\""] {
+            let response = raw
+                .get(format!("{base}/letters"))
+                .header("letters", value)
+                .send()
+                .await?;
+            assert_eq!(
+                response.status().as_u16(),
+                400,
+                "invalid character header {value:?}"
+            );
+        }
+        for value in ["", "ab", "\"a\""] {
+            let response = raw
+                .get(format!("{base}/initial"))
+                .header("letter", value)
+                .send()
+                .await?;
+            assert_eq!(
+                response.status().as_u16(),
+                400,
+                "invalid scalar character header {value:?}"
+            );
         }
         println!("PASS: collection SDK wire occurrences");
         return Ok(());

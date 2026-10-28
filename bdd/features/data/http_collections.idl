@@ -4,6 +4,9 @@ module transport {
     typedef sequence<Count> Counts;
     typedef sequence<Label> Labels;
     typedef Labels Selection;
+    typedef char Letter;
+    typedef wchar WideLetter;
+    typedef sequence<Letter> Letters;
 };
 
 struct Collections {
@@ -29,6 +32,15 @@ interface CollectionInputs {
     @get(path="/numbers")
     Numbers numbers(@query long count, @header double ratio,
                     @cookie unsigned long units, @query @optional double threshold);
+    @get(path="/letters")
+    sequence<char> letters(@header sequence<char> letters);
+    @get(path="/letter-aliases")
+    transport::Letters letter_aliases(@header transport::Letters letters);
+    @get(path="/wide-letters")
+    sequence<transport::WideLetter> wide_letters(@header sequence<transport::WideLetter> letters);
+    @get(path="/initial") char initial(@header char letter);
+    @get(path="/cookie-letters")
+    sequence<wchar> cookie_letters(@cookie sequence<wchar> letters);
     @server_stream @get(path="/stream")
     StreamValues stream(@query @optional sequence<long> values);
 };

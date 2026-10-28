@@ -45,4 +45,23 @@ for (const tag of ['one,two', ' leading', 'trailing ']) {
     },
   );
 }
+for (const letters of [[], ['a'], ['a', 'b', 'a']]) {
+  assert.deepEqual(await client.letters(letters), letters);
+  assert.deepEqual(await client.letter_aliases(letters), letters);
+  assert.deepEqual(await client.wide_letters(letters), letters);
+}
+assert.equal(await client.initial('A'), 'A');
+const cookieLetters = [',', ' ', '雪'];
+assert.deepEqual(await client.cookie_letters(cookieLetters), cookieLetters);
+for (const letter of [',', ' ']) {
+  await assert.rejects(client.letters([letter]), (error: unknown) => {
+    assert(error instanceof XidlClientError);
+    assert.equal(error.code, 400);
+    assert.match(
+      error.message,
+      /unrepresentable simple header collection element: letters/,
+    );
+    return true;
+  });
+}
 console.log('PASS: collection SDK wire occurrences');

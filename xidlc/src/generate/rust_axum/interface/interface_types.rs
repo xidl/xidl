@@ -75,9 +75,11 @@ pub(crate) fn header_item_is_string(ty: &hir::TypeSpec) -> bool {
 pub(crate) fn header_item_is_primitive(ty: &hir::TypeSpec) -> bool {
     match ty {
         hir::TypeSpec::SequenceType(seq) => header_item_is_primitive(&seq.ty),
-        hir::TypeSpec::IntegerType(_) | hir::TypeSpec::FloatingPtType | hir::TypeSpec::Boolean => {
-            true
-        }
+        hir::TypeSpec::IntegerType(_)
+        | hir::TypeSpec::FloatingPtType
+        | hir::TypeSpec::Boolean
+        | hir::TypeSpec::CharType
+        | hir::TypeSpec::WideCharType => true,
         _ => false,
     }
 }

@@ -24,6 +24,16 @@ export interface CollectionInputs {
     
         numbers(count: number, ratio: number, units: number, threshold: number | undefined): Awaitable<types.Numbers>;
     
+        letters(letters: Array<string>): Awaitable<Array<string>>;
+    
+        letter_aliases(letters: types.transport.Letters): Awaitable<types.transport.Letters>;
+    
+        wide_letters(letters: Array<types.transport.WideLetter>): Awaitable<Array<types.transport.WideLetter>>;
+    
+        initial(letter: string): Awaitable<string>;
+    
+        cookie_letters(letters: Array<string>): Awaitable<Array<string>>;
+    
         stream(values: Array<number> | undefined): Awaitable<AsyncIterable<types.StreamValues>>;
     
 }
@@ -128,6 +138,177 @@ export const CollectionInputsOperations = {
             headers: [],
             cookies: [],
             schema: ifaceSchemas.models.NumbersSchema,
+            stream: false,
+            
+        },
+        security: [],
+        
+    }),
+    
+        letters: defineOperation<CollectionInputs, "letters">({
+            handler: "letters",
+            method: "GET",
+            path: "/letters",
+            paths: ["/letters"],
+            request: {
+                kind: "object",
+                args: ["letters"],
+                schema: ifaceSchemas.CollectionInputsLettersRequestSchema,
+                path: [],
+                query: [],
+                headers: [{ wireName: "letters", key: "letters", multi: true, optional: false }],
+                cookies: [],
+                body: {
+                    kind: "none",
+                    contentType: "",
+                    fields: [],
+                    
+            },
+        },
+        response: {
+            status: 200,
+            contentType: "application/json",
+            bodyMode: "return",
+            bodyFields: [{ wireName: "return", key: "return" }],
+            headers: [],
+            cookies: [],
+            stream: false,
+            
+        },
+        security: [],
+        
+    }),
+    
+        letter_aliases: defineOperation<CollectionInputs, "letter_aliases">({
+            handler: "letter_aliases",
+            method: "GET",
+            path: "/letter-aliases",
+            paths: ["/letter-aliases"],
+            request: {
+                kind: "object",
+                args: ["letters"],
+                schema: ifaceSchemas.CollectionInputsLetterAliasesRequestSchema,
+                path: [],
+                query: [],
+                headers: [{ wireName: "letters", key: "letters", multi: true, optional: false }],
+                cookies: [],
+                body: {
+                    kind: "none",
+                    contentType: "",
+                    fields: [],
+                    
+            },
+        },
+        response: {
+            status: 200,
+            contentType: "application/json",
+            bodyMode: "return",
+            bodyFields: [{ wireName: "return", key: "return" }],
+            headers: [],
+            cookies: [],
+            schema: ifaceSchemas.models.transport.LettersSchema,
+            stream: false,
+            
+        },
+        security: [],
+        
+    }),
+    
+        wide_letters: defineOperation<CollectionInputs, "wide_letters">({
+            handler: "wide_letters",
+            method: "GET",
+            path: "/wide-letters",
+            paths: ["/wide-letters"],
+            request: {
+                kind: "object",
+                args: ["letters"],
+                schema: ifaceSchemas.CollectionInputsWideLettersRequestSchema,
+                path: [],
+                query: [],
+                headers: [{ wireName: "letters", key: "letters", multi: true, optional: false }],
+                cookies: [],
+                body: {
+                    kind: "none",
+                    contentType: "",
+                    fields: [],
+                    
+            },
+        },
+        response: {
+            status: 200,
+            contentType: "application/json",
+            bodyMode: "return",
+            bodyFields: [{ wireName: "return", key: "return" }],
+            headers: [],
+            cookies: [],
+            stream: false,
+            
+        },
+        security: [],
+        
+    }),
+    
+        initial: defineOperation<CollectionInputs, "initial">({
+            handler: "initial",
+            method: "GET",
+            path: "/initial",
+            paths: ["/initial"],
+            request: {
+                kind: "object",
+                args: ["letter"],
+                schema: ifaceSchemas.CollectionInputsInitialRequestSchema,
+                path: [],
+                query: [],
+                headers: [{ wireName: "letter", key: "letter", multi: false, optional: false }],
+                cookies: [],
+                body: {
+                    kind: "none",
+                    contentType: "",
+                    fields: [],
+                    
+            },
+        },
+        response: {
+            status: 200,
+            contentType: "text/plain",
+            bodyMode: "return",
+            bodyFields: [{ wireName: "return", key: "return" }],
+            headers: [],
+            cookies: [],
+            stream: false,
+            
+        },
+        security: [],
+        
+    }),
+    
+        cookie_letters: defineOperation<CollectionInputs, "cookie_letters">({
+            handler: "cookie_letters",
+            method: "GET",
+            path: "/cookie-letters",
+            paths: ["/cookie-letters"],
+            request: {
+                kind: "object",
+                args: ["letters"],
+                schema: ifaceSchemas.CollectionInputsCookieLettersRequestSchema,
+                path: [],
+                query: [],
+                headers: [],
+                cookies: [{ wireName: "letters", key: "letters", multi: true, optional: false }],
+                body: {
+                    kind: "none",
+                    contentType: "",
+                    fields: [],
+                    
+            },
+        },
+        response: {
+            status: 200,
+            contentType: "application/json",
+            bodyMode: "return",
+            bodyFields: [{ wireName: "return", key: "return" }],
+            headers: [],
+            cookies: [],
             stream: false,
             
         },

@@ -66,6 +66,20 @@ pub trait CollectionInputs {
         units: u32,
         threshold: Option<f64>,
     ) -> ::xidl_rust_axum::Result<Numbers>;
+    async fn letters(&self, letters: Vec<char>) -> ::xidl_rust_axum::Result<Vec<char>>;
+    async fn letter_aliases(
+        &self,
+        letters: transport::Letters,
+    ) -> ::xidl_rust_axum::Result<transport::Letters>;
+    async fn wide_letters(
+        &self,
+        letters: Vec<transport::WideLetter>,
+    ) -> ::xidl_rust_axum::Result<Vec<transport::WideLetter>>;
+    async fn initial(&self, letter: char) -> ::xidl_rust_axum::Result<char>;
+    async fn cookie_letters(
+        &self,
+        letters: Vec<char>,
+    ) -> ::xidl_rust_axum::Result<Vec<char>>;
     async fn stream(
         &self,
         req: ::xidl_rust_axum::Request<CollectionInputsStreamRequest>,
@@ -573,6 +587,243 @@ where
         }
     }
 }
+#[derive(::serde::Deserialize)]
+struct CollectionInputsLettersRequest {
+    letters: Vec<char>,
+}
+#[allow(clippy::manual_async_fn, unused_mut)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for CollectionInputsLettersRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
+            let mut letters: Vec<char> = Vec::new();
+            for header_value in xidl_headers.get_all("letters").iter() {
+                let header_str = header_value
+                    .to_str()
+                    .map_err(|err| ::xidl_rust_axum::Error::new(
+                        400,
+                        format!("{err:?}"),
+                    ))?;
+                for header_str in header_str.split(',').map(str::trim) {
+                    let parsed: char = header_str
+                        .parse()
+                        .map_err(|err| ::xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?;
+                    letters.push(parsed);
+                }
+            }
+            Ok(Self { letters })
+        }
+    }
+}
+#[derive(::serde::Deserialize)]
+struct CollectionInputsLetterAliasesRequest {
+    letters: Vec<char>,
+}
+#[allow(clippy::manual_async_fn, unused_mut)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for CollectionInputsLetterAliasesRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
+            let mut letters: Vec<char> = Vec::new();
+            for header_value in xidl_headers.get_all("letters").iter() {
+                let header_str = header_value
+                    .to_str()
+                    .map_err(|err| ::xidl_rust_axum::Error::new(
+                        400,
+                        format!("{err:?}"),
+                    ))?;
+                for header_str in header_str.split(',').map(str::trim) {
+                    let parsed: char = header_str
+                        .parse()
+                        .map_err(|err| ::xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?;
+                    letters.push(parsed);
+                }
+            }
+            Ok(Self { letters })
+        }
+    }
+}
+#[derive(::serde::Deserialize)]
+struct CollectionInputsWideLettersRequest {
+    letters: Vec<char>,
+}
+#[allow(clippy::manual_async_fn, unused_mut)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for CollectionInputsWideLettersRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
+            let mut letters: Vec<char> = Vec::new();
+            for header_value in xidl_headers.get_all("letters").iter() {
+                let header_str = header_value
+                    .to_str()
+                    .map_err(|err| ::xidl_rust_axum::Error::new(
+                        400,
+                        format!("{err:?}"),
+                    ))?;
+                for header_str in header_str.split(',').map(str::trim) {
+                    let parsed: char = header_str
+                        .parse()
+                        .map_err(|err| ::xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?;
+                    letters.push(parsed);
+                }
+            }
+            Ok(Self { letters })
+        }
+    }
+}
+#[derive(::serde::Deserialize)]
+struct CollectionInputsInitialRequest {
+    letter: char,
+}
+#[allow(clippy::manual_async_fn, unused_mut)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for CollectionInputsInitialRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
+            let letter: char = match xidl_headers.get("letter") {
+                Some(header_value) => {
+                    let header_str = header_value
+                        .to_str()
+                        .map_err(|err| ::xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?;
+                    header_str
+                        .parse()
+                        .map_err(|err| ::xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?
+                }
+                None => {
+                    return Err(
+                        ::xidl_rust_axum::Error::new(
+                            400,
+                            concat!("missing required header parameter ", "letter"),
+                        ),
+                    );
+                }
+            };
+            Ok(Self { letter })
+        }
+    }
+}
+#[derive(::serde::Deserialize)]
+struct CollectionInputsCookieLettersRequest {
+    letters: Vec<char>,
+}
+#[allow(clippy::manual_async_fn, unused_mut)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for CollectionInputsCookieLettersRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
+            let xidl_headers = &parts.headers;
+            let _ = xidl_headers;
+            let mut cookie_map: ::std::collections::HashMap<String, Vec<String>> = ::std::collections::HashMap::new();
+            for header_value in xidl_headers.get_all("cookie").iter() {
+                let cookie_str = header_value
+                    .to_str()
+                    .map_err(|err| ::xidl_rust_axum::Error::new(
+                        400,
+                        format!("{err:?}"),
+                    ))?;
+                for cookie in xidl_rust_axum::cookie::Cookie::split_parse_encoded(
+                    cookie_str,
+                ) {
+                    let cookie = cookie
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            400,
+                            format!("request cookie: {err}"),
+                        ))?;
+                    cookie_map
+                        .entry(cookie.name().to_string())
+                        .or_default()
+                        .push(cookie.value().to_string());
+                }
+            }
+            let mut letters: Vec<char> = Vec::new();
+            if let Some(values) = cookie_map.get("letters") {
+                for value in values {
+                    let parsed: char = value
+                        .parse()
+                        .map_err(|err| ::xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?;
+                    letters.push(parsed);
+                }
+            }
+            Ok(Self { letters })
+        }
+    }
+}
 #[derive(::serde::Serialize, ::core::default::Default)]
 struct CollectionInputsStreamRequestOutQuery {
     #[serde(default)]
@@ -612,6 +863,20 @@ where
             .route("/collections", xidl_rust_axum::axum::routing::get(Self::read))
             .route("/search", xidl_rust_axum::axum::routing::get(Self::search))
             .route("/numbers", xidl_rust_axum::axum::routing::get(Self::numbers))
+            .route("/letters", xidl_rust_axum::axum::routing::get(Self::letters))
+            .route(
+                "/letter-aliases",
+                xidl_rust_axum::axum::routing::get(Self::letter_aliases),
+            )
+            .route(
+                "/wide-letters",
+                xidl_rust_axum::axum::routing::get(Self::wide_letters),
+            )
+            .route("/initial", xidl_rust_axum::axum::routing::get(Self::initial))
+            .route(
+                "/cookie-letters",
+                xidl_rust_axum::axum::routing::get(Self::cookie_letters),
+            )
             .route("/stream", xidl_rust_axum::axum::routing::get(Self::stream))
             .with_state(_svc)
     }
@@ -758,6 +1023,271 @@ where
                 let mut resp = {
                     let body_value: __xidl_out_CollectionInputs::Numbers = resp_value
                         .into();
+                    let _ = &body_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(
+                            ::xidl_rust_axum::axum::http::StatusCode::from_u16(200)
+                                .unwrap(),
+                        )
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
+    async fn letters(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
+        request: CollectionInputsLettersRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let CollectionInputsLettersRequest { letters } = request;
+        let letters: Vec<char> = letters.into_iter().collect();
+        let mut resp = match svc.letters(letters).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: Vec<char> = resp_value.into_iter().collect();
+                    let _ = &body_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(
+                            ::xidl_rust_axum::axum::http::StatusCode::from_u16(200)
+                                .unwrap(),
+                        )
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
+    async fn letter_aliases(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
+        request: CollectionInputsLetterAliasesRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let CollectionInputsLetterAliasesRequest { letters } = request;
+        let letters: transport::Letters = letters.into_iter().collect();
+        let mut resp = match svc.letter_aliases(letters).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: Vec<char> = resp_value.into_iter().collect();
+                    let _ = &body_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(
+                            ::xidl_rust_axum::axum::http::StatusCode::from_u16(200)
+                                .unwrap(),
+                        )
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
+    async fn wide_letters(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
+        request: CollectionInputsWideLettersRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let CollectionInputsWideLettersRequest { letters } = request;
+        let letters: Vec<transport::WideLetter> = letters.into_iter().collect();
+        let mut resp = match svc.wide_letters(letters).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: Vec<char> = resp_value.into_iter().collect();
+                    let _ = &body_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(
+                            ::xidl_rust_axum::axum::http::StatusCode::from_u16(200)
+                                .unwrap(),
+                        )
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
+    async fn initial(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
+        request: CollectionInputsInitialRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "text/plain") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let CollectionInputsInitialRequest { letter } = request;
+        let letter: char = letter;
+        let mut resp = match svc.initial(letter).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: char = resp_value;
+                    let _ = &body_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("text/plain")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(
+                            ::xidl_rust_axum::axum::http::StatusCode::from_u16(200)
+                                .unwrap(),
+                        )
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "text/plain",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
+    async fn cookie_letters(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri,
+        request: CollectionInputsCookieLettersRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let CollectionInputsCookieLettersRequest { letters } = request;
+        let letters: Vec<char> = letters.into_iter().collect();
+        let mut resp = match svc.cookie_letters(letters).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: Vec<char> = resp_value.into_iter().collect();
                     let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
@@ -1130,6 +1660,344 @@ impl CollectionInputsClient {
         }
     }
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
+    pub async fn letters(
+        &self,
+        letters: Vec<char>,
+    ) -> Result<Vec<char>, xidl_rust_axum::Error> {
+        let xidl_path = "/letters".to_string();
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
+                "letters".as_bytes(),
+            )
+            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+        for value in letters {
+            let header_value_str = value.to_string();
+            if header_value_str.contains(',')
+                || header_value_str.trim() != header_value_str
+            {
+                return Err(
+                    xidl_rust_axum::Error::new(
+                            400,
+                            concat!(
+                                "unrepresentable simple header collection element: ",
+                                "letters"
+                            ),
+                        )
+                        .into(),
+                );
+            }
+            let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                    &header_value_str,
+                )
+                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            req.headers_mut().append(header_name.clone(), header_value);
+        }
+        let auth_target = &self.client;
+        let _ = auth_target;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: Vec<char> = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into_iter().collect())
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
+    pub async fn letter_aliases(
+        &self,
+        letters: transport::Letters,
+    ) -> Result<transport::Letters, xidl_rust_axum::Error> {
+        let xidl_path = "/letter-aliases".to_string();
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
+                "letters".as_bytes(),
+            )
+            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+        for value in letters {
+            let header_value_str = value.to_string();
+            if header_value_str.contains(',')
+                || header_value_str.trim() != header_value_str
+            {
+                return Err(
+                    xidl_rust_axum::Error::new(
+                            400,
+                            concat!(
+                                "unrepresentable simple header collection element: ",
+                                "letters"
+                            ),
+                        )
+                        .into(),
+                );
+            }
+            let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                    &header_value_str,
+                )
+                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            req.headers_mut().append(header_name.clone(), header_value);
+        }
+        let auth_target = &self.client;
+        let _ = auth_target;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: Vec<char> = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into_iter().collect())
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
+    pub async fn wide_letters(
+        &self,
+        letters: Vec<transport::WideLetter>,
+    ) -> Result<Vec<transport::WideLetter>, xidl_rust_axum::Error> {
+        let xidl_path = "/wide-letters".to_string();
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
+                "letters".as_bytes(),
+            )
+            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+        for value in letters {
+            let header_value_str = value.to_string();
+            if header_value_str.contains(',')
+                || header_value_str.trim() != header_value_str
+            {
+                return Err(
+                    xidl_rust_axum::Error::new(
+                            400,
+                            concat!(
+                                "unrepresentable simple header collection element: ",
+                                "letters"
+                            ),
+                        )
+                        .into(),
+                );
+            }
+            let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                    &header_value_str,
+                )
+                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            req.headers_mut().append(header_name.clone(), header_value);
+        }
+        let auth_target = &self.client;
+        let _ = auth_target;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: Vec<char> = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into_iter().collect())
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
+    pub async fn initial(&self, letter: char) -> Result<char, xidl_rust_axum::Error> {
+        let xidl_path = "/initial".to_string();
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/plain")
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
+                "letter".as_bytes(),
+            )
+            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+        let header_value_str = letter.to_string();
+        let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                &header_value_str,
+            )
+            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+        req.headers_mut().insert(header_name, header_value);
+        let auth_target = &self.client;
+        let _ = auth_target;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: char = xidl_rust_axum::DeserializeFactory::new("text/plain")
+                .from_slice(&body)?;
+            Ok(body)
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
+    pub async fn cookie_letters(
+        &self,
+        letters: Vec<char>,
+    ) -> Result<Vec<char>, xidl_rust_axum::Error> {
+        let xidl_path = "/cookie-letters".to_string();
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&xidl_path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let mut cookie_pairs: Vec<String> = Vec::new();
+        for value in letters {
+            let value_str = value.to_string();
+            cookie_pairs
+                .push(
+                    xidl_rust_axum::cookie::Cookie::new("letters", value_str)
+                        .encoded()
+                        .to_string(),
+                );
+        }
+        if !cookie_pairs.is_empty() {
+            let cookie_value = cookie_pairs.join("; ");
+            let cookie_name = xidl_rust_axum::reqwest::header::HeaderName::from_static(
+                "cookie",
+            );
+            let merged = match req.headers().get(&cookie_name) {
+                Some(existing) => {
+                    let existing = existing
+                        .to_str()
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?;
+                    if existing.is_empty() {
+                        cookie_value
+                    } else {
+                        format!("{existing}; {cookie_value}")
+                    }
+                }
+                None => cookie_value,
+            };
+            let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                    &merged,
+                )
+                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            req.headers_mut().insert(cookie_name, header_value);
+        }
+        let auth_target = &self.client;
+        let _ = auth_target;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: Vec<char> = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into_iter().collect())
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn stream(
         &self,
         values: Option<Vec<i32>>,
@@ -1169,4 +2037,7 @@ pub mod transport {
     pub type Counts = Vec<Count>;
     pub type Labels = Vec<Label>;
     pub type Selection = Labels;
+    pub type Letter = char;
+    pub type WideLetter = char;
+    pub type Letters = Vec<Letter>;
 }

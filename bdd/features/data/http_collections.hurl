@@ -196,3 +196,58 @@ HTTP 400
 
 GET {{base_url}}/stream?values=
 HTTP 400
+
+# Character lists use simple header text, including separator whitespace.
+GET {{base_url}}/letters
+letters: a, b ,a
+HTTP 200
+[Asserts]
+jsonpath "$" count == 3
+jsonpath "$[0]" == "a"
+jsonpath "$[1]" == "b"
+jsonpath "$[2]" == "a"
+
+# A collection typedef and a character typedef retain repeated occurrences.
+GET {{base_url}}/letter-aliases
+letters: a
+letters: b,a
+HTTP 200
+[Asserts]
+jsonpath "$" count == 3
+jsonpath "$[0]" == "a"
+jsonpath "$[1]" == "b"
+jsonpath "$[2]" == "a"
+
+# A wchar alias uses the same header encoding for representable ASCII.
+GET {{base_url}}/wide-letters
+letters: A,Z
+HTTP 200
+[Asserts]
+jsonpath "$" count == 2
+jsonpath "$[0]" == "A"
+jsonpath "$[1]" == "Z"
+
+GET {{base_url}}/letters
+HTTP 200
+[Asserts]
+jsonpath "$" count == 0
+
+GET {{base_url}}/initial
+letter: A
+HTTP 200
+Content-Type: text/plain
+[Asserts]
+body == "A"
+
+GET {{base_url}}/initial
+HTTP 400
+
+# Repeated, encoded cookies can preserve delimiter, whitespace and Unicode.
+GET {{base_url}}/cookie-letters
+Cookie: letters=%2C; letters=%20; letters=%E9%9B%AA
+HTTP 200
+[Asserts]
+jsonpath "$" count == 3
+jsonpath "$[0]" == ","
+jsonpath "$[1]" == " "
+jsonpath "$[2]" == "雪"

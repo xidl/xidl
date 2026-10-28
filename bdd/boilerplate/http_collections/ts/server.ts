@@ -6,6 +6,10 @@ import {
 } from './http_collections.server.js';
 
 const service: CollectionInputs = {
+  cookie_letters: letters => letters,
+  initial: letter => letter,
+  letter_aliases: letters => letters,
+  letters: letters => letters,
   numbers: (count, ratio, units, threshold) => ({
     count,
     ratio,
@@ -17,6 +21,7 @@ const service: CollectionInputs = {
   async *stream(values) {
     yield { values };
   },
+  wide_letters: letters => letters,
 };
 const handler = createRouter(
   Object.values(CollectionInputsOperations),
