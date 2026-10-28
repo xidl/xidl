@@ -93,6 +93,11 @@ pub mod test {
                 }
             }
         }
+        impl Default for test_Status {
+            fn default() -> Self {
+                super::Status::default().into()
+            }
+        }
         #[derive(::serde::Serialize, ::serde::Deserialize)]
         pub struct test_User {
             pub id: u32,
@@ -118,6 +123,11 @@ pub mod test {
                     name: value.name,
                     status: value.status.into(),
                 }
+            }
+        }
+        impl Default for test_User {
+            fn default() -> Self {
+                super::User::default().into()
             }
         }
     }
@@ -154,6 +164,11 @@ pub mod test {
                 }
             }
         }
+        impl Default for test_Status {
+            fn default() -> Self {
+                super::Status::default().into()
+            }
+        }
         #[derive(::serde::Serialize, ::serde::Deserialize)]
         pub struct test_User {
             pub id: u32,
@@ -179,6 +194,11 @@ pub mod test {
                     name: value.name,
                     status: value.status.into(),
                 }
+            }
+        }
+        impl Default for test_User {
+            fn default() -> Self {
+                super::User::default().into()
             }
         }
     }
@@ -313,9 +333,9 @@ pub mod test {
                     }
                 };
                 let mut prefs: Vec<String> = Vec::new();
-                if let Some(values) = cookie_map.get("pref") {
-                    for value in values {
-                        let parsed: String = value.to_string();
+                if let Some(xidl_cookie_values) = cookie_map.get("pref") {
+                    for xidl_cookie_value in xidl_cookie_values {
+                        let parsed: String = xidl_cookie_value.to_string();
                         prefs.push(parsed);
                     }
                 }
@@ -623,6 +643,11 @@ pub mod test {
             session_id: String,
             prefs: Vec<String>,
         ) -> Result<User, xidl_rust_axum::Error> {
+            let req_id: String = req_id;
+            let flags: Vec<String> = flags.into_iter().collect();
+            let age: u32 = age;
+            let session_id: String = session_id;
+            let prefs: Vec<String> = prefs.into_iter().collect();
             let xidl_path = "/v1/headers/{id}".to_string();
             let xidl_path = xidl_path.replace("{id}", &id.to_string());
             let mut req = self
@@ -771,6 +796,8 @@ pub mod test {
             session_id: String,
             name: String,
         ) -> Result<(), xidl_rust_axum::Error> {
+            let token: String = token;
+            let session_id: String = session_id;
             let xidl_path = "/v1/headers".to_string();
             let mut req = self
                 .client

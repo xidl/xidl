@@ -14,6 +14,7 @@ pub(super) mod helpers;
 mod method;
 mod render_types;
 mod representations;
+mod response_schema;
 pub(crate) mod text_aliases;
 mod websocket_helpers;
 

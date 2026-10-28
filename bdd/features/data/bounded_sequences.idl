@@ -1,0 +1,22 @@
+#pragma xidlc package Billing Batches
+#pragma xidlc version v1
+#include "bounded_sequences/types.idl"
+
+interface Batches {
+    @post(path="/batches") billing::Batch reserve(@body billing::Batch batch);
+    @get(path="/accepted") billing::Total accepted();
+    @get(path="/rejected") billing::Total rejected(@query long fault) raises(billing::BatchRejected);
+    @get(path="/query") billing::InvoiceIds query(@query billing::InvoiceIds values);
+    @get(path="/headers") billing::InvoiceIds headers(@header billing::InvoiceIds values);
+    @get(path="/cookies") billing::InvoiceIds cookies(@cookie billing::InvoiceIds values);
+    @post(path="/upload") billing::Total upload(@body sequence<octet, billing::BATCH_LIMIT> bytes);
+    @get(path="/metadata") void metadata(
+        @query boolean invalid,
+        @header map<string, billing::InvoiceIds> groups,
+        @cookie map<string, billing::InvoiceIds> backup,
+        @header out map<string, billing::InvoiceIds> value);
+    @get(path="/exported") void exported(@query boolean invalid,
+        @header out billing::InvoiceIds ids, @cookie out billing::InvoiceIds tokens);
+    @get(path="/download") billing::Export download(@query boolean raw, @query boolean invalid);
+    @get(path="/oversized") billing::Batch oversized();
+};

@@ -85,6 +85,9 @@
                             Self::Framework(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
                             {% for ex in method.raises %}
                                 Self::{{ ex.variant }}({% if ex.has_body or ex.headers | length > 0 or ex.cookies | length > 0 %}err{% else %}_{% endif %}) => {
+                                    {% if ex.has_body or ex.headers | length > 0 or ex.cookies | length > 0 %}
+                                        let err: {{ ex.wire_ty }} = err.into();
+                                    {% endif %}
                                     {% if ex.headers | length > 0 or ex.cookies | length > 0 %}
                                         {% include 'interface/exception_headers.rs.j2' %}
                                     {% endif %}
@@ -315,7 +318,8 @@
                                 .await
                                 .map_err(|err| ::xidl_rust_axum::Error::new(err.status().as_u16(), err.body_text()))?;
                                 {% if method.request_content_type == "application/octet-stream" %}
-                                    let {{ method.body_params[0].name }} = xidl_body_bytes.to_vec();
+                                    let {{ method.body_params[0].name }} = {% if method.body_params[0].maximum is not none %}::xidl_rust_axum::SequenceWire::<_, {{ method.body_params[0].maximum }}>::try_from(xidl_body_bytes.to_vec())
+                                        .map_err(|error| ::xidl_rust_axum::Error::new(400, error.to_string()))?{% else %}xidl_body_bytes.to_vec(){% endif %};
                                 {% else %}
                                     let xidl_body: {{ method.struct_prefix }}RequestInBody = ::xidl_rust_axum::DeserializeFactory::new("{{ method.request_content_type }}")
                                     .from_slice(&xidl_body_bytes)?;

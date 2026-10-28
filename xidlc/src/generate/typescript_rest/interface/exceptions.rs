@@ -11,6 +11,7 @@ impl TsRaisesContext {
     pub(super) fn for_operation(
         op: &HttpOperation,
         exceptions: &[xidl_parser::rest_hir::HttpException],
+        aliases: &super::text_aliases::TextAliases,
     ) -> Vec<TsRaisesContext> {
         op.meta
             .raises
@@ -21,13 +22,21 @@ impl TsRaisesContext {
                     .find(|e| e.ident == refer.ident && e.module_path == refer.module_path)?;
                 let member =
                     |m: &xidl_parser::rest_hir::HttpExceptionMember| TsExceptionMemberContext {
-                        item_is_string: matches!(
-                            match &m.ty {
-                                hir::TypeSpec::SequenceType(seq) => seq.ty.as_ref(),
-                                ty => ty,
-                            },
-                            hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_)
+                        schema: zod_schema_for_type_spec_with_prefix(
+                            &m.ty,
+                            &exception.module_path,
+                            Some("ifaceSchemas.models"),
                         ),
+                        item_is_string: {
+                            let expanded = aliases.expand(&m.ty, &exception.module_path);
+                            let item = match &expanded {
+                                hir::TypeSpec::SequenceType(sequence) if m.is_multi => {
+                                    sequence.ty.as_ref()
+                                }
+                                ty => ty,
+                            };
+                            aliases.is_text(item, &exception.module_path)
+                        },
                         field: m.field.clone(),
                         wire_name: m.wire_name.clone(),
                         ty: ts_type_for_type_spec(

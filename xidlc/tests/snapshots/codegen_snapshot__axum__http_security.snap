@@ -484,6 +484,7 @@ impl HttpSecurityServiceClient {
         trace_id: String,
         xidl_auth: xidl_rust_axum::ClientAuth,
     ) -> Result<String, xidl_rust_axum::Error> {
+        let trace_id: String = trace_id;
         let xidl_path = "/users/{id}".to_string();
         let xidl_path = xidl_path.replace("{id}", &id.to_string());
         let mut req = self

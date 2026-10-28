@@ -347,7 +347,7 @@ impl SchemaScope<'_> {
                     .filter(|size| *size >= 0)
                 {
                     let size = size as usize;
-                    schema = schema.min_items(Some(size)).max_items(Some(size));
+                    schema = schema.max_items(Some(size));
                 }
                 RefOr::T(Schema::from(schema))
             }

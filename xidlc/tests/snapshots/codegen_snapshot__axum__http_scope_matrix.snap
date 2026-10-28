@@ -97,6 +97,11 @@ pub(super) mod __xidl_in_HttpScopeMatrixService {
             }
         }
     }
+    impl Default for MatrixBody {
+        fn default() -> Self {
+            super::MatrixBody::default().into()
+        }
+    }
 }
 #[allow(
     non_snake_case,
@@ -132,6 +137,11 @@ pub(super) mod __xidl_out_HttpScopeMatrixService {
                 alias: value.alias,
                 tags: value.tags.into_iter().collect(),
             }
+        }
+    }
+    impl Default for MatrixBody {
+        fn default() -> Self {
+            super::MatrixBody::default().into()
         }
     }
 }
@@ -2473,6 +2483,7 @@ impl HttpSecurityMatrixServiceClient {
         id: String,
         x_trace_id: String,
     ) -> Result<String, xidl_rust_axum::Error> {
+        let x_trace_id: String = x_trace_id;
         let xidl_path = "/v2/security/inherited/{id}".to_string();
         let xidl_path = xidl_path.replace("{id}", &id.to_string());
         let mut req = self

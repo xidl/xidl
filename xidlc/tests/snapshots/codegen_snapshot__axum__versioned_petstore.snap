@@ -61,6 +61,11 @@ pub mod v1 {
                 }
             }
         }
+        impl Default for v1_Pet {
+            fn default() -> Self {
+                super::Pet::default().into()
+            }
+        }
     }
     #[allow(
         non_snake_case,
@@ -92,6 +97,11 @@ pub mod v1 {
                     id: value.id,
                     color: value.color,
                 }
+            }
+        }
+        impl Default for v1_Pet {
+            fn default() -> Self {
+                super::Pet::default().into()
             }
         }
     }
@@ -448,6 +458,11 @@ pub mod v2 {
                 }
             }
         }
+        impl Default for v2_Pet {
+            fn default() -> Self {
+                super::Pet::default().into()
+            }
+        }
     }
     #[allow(
         non_snake_case,
@@ -480,6 +495,11 @@ pub mod v2 {
                     id: value.id,
                     note: value.note,
                 }
+            }
+        }
+        impl Default for v2_Pet {
+            fn default() -> Self {
+                super::Pet::default().into()
             }
         }
     }

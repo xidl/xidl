@@ -8,6 +8,7 @@ use xidl_parser::hir;
 /// underlying shape before a coerce schema can be rendered for it.
 pub(crate) struct TextAliases {
     entries: HashMap<Vec<String>, AliasEntry>,
+    enums: std::collections::HashSet<Vec<String>>,
 }
 
 struct AliasEntry {
@@ -20,21 +21,31 @@ struct AliasEntry {
 impl TextAliases {
     pub(crate) fn collect(spec: &hir::Specification) -> Self {
         let mut entries = HashMap::new();
-        Self::collect_defs(&spec.0, &[], &mut entries);
-        Self { entries }
+        let mut enums = std::collections::HashSet::new();
+        Self::collect_defs(&spec.0, &[], &mut entries, &mut enums);
+        Self { entries, enums }
     }
 
     fn collect_defs(
         defs: &[hir::Definition],
         module_path: &[String],
         entries: &mut HashMap<Vec<String>, AliasEntry>,
+        enums: &mut std::collections::HashSet<Vec<String>>,
     ) {
         for def in defs {
             match def {
                 hir::Definition::ModuleDcl(module) => {
                     let mut path = module_path.to_vec();
                     path.push(module.ident.clone());
-                    Self::collect_defs(&module.definition, &path, entries);
+                    Self::collect_defs(&module.definition, &path, entries, enums);
+                }
+                hir::Definition::TypeDcl(hir::TypeDcl::ConstrTypeDcl(
+                    hir::ConstrTypeDcl::EnumDcl(enumeration),
+                ))
+                | hir::Definition::ConstrTypeDcl(hir::ConstrTypeDcl::EnumDcl(enumeration)) => {
+                    let mut path = module_path.to_vec();
+                    path.push(enumeration.ident.clone());
+                    enums.insert(path);
                 }
                 hir::Definition::TypeDcl(hir::TypeDcl::TypedefDcl(typedef)) => {
                     let hir::TypedefType::TypeSpec(ty) = &typedef.ty else {
@@ -70,6 +81,17 @@ impl TextAliases {
         )
     }
 
+    /// Text-backed members decode by their declaration, never by their contents.
+    pub(crate) fn is_text(&self, ty: &hir::TypeSpec, module_path: &[String]) -> bool {
+        match self.expand(ty, module_path) {
+            hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => true,
+            hir::TypeSpec::ScopedName(name) => self
+                .resolve(&name, module_path)
+                .is_some_and(|path| self.enums.contains(&path)),
+            _ => false,
+        }
+    }
+
     fn expand_inner(
         &self,
         ty: hir::TypeSpec,
@@ -78,13 +100,16 @@ impl TextAliases {
     ) -> hir::TypeSpec {
         match ty {
             hir::TypeSpec::ScopedName(name) => {
-                let entry = self
-                    .lookup(&name.name, module_path)
-                    .or_else(|| self.lookup(&name.name, &[]));
-                let Some(AliasEntry { defining_path, ty }) = entry else {
+                let Some(path) = self.resolve(&name, module_path) else {
                     return hir::TypeSpec::ScopedName(name);
                 };
-                if !visited.insert(name.name.clone()) {
+                let Some(AliasEntry { defining_path, ty }) = self.entries.get(&path) else {
+                    return hir::TypeSpec::ScopedName(hir::ScopedName {
+                        name: path,
+                        is_root: true,
+                    });
+                };
+                if !visited.insert(path) {
                     return hir::TypeSpec::ScopedName(name);
                 }
                 self.expand_inner(ty.clone(), defining_path.as_slice(), visited)
@@ -98,9 +123,11 @@ impl TextAliases {
         }
     }
 
-    fn lookup(&self, name: &[String], module_path: &[String]) -> Option<&AliasEntry> {
-        let mut key = module_path.to_vec();
-        key.extend(name.iter().cloned());
-        self.entries.get(&key)
+    fn resolve(&self, name: &hir::ScopedName, module_path: &[String]) -> Option<Vec<String>> {
+        crate::generate::utils::scope::resolve_canonical(module_path, name, |key| {
+            let path = key.split("::").map(str::to_owned).collect::<Vec<_>>();
+            self.entries.contains_key(&path) || self.enums.contains(&path)
+        })
+        .map(|key| key.split("::").map(str::to_owned).collect())
     }
 }

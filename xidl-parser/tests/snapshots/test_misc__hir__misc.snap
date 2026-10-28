@@ -250,13 +250,12 @@ Specification(
                                 ),
                                 len: Some(
                                     PositiveIntConst(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "red",
-                                                ],
-                                                is_root: false,
-                                            },
+                                        Literal(
+                                            IntegerLiteral(
+                                                IntegerLiteral(
+                                                    "3",
+                                                ),
+                                            ),
                                         ),
                                     ),
                                 ),

@@ -86,7 +86,8 @@ import {
                 return { kind: "Json", value, ...buildResponsePayload(undefined, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }, { name: "X-Tag", key: "tags", optional: false, isMulti: true, decode: value => value }], [{ name: "cached", key: "cached", optional: false, isMulti: false }]) } as { kind: "Json", value: types.representations.FileMeta, etag: string, tags: Array<string>, cached: boolean } | { kind: "OctetStream", value: Uint8Array, etag: string, tags: Array<string>, cached: boolean } | { kind: "Text", value: string, etag: string, tags: Array<string>, cached: boolean };
             }
                 if (contentType === "application/octet-stream") {
-                    const value = new Uint8Array(await resp.arrayBuffer());
+                    const schema = z.instanceof(Uint8Array);
+                const value = schema.parse(new Uint8Array(await resp.arrayBuffer()));
                 return { kind: "OctetStream", value, ...buildResponsePayload(undefined, resp, "none", [], [{ name: "ETag", key: "etag", optional: false, isMulti: false, decode: value => value }, { name: "X-Tag", key: "tags", optional: false, isMulti: true, decode: value => value }], [{ name: "cached", key: "cached", optional: false, isMulti: false }]) } as { kind: "Json", value: types.representations.FileMeta, etag: string, tags: Array<string>, cached: boolean } | { kind: "OctetStream", value: Uint8Array, etag: string, tags: Array<string>, cached: boolean } | { kind: "Text", value: string, etag: string, tags: Array<string>, cached: boolean };
             }
                 if (contentType === "text/plain") {
@@ -176,10 +177,12 @@ import {
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
                 if (!decoded.success) throw await parseXidlError(resp);
                 const body = decoded.data;
-                throw new $xidlErrors.NotFound({
+                const error = new $xidlErrors.NotFound({
                     "code": body["code"] as never,
                     "msg": body["msg"] as never,
                     });
+                
+                throw error;
             }
             throw await parseXidlError(resp);
         }
@@ -187,9 +190,13 @@ import {
         async throwHeadFileError(resp: Response): Promise<never> {
             const status = resp.status;
             if (status === 404) {
-                throw new $xidlErrors.HeadMissing({
+                const error = new $xidlErrors.HeadMissing({
                     "code": readResponseHeader(resp.headers, "X-Error-Code", false, value => value) as never,
                     });
+                
+                    z.string().parse(error.code);
+                
+                throw error;
             }
             throw await parseXidlError(resp);
         }
@@ -197,9 +204,13 @@ import {
         async throwGetFreshError(resp: Response): Promise<never> {
             const status = resp.status;
             if (status === 304) {
-                throw new $xidlErrors.NotModified({
+                const error = new $xidlErrors.NotModified({
                     "etag": readResponseHeader(resp.headers, "ETag", false, value => value) as never,
                     });
+                
+                    z.string().parse(error.etag);
+                
+                throw error;
             }
             throw await parseXidlError(resp);
         }
@@ -213,11 +224,15 @@ import {
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
                 if (!decoded.success) throw await parseXidlError(resp);
                 const body = decoded.data;
-                throw new $xidlErrors.PreconditionFailed({
+                const error = new $xidlErrors.PreconditionFailed({
                     "etag": readResponseHeader(resp.headers, "ETag", false, value => value) as never,
                     "code": body["code"] as never,
                     "msg": body["msg"] as never,
                     });
+                
+                    z.string().parse(error.etag);
+                
+                throw error;
             }
             throw await parseXidlError(resp);
         }
@@ -436,7 +451,7 @@ import * as ifaceSchemas from "./http_envelope.iface.zod";
 import { z } from "zod";
 import {
     defineOperation,
-    writeResponseBindings,
+    writeResponseBindings, parseResponse,
     type Awaitable,
 } from "xidl-typescript-server";
 
@@ -482,7 +497,7 @@ export const EnvelopeApiOperations = {
             bodyFields: [{ wireName: "return", key: "return" }],
             headers: [{ wireName: "ETag", key: "etag", multi: false }, { wireName: "X-Tag", key: "tags", multi: true }],
             cookies: [{ wireName: "cached", key: "cached", multi: false }],
-            representations: [{ kind: "Json", contentType: "application/json", schema: ifaceSchemas.models.representations.FileMetaSchema }, { kind: "OctetStream", contentType: "application/octet-stream" }, { kind: "Text", contentType: "text/plain", schema: z.string() }],
+            representations: [{ kind: "Json", contentType: "application/json", schema: ifaceSchemas.models.representations.FileMetaSchema }, { kind: "OctetStream", contentType: "application/octet-stream", schema: z.instanceof(Uint8Array) }, { kind: "Text", contentType: "text/plain", schema: z.string() }],
             stream: false,
             
         },
@@ -492,6 +507,10 @@ export const EnvelopeApiOperations = {
                 match: (error: unknown) => {
                     
                         if (error instanceof $xidlErrors.NotFound) {
+                            parseResponse(error, z.object({
+                                "code": z.number().int().nonnegative(), "msg": z.string(), 
+                                
+                            }));
                             const headers = new Headers();
                             writeResponseBindings(headers, { ...error }, [], false);
                             writeResponseBindings(headers, { ...error }, [], true);
@@ -547,6 +566,10 @@ export const EnvelopeApiOperations = {
                 match: (error: unknown) => {
                     
                         if (error instanceof $xidlErrors.HeadMissing) {
+                            parseResponse(error, z.object({
+                                
+                                "code": z.string(), 
+                            }));
                             const headers = new Headers();
                             writeResponseBindings(headers, { ...error }, [{ wireName: "X-Error-Code", key: "code", multi: false }], false);
                             writeResponseBindings(headers, { ...error }, [], true);
@@ -595,6 +618,10 @@ export const EnvelopeApiOperations = {
                 match: (error: unknown) => {
                     
                         if (error instanceof $xidlErrors.NotModified) {
+                            parseResponse(error, z.object({
+                                
+                                "etag": z.string(), 
+                            }));
                             const headers = new Headers();
                             writeResponseBindings(headers, { ...error }, [{ wireName: "ETag", key: "etag", multi: false }], false);
                             writeResponseBindings(headers, { ...error }, [], true);
@@ -644,6 +671,10 @@ export const EnvelopeApiOperations = {
                 match: (error: unknown) => {
                     
                         if (error instanceof $xidlErrors.PreconditionFailed) {
+                            parseResponse(error, z.object({
+                                "code": z.number().int().nonnegative(), "msg": z.string(), 
+                                "etag": z.string(), 
+                            }));
                             const headers = new Headers();
                             writeResponseBindings(headers, { ...error }, [{ wireName: "ETag", key: "etag", multi: false }], false);
                             writeResponseBindings(headers, { ...error }, [], true);

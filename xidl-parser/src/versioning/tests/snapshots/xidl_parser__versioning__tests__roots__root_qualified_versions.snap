@@ -19,7 +19,7 @@ module v1 {
         const long WIDTH = 2;
         struct Address {
             ::v1::Identifier id;
-            sequence<::v1::Identifier, ::v1::WIDTH> labels;
+            sequence<::v1::Identifier, 8> labels;
             map<string, ::v1::Identifier, ::v1::WIDTH> by_tag;
             string<::v1::WIDTH> label;
             wstring<::v1::WIDTH> wide;
@@ -56,7 +56,7 @@ module v2 {
         const long WIDTH = 2;
         struct Address {
             ::v2::Identifier id;
-            sequence<::v2::Identifier, ::v2::WIDTH> labels;
+            sequence<::v2::Identifier, 8> labels;
             map<string, ::v2::Identifier, ::v2::WIDTH> by_tag;
             string<::v2::WIDTH> label;
             wstring<::v2::WIDTH> wide;

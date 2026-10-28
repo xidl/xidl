@@ -166,7 +166,8 @@ import {
                 throw await parseXidlError(resp);
                 
             }
-            return await decodeResponseBody<Array<types.v2.Pet>>(resp, "application/json", this.codecs);
+            const schema = z.array(ifaceSchemas.models.v2.PetSchema);
+            return schema.parse(await decodeResponseBody(resp, "application/json", this.codecs, schema)) as Array<types.v2.Pet>;
         }
         
         
@@ -406,6 +407,7 @@ import {
                 bodyFields: [{ wireName: "return", key: "return" }],
                 headers: [],
                 cookies: [],
+                schema: z.array(ifaceSchemas.models.v2.PetSchema),
                 stream: false,
                 
             },

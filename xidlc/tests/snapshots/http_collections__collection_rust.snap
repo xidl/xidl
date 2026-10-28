@@ -124,6 +124,11 @@ pub(super) mod __xidl_in_CollectionInputs {
             }
         }
     }
+    impl Default for Collections {
+        fn default() -> Self {
+            super::Collections::default().into()
+        }
+    }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub struct Numbers {
         pub count: i32,
@@ -154,6 +159,11 @@ pub(super) mod __xidl_in_CollectionInputs {
             }
         }
     }
+    impl Default for Numbers {
+        fn default() -> Self {
+            super::Numbers::default().into()
+        }
+    }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub struct Search {
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -169,6 +179,11 @@ pub(super) mod __xidl_in_CollectionInputs {
     impl From<Search> for super::Search {
         fn from(value: Search) -> Self {
             Self { term: value.term }
+        }
+    }
+    impl Default for Search {
+        fn default() -> Self {
+            super::Search::default().into()
         }
     }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
@@ -190,6 +205,11 @@ pub(super) mod __xidl_in_CollectionInputs {
             Self {
                 values: value.values.map(|value| value.into_iter().collect()),
             }
+        }
+    }
+    impl Default for StreamValues {
+        fn default() -> Self {
+            super::StreamValues::default().into()
         }
     }
 }
@@ -232,6 +252,11 @@ pub(super) mod __xidl_out_CollectionInputs {
             }
         }
     }
+    impl Default for Collections {
+        fn default() -> Self {
+            super::Collections::default().into()
+        }
+    }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub struct Numbers {
         pub count: i32,
@@ -262,6 +287,11 @@ pub(super) mod __xidl_out_CollectionInputs {
             }
         }
     }
+    impl Default for Numbers {
+        fn default() -> Self {
+            super::Numbers::default().into()
+        }
+    }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub struct Search {
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -277,6 +307,11 @@ pub(super) mod __xidl_out_CollectionInputs {
     impl From<Search> for super::Search {
         fn from(value: Search) -> Self {
             Self { term: value.term }
+        }
+    }
+    impl Default for Search {
+        fn default() -> Self {
+            super::Search::default().into()
         }
     }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
@@ -298,6 +333,11 @@ pub(super) mod __xidl_out_CollectionInputs {
             Self {
                 values: value.values.map(|value| value.into_iter().collect()),
             }
+        }
+    }
+    impl Default for StreamValues {
+        fn default() -> Self {
+            super::StreamValues::default().into()
         }
     }
 }
@@ -385,9 +425,9 @@ where
                 }
             }
             let mut names: Vec<String> = Vec::new();
-            if let Some(values) = cookie_map.get("names") {
-                for value in values {
-                    let parsed: String = value.to_string();
+            if let Some(xidl_cookie_values) = cookie_map.get("names") {
+                for xidl_cookie_value in xidl_cookie_values {
+                    let parsed: String = xidl_cookie_value.to_string();
                     names.push(parsed);
                 }
             }
@@ -809,9 +849,9 @@ where
                 }
             }
             let mut letters: Vec<char> = Vec::new();
-            if let Some(values) = cookie_map.get("letters") {
-                for value in values {
-                    let parsed: char = value
+            if let Some(xidl_cookie_values) = cookie_map.get("letters") {
+                for xidl_cookie_value in xidl_cookie_values {
+                    let parsed: char = xidl_cookie_value
                         .parse()
                         .map_err(|err| ::xidl_rust_axum::Error::new(
                             400,
@@ -1396,6 +1436,8 @@ impl CollectionInputsClient {
         names: transport::Selection,
         labels: Option<transport::Selection>,
     ) -> Result<Collections, xidl_rust_axum::Error> {
+        let tags: Vec<String> = tags.into_iter().collect();
+        let names: Vec<String> = names.into_iter().collect();
         let xidl_path = "/collections".to_string();
         let mut req = self
             .client
@@ -1566,6 +1608,8 @@ impl CollectionInputsClient {
         units: u32,
         threshold: Option<f64>,
     ) -> Result<Numbers, xidl_rust_axum::Error> {
+        let ratio: f64 = ratio;
+        let units: u32 = units;
         let xidl_path = "/numbers".to_string();
         let mut req = self
             .client
@@ -1664,6 +1708,7 @@ impl CollectionInputsClient {
         &self,
         letters: Vec<char>,
     ) -> Result<Vec<char>, xidl_rust_axum::Error> {
+        let letters: Vec<char> = letters.into_iter().collect();
         let xidl_path = "/letters".to_string();
         let mut req = self
             .client
@@ -1734,6 +1779,7 @@ impl CollectionInputsClient {
         &self,
         letters: transport::Letters,
     ) -> Result<transport::Letters, xidl_rust_axum::Error> {
+        let letters: Vec<char> = letters.into_iter().collect();
         let xidl_path = "/letter-aliases".to_string();
         let mut req = self
             .client
@@ -1804,6 +1850,7 @@ impl CollectionInputsClient {
         &self,
         letters: Vec<transport::WideLetter>,
     ) -> Result<Vec<transport::WideLetter>, xidl_rust_axum::Error> {
+        let letters: Vec<char> = letters.into_iter().collect();
         let xidl_path = "/wide-letters".to_string();
         let mut req = self
             .client
@@ -1871,6 +1918,7 @@ impl CollectionInputsClient {
     }
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn initial(&self, letter: char) -> Result<char, xidl_rust_axum::Error> {
+        let letter: char = letter;
         let xidl_path = "/initial".to_string();
         let mut req = self
             .client
@@ -1921,6 +1969,7 @@ impl CollectionInputsClient {
         &self,
         letters: Vec<char>,
     ) -> Result<Vec<char>, xidl_rust_axum::Error> {
+        let letters: Vec<char> = letters.into_iter().collect();
         let xidl_path = "/cookie-letters".to_string();
         let mut req = self
             .client

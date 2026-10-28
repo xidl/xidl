@@ -1,17 +1,17 @@
-//! Resolve fixed-array dimensions before targets consume the shared HIR.
+//! Resolve collection bounds before targets consume the shared HIR.
 
 use super::constants::{IntegerConstants, IntegerImports};
 use crate::error::{ParseError, ParserResult};
 use crate::hir;
 
-/// Normalizes array sizes without changing public constant declarations.
-pub(super) struct ArrayDimensions {
+/// Normalizes exact array sizes and maximum sequence lengths in shared HIR.
+pub(crate) struct CollectionBounds {
     constants: IntegerConstants,
 }
 
-impl ArrayDimensions {
+impl CollectionBounds {
     /// Computes dimensions in the selected projection before inheritance copies them.
-    pub(super) fn normalize(
+    pub(crate) fn normalize(
         spec: &mut hir::Specification,
         imports: &IntegerImports,
     ) -> ParserResult<()> {
@@ -60,7 +60,23 @@ impl ArrayDimensions {
                 hir::Export::ExceptDcl(except) => {
                     self.members(&mut except.member, scope, &except.ident)?;
                 }
-                _ => {}
+                hir::Export::OpDcl(op) => {
+                    if let hir::OpTypeSpec::TypeSpec(ty) = &mut op.ty {
+                        self.type_spec(ty, scope)?;
+                    }
+                    if let Some(params) = &mut op.parameter {
+                        for param in &mut params.0 {
+                            self.type_spec(&mut param.ty, scope)?;
+                        }
+                    }
+                }
+                hir::Export::AttrDcl(attr) => match &mut attr.decl {
+                    hir::AttrDclInner::ReadonlyAttrSpec(value) => {
+                        self.type_spec(&mut value.ty, scope)?
+                    }
+                    hir::AttrDclInner::AttrSpec(value) => self.type_spec(&mut value.ty, scope)?,
+                },
+                hir::Export::ConstDcl(_) => {}
             }
         }
         Ok(())
@@ -70,8 +86,9 @@ impl ArrayDimensions {
         match decl {
             hir::TypeDcl::ConstrTypeDcl(constr) => self.constructed(constr, scope)?,
             hir::TypeDcl::TypedefDcl(alias) => {
-                if let hir::TypedefType::ConstrTypeDcl(constr) = &mut alias.ty {
-                    self.constructed(constr, scope)?;
+                match &mut alias.ty {
+                    hir::TypedefType::ConstrTypeDcl(constr) => self.constructed(constr, scope)?,
+                    hir::TypedefType::TypeSpec(ty) => self.type_spec(ty, scope)?,
                 }
                 for decl in &mut alias.decl {
                     self.declarator(decl, scope, "")?;
@@ -94,8 +111,11 @@ impl ArrayDimensions {
             }
             hir::ConstrTypeDcl::UnionDef(union) => {
                 for case in &mut union.case {
-                    if let hir::ElementSpecTy::ConstrTypeDcl(constr) = &mut case.element.ty {
-                        self.constructed(constr, scope)?;
+                    match &mut case.element.ty {
+                        hir::ElementSpecTy::ConstrTypeDcl(constr) => {
+                            self.constructed(constr, scope)?
+                        }
+                        hir::ElementSpecTy::TypeSpec(ty) => self.type_spec(ty, scope)?,
                     }
                     self.declarator(&mut case.element.value, scope, &union.ident)?;
                 }
@@ -112,10 +132,54 @@ impl ArrayDimensions {
         owner: &str,
     ) -> ParserResult<()> {
         for member in members {
+            self.type_spec(&mut member.ty, scope)?;
             for decl in &mut member.ident {
                 self.declarator(decl, scope, owner)?;
             }
         }
+        Ok(())
+    }
+
+    fn type_spec(&mut self, ty: &mut hir::TypeSpec, scope: &[String]) -> ParserResult<()> {
+        match ty {
+            hir::TypeSpec::SequenceType(sequence) => {
+                if let Some(bound) = &mut sequence.len {
+                    self.bound(bound, scope, "sequence bound")?;
+                }
+                self.type_spec(&mut sequence.ty, scope)?;
+            }
+            hir::TypeSpec::MapType(map) => {
+                self.type_spec(&mut map.key, scope)?;
+                self.type_spec(&mut map.value, scope)?;
+            }
+            hir::TypeSpec::TemplateType(template) => {
+                for arg in &mut template.args {
+                    self.type_spec(arg, scope)?;
+                }
+            }
+            _ => {}
+        }
+        Ok(())
+    }
+
+    fn bound(
+        &mut self,
+        bound: &mut hir::PositiveIntConst,
+        scope: &[String],
+        contract: &str,
+    ) -> ParserResult<()> {
+        let size = self
+            .constants
+            .dimension(&bound.0, scope)
+            .map_err(|error| ParseError::Message(format!("{contract}: {error}")))?;
+        if size <= 0 {
+            return Err(ParseError::Message(format!(
+                "{contract} must be positive, got {size}"
+            )));
+        }
+        bound.0 = hir::ConstExpr::Literal(hir::Literal::IntegerLiteral(hir::IntegerLiteral(
+            size.to_string(),
+        )));
         Ok(())
     }
 
@@ -136,20 +200,7 @@ impl ArrayDimensions {
             .collect::<Vec<_>>()
             .join("::");
         for length in &mut array.len {
-            let size = self
-                .constants
-                .dimension(&length.0, scope)
-                .map_err(|error| {
-                    ParseError::Message(format!("array dimension for '{location}': {error}"))
-                })?;
-            if size <= 0 {
-                return Err(ParseError::Message(format!(
-                    "array dimension for '{location}' must be positive, got {size}"
-                )));
-            }
-            length.0 = hir::ConstExpr::Literal(hir::Literal::IntegerLiteral(hir::IntegerLiteral(
-                size.to_string(),
-            )));
+            self.bound(length, scope, &format!("array dimension for '{location}'"))?;
         }
         Ok(())
     }

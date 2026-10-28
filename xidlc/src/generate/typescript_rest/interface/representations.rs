@@ -1,7 +1,7 @@
 use super::super::model::TsRepresentationContext;
 use crate::generate::typescript::definition::TypeRefTarget;
 use crate::generate::typescript::definition::contexts::{
-    FieldTypeContext, ParamDeclContext, TsType,
+    FieldTypeContext, ParamDeclContext, TsType, ZodSchema,
 };
 use crate::generate::typescript::definition::type_expr::{
     ts_type_for_type_spec, zod_schema_for_type_spec_with_prefix,
@@ -18,11 +18,23 @@ impl TsRepresentationContext {
                 kind: repr.content_type.idl_name().to_string(),
                 content_type: repr.content_type.as_str().to_string(),
                 value_ty: ts_type_for_type_spec(&repr.ty, module_path, TypeRefTarget::Client),
-                schema: zod_schema_for_type_spec_with_prefix(
-                    &repr.ty,
-                    module_path,
-                    Some("ifaceSchemas.models"),
-                ),
+                schema: if repr.is_byte {
+                    ZodSchema::ByteBuffer {
+                        maximum: match &repr.ty {
+                            xidl_parser::hir::TypeSpec::SequenceType(sequence) => sequence
+                                .len
+                                .as_ref()
+                                .and_then(|bound| xidl_parser::hir::const_expr_to_i64(&bound.0)),
+                            _ => None,
+                        },
+                    }
+                } else {
+                    zod_schema_for_type_spec_with_prefix(
+                        &repr.ty,
+                        module_path,
+                        Some("ifaceSchemas.models"),
+                    )
+                },
                 is_byte: repr.is_byte,
             })
             .collect()

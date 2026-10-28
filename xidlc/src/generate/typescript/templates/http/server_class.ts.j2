@@ -39,8 +39,9 @@ export const {{ service_name }}Operations = {
             {%- if fixed_response_headers %}
                 fixedHeaders: {{ fixed_response_headers | tojson }},
             {%- endif %}
-            {% if method.representations | length > 0 %}representations: [{% for repr in method.representations %}{ kind: "{{ repr.kind }}", contentType: "{{ repr.content_type }}"{% if not repr.is_byte %}, schema: {{ render_zod(repr.schema) }}{% endif %} }{% if not loop.last %}, {% endif %}{% endfor %}],
+            {% if method.representations | length > 0 %}representations: [{% for repr in method.representations %}{ kind: "{{ repr.kind }}", contentType: "{{ repr.content_type }}", schema: {{ render_zod(repr.schema) }} }{% if not loop.last %}, {% endif %}{% endfor %}],
             {% endif %}{% if method.response_schema_ref and method.representations | length == 0 %}schema: ifaceSchemas.{{ method.response_schema_ref }}Schema,
+            {% elif method.response_value_schema %}schema: {{ render_zod(method.response_value_schema) }},
             {% endif %}stream: {{ method.is_server_stream | lower }},
             {% if method.stream_item_schema_ref %}streamSchema: ifaceSchemas.{{ method.stream_item_schema_ref }}Schema,
             {% endif %}
@@ -51,6 +52,10 @@ export const {{ service_name }}Operations = {
                 match: (error: unknown) => {
                     {% for ex in method.raises %}
                         if (error instanceof {{ ex.ident }}) {
+                            parseResponse(error, z.object({
+                                {% for field in ex.body %}"{{ field.field }}": {{ render_zod(field.schema) }}{% if field.optional %}.optional(){% endif %}, {% endfor %}
+                                {% for kind in ["headers", "cookies"] %}{% for member in ex[kind] %}"{{ member.field }}": {{ render_zod(member.schema) }}{% if member.optional %}.optional(){% endif %}, {% endfor %}{% endfor %}
+                            }));
                             const headers = new Headers();
                             writeResponseBindings(headers, { ...error }, [{% for member in ex.headers %}{ wireName: "{{ member.wire_name }}", key: "{{ member.field }}", multi: {{ member.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], false);
                             writeResponseBindings(headers, { ...error }, [{% for member in ex.cookies %}{ wireName: "{{ member.wire_name }}", key: "{{ member.field }}", multi: {{ member.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], true);

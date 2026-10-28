@@ -2,18 +2,27 @@
 
 use super::{DeclarationKind, TypeDeclarations};
 use crate::hir::{self, VisitScopedNames};
-use crate::rest_hir::{HttpInterface, HttpOperation, RestHirResult};
+use crate::rest_hir::{HttpException, HttpInterface, HttpOperation, RestHirResult};
 
 impl TypeDeclarations<'_> {
     pub(in crate::rest_hir) fn normalize(
         &self,
         interfaces: &mut [HttpInterface],
+        exceptions: &mut [HttpException],
     ) -> RestHirResult<()> {
         for interface in interfaces {
             let mut scope = interface.module_path.clone();
             scope.push(interface.name.clone());
             for operation in &mut interface.operations {
                 self.operation(operation, &scope)?;
+            }
+        }
+        for exception in exceptions {
+            for member in exception.headers.iter_mut().chain(&mut exception.cookies) {
+                member.ty = self.qualified(&member.ty, &exception.module_path);
+            }
+            for field in &mut exception.body {
+                field.ty = self.qualified(&field.ty, &exception.module_path);
             }
         }
         Ok(())

@@ -172,6 +172,7 @@ export const CollectionInputsOperations = {
             bodyFields: [{ wireName: "return", key: "return" }],
             headers: [],
             cookies: [],
+            schema: z.array(z.string()),
             stream: false,
             
         },
@@ -241,6 +242,7 @@ export const CollectionInputsOperations = {
             bodyFields: [{ wireName: "return", key: "return" }],
             headers: [],
             cookies: [],
+            schema: z.array(ifaceSchemas.models.transport.WideLetterSchema),
             stream: false,
             
         },
@@ -309,6 +311,7 @@ export const CollectionInputsOperations = {
             bodyFields: [{ wireName: "return", key: "return" }],
             headers: [],
             cookies: [],
+            schema: z.array(z.string()),
             stream: false,
             
         },

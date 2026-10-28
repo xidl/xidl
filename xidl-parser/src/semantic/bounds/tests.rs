@@ -2,6 +2,61 @@ use crate::{error::ParserResult, hir::Specification};
 use serde_json::Value;
 use std::collections::BTreeMap;
 
+#[test]
+fn interface_bounds_resolve_before_rpc_wrappers_leave_the_lexical_scope() {
+    let spec = parse(
+        r#"
+        const long LIMIT = 7;
+        module billing {
+            const long LIMIT = 3;
+            typedef sequence<long, LIMIT> Batch;
+            interface Probe {
+                const long LIMIT = 2;
+                sequence<long, LIMIT> batch(in sequence<long, LIMIT> values);
+            };
+        };
+    "#,
+    )
+    .expect("source bounds resolve before RPC expansion");
+    let value = serde_json::to_value(spec).unwrap();
+    fn visit(value: &Value, bounds: &mut Vec<i64>) {
+        match value {
+            Value::Object(object) => {
+                if let Some(sequence) = object.get("SequenceType") {
+                    let bound = &sequence["len"]["Literal"]["IntegerLiteral"];
+                    bounds.push(bound.as_str().expect("normalized bound").parse().unwrap());
+                }
+                for value in object.values() {
+                    visit(value, bounds);
+                }
+            }
+            Value::Array(values) => {
+                for value in values {
+                    visit(value, bounds);
+                }
+            }
+            _ => {}
+        }
+    }
+    let mut bounds = Vec::new();
+    visit(&value, &mut bounds);
+    assert!(bounds.contains(&3));
+    assert!(bounds.iter().filter(|bound| **bound == 2).count() >= 2);
+    assert!(!bounds.contains(&7), "nearest source scope wins");
+}
+
+#[test]
+fn invalid_sequence_bounds_are_contract_errors() {
+    for bound in ["0", "-1", "1 / 0", "9223372036854775807 + 1"] {
+        let source = format!("typedef sequence<long, {bound}> Batch;");
+        let error = parse(&source).expect_err("invalid sequence bound");
+        assert!(error.to_string().contains("sequence bound"), "{error}");
+    }
+    let error = parse("enum Color { red }; typedef sequence<long, red> Batch;")
+        .expect_err("enumerators are not positive integer bounds");
+    assert!(error.to_string().contains("sequence bound"));
+}
+
 fn parse(source: &str) -> ParserResult<Specification> {
     let typed = crate::parser::parser_text(source).expect("legal IDL syntax");
     Specification::from_typed_ast_with_path(typed, "dimensions.idl")
@@ -84,7 +139,7 @@ fn dimensions_use_declaration_scope_and_preserve_constant_declarations() {
         before.to_string().contains("BinaryExpr"),
         "constant RHS remains an expression"
     );
-    crate::semantic::analyze(&mut spec, &Default::default()).expect("repeated analysis");
+    crate::semantic::Analysis::run(&mut spec, &Default::default()).expect("repeated analysis");
     assert_eq!(before, serde_json::to_value(&spec).unwrap());
 }
 

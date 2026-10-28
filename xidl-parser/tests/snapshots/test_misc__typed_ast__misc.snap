@@ -426,14 +426,12 @@ Specification(
                                                                     MultExpr(
                                                                         UnaryExpr(
                                                                             PrimaryExpr(
-                                                                                ScopedName(
-                                                                                    ScopedName {
-                                                                                        scoped_name: None,
-                                                                                        identifier: Identifier(
-                                                                                            "red",
+                                                                                Literal(
+                                                                                    IntegerLiteral(
+                                                                                        DecNumber(
+                                                                                            "3",
                                                                                         ),
-                                                                                        node_text: "red",
-                                                                                    },
+                                                                                    ),
                                                                                 ),
                                                                             ),
                                                                         ),

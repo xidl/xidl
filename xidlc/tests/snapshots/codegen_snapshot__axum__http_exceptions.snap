@@ -113,6 +113,7 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for FilesGetFileError {
                 ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
             }
             Self::NotModified(err) => {
+                let err: __xidl_out_Files::NotModified = err.into();
                 let headers = (|| -> xidl_rust_axum::Result<
                     ::xidl_rust_axum::axum::http::HeaderMap,
                 > {
@@ -149,6 +150,7 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for FilesGetFileError {
                 response
             }
             Self::PreconditionFailed(err) => {
+                let err: __xidl_out_Files::PreconditionFailed = err.into();
                 let headers = (|| -> xidl_rust_axum::Result<
                     ::xidl_rust_axum::axum::http::HeaderMap,
                 > {
@@ -267,6 +269,7 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for FilesGetFileError {
                 response
             }
             Self::NotFound(err) => {
+                let err: __xidl_out_Files::NotFound = err.into();
                 let body = match xidl_rust_axum::serde_json::to_vec(&err) {
                     Ok(body) => body,
                     Err(err) => {
@@ -335,6 +338,11 @@ pub(super) mod __xidl_in_Files {
             }
         }
     }
+    impl Default for FileMeta {
+        fn default() -> Self {
+            super::FileMeta::default().into()
+        }
+    }
 }
 #[allow(
     non_snake_case,
@@ -345,6 +353,25 @@ pub(super) mod __xidl_in_Files {
 )]
 pub(super) mod __xidl_out_Files {
     use super::*;
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub struct EmptyGone {}
+    #[allow(unused_variables, unreachable_code)]
+    impl From<super::EmptyGone> for EmptyGone {
+        fn from(value: super::EmptyGone) -> Self {
+            Self {}
+        }
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<EmptyGone> for super::EmptyGone {
+        fn from(value: EmptyGone) -> Self {
+            Self {}
+        }
+    }
+    impl Default for EmptyGone {
+        fn default() -> Self {
+            super::EmptyGone::default().into()
+        }
+    }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub struct FileMeta {
         pub id: String,
@@ -366,6 +393,123 @@ pub(super) mod __xidl_out_Files {
                 id: value.id,
                 etag: value.etag,
             }
+        }
+    }
+    impl Default for FileMeta {
+        fn default() -> Self {
+            super::FileMeta::default().into()
+        }
+    }
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub struct NotFound {
+        pub code: u32,
+        pub msg: String,
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<super::NotFound> for NotFound {
+        fn from(value: super::NotFound) -> Self {
+            Self {
+                code: value.code,
+                msg: value.msg,
+            }
+        }
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<NotFound> for super::NotFound {
+        fn from(value: NotFound) -> Self {
+            Self {
+                code: value.code,
+                msg: value.msg,
+            }
+        }
+    }
+    impl Default for NotFound {
+        fn default() -> Self {
+            super::NotFound::default().into()
+        }
+    }
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub struct NotModified {
+        #[serde(skip)]
+        #[serde(rename = "ETag")]
+        pub etag: String,
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<super::NotModified> for NotModified {
+        fn from(value: super::NotModified) -> Self {
+            Self { etag: value.etag }
+        }
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<NotModified> for super::NotModified {
+        fn from(value: NotModified) -> Self {
+            Self { etag: value.etag }
+        }
+    }
+    impl Default for NotModified {
+        fn default() -> Self {
+            super::NotModified::default().into()
+        }
+    }
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub struct PreconditionFailed {
+        #[serde(skip)]
+        #[serde(rename = "ETag")]
+        pub etag: String,
+        #[serde(skip)]
+        #[serde(rename = "X-Hint")]
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        pub hints: Option<Vec<String>>,
+        #[serde(skip)]
+        #[serde(rename = "session")]
+        pub session_id: String,
+        #[serde(skip)]
+        #[serde(rename = "retry")]
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        pub retry_token: Option<String>,
+        #[serde(skip)]
+        #[serde(rename = "attempt")]
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        pub attempts: Option<Vec<String>>,
+        pub code: u32,
+        #[serde(rename = "message")]
+        pub msg: String,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        pub detail: Option<String>,
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<super::PreconditionFailed> for PreconditionFailed {
+        fn from(value: super::PreconditionFailed) -> Self {
+            Self {
+                etag: value.etag,
+                hints: value.hints.map(|value| value.into_iter().collect()),
+                session_id: value.session_id,
+                retry_token: value.retry_token,
+                attempts: value.attempts.map(|value| value.into_iter().collect()),
+                code: value.code,
+                msg: value.msg,
+                detail: value.detail,
+            }
+        }
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<PreconditionFailed> for super::PreconditionFailed {
+        fn from(value: PreconditionFailed) -> Self {
+            Self {
+                etag: value.etag,
+                hints: value.hints.map(|value| value.into_iter().collect()),
+                session_id: value.session_id,
+                retry_token: value.retry_token,
+                attempts: value.attempts.map(|value| value.into_iter().collect()),
+                code: value.code,
+                msg: value.msg,
+                detail: value.detail,
+            }
+        }
+    }
+    impl Default for PreconditionFailed {
+        fn default() -> Self {
+            super::PreconditionFailed::default().into()
         }
     }
 }
@@ -550,7 +694,8 @@ impl FilesClient {
             let status = resp.status();
             if status.as_u16() == 304 {
                 let headers = resp.headers().clone();
-                let mut value: NotModified = ::core::default::Default::default();
+                let mut value: __xidl_out_Files::NotModified = NotModified::default()
+                    .into();
                 value.etag = match headers.get("ETag") {
                     Some(header_value) => {
                         let header_str = header_value
@@ -563,12 +708,12 @@ impl FilesClient {
                     }
                     None => ::core::default::Default::default(),
                 };
-                return Err(FilesGetFileError::NotModified(value));
+                return Err(FilesGetFileError::NotModified(value.into()));
             }
             if status.as_u16() == 412 {
                 let headers = resp.headers().clone();
-                let mut value: PreconditionFailed = resp
-                    .json::<PreconditionFailed>()
+                let mut value: __xidl_out_Files::PreconditionFailed = resp
+                    .json::<__xidl_out_Files::PreconditionFailed>()
                     .await
                     .map_err(|err| xidl_rust_axum::Error::new(
                         status.as_u16(),
@@ -600,7 +745,11 @@ impl FilesClient {
                             values.push(parsed);
                         }
                     }
-                    if headers.contains_key("X-Hint") { Some(values) } else { None }
+                    if headers.contains_key("X-Hint") {
+                        Some(values.into_iter().collect())
+                    } else {
+                        None
+                    }
                 };
                 let cookie_map = xidl_rust_axum::http::parse_set_cookies(
                     headers.get_all(::xidl_rust_axum::reqwest::header::SET_COOKIE).iter(),
@@ -627,25 +776,29 @@ impl FilesClient {
                             values.push(parsed);
                         }
                     }
-                    if cookie_map.contains_key("attempt") { Some(values) } else { None }
+                    if cookie_map.contains_key("attempt") {
+                        Some(values.into_iter().collect())
+                    } else {
+                        None
+                    }
                 };
-                return Err(FilesGetFileError::PreconditionFailed(value));
+                return Err(FilesGetFileError::PreconditionFailed(value.into()));
             }
             if status.as_u16() == 404 {
                 let headers = resp.headers().clone();
-                let mut value: NotFound = resp
-                    .json::<NotFound>()
+                let mut value: __xidl_out_Files::NotFound = resp
+                    .json::<__xidl_out_Files::NotFound>()
                     .await
                     .map_err(|err| xidl_rust_axum::Error::new(
                         status.as_u16(),
                         format!("exception NotFound body: {err}"),
                     ))?;
-                return Err(FilesGetFileError::NotFound(value));
+                return Err(FilesGetFileError::NotFound(value.into()));
             }
             if status.as_u16() == 410 {
                 let headers = resp.headers().clone();
-                let mut value: EmptyGone = ::core::default::Default::default();
-                return Err(FilesGetFileError::EmptyGone(value));
+                let mut value: __xidl_out_Files::EmptyGone = EmptyGone::default().into();
+                return Err(FilesGetFileError::EmptyGone(value.into()));
             }
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(
@@ -705,6 +858,7 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for ScopedReadError {
                 ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
             }
             Self::Http409Failure(err) => {
+                let err: __xidl_out_Scoped::left_Failure = err.into();
                 let body = match xidl_rust_axum::serde_json::to_vec(&err) {
                     Ok(body) => body,
                     Err(err) => {
@@ -730,6 +884,7 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for ScopedReadError {
                 response
             }
             Self::Http422Failure(err) => {
+                let err: __xidl_out_Scoped::right_Failure = err.into();
                 let body = match xidl_rust_axum::serde_json::to_vec(&err) {
                     Ok(body) => body,
                     Err(err) => {
@@ -776,6 +931,73 @@ pub(super) mod __xidl_in_Scoped {
 )]
 pub(super) mod __xidl_out_Scoped {
     use super::*;
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub struct left_Detail {
+        pub message: String,
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<super::left::Detail> for left_Detail {
+        fn from(value: super::left::Detail) -> Self {
+            Self { message: value.message }
+        }
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<left_Detail> for super::left::Detail {
+        fn from(value: left_Detail) -> Self {
+            Self { message: value.message }
+        }
+    }
+    impl Default for left_Detail {
+        fn default() -> Self {
+            super::left::Detail::default().into()
+        }
+    }
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub struct left_Failure {
+        pub detail: __xidl_out_Scoped::left_Detail,
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<super::left::Failure> for left_Failure {
+        fn from(value: super::left::Failure) -> Self {
+            Self {
+                detail: value.detail.into(),
+            }
+        }
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<left_Failure> for super::left::Failure {
+        fn from(value: left_Failure) -> Self {
+            Self {
+                detail: value.detail.into(),
+            }
+        }
+    }
+    impl Default for left_Failure {
+        fn default() -> Self {
+            super::left::Failure::default().into()
+        }
+    }
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub struct right_Failure {
+        pub reason: String,
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<super::right::Failure> for right_Failure {
+        fn from(value: super::right::Failure) -> Self {
+            Self { reason: value.reason }
+        }
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<right_Failure> for super::right::Failure {
+        fn from(value: right_Failure) -> Self {
+            Self { reason: value.reason }
+        }
+    }
+    impl Default for right_Failure {
+        fn default() -> Self {
+            super::right::Failure::default().into()
+        }
+    }
 }
 pub struct ScopedServer<T> {
     inner: ::std::sync::Arc<T>,
@@ -914,25 +1136,25 @@ impl ScopedClient {
             let status = resp.status();
             if status.as_u16() == 409 {
                 let headers = resp.headers().clone();
-                let mut value: left::Failure = resp
-                    .json::<left::Failure>()
+                let mut value: __xidl_out_Scoped::left_Failure = resp
+                    .json::<__xidl_out_Scoped::left_Failure>()
                     .await
                     .map_err(|err| xidl_rust_axum::Error::new(
                         status.as_u16(),
                         format!("exception left::Failure body: {err}"),
                     ))?;
-                return Err(ScopedReadError::Http409Failure(value));
+                return Err(ScopedReadError::Http409Failure(value.into()));
             }
             if status.as_u16() == 422 {
                 let headers = resp.headers().clone();
-                let mut value: right::Failure = resp
-                    .json::<right::Failure>()
+                let mut value: __xidl_out_Scoped::right_Failure = resp
+                    .json::<__xidl_out_Scoped::right_Failure>()
                     .await
                     .map_err(|err| xidl_rust_axum::Error::new(
                         status.as_u16(),
                         format!("exception right::Failure body: {err}"),
                     ))?;
-                return Err(ScopedReadError::Http422Failure(value));
+                return Err(ScopedReadError::Http422Failure(value.into()));
             }
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(
@@ -992,6 +1214,7 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for NamingReadError {
                 ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
             }
             Self::Http409FilesClient(err) => {
+                let err: __xidl_out_Naming::collision_FilesClient = err.into();
                 let body = match xidl_rust_axum::serde_json::to_vec(&err) {
                     Ok(body) => body,
                     Err(err) => {
@@ -1017,6 +1240,7 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for NamingReadError {
                 response
             }
             Self::Http502Framework(err) => {
+                let err: __xidl_out_Naming::collision_Framework = err.into();
                 let body = match xidl_rust_axum::serde_json::to_vec(&err) {
                     Ok(body) => body,
                     Err(err) => {
@@ -1063,6 +1287,48 @@ pub(super) mod __xidl_in_Naming {
 )]
 pub(super) mod __xidl_out_Naming {
     use super::*;
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub struct collision_FilesClient {
+        pub reason: String,
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<super::collision::FilesClient> for collision_FilesClient {
+        fn from(value: super::collision::FilesClient) -> Self {
+            Self { reason: value.reason }
+        }
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<collision_FilesClient> for super::collision::FilesClient {
+        fn from(value: collision_FilesClient) -> Self {
+            Self { reason: value.reason }
+        }
+    }
+    impl Default for collision_FilesClient {
+        fn default() -> Self {
+            super::collision::FilesClient::default().into()
+        }
+    }
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub struct collision_Framework {
+        pub reason: String,
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<super::collision::Framework> for collision_Framework {
+        fn from(value: super::collision::Framework) -> Self {
+            Self { reason: value.reason }
+        }
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<collision_Framework> for super::collision::Framework {
+        fn from(value: collision_Framework) -> Self {
+            Self { reason: value.reason }
+        }
+    }
+    impl Default for collision_Framework {
+        fn default() -> Self {
+            super::collision::Framework::default().into()
+        }
+    }
 }
 #[derive(::serde::Deserialize)]
 pub struct NamingReadPath {
@@ -1218,25 +1484,25 @@ impl NamingClient {
             let status = resp.status();
             if status.as_u16() == 409 {
                 let headers = resp.headers().clone();
-                let mut value: collision::FilesClient = resp
-                    .json::<collision::FilesClient>()
+                let mut value: __xidl_out_Naming::collision_FilesClient = resp
+                    .json::<__xidl_out_Naming::collision_FilesClient>()
                     .await
                     .map_err(|err| xidl_rust_axum::Error::new(
                         status.as_u16(),
                         format!("exception collision::FilesClient body: {err}"),
                     ))?;
-                return Err(NamingReadError::Http409FilesClient(value));
+                return Err(NamingReadError::Http409FilesClient(value.into()));
             }
             if status.as_u16() == 502 {
                 let headers = resp.headers().clone();
-                let mut value: collision::Framework = resp
-                    .json::<collision::Framework>()
+                let mut value: __xidl_out_Naming::collision_Framework = resp
+                    .json::<__xidl_out_Naming::collision_Framework>()
                     .await
                     .map_err(|err| xidl_rust_axum::Error::new(
                         status.as_u16(),
                         format!("exception collision::Framework body: {err}"),
                     ))?;
-                return Err(NamingReadError::Http502Framework(value));
+                return Err(NamingReadError::Http502Framework(value.into()));
             }
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(

@@ -80,7 +80,15 @@ impl MethodModel {
                     ts_type_for_type_spec(&p.ty, module_path, TypeRefTarget::Client)
                 },
                 schema: if byte_body_param == Some(p.name.as_str()) {
-                    ZodSchema::Primitive("instanceof(Uint8Array)".into())
+                    ZodSchema::ByteBuffer {
+                        maximum: match text_aliases.expand(&p.ty, module_path) {
+                            hir::TypeSpec::SequenceType(sequence) => sequence
+                                .len
+                                .as_ref()
+                                .and_then(|bound| hir::const_expr_to_i64(&bound.0)),
+                            _ => None,
+                        },
+                    }
                 } else if stringly.contains(&p.name) {
                     let ty = text_aliases.expand(&p.ty, module_path);
                     zod_coerced_schema_for_type_spec_with_prefix(&ty, module_path, Some("models"))
@@ -325,6 +333,7 @@ impl MethodModel {
             request_payload,
             response_name,
             response_schema_ref,
+            response_value_schema: Self::response_value_schema(op, module_path),
             request_content_type: op
                 .http
                 .request
@@ -378,7 +387,7 @@ impl MethodModel {
             security: security_contexts(op),
             request_fields,
             response_fields,
-            raises: TsRaisesContext::for_operation(op, exceptions),
+            raises: TsRaisesContext::for_operation(op, exceptions, text_aliases),
         })
     }
 }

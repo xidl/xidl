@@ -68,6 +68,11 @@ pub(super) mod __xidl_in_BodyShape {
             Self { title: value.title }
         }
     }
+    impl Default for Document {
+        fn default() -> Self {
+            super::Document::default().into()
+        }
+    }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub struct UploadResult {
         pub media_type: String,
@@ -89,6 +94,11 @@ pub(super) mod __xidl_in_BodyShape {
                 media_type: value.media_type,
                 size: value.size,
             }
+        }
+    }
+    impl Default for UploadResult {
+        fn default() -> Self {
+            super::UploadResult::default().into()
         }
     }
 }
@@ -117,6 +127,11 @@ pub(super) mod __xidl_out_BodyShape {
             Self { title: value.title }
         }
     }
+    impl Default for Document {
+        fn default() -> Self {
+            super::Document::default().into()
+        }
+    }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub struct UploadResult {
         pub media_type: String,
@@ -138,6 +153,11 @@ pub(super) mod __xidl_out_BodyShape {
                 media_type: value.media_type,
                 size: value.size,
             }
+        }
+    }
+    impl Default for UploadResult {
+        fn default() -> Self {
+            super::UploadResult::default().into()
         }
     }
 }
@@ -374,8 +394,12 @@ where
         }
         let mut resp = match svc.document().await {
             Ok(resp_value) => {
+                let etag_wire: String = {
+                    let etag = resp_value.etag.clone();
+                    etag
+                };
                 let etag_header_value: String = {
-                    let value = &resp_value.etag;
+                    let value = &etag_wire;
                     value.clone()
                 };
                 let mut resp = {
@@ -401,11 +425,11 @@ where
                 let header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
                         "ETag".as_bytes(),
                     )
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
                         &etag_header_value,
                     )
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 resp.headers_mut().insert(header_name, header_value);
                 resp
             }
@@ -437,16 +461,28 @@ where
         }
         let mut resp = match svc.scalar().await {
             Ok(resp_value) => {
+                let etag_wire: String = {
+                    let etag = resp_value.etag.clone();
+                    etag
+                };
+                let count_wire: u32 = {
+                    let count = resp_value.count.clone();
+                    count
+                };
+                let cached_wire: bool = {
+                    let cached = resp_value.cached.clone();
+                    cached
+                };
                 let etag_header_value: String = {
-                    let value = &resp_value.etag;
+                    let value = &etag_wire;
                     value.clone()
                 };
                 let count_header_value: String = {
-                    let value = &resp_value.count;
+                    let value = &count_wire;
                     value.to_string()
                 };
                 let cached_cookie_value: String = {
-                    let value = &resp_value.cached;
+                    let value = &cached_wire;
                     value.to_string()
                 };
                 let mut resp = {
@@ -472,20 +508,20 @@ where
                 let header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
                         "ETag".as_bytes(),
                     )
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
                         &etag_header_value,
                     )
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 resp.headers_mut().insert(header_name, header_value);
                 let header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
                         "X-Count".as_bytes(),
                     )
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
                         &count_header_value,
                     )
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 resp.headers_mut().insert(header_name, header_value);
                 let cookie_str = xidl_rust_axum::cookie::Cookie::new(
                         "cached",
@@ -496,7 +532,7 @@ where
                 let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
                         &cookie_str,
                     )
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 resp.headers_mut()
                     .append(
                         ::xidl_rust_axum::axum::http::header::SET_COOKIE,
@@ -535,8 +571,12 @@ where
         let document: Document = document.into();
         let mut resp = match svc.rename(document).await {
             Ok(resp_value) => {
+                let etag_wire: String = {
+                    let etag = resp_value.etag.clone();
+                    etag
+                };
                 let etag_header_value: String = {
-                    let value = &resp_value.etag;
+                    let value = &etag_wire;
                     value.clone()
                 };
                 let mut resp = {
@@ -562,11 +602,11 @@ where
                 let header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
                         "ETag".as_bytes(),
                     )
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
                         &etag_header_value,
                     )
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 resp.headers_mut().insert(header_name, header_value);
                 resp
             }
@@ -598,8 +638,12 @@ where
         }
         let mut resp = match svc.output().await {
             Ok(resp_value) => {
+                let etag_wire: String = {
+                    let etag = resp_value.etag.clone();
+                    etag
+                };
                 let etag_header_value: String = {
-                    let value = &resp_value.etag;
+                    let value = &etag_wire;
                     value.clone()
                 };
                 let mut resp = {
@@ -625,11 +669,11 @@ where
                 let header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
                         "ETag".as_bytes(),
                     )
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
                         &etag_header_value,
                     )
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 resp.headers_mut().insert(header_name, header_value);
                 resp
             }
@@ -765,6 +809,7 @@ impl BodyShapeClient {
                 }
                 None => ::core::default::Default::default(),
             };
+            let etag: String = etag;
             let body = resp
                 .bytes()
                 .await
@@ -821,6 +866,7 @@ impl BodyShapeClient {
                 }
                 None => ::core::default::Default::default(),
             };
+            let etag: String = etag;
             let count: u32 = match headers.get("X-Count") {
                 Some(header_value) => {
                     let header_str = header_value
@@ -838,6 +884,7 @@ impl BodyShapeClient {
                 }
                 None => ::core::default::Default::default(),
             };
+            let count: u32 = count;
             let cookie_map = xidl_rust_axum::http::parse_set_cookies(
                 headers.get_all(::xidl_rust_axum::reqwest::header::SET_COOKIE).iter(),
             );
@@ -855,6 +902,7 @@ impl BodyShapeClient {
                 }
                 None => ::core::default::Default::default(),
             };
+            let cached: bool = cached;
             let body = resp
                 .bytes()
                 .await
@@ -928,6 +976,7 @@ impl BodyShapeClient {
                 }
                 None => ::core::default::Default::default(),
             };
+            let etag: String = etag;
             let body = resp
                 .bytes()
                 .await
@@ -986,6 +1035,7 @@ impl BodyShapeClient {
                 }
                 None => ::core::default::Default::default(),
             };
+            let etag: String = etag;
             let body = resp
                 .bytes()
                 .await
@@ -1009,6 +1059,7 @@ impl BodyShapeClient {
         media_type: Option<String>,
         payload: Vec<u8>,
     ) -> Result<UploadResult, xidl_rust_axum::Error> {
+        let media_type: Option<String> = media_type;
         let xidl_path = "/upload".to_string();
         let mut req = self
             .client

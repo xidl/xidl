@@ -67,7 +67,7 @@ pub fn from_spec_with_http(
         .iter()
         .map(|(id, _)| {
             let mut projected = record.project_source(spec, id)?;
-            crate::semantic::analyze(&mut projected, &options.integer_imports)?;
+            crate::semantic::Analysis::run(&mut projected, &options.integer_imports)?;
             Ok(projected)
         })
         .collect::<ParserResult<Vec<_>>>()?;

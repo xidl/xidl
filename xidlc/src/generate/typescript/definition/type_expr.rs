@@ -329,7 +329,8 @@ fn zod_schema_for_type_spec_impl(
                 prefix,
                 coercion,
             )),
-            length: seq
+            length: None,
+            maximum: seq
                 .len
                 .as_ref()
                 .and_then(|len| xidl_parser::hir::const_expr_to_i64(&len.0)),
@@ -391,6 +392,7 @@ pub(crate) fn apply_array_zod(mut base: ZodSchema, decl: &hir::Declarator) -> Zo
             base = ZodSchema::Array {
                 element: Box::new(base),
                 length: xidl_parser::hir::const_expr_to_i64(&len.0),
+                maximum: None,
             };
         }
     }

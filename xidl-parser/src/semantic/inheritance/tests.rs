@@ -100,7 +100,7 @@ fn interface_local_ancestors_keep_their_declared_type_identity() {
 }
 
 #[test]
-fn inherited_array_sizes_resolve_while_other_expressions_keep_their_declared_constants() {
+fn inherited_collection_bounds_resolve_while_other_expressions_keep_their_declared_constants() {
     let spec = parse(
         r#"
         module limits {
@@ -130,6 +130,13 @@ fn inherited_array_sizes_resolve_while_other_expressions_keep_their_declared_con
         panic!("inherited digits array");
     };
     assert_eq!(crate::hir::const_expr_to_i64(&array.len[0].0), Some(8));
+    let crate::hir::TypeSpec::SequenceType(sequence) = &inherited[1].ty else {
+        panic!("inherited lines sequence");
+    };
+    assert_eq!(
+        crate::hir::const_expr_to_i64(&sequence.len.as_ref().unwrap().0),
+        Some(8)
+    );
     let json = serde_json::to_value(inherited).expect("inherited receipt fields");
     let mut names = Vec::new();
     collect_names(&json, &mut names);
@@ -142,7 +149,7 @@ fn inherited_array_sizes_resolve_while_other_expressions_keep_their_declared_con
     assert_eq!(
         counts,
         std::collections::BTreeMap::from([
-            ("limits::WIDTH".to_string(), 6),
+            ("limits::WIDTH".to_string(), 5),
             ("limits::SCALE".to_string(), 2),
         ])
     );

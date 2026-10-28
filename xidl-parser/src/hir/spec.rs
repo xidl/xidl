@@ -249,12 +249,13 @@ impl Specification {
         expand_interfaces: bool,
         imports: &semantic::IntegerImports,
     ) -> crate::error::ParserResult<Self> {
+        semantic::CollectionBounds::normalize(&mut spec, imports)?;
         // Validate lexical source scopes before adding RPC wrapper declarations
         // at their generated scopes.
         if expand_interfaces {
             Self::expand_interfaces(&mut spec.0, &mut Vec::new())?;
         }
-        semantic::analyze(&mut spec, imports)?;
+        semantic::Analysis::structure(&mut spec)?;
         Ok(spec)
     }
 

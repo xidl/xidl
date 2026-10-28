@@ -1,5 +1,6 @@
 import { serialize, type XidlSchema } from 'xidl-typescript-codec';
 
+import { XidlServerError } from './error.ts';
 import { assertAccepts, encodeScalar, normalizeMime } from './scalar.ts';
 import { byteStreamResponse, sseResponse } from './stream.ts';
 import type {
@@ -52,8 +53,7 @@ export function encodeOperationResponse<TService>(
         true,
       );
       headers.set('Content-Type', representation.contentType);
-      const parsed =
-        representation.schema?.parse(wrapper.value) ?? wrapper.value;
+      const parsed = parseResponse(wrapper.value, representation.schema);
       const value = representation.schema
         ? serialize(parsed, representation.schema)
         : parsed;
@@ -72,7 +72,7 @@ export function encodeOperationResponse<TService>(
     }
   }
 
-  const parsed = operation.response.schema?.parse(result) ?? result;
+  const parsed = parseResponse(result, operation.response.schema);
   const serialized = operation.response.schema
     ? serialize(parsed, operation.response.schema)
     : parsed;
@@ -100,6 +100,17 @@ export function encodeOperationResponse<TService>(
       status: operation.response.status,
     },
   );
+}
+
+export function parseResponse(value: unknown, schema?: XidlSchema): unknown {
+  if (!schema) {
+    return value;
+  }
+  try {
+    return schema.parse(value);
+  } catch {
+    throw new XidlServerError(500, 'invalid response');
+  }
 }
 
 function toRecord(value: unknown): Record<string, unknown> {

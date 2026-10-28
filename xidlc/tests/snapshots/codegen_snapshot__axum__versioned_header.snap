@@ -70,6 +70,11 @@ pub mod v1 {
                 Self { id: value.id }
             }
         }
+        impl Default for v1_Item {
+            fn default() -> Self {
+                super::Item::default().into()
+            }
+        }
     }
     #[allow(
         non_snake_case,
@@ -94,6 +99,11 @@ pub mod v1 {
         impl From<v1_Item> for super::Item {
             fn from(value: v1_Item) -> Self {
                 Self { id: value.id }
+            }
+        }
+        impl Default for v1_Item {
+            fn default() -> Self {
+                super::Item::default().into()
             }
         }
     }
@@ -570,6 +580,11 @@ pub mod v2 {
                 Self { id: value.id }
             }
         }
+        impl Default for v2_Item {
+            fn default() -> Self {
+                super::Item::default().into()
+            }
+        }
     }
     #[allow(
         non_snake_case,
@@ -594,6 +609,11 @@ pub mod v2 {
         impl From<v2_Item> for super::Item {
             fn from(value: v2_Item) -> Self {
                 Self { id: value.id }
+            }
+        }
+        impl Default for v2_Item {
+            fn default() -> Self {
+                super::Item::default().into()
             }
         }
     }

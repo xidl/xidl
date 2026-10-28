@@ -82,6 +82,11 @@ pub(super) mod __xidl_in_WireNamesService {
             }
         }
     }
+    impl Default for WireNames {
+        fn default() -> Self {
+            super::WireNames::default().into()
+        }
+    }
 }
 #[allow(
     non_snake_case,
@@ -116,6 +121,11 @@ pub(super) mod __xidl_out_WireNamesService {
                 special: value.special,
                 ..::core::default::Default::default()
             }
+        }
+    }
+    impl Default for WireNames {
+        fn default() -> Self {
+            super::WireNames::default().into()
         }
     }
 }

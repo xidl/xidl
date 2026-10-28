@@ -79,6 +79,36 @@ const router = createRouter([getItem, createItem], {
   getItem: id => ({ id }),
 });
 
+test('response contract failures are server errors in every representation', async () => {
+  const schema = z.array(z.number()).max(2);
+  for (const negotiated of [false, true]) {
+    const operation = defineOperation<
+      { getItem(id: number): unknown },
+      'getItem'
+    >({
+      ...getItem,
+      response: {
+        ...getItem.response,
+        representations: negotiated
+          ? [{ contentType: 'application/json', kind: 'Json', schema }]
+          : undefined,
+        schema: negotiated ? undefined : z.object({ return: schema }),
+      },
+    });
+    const serve = createRouter([operation], {
+      getItem: () =>
+        negotiated ? { kind: 'Json', value: [1, 2, 3] } : { return: [1, 2, 3] },
+    });
+    const invalidRequest = await serve(
+      new Request('http://test/items/invalid'),
+    );
+    assert.equal(invalidRequest.status, 400);
+    const invalidResponse = await serve(new Request('http://test/items/1'));
+    assert.equal(invalidResponse.status, 500);
+    assert.equal((await invalidResponse.json()).msg, 'invalid response');
+  }
+});
+
 test('bodyless responses preserve the declared status and metadata', async () => {
   for (const [method, status] of [
     ['HEAD', 200],

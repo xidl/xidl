@@ -48,6 +48,11 @@ pub(super) mod __xidl_in_Catalog {
             Self { label: value.label }
         }
     }
+    impl Default for Preference {
+        fn default() -> Self {
+            super::Preference::default().into()
+        }
+    }
 }
 #[allow(
     non_snake_case,
@@ -72,6 +77,11 @@ pub(super) mod __xidl_out_Catalog {
     impl From<Preference> for super::Preference {
         fn from(value: Preference) -> Self {
             Self { label: value.label }
+        }
+    }
+    impl Default for Preference {
+        fn default() -> Self {
+            super::Preference::default().into()
         }
     }
 }
@@ -153,26 +163,42 @@ where
         }
         let mut resp = match svc.read().await {
             Ok(resp_value) => {
+                let bookmark_wire: Option<String> = {
+                    let bookmark = resp_value.bookmark.clone();
+                    bookmark
+                };
+                let consent_wire: Option<bool> = {
+                    let consent = resp_value.consent.clone();
+                    consent
+                };
+                let revision_wire: Option<i64> = {
+                    let revision = resp_value.revision.clone();
+                    revision
+                };
+                let preference_wire: Option<__xidl_out_Catalog::Preference> = {
+                    let preference = resp_value.preference.clone();
+                    preference.map(|value| value.into())
+                };
                 let bookmark_cookie_value: Option<String> = {
-                    let value = &resp_value.bookmark;
+                    let value = &bookmark_wire;
                     value.clone()
                 };
                 let consent_cookie_value: Option<String> = {
-                    let value = &resp_value.consent;
+                    let value = &consent_wire;
                     value.as_ref().map(|value| value.to_string())
                 };
                 let revision_cookie_value: Option<String> = {
-                    let value = &resp_value.revision;
+                    let value = &revision_wire;
                     value.as_ref().map(|value| value.to_string())
                 };
                 let preference_cookie_value: Option<String> = {
-                    let value = &resp_value.preference;
+                    let value = &preference_wire;
                     value
                         .as_ref()
                         .map(xidl_rust_axum::serde_json::to_string)
                         .transpose()
                         .map_err(|err| xidl_rust_axum::Error::new(
-                            400,
+                            500,
                             format!("{err:?}"),
                         ))?
                 };
@@ -207,7 +233,7 @@ where
                             &cookie_str,
                         )
                         .map_err(|err| xidl_rust_axum::Error::new(
-                            400,
+                            500,
                             format!("{err:?}"),
                         ))?;
                     resp.headers_mut()
@@ -227,7 +253,7 @@ where
                             &cookie_str,
                         )
                         .map_err(|err| xidl_rust_axum::Error::new(
-                            400,
+                            500,
                             format!("{err:?}"),
                         ))?;
                     resp.headers_mut()
@@ -247,7 +273,7 @@ where
                             &cookie_str,
                         )
                         .map_err(|err| xidl_rust_axum::Error::new(
-                            400,
+                            500,
                             format!("{err:?}"),
                         ))?;
                     resp.headers_mut()
@@ -267,7 +293,7 @@ where
                             &cookie_str,
                         )
                         .map_err(|err| xidl_rust_axum::Error::new(
-                            400,
+                            500,
                             format!("{err:?}"),
                         ))?;
                     resp.headers_mut()
@@ -303,8 +329,12 @@ where
         let _ = &headers;
         let mut resp = match svc.remember().await {
             Ok(resp_value) => {
+                let bookmark_wire: Option<String> = {
+                    let bookmark = resp_value.bookmark.clone();
+                    bookmark
+                };
                 let bookmark_cookie_value: Option<String> = {
-                    let value = &resp_value.bookmark;
+                    let value = &bookmark_wire;
                     value.clone()
                 };
                 let mut resp = {
@@ -324,7 +354,7 @@ where
                             &cookie_str,
                         )
                         .map_err(|err| xidl_rust_axum::Error::new(
-                            400,
+                            500,
                             format!("{err:?}"),
                         ))?;
                     resp.headers_mut()
@@ -403,6 +433,7 @@ impl CatalogClient {
                 .get("bookmark")
                 .and_then(|values| values.first())
                 .cloned();
+            let bookmark: Option<String> = bookmark;
             let consent: Option<bool> = match cookie_map
                 .get("consent")
                 .and_then(|values| values.first())
@@ -419,6 +450,7 @@ impl CatalogClient {
                 }
                 None => None,
             };
+            let consent: Option<bool> = consent;
             let revision: Option<i64> = match cookie_map
                 .get("revision")
                 .and_then(|values| values.first())
@@ -435,7 +467,8 @@ impl CatalogClient {
                 }
                 None => None,
             };
-            let preference: Option<Preference> = match cookie_map
+            let revision: Option<i64> = revision;
+            let preference: Option<__xidl_out_Catalog::Preference> = match cookie_map
                 .get("preference")
                 .and_then(|values| values.first())
             {
@@ -450,6 +483,7 @@ impl CatalogClient {
                 }
                 None => None,
             };
+            let preference: Option<Preference> = preference.map(|value| value.into());
             let body = resp
                 .bytes()
                 .await
@@ -504,6 +538,7 @@ impl CatalogClient {
                 .get("bookmark")
                 .and_then(|values| values.first())
                 .cloned();
+            let bookmark: Option<String> = bookmark;
             Ok(CatalogRememberResponse {
                 bookmark,
             })

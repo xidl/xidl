@@ -168,7 +168,10 @@ impl VersioningRecord {
     /// Projects `version` into an ordinary specification.
     pub fn project(&self, spec: &Specification, version: VersionId) -> ParserResult<Specification> {
         let mut projected = self.project_source(spec, version)?;
-        crate::semantic::analyze(&mut projected, &crate::semantic::IntegerImports::default())?;
+        crate::semantic::Analysis::run(
+            &mut projected,
+            &crate::semantic::IntegerImports::default(),
+        )?;
         Ok(projected)
     }
 
@@ -189,7 +192,7 @@ impl VersioningRecord {
         versions: &[VersionId],
     ) -> ParserResult<Specification> {
         let mut merged = self.merge_source(spec, versions)?;
-        crate::semantic::analyze(&mut merged, &crate::semantic::IntegerImports::default())?;
+        crate::semantic::Analysis::run(&mut merged, &crate::semantic::IntegerImports::default())?;
         Ok(merged)
     }
 

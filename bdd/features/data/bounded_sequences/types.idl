@@ -1,0 +1,40 @@
+module codes {
+    enum RetryState { @rename("true") blocked, retryable };
+    typedef RetryState State;
+};
+
+module billing {
+    const unsigned short BATCH_LIMIT = 2;
+    typedef sequence<long, BATCH_LIMIT / 1> InvoiceIds;
+    typedef string Token;
+
+    struct Total { long count; };
+    @derive(PartialOrd, Ord)
+    enum Region { eu, us };
+
+    @http(409)
+    exception BatchRejected {
+        InvoiceIds ids;
+        map<Region, InvoiceIds> regions;
+        @header InvoiceIds retry;
+        @cookie InvoiceIds tokens;
+        @header Total detail;
+        @cookie ::codes::State state;
+        @header Token tag;
+        @cookie Token token;
+    };
+
+    struct Batch {
+        InvoiceIds invoices;
+        sequence<InvoiceIds, BATCH_LIMIT> windows;
+        map<string, InvoiceIds> regions;
+        InvoiceIds days[2];
+        @optional InvoiceIds retry;
+    };
+
+    @http
+    union Export switch(ContentType) {
+        case ContentType::Json: InvoiceIds ids;
+        case ContentType::OctetStream: sequence<octet, BATCH_LIMIT> bytes;
+    };
+};

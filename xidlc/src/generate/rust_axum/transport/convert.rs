@@ -112,9 +112,9 @@ impl<'a> OwnedConversion<'a> {
             return Ok(source.to_owned());
         };
         match self.scope.registry.get(key.as_str()) {
-            Some(TransportTypeDef::Struct(_)) | Some(TransportTypeDef::Enum(_)) => {
-                Ok(format!("{source}.into()"))
-            }
+            Some(TransportTypeDef::Struct(_))
+            | Some(TransportTypeDef::Exception(_))
+            | Some(TransportTypeDef::Enum(_)) => Ok(format!("{source}.into()")),
             Some(TransportTypeDef::Typedef { ty, declarator }) => {
                 match ty {
                     hir::TypedefType::TypeSpec(inner) => {

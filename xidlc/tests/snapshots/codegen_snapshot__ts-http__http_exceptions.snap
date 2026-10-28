@@ -86,9 +86,13 @@ import {
         async throwGetFileError(resp: Response): Promise<never> {
             const status = resp.status;
             if (status === 304) {
-                throw new $xidlErrors.NotModified({
+                const error = new $xidlErrors.NotModified({
                     "etag": readResponseHeader(resp.headers, "ETag", false, value => value) as never,
                     });
+                
+                    z.string().parse(error.etag);
+                
+                throw error;
             }
             if (status === 412) {
                 const bodySchema = z.object({ "code": z.number().int().nonnegative(), "message": z.string(), "detail": z.string().optional(),  });
@@ -97,7 +101,7 @@ import {
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
                 if (!decoded.success) throw await parseXidlError(resp);
                 const body = decoded.data;
-                throw new $xidlErrors.PreconditionFailed({
+                const error = new $xidlErrors.PreconditionFailed({
                     "etag": readResponseHeader(resp.headers, "ETag", false, value => value) as never,
                     "hints": (readResponseHeader(resp.headers, "X-Hint", true, value => value) ?? undefined) as never,
                     "session_id": (readResponseCookies(resp.headers, value => value).get("session")?.[0]) as never,
@@ -107,6 +111,18 @@ import {
                     "msg": body["message"] as never,
                     "detail": (body["detail"] ?? undefined) as never,
                     });
+                
+                    z.string().parse(error.etag);
+                
+                    z.array(z.string()).optional().parse(error.hints);
+                
+                    z.string().parse(error.session_id);
+                
+                    z.string().optional().parse(error.retry_token);
+                
+                    z.array(z.string()).optional().parse(error.attempts);
+                
+                throw error;
             }
             if (status === 404) {
                 const bodySchema = z.object({ "code": z.number().int().nonnegative(), "msg": z.string(),  });
@@ -115,14 +131,18 @@ import {
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
                 if (!decoded.success) throw await parseXidlError(resp);
                 const body = decoded.data;
-                throw new $xidlErrors.NotFound({
+                const error = new $xidlErrors.NotFound({
                     "code": body["code"] as never,
                     "msg": body["msg"] as never,
                     });
+                
+                throw error;
             }
             if (status === 410) {
-                throw new $xidlErrors.EmptyGone({
+                const error = new $xidlErrors.EmptyGone({
                     });
+                
+                throw error;
             }
             throw await parseXidlError(resp);
         }
@@ -177,9 +197,11 @@ import {
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
                 if (!decoded.success) throw await parseXidlError(resp);
                 const body = decoded.data;
-                throw new $xidlErrors.left$Failure({
+                const error = new $xidlErrors.left$Failure({
                     "detail": body["detail"] as never,
                     });
+                
+                throw error;
             }
             if (status === 422) {
                 const bodySchema = z.object({ "reason": z.string(),  });
@@ -188,9 +210,11 @@ import {
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
                 if (!decoded.success) throw await parseXidlError(resp);
                 const body = decoded.data;
-                throw new $xidlErrors.right$Failure({
+                const error = new $xidlErrors.right$Failure({
                     "reason": body["reason"] as never,
                     });
+                
+                throw error;
             }
             throw await parseXidlError(resp);
         }
@@ -247,9 +271,11 @@ import {
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
                 if (!decoded.success) throw await parseXidlError(resp);
                 const body = decoded.data;
-                throw new $xidlErrors.FilesClient({
+                const error = new $xidlErrors.FilesClient({
                     "reason": body["reason"] as never,
                     });
+                
+                throw error;
             }
             if (status === 502) {
                 const bodySchema = z.object({ "reason": z.string(),  });
@@ -258,9 +284,11 @@ import {
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
                 if (!decoded.success) throw await parseXidlError(resp);
                 const body = decoded.data;
-                throw new $xidlErrors.Framework({
+                const error = new $xidlErrors.Framework({
                     "reason": body["reason"] as never,
                     });
+                
+                throw error;
             }
             throw await parseXidlError(resp);
         }
@@ -531,7 +559,7 @@ import * as ifaceSchemas from "./http_exceptions.iface.zod";
 import { z } from "zod";
 import {
     defineOperation,
-    writeResponseBindings,
+    writeResponseBindings, parseResponse,
     type Awaitable,
 } from "xidl-typescript-server";
 
@@ -581,6 +609,10 @@ export const FilesOperations = {
                 match: (error: unknown) => {
                     
                         if (error instanceof $xidlErrors.NotModified) {
+                            parseResponse(error, z.object({
+                                
+                                "etag": z.string(), 
+                            }));
                             const headers = new Headers();
                             writeResponseBindings(headers, { ...error }, [{ wireName: "ETag", key: "etag", multi: false }], false);
                             writeResponseBindings(headers, { ...error }, [], true);
@@ -589,6 +621,10 @@ export const FilesOperations = {
                     }
                 
                         if (error instanceof $xidlErrors.PreconditionFailed) {
+                            parseResponse(error, z.object({
+                                "code": z.number().int().nonnegative(), "msg": z.string(), "detail": z.string().optional(), 
+                                "etag": z.string(), "hints": z.array(z.string()).optional(), "session_id": z.string(), "retry_token": z.string().optional(), "attempts": z.array(z.string()).optional(), 
+                            }));
                             const headers = new Headers();
                             writeResponseBindings(headers, { ...error }, [{ wireName: "ETag", key: "etag", multi: false }, { wireName: "X-Hint", key: "hints", multi: true }], false);
                             writeResponseBindings(headers, { ...error }, [{ wireName: "session", key: "session_id", multi: false }, { wireName: "retry", key: "retry_token", multi: false }, { wireName: "attempt", key: "attempts", multi: true }], true);
@@ -602,6 +638,10 @@ export const FilesOperations = {
                     }
                 
                         if (error instanceof $xidlErrors.NotFound) {
+                            parseResponse(error, z.object({
+                                "code": z.number().int().nonnegative(), "msg": z.string(), 
+                                
+                            }));
                             const headers = new Headers();
                             writeResponseBindings(headers, { ...error }, [], false);
                             writeResponseBindings(headers, { ...error }, [], true);
@@ -615,6 +655,10 @@ export const FilesOperations = {
                     }
                 
                         if (error instanceof $xidlErrors.EmptyGone) {
+                            parseResponse(error, z.object({
+                                
+                                
+                            }));
                             const headers = new Headers();
                             writeResponseBindings(headers, { ...error }, [], false);
                             writeResponseBindings(headers, { ...error }, [], true);
@@ -674,6 +718,10 @@ export const ScopedOperations = {
                 match: (error: unknown) => {
                     
                         if (error instanceof $xidlErrors.left$Failure) {
+                            parseResponse(error, z.object({
+                                "detail": ifaceSchemas.models.left.DetailSchema, 
+                                
+                            }));
                             const headers = new Headers();
                             writeResponseBindings(headers, { ...error }, [], false);
                             writeResponseBindings(headers, { ...error }, [], true);
@@ -687,6 +735,10 @@ export const ScopedOperations = {
                     }
                 
                         if (error instanceof $xidlErrors.right$Failure) {
+                            parseResponse(error, z.object({
+                                "reason": z.string(), 
+                                
+                            }));
                             const headers = new Headers();
                             writeResponseBindings(headers, { ...error }, [], false);
                             writeResponseBindings(headers, { ...error }, [], true);
@@ -752,6 +804,10 @@ export const NamingOperations = {
                 match: (error: unknown) => {
                     
                         if (error instanceof $xidlErrors.FilesClient) {
+                            parseResponse(error, z.object({
+                                "reason": z.string(), 
+                                
+                            }));
                             const headers = new Headers();
                             writeResponseBindings(headers, { ...error }, [], false);
                             writeResponseBindings(headers, { ...error }, [], true);
@@ -765,6 +821,10 @@ export const NamingOperations = {
                     }
                 
                         if (error instanceof $xidlErrors.Framework) {
+                            parseResponse(error, z.object({
+                                "reason": z.string(), 
+                                
+                            }));
                             const headers = new Headers();
                             writeResponseBindings(headers, { ...error }, [], false);
                             writeResponseBindings(headers, { ...error }, [], true);

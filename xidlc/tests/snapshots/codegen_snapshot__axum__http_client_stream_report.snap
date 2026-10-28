@@ -72,6 +72,11 @@ pub(super) mod __xidl_in_HttpClientStreamReportService {
             }
         }
     }
+    impl Default for UploadChunk {
+        fn default() -> Self {
+            super::UploadChunk::default().into()
+        }
+    }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub struct UploadSummary {
         pub upload_id: String,
@@ -93,6 +98,11 @@ pub(super) mod __xidl_in_HttpClientStreamReportService {
                 upload_id: value.upload_id,
                 accepted: value.accepted,
             }
+        }
+    }
+    impl Default for UploadSummary {
+        fn default() -> Self {
+            super::UploadSummary::default().into()
         }
     }
 }
@@ -128,6 +138,11 @@ pub(super) mod __xidl_out_HttpClientStreamReportService {
             }
         }
     }
+    impl Default for UploadChunk {
+        fn default() -> Self {
+            super::UploadChunk::default().into()
+        }
+    }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub struct UploadSummary {
         pub upload_id: String,
@@ -149,6 +164,11 @@ pub(super) mod __xidl_out_HttpClientStreamReportService {
                 upload_id: value.upload_id,
                 accepted: value.accepted,
             }
+        }
+    }
+    impl Default for UploadSummary {
+        fn default() -> Self {
+            super::UploadSummary::default().into()
         }
     }
 }

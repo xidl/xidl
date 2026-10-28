@@ -8,7 +8,15 @@ use xidl_parser::hir;
 impl WireDecoderBuilder<'_> {
     pub(super) fn schema(&mut self, version: &str, value: &TypeUse) -> IdlcResult<ZodSchema> {
         if value.representation == ValueRepresentation::ByteBuffer {
-            return Ok(ZodSchema::Primitive("instanceof(Uint8Array)".into()));
+            return Ok(ZodSchema::ByteBuffer {
+                maximum: match &value.ty {
+                    hir::TypeSpec::SequenceType(sequence) => sequence
+                        .len
+                        .as_ref()
+                        .and_then(|bound| hir::const_expr_to_i64(&bound.0)),
+                    _ => None,
+                },
+            });
         }
         let mut ty = value.ty.clone();
         self.normalize(&mut ty, version, &value.scope)?;

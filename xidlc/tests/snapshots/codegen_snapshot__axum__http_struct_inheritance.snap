@@ -70,6 +70,11 @@ pub(super) mod __xidl_in_Media {
             }
         }
     }
+    impl Default for Participant {
+        fn default() -> Self {
+            super::Participant::default().into()
+        }
+    }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub struct UserRef {
         #[serde(rename = "userId")]
@@ -94,6 +99,11 @@ pub(super) mod __xidl_in_Media {
                 user_id: value.user_id,
                 avatar_url: value.avatar_url,
             }
+        }
+    }
+    impl Default for UserRef {
+        fn default() -> Self {
+            super::UserRef::default().into()
         }
     }
 }
@@ -130,6 +140,11 @@ pub(super) mod __xidl_out_Media {
             }
         }
     }
+    impl Default for Participant {
+        fn default() -> Self {
+            super::Participant::default().into()
+        }
+    }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub struct UserRef {
         #[serde(rename = "userId")]
@@ -154,6 +169,11 @@ pub(super) mod __xidl_out_Media {
                 user_id: value.user_id,
                 avatar_url: value.avatar_url,
             }
+        }
+    }
+    impl Default for UserRef {
+        fn default() -> Self {
+            super::UserRef::default().into()
         }
     }
 }
