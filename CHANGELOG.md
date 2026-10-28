@@ -1,5 +1,46 @@
 # Changelog
 
+## [0.107.0](https://github.com/xidl/xidl/compare/v0.106.0...v0.107.0) (2026-10-28)
+
+
+### Features
+
+* **deprecated:** widen [@deprecated](https://github.com/deprecated) to modules, types, members, enumerators and parameters ([0d7a40b](https://github.com/xidl/xidl/commit/0d7a40b72f694176f5337d91145ba2b0fa59e08d))
+* **versioning:** decide every removed member from stored values ([e622836](https://github.com/xidl/xidl/commit/e62283635acef48fd1234888d1e5e16a2cbf9fbf))
+* **versioning:** derive update adapters from paired member retirement ([c2f7ff3](https://github.com/xidl/xidl/commit/c2f7ff313cdad216eb6a4a9213379e52f94ba55a))
+* **versioning:** merge stored bags with first-defined-wins semantics ([fe41f6a](https://github.com/xidl/xidl/commit/fe41f6aa1a38502602471f3a3b4a4e6902dfbab5))
+* **versioning:** project inherited members through typed adapters ([e92e348](https://github.com/xidl/xidl/commit/e92e348b245a212949c78b0e766945f5757e8477))
+* **versioning:** require explicit implied values for defaulted additions ([8c55985](https://github.com/xidl/xidl/commit/8c559855ac9348ad12d90e5acd8a79142a6f7742))
+
+
+### Bug Fixes
+
+* **ci:** install libxml2 and pin ubuntu-24.04 for bdd test runners ([3073c50](https://github.com/xidl/xidl/commit/3073c50f8bb9bb5b3dc1f2aa068f2db6ff245284))
+* **go-rest:** preserve qualified HTTP model names ([98cdc06](https://github.com/xidl/xidl/commit/98cdc06f8b456003e4b9d9a06ce344b06ba2e653))
+* **http:** preserve collection wire occurrences ([037c6ed](https://github.com/xidl/xidl/commit/037c6ed863d8f327106bb12346da2221e39b89a4))
+* **http:** preserve typedef array dimensions ([6c6e114](https://github.com/xidl/xidl/commit/6c6e1142a73a404407b5f41c27b8a8028e554a3f))
+* **http:** resolve typedef collection bindings ([1b80176](https://github.com/xidl/xidl/commit/1b80176487016634b21c786b662ce8947adf93d6))
+* **inheritance:** preserve declaring scope in inherited references ([35fa7fc](https://github.com/xidl/xidl/commit/35fa7fc1ace9affdfa756bea26b0fcdbe42f1b90))
+* **parser:** reject unqualified union enumerator labels ([2483eed](https://github.com/xidl/xidl/commit/2483eedd25826d85dfd73c5d03b2c8e5250bf852))
+* **parser:** resolve constant array dimensions in shared HIR ([f3ff4b4](https://github.com/xidl/xidl/commit/f3ff4b4af1e0fe1c7dc28dca8aa2aef6aa5cc6ba))
+* **rust-axum:** emit lint-clean HTTP adapters ([0f693bb](https://github.com/xidl/xidl/commit/0f693bb2e48ece42f1510b89002c9686badb94ff))
+* **rust-axum:** give the stored-needs table aliases static lifetimes ([264456b](https://github.com/xidl/xidl/commit/264456be47d3185aa800a9df7bd1382917db9d1f))
+* **rust-axum:** preserve declared SDK models across versions ([2eb8744](https://github.com/xidl/xidl/commit/2eb87448141ddbdad77df017200ae31effaf1b8d))
+* **rust-axum:** preserve optional response cookies ([053ff45](https://github.com/xidl/xidl/commit/053ff45c906151600053c4f04e33c98677d9678d))
+* **rust-axum:** preserve recursive transport member layouts ([e7a64ec](https://github.com/xidl/xidl/commit/e7a64ec87579b118941fe34a7aefbfddf5014fc5))
+* **rust-axum:** preserve zero-occurrence query sequences ([7167494](https://github.com/xidl/xidl/commit/7167494eab56482914722c81b7349d7ea80a146f))
+* **rust-axum:** reject absent required HTTP scalars ([e1019f7](https://github.com/xidl/xidl/commit/e1019f7cc5be610bef6ad5c939b9f6e18e32cc93))
+* **rust-axum:** render named wire decoders directly ([3bf85f3](https://github.com/xidl/xidl/commit/3bf85f33efb3ce2223a3c53e21fb30191bfeaedd))
+* **test:** regenerate rust-axum versioned_adapters_business baseline with v0.0.1-snapshot ([7c8512a](https://github.com/xidl/xidl/commit/7c8512ac1a7e07fa072e5f1542b5c027e89d0569))
+* **typescript-rest:** retain imported models and validators ([311a0d4](https://github.com/xidl/xidl/commit/311a0d43b4160b4a00d02ba1604e896df1dcb320))
+* **typescript:** decode JSON positions strictly and coerce only text transports ([d60703c](https://github.com/xidl/xidl/commit/d60703cb47f70b7dbb3cdb51eb97e8ac9a628b85)), closes [#388](https://github.com/xidl/xidl/issues/388)
+* **typescript:** preserve declared fixed-array dimension order ([4da33ba](https://github.com/xidl/xidl/commit/4da33ba54bd40fdea9597c2772e5196e70d7e29a))
+* **typescript:** reject minus signs in unsigned text ([89c3fc6](https://github.com/xidl/xidl/commit/89c3fc67faa98ee44307e17f6ad41b63de4f0ba9))
+* **versioning:** enforce strict TypeScript hook inputs ([e605ae1](https://github.com/xidl/xidl/commit/e605ae1ef391de6ea4004c5069732dcdcf6857dc))
+* **versioning:** locate container-element refusals with the member path ([f1f6b5d](https://github.com/xidl/xidl/commit/f1f6b5d462f25f15325aeece911d492b5a42204c))
+* **versioning:** preserve root reference identity across versions ([7035ec0](https://github.com/xidl/xidl/commit/7035ec0fab72704525e65300647837527f678a18))
+* **versioning:** stop locating optional members whose hook names the member ([df23d34](https://github.com/xidl/xidl/commit/df23d34808eded46b113502d39da9a1d46bff16e))
+
 ## [0.106.0](https://github.com/xidl/xidl/compare/v0.105.2...v0.106.0) (2026-10-22)
 
 
