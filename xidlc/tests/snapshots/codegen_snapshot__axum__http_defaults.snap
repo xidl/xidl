@@ -107,6 +107,7 @@ pub(super) mod __xidl_in_HttpDefaultsService {
         }
     }
     impl Default for CreateUserRequest {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::CreateUserRequest::default().into()
         }
@@ -145,6 +146,7 @@ pub(super) mod __xidl_out_HttpDefaultsService {
         }
     }
     impl Default for CreateUserRequest {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::CreateUserRequest::default().into()
         }

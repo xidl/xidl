@@ -94,6 +94,7 @@ pub mod test {
             }
         }
         impl Default for test_Status {
+            #[allow(unreachable_code)]
             fn default() -> Self {
                 super::Status::default().into()
             }
@@ -126,6 +127,7 @@ pub mod test {
             }
         }
         impl Default for test_User {
+            #[allow(unreachable_code)]
             fn default() -> Self {
                 super::User::default().into()
             }
@@ -165,6 +167,7 @@ pub mod test {
             }
         }
         impl Default for test_Status {
+            #[allow(unreachable_code)]
             fn default() -> Self {
                 super::Status::default().into()
             }
@@ -197,6 +200,7 @@ pub mod test {
             }
         }
         impl Default for test_User {
+            #[allow(unreachable_code)]
             fn default() -> Self {
                 super::User::default().into()
             }

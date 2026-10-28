@@ -80,6 +80,7 @@ pub(super) mod {{ module.name }} {
     {% endif %}
 
         impl Default for {{ item.transport_ident }} {
+            #[allow(unreachable_code)]
             fn default() -> Self {
                 {{ item.public_path }}::default().into()
             }

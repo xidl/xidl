@@ -216,6 +216,7 @@ pub(super) mod __xidl_out_Files {
         }
     }
     impl Default for FileMeta {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::FileMeta::default().into()
         }
@@ -244,6 +245,7 @@ pub(super) mod __xidl_out_Files {
         }
     }
     impl Default for NotFound {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::NotFound::default().into()
         }
@@ -483,7 +485,7 @@ where
         let mut resp = match svc.get_file(path).await {
             Ok(resp_value) => {
                 let etag_wire: String = {
-                    let etag = resp_value.etag.clone();
+                    let etag = ::core::clone::Clone::clone(&resp_value.etag);
                     etag
                 };
                 let etag_header_value: String = {

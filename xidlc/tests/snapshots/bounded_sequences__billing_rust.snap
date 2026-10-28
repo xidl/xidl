@@ -330,6 +330,7 @@ pub(super) mod __xidl_in_Batches {
         }
     }
     impl Default for billing_Batch {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::billing::Batch::default().into()
         }
@@ -351,6 +352,7 @@ pub(super) mod __xidl_in_Batches {
         }
     }
     impl Default for billing_Total {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::billing::Total::default().into()
         }
@@ -421,6 +423,7 @@ pub(super) mod __xidl_out_Batches {
         }
     }
     impl Default for billing_Batch {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::billing::Batch::default().into()
         }
@@ -484,6 +487,7 @@ pub(super) mod __xidl_out_Batches {
         }
     }
     impl Default for billing_BatchRejected {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::billing::BatchRejected::default().into()
         }
@@ -505,6 +509,7 @@ pub(super) mod __xidl_out_Batches {
         }
     }
     impl Default for billing_Total {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::billing::Total::default().into()
         }
@@ -534,6 +539,7 @@ pub(super) mod __xidl_out_Batches {
         }
     }
     impl Default for codes_RetryState {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::codes::RetryState::default().into()
         }
@@ -1462,7 +1468,7 @@ where
                     String,
                     ::xidl_rust_axum::SequenceWire<i32, 2>,
                 > = {
-                    let value = resp_value.value.clone();
+                    let value = ::core::clone::Clone::clone(&resp_value.value);
                     value
                         .into_iter()
                         .map(|(key, value)| (key, value.into_iter().collect()))
@@ -1522,7 +1528,7 @@ where
         let mut resp = match svc.exported(invalid).await {
             Ok(resp_value) => {
                 let ids_wire: ::xidl_rust_axum::SequenceWire<i32, 2> = {
-                    let ids = resp_value.ids.clone();
+                    let ids = ::core::clone::Clone::clone(&resp_value.ids);
                     ids.into_iter().collect()
                 };
                 ::xidl_rust_axum::SequenceLimit::check((ids_wire).len(), 2)
@@ -1531,7 +1537,7 @@ where
                         error.to_string(),
                     ))?;
                 let tokens_wire: ::xidl_rust_axum::SequenceWire<i32, 2> = {
-                    let tokens = resp_value.tokens.clone();
+                    let tokens = ::core::clone::Clone::clone(&resp_value.tokens);
                     tokens.into_iter().collect()
                 };
                 ::xidl_rust_axum::SequenceLimit::check((tokens_wire).len(), 2)

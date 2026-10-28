@@ -40,3 +40,15 @@ fn nested_bounds_hold_in_both_directions() {
     assert_eq!(error.maximum, 2);
     assert!(error.to_string().contains("sequence length 3"));
 }
+
+#[test]
+fn wire_collections_preserve_element_order_for_projection_and_empty_defaults() {
+    let wire = SequenceWire::<_, 3>::try_from(vec!["invoice-b", "invoice-a"]).unwrap();
+    let borrowed = (&wire).into_iter().copied().collect::<Vec<_>>();
+    let owned = wire.into_iter().collect::<Vec<_>>();
+    assert_eq!(borrowed, ["invoice-b", "invoice-a"]);
+    assert_eq!(owned, borrowed);
+    let empty = SequenceWire::<u8, 0>::default();
+    assert_eq!(serde_json::to_string(&empty).unwrap(), "[]");
+    assert!(SequenceWire::<_, 0>::try_from(vec![1]).is_err());
+}

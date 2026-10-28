@@ -62,6 +62,7 @@ pub(super) mod __xidl_in_HttpStreamSseBindingsService {
         }
     }
     impl Default for ProjectEvent {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::ProjectEvent::default().into()
         }
@@ -100,6 +101,7 @@ pub(super) mod __xidl_out_HttpStreamSseBindingsService {
         }
     }
     impl Default for ProjectEvent {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::ProjectEvent::default().into()
         }

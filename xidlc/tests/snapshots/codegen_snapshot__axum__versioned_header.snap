@@ -71,6 +71,7 @@ pub mod v1 {
             }
         }
         impl Default for v1_Item {
+            #[allow(unreachable_code)]
             fn default() -> Self {
                 super::Item::default().into()
             }
@@ -102,6 +103,7 @@ pub mod v1 {
             }
         }
         impl Default for v1_Item {
+            #[allow(unreachable_code)]
             fn default() -> Self {
                 super::Item::default().into()
             }
@@ -581,6 +583,7 @@ pub mod v2 {
             }
         }
         impl Default for v2_Item {
+            #[allow(unreachable_code)]
             fn default() -> Self {
                 super::Item::default().into()
             }
@@ -612,6 +615,7 @@ pub mod v2 {
             }
         }
         impl Default for v2_Item {
+            #[allow(unreachable_code)]
             fn default() -> Self {
                 super::Item::default().into()
             }

@@ -125,6 +125,7 @@ pub(super) mod __xidl_in_CollectionInputs {
         }
     }
     impl Default for Collections {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::Collections::default().into()
         }
@@ -160,6 +161,7 @@ pub(super) mod __xidl_in_CollectionInputs {
         }
     }
     impl Default for Numbers {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::Numbers::default().into()
         }
@@ -182,6 +184,7 @@ pub(super) mod __xidl_in_CollectionInputs {
         }
     }
     impl Default for Search {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::Search::default().into()
         }
@@ -208,6 +211,7 @@ pub(super) mod __xidl_in_CollectionInputs {
         }
     }
     impl Default for StreamValues {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::StreamValues::default().into()
         }
@@ -253,6 +257,7 @@ pub(super) mod __xidl_out_CollectionInputs {
         }
     }
     impl Default for Collections {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::Collections::default().into()
         }
@@ -288,6 +293,7 @@ pub(super) mod __xidl_out_CollectionInputs {
         }
     }
     impl Default for Numbers {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::Numbers::default().into()
         }
@@ -310,6 +316,7 @@ pub(super) mod __xidl_out_CollectionInputs {
         }
     }
     impl Default for Search {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::Search::default().into()
         }
@@ -336,6 +343,7 @@ pub(super) mod __xidl_out_CollectionInputs {
         }
     }
     impl Default for StreamValues {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::StreamValues::default().into()
         }

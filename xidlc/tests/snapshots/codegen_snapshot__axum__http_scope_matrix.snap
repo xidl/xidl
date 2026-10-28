@@ -98,6 +98,7 @@ pub(super) mod __xidl_in_HttpScopeMatrixService {
         }
     }
     impl Default for MatrixBody {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::MatrixBody::default().into()
         }
@@ -140,6 +141,7 @@ pub(super) mod __xidl_out_HttpScopeMatrixService {
         }
     }
     impl Default for MatrixBody {
+        #[allow(unreachable_code)]
         fn default() -> Self {
             super::MatrixBody::default().into()
         }

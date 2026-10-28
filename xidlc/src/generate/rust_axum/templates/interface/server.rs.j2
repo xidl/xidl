@@ -255,7 +255,7 @@ T: {{ ident }} + Send + Sync + 'static,
                                     {% for param in method.response_header_params + method.response_cookie_params %}
                                         {% set sequence_value = "resp_value." ~ param.name if method.response_struct else "resp_value" %}
                                         let {{ param.name }}_wire: {{ param.out_ty }} = {
-                                            let {{ param.name }} = {{ sequence_value }}.clone();
+                                            let {{ param.name }} = ::core::clone::Clone::clone(&{{ sequence_value }});
                                             {{ param.out_expr }}
                                         };
                                         {{ check_sequence(param.name ~ "_wire", param.maximum, 500, param.optional) }}
