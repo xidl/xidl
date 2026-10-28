@@ -121,6 +121,11 @@ pub mod graph {
                 }
             }
         }
+        impl Default for graph_Graph {
+            fn default() -> Self {
+                super::Graph::default().into()
+            }
+        }
         #[derive(::serde::Serialize, ::serde::Deserialize)]
         pub struct graph_Left {
             #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -140,6 +145,11 @@ pub mod graph {
                 Self {
                     next: value.next.map(|value| Box::new((*value).into())),
                 }
+            }
+        }
+        impl Default for graph_Left {
+            fn default() -> Self {
+                super::Left::default().into()
             }
         }
         #[derive(::serde::Serialize, ::serde::Deserialize)]
@@ -206,6 +216,11 @@ pub mod graph {
                 }
             }
         }
+        impl Default for graph_Node {
+            fn default() -> Self {
+                super::Node::default().into()
+            }
+        }
         #[derive(::serde::Serialize, ::serde::Deserialize)]
         pub struct graph_Right {
             #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -225,6 +240,11 @@ pub mod graph {
                 Self {
                     next: value.next.map(|value| Box::new((*value).into())),
                 }
+            }
+        }
+        impl Default for graph_Right {
+            fn default() -> Self {
+                super::Right::default().into()
             }
         }
     }
@@ -290,6 +310,11 @@ pub mod graph {
                 }
             }
         }
+        impl Default for graph_Graph {
+            fn default() -> Self {
+                super::Graph::default().into()
+            }
+        }
         #[derive(::serde::Serialize, ::serde::Deserialize)]
         pub struct graph_Left {
             #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -309,6 +334,11 @@ pub mod graph {
                 Self {
                     next: value.next.map(|value| Box::new((*value).into())),
                 }
+            }
+        }
+        impl Default for graph_Left {
+            fn default() -> Self {
+                super::Left::default().into()
             }
         }
         #[derive(::serde::Serialize, ::serde::Deserialize)]
@@ -375,6 +405,11 @@ pub mod graph {
                 }
             }
         }
+        impl Default for graph_Node {
+            fn default() -> Self {
+                super::Node::default().into()
+            }
+        }
         #[derive(::serde::Serialize, ::serde::Deserialize)]
         pub struct graph_Right {
             #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -394,6 +429,11 @@ pub mod graph {
                 Self {
                     next: value.next.map(|value| Box::new((*value).into())),
                 }
+            }
+        }
+        impl Default for graph_Right {
+            fn default() -> Self {
+                super::Right::default().into()
             }
         }
     }
