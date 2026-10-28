@@ -1,4 +1,4 @@
-@bdd_rest-versioning
+@bdd_rest-versioning-apps
 Feature: versioned event splits
   One broad event kind splits into two precise ones. Old subscribers keep
   receiving the old name for both halves, each push keeps its own id, and an

@@ -1,4 +1,4 @@
-@bdd_rest-versioning
+@bdd_rest-versioning-http
 Feature: Required HTTP inputs never acquire fabricated scalar defaults
 
   Scenario Outline: generated servers reject absent inputs before dispatch

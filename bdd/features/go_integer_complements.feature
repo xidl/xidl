@@ -1,4 +1,4 @@
-@bdd_rest-versioning
+@bdd_rest-versioning-core
 Feature: Imported integer masks preserve their values in Go
   A shared IDL fragment declares masks in a dependency unit.
   Its importer combines complements without changing the declared integer widths.

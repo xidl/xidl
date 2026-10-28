@@ -1,4 +1,4 @@
-@bdd_rest-versioning
+@bdd_rest-versioning-http
 Feature: Collection wire occurrences agree with SDKs and OpenAPI
 
   Named query, header and cookie collections use the same wire encoding as

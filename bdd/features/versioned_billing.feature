@@ -1,4 +1,4 @@
-@bdd_rest-versioning
+@bdd_rest-versioning-apps
 Feature: Independently versioned SDKs share one authoritative billing ledger
 
   This reduced contract is inspired by Stripe's partial invoice payments change.

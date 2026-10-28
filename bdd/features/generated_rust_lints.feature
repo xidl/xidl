@@ -1,4 +1,4 @@
-@bdd_rest-versioning
+@bdd_rest-versioning-core
 Feature: Emitted Rust HTTP contracts compile without lint suppressions
 
   Scenario: ordinary required and optional HTTP parameters

@@ -1,4 +1,4 @@
-@bdd_rest-versioning
+@bdd_rest-versioning-apps
 Feature: versioned transform shapes
   One profile contract exercising every change shape from the walkthrough's
   catalogue: a flat string becoming a structured route whose value set grows
