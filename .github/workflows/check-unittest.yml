@@ -155,4 +155,4 @@ jobs:
         run: |
           cargo check -p xidl-rust-axum --target wasm32-unknown-unknown --no-default-features --features client
           cargo check -p xidl-rust-axum --target wasm32-unknown-unknown --no-default-features --features router
-          bash ci/check-router-wasm.sh
+          bash scripts/check-router-wasm.sh

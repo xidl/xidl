@@ -19,7 +19,7 @@ jobs:
         run: |
           if [ "$BASE_REF" != "master" ]; then
             echo "::error::Pull requests MUST target 'master'. Target branch '$BASE_REF' is forbidden."
-            gh pr comment "$PR_NUMBER" --body "❌ **Pull Request Rejected**: All pull requests must target \`master\` as specified in \`AGENTS.md\` and \`agents/pr.md\`. Target branch \`$BASE_REF\` is not allowed." || true
+            gh pr comment "$PR_NUMBER" --body "❌ **Pull Request Rejected**: All pull requests must target \`master\` as specified in \`AGENTS.md\`. Target branch \`$BASE_REF\` is not allowed." || true
             gh pr close "$PR_NUMBER" || true
             exit 1
           fi
