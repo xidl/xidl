@@ -1,5 +1,8 @@
 //! Structural traversal of references, preserving declarations and annotations.
 
+#[cfg(test)]
+mod tests;
+
 use super::*;
 
 /// Visits scoped references without treating declaration identifiers as uses.
