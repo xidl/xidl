@@ -233,7 +233,7 @@ impl Specification {
         Ok(spec)
     }
 
-    /// Evaluates selected source constants before interface expansion.
+    /// Resolves selected integer expression types before interface expansion.
     fn finalize_projection(
         mut spec: Self,
         expand: bool,

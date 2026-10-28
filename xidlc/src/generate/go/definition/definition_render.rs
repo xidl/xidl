@@ -18,7 +18,10 @@ pub(super) fn render_const(
 ) -> IdlcResult<()> {
     let name = go_export_name(prefix, &def.ident);
     let ty = ctx.const_type(&def.ty);
-    let value = ctx.const_expr(&def.value)?;
+    let value = match ctx.integer_constant(def, &name)? {
+        Some(value) => value,
+        None => ctx.const_expr(&def.value)?,
+    };
     ctx.push_template("const.go.j2", &ConstTemplate { name, ty, value })
 }
 

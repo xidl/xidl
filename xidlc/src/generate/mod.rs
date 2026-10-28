@@ -9,6 +9,8 @@ pub mod go;
 #[cfg(feature = "gen-go-rest")]
 pub mod go_rest;
 pub mod hir_gen;
+#[cfg(any(feature = "gen-go", feature = "gen-rust"))]
+mod integer_expr;
 #[cfg(feature = "gen-openapi")]
 pub mod openapi;
 #[cfg(feature = "gen-openrpc")]

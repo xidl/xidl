@@ -1,4 +1,4 @@
-use super::{integer, project, values};
+use super::{integer, plans, project, values};
 use crate::hir::{FsIncludeResolver, ParserProperties, Specification};
 use crate::semantic::{INTEGER_IMPORTS_PROPERTY, IntegerExports, IntegerImports};
 use crate::versioning::VersioningRecord;
@@ -63,10 +63,11 @@ fn imported_values_and_aliases_keep_their_declaring_version_and_scope() {
         "#,
         properties(&imports),
     );
-    let values = values(&spec);
-    assert_eq!(values["LOCAL"], integer(3));
-    assert_eq!(values["ROOTED"], integer(2));
-    assert_eq!(values["WIDE"], integer(4_294_967_296));
+    let plans = plans(&spec);
+    assert!(plans["LOCAL"].to_string().contains("4294967292"));
+    assert!(plans["ROOTED"].to_string().contains("4294967293"));
+    assert!(plans["WIDE"].to_string().contains("Binary"));
+    assert!(values(&spec)["WIDE"].get("BinaryExpr").is_some());
     let crate::hir::Definition::TypeDcl(crate::hir::TypeDcl::TypedefDcl(alias)) =
         spec.0.last().unwrap()
     else {
@@ -87,10 +88,9 @@ fn transitive_constants_use_only_the_imports_declared_by_their_owner() {
     imports.bind("base", &base, []);
     imports.bind("middle", &middle, ["base".into()]);
     let source = "const unsigned long long RESULT = middle::LIMIT + 1;";
-    assert_eq!(
-        values(&project(source, properties(&imports)))["RESULT"],
-        integer(4_294_967_297)
-    );
+    let planned = project(source, properties(&imports));
+    assert!(plans(&planned)["RESULT"].to_string().contains("4294967295"));
+    assert!(values(&planned)["RESULT"].get("BinaryExpr").is_some());
 
     imports.bind("middle", &middle, []);
     let raw = project(source, ParserProperties::new());
@@ -110,8 +110,8 @@ fn versions_do_not_share_cached_constants_and_unselected_values_are_not_evaluate
         "const long OLD = ~dep::v1::policy::MASK; const long NEW = ~dep::v2::policy::MASK;",
         properties(&imports),
     );
-    assert_eq!(values(&spec)["OLD"], integer(2));
-    assert_eq!(values(&spec)["NEW"], integer(3));
+    assert!(plans(&spec)["OLD"].to_string().contains("4294967293"));
+    assert!(plans(&spec)["NEW"].to_string().contains("4294967292"));
 
     let changed = source.replace("0xfffffffc", "1 / 0");
     imports.bind("dep", &exports(&changed), []);
@@ -119,22 +119,12 @@ fn versions_do_not_share_cached_constants_and_unselected_values_are_not_evaluate
         "const long OLD = ~dep::v1::policy::MASK;",
         properties(&imports),
     );
-    assert_eq!(values(&old)["OLD"], integer(2));
+    assert_eq!(plans(&old)["OLD"], plans(&spec)["OLD"]);
 }
 
 #[test]
-fn imported_cycles_and_arithmetic_errors_name_the_failing_contract() {
+fn imported_constant_and_alias_cycles_name_the_failing_contract() {
     for (dependency, consumer, expected) in [
-        (
-            "const unsigned long long LIMIT = 4294967296;",
-            "const unsigned long BROKEN = dep::LIMIT;",
-            &["BROKEN", "32-bit unsigned"][..],
-        ),
-        (
-            "const unsigned long LIMIT = 0xffffffff;",
-            "const unsigned long BROKEN = dep::LIMIT + 1;",
-            &["BROKEN", "32-bit unsigned"][..],
-        ),
         (
             "const long LEFT = RIGHT; const long RIGHT = LEFT;",
             "const long BROKEN = dep::LEFT;",

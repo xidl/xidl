@@ -1,0 +1,12 @@
+{
+    {% for step in steps %}
+    {% if step.shift %}
+    assert!({{ step.shift }} >= 0 && {{ step.shift }} < 64, "IDL integer constant {{ name }} has an invalid shift");
+    {% endif %}
+    let {{ step.name }}: i128 = {{ step.value }};
+    {% if step.check %}
+    assert!({{ step.name }} >= {{ step.minimum }}_i128 && {{ step.name }} <= {{ step.maximum }}_i128, "IDL integer constant {{ name }} exceeds its range");
+    {% endif %}
+    {% endfor %}
+    {{ result }} as {{ ty }}
+}

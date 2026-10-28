@@ -9,7 +9,10 @@ types.go
 
 package types
 
-const Answer int32 = 42
+const _xidl_Answer_0 = 42
+const _xidl_Answer_1 = _xidl_Answer_0
+const _ int32 = _xidl_Answer_1
+const Answer int32 = _xidl_Answer_1
 
 type NameSeq = []string
 

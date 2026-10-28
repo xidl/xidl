@@ -1,4 +1,5 @@
 mod definition;
+mod integer;
 mod packages;
 mod render;
 mod spec;

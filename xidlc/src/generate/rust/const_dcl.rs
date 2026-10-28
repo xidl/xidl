@@ -7,7 +7,9 @@ use xidl_parser::hir;
 impl RustRender for hir::ConstDcl {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
         let ty = rust_const_type(&self.ty);
-        let value = render_const(&self.value);
+        let value = renderer
+            .integer_constant(self)?
+            .unwrap_or_else(|| render_const(&self.value));
         let ctx = renderer.with_ident(
             json!({
                 "ty": ty,

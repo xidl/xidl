@@ -6,28 +6,100 @@ expression: api
 
 package api
 
-const REMAINING32 uint32 = 0
+const _xidl_REMAINING32_0 = 4294967295
+const _xidl_REMAINING32_1 = ((^_xidl_REMAINING32_0) & 4294967295)
+const _ uint32 = _xidl_REMAINING32_1
+const REMAINING32 uint32 = _xidl_REMAINING32_1
 
-const REMAINING64 uint64 = 0
+const _xidl_REMAINING64_0 = 0
+const _xidl_REMAINING64_1 = ((^_xidl_REMAINING64_0) & 18446744073709551615)
+const _ uint64 = _xidl_REMAINING64_1
+const _xidl_REMAINING64_2 = ((^_xidl_REMAINING64_1) & 18446744073709551615)
+const _ uint64 = _xidl_REMAINING64_2
+const REMAINING64 uint64 = _xidl_REMAINING64_2
 
-const MAXIMUM32 uint32 = 4294967295
+const _xidl_MAXIMUM32_0 = 0
+const _xidl_MAXIMUM32_1 = ((^_xidl_MAXIMUM32_0) & 4294967295)
+const _ uint32 = _xidl_MAXIMUM32_1
+const MAXIMUM32 uint32 = _xidl_MAXIMUM32_1
 
-const MAXIMUM64 uint64 = 18446744073709551615
+const _xidl_MAXIMUM64_0 = 0
+const _xidl_MAXIMUM64_1 = ((^_xidl_MAXIMUM64_0) & 18446744073709551615)
+const _ uint64 = _xidl_MAXIMUM64_1
+const MAXIMUM64 uint64 = _xidl_MAXIMUM64_1
 
-const COMPLEMENT32 int32 = 1
+const _xidl_COMPLEMENT32_0 = 2
+const _xidl_COMPLEMENT32_1 = (-_xidl_COMPLEMENT32_0)
+const _ int32 = _xidl_COMPLEMENT32_1
+const _xidl_COMPLEMENT32_2 = ((((^_xidl_COMPLEMENT32_1) & 4294967295) ^ 2147483648) - 2147483648)
+const _ int32 = _xidl_COMPLEMENT32_2
+const COMPLEMENT32 int32 = _xidl_COMPLEMENT32_2
 
-const COMPLEMENT64 int64 = 1
+const _xidl_COMPLEMENT64_0 = 2
+const _xidl_COMPLEMENT64_1 = (-_xidl_COMPLEMENT64_0)
+const _ int64 = _xidl_COMPLEMENT64_1
+const _xidl_COMPLEMENT64_2 = ((((^_xidl_COMPLEMENT64_1) & 18446744073709551615) ^ 9223372036854775808) - 9223372036854775808)
+const _ int64 = _xidl_COMPLEMENT64_2
+const COMPLEMENT64 int64 = _xidl_COMPLEMENT64_2
 
-const MaximumSigned32 int32 = 2147483647
+const _xidl_MaximumSigned32_0 = 2147483648
+const _xidl_MaximumSigned32_1 = (-_xidl_MaximumSigned32_0)
+const _ int32 = _xidl_MaximumSigned32_1
+const _xidl_MaximumSigned32_2 = ((((^_xidl_MaximumSigned32_1) & 4294967295) ^ 2147483648) - 2147483648)
+const _ int32 = _xidl_MaximumSigned32_2
+const MaximumSigned32 int32 = _xidl_MaximumSigned32_2
 
-const MaximumSigned64 int64 = 9223372036854775807
+const _xidl_MaximumSigned64_0 = 9223372036854775808
+const _xidl_MaximumSigned64_1 = (-_xidl_MaximumSigned64_0)
+const _ int64 = _xidl_MaximumSigned64_1
+const _xidl_MaximumSigned64_2 = ((((^_xidl_MaximumSigned64_1) & 18446744073709551615) ^ 9223372036854775808) - 9223372036854775808)
+const _ int64 = _xidl_MaximumSigned64_2
+const MaximumSigned64 int64 = _xidl_MaximumSigned64_2
 
-const RESTORED int64 = (-2)
+const _xidl_RESTORED_0 = 2
+const _xidl_RESTORED_1 = (-_xidl_RESTORED_0)
+const _ int64 = _xidl_RESTORED_1
+const _xidl_RESTORED_2 = ((((^_xidl_RESTORED_1) & 18446744073709551615) ^ 9223372036854775808) - 9223372036854775808)
+const _ int64 = _xidl_RESTORED_2
+const _xidl_RESTORED_3 = ((((^_xidl_RESTORED_2) & 18446744073709551615) ^ 9223372036854775808) - 9223372036854775808)
+const _ int64 = _xidl_RESTORED_3
+const RESTORED int64 = _xidl_RESTORED_3
 
-const ALLOWED uint32 = 2
+const _xidl_ALLOWED_0 = 4294967295
+const _xidl_ALLOWED_1 = ((^_xidl_ALLOWED_0) & 4294967295)
+const _ uint32 = _xidl_ALLOWED_1
+const _xidl_ALLOWED_2 = 2
+const _xidl_ALLOWED_3 = (+_xidl_ALLOWED_2)
+const _ uint32 = _xidl_ALLOWED_3
+const _xidl_ALLOWED_4 = (+_xidl_ALLOWED_3)
+const _ uint32 = _xidl_ALLOWED_4
+const _xidl_ALLOWED_5 = ((_xidl_ALLOWED_1 | _xidl_ALLOWED_4) & 4294967295)
+const _ uint32 = _xidl_ALLOWED_5
+const ALLOWED uint32 = _xidl_ALLOWED_5
 
-const DENIED uint32 = 4294967293
+const _xidl_DENIED_0 = 4294967295
+const _xidl_DENIED_1 = ((^_xidl_DENIED_0) & 4294967295)
+const _ uint32 = _xidl_DENIED_1
+const _xidl_DENIED_2 = 2
+const _xidl_DENIED_3 = (+_xidl_DENIED_2)
+const _ uint32 = _xidl_DENIED_3
+const _xidl_DENIED_4 = (+_xidl_DENIED_3)
+const _ uint32 = _xidl_DENIED_4
+const _xidl_DENIED_5 = ((_xidl_DENIED_1 | _xidl_DENIED_4) & 4294967295)
+const _ uint32 = _xidl_DENIED_5
+const _xidl_DENIED_6 = ((^_xidl_DENIED_5) & 4294967295)
+const _ uint32 = _xidl_DENIED_6
+const DENIED uint32 = _xidl_DENIED_6
 
-const REST uint64 = 4294967296
+const _xidl_REST_0 = 4294967295
+const _xidl_REST_1 = _xidl_REST_0
+const _xidl_REST_2 = 1
+const _xidl_REST_3 = (_xidl_REST_1 + _xidl_REST_2)
+const _ uint64 = _xidl_REST_3
+const REST uint64 = _xidl_REST_3
 
-const WIDE uint64 = 18446744069414584320
+const _xidl_WIDE_0 = 4294967295
+const _xidl_WIDE_1 = _xidl_WIDE_0
+const _xidl_WIDE_2 = ((^_xidl_WIDE_1) & 18446744073709551615)
+const _ uint64 = _xidl_WIDE_2
+const WIDE uint64 = _xidl_WIDE_2

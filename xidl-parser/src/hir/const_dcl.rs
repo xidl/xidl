@@ -7,6 +7,9 @@ pub struct ConstDcl {
     pub ty: ConstType,
     pub ident: String,
     pub value: ConstExpr,
+    /// Integer types and reference boundaries resolved after version selection.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub integer: Option<IntegerExpression>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -31,6 +34,7 @@ impl From<crate::typed_ast::ConstDcl> for ConstDcl {
             ty: value.ty.into(),
             ident: value.ident.0,
             value: value.value.into(),
+            integer: None,
         }
     }
 }

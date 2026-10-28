@@ -13,7 +13,7 @@ pub(in crate::semantic) struct IntegerConstants {
     local: IntegerIndex,
     imports: IntegerImports,
     values: BTreeMap<IntegerScope, Integer>,
-    active: BTreeSet<IntegerScope>,
+    pub(super) active: BTreeSet<IntegerScope>,
 }
 
 impl IntegerConstants {
@@ -30,7 +30,7 @@ impl IntegerConstants {
         }
     }
 
-    fn index(&self, scope: &IntegerScope) -> ParserResult<&IntegerIndex> {
+    pub(super) fn index(&self, scope: &IntegerScope) -> ParserResult<&IntegerIndex> {
         match &scope.origin {
             IntegerOrigin::Local => Ok(&self.local),
             _ => self.imports.index(&scope.origin).ok_or_else(|| {
@@ -67,24 +67,30 @@ impl IntegerConstants {
             .dimension()
     }
 
-    /// Keeps non-integral declarations intact and lowers integral values once.
+    /// Resolves integer types and references while retaining the source expression.
     pub(super) fn normalize_declaration(
         &mut self,
         constant: &mut hir::ConstDcl,
         scope: &[String],
     ) -> ParserResult<()> {
+        if constant.integer.is_some() {
+            return Ok(());
+        }
         let scope = IntegerScope::local(scope);
         if self.kind(&constant.ty, &scope)?.is_none()
             || !self.is_known(&constant.value, &scope, &mut BTreeSet::new())?
         {
             return Ok(());
         }
-        let value = self.constant(constant, &scope).map_err(|error| {
-            let mut declaration = scope.clone();
-            declaration.path.push(constant.ident.clone());
-            ParseError::Message(format!("constant '{}': {error}", declaration.qualified()))
-        })?;
-        constant.value = value.expression();
+        constant.integer = Some(
+            super::expressions::IntegerExpressions::resolve(self, constant, &scope).map_err(
+                |error| {
+                    let mut declaration = scope.clone();
+                    declaration.path.push(constant.ident.clone());
+                    ParseError::Message(format!("constant '{}': {error}", declaration.qualified()))
+                },
+            )?,
+        );
         Ok(())
     }
 
@@ -145,7 +151,11 @@ impl IntegerConstants {
         }
     }
 
-    fn resolve(&self, name: &hir::ScopedName, scope: &IntegerScope) -> ParserResult<IntegerScope> {
+    pub(super) fn resolve(
+        &self,
+        name: &hir::ScopedName,
+        scope: &IntegerScope,
+    ) -> ParserResult<IntegerScope> {
         self.binding(name, scope)?.ok_or_else(|| {
             ParseError::Message(format!(
                 "integer constant reference '{}' does not resolve",
@@ -154,7 +164,7 @@ impl IntegerConstants {
         })
     }
 
-    fn enter(&mut self, key: &IntegerScope) -> ParserResult<()> {
+    pub(super) fn enter(&mut self, key: &IntegerScope) -> ParserResult<()> {
         if self.active.insert(key.clone()) {
             Ok(())
         } else {
@@ -208,7 +218,7 @@ impl IntegerConstants {
             .assign(kind)
     }
 
-    fn kind(
+    pub(super) fn kind(
         &mut self,
         ty: &hir::ConstType,
         scope: &IntegerScope,

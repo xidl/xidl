@@ -1,38 +1,30 @@
-use super::{integer, project, values};
+use super::{plans, project, values};
 use crate::hir::{ParserProperties, Specification};
 
 #[test]
-fn constants_use_idl_precision_and_repeated_lowering_is_stable() {
-    for (source, expected) in [
-        ("const unsigned long VALUE = ~0xffffffff;", 0),
-        ("const long VALUE = ~0xffffffff;", 0),
-        ("const unsigned long VALUE = ~0;", 4_294_967_295),
-        (
-            "const unsigned long long VALUE = ~0;",
-            18_446_744_073_709_551_615,
-        ),
-        ("const long long VALUE = ~0xffffffffffffffff;", 0),
-        (
-            "const long long VALUE = -9223372036854775808;",
-            -9_223_372_036_854_775_808,
-        ),
-        ("const long VALUE = ~(-2);", 1),
-        ("const long VALUE = ~(-0);", -1),
-        ("const long VALUE = ~(-2147483648);", 2_147_483_647),
-        (
-            "const long long VALUE = ~(-9223372036854775808);",
-            9_223_372_036_854_775_807,
-        ),
-        ("const octet VALUE = ~0xffffff00;", 255),
-        ("const long VALUE = (-2 >> 31);", 1),
-        ("const unsigned long VALUE = +2;", 2),
+fn ordinary_constants_retain_expressions_and_resolving_types_is_stable() {
+    for source in [
+        "const unsigned long VALUE = ~0;",
+        "const long long VALUE = -9223372036854775808;",
+        "const long VALUE = ~(-0);",
+        "const long VALUE = (-2 >> 31);",
+        "const octet VALUE = ~0xffffff00;",
+        "const unsigned long VALUE = -1 + 2;",
+        "const long VALUE = 1 / 0;",
+        "const unsigned long VALUE = 0xffffffff + 1;",
     ] {
+        let typed = crate::parser::parser_text(source).unwrap();
+        let raw = Specification::from_typed_ast_with_path(typed, "constants.idl").unwrap();
         let mut spec = project(source, ParserProperties::new());
-        assert_eq!(values(&spec)["VALUE"], integer(expected), "{source}");
+        assert_eq!(
+            values(&spec),
+            values(&raw),
+            "ordinary arithmetic stays symbolic: {source}"
+        );
+        assert!(plans(&spec)["VALUE"].is_object());
         let before = serde_json::to_value(&spec).unwrap();
-        super::super::IntegerDeclarations::normalize(&mut spec, &Default::default())
-            .expect("repeat lowering");
-        assert_eq!(serde_json::to_value(&spec).unwrap(), before, "{source}");
+        super::super::IntegerDeclarations::normalize(&mut spec, &Default::default()).unwrap();
+        assert_eq!(serde_json::to_value(&spec).unwrap(), before);
     }
 }
 
@@ -46,17 +38,19 @@ fn aliases_and_interface_constants_resolve_in_their_declaration_scope() {
             const Word MASK = 0xfffffffc;
             const Word LOCAL = ~MASK;
             const Word ROOT = ~::MASK;
-            interface Limits {
-                const Word AVAILABLE = ~MASK;
-            };
+            interface Limits { const Word AVAILABLE = ~MASK; };
         };
         "#,
         ParserProperties::new(),
     );
-    let values = values(&spec);
-    assert_eq!(values["LOCAL"], integer(3));
-    assert_eq!(values["ROOT"], integer(2));
-    assert_eq!(values["AVAILABLE"], integer(3));
+    let plans = plans(&spec);
+    assert_eq!(plans["LOCAL"], plans["AVAILABLE"]);
+    assert!(plans["LOCAL"].to_string().contains("4294967292"));
+    assert!(plans["ROOT"].to_string().contains("4294967293"));
+    insta::assert_snapshot!(
+        "integer_expression_types",
+        serde_json::to_string_pretty(&plans).unwrap()
+    );
 }
 
 #[test]
@@ -84,18 +78,12 @@ fn non_integral_and_external_constants_retain_their_expressions() {
 }
 
 #[test]
-fn invalid_local_constants_name_the_declaration_and_integer_contract() {
+fn invalid_literal_types_and_cycles_name_the_integer_contract() {
     for (declaration, reason) in [
-        ("const short BROKEN = 65536;", "16-bit signed"),
-        ("const unsigned long BROKEN = -2;", "32-bit unsigned"),
-        ("const long BROKEN = ~0;", "32-bit signed"),
-        ("const long long BROKEN = ~0;", "64-bit signed"),
         (
             "const long BROKEN = 4294967296 - 4294967294;",
             "32-bit unsigned",
         ),
-        ("const long BROKEN = 1 / 0;", "invalid or overflows"),
-        ("const long BROKEN = 1 << 64;", "invalid or overflows"),
         (
             "const unsigned long long BROKEN = 18446744073709551616;",
             "integer constant literal",

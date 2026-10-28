@@ -2,45 +2,13 @@
 //! See OMG IDL 4.2 section 7.4.1.4.3: https://www.omg.org/spec/IDL/4.2/PDF.
 
 use crate::error::{ParseError, ParserResult};
-use crate::hir::{BinaryOperator, ConstExpr, IntegerLiteral, IntegerType, Literal, UnaryOperator};
+use crate::hir::{BinaryOperator, UnaryOperator};
 
-/// The declared range of an IDL integer constant.
-#[derive(Clone, Copy)]
-pub(super) struct IntegerKind {
-    bits: u32,
-    signed: bool,
-}
+pub(super) use crate::hir::IntegerKind;
 
 impl IntegerKind {
-    /// Retains signedness and width without depending on a target language.
-    pub(super) fn from_hir(kind: &IntegerType) -> Self {
-        let (bits, signed) = match kind {
-            IntegerType::I8 => (8, true),
-            IntegerType::I16 => (16, true),
-            IntegerType::I32 => (32, true),
-            IntegerType::I64 => (64, true),
-            IntegerType::Char | IntegerType::UChar | IntegerType::Octet | IntegerType::U8 => {
-                (8, false)
-            }
-            IntegerType::U16 => (16, false),
-            IntegerType::U32 => (32, false),
-            IntegerType::U64 => (64, false),
-        };
-        Self { bits, signed }
-    }
-
-    /// IDL constant expressions use at least long precision.
-    pub(super) fn precision(self) -> u32 {
-        self.bits.max(32)
-    }
-
     fn check(self, value: i128) -> ParserResult<Integer> {
-        let minimum = if self.signed {
-            -(1_i128 << (self.bits - 1))
-        } else {
-            0
-        };
-        let maximum = (1_i128 << (self.bits - u32::from(self.signed))) - 1;
+        let (minimum, maximum) = self.bounds();
         if !(minimum..=maximum).contains(&value) {
             return Err(ParseError::Message(format!(
                 "integer constant value {value} exceeds {}-bit {} integer range",
@@ -49,30 +17,6 @@ impl IntegerKind {
             )));
         }
         Ok(Integer { value, kind: self })
-    }
-
-    fn promoted(self) -> Self {
-        Self {
-            bits: self.precision(),
-            signed: self.signed || self.bits < 32,
-        }
-    }
-
-    fn common(self, other: Self) -> Self {
-        let left = self.promoted();
-        let right = other.promoted();
-        let bits = left.bits.max(right.bits);
-        let unsigned = [left, right]
-            .iter()
-            .any(|kind| kind.bits == bits && !kind.signed);
-        Self {
-            bits,
-            signed: !unsigned,
-        }
-    }
-
-    fn mask(self) -> i128 {
-        (1_i128 << self.bits) - 1
     }
 
     fn decode(self, value: i128) -> ParserResult<Integer> {
@@ -111,10 +55,7 @@ impl Integer {
 
     /// Uses the enclosing constant's precision for its subexpressions.
     pub(super) fn with_precision(mut self, precision: Option<u32>) -> ParserResult<Self> {
-        self.kind = self.kind.promoted();
-        if let Some(bits) = precision {
-            self.kind.bits = bits;
-        }
+        self.kind = self.kind.with_precision(precision);
         self.kind.check(self.value)
     }
 
@@ -171,16 +112,9 @@ impl Integer {
         kind.check(value)
     }
 
-    /// Retains the HIR distinction between a positive literal and unary minus.
-    pub(super) fn expression(self) -> ConstExpr {
-        let literal = ConstExpr::Literal(Literal::IntegerLiteral(IntegerLiteral(
-            self.value.abs().to_string(),
-        )));
-        if self.value < 0 {
-            ConstExpr::UnaryExpr(UnaryOperator::Sub, Box::new(literal))
-        } else {
-            literal
-        }
+    /// Exposes the literal type without evaluating any arithmetic expression.
+    pub(super) fn kind(self) -> IntegerKind {
+        self.kind
     }
 
     /// Keeps normalized dimensions readable by every existing HIR consumer.

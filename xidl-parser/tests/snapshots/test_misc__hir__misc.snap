@@ -48,6 +48,7 @@ Specification(
                         is_root: false,
                     },
                 ),
+                integer: None,
             },
         ),
         ModuleDcl(
@@ -104,6 +105,7 @@ Specification(
                         is_root: false,
                     },
                 ),
+                integer: None,
             },
         ),
         ConstDcl(
@@ -126,6 +128,7 @@ Specification(
                         is_root: false,
                     },
                 ),
+                integer: None,
             },
         ),
         ConstDcl(
@@ -149,6 +152,7 @@ Specification(
                         is_root: false,
                     },
                 ),
+                integer: None,
             },
         ),
         TypeDcl(
@@ -634,6 +638,7 @@ Specification(
                         ),
                     ),
                 ),
+                integer: None,
             },
         ),
         TypeDcl(
@@ -1088,6 +1093,7 @@ Specification(
                         ),
                     ),
                 ),
+                integer: None,
             },
         ),
         TypeDcl(
@@ -1650,6 +1656,7 @@ Specification(
                         ),
                     ),
                 ),
+                integer: None,
             },
         ),
         TypeDcl(
@@ -2142,6 +2149,7 @@ Specification(
                         ),
                     ),
                 ),
+                integer: None,
             },
         ),
         TypeDcl(
@@ -2634,6 +2642,7 @@ Specification(
                         ),
                     ),
                 ),
+                integer: None,
             },
         ),
         TypeDcl(
@@ -3189,6 +3198,7 @@ Specification(
                         ),
                     ),
                 ),
+                integer: None,
             },
         ),
         ConstDcl(
@@ -3205,6 +3215,7 @@ Specification(
                         ),
                     ),
                 ),
+                integer: None,
             },
         ),
         TypeDcl(
@@ -3721,6 +3732,7 @@ Specification(
                                                     ),
                                                 ),
                                             ),
+                                            integer: None,
                                         },
                                     ),
                                 ],
@@ -3879,6 +3891,7 @@ Specification(
                         ),
                     ),
                 ),
+                integer: None,
             },
         ),
         ConstDcl(
@@ -3895,6 +3908,7 @@ Specification(
                         ),
                     ),
                 ),
+                integer: None,
             },
         ),
         ConstDcl(
@@ -3911,6 +3925,7 @@ Specification(
                         ),
                     ),
                 ),
+                integer: None,
             },
         ),
         ConstDcl(
@@ -3927,6 +3942,7 @@ Specification(
                         ),
                     ),
                 ),
+                integer: None,
             },
         ),
         ConstDcl(
@@ -3943,6 +3959,7 @@ Specification(
                         ),
                     ),
                 ),
+                integer: None,
             },
         ),
         ConstDcl(
@@ -3959,6 +3976,7 @@ Specification(
                         ),
                     ),
                 ),
+                integer: None,
             },
         ),
         TypeDcl(

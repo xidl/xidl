@@ -1,0 +1,98 @@
+---
+source: xidl-parser/src/semantic/constants/tests/declarations.rs
+expression: "serde_json::to_string_pretty(&plans).unwrap()"
+---
+{
+  "AVAILABLE": {
+    "result": 1,
+    "steps": [
+      {
+        "kind": {
+          "bits": 32,
+          "signed": false
+        },
+        "value": {
+          "Literal": "4294967292"
+        }
+      },
+      {
+        "kind": {
+          "bits": 32,
+          "signed": false
+        },
+        "value": {
+          "Unary": [
+            "Not",
+            0
+          ]
+        }
+      }
+    ]
+  },
+  "LOCAL": {
+    "result": 1,
+    "steps": [
+      {
+        "kind": {
+          "bits": 32,
+          "signed": false
+        },
+        "value": {
+          "Literal": "4294967292"
+        }
+      },
+      {
+        "kind": {
+          "bits": 32,
+          "signed": false
+        },
+        "value": {
+          "Unary": [
+            "Not",
+            0
+          ]
+        }
+      }
+    ]
+  },
+  "MASK": {
+    "result": 0,
+    "steps": [
+      {
+        "kind": {
+          "bits": 32,
+          "signed": false
+        },
+        "value": {
+          "Literal": "4294967292"
+        }
+      }
+    ]
+  },
+  "ROOT": {
+    "result": 1,
+    "steps": [
+      {
+        "kind": {
+          "bits": 32,
+          "signed": false
+        },
+        "value": {
+          "Literal": "4294967293"
+        }
+      },
+      {
+        "kind": {
+          "bits": 32,
+          "signed": false
+        },
+        "value": {
+          "Unary": [
+            "Not",
+            0
+          ]
+        }
+      }
+    ]
+  }
+}

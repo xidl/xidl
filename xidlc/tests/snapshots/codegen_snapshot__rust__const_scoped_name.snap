@@ -10,21 +10,75 @@ const_scoped_name.rs
 #[allow(non_upper_case_globals)]
 pub const a: int = 0;
 #[allow(non_upper_case_globals)]
-pub const a: u8 = 0;
+pub const a: u8 = {
+    let _xidl_0: i128 = 0_i128;
+    let _xidl_1: i128 = _xidl_0;
+    assert!(
+        _xidl_1 >= 0_i128 && _xidl_1 <= 255_i128,
+        "IDL integer constant a exceeds its range"
+    );
+    _xidl_1 as u8
+};
 #[allow(non_upper_case_globals)]
-pub const a: u16 = 0;
+pub const a: u16 = {
+    let _xidl_0: i128 = 0_i128;
+    let _xidl_1: i128 = _xidl_0;
+    assert!(
+        _xidl_1 >= 0_i128 && _xidl_1 <= 65535_i128,
+        "IDL integer constant a exceeds its range"
+    );
+    _xidl_1 as u16
+};
 #[allow(non_upper_case_globals)]
-pub const a: u32 = 0;
+pub const a: u32 = {
+    let _xidl_0: i128 = 0_i128;
+    _xidl_0 as u32
+};
 #[allow(non_upper_case_globals)]
-pub const a: u64 = 0;
+pub const a: u64 = {
+    let _xidl_0: i128 = 0_i128;
+    _xidl_0 as u64
+};
 #[allow(non_upper_case_globals)]
-pub const a: i8 = 0;
+pub const a: i8 = {
+    let _xidl_0: i128 = 0_i128;
+    let _xidl_1: i128 = _xidl_0;
+    assert!(
+        _xidl_1 >= - 128_i128 && _xidl_1 <= 127_i128,
+        "IDL integer constant a exceeds its range"
+    );
+    _xidl_1 as i8
+};
 #[allow(non_upper_case_globals)]
-pub const a: i16 = 0;
+pub const a: i16 = {
+    let _xidl_0: i128 = 0_i128;
+    let _xidl_1: i128 = _xidl_0;
+    assert!(
+        _xidl_1 >= - 32768_i128 && _xidl_1 <= 32767_i128,
+        "IDL integer constant a exceeds its range"
+    );
+    _xidl_1 as i16
+};
 #[allow(non_upper_case_globals)]
-pub const a: i32 = 0;
+pub const a: i32 = {
+    let _xidl_0: i128 = 0_i128;
+    let _xidl_1: i128 = _xidl_0;
+    assert!(
+        _xidl_1 >= - 2147483648_i128 && _xidl_1 <= 2147483647_i128,
+        "IDL integer constant a exceeds its range"
+    );
+    _xidl_1 as i32
+};
 #[allow(non_upper_case_globals)]
-pub const a: i64 = 0;
+pub const a: i64 = {
+    let _xidl_0: i128 = 0_i128;
+    let _xidl_1: i128 = _xidl_0;
+    assert!(
+        _xidl_1 >= - 9223372036854775808_i128 && _xidl_1 <= 9223372036854775807_i128,
+        "IDL integer constant a exceeds its range"
+    );
+    _xidl_1 as i64
+};
 #[allow(non_upper_case_globals)]
 pub const a: char8 = 0;
 #[allow(non_upper_case_globals)]
