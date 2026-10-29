@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.108.0](https://github.com/xidl/xidl/compare/v0.107.0...v0.108.0) (2026-10-29)
+
+
+### Features
+
+* **webhooks:** publish ordinary HTTP operations as webhooks ([743ca89](https://github.com/xidl/xidl/commit/743ca89ea78a959f9ab9277aaac3f515867b1958))
+
+
+### Bug Fixes
+
+* **axum:** decode character header arrays as text ([aba5049](https://github.com/xidl/xidl/commit/aba50494e8eafca2fca5e5480ff39926dac90570))
+* **axum:** preserve defaults and metadata ownership in wire projections ([0014fe0](https://github.com/xidl/xidl/commit/0014fe075a143a35b4e215dff243a24947c87093))
+* **bdd:** build the xidlc CLI before running scenarios ([d8af0c4](https://github.com/xidl/xidl/commit/d8af0c4b4a5bd6f0b49c61f458c5f667cea63ba6))
+* **codegen:** preserve IDL integer constant values in Rust ([c22ce6d](https://github.com/xidl/xidl/commit/c22ce6defbac535623d95d7413d4aa7452606c4e))
+* **constants:** delegate ordinary integer expressions to target compilers ([2e89981](https://github.com/xidl/xidl/commit/2e899816b57e41929e3ba13948ab85060a5d01bd))
+* **constants:** evaluate imported integers in their source context ([ad2a710](https://github.com/xidl/xidl/commit/ad2a710ab21ce6e200dede96dab4bf48ac67885c))
+* **go:** render imported integer complements correctly ([151ddb2](https://github.com/xidl/xidl/commit/151ddb2cf58ade95d7c4ee692e3f40809243103c))
+* **sequence:** enforce maximum lengths across HTTP contracts ([0aea112](https://github.com/xidl/xidl/commit/0aea1128864dd29c323a448674d5c7cf2caa9cf8))
+* **sequence:** update recursive and typedef wire snapshots ([55d2e94](https://github.com/xidl/xidl/commit/55d2e9481c2ff94cb705e9b3d11635f490ba26be))
+
 ## [0.107.0](https://github.com/xidl/xidl/compare/v0.106.0...v0.107.0) (2026-10-28)
 
 
