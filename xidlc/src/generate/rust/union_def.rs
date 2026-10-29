@@ -3,7 +3,7 @@ use crate::error::IdlcResult;
 use crate::generate::rust::util::{
     constr_type_scoped_name, declarator_name, render_const, rust_deprecated_attr,
     rust_derive_info_with_extra, rust_ident, rust_passthrough_attrs_from_annotations,
-    rust_scoped_name, rust_switch_type, type_with_decl,
+    rust_scoped_name, rust_switch_type,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
@@ -41,7 +41,9 @@ fn render_http_union(def: &hir::UnionDef, renderer: &RustRenderer) -> IdlcResult
                 crate::error::IdlcError::rpc("HTTP union case has an empty ContentType label")
             })?;
             let ty = match &case.element.ty {
-                hir::ElementSpecTy::TypeSpec(ty) => type_with_decl(ty, &case.element.value),
+                hir::ElementSpecTy::TypeSpec(ty) => {
+                    renderer.declared_type(ty, &case.element.value)?
+                }
                 hir::ElementSpecTy::ConstrTypeDcl(_) => {
                     return Err(crate::error::IdlcError::rpc(
                         "HTTP union payload requires a named type",
@@ -103,7 +105,7 @@ pub(crate) fn render_union_with_config(
         .into_iter()
         .map(|(name, ty, decl, doc, rust_attrs, recursive)| {
             let mut ty = match ty {
-                hir::ElementSpecTy::TypeSpec(spec) => type_with_decl(spec, decl),
+                hir::ElementSpecTy::TypeSpec(spec) => renderer.declared_type(spec, decl)?,
                 hir::ElementSpecTy::ConstrTypeDcl(constr) => {
                     rust_scoped_name(&constr_type_scoped_name(constr))
                 }
@@ -111,9 +113,9 @@ pub(crate) fn render_union_with_config(
             if recursive {
                 ty = format!("Box<{ty}>");
             }
-            json!({ "name": name, "ty": ty, "doc": doc, "rust_attrs": rust_attrs })
+            Ok(json!({ "name": name, "ty": ty, "doc": doc, "rust_attrs": rust_attrs }))
         })
-        .collect::<Vec<_>>();
+        .collect::<IdlcResult<Vec<_>>>()?;
 
     let mut cases = def
         .case
@@ -142,7 +144,9 @@ pub(crate) fn render_union_with_config(
                 .map(|value| format!("{value}u32"))
                 .unwrap_or_else(|| "1u32".to_string());
             let mut field_ty = match &case.element.ty {
-                hir::ElementSpecTy::TypeSpec(spec) => type_with_decl(spec, &case.element.value),
+                hir::ElementSpecTy::TypeSpec(spec) => {
+                    renderer.declared_type(spec, &case.element.value)?
+                }
                 hir::ElementSpecTy::ConstrTypeDcl(constr) => {
                     rust_scoped_name(&constr_type_scoped_name(constr))
                 }
@@ -168,7 +172,7 @@ pub(crate) fn render_union_with_config(
                     })
                     .collect::<Vec<_>>()
             };
-            json!({
+            Ok(json!({
                 "case_index": case_index,
                 "constructor_tag": if is_default {
                     format!("{}::default()", rust_switch_type(&def.switch_type_spec))
@@ -186,9 +190,9 @@ pub(crate) fn render_union_with_config(
                 "member": member,
                 "helper_variant": helper_variant,
                 "field_id": field_id,
-            })
+            }))
         })
-        .collect::<Vec<_>>();
+        .collect::<IdlcResult<Vec<_>>>()?;
 
     if let Some(pos) = cases
         .iter()

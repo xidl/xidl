@@ -44,11 +44,13 @@ enum Conversion<'a> {
     },
     Sequence {
         source: &'a str,
-        converted: Option<&'a str>,
+        converted: &'a str,
+        bounded: bool,
     },
     Record {
         source: &'a str,
-        converted: Option<&'a str>,
+        converted: &'a str,
+        bounded: bool,
     },
 }
 
@@ -63,16 +65,24 @@ impl<'a> OwnedConversion<'a> {
         match ty {
             hir::TypeSpec::SequenceType(seq) => {
                 let inner = self.value("value", &seq.ty)?;
+                if inner == "value" {
+                    return Ok(source.to_owned());
+                }
                 self.render(&Conversion::Sequence {
                     source,
-                    converted: (inner != "value").then_some(inner.as_str()),
+                    converted: &inner,
+                    bounded: seq.len.is_some(),
                 })
             }
             hir::TypeSpec::MapType(map) => {
                 let inner = self.value("value", &map.value)?;
+                if inner == "value" {
+                    return Ok(source.to_owned());
+                }
                 self.render(&Conversion::Record {
                     source,
-                    converted: (inner != "value").then_some(inner.as_str()),
+                    converted: &inner,
+                    bounded: map.len.is_some(),
                 })
             }
             hir::TypeSpec::ScopedName(value) => self.scoped(source, value),

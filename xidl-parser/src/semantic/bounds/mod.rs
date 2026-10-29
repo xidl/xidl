@@ -4,7 +4,7 @@ use super::constants::{IntegerConstants, IntegerImports};
 use crate::error::{ParseError, ParserResult};
 use crate::hir;
 
-/// Normalizes exact array sizes and maximum sequence lengths in shared HIR.
+/// Normalizes exact array sizes and maximum collection lengths in shared HIR.
 pub(crate) struct CollectionBounds {
     constants: IntegerConstants,
 }
@@ -149,6 +149,9 @@ impl CollectionBounds {
                 self.type_spec(&mut sequence.ty, scope)?;
             }
             hir::TypeSpec::MapType(map) => {
+                if let Some(bound) = &mut map.len {
+                    self.bound(bound, scope, "map bound")?;
+                }
                 self.type_spec(&mut map.key, scope)?;
                 self.type_spec(&mut map.value, scope)?;
             }

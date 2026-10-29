@@ -214,8 +214,9 @@ interface Store : ::Parent {
             hir::const_expr_to_i64(&sequence.len.as_ref().unwrap().0),
             Some(4)
         );
-        assert!(
-            matches!(&map.len, Some(hir::PositiveIntConst(hir::ConstExpr::ScopedName(name))) if name.name == [definition.ident.as_str(), "LIMIT"] && name.is_root)
+        assert_eq!(
+            hir::const_expr_to_i64(&map.len.as_ref().unwrap().0),
+            Some(4)
         );
         let hir::Declarator::ArrayDeclarator(grid) = &batch.member[2].ident[0] else {
             panic!("grid")

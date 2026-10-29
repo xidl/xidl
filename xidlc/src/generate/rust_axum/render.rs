@@ -20,6 +20,7 @@ pub trait RustAxumRender {
 pub struct RustAxumRenderer {
     env: Environment<'static>,
     rest_hir: Option<RestHirDocument>,
+    pub(crate) models: crate::generate::rust::RustRenderer,
 }
 
 impl RustAxumRenderer {
@@ -31,6 +32,8 @@ impl RustAxumRenderer {
         Ok(Self {
             env,
             rest_hir: None,
+            models: crate::generate::rust::RustRenderer::new(Default::default())?
+                .with_runtime("::xidl_rust_axum"),
         })
     }
 

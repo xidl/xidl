@@ -487,10 +487,10 @@ pub(super) mod __xidl_out_Files {
         fn from(value: super::PreconditionFailed) -> Self {
             Self {
                 etag: value.etag,
-                hints: value.hints.map(|value| value.into_iter().collect()),
+                hints: value.hints,
                 session_id: value.session_id,
                 retry_token: value.retry_token,
-                attempts: value.attempts.map(|value| value.into_iter().collect()),
+                attempts: value.attempts,
                 code: value.code,
                 msg: value.msg,
                 detail: value.detail,
@@ -502,10 +502,10 @@ pub(super) mod __xidl_out_Files {
         fn from(value: PreconditionFailed) -> Self {
             Self {
                 etag: value.etag,
-                hints: value.hints.map(|value| value.into_iter().collect()),
+                hints: value.hints,
                 session_id: value.session_id,
                 retry_token: value.retry_token,
-                attempts: value.attempts.map(|value| value.into_iter().collect()),
+                attempts: value.attempts,
                 code: value.code,
                 msg: value.msg,
                 detail: value.detail,
@@ -751,11 +751,7 @@ impl FilesClient {
                             values.push(parsed);
                         }
                     }
-                    if headers.contains_key("X-Hint") {
-                        Some(values.into_iter().collect())
-                    } else {
-                        None
-                    }
+                    if headers.contains_key("X-Hint") { Some(values) } else { None }
                 };
                 let cookie_map = xidl_rust_axum::http::parse_set_cookies(
                     headers.get_all(::xidl_rust_axum::reqwest::header::SET_COOKIE).iter(),
@@ -782,11 +778,7 @@ impl FilesClient {
                             values.push(parsed);
                         }
                     }
-                    if cookie_map.contains_key("attempt") {
-                        Some(values.into_iter().collect())
-                    } else {
-                        None
-                    }
+                    if cookie_map.contains_key("attempt") { Some(values) } else { None }
                 };
                 return Err(FilesGetFileError::PreconditionFailed(value.into()));
             }

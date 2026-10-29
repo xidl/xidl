@@ -37,8 +37,7 @@ pub fn generate(
 
     let refs = spec.0.iter().collect::<Vec<_>>();
     let registry = transport::build_type_registry(&refs, &[]);
-    let rust_renderer = crate::generate::rust::RustRenderer::new(std::collections::HashMap::new())?;
-    let builder = merged::MergedAxumSpecBuilder::new(&renderer, rust_renderer, registry);
+    let builder = merged::MergedAxumSpecBuilder::new(&renderer, registry);
     let definitions = builder.render(&spec)?;
     let imports = crate::generate::utils::referenced_imports(&props, &definitions, "::");
 

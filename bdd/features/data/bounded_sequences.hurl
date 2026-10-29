@@ -18,7 +18,7 @@ jsonpath "$.days[1]" count == 0
 # Partial batches and the inclusive maximum round-trip without padding.
 POST {{base_url}}/batches
 Content-Type: application/json
-{"invoices": [1], "windows": [[], [1, 2]], "regions": {"eu": [1, 2]}, "days": [[1], [2]], "retry": []}
+{"invoices": [1], "windows": [[], [1, 2]], "regions": {"eu": [1, 2], "us": []}, "days": [[1], [2]], "retry": []}
 HTTP 200
 [Asserts]
 jsonpath "$.invoices" count == 1
@@ -26,6 +26,8 @@ jsonpath "$.invoices[0]" == 1
 jsonpath "$.windows" count == 2
 jsonpath "$.windows[0]" count == 0
 jsonpath "$.windows[1]" count == 2
+jsonpath "$.regions.*" count == 2
+jsonpath "$.regions.us" count == 0
 jsonpath "$.retry" count == 0
 
 POST {{base_url}}/batches
@@ -38,6 +40,11 @@ jsonpath "$.invoices[0]" == 1
 jsonpath "$.invoices[1]" == 2
 
 # Every rejection below must happen before the reservation side effect.
+POST {{base_url}}/batches
+Content-Type: application/json
+{"invoices": [], "windows": [], "regions": {"eu": [], "us": [], "jp": []}, "days": [[], []]}
+HTTP 400
+
 POST {{base_url}}/batches
 Content-Type: application/json
 {"invoices": [1, 2, 3], "windows": [], "regions": {}, "days": [[], []]}

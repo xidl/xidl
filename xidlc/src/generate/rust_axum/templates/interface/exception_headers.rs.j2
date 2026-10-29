@@ -2,12 +2,6 @@ let headers = (|| -> xidl_rust_axum::Result<::xidl_rust_axum::axum::http::Header
     let {% if ex.headers | length > 0 or ex.cookies | length > 0 %}mut {% endif %}headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
     {% for kind in ["headers", "cookies"] %}
         {% for member in ex[kind] %}
-            {% if member.maximum %}
-                {% if member.optional %}if let Some(value) = &err.{{ member.field }} { {% else %}{ let value = &err.{{ member.field }}; {% endif %}
-                    ::xidl_rust_axum::SequenceLimit::check(value.len(), {{ member.maximum }})
-                        .map_err(|err| xidl_rust_axum::Error::new(500, format!("exception {{ member.wire_name }}: {err}")))?;
-                }
-            {% endif %}
             {% if member.optional %}
                 for value in err.{{ member.field }}.as_ref().into_iter(){% if member.is_multi %}.flatten(){% endif %} {
                 {% elif member.is_multi %}

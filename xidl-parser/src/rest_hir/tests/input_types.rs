@@ -114,6 +114,40 @@ fn body_and_stream_mappings_keep_the_same_named_references_as_the_signature() {
 }
 
 #[test]
+fn nested_map_input_aliases_keep_their_declaration_scope() {
+    let spec = parse(
+        r#"
+        module Billing {
+            typedef sequence<long, 2> InvoiceIds;
+            typedef map<string, InvoiceIds, 2> Regions;
+        };
+        typedef string InvoiceIds;
+        interface Batches {
+            @get(path="/metadata")
+            void read(@header Billing::Regions groups, @cookie Billing::Regions backup);
+        };
+        "#,
+    );
+    let document = rest_hir::project(&spec).expect("nested map input alias projection");
+    let request = &document.interfaces[0].operations[0].http.request;
+    for binding in request.header.iter().chain(&request.cookie) {
+        assert!(matches!(&binding.ty, hir::TypeSpec::MapType(map)
+            if matches!(&*map.value, hir::TypeSpec::ScopedName(name)
+                if name.is_root && name.name == ["Billing", "InvoiceIds"])));
+    }
+    assert!(
+        document.interfaces[0].operations[0]
+            .signature
+            .params
+            .iter()
+            .all(|param| {
+                matches!(&param.ty, hir::TypeSpec::ScopedName(name)
+            if name.is_root && name.name == ["Billing", "Regions"])
+            })
+    );
+}
+
+#[test]
 fn fixed_arrays_and_named_sequence_elements_keep_their_declared_identity() {
     let spec = parse(
         r#"

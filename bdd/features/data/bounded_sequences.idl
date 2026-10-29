@@ -12,9 +12,9 @@ interface Batches {
     @post(path="/upload") billing::Total upload(@body sequence<octet, billing::BATCH_LIMIT> bytes);
     @get(path="/metadata") void metadata(
         @query boolean invalid,
-        @header map<string, billing::InvoiceIds> groups,
-        @cookie map<string, billing::InvoiceIds> backup,
-        @header out map<string, billing::InvoiceIds> value);
+        @header billing::Regions groups,
+        @cookie billing::Regions backup,
+        @header out billing::Regions value);
     @get(path="/exported") void exported(@query boolean invalid,
         @header out billing::InvoiceIds ids, @cookie out billing::InvoiceIds tokens);
     @get(path="/download") billing::Export download(@query boolean raw, @query boolean invalid);

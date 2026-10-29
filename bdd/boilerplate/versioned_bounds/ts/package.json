@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "xidl-typescript-client": "file:{{TS_XIDL_TYPESCRIPT_CLIENT_PATH}}",
+    "xidl-typescript-codec": "file:{{TS_XIDL_TYPESCRIPT_CODEC_PATH}}",
+    "xidl-typescript-server": "file:{{TS_XIDL_TYPESCRIPT_SERVER_PATH}}",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "tsx": "^4.0.0",
+    "typescript": "^6.0.0"
+  },
+  "name": "xidl-versioned-bounds",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0"
+}

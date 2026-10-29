@@ -1,8 +1,9 @@
 @bdd_rest-serialization
 Feature: Billing batch limits hold at every wire boundary
   A shared module declares a maximum invoice batch size. Empty and partial
-  batches remain legal; exceeding a bound must not reach the reservation
-  service, even through aliases, nested containers or binary payloads.
+  batches remain legal. Bounded maps count entries; exceeding either bound must
+  not reach the reservation service, even through aliases, nested containers or
+  binary payloads.
 
   Scenario Outline: billing limits agree across generated SDKs and raw HTTP
     Given a REST IDL file "bdd/features/data/bounded_sequences.idl"

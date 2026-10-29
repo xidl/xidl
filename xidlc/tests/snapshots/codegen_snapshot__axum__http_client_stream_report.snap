@@ -59,7 +59,7 @@ pub(super) mod __xidl_in_HttpClientStreamReportService {
         fn from(value: super::UploadChunk) -> Self {
             Self {
                 part_id: value.part_id,
-                bytes: value.bytes.into_iter().collect(),
+                bytes: value.bytes,
             }
         }
     }
@@ -68,7 +68,7 @@ pub(super) mod __xidl_in_HttpClientStreamReportService {
         fn from(value: UploadChunk) -> Self {
             Self {
                 part_id: value.part_id,
-                bytes: value.bytes.into_iter().collect(),
+                bytes: value.bytes,
             }
         }
     }
@@ -127,7 +127,7 @@ pub(super) mod __xidl_out_HttpClientStreamReportService {
         fn from(value: super::UploadChunk) -> Self {
             Self {
                 part_id: value.part_id,
-                bytes: value.bytes.into_iter().collect(),
+                bytes: value.bytes,
             }
         }
     }
@@ -136,7 +136,7 @@ pub(super) mod __xidl_out_HttpClientStreamReportService {
         fn from(value: UploadChunk) -> Self {
             Self {
                 part_id: value.part_id,
-                bytes: value.bytes.into_iter().collect(),
+                bytes: value.bytes,
             }
         }
     }

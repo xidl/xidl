@@ -10,6 +10,7 @@ mod render;
 mod spec;
 mod struct_dcl;
 mod type_dcl;
+pub(crate) mod types;
 mod union_def;
 pub(crate) mod util;
 

@@ -20,8 +20,9 @@
     {%- elif schema.kind == "Raw" -%}{{ schema.data }}
     {%- elif schema.kind == "CoercedNumber" -%}z.union([z.number(), z.string().regex(/{% if schema.data.integer %}{% if schema.data.unsigned %}^[+]?[0-9]+{% else %}^[+-]?[0-9]+{% endif %}{% else %}^[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?{% endif %}(?![\s\S])/).transform(Number)]).pipe(z.number(){% if schema.data.integer %}.int(){% endif %}{% if schema.data.unsigned %}.nonnegative(){% endif %})
     {%- elif schema.kind == "ScopedName" -%}{{ schema.data }}
-    {%- elif schema.kind == "Array" -%}z.array({{ render_zod(schema.data.element) }}){% if schema.data.length is not none %}.length({{ schema.data.length }}){% endif %}
-    {%- elif schema.kind == "Record" -%}z.record(z.string(), {{ render_zod(schema.data) }})
+    {%- elif schema.kind == "ByteBuffer" -%}z.instanceof(Uint8Array){% if schema.data.maximum is not none %}.refine((value) => value.byteLength <= {{ schema.data.maximum }}, "sequence maximum length exceeded"){% endif %}
+    {%- elif schema.kind == "Array" -%}z.array({{ render_zod(schema.data.element) }}){% if schema.data.length is not none %}.length({{ schema.data.length }}){% endif %}{% if schema.data.maximum is not none %}.max({{ schema.data.maximum }}){% endif %}
+    {%- elif schema.kind == "Record" -%}z.record(z.string(), {{ render_zod(schema.data.value) }}){% if schema.data.maximum is not none %}.refine((value) => Object.keys(value).length <= {{ schema.data.maximum }}, "map maximum length exceeded"){% endif %}
     {%- elif schema.kind == "Object" -%}z.object({ {% for field in schema.data %}{{ field.prop }}: {{ render_field_zod(field) }}{% if not loop.last %}, {% endif %}{% endfor %} })
     {%- elif schema.kind == "Enum" -%}z.enum([{% for value in schema.data %}"{{ value }}"{% if not loop.last %}, {% endif %}{% endfor %}])
     {%- elif schema.kind == "Union" -%}{% if schema.data | length == 1 %}{{ render_zod(schema.data[0]) }}{% else %}z.union([{% for variant in schema.data %}{{ render_zod(variant) }}{% if not loop.last %}, {% endif %}{% endfor %}]){% endif %}

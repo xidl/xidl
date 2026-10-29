@@ -11,8 +11,7 @@ pub use util_union::{http_union_case_ident, union_serde_tag_string};
 pub use self::util_annotations::{rust_deprecated_attr, rust_passthrough_attrs_from_annotations};
 #[allow(unused_imports)]
 pub use self::util_declarators::{
-    array_type, constr_type_scoped_name, declarator_dims, declarator_name, type_with_decl,
-    typedef_json,
+    array_type, constr_type_scoped_name, declarator_dims, declarator_name, typedef_json,
 };
 #[allow(unused_imports)]
 pub use self::util_derives::{

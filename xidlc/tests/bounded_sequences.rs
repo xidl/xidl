@@ -1,5 +1,7 @@
 #![cfg(all(
     feature = "gen-openapi",
+    feature = "gen-rust-axum",
+    feature = "gen-typescript-rest",
     feature = "gen-rust-axum-adapters",
     feature = "gen-typescript-rest-adapters"
 ))]
@@ -33,25 +35,100 @@ fn billing_bounds_are_rendered_as_maxima_and_fixed_arrays_remain_exact() {
             .collect::<Vec<_>>()
             .join("\n");
         insta::assert_snapshot!(snapshot, output);
+        if target == "rust-axum" {
+            assert!(output.contains("BoundedVec<i32, 2>"));
+            assert!(output.contains("BoundedMap<String, InvoiceIds, 2>"));
+            assert!(!output.contains("SequenceWire"));
+            assert!(!output.contains("SequenceLimit"));
+        }
         if target == "typescript-rest" {
             assert!(output.contains(".max(2)"));
             assert!(output.contains(".length(2)"), "fixed arrays remain exact");
+            assert!(output.contains("models.billing.InvoiceIdsSchema"));
+            assert!(!output.contains("models.InvoiceIdsSchema"));
         }
         if target == "openapi" {
             let document: serde_json::Value = serde_json::from_str(files[0].content()).unwrap();
             let query = &document["paths"]["/query"]["get"]["parameters"][0]["schema"];
             assert_eq!(query["maxItems"], 2);
             assert!(query.get("minItems").is_none());
+            let regions = &document["components"]["schemas"]["billing.Regions"];
+            assert_eq!(regions["maxProperties"], 2);
+            assert_eq!(
+                regions["additionalProperties"]["$ref"],
+                "#/components/schemas/billing.InvoiceIds"
+            );
+            let header = &document["paths"]["/metadata"]["get"]["parameters"][1]["schema"];
+            assert_eq!(header["maxProperties"], 2);
+            assert_eq!(
+                header["additionalProperties"]["$ref"],
+                "#/components/schemas/billing.InvoiceIds"
+            );
         }
     }
+}
+
+#[test]
+fn plain_rust_models_do_not_depend_on_the_axum_runtime() {
+    let source =
+        "typedef sequence<long, 2> Ids; struct Batch { Ids ids; map<string, Ids, 2> groups; };";
+    let files = Generator::new("rust".into())
+        .generate_from_idl(source, Path::new("batch.idl"), HashMap::new())
+        .expect("plain Rust model generation");
+    let output = files[0].content();
+    assert!(output.contains("Vec<i32>"));
+    assert!(output.contains("BTreeMap<String, Ids>"));
+    assert!(!output.contains("xidl_rust_axum"));
+}
+
+#[test]
+fn unbounded_collections_do_not_require_checked_construction() {
+    let source = r#"
+        typedef sequence<long> Ids;
+        interface Batches {
+            @get(path="/metadata") void metadata(@header Ids ids, @optional @cookie Ids retry);
+            @post(path="/upload") void upload(@body sequence<octet> bytes);
+        };
+    "#;
+    let files = Generator::new("rust-axum".into())
+        .generate_from_idl(
+            source,
+            Path::new("batches.idl"),
+            HashMap::from([
+                ("enable_client".into(), true.into()),
+                ("enable_server".into(), true.into()),
+            ]),
+        )
+        .expect("unbounded metadata aliases and raw bytes");
+    assert!(!files[0].content().contains(".try_into()"));
+}
+
+#[test]
+fn axum_dynamic_types_keep_the_runtime_owned_json_dependency() {
+    let source = r#"
+        interface Echo {
+            @post(path="/echo") any echo(@body any value);
+            @post(path="/object") Object object(@body Object value);
+            @post(path="/base") ValueBase base(@body ValueBase value);
+        };
+    "#;
+    let files = Generator::new("rust-axum".into())
+        .generate_from_idl(source, Path::new("echo.idl"), HashMap::new())
+        .expect("runtime JSON values remain usable without a direct serde_json dependency");
+    let output = files[0].content();
+    assert!(output.contains("xidl_rust_axum::serde_json::Value"));
+    assert!(!output.contains(" ::serde_json::Value"));
 }
 
 #[test]
 fn adapter_wire_decoders_keep_the_same_bound_in_every_version() {
     let source = r#"
         @version enum V { v1, v2 };
-        struct Batch { sequence<long, 2> ids; };
-        interface Batches { @post(path="/batches") Batch reserve(@body Batch batch); };
+        struct Batch { sequence<long, 2> ids; map<string, sequence<long, 2>, 2> groups; };
+        interface Batches {
+            @post(path="/batches") Batch reserve(@body Batch batch);
+            @post(path="/upload") long upload(@body sequence<octet, 2> bytes);
+        };
     "#;
     for (target, snapshot) in [
         ("rust-axum-adapters", "bounded_rust_adapters"),
@@ -62,7 +139,7 @@ fn adapter_wire_decoders_keep_the_same_bound_in_every_version() {
             .expect("versioned batch contract");
         let output = files[0].content();
         assert!(output.contains("v1") && output.contains("v2"));
-        assert!(output.contains(".max(2)") || output.contains("sequence maximum length exceeded"));
+        assert!(output.contains(".max(2)") || output.contains("BoundedVec<i32, 2>"));
         insta::assert_snapshot!(snapshot, output);
     }
 }
@@ -109,7 +186,7 @@ fn imported_constants_define_the_wire_bound_without_target_specific_evaluation()
             .collect::<Vec<_>>()
             .join("\n");
         let expected = match target {
-            "rust-axum" => "SequenceWire<i32, 2>",
+            "rust-axum" => "BoundedVec<i32, 2>",
             "typescript-rest" => ".max(2)",
             _ => "\"maxItems\": 2",
         };

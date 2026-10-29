@@ -366,9 +366,10 @@ pub(super) enum WireValue {
     Named(String),
     Sequence {
         inner: Box<Self>,
-        maximum: Option<String>,
+        ty: String,
     },
     Map {
+        ty: String,
         key: String,
         value: Box<Self>,
     },

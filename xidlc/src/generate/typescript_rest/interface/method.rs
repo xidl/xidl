@@ -58,7 +58,7 @@ impl MethodModel {
         // surfaces to clients as `Uint8Array`.
         let byte_body_param = op.http.request.body.shape.byte_parameter();
 
-        let stringly = super::helpers::text_positions(op);
+        let text_inputs = super::helpers::text_inputs(op);
         let request_fields = op
             .signature
             .params
@@ -89,8 +89,8 @@ impl MethodModel {
                             _ => None,
                         },
                     }
-                } else if stringly.contains(&p.name) {
-                    let ty = text_aliases.expand(&p.ty, module_path);
+                } else if let Some(ty) = text_inputs.get(p.name.as_str()) {
+                    let ty = text_aliases.expand(ty, module_path);
                     zod_coerced_schema_for_type_spec_with_prefix(&ty, module_path, Some("models"))
                 } else {
                     zod_schema_for_type_spec_with_prefix(&p.ty, module_path, Some("models"))

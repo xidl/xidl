@@ -1,3 +1,4 @@
+{% from "interface/collection.rs.j2" import collect_values %}
 {% if method.header_params | length > 0 %}
     {% for param in method.header_params %}
         {% if param.is_sequence %}
@@ -20,13 +21,7 @@
                 }
                 {% endif %}
             }
-            {% if param.maximum is not none %}
-                let {{ param.name }} = ::xidl_rust_axum::SequenceWire::<_, {{ param.maximum }}>::try_from({{ param.name }})
-                    .map_err(|error| ::xidl_rust_axum::Error::new(400, error.to_string()))?;
-            {% endif %}
-            {% if param.optional %}
-                let {{ param.name }} = if {{ param.name }}.is_empty() { None } else { Some({{ param.name }}) };
-            {% endif %}
+            {{ collect_values(param.name, param.in_ty, param.optional, param.is_bounded_sequence) }}
         {% else %}
             {% if param.optional %}
                 let {{ param.name }}: {{ param.in_ty }} = match {{ request_headers }}.get("{{ param.wire_name }}") {
@@ -89,13 +84,7 @@
                         {{ param.name }}.push(parsed);
                     }
                 }
-                {% if param.maximum is not none %}
-                    let {{ param.name }} = ::xidl_rust_axum::SequenceWire::<_, {{ param.maximum }}>::try_from({{ param.name }})
-                        .map_err(|error| ::xidl_rust_axum::Error::new(400, error.to_string()))?;
-                {% endif %}
-                {% if param.optional %}
-                    let {{ param.name }} = if {{ param.name }}.is_empty() { None } else { Some({{ param.name }}) };
-                {% endif %}
+                {{ collect_values(param.name, param.in_ty, param.optional, param.is_bounded_sequence) }}
             {% else %}
                 {% if param.optional %}
                     {% if param.cookie_item_is_string %}

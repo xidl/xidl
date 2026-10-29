@@ -1,5 +1,4 @@
-mod annotations;
-pub(crate) use annotations::ts_doc_lines;
+pub(crate) mod annotations;
 mod attr;
 pub(crate) mod contexts;
 mod http;
@@ -20,5 +19,9 @@ mod type_render_helpers;
 #[cfg(test)]
 mod tests;
 
+#[cfg(any(
+    feature = "gen-typescript-rest",
+    feature = "gen-typescript-rest-adapters"
+))]
 pub(crate) use method::TypeRefTarget;
 pub use module_render::render_typescript;

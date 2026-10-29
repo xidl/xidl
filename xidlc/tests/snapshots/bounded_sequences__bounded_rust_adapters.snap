@@ -85,8 +85,16 @@ pub mod version_adapters {
         pub batch: v1::Batch,
     }
     /// Public model parameters for one served version's operation.
+    pub struct BatchesUploadRequestV1 {
+        pub bytes: ::xidl_rust_axum::BoundedVec<u8, 2>,
+    }
+    /// Public model parameters for one served version's operation.
     pub struct BatchesReserveRequestV2 {
         pub batch: v2::Batch,
+    }
+    /// Public model parameters for one served version's operation.
+    pub struct BatchesUploadRequestV2 {
+        pub bytes: ::xidl_rust_axum::BoundedVec<u8, 2>,
     }
     fn locate<T>(result: VersionedResult<T>, path: &str) -> VersionedResult<T> {
         result
@@ -95,12 +103,42 @@ pub mod version_adapters {
                 ..error
             })
     }
-    fn map_sequence<S, T>(
+    fn map_sequence<S, T, C>(
         source: &[S],
         convert: impl Fn(&S) -> VersionedResult<T>,
+        refusal: impl Fn(&str) -> UnsupportedProjection,
         path: &str,
-    ) -> VersionedResult<Vec<T>> {
-        source.iter().map(|item| locate(convert(item), path)).collect()
+    ) -> VersionedResult<C>
+    where
+        C: TryFrom<Vec<T>>,
+        C::Error: ::std::fmt::Display,
+    {
+        let values = source
+            .iter()
+            .map(|item| locate(convert(item), path))
+            .collect::<VersionedResult<Vec<_>>>()?;
+        C::try_from(values).map_err(|error| refusal(&error.to_string()))
+    }
+    fn map_record<K: Ord, V, L: Ord, W, C>(
+        source: &::std::collections::BTreeMap<K, V>,
+        key: impl Fn(&K) -> VersionedResult<L>,
+        value: impl Fn(&V) -> VersionedResult<W>,
+        refusal: impl Fn(&str) -> UnsupportedProjection,
+        path: &str,
+    ) -> VersionedResult<C>
+    where
+        C: TryFrom<::std::collections::BTreeMap<L, W>>,
+        C::Error: ::std::fmt::Display,
+    {
+        let mut target = ::std::collections::BTreeMap::new();
+        for (old_key, old_value) in source {
+            let next_key = locate(key(old_key), path)?;
+            let next_value = locate(value(old_value), path)?;
+            if target.insert(next_key, next_value).is_some() {
+                return Err(refusal("map key projection is not injective"));
+            }
+        }
+        C::try_from(target).map_err(|error| refusal(&error.to_string()))
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn batch_upcast_from_v_1(
@@ -116,9 +154,25 @@ pub mod version_adapters {
         let projected_0 = map_sequence(
             &source.ids,
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
+            refusal,
             "Batch.ids",
         )?;
-        Ok(v2::Batch { ids: projected_0 })
+        let projected_1 = map_record(
+            &source.groups,
+            |key| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(key)),
+            |item| map_sequence(
+                item,
+                |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
+                refusal,
+                "Batch.groups",
+            ),
+            refusal,
+            "Batch.groups",
+        )?;
+        Ok(v2::Batch {
+            ids: projected_0,
+            groups: projected_1,
+        })
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn batch_downcast_to_v_1(
@@ -134,9 +188,25 @@ pub mod version_adapters {
         let projected_0 = map_sequence(
             &source.ids,
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
+            refusal,
             "Batch.ids",
         )?;
-        Ok(v1::Batch { ids: projected_0 })
+        let projected_1 = map_record(
+            &source.groups,
+            |key| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(key)),
+            |item| map_sequence(
+                item,
+                |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
+                refusal,
+                "Batch.groups",
+            ),
+            refusal,
+            "Batch.groups",
+        )?;
+        Ok(v1::Batch {
+            ids: projected_0,
+            groups: projected_1,
+        })
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn batches_reserve_request_upcast_from_v_1(
@@ -168,8 +238,51 @@ pub mod version_adapters {
         let projected_0 = batch_downcast_to_v_1(source, adapters)?;
         Ok(projected_0)
     }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn batches_upload_request_upcast_from_v_1(
+        source: &BatchesUploadRequestV1,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<BatchesUploadRequestV2> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v1".into(),
+            direction: Direction::Upcast,
+            type_path: "BatchesUploadRequest".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(&source.bytes))?;
+        Ok(BatchesUploadRequestV2 {
+            bytes: projected_0,
+        })
+    }
+    /// Projects one adjacent declaration by borrowing its source value.
+    pub fn batches_upload_response_downcast_to_v_1(
+        source: &i32,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<i32> {
+        let refusal = |reason: &str| UnsupportedProjection {
+            version: "v2".into(),
+            direction: Direction::Downcast,
+            type_path: "BatchesUploadResponse".into(),
+            reason: reason.into(),
+        };
+        let projected_0 = Ok::<
+            _,
+            UnsupportedProjection,
+        >(::std::clone::Clone::clone(source))?;
+        Ok(projected_0)
+    }
     /// Downgrade the complete operation error vocabulary for one adjacent step.
     pub fn downcast_batches_reserve_error_to_v_1(
+        source: &::xidl_rust_axum::Error,
+        adapters: &dyn VersionAdapters,
+    ) -> VersionedResult<::xidl_rust_axum::Error> {
+        Ok(source.clone())
+    }
+    /// Downgrade the complete operation error vocabulary for one adjacent step.
+    pub fn downcast_batches_upload_error_to_v_1(
         source: &::xidl_rust_axum::Error,
         adapters: &dyn VersionAdapters,
     ) -> VersionedResult<::xidl_rust_axum::Error> {
@@ -179,7 +292,7 @@ pub mod version_adapters {
         let object = wire
             .as_object()
             .ok_or_else(|| "expected a served-version object".to_string())?;
-        let keys: &[&str] = &["ids"];
+        let keys: &[&str] = &["groups", "ids"];
         let forbidden: &[&str] = &[];
         for key in object.keys() {
             if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
@@ -191,13 +304,10 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "ids").to_string()
             })?;
-        let value_0: Vec<i32> = (|| {
+        let value_0: ::xidl_rust_axum::BoundedVec<i32, 2> = (|| {
             let array = (raw_0)
                 .as_array()
                 .ok_or_else(|| "expected an array".to_string())?;
-            if array.len() > (2) as usize {
-                return Err("sequence maximum length exceeded".into());
-            }
             let values = array
                 .iter()
                 .map(|item| {
@@ -205,15 +315,74 @@ pub mod version_adapters {
                         .map_err(|error| error.to_string())
                 })
                 .collect::<Result<Vec<_>, String>>()?;
-            Ok::<_, String>(values)
+            <::xidl_rust_axum::BoundedVec<i32, 2>>::try_from(values)
+                .map_err(|error| error.to_string())
         })()?;
-        Ok(v1::Batch { ids: value_0 })
+        let raw_1 = object
+            .get("groups")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "groups").to_string()
+            })?;
+        let value_1: ::xidl_rust_axum::BoundedMap<
+            String,
+            ::xidl_rust_axum::BoundedVec<i32, 2>,
+            2,
+        > = (|| {
+            let object = (raw_1)
+                .as_object()
+                .ok_or_else(|| "expected a map".to_string())?;
+            let mut decoded = ::std::collections::BTreeMap::new();
+            for (raw_key, raw_value) in object {
+                let singleton = ::serde_json::Value::Object(
+                    ::serde_json::Map::from_iter([
+                        (raw_key.clone(), ::serde_json::Value::Null),
+                    ]),
+                );
+                let parsed = ::serde_json::from_value::<
+                    ::std::collections::BTreeMap<String, ::serde_json::Value>,
+                >(singleton)
+                    .map_err(|error| error.to_string())?;
+                let key = parsed
+                    .into_keys()
+                    .next()
+                    .ok_or_else(|| "map key was not decoded".to_string())?;
+                let value = (|| {
+                    let array = (raw_value)
+                        .as_array()
+                        .ok_or_else(|| "expected an array".to_string())?;
+                    let values = array
+                        .iter()
+                        .map(|item| {
+                            ::serde_json::from_value::<
+                                i32,
+                            >(::std::clone::Clone::clone(item))
+                                .map_err(|error| error.to_string())
+                        })
+                        .collect::<Result<Vec<_>, String>>()?;
+                    <::xidl_rust_axum::BoundedVec<i32, 2>>::try_from(values)
+                        .map_err(|error| error.to_string())
+                })()?;
+                if decoded.insert(key, value).is_some() {
+                    return Err("distinct wire keys decode to the same map key".into());
+                }
+            }
+            <::xidl_rust_axum::BoundedMap<
+                String,
+                ::xidl_rust_axum::BoundedVec<i32, 2>,
+                2,
+            >>::try_from(decoded)
+                .map_err(|error| error.to_string())
+        })()?;
+        Ok(v1::Batch {
+            ids: value_0,
+            groups: value_1,
+        })
     }
     fn decode_wire_v_2_batch(wire: &::serde_json::Value) -> Result<v2::Batch, String> {
         let object = wire
             .as_object()
             .ok_or_else(|| "expected a served-version object".to_string())?;
-        let keys: &[&str] = &["ids"];
+        let keys: &[&str] = &["groups", "ids"];
         let forbidden: &[&str] = &[];
         for key in object.keys() {
             if forbidden.contains(&key.as_str()) || !keys.contains(&key.as_str()) {
@@ -225,13 +394,10 @@ pub mod version_adapters {
             .ok_or_else(|| {
                 concat!("required wire field is missing: ", "ids").to_string()
             })?;
-        let value_0: Vec<i32> = (|| {
+        let value_0: ::xidl_rust_axum::BoundedVec<i32, 2> = (|| {
             let array = (raw_0)
                 .as_array()
                 .ok_or_else(|| "expected an array".to_string())?;
-            if array.len() > (2) as usize {
-                return Err("sequence maximum length exceeded".into());
-            }
             let values = array
                 .iter()
                 .map(|item| {
@@ -239,9 +405,68 @@ pub mod version_adapters {
                         .map_err(|error| error.to_string())
                 })
                 .collect::<Result<Vec<_>, String>>()?;
-            Ok::<_, String>(values)
+            <::xidl_rust_axum::BoundedVec<i32, 2>>::try_from(values)
+                .map_err(|error| error.to_string())
         })()?;
-        Ok(v2::Batch { ids: value_0 })
+        let raw_1 = object
+            .get("groups")
+            .ok_or_else(|| {
+                concat!("required wire field is missing: ", "groups").to_string()
+            })?;
+        let value_1: ::xidl_rust_axum::BoundedMap<
+            String,
+            ::xidl_rust_axum::BoundedVec<i32, 2>,
+            2,
+        > = (|| {
+            let object = (raw_1)
+                .as_object()
+                .ok_or_else(|| "expected a map".to_string())?;
+            let mut decoded = ::std::collections::BTreeMap::new();
+            for (raw_key, raw_value) in object {
+                let singleton = ::serde_json::Value::Object(
+                    ::serde_json::Map::from_iter([
+                        (raw_key.clone(), ::serde_json::Value::Null),
+                    ]),
+                );
+                let parsed = ::serde_json::from_value::<
+                    ::std::collections::BTreeMap<String, ::serde_json::Value>,
+                >(singleton)
+                    .map_err(|error| error.to_string())?;
+                let key = parsed
+                    .into_keys()
+                    .next()
+                    .ok_or_else(|| "map key was not decoded".to_string())?;
+                let value = (|| {
+                    let array = (raw_value)
+                        .as_array()
+                        .ok_or_else(|| "expected an array".to_string())?;
+                    let values = array
+                        .iter()
+                        .map(|item| {
+                            ::serde_json::from_value::<
+                                i32,
+                            >(::std::clone::Clone::clone(item))
+                                .map_err(|error| error.to_string())
+                        })
+                        .collect::<Result<Vec<_>, String>>()?;
+                    <::xidl_rust_axum::BoundedVec<i32, 2>>::try_from(values)
+                        .map_err(|error| error.to_string())
+                })()?;
+                if decoded.insert(key, value).is_some() {
+                    return Err("distinct wire keys decode to the same map key".into());
+                }
+            }
+            <::xidl_rust_axum::BoundedMap<
+                String,
+                ::xidl_rust_axum::BoundedVec<i32, 2>,
+                2,
+            >>::try_from(decoded)
+                .map_err(|error| error.to_string())
+        })()?;
+        Ok(v2::Batch {
+            ids: value_0,
+            groups: value_1,
+        })
     }
     /// The complete typed result of this operation in one frozen contract.
     pub type BatchesReserveResultV1 = Result<v1::Batch, ::xidl_rust_axum::Error>;
@@ -336,6 +561,111 @@ pub mod version_adapters {
         Ok(downcast_batches_reserve_from_v_1_outcome(head, adapters))
     }
     /// The complete typed result of this operation in one frozen contract.
+    pub type BatchesUploadResultV1 = Result<i32, ::xidl_rust_axum::Error>;
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_batches_upload_from_v_1(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<BatchesUploadRequestV2, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["bytes"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("bytes")
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "bytes").into(),
+            ))?;
+        let value_0: ::xidl_rust_axum::BoundedVec<u8, 2> = (|| {
+            let array = (raw_0)
+                .as_array()
+                .ok_or_else(|| "expected an array".to_string())?;
+            let values = array
+                .iter()
+                .map(|item| {
+                    ::serde_json::from_value::<u8>(::std::clone::Clone::clone(item))
+                        .map_err(|error| error.to_string())
+                })
+                .collect::<Result<Vec<_>, String>>()?;
+            <::xidl_rust_axum::BoundedVec<u8, 2>>::try_from(values)
+                .map_err(|error| error.to_string())
+        })()
+            .map_err(AdaptationError::Validation)?;
+        let source = BatchesUploadRequestV1 {
+            bytes: value_0,
+        };
+        let source = batches_upload_request_upcast_from_v_1(&source, adapters)?;
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_batches_upload_from_v_1_outcome(
+        head: BatchesUploadResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<BatchesUploadResultV1, BatchesUploadResultV2> {
+        match &head {
+            Ok(source) => {
+                let source = match batches_upload_response_downcast_to_v_1(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Ok(source))
+            }
+            Err(source) => {
+                let source = match downcast_batches_upload_error_to_v_1(
+                    source,
+                    adapters,
+                ) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        };
+                    }
+                };
+                ProjectionOutcome::Projected(Err(source))
+            }
+        }
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_batches_upload_from_v_1<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<BatchesUploadResultV1, BatchesUploadResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(BatchesUploadRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = BatchesUploadResultV2>,
+    {
+        let input = decode_and_upcast_batches_upload_from_v_1(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V1,
+                },
+            )
+            .await;
+        Ok(downcast_batches_upload_from_v_1_outcome(head, adapters))
+    }
+    /// The complete typed result of this operation in one frozen contract.
     pub type BatchesReserveResultV2 = Result<v2::Batch, ::xidl_rust_axum::Error>;
     /// Validate the served request before executing any business conversion.
     pub fn decode_and_upcast_batches_reserve_from_v_2(
@@ -394,6 +724,79 @@ pub mod version_adapters {
             )
             .await;
         Ok(downcast_batches_reserve_from_v_2_outcome(head, adapters))
+    }
+    /// The complete typed result of this operation in one frozen contract.
+    pub type BatchesUploadResultV2 = Result<i32, ::xidl_rust_axum::Error>;
+    /// Validate the served request before executing any business conversion.
+    pub fn decode_and_upcast_batches_upload_from_v_2(
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<BatchesUploadRequestV2, AdaptationError> {
+        let object = wire
+            .as_object()
+            .ok_or_else(|| AdaptationError::Validation(
+                "request parameter envelope must be an object".into(),
+            ))?;
+        let keys: &[&str] = &["bytes"];
+        if let Some(key) = object.keys().find(|key| !keys.contains(&key.as_str())) {
+            return Err(
+                AdaptationError::Validation(format!("unknown source parameter {key}")),
+            );
+        }
+        let raw_0 = object
+            .get("bytes")
+            .ok_or_else(|| AdaptationError::Validation(
+                concat!("missing source parameter ", "bytes").into(),
+            ))?;
+        let value_0: ::xidl_rust_axum::BoundedVec<u8, 2> = (|| {
+            let array = (raw_0)
+                .as_array()
+                .ok_or_else(|| "expected an array".to_string())?;
+            let values = array
+                .iter()
+                .map(|item| {
+                    ::serde_json::from_value::<u8>(::std::clone::Clone::clone(item))
+                        .map_err(|error| error.to_string())
+                })
+                .collect::<Result<Vec<_>, String>>()?;
+            <::xidl_rust_axum::BoundedVec<u8, 2>>::try_from(values)
+                .map_err(|error| error.to_string())
+        })()
+            .map_err(AdaptationError::Validation)?;
+        let source = BatchesUploadRequestV2 {
+            bytes: value_0,
+        };
+        Ok(source)
+    }
+    /// Project an owned Head result and retain it unchanged on any refusal.
+    pub fn downcast_batches_upload_from_v_2_outcome(
+        head: BatchesUploadResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<BatchesUploadResultV2, BatchesUploadResultV2> {
+        ProjectionOutcome::Projected(head)
+    }
+    /// Execute a caller-supplied Head handler once after successful adaptation.
+    pub async fn dispatch_batches_upload_from_v_2<F, Fut>(
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<BatchesUploadResultV2, BatchesUploadResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(BatchesUploadRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = BatchesUploadResultV2>,
+    {
+        let input = decode_and_upcast_batches_upload_from_v_2(wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: Version::V2,
+                },
+            )
+            .await;
+        Ok(downcast_batches_upload_from_v_2_outcome(head, adapters))
     }
     /// The caller-selected version's projected model type.
     pub enum BatchProjection {
@@ -491,5 +894,80 @@ pub mod version_adapters {
             )
             .await;
         Ok(downcast_batches_reserve_outcome(version, head, adapters))
+    }
+    /// Outcome in the caller's explicitly selected contract version.
+    pub enum BatchesUploadOutcome {
+        V1(BatchesUploadResultV1),
+        V2(BatchesUploadResultV2),
+    }
+    /// Decode a request using an application-resolved version before any hook.
+    pub fn decode_and_upcast_batches_upload(
+        version: Version,
+        wire: ::serde_json::Value,
+        adapters: &dyn VersionAdapters,
+    ) -> Result<BatchesUploadRequestV2, AdaptationError> {
+        match version {
+            Version::V1 => decode_and_upcast_batches_upload_from_v_1(wire, adapters),
+            Version::V2 => decode_and_upcast_batches_upload_from_v_2(wire, adapters),
+        }
+    }
+    /// Retain the original owned Head outcome when any projection refuses.
+    pub fn downcast_batches_upload_outcome(
+        version: Version,
+        head: BatchesUploadResultV2,
+        adapters: &dyn VersionAdapters,
+    ) -> ProjectionOutcome<BatchesUploadOutcome, BatchesUploadResultV2> {
+        match version {
+            Version::V1 => {
+                match downcast_batches_upload_from_v_1_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(BatchesUploadOutcome::V1(value))
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+            Version::V2 => {
+                match downcast_batches_upload_from_v_2_outcome(head, adapters) {
+                    ProjectionOutcome::Projected(value) => {
+                        ProjectionOutcome::Projected(BatchesUploadOutcome::V2(value))
+                    }
+                    ProjectionOutcome::Unsupported { head, error } => {
+                        ProjectionOutcome::Unsupported {
+                            head,
+                            error,
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /// Execute a Head handler once; the application supplies version resolution.
+    pub async fn dispatch_batches_upload<F, Fut>(
+        version: Version,
+        wire: ::serde_json::Value,
+        handler: F,
+        adapters: &(dyn VersionAdapters + Sync),
+    ) -> Result<
+        ProjectionOutcome<BatchesUploadOutcome, BatchesUploadResultV2>,
+        AdaptationError,
+    >
+    where
+        F: FnOnce(BatchesUploadRequestV2, VersionContext) -> Fut,
+        Fut: ::std::future::Future<Output = BatchesUploadResultV2>,
+    {
+        let input = decode_and_upcast_batches_upload(version, wire, adapters)?;
+        let head = handler(
+                input,
+                VersionContext {
+                    original_version: version,
+                },
+            )
+            .await;
+        Ok(downcast_batches_upload_outcome(version, head, adapters))
     }
 }

@@ -67,7 +67,7 @@ pub(crate) fn render_op_from_http(
         )));
     }
 
-    let ret = op_return_ty(&op.ty, env);
+    let ret = op_return_ty(&op.ty, env)?;
     let ret_in_ty = match &op.ty {
         hir::OpTypeSpec::Void => "()".to_string(),
         hir::OpTypeSpec::TypeSpec(ty) => {
@@ -264,12 +264,13 @@ pub(crate) fn render_op_from_http(
             Ok(RepresentationContext {
                 variant: repr.content_type.idl_name().to_string(),
                 content_type: repr.content_type.as_str().to_string(),
-                ty: env.axum_type(&repr.ty),
+                ty: env.axum_type(&repr.ty)?,
                 wire_ty: transport.map_type(&repr.ty, TransportDirection::Out, env.scope())?,
                 encode_expr: encode_expr("payload", &repr.ty, env.scope())?,
                 decode_expr: decode_expr("payload", &repr.ty, env.scope())?,
-                maximum: env.scope().sequence_maximum(&repr.ty),
+
                 is_byte: repr.is_byte,
+                is_bounded_sequence: matches!(&repr.ty, hir::TypeSpec::SequenceType(sequence) if sequence.len.is_some()),
             })
         })
         .collect::<IdlcResult<_>>()?;

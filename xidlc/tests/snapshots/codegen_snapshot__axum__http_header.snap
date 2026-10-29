@@ -523,10 +523,10 @@ pub mod test {
             } = request;
             let id: u32 = id;
             let req_id: String = req_id;
-            let flags: Vec<String> = flags.into_iter().collect();
+            let flags: Vec<String> = flags;
             let age: u32 = age;
             let session_id: String = session_id;
-            let prefs: Vec<String> = prefs.into_iter().collect();
+            let prefs: Vec<String> = prefs;
             let mut resp = match svc
                 .get_user(id, req_id, flags, age, session_id, prefs)
                 .await
@@ -648,10 +648,10 @@ pub mod test {
             prefs: Vec<String>,
         ) -> Result<User, xidl_rust_axum::Error> {
             let req_id: String = req_id;
-            let flags: Vec<String> = flags.into_iter().collect();
+            let flags: Vec<String> = flags;
             let age: u32 = age;
             let session_id: String = session_id;
-            let prefs: Vec<String> = prefs.into_iter().collect();
+            let prefs: Vec<String> = prefs;
             let xidl_path = "/v1/headers/{id}".to_string();
             let xidl_path = xidl_path.replace("{id}", &id.to_string());
             let mut req = self

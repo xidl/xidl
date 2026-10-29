@@ -122,8 +122,9 @@ pub(crate) struct RepresentationContext {
     pub(crate) wire_ty: String,
     pub(crate) encode_expr: String,
     pub(crate) decode_expr: String,
-    pub(crate) maximum: Option<i64>,
+
     pub(crate) is_byte: bool,
+    pub(crate) is_bounded_sequence: bool,
 }
 
 /// One `raises(...)` entry projected for the rust-axum generator.
@@ -150,12 +151,12 @@ pub(crate) struct ExceptionMemberContext {
     pub(crate) wire_name: String,
     pub(crate) ty: String,
     pub(crate) is_multi: bool,
+    pub(crate) is_bounded_sequence: bool,
     pub(crate) item_ty: String,
     pub(crate) item_is_string: bool,
     pub(crate) item_is_primitive: bool,
     /// `@optional`: the field is `Option<_>`; absent means no header.
     pub(crate) optional: bool,
-    pub(crate) maximum: Option<i64>,
 }
 
 #[derive(Serialize, Clone)]
@@ -171,7 +172,8 @@ pub(crate) struct ParamContext {
     pub(crate) serde_rename: Option<String>,
     /// Sequences encode an empty list with zero parameter occurrences.
     pub(crate) is_sequence: bool,
-    pub(crate) maximum: Option<i64>,
+    pub(crate) is_bounded_sequence: bool,
+
     /// A float arrives directly or as the sequence element: non-finite text
     /// (`inf`, `NaN`) must fail extraction instead of reaching the handler.
     pub(crate) is_floating: bool,
@@ -216,6 +218,7 @@ pub(crate) struct RenderEnv<'a> {
 impl<'a> RenderEnv<'a> {
     pub(crate) fn scope(&self) -> super::super::scope::TypeScope<'a> {
         super::super::scope::TypeScope {
+            types: &self.renderer.models,
             registry: self.registry,
             declaration: self.declaration_path,
             output: self.module_path,

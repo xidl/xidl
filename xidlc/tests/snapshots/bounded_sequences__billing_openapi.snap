@@ -38,10 +38,7 @@ expression: output
             "$ref": "#/components/schemas/billing.InvoiceIds"
           },
           "regions": {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/billing.InvoiceIds"
-            },
-            "type": "object"
+            "$ref": "#/components/schemas/billing.Regions"
           },
           "retry": {
             "$ref": "#/components/schemas/billing.InvoiceIds"
@@ -71,6 +68,7 @@ expression: output
             "additionalProperties": {
               "$ref": "#/components/schemas/billing.InvoiceIds"
             },
+            "maxProperties": 2,
             "type": "object"
           }
         },
@@ -126,6 +124,13 @@ expression: output
           "us"
         ],
         "type": "string"
+      },
+      "billing.Regions": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/billing.InvoiceIds"
+        },
+        "maxProperties": 2,
+        "type": "object"
       },
       "billing.Token": {
         "type": "string"
@@ -488,6 +493,7 @@ expression: output
               "additionalProperties": {
                 "$ref": "#/components/schemas/billing.InvoiceIds"
               },
+              "maxProperties": 2,
               "type": "object"
             }
           },
@@ -499,6 +505,7 @@ expression: output
               "additionalProperties": {
                 "$ref": "#/components/schemas/billing.InvoiceIds"
               },
+              "maxProperties": 2,
               "type": "object"
             }
           }
@@ -509,10 +516,7 @@ expression: output
             "headers": {
               "value": {
                 "schema": {
-                  "additionalProperties": {
-                    "$ref": "#/components/schemas/billing.InvoiceIds"
-                  },
-                  "type": "object"
+                  "$ref": "#/components/schemas/billing.Regions"
                 }
               }
             }

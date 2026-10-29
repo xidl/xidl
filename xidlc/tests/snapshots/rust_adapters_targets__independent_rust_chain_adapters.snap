@@ -1,6 +1,5 @@
 ---
 source: xidlc/tests/rust_adapters_targets.rs
-assertion_line: 82
 expression: "&files[0].1"
 ---
 /// Pure version projections. The application owns routing and side effects.
@@ -184,12 +183,21 @@ pub mod version_adapters {
                 ..error
             })
     }
-    fn map_sequence<S, T>(
+    fn map_sequence<S, T, C>(
         source: &[S],
         convert: impl Fn(&S) -> VersionedResult<T>,
+        refusal: impl Fn(&str) -> UnsupportedProjection,
         path: &str,
-    ) -> VersionedResult<Vec<T>> {
-        source.iter().map(|item| locate(convert(item), path)).collect()
+    ) -> VersionedResult<C>
+    where
+        C: TryFrom<Vec<T>>,
+        C::Error: ::std::fmt::Display,
+    {
+        let values = source
+            .iter()
+            .map(|item| locate(convert(item), path))
+            .collect::<VersionedResult<Vec<_>>>()?;
+        C::try_from(values).map_err(|error| refusal(&error.to_string()))
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn booking_upcast_from_v_2026_06_01(
@@ -214,6 +222,7 @@ pub mod version_adapters {
         let projected_2 = map_sequence(
             &source.roster,
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
+            refusal,
             "Booking.roster",
         )?;
         let projected_3 = ::std::option::Option::as_ref(&source.owner)
@@ -252,6 +261,7 @@ pub mod version_adapters {
         let projected_2 = map_sequence(
             &source.roster,
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
+            refusal,
             "Booking.roster",
         )?;
         let projected_3 = ::std::option::Option::as_ref(&source.owner)
@@ -420,6 +430,7 @@ pub mod version_adapters {
         let projected_2 = map_sequence(
             &source.items,
             |item| agenda_entry_upcast_from_v_2026_10_01(item, adapters),
+            refusal,
             "Booking.items",
         )?;
         let projected_3 = ::std::option::Option::as_ref(&source.locked)
@@ -457,6 +468,7 @@ pub mod version_adapters {
         let projected_2 = map_sequence(
             &source.items,
             |item| agenda_entry_downcast_to_v_2026_10_01(item, adapters),
+            refusal,
             "Booking.items",
         )?;
         let projected_3 = ::std::option::Option::as_ref(&source.locked)
@@ -655,7 +667,7 @@ pub mod version_adapters {
                         .map_err(|error| error.to_string())
                 })
                 .collect::<Result<Vec<_>, String>>()?;
-            Ok::<_, String>(values)
+            <Vec<String>>::try_from(values).map_err(|error| error.to_string())
         })()?;
         let raw_4 = object.get("owner").unwrap_or(&::serde_json::Value::Null);
         let value_4: Option<String> = if (raw_4).is_null() {
@@ -717,7 +729,8 @@ pub mod version_adapters {
                 .iter()
                 .map(decode_wire_v_2026_10_01_agenda_entry)
                 .collect::<Result<Vec<_>, String>>()?;
-            Ok::<_, String>(values)
+            <Vec<v2026_10_01::AgendaEntry>>::try_from(values)
+                .map_err(|error| error.to_string())
         })()?;
         let raw_3 = object
             .get("roster")
@@ -735,7 +748,7 @@ pub mod version_adapters {
                         .map_err(|error| error.to_string())
                 })
                 .collect::<Result<Vec<_>, String>>()?;
-            Ok::<_, String>(values)
+            <Vec<String>>::try_from(values).map_err(|error| error.to_string())
         })()?;
         let raw_4 = object.get("owner").unwrap_or(&::serde_json::Value::Null);
         let value_4: Option<String> = if (raw_4).is_null() {
@@ -842,7 +855,8 @@ pub mod version_adapters {
                 .iter()
                 .map(decode_wire_v_2027_01_01_agenda_entry)
                 .collect::<Result<Vec<_>, String>>()?;
-            Ok::<_, String>(values)
+            <Vec<v2027_01_01::AgendaEntry>>::try_from(values)
+                .map_err(|error| error.to_string())
         })()?;
         let raw_3 = object.get("organizer").unwrap_or(&::serde_json::Value::Null);
         let value_3: Option<String> = if (raw_3).is_null() {

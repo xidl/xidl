@@ -62,8 +62,8 @@ pub(crate) fn collect_method_params(
         let name = rust_ident(&p.name);
         let optional = p.is_optional;
         let flatten = p.is_flatten;
-        let inner_ty = env.axum_type(&p.ty);
-        let ty = env.render_param_type(&p.ty, optional);
+        let inner_ty = env.axum_type(&p.ty)?;
+        let ty = env.render_param_type(&p.ty, optional)?;
 
         // Input
         use xidl_parser::rest_hir::HttpSignatureParamDirection as Dir;
@@ -293,7 +293,7 @@ fn build_param_context(
         raw_name: input.sig_param.name.clone(),
         wire_name: input.wire_name.to_string(),
         path_template_name: input.path_template_name,
-        ty: env.render_param_type(&input.sig_param.ty, input.optional),
+        ty: env.render_param_type(&input.sig_param.ty, input.optional)?,
         in_ty: transport_param_type(
             &input.sig_param.ty,
             input.optional,
@@ -311,7 +311,8 @@ fn build_param_context(
         source: param_source_code(input.source),
         serde_rename: input.serde_name,
         is_sequence: matches!(input.wire_ty, TypeSpec::SequenceType(_)),
-        maximum: env.scope().sequence_maximum(&input.sig_param.ty),
+        is_bounded_sequence: matches!(input.wire_ty, TypeSpec::SequenceType(sequence) if sequence.len.is_some()),
+
         is_floating: match input.wire_ty {
             TypeSpec::FloatingPtType => true,
             TypeSpec::SequenceType(sequence) => {
@@ -319,10 +320,10 @@ fn build_param_context(
             }
             _ => false,
         },
-        header_item_ty: env.header_item_ty(input.wire_ty),
+        header_item_ty: env.header_item_ty(input.wire_ty)?,
         header_item_is_string: header_item_is_string(input.wire_ty),
         header_item_is_primitive: header_item_is_primitive(input.wire_ty),
-        cookie_item_ty: env.cookie_item_ty(input.wire_ty),
+        cookie_item_ty: env.cookie_item_ty(input.wire_ty)?,
         cookie_item_is_string: cookie_item_is_string(input.wire_ty),
         cookie_item_is_primitive: cookie_item_is_primitive(input.wire_ty),
         optional: input.optional,

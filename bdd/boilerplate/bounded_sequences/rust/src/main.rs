@@ -7,7 +7,7 @@ pub mod gen {
     include!("../bounded_sequences.rs");
 }
 use gen::{
-    billing::{Batch, BatchRejected, Export, Region, Total},
+    billing::{Batch, BatchRejected, Export, InvoiceIds, Region, Regions, Total},
     codes::RetryState,
     Batches, BatchesClient, BatchesExportedResponse, BatchesMetadataResponse, BatchesRejectedError,
     BatchesServer,
@@ -18,23 +18,34 @@ struct Billing {
     accepted: AtomicI32,
 }
 
+impl Billing {
+    fn ids(values: Vec<i32>) -> xidl_rust_axum::Result<InvoiceIds> {
+        InvoiceIds::try_from(values)
+            .map_err(|error| xidl_rust_axum::Error::new(500, error.to_string()))
+    }
+}
+
 #[async_trait]
 impl Batches for Billing {
     async fn rejected(&self, fault: i32) -> Result<Total, BatchesRejectedError> {
         let values = |channel| {
-            if fault == channel {
+            Billing::ids(if fault == channel {
                 vec![1, 2, 3]
             } else {
                 vec![1, 2]
-            }
+            })
         };
         Err(BatchesRejectedError::BatchRejected(BatchRejected {
-            ids: values(1),
-            retry: values(2),
-            tokens: values(3),
-            regions: BTreeMap::from([(Region::eu, values(4))]),
+            ids: values(1)?,
+            retry: values(2)?,
+            tokens: values(3)?,
+            regions: BTreeMap::from([(Region::Eu, values(4)?)])
+                .try_into()
+                .map_err(|error: xidl_rust_axum::BoundExceeded| {
+                    xidl_rust_axum::Error::new(500, error.to_string())
+                })?,
             detail: Total { count: 2 },
-            state: RetryState::blocked,
+            state: RetryState::Blocked,
             tag: "123".into(),
             token: "true".into(),
         }))
@@ -48,16 +59,19 @@ impl Batches for Billing {
             count: self.accepted.load(Ordering::SeqCst),
         })
     }
-    async fn query(&self, values: Vec<i32>) -> xidl_rust_axum::Result<Vec<i32>> {
+    async fn query(&self, values: InvoiceIds) -> xidl_rust_axum::Result<InvoiceIds> {
         Ok(values)
     }
-    async fn headers(&self, values: Vec<i32>) -> xidl_rust_axum::Result<Vec<i32>> {
+    async fn headers(&self, values: InvoiceIds) -> xidl_rust_axum::Result<InvoiceIds> {
         Ok(values)
     }
-    async fn cookies(&self, values: Vec<i32>) -> xidl_rust_axum::Result<Vec<i32>> {
+    async fn cookies(&self, values: InvoiceIds) -> xidl_rust_axum::Result<InvoiceIds> {
         Ok(values)
     }
-    async fn upload(&self, bytes: Vec<u8>) -> xidl_rust_axum::Result<Total> {
+    async fn upload(
+        &self,
+        bytes: xidl_rust_axum::BoundedVec<u8, 2>,
+    ) -> xidl_rust_axum::Result<Total> {
         Ok(Total {
             count: bytes.len() as i32,
         })
@@ -65,38 +79,41 @@ impl Batches for Billing {
     async fn metadata(
         &self,
         invalid: bool,
-        groups: BTreeMap<String, Vec<i32>>,
-        _backup: BTreeMap<String, Vec<i32>>,
+        groups: Regions,
+        _backup: Regions,
     ) -> xidl_rust_axum::Result<BatchesMetadataResponse> {
         Ok(BatchesMetadataResponse {
             value: if invalid {
-                BTreeMap::from([("eu".into(), vec![1, 2, 3])])
+                Regions::try_from_iter([("eu".into(), Self::ids(vec![1, 2, 3])?)])
+                    .map_err(|error| xidl_rust_axum::Error::new(500, error.to_string()))?
             } else {
                 groups
             },
         })
     }
     async fn exported(&self, invalid: bool) -> xidl_rust_axum::Result<BatchesExportedResponse> {
-        let ids = if invalid { vec![1, 2, 3] } else { vec![1, 2] };
+        let ids = Self::ids(if invalid { vec![1, 2, 3] } else { vec![1, 2] })?;
         Ok(BatchesExportedResponse {
             ids: ids.clone(),
             tokens: ids,
         })
     }
     async fn download(&self, raw: bool, invalid: bool) -> xidl_rust_axum::Result<Export> {
-        let ids = if invalid { vec![1, 2, 3] } else { vec![1, 2] };
+        let ids = Self::ids(if invalid { vec![1, 2, 3] } else { vec![1, 2] })?;
         Ok(if raw {
-            Export::OctetStream(ids.into_iter().map(|id| id as u8).collect())
+            Export::OctetStream(ids.map(|id| id as u8))
         } else {
             Export::Json(ids)
         })
     }
     async fn oversized(&self) -> xidl_rust_axum::Result<Batch> {
+        let value = Self::ids(vec![1, 2, 3])?;
         Ok(Batch {
-            invoices: vec![],
-            windows: vec![],
-            regions: [("eu".into(), vec![1, 2, 3])].into(),
-            days: [vec![], vec![]],
+            invoices: InvoiceIds::new(),
+            windows: Default::default(),
+            regions: Regions::try_from_iter([("eu".into(), value)])
+                .map_err(|error| xidl_rust_axum::Error::new(500, error.to_string()))?,
+            days: Default::default(),
             retry: None,
         })
     }
@@ -221,34 +238,43 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     });
     let client = BatchesClient::new(format!("http://{address}"));
     for values in [vec![], vec![1], vec![1, 2]] {
+        let ids = InvoiceIds::try_from(values.clone())?;
         let returned = client
             .reserve(Batch {
-                invoices: values.clone(),
-                windows: vec![values.clone()],
-                regions: [("eu".into(), values.clone())].into(),
-                days: [values.clone(), vec![]],
-                retry: Some(values.clone()),
+                invoices: ids.clone(),
+                windows: vec![ids.clone()].try_into()?,
+                regions: Regions::try_from_iter([("eu".into(), ids.clone())])?,
+                days: [ids.clone(), InvoiceIds::new()],
+                retry: Some(ids),
             })
             .await?;
-        assert_eq!(returned.invoices, values);
+        assert_eq!(returned.invoices.as_ref(), values.as_slice());
     }
-    assert_eq!(client.query(vec![1]).await?, vec![1]);
-    assert_eq!(client.headers(vec![1, 2]).await?, vec![1, 2]);
-    assert_eq!(client.cookies(vec![1, 2]).await?, vec![1, 2]);
-    assert_eq!(client.upload(vec![1, 2]).await?.count, 2);
+    assert_eq!(client.query(vec![1].try_into()?).await?.as_ref(), &[1]);
+    assert_eq!(
+        client.headers(vec![1, 2].try_into()?).await?.as_ref(),
+        &[1, 2]
+    );
+    assert_eq!(
+        client.cookies(vec![1, 2].try_into()?).await?.as_ref(),
+        &[1, 2]
+    );
+    assert_eq!(client.upload(vec![1, 2].try_into()?).await?.count, 2);
     assert!(
-        matches!(client.rejected(0).await, Err(BatchesRejectedError::BatchRejected(error)) if error.ids == vec![1, 2] && error.retry == vec![1, 2] && error.tokens == vec![1, 2])
+        matches!(client.rejected(0).await, Err(BatchesRejectedError::BatchRejected(error))
+        if error.ids.as_ref() == [1, 2] && error.retry.as_ref() == [1, 2] && error.tokens.as_ref() == [1, 2])
     );
     for fault in 1..=4 {
         assert!(
             matches!(client.rejected(fault).await, Err(BatchesRejectedError::Framework(error)) if error.code == 500)
         );
     }
-    assert!(client.upload(vec![1, 2, 3]).await.is_err());
-    assert!(client.query(vec![1, 2, 3]).await.is_err());
-    assert!(client.headers(vec![1, 2, 3]).await.is_err());
-    assert!(client.cookies(vec![1, 2, 3]).await.is_err());
-    let groups = BTreeMap::from([("eu".into(), vec![1, 2])]);
+    assert!(
+        InvoiceIds::try_from(vec![1, 2, 3]).is_err(),
+        "invalid SDK input cannot be constructed"
+    );
+    assert!(xidl_rust_axum::BoundedVec::<u8, 2>::try_from(vec![1, 2, 3]).is_err());
+    let groups = Regions::try_from_iter([("eu".into(), vec![1, 2].try_into()?)])?;
     assert_eq!(
         client
             .metadata(false, groups.clone(), groups.clone())
@@ -265,17 +291,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .code,
         500
     );
-    let invalid = BTreeMap::from([("eu".into(), vec![1, 2, 3])]);
-    assert!(client
-        .metadata(false, invalid.clone(), groups.clone())
-        .await
-        .is_err());
-    assert!(client.metadata(false, groups, invalid).await.is_err());
-    assert_eq!(client.exported(false).await?.ids, vec![1, 2]);
-    assert!(client.exported(true).await.is_err());
-    assert!(matches!(client.download(false, false).await?, Export::Json(ids) if ids == vec![1, 2]));
     assert!(
-        matches!(client.download(true, false).await?, Export::OctetStream(ids) if ids == vec![1, 2])
+        Regions::try_from_iter([
+            ("eu".into(), InvoiceIds::new()),
+            ("us".into(), InvoiceIds::new()),
+            ("jp".into(), InvoiceIds::new())
+        ])
+        .is_err(),
+        "outer map bound survives the typedef"
+    );
+    assert_eq!(client.exported(false).await?.ids.as_ref(), &[1, 2]);
+    assert!(client.exported(true).await.is_err());
+    assert!(
+        matches!(client.download(false, false).await?, Export::Json(ids) if ids.as_ref() == [1, 2])
+    );
+    assert!(
+        matches!(client.download(true, false).await?, Export::OctetStream(ids) if ids.as_ref() == [1, 2])
     );
     assert!(client.download(false, true).await.is_err());
     assert!(client.download(true, true).await.is_err());

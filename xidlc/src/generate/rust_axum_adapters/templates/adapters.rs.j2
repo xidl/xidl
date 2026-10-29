@@ -119,8 +119,10 @@
                     }
                 {% endif %}
                 {% if "sequence" in helpers %}
-                    fn map_sequence<S, T>(source: &[S], convert: impl Fn(&S) -> VersionedResult<T>, path: &str) -> VersionedResult<Vec<T>> {
-                        source.iter().map(|item| locate(convert(item), path)).collect()
+                    fn map_sequence<S, T, C>(source: &[S], convert: impl Fn(&S) -> VersionedResult<T>, refusal: impl Fn(&str) -> UnsupportedProjection, path: &str) -> VersionedResult<C>
+                    where C: TryFrom<Vec<T>>, C::Error: ::std::fmt::Display {
+                        let values = source.iter().map(|item| locate(convert(item), path)).collect::<VersionedResult<Vec<_>>>()?;
+                        C::try_from(values).map_err(|error| refusal(&error.to_string()))
                     }
                 {% endif %}
                 {% if "array" in helpers %}
@@ -131,20 +133,21 @@
                     }
                 {% endif %}
                 {% if "record" in helpers %}
-                    fn map_record<K: Ord, V, L: Ord, W>(
+                    fn map_record<K: Ord, V, L: Ord, W, C>(
                     source: &::std::collections::BTreeMap<K, V>,
                     key: impl Fn(&K) -> VersionedResult<L>,
                     value: impl Fn(&V) -> VersionedResult<W>,
                     refusal: impl Fn(&str) -> UnsupportedProjection,
                     path: &str,
-                    ) -> VersionedResult<::std::collections::BTreeMap<L, W>> {
+                    ) -> VersionedResult<C>
+                    where C: TryFrom<::std::collections::BTreeMap<L, W>>, C::Error: ::std::fmt::Display {
                         let mut target = ::std::collections::BTreeMap::new();
                         for (old_key, old_value) in source {
                             let next_key = locate(key(old_key), path)?;
                             let next_value = locate(value(old_value), path)?;
                             if target.insert(next_key, next_value).is_some() { return Err(refusal("map key projection is not injective")); }
                         }
-                        Ok(target)
+                        C::try_from(target).map_err(|error| refusal(&error.to_string()))
                     }
                 {% endif %}
                 {% include "adapters/conversions.rs.j2" %}

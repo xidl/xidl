@@ -57,6 +57,32 @@ fn invalid_sequence_bounds_are_contract_errors() {
     assert!(error.to_string().contains("sequence bound"));
 }
 
+#[test]
+fn map_bounds_resolve_in_the_declaring_scope_and_reject_invalid_dimensions() {
+    let spec = parse(
+        r#"
+        const long LIMIT = 7;
+        module billing {
+            const long LIMIT = 2;
+            typedef map<string, sequence<long, LIMIT>, LIMIT / 1> Groups;
+        };
+    "#,
+    )
+    .expect("existing map syntax accepts a maximum entry count");
+    let value = serde_json::to_value(spec).unwrap();
+    let map = &value[1]["ModuleDcl"]["definition"][1]["TypeDcl"]["TypedefDcl"]["ty"]["TypeSpec"]["MapType"];
+    assert_eq!(map["len"]["Literal"]["IntegerLiteral"], "2");
+    assert_eq!(
+        map["value"]["SequenceType"]["len"]["Literal"]["IntegerLiteral"],
+        "2"
+    );
+    for bound in ["0", "-1", "1 / 0", "9223372036854775807 + 1", "missing"] {
+        let source = format!("typedef map<string, long, {bound}> Groups;");
+        let error = parse(&source).expect_err("invalid map bound");
+        assert!(error.to_string().contains("map bound"), "{error}");
+    }
+}
+
 fn parse(source: &str) -> ParserResult<Specification> {
     let typed = crate::parser::parser_text(source).expect("legal IDL syntax");
     Specification::from_typed_ast_with_path(typed, "dimensions.idl")

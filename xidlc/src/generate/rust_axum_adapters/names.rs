@@ -4,13 +4,14 @@ use super::context::{Call, Value};
 use super::layout::Layout;
 use crate::error::IdlcResult;
 use crate::generate::adapter::{TypeShape, TypeUse, ValuePlan};
-use crate::generate::rust::util::{rust_ident, type_with_decl};
+use crate::generate::rust::util::rust_ident;
 use crate::generate::utils::scope::resolve_canonical;
 use convert_case::{Case, Casing};
 use std::collections::BTreeMap;
 use xidl_parser::hir;
 
 pub(super) struct Names<'a> {
+    pub models: &'a crate::generate::rust::RustRenderer,
     pub version: &'a str,
     pub step_from: &'a str,
     pub upward: bool,
@@ -73,7 +74,7 @@ impl Names<'_> {
                 self.normalize_constant(&mut dimension.0, &value.scope)?;
             }
         }
-        let mut ty = type_with_decl(&ty, &declarator);
+        let mut ty = self.models.declared_type(&ty, &declarator)?;
         if recursive {
             ty = format!("Box<{ty}>");
         }
@@ -86,7 +87,7 @@ impl Names<'_> {
     pub(super) fn type_name(&self, ty: &hir::TypeSpec, scope: &[String]) -> IdlcResult<String> {
         let mut ty = ty.clone();
         self.normalize(&mut ty, scope)?;
-        Ok(crate::generate::rust::util::rust_type(&ty))
+        self.models.type_name(&ty)
     }
 
     pub(super) fn value(&self, plan: &ValuePlan) -> Value {

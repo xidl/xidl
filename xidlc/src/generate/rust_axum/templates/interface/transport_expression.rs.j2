@@ -3,7 +3,7 @@
 {%- elif kind == "box" -%}
 Box::new({{ converted }})
 {%- elif kind == "sequence" -%}
-{{ source }}.into_iter(){% if converted %}.map(|value| {{ converted }}){% endif %}.collect()
+{{ source }}{% if not bounded %}.into_iter(){% endif %}.map(|value| {{ converted }}){% if not bounded %}.collect(){% endif %}
 {%- elif kind == "record" -%}
-{{ source }}.into_iter(){% if converted %}.map(|(key, value)| (key, {{ converted }})){% endif %}.collect()
+{{ source }}{% if bounded %}.map_values(|value| {{ converted }}){% else %}.into_iter().map(|(key, value)| (key, {{ converted }})).collect(){% endif %}
 {%- endif -%}

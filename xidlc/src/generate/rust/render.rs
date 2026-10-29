@@ -49,6 +49,7 @@ pub trait RustRender {
 pub struct RustRenderer {
     env: Environment<'static>,
     imports: Vec<String>,
+    pub(super) runtime: Option<&'static str>,
 }
 
 impl RustRenderer {
@@ -62,7 +63,11 @@ impl RustRenderer {
         env.add_filter("rustfmt", rust_format_filter);
         env.add_global("opt", minijinja::Value::from_serialize(&attribute));
         let imports = Self::import_prefixes_of(&attribute);
-        Ok(Self { env, imports })
+        Ok(Self {
+            env,
+            imports,
+            runtime: None,
+        })
     }
 
     /// Reference prefixes of the units this file imports, when it imports any.

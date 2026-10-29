@@ -1,5 +1,5 @@
 use crate::error::IdlcResult;
-use crate::generate::rust::{RustRender, RustRenderer};
+use crate::generate::rust::RustRender;
 use crate::generate::rust_axum::interface::render_interface_with_path;
 use crate::generate::rust_axum::transport::TypeRegistry;
 use crate::generate::rust_axum::{RustAxumRenderOutput, RustAxumRenderer};
@@ -9,20 +9,14 @@ use xidl_parser::hir;
 /// Merged Axum specification renderer with types before interfaces.
 pub(crate) struct MergedAxumSpecBuilder<'a> {
     axum_renderer: &'a RustAxumRenderer,
-    rust_renderer: RustRenderer,
     registry: TypeRegistry,
 }
 
 impl<'a> MergedAxumSpecBuilder<'a> {
     /// Create a merged renderer from prepared Axum and Rust renderers.
-    pub(crate) fn new(
-        axum_renderer: &'a RustAxumRenderer,
-        rust_renderer: RustRenderer,
-        registry: TypeRegistry,
-    ) -> Self {
+    pub(crate) fn new(axum_renderer: &'a RustAxumRenderer, registry: TypeRegistry) -> Self {
         Self {
             axum_renderer,
-            rust_renderer,
             registry,
         }
     }
@@ -127,8 +121,9 @@ impl<'a> MergedAxumSpecBuilder<'a> {
         module_path: &[String],
     ) -> IdlcResult<RustAxumRenderOutput> {
         let mut def = def.clone();
-        super::scope::TypeScope::new(&self.registry, module_path).lower_definition(&mut def);
-        let output = def.render(&self.rust_renderer)?;
+        super::scope::TypeScope::new(&self.registry, module_path, &self.axum_renderer.models)
+            .lower_definition(&mut def);
+        let output = def.render(&self.axum_renderer.models)?;
         Ok(RustAxumRenderOutput {
             source: output.source,
         })

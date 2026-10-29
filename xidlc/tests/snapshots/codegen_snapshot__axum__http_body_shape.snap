@@ -345,7 +345,7 @@ where
                     err.status().as_u16(),
                     err.body_text(),
                 ))?;
-            let payload = xidl_body_bytes.to_vec();
+            let payload: Vec<u8> = xidl_body_bytes.to_vec();
             Ok(Self { media_type, payload })
         }
     }
@@ -710,7 +710,7 @@ where
         }
         let BodyShapeUploadRequest { media_type, payload } = request;
         let media_type: Option<String> = media_type;
-        let payload: Vec<u8> = payload.into_iter().collect();
+        let payload: Vec<u8> = payload;
         let mut resp = match svc.upload(media_type, payload).await {
             Ok(resp_value) => {
                 let mut resp = {
