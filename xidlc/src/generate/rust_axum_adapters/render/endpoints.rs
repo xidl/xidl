@@ -25,6 +25,7 @@ impl AdapterRenderer<'_> {
             .map(|operation| operation.prefix.replace("_from_", "_error_to_"))
             .collect::<BTreeSet<_>>();
         let head_names = Names {
+            models: self.models,
             version: &head.version.id,
             step_from: &head.version.id,
             upward: false,
@@ -33,6 +34,7 @@ impl AdapterRenderer<'_> {
         };
         for (index, version) in self.plan.versions.iter().enumerate() {
             let names = Names {
+                models: self.models,
                 version: &version.version.id,
                 step_from: &version.version.id,
                 upward: false,
@@ -73,6 +75,7 @@ impl AdapterRenderer<'_> {
                 let mut downcast_error = Vec::new();
                 for step in &self.plan.steps[index..] {
                     let new = Names {
+                        models: self.models,
                         version: &step.to.id,
                         step_from: &step.from.id,
                         upward: true,
@@ -90,6 +93,7 @@ impl AdapterRenderer<'_> {
                 }
                 for step in self.plan.steps[index..].iter().rev() {
                     let old = Names {
+                        models: self.models,
                         version: &step.from.id,
                         step_from: &step.from.id,
                         upward: false,
@@ -163,6 +167,7 @@ impl AdapterRenderer<'_> {
             return Ok(());
         };
         let names = Names {
+            models: self.models,
             version: &head.version.id,
             step_from: &head.version.id,
             upward: false,
@@ -189,6 +194,7 @@ impl AdapterRenderer<'_> {
                     continue;
                 };
                 let names = Names {
+                    models: self.models,
                     version: &version.version.id,
                     step_from: &version.version.id,
                     upward: false,
@@ -253,6 +259,7 @@ impl AdapterRenderer<'_> {
             self.layout
                 .validate(&format!("{}::{key}", head.version.id))?;
             let head_names = Names {
+                models: self.models,
                 version: &head.version.id,
                 step_from: &head.version.id,
                 upward: false,
@@ -274,6 +281,7 @@ impl AdapterRenderer<'_> {
                     continue;
                 }
                 let names = Names {
+                    models: self.models,
                     version: &version.version.id,
                     step_from: &version.version.id,
                     upward: false,
@@ -285,6 +293,7 @@ impl AdapterRenderer<'_> {
                     .rev()
                     .map(|step| {
                         let call_name = Names {
+                            models: self.models,
                             version: &step.from.id,
                             step_from: &step.from.id,
                             upward: false,

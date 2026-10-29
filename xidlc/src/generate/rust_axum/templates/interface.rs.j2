@@ -318,8 +318,8 @@
                                 .await
                                 .map_err(|err| ::xidl_rust_axum::Error::new(err.status().as_u16(), err.body_text()))?;
                                 {% if method.request_content_type == "application/octet-stream" %}
-                                    let {{ method.body_params[0].name }} = {% if method.body_params[0].maximum is not none %}::xidl_rust_axum::SequenceWire::<_, {{ method.body_params[0].maximum }}>::try_from(xidl_body_bytes.to_vec())
-                                        .map_err(|error| ::xidl_rust_axum::Error::new(400, error.to_string()))?{% else %}xidl_body_bytes.to_vec(){% endif %};
+                                    let {{ method.body_params[0].name }}: {{ method.body_params[0].in_ty }} = xidl_body_bytes.to_vec(){% if method.body_params[0].is_bounded_sequence %}.try_into()
+                                        .map_err(|error| ::xidl_rust_axum::Error::new(400, format!("{error}")))?{% endif %};
                                 {% else %}
                                     let xidl_body: {{ method.struct_prefix }}RequestInBody = ::xidl_rust_axum::DeserializeFactory::new("{{ method.request_content_type }}")
                                     .from_slice(&xidl_body_bytes)?;

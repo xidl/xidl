@@ -1,6 +1,6 @@
 use xidl_parser::hir;
 
-use super::contexts::{FieldTypeContext, FieldZodContext, TsType, ZodSchema};
+use super::contexts::{FieldTypeContext, FieldZodContext, TsType, ZodCoercion, ZodSchema};
 use super::method::TypeRefTarget;
 use super::names::{
     declarator_name, integer_schema_primitive, ts_ident, ts_prop_name, ts_scoped_name,
@@ -243,6 +243,8 @@ pub(crate) fn zod_schema_for_type_spec(ty: &hir::TypeSpec, module_path: &[String
     zod_schema_for_type_spec_impl(ty, module_path, None, ZodCoercion::Strict)
 }
 
+/// Builds strict schemas referencing another generated model file.
+#[cfg(feature = "gen-typescript-rest")]
 pub(crate) fn zod_schema_for_type_spec_with_prefix(
     ty: &hir::TypeSpec,
     module_path: &[String],
@@ -260,19 +262,14 @@ pub(crate) fn zod_coerced_schema_for_type_spec(
     zod_schema_for_type_spec_impl(ty, module_path, None, ZodCoercion::Coerce)
 }
 
+/// Builds text-coercing schemas referencing another generated model file.
+#[cfg(feature = "gen-typescript-rest")]
 pub(crate) fn zod_coerced_schema_for_type_spec_with_prefix(
     ty: &hir::TypeSpec,
     module_path: &[String],
     prefix: Option<&str>,
 ) -> ZodSchema {
     zod_schema_for_type_spec_impl(ty, module_path, prefix, ZodCoercion::Coerce)
-}
-
-/// Whether a schema position may coerce text into the declared type.
-#[derive(Clone, Copy)]
-pub(crate) enum ZodCoercion {
-    Strict,
-    Coerce,
 }
 
 fn zod_schema_for_type_spec_impl(
@@ -351,9 +348,10 @@ fn zod_schema_for_type_spec_impl(
             }
             .to_string(),
         ),
-        hir::TypeSpec::MapType(map) => ZodSchema::Record(Box::new(
-            zod_schema_for_type_spec_impl(&map.value, module_path, prefix, coercion),
-        )),
+        hir::TypeSpec::MapType(map) => ZodSchema::Record {
+            value: Box::new(zod_schema_for_type_spec_impl(&map.value, module_path, prefix, coercion)),
+            maximum: map.len.as_ref().and_then(|bound| hir::const_expr_to_i64(&bound.0)),
+        },
         hir::TypeSpec::TemplateType(value) => {
             let ty = ts_template_type(value, module_path, TypeRefTarget::Types);
             ZodSchema::Custom(ty)

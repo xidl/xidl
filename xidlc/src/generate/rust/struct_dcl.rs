@@ -2,7 +2,6 @@ use crate::error::IdlcResult;
 use crate::generate::rust::util::{
     declarator_name, is_skipped_from_annotations, rust_deprecated_attr,
     rust_derive_info_with_extra, rust_passthrough_attrs_from_annotations, rust_scoped_name,
-    type_with_decl,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::{doc_lines_from_annotations, has_annotation};
@@ -47,7 +46,7 @@ pub(crate) fn render_struct_with_config(
             member.ident.iter().map(move |decl| {
                 let raw_name = declarator_name(decl);
                 let name = crate::generate::rust::util::rust_ident(&raw_name);
-                let mut ty = type_with_decl(&member.ty, decl);
+                let mut ty = renderer.declared_type(&member.ty, decl)?;
                 if member.recursive {
                     ty = format!("Box<{ty}>");
                 }
@@ -57,7 +56,7 @@ pub(crate) fn render_struct_with_config(
                 let wire_name =
                     hir::effective_wire_name(&raw_name, &member.annotations, &def.annotations);
                 let rename = (wire_name != raw_name).then_some(wire_name);
-                json!({
+                Ok(json!({
                     "ty": ty,
                     "name": name,
                     "serde_rename": rename,
@@ -67,10 +66,10 @@ pub(crate) fn render_struct_with_config(
                     "optional": optional,
                     "doc": doc,
                     "rust_attrs": rust_attrs,
-                })
+                }))
             })
         })
-        .collect::<Vec<_>>();
+        .collect::<IdlcResult<Vec<_>>>()?;
     let derive = rust_derive_info_with_extra(&def.annotations, &def.annotations);
     // Mechanical references live inside the type's own declaration and
     // impls: field types, `#[default]` variants and derive expansions all

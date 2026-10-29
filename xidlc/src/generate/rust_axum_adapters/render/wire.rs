@@ -40,6 +40,7 @@ impl AdapterRenderer<'_> {
                     Layout::error(&endpoint.request, "missing served request surface")
                 })?;
             let names = Names {
+                models: self.models,
                 version: &version.version.id,
                 step_from: &version.version.id,
                 upward: false,
@@ -83,6 +84,7 @@ impl AdapterRenderer<'_> {
 impl WireBuilder<'_> {
     fn names<'a>(&'a self, version: &'a VersionPlan) -> Names<'a> {
         Names {
+            models: self.renderer.models,
             version: &version.version.id,
             step_from: &version.version.id,
             upward: false,
@@ -138,15 +140,12 @@ impl WireBuilder<'_> {
             }
             hir::TypeSpec::SequenceType(sequence) => Ok(WireValue::Sequence {
                 inner: Box::new(self.ty(&sequence.ty, scope, version)?),
-                maximum: sequence
-                    .len
-                    .as_ref()
-                    .map(|bound| self.names(version).bound(bound, scope))
-                    .transpose()?,
+                ty: self.names(version).type_name(ty, scope)?,
             }),
             hir::TypeSpec::MapType(map) => {
                 self.validate_map_key(&map.key, scope, version)?;
                 Ok(WireValue::Map {
+                    ty: self.names(version).type_name(ty, scope)?,
                     key: self.names(version).type_name(&map.key, scope)?,
                     value: Box::new(self.ty(&map.value, scope, version)?),
                 })

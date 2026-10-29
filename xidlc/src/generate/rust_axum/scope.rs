@@ -6,14 +6,20 @@ use xidl_parser::hir;
 /// IDL lookup scope and Rust output scope for one rendering site.
 #[derive(Clone, Copy)]
 pub(crate) struct TypeScope<'a> {
+    pub(crate) types: &'a crate::generate::rust::RustRenderer,
     pub(crate) registry: &'a TypeRegistry,
     pub(crate) declaration: &'a [String],
     pub(crate) output: &'a [String],
 }
 
 impl<'a> TypeScope<'a> {
-    pub(crate) fn new(registry: &'a TypeRegistry, module: &'a [String]) -> Self {
+    pub(crate) fn new(
+        registry: &'a TypeRegistry,
+        module: &'a [String],
+        types: &'a crate::generate::rust::RustRenderer,
+    ) -> Self {
         Self {
+            types,
             registry,
             declaration: module,
             output: module,
@@ -40,34 +46,10 @@ impl<'a> TypeScope<'a> {
     }
 
     /// Map keys retain their public scalar representation and ordering traits.
-    pub(crate) fn public_type(self, ty: &hir::TypeSpec) -> String {
+    pub(crate) fn public_type(self, ty: &hir::TypeSpec) -> crate::error::IdlcResult<String> {
         let mut ty = ty.clone();
         self.lower_type(&mut ty);
-        crate::generate::rust::util::rust_type(&ty)
-    }
-
-    /// Resolves a sequence's maximum through transparent typedefs.
-    pub(crate) fn sequence_maximum(self, ty: &hir::TypeSpec) -> Option<i64> {
-        match ty {
-            hir::TypeSpec::SequenceType(sequence) => sequence
-                .len
-                .as_ref()
-                .and_then(|bound| hir::const_expr_to_i64(&bound.0)),
-            hir::TypeSpec::ScopedName(name) => {
-                let key = self.resolve(name)?;
-                let super::transport::TransportTypeDef::Typedef {
-                    ty: hir::TypedefType::TypeSpec(ty),
-                    declarator: hir::Declarator::SimpleDeclarator(_),
-                } = self.registry.get(&key)?
-                else {
-                    return None;
-                };
-                let mut parent = key.split("::").map(str::to_owned).collect::<Vec<_>>();
-                parent.pop();
-                self.in_declaration(&parent).sequence_maximum(ty)
-            }
-            _ => None,
-        }
+        self.types.type_name(&ty)
     }
 
     pub(crate) fn relative_path(output: &[String], canonical: &str) -> String {

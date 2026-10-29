@@ -59,7 +59,11 @@ fn render_modules_returns_structured_transport_context() {
                 is_root: false,
             }),
             TransportDirection::In,
-            super::super::scope::TypeScope::new(&registry, &["demo".to_string()]),
+            super::super::scope::TypeScope::new(
+                &registry,
+                &["demo".to_string()],
+                &super::super::RustAxumRenderer::new().unwrap().models,
+            ),
         )
         .expect("track widget type");
 
@@ -103,7 +107,11 @@ fn skipped_members_mark_the_public_struct_for_default_fallback() {
                 is_root: false,
             }),
             TransportDirection::Out,
-            super::super::scope::TypeScope::new(&registry, &["demo".to_string()]),
+            super::super::scope::TypeScope::new(
+                &registry,
+                &["demo".to_string()],
+                &super::super::RustAxumRenderer::new().unwrap().models,
+            ),
         )
         .expect("track widget type");
 
@@ -153,7 +161,11 @@ fn inherited_base_is_a_flattened_transport_field() {
                 is_root: false,
             }),
             TransportDirection::Out,
-            super::super::scope::TypeScope::new(&registry, &["demo".to_string()]),
+            super::super::scope::TypeScope::new(
+                &registry,
+                &["demo".to_string()],
+                &super::super::RustAxumRenderer::new().unwrap().models,
+            ),
         )
         .expect("track child type");
     let modules = tracker

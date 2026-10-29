@@ -1,6 +1,7 @@
 use crate::error::IdlcResult;
 use crate::generate::typescript::TypescriptRenderer;
 use crate::generate::typescript::definition::TypeRefTarget;
+use crate::generate::typescript::definition::annotations::ts_doc_lines;
 use crate::generate::typescript::definition::contexts::TsType;
 use crate::generate::typescript::definition::type_expr::ts_type_for_type_spec;
 use serde::Serialize;
@@ -245,8 +246,7 @@ fn render_defs(
                 if !body.is_empty() {
                     let ident =
                         crate::generate::typescript::definition::names::ts_ident(&module.ident);
-                    let doc =
-                        crate::generate::typescript::definition::ts_doc_lines(&module.annotations)?;
+                    let doc = ts_doc_lines(&module.annotations)?;
                     let module = ModuleBlock {
                         renderer,
                         ident: &ident,

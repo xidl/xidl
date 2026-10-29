@@ -43,7 +43,10 @@ impl Codegen for RustAxumAdaptersCodegen {
             .ok_or_else(|| RpcError::new(format!("rust-axum-adapters: invalid contract {path}")))?;
         let renderer = renderer::RustAxumAdaptersRenderer::new()
             .map_err(|error| RpcError::new(error.to_string()))?;
-        let context = render::AdapterRenderer::new(&http, &plan)
+        let models = crate::generate::rust::RustRenderer::new(Default::default())
+            .map_err(|error| RpcError::new(error.to_string()))?
+            .with_runtime("::xidl_rust_axum");
+        let context = render::AdapterRenderer::new(&http, &plan, &models)
             .context()
             .map_err(|error| RpcError::new(error.to_string()))?;
         let content = renderer

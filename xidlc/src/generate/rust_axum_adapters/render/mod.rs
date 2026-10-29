@@ -21,14 +21,20 @@ use xidl_parser::rest_hir::RestHirDocument;
 
 pub(super) struct AdapterRenderer<'a> {
     pub http: &'a RestHirDocument,
+    pub models: &'a crate::generate::rust::RustRenderer,
     pub plan: &'a AdapterPlan,
     pub layout: Layout<'a>,
 }
 
 impl<'a> AdapterRenderer<'a> {
-    pub(super) fn new(http: &'a RestHirDocument, plan: &'a AdapterPlan) -> Self {
+    pub(super) fn new(
+        http: &'a RestHirDocument,
+        plan: &'a AdapterPlan,
+        models: &'a crate::generate::rust::RustRenderer,
+    ) -> Self {
         Self {
             http,
+            models,
             plan,
             layout: Layout::new(&http.spec),
         }
@@ -47,6 +53,7 @@ impl<'a> AdapterRenderer<'a> {
                 value: version.version.value.clone(),
             });
             let names = Names {
+                models: self.models,
                 version: &version.version.id,
                 step_from: &version.version.id,
                 upward: false,
@@ -60,6 +67,7 @@ impl<'a> AdapterRenderer<'a> {
         let head_names = self.head_names();
         for (index, step) in self.plan.steps.iter().enumerate() {
             let old = Names {
+                models: self.models,
                 version: &step.from.id,
                 step_from: &step.from.id,
                 upward: false,
@@ -67,6 +75,7 @@ impl<'a> AdapterRenderer<'a> {
                 layout: &self.layout,
             };
             let new = Names {
+                models: self.models,
                 version: &step.to.id,
                 step_from: &step.from.id,
                 upward: true,
@@ -171,6 +180,7 @@ impl<'a> AdapterRenderer<'a> {
     fn head_names(&self) -> Names<'_> {
         let head = self.plan.versions.last().expect("timeline is non-empty");
         Names {
+            models: self.models,
             version: &head.version.id,
             step_from: &head.version.id,
             upward: false,

@@ -146,12 +146,21 @@ pub mod version_adapters {
                 ..error
             })
     }
-    fn map_sequence<S, T>(
+    fn map_sequence<S, T, C>(
         source: &[S],
         convert: impl Fn(&S) -> VersionedResult<T>,
+        refusal: impl Fn(&str) -> UnsupportedProjection,
         path: &str,
-    ) -> VersionedResult<Vec<T>> {
-        source.iter().map(|item| locate(convert(item), path)).collect()
+    ) -> VersionedResult<C>
+    where
+        C: TryFrom<Vec<T>>,
+        C::Error: ::std::fmt::Display,
+    {
+        let values = source
+            .iter()
+            .map(|item| locate(convert(item), path))
+            .collect::<VersionedResult<Vec<_>>>()?;
+        C::try_from(values).map_err(|error| refusal(&error.to_string()))
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn item_downcast_to_v_1(
@@ -181,7 +190,12 @@ pub mod version_adapters {
             type_path: "Items".into(),
             reason: reason.into(),
         };
-        map_sequence(source, |item| item_downcast_to_v_1(item, adapters), "Items")
+        map_sequence(
+            source,
+            |item| item_downcast_to_v_1(item, adapters),
+            refusal,
+            "Items",
+        )
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn responses_alias_request_upcast_from_v_1(
@@ -237,6 +251,7 @@ pub mod version_adapters {
         let projected_0 = map_sequence(
             source,
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
+            refusal,
             "ResponsesBytesResponse.r#return",
         )?;
         Ok(projected_0)
@@ -268,6 +283,7 @@ pub mod version_adapters {
         let projected_0 = map_sequence(
             source,
             |item| item_downcast_to_v_1(item, adapters),
+            refusal,
             "ResponsesItemsResponse.r#return",
         )?;
         Ok(projected_0)
@@ -299,6 +315,7 @@ pub mod version_adapters {
         let projected_0 = map_sequence(
             source,
             |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
+            refusal,
             "ResponsesLabelsResponse.r#return",
         )?;
         Ok(projected_0)
@@ -332,8 +349,10 @@ pub mod version_adapters {
             |item| map_sequence(
                 item,
                 |item| Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone(item)),
+                refusal,
                 "ResponsesMatrixResponse.r#return",
             ),
+            refusal,
             "ResponsesMatrixResponse.r#return",
         )?;
         Ok(projected_0)
@@ -366,6 +385,7 @@ pub mod version_adapters {
             .map(|item| map_sequence(
                 item,
                 |item| item_downcast_to_v_1(item, adapters),
+                refusal,
                 "ResponsesOptionalResponse.values",
             ))
             .transpose()?;
@@ -403,6 +423,7 @@ pub mod version_adapters {
         let projected_0 = map_sequence(
             source,
             |item| item_downcast_to_v_1(item, adapters),
+            refusal,
             "ResponsesRetiredHeaderResponse.r#return",
         )?;
         Ok(v1::ResponsesRetiredHeaderResponse {

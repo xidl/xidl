@@ -1,4 +1,4 @@
-{% from "interface/sequence_limits.rs.j2" import check as check_sequence %}
+{% from "interface/collection.rs.j2" import collect_values %}
 {% from "interface/version_parameter.rs.j2" import pin_http, pin_ws with context %}
 {#- Decode response header/cookie out-parameters into local variables
     named after them. Requires `resp` in scope. -#}
@@ -18,13 +18,7 @@
                         .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %};
                         {{ param.name }}.push(parsed);
                     }
-                    {% if param.maximum is not none %}
-                    let {{ param.name }} = ::xidl_rust_axum::SequenceWire::<_, {{ param.maximum }}>::try_from({{ param.name }})
-                        .map_err(|error| ::xidl_rust_axum::Error::new(400, error.to_string()))?;
-                    {% endif %}
-                    {% if param.optional %}
-                        let {{ param.name }} = if {{ param.name }}.is_empty() { None } else { Some({{ param.name }}) };
-                    {% endif %}
+                    {{ collect_values(param.name, param.out_ty, param.optional, param.is_bounded_sequence) }}
                 {% else %}
                     {% if param.optional %}
                         let {{ param.name }}: {{ param.out_ty }} = match headers.get("{{ param.wire_name }}") {
@@ -68,13 +62,7 @@
                             {{ param.name }}.push(parsed);
                         }
                     }
-                    {% if param.maximum is not none %}
-                    let {{ param.name }} = ::xidl_rust_axum::SequenceWire::<_, {{ param.maximum }}>::try_from({{ param.name }})
-                        .map_err(|error| ::xidl_rust_axum::Error::new(400, error.to_string()))?;
-                    {% endif %}
-                    {% if param.optional %}
-                        let {{ param.name }} = if {{ param.name }}.is_empty() { None } else { Some({{ param.name }}) };
-                    {% endif %}
+                    {{ collect_values(param.name, param.out_ty, param.optional, param.is_bounded_sequence) }}
                 {% else %}
                     {% if param.optional and param.cookie_item_is_string %}
                         let {{ param.name }}: {{ param.out_ty }} = cookie_map
@@ -123,7 +111,7 @@
         {% for member in ex.headers %}
             {% if member.is_multi %}
                 value.{{ member.field }} = {
-                    let mut values: {{ member.ty }} = Vec::new();
+                    let mut values: Vec<{{ member.item_ty }}> = Vec::new();
                     for header_value in headers.get_all("{{ member.wire_name }}").iter() {
                         let header_str = header_value
                         .to_str()
@@ -135,11 +123,10 @@
                             values.push(parsed);
                         }
                     }
-                    {% if member.maximum %}
-                        ::xidl_rust_axum::SequenceLimit::check(values.len(), {{ member.maximum }})
-                            .map_err(|err| xidl_rust_axum::Error::new(status.as_u16(), format!("exception {{ member.wire_name }}: {err}")))?;
+                    {% if member.is_bounded_sequence %}
+                        let values = values.try_into().map_err(|error| xidl_rust_axum::Error::new(status.as_u16(), format!("exception {{ member.wire_name }}: {error}")))?;
                     {% endif %}
-                    {% if member.optional %}if headers.contains_key("{{ member.wire_name }}") { Some(values.into_iter().collect()) } else { None }{% else %}values.into_iter().collect(){% endif %}
+                    {% if member.optional %}if headers.contains_key("{{ member.wire_name }}") { Some(values) } else { None }{% else %}values{% endif %}
                     };
                 {% elif member.optional %}
                     value.{{ member.field }} = match headers.get("{{ member.wire_name }}") {
@@ -172,7 +159,7 @@
                 {% for member in ex.cookies %}
                     {% if member.is_multi %}
                         value.{{ member.field }} = {
-                            let mut values: {{ member.ty }} = Vec::new();
+                            let mut values: Vec<{{ member.item_ty }}> = Vec::new();
                             if let Some(items) = cookie_map.get("{{ member.wire_name }}") {
                                 for value_str in items {
                                     let parsed: {{ member.item_ty }} = {% if member.item_is_string %}value_str.to_string(){% elif member.item_is_primitive %}value_str.parse()
@@ -181,11 +168,10 @@
                                     values.push(parsed);
                                 }
                             }
-                            {% if member.maximum %}
-                        ::xidl_rust_axum::SequenceLimit::check(values.len(), {{ member.maximum }})
-                            .map_err(|err| xidl_rust_axum::Error::new(status.as_u16(), format!("exception {{ member.wire_name }}: {err}")))?;
+                    {% if member.is_bounded_sequence %}
+                        let values = values.try_into().map_err(|error| xidl_rust_axum::Error::new(status.as_u16(), format!("exception {{ member.wire_name }}: {error}")))?;
                     {% endif %}
-                    {% if member.optional %}if cookie_map.contains_key("{{ member.wire_name }}") { Some(values.into_iter().collect()) } else { None }{% else %}values.into_iter().collect(){% endif %}
+                    {% if member.optional %}if cookie_map.contains_key("{{ member.wire_name }}") { Some(values) } else { None }{% else %}values{% endif %}
                             };
                         {% elif member.optional %}
                             value.{{ member.field }} = match cookie_map.get("{{ member.wire_name }}").and_then(|values| values.first()) {
@@ -312,9 +298,6 @@
             {% for method in methods %}
                 #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables{% if method.raises_deprecated %}, deprecated{% endif %})]
                 pub async fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{% if method.is_client_stream %}{% if method.is_byte_stream %}xidl_rust_axum::stream::Writer<xidl_rust_axum::axum::body::Bytes, {{ method.response_ty }}>{% else %}xidl_rust_axum::stream::Writer<{{ method.request_item_ty }}, {{ method.response_ty }}>{% endif %}{% elif method.is_bidi_stream %}xidl_rust_axum::stream::ReaderWriter<{{ method.request_item_ty }}, {{ method.response_ty }}>{% elif method.is_server_stream %}{% if method.is_byte_stream %}xidl_rust_axum::stream::ByteReader{% else %}xidl_rust_axum::stream::Reader<{{ method.response_ty }}>{% endif %}{% elif method.is_upgrade %}::xidl_rust_axum::reqwest::Upgraded{% else %}{{ method.response_ty }}{% endif %}, {% if method.raises | length > 0 %}{{ method.error_ty }}{% else %}xidl_rust_axum::Error{% endif %}> {
-                    {% for param in method.request_params %}
-                        {{ check_sequence(param.name, param.maximum, 400, param.optional) }}
-                    {% endfor %}
                     {% for param in method.header_params + method.cookie_params %}
                         let {{ param.name }}: {{ param.out_ty }} = {{ param.out_expr }};
                     {% endfor %}
@@ -652,7 +635,7 @@
                                     req.headers_mut()
                                     .entry(xidl_rust_axum::reqwest::header::CONTENT_TYPE)
                                     .or_insert(xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/octet-stream"));
-                                    *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from({{ method.body_params[0].name }}));
+                                    *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from({{ method.body_params[0].name }}{% if method.body_params[0].is_bounded_sequence %}.into_inner(){% endif %}));
                                 {% elif method.body_params | length > 0 %}
                                     {% if method.body_params | length == 1 %}
                                         let body: {{ method.body_params[0].out_ty }} = {{ method.body_params[0].out_expr }};
@@ -718,6 +701,10 @@
                                                         .await
                                                         .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?
                                                         .to_vec();
+                                                        {% if repr.is_bounded_sequence %}
+                                                            let payload: {{ repr.ty }} = payload.try_into()
+                                                                .map_err(|error| xidl_rust_axum::Error::new(400, format!("{error}")))?;
+                                                        {% endif %}
                                                     {% else %}
                                                         let body = resp
                                                         .bytes()
@@ -726,9 +713,7 @@
                                                         let payload: {{ repr.wire_ty }} = xidl_rust_axum::DeserializeFactory::new(xidl_rust_axum::http::ContentType::{{ repr.variant }}.as_str())
                                                         .from_slice(&body)?;
                                                     {% endif %}
-                                                    {% if repr.is_byte %}
-                                                        {{ check_sequence("payload", repr.maximum, 400) }}
-                                                    {% else %}
+                                                    {% if not repr.is_byte %}
                                                         let payload: {{ repr.ty }} = {{ repr.decode_expr }};
                                                     {% endif %}
                                                     {% if method.response_struct %}

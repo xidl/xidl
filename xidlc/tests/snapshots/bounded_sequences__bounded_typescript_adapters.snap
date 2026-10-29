@@ -87,6 +87,8 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
+            ["groups"]: z.unknown().optional(),
+        
             ["ids"]: z.unknown().optional(),
         
     }).strict()
@@ -95,15 +97,23 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["ids"]: wire["ids"],
         
+            ["groups"]: wire["groups"],
+        
     }))
     .pipe(z.object({
         
             ["ids"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(z.number().int()).max(2)),
         
+            ["groups"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.unknown().superRefine(rejectPrototypeKey).pipe(z.record(z.string(), z.array(z.number().int()).max(2)).refine((value) => Object.keys(value).length <= 2, "map maximum length exceeded"))),
+        
     })).transform((value) => ({
         
             
                 ["ids"]: value["ids"],
+            
+        
+            
+                ["groups"]: value["groups"],
             
         
     })))
@@ -137,9 +147,38 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
+    const wireRequest2Schema: z.ZodType<ifaceTypes.v1.BatchesUploadRequest> = z.lazy(() =>
+    
+        z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
+        
+            ["bytes"]: z.unknown().optional(),
+        
+    }).strict()
+    
+    .transform((wire): Record<string, unknown> => ({
+        
+            ["bytes"]: wire["bytes"],
+        
+    }))
+    .pipe(z.object({
+        
+            ["bytes"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.instanceof(Uint8Array).refine((value) => value.byteLength <= 2, "sequence maximum length exceeded")),
+        
+    })).transform((value) => ({
+        
+            
+                ["bytes"]: value["bytes"],
+            
+        
+    })))
+    
+    );
+
     const wireType1Schema: z.ZodType<types.v2.Batch> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
+        
+            ["groups"]: z.unknown().optional(),
         
             ["ids"]: z.unknown().optional(),
         
@@ -149,10 +188,14 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["ids"]: wire["ids"],
         
+            ["groups"]: wire["groups"],
+        
     }))
     .pipe(z.object({
         
             ["ids"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(z.number().int()).max(2)),
+        
+            ["groups"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.unknown().superRefine(rejectPrototypeKey).pipe(z.record(z.string(), z.array(z.number().int()).max(2)).refine((value) => Object.keys(value).length <= 2, "map maximum length exceeded"))),
         
     })).transform((value) => ({
         
@@ -160,11 +203,15 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
                 ["ids"]: value["ids"],
             
         
+            
+                ["groups"]: value["groups"],
+            
+        
     })))
     
     );
 
-    const wireRequest2Schema: z.ZodType<ifaceTypes.v2.BatchesReserveRequest> = z.lazy(() =>
+    const wireRequest3Schema: z.ZodType<ifaceTypes.v2.BatchesReserveRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -191,6 +238,33 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
+    const wireRequest5Schema: z.ZodType<ifaceTypes.v2.BatchesUploadRequest> = z.lazy(() =>
+    
+        z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
+        
+            ["bytes"]: z.unknown().optional(),
+        
+    }).strict()
+    
+    .transform((wire): Record<string, unknown> => ({
+        
+            ["bytes"]: wire["bytes"],
+        
+    }))
+    .pipe(z.object({
+        
+            ["bytes"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.instanceof(Uint8Array).refine((value) => value.byteLength <= 2, "sequence maximum length exceeded")),
+        
+    })).transform((value) => ({
+        
+            
+                ["bytes"]: value["bytes"],
+            
+        
+    })))
+    
+    );
+
 
 /** Required pure application decisions. Use strictFunctionTypes to reject narrower inputs. */
 export interface VersionAdapters {
@@ -210,9 +284,13 @@ export interface VersionAdapters {
                 const converted0 = mapSequence(source["ids"], (item) => ok(item), "Batch.ids");
                 if (!converted0.ok) return converted0;
             
+                const converted1 = mapRecord(source["groups"], (item) => mapSequence(item, (item) => ok(item), "Batch.groups"), "Batch.groups");
+                if (!converted1.ok) return converted1;
+            
             return ok({
                 
                         ["ids"]: converted0.value,
+                        ["groups"]: converted1.value,
                 
             });
         
@@ -225,9 +303,13 @@ export interface VersionAdapters {
                 const converted0 = mapSequence(source["ids"], (item) => ok(item), "Batch.ids");
                 if (!converted0.ok) return converted0;
             
+                const converted1 = mapRecord(source["groups"], (item) => mapSequence(item, (item) => ok(item), "Batch.groups"), "Batch.groups");
+                if (!converted1.ok) return converted1;
+            
             return ok({
                 
                         ["ids"]: converted0.value,
+                        ["groups"]: converted1.value,
                 
             });
         
@@ -263,6 +345,36 @@ export interface VersionAdapters {
         
     }
 
+    export function upcastBatchesUploadRequestFromV1(source: ifaceTypes.v1.BatchesUploadRequest, adapters: VersionAdapters): VersionedResult<ifaceTypes.v2.BatchesUploadRequest> {
+        
+            
+            
+                const converted0 = ok(source["bytes"]);
+                if (!converted0.ok) return converted0;
+            
+            return ok({
+                
+                        ["bytes"]: converted0.value,
+                
+            });
+        
+    }
+
+    export function downcastBatchesUploadResponseToV1(source: { "return": number }, adapters: VersionAdapters): VersionedResult<{ "return": number }> {
+        
+            
+            
+                const converted0 = ok(source["return"]);
+                if (!converted0.ok) return converted0;
+            
+            return ok({
+                
+                        ["return"]: converted0.value,
+                
+            });
+        
+    }
+
 
 
     function downcastStepBatchesReserveResultToV1(value: types.v2.Batch, adapters: VersionAdapters): VersionedResult<types.v1.Batch> {
@@ -273,6 +385,18 @@ export interface VersionAdapters {
     export type BatchesReserveErrorFromV1 = FrameworkError;
     export type BatchesReserveErrorToV1 = FrameworkError;
     function downcastStepBatchesReserveErrorToV1(head: BatchesReserveErrorFromV1, adapters: VersionAdapters): VersionedResult<BatchesReserveErrorToV1> {
+        
+        return ok(head);
+    }
+
+    function downcastStepBatchesUploadResultToV1(value: number, adapters: VersionAdapters): VersionedResult<number> {
+        const projected = downcastBatchesUploadResponseToV1({ return: value }, adapters);
+        if (!projected.ok) return projected;
+        return ok(projected.value.return);
+    }
+    export type BatchesUploadErrorFromV1 = FrameworkError;
+    export type BatchesUploadErrorToV1 = FrameworkError;
+    function downcastStepBatchesUploadErrorToV1(head: BatchesUploadErrorFromV1, adapters: VersionAdapters): VersionedResult<BatchesUploadErrorToV1> {
         
         return ok(head);
     }
@@ -337,8 +461,53 @@ export type DispatchOutcome<T, Head> =
     }
 
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
-    export function decodeAndUpcastBatchesReserveFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v2.BatchesReserveRequest> {
+    export function decodeAndUpcastBatchesUploadFromV1(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v2.BatchesUploadRequest> {
         const parsed = wireRequest2Schema.safeParse(raw);
+        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v1", operation: "Batches.upload", issues: parsed.error.issues } };
+        
+            const step0 = upcastBatchesUploadRequestFromV1(parsed.data, adapters);
+            if (!step0.ok) return step0;
+        
+        return step0;
+    }
+    export function downcastBatchesUploadResultToV1(head: number, adapters: VersionAdapters): VersionedResult<number> {
+        
+            const step0 = downcastStepBatchesUploadResultToV1(head, adapters);
+            if (!step0.ok) return step0;
+        
+        return step0;
+    }
+    export function downcastBatchesUploadErrorToV1(head: FrameworkError, adapters: VersionAdapters): VersionedResult<FrameworkError> {
+        
+            const step0 = downcastStepBatchesUploadErrorToV1(head, adapters);
+            if (!step0.ok) return step0;
+        
+        return step0;
+    }
+    /** Failed projection retains the original Head outcome, including typed errors. */
+    export function downcastBatchesUploadOutcomeToV1(head: OperationOutcome<number, FrameworkError>, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<number, FrameworkError>, OperationOutcome<number, FrameworkError>> {
+        if (head.ok) {
+            const result = downcastBatchesUploadResultToV1(head.value, adapters);
+            return result.ok ? { projected: true, value: { ok: true, value: result.value } } : { projected: false, head, error: result.error };
+        }
+        const result = downcastBatchesUploadErrorToV1(head.error, adapters);
+        return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
+    }
+    
+    export async function dispatchBatchesUploadFromV1(
+    raw: unknown,
+    handler: (request: ifaceTypes.v2.BatchesUploadRequest, context: VersionContext) => Promise<OperationOutcome<number, FrameworkError>>,
+    adapters: VersionAdapters,
+    ): Promise<DispatchOutcome<OperationOutcome<number, FrameworkError>, OperationOutcome<number, FrameworkError>>> {
+        const request = decodeAndUpcastBatchesUploadFromV1(raw, adapters);
+        if (!request.ok) return { dispatched: false, error: request.error };
+        const head = await handler(request.value, { originalVersion: "v1", originalVersionId: "v1" });
+        return { dispatched: true, ...downcastBatchesUploadOutcomeToV1(head, adapters) };
+    }
+
+    /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
+    export function decodeAndUpcastBatchesReserveFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v2.BatchesReserveRequest> {
+        const parsed = wireRequest3Schema.safeParse(raw);
         if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v2", operation: "Batches.reserve", issues: parsed.error.issues } };
         
         return ok(parsed.data);
@@ -372,6 +541,42 @@ export type DispatchOutcome<T, Head> =
         return { dispatched: true, ...downcastBatchesReserveOutcomeToV2(head, adapters) };
     }
 
+    /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
+    export function decodeAndUpcastBatchesUploadFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v2.BatchesUploadRequest> {
+        const parsed = wireRequest5Schema.safeParse(raw);
+        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v2", operation: "Batches.upload", issues: parsed.error.issues } };
+        
+        return ok(parsed.data);
+    }
+    export function downcastBatchesUploadResultToV2(head: number, adapters: VersionAdapters): VersionedResult<number> {
+        
+        return ok(head);
+    }
+    export function downcastBatchesUploadErrorToV2(head: FrameworkError, adapters: VersionAdapters): VersionedResult<FrameworkError> {
+        
+        return ok(head);
+    }
+    /** Failed projection retains the original Head outcome, including typed errors. */
+    export function downcastBatchesUploadOutcomeToV2(head: OperationOutcome<number, FrameworkError>, adapters: VersionAdapters): ProjectionOutcome<OperationOutcome<number, FrameworkError>, OperationOutcome<number, FrameworkError>> {
+        if (head.ok) {
+            const result = downcastBatchesUploadResultToV2(head.value, adapters);
+            return result.ok ? { projected: true, value: { ok: true, value: result.value } } : { projected: false, head, error: result.error };
+        }
+        const result = downcastBatchesUploadErrorToV2(head.error, adapters);
+        return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
+    }
+    
+    export async function dispatchBatchesUploadFromV2(
+    raw: unknown,
+    handler: (request: ifaceTypes.v2.BatchesUploadRequest, context: VersionContext) => Promise<OperationOutcome<number, FrameworkError>>,
+    adapters: VersionAdapters,
+    ): Promise<DispatchOutcome<OperationOutcome<number, FrameworkError>, OperationOutcome<number, FrameworkError>>> {
+        const request = decodeAndUpcastBatchesUploadFromV2(raw, adapters);
+        if (!request.ok) return { dispatched: false, error: request.error };
+        const head = await handler(request.value, { originalVersion: "v2", originalVersionId: "v2" });
+        return { dispatched: true, ...downcastBatchesUploadOutcomeToV2(head, adapters) };
+    }
+
 
 
     /** Compose one request using an already resolved version identifier. */
@@ -386,6 +591,22 @@ export type DispatchOutcome<T, Head> =
                 case "v1": return dispatchBatchesReserveFromV1(raw, handler, adapters);
             
                 case "v2": return dispatchBatchesReserveFromV2(raw, handler, adapters);
+            
+        }
+    }
+
+    /** Compose one request using an already resolved version identifier. */
+    export async function dispatchBatchesUpload(
+    version: "v1" | "v2",
+    raw: unknown,
+    handler: (request: ifaceTypes.v2.BatchesUploadRequest, context: VersionContext) => Promise<OperationOutcome<number, FrameworkError>>,
+    adapters: VersionAdapters,
+    ): Promise<DispatchOutcome<OperationOutcome<number | number, FrameworkError>, OperationOutcome<number, FrameworkError>>> {
+        switch (version) {
+            
+                case "v1": return dispatchBatchesUploadFromV1(raw, handler, adapters);
+            
+                case "v2": return dispatchBatchesUploadFromV2(raw, handler, adapters);
             
         }
     }

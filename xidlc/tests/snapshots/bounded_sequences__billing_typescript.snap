@@ -27,11 +27,11 @@ export interface BatchesUploadRequest {
 }
 export interface BatchesMetadataRequest {
     invalid: boolean;
-    groups: Record<string, types.billing.InvoiceIds>;
-    backup: Record<string, types.billing.InvoiceIds>;
+    groups: types.billing.Regions;
+    backup: types.billing.Regions;
 }
 export interface BatchesMetadataResponse {
-    value: Record<string, types.billing.InvoiceIds>;
+    value: types.billing.Regions;
 }
 export interface BatchesExportedRequest {
     invalid: boolean;
@@ -95,14 +95,14 @@ export type BatchesUploadRequest = z.infer<typeof BatchesUploadRequestSchema>;
     
 export const BatchesMetadataRequestSchema = z.object({
         invalid: z.union([z.boolean(), z.enum(["true", "false"]).transform((value) => value === "true")]),
-        groups: z.record(z.string(), models.billing.InvoiceIdsSchema),
-        backup: z.record(z.string(), models.billing.InvoiceIdsSchema),
+        groups: z.record(z.string(), models.billing.InvoiceIdsSchema).refine((value) => Object.keys(value).length <= 2, "map maximum length exceeded"),
+        backup: z.record(z.string(), models.billing.InvoiceIdsSchema).refine((value) => Object.keys(value).length <= 2, "map maximum length exceeded"),
     });
 export type BatchesMetadataRequest = z.infer<typeof BatchesMetadataRequestSchema>;
 
     
 export const BatchesMetadataResponseSchema = z.object({
-        value: z.record(z.string(), models.billing.InvoiceIdsSchema),
+        value: models.billing.RegionsSchema,
     });
 export type BatchesMetadataResponse = z.infer<typeof BatchesMetadataResponseSchema>;
 
@@ -352,7 +352,7 @@ import {
         return ifaceSchemas.models.billing.TotalSchema.parse(deserialize(responseBody, ifaceSchemas.models.billing.TotalSchema)) as types.billing.Total;
     }
     
-            async metadata(invalid: boolean, groups: Record<string, types.billing.InvoiceIds>, backup: Record<string, types.billing.InvoiceIds>): Promise<ifaceTypes.BatchesMetadataResponse> {
+            async metadata(invalid: boolean, groups: types.billing.Regions, backup: types.billing.Regions): Promise<ifaceTypes.BatchesMetadataResponse> {
                 const parsed = ifaceSchemas.BatchesMetadataRequestSchema.parse({ "invalid": invalid, "groups": groups, "backup": backup });
                 let xidlPath = "/metadata";
                 const query = new URLSearchParams();
@@ -466,7 +466,7 @@ import {
         async throwRejectedError(resp: Response): Promise<never> {
             const status = resp.status;
             if (status === 409) {
-                const bodySchema = z.object({ "ids": ifaceSchemas.models.billing.InvoiceIdsSchema, "regions": z.record(z.string(), ifaceSchemas.models.billing.InvoiceIdsSchema),  });
+                const bodySchema = z.object({ "ids": ifaceSchemas.models.billing.InvoiceIdsSchema, "regions": z.record(z.string(), ifaceSchemas.models.billing.InvoiceIdsSchema).refine((value) => Object.keys(value).length <= 2, "map maximum length exceeded"),  });
                 const rawBody = await resp.clone().json().catch(() => undefined);
                 if (rawBody == null || rawBody["ids"] === undefined || rawBody["regions"] === undefined) throw await parseXidlError(resp);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
@@ -535,7 +535,7 @@ export interface Batches {
     
         upload(bytes: Uint8Array): Awaitable<types.billing.Total>;
     
-        metadata(invalid: boolean, groups: Record<string, types.billing.InvoiceIds>, backup: Record<string, types.billing.InvoiceIds>): Awaitable<ifaceTypes.BatchesMetadataResponse>;
+        metadata(invalid: boolean, groups: types.billing.Regions, backup: types.billing.Regions): Awaitable<ifaceTypes.BatchesMetadataResponse>;
     
         exported(invalid: boolean): Awaitable<ifaceTypes.BatchesExportedResponse>;
     
@@ -656,7 +656,7 @@ export const BatchesOperations = {
                     
                         if (error instanceof $xidlErrors.BatchRejected) {
                             parseResponse(error, z.object({
-                                "ids": ifaceSchemas.models.billing.InvoiceIdsSchema, "regions": z.record(z.string(), ifaceSchemas.models.billing.InvoiceIdsSchema), 
+                                "ids": ifaceSchemas.models.billing.InvoiceIdsSchema, "regions": z.record(z.string(), ifaceSchemas.models.billing.InvoiceIdsSchema).refine((value) => Object.keys(value).length <= 2, "map maximum length exceeded"), 
                                 "retry": ifaceSchemas.models.billing.InvoiceIdsSchema, "detail": ifaceSchemas.models.billing.TotalSchema, "tag": ifaceSchemas.models.billing.TokenSchema, "tokens": ifaceSchemas.models.billing.InvoiceIdsSchema, "state": ifaceSchemas.models.codes.StateSchema, "token": ifaceSchemas.models.billing.TokenSchema, 
                             }));
                             const headers = new Headers();
@@ -1020,6 +1020,9 @@ export namespace billing {
     export type InvoiceIds = Array<number>;
 
 
+    export type Regions = Record<string, InvoiceIds>;
+
+
     export type Token = string;
     export interface Total {
         count: number;
@@ -1038,7 +1041,7 @@ export namespace billing {
     export interface Batch {
         invoices: InvoiceIds;
         windows: Array<InvoiceIds>;
-        regions: Record<string, InvoiceIds>;
+        regions: Regions;
         days: Array<InvoiceIds>;
         retry?: InvoiceIds;
     }
@@ -1065,6 +1068,8 @@ import * as $xidl_root from "./bounded_sequences.zod";
 
         export const InvoiceIdsSchema = z.array(z.number().int()).max(2);
 
+        export const RegionsSchema = z.record(z.string(), InvoiceIdsSchema).refine((value) => Object.keys(value).length <= 2, "map maximum length exceeded");
+
         export const TokenSchema = z.string();
 
         export const TotalSchema = z.object({
@@ -1078,7 +1083,7 @@ import * as $xidl_root from "./bounded_sequences.zod";
             
                 ids: InvoiceIdsSchema,
             
-                regions: z.record(z.string(), InvoiceIdsSchema),
+                regions: z.record(z.string(), InvoiceIdsSchema).refine((value) => Object.keys(value).length <= 2, "map maximum length exceeded"),
             
                 retry: InvoiceIdsSchema,
             
@@ -1100,7 +1105,7 @@ import * as $xidl_root from "./bounded_sequences.zod";
             
                 windows: z.array(InvoiceIdsSchema).max(2),
             
-                regions: z.record(z.string(), InvoiceIdsSchema),
+                regions: RegionsSchema,
             
                 days: z.array(InvoiceIdsSchema).length(2),
             

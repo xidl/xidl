@@ -1,0 +1,7 @@
+{% macro collect_values(name, ty, optional, bounded) -%}
+{% if optional or bounded %}
+let {{ name }}: {{ ty }} = {% if optional %}if {{ name }}.is_empty() { None } else { Some({% endif %}
+    {{ name }}{% if bounded %}.try_into().map_err(|error| ::xidl_rust_axum::Error::new(400, format!("{error}")))?{% endif %}
+{% if optional %}) }{% endif %};
+{% endif %}
+{%- endmacro %}

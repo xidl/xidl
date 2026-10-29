@@ -3,7 +3,7 @@ use crate::generate::rust::bitset_dcl::render_bitset_with_config;
 use crate::generate::rust::struct_dcl::render_struct_with_config;
 use crate::generate::rust::union_def::render_union_with_config;
 use crate::generate::rust::util::{
-    constr_type_scoped_name, rust_passthrough_attrs_from_annotations, rust_scoped_name, rust_type,
+    constr_type_scoped_name, rust_passthrough_attrs_from_annotations, rust_scoped_name,
     typedef_json,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
@@ -46,7 +46,7 @@ pub(crate) fn render_typedef_with_config(
     match &def.ty {
         hir::TypedefType::TypeSpec(ty) => {
             for decl in &def.decl {
-                let base = rust_type(ty);
+                let base = renderer.type_name(ty)?;
                 let mut typedef = typedef_json(&base, decl);
                 typedef["rust_attrs"] = json!(typedef_attrs(def));
                 let ctx = renderer.enrich_ctx(typedef, &doc);

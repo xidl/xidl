@@ -57,19 +57,17 @@ impl RaisesContext {
                         Ok(ExceptionMemberContext {
                             field: rust_ident(&member.field),
                             wire_name: member.wire_name.clone(),
-                            ty: if member.is_multi {
-                                format!("Vec<{item_ty}>")
-                            } else if member.optional {
+                            ty: if member.optional {
                                 format!("Option<{wire_ty}>")
                             } else {
                                 wire_ty
                             },
                             is_multi: member.is_multi,
+                            is_bounded_sequence: matches!(&member.ty, xidl_parser::hir::TypeSpec::SequenceType(sequence) if sequence.len.is_some()),
                             item_ty,
                             item_is_string: header_item_is_string(&member.ty),
                             item_is_primitive: header_item_is_primitive(&member.ty),
                             optional: member.optional,
-                            maximum: member_env.scope().sequence_maximum(&member.ty),
                         })
                     })
                     .collect::<IdlcResult<Vec<_>>>()

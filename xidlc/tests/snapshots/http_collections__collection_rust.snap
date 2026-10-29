@@ -106,10 +106,10 @@ pub(super) mod __xidl_in_CollectionInputs {
     impl From<super::Collections> for Collections {
         fn from(value: super::Collections) -> Self {
             Self {
-                values: value.values.into_iter().collect(),
-                tags: value.tags.into_iter().collect(),
-                names: value.names.into_iter().collect(),
-                labels: value.labels.map(|value| value.into_iter().collect()),
+                values: value.values,
+                tags: value.tags,
+                names: value.names,
+                labels: value.labels,
             }
         }
     }
@@ -117,10 +117,10 @@ pub(super) mod __xidl_in_CollectionInputs {
     impl From<Collections> for super::Collections {
         fn from(value: Collections) -> Self {
             Self {
-                values: value.values.into_iter().collect(),
-                tags: value.tags.into_iter().collect(),
-                names: value.names.into_iter().collect(),
-                labels: value.labels.map(|value| value.into_iter().collect()),
+                values: value.values,
+                tags: value.tags,
+                names: value.names,
+                labels: value.labels,
             }
         }
     }
@@ -197,17 +197,13 @@ pub(super) mod __xidl_in_CollectionInputs {
     #[allow(unused_variables, unreachable_code)]
     impl From<super::StreamValues> for StreamValues {
         fn from(value: super::StreamValues) -> Self {
-            Self {
-                values: value.values.map(|value| value.into_iter().collect()),
-            }
+            Self { values: value.values }
         }
     }
     #[allow(unused_variables, unreachable_code)]
     impl From<StreamValues> for super::StreamValues {
         fn from(value: StreamValues) -> Self {
-            Self {
-                values: value.values.map(|value| value.into_iter().collect()),
-            }
+            Self { values: value.values }
         }
     }
     impl Default for StreamValues {
@@ -238,10 +234,10 @@ pub(super) mod __xidl_out_CollectionInputs {
     impl From<super::Collections> for Collections {
         fn from(value: super::Collections) -> Self {
             Self {
-                values: value.values.into_iter().collect(),
-                tags: value.tags.into_iter().collect(),
-                names: value.names.into_iter().collect(),
-                labels: value.labels.map(|value| value.into_iter().collect()),
+                values: value.values,
+                tags: value.tags,
+                names: value.names,
+                labels: value.labels,
             }
         }
     }
@@ -249,10 +245,10 @@ pub(super) mod __xidl_out_CollectionInputs {
     impl From<Collections> for super::Collections {
         fn from(value: Collections) -> Self {
             Self {
-                values: value.values.into_iter().collect(),
-                tags: value.tags.into_iter().collect(),
-                names: value.names.into_iter().collect(),
-                labels: value.labels.map(|value| value.into_iter().collect()),
+                values: value.values,
+                tags: value.tags,
+                names: value.names,
+                labels: value.labels,
             }
         }
     }
@@ -329,17 +325,13 @@ pub(super) mod __xidl_out_CollectionInputs {
     #[allow(unused_variables, unreachable_code)]
     impl From<super::StreamValues> for StreamValues {
         fn from(value: super::StreamValues) -> Self {
-            Self {
-                values: value.values.map(|value| value.into_iter().collect()),
-            }
+            Self { values: value.values }
         }
     }
     #[allow(unused_variables, unreachable_code)]
     impl From<StreamValues> for super::StreamValues {
         fn from(value: StreamValues) -> Self {
-            Self {
-                values: value.values.map(|value| value.into_iter().collect()),
-            }
+            Self { values: value.values }
         }
     }
     impl Default for StreamValues {
@@ -950,11 +942,10 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let CollectionInputsReadRequest { values, tags, names, labels } = request;
-        let values: transport::Counts = values.into_iter().collect();
-        let tags: transport::Selection = tags.into_iter().collect();
-        let names: transport::Selection = names.into_iter().collect();
-        let labels: Option<transport::Selection> = labels
-            .map(|value| value.into_iter().collect());
+        let values: transport::Counts = values;
+        let tags: transport::Selection = tags;
+        let names: transport::Selection = names;
+        let labels: Option<transport::Selection> = labels;
         let mut resp = match svc.read(values, tags, names, labels).await {
             Ok(resp_value) => {
                 let mut resp = {
@@ -1119,11 +1110,11 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let CollectionInputsLettersRequest { letters } = request;
-        let letters: Vec<char> = letters.into_iter().collect();
+        let letters: Vec<char> = letters;
         let mut resp = match svc.letters(letters).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: Vec<char> = resp_value.into_iter().collect();
+                    let body_value: Vec<char> = resp_value;
                     let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
@@ -1172,11 +1163,11 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let CollectionInputsLetterAliasesRequest { letters } = request;
-        let letters: transport::Letters = letters.into_iter().collect();
+        let letters: transport::Letters = letters;
         let mut resp = match svc.letter_aliases(letters).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: Vec<char> = resp_value.into_iter().collect();
+                    let body_value: Vec<char> = resp_value;
                     let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
@@ -1225,11 +1216,11 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let CollectionInputsWideLettersRequest { letters } = request;
-        let letters: Vec<transport::WideLetter> = letters.into_iter().collect();
+        let letters: Vec<transport::WideLetter> = letters;
         let mut resp = match svc.wide_letters(letters).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: Vec<char> = resp_value.into_iter().collect();
+                    let body_value: Vec<char> = resp_value;
                     let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
@@ -1331,11 +1322,11 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let CollectionInputsCookieLettersRequest { letters } = request;
-        let letters: Vec<char> = letters.into_iter().collect();
+        let letters: Vec<char> = letters;
         let mut resp = match svc.cookie_letters(letters).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: Vec<char> = resp_value.into_iter().collect();
+                    let body_value: Vec<char> = resp_value;
                     let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
@@ -1388,7 +1379,7 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let CollectionInputsStreamRequestInQuery { values } = query;
-        let values: Option<Vec<i32>> = values.map(|value| value.into_iter().collect());
+        let values: Option<Vec<i32>> = values;
         let data = CollectionInputsStreamRequest {
             values,
         };
@@ -1444,8 +1435,8 @@ impl CollectionInputsClient {
         names: transport::Selection,
         labels: Option<transport::Selection>,
     ) -> Result<Collections, xidl_rust_axum::Error> {
-        let tags: Vec<String> = tags.into_iter().collect();
-        let names: Vec<String> = names.into_iter().collect();
+        let tags: Vec<String> = tags;
+        let names: Vec<String> = names;
         let xidl_path = "/collections".to_string();
         let mut req = self
             .client
@@ -1524,8 +1515,8 @@ impl CollectionInputsClient {
             req.headers_mut().insert(cookie_name, header_value);
         }
         let query = CollectionInputsReadRequestOutQuery {
-            values: values.into_iter().collect(),
-            labels: labels.map(|value| value.into_iter().collect()),
+            values,
+            labels,
         };
         let query = xidl_rust_axum::serde_html_form::to_string(&query)
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
@@ -1716,7 +1707,7 @@ impl CollectionInputsClient {
         &self,
         letters: Vec<char>,
     ) -> Result<Vec<char>, xidl_rust_axum::Error> {
-        let letters: Vec<char> = letters.into_iter().collect();
+        let letters: Vec<char> = letters;
         let xidl_path = "/letters".to_string();
         let mut req = self
             .client
@@ -1775,7 +1766,7 @@ impl CollectionInputsClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into_iter().collect())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -1787,7 +1778,7 @@ impl CollectionInputsClient {
         &self,
         letters: transport::Letters,
     ) -> Result<transport::Letters, xidl_rust_axum::Error> {
-        let letters: Vec<char> = letters.into_iter().collect();
+        let letters: Vec<char> = letters;
         let xidl_path = "/letter-aliases".to_string();
         let mut req = self
             .client
@@ -1846,7 +1837,7 @@ impl CollectionInputsClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into_iter().collect())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -1858,7 +1849,7 @@ impl CollectionInputsClient {
         &self,
         letters: Vec<transport::WideLetter>,
     ) -> Result<Vec<transport::WideLetter>, xidl_rust_axum::Error> {
-        let letters: Vec<char> = letters.into_iter().collect();
+        let letters: Vec<char> = letters;
         let xidl_path = "/wide-letters".to_string();
         let mut req = self
             .client
@@ -1917,7 +1908,7 @@ impl CollectionInputsClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into_iter().collect())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -1977,7 +1968,7 @@ impl CollectionInputsClient {
         &self,
         letters: Vec<char>,
     ) -> Result<Vec<char>, xidl_rust_axum::Error> {
-        let letters: Vec<char> = letters.into_iter().collect();
+        let letters: Vec<char> = letters;
         let xidl_path = "/cookie-letters".to_string();
         let mut req = self
             .client
@@ -2047,7 +2038,7 @@ impl CollectionInputsClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into_iter().collect())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -2075,7 +2066,7 @@ impl CollectionInputsClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let query = CollectionInputsStreamRequestOutQuery {
-            values: values.map(|value| value.into_iter().collect()),
+            values,
         };
         let query = xidl_rust_axum::serde_html_form::to_string(&query)
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;

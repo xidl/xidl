@@ -17,8 +17,9 @@
 mod error;
 /// Error and result types used throughout the runtime.
 pub use error::{Error, ErrorBody, Result};
-/// Bounded sequence wire validation shared by generated codecs.
-pub use xidl_http::{SequenceLimit, SequenceWire};
+mod bounded;
+/// Containers preserving IDL collection bounds during construction and decoding.
+pub use bounded::{BoundExceeded, BoundedMap, BoundedVec};
 
 #[cfg(feature = "client")]
 mod client;

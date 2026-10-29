@@ -1,7 +1,7 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::util::{
     declarator_name, rust_deprecated_attr, rust_derive_info_with_extra,
-    rust_passthrough_attrs_from_annotations, type_with_decl,
+    rust_passthrough_attrs_from_annotations,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
@@ -41,7 +41,7 @@ impl RustRender for hir::ExceptDcl {
                 member.ident.iter().map(move |decl| {
                     let raw_name = declarator_name(decl);
                     let name = crate::generate::rust::util::rust_ident(&raw_name);
-                    let mut ty = type_with_decl(&member.ty, decl);
+                    let mut ty = renderer.declared_type(&member.ty, decl)?;
                     let optional = member.is_optional();
                     if optional {
                         ty = format!("Option<{ty}>");
@@ -49,7 +49,7 @@ impl RustRender for hir::ExceptDcl {
                     let wire_name =
                         hir::effective_wire_name(&raw_name, &member.annotations, &self.annotations);
                     let rename = (wire_name != raw_name).then_some(wire_name);
-                    json!({
+                    Ok(json!({
                         "ty": ty,
                         "name": name,
                         "serde_skip": skip,
@@ -57,10 +57,10 @@ impl RustRender for hir::ExceptDcl {
                         "serde_rename": rename,
                         "doc": doc,
                         "rust_attrs": rust_attrs,
-                    })
+                    }))
                 })
             })
-            .collect::<Vec<_>>();
+            .collect::<IdlcResult<Vec<_>>>()?;
         let derive = rust_derive_info_with_extra(&self.annotations, &self.annotations);
         let mut rust_attrs = rust_passthrough_attrs_from_annotations(&self.annotations);
         if allow_deprecated {

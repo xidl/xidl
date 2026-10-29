@@ -55,7 +55,7 @@ pub(crate) fn render_attr_operation_from_http(
                 | xidl_parser::rest_hir::HttpSignatureParamDirection::InOut
         ) {
             let param_name = rust_ident(&p.name);
-            let ty = env.axum_type(&p.ty);
+            let ty = env.axum_type(&p.ty)?;
             params.push(format!("{param_name}: {ty}"));
             param_names.push(param_name.clone());
             server_params.push(format!("{param_name}: {ty}"));
@@ -74,7 +74,8 @@ pub(crate) fn render_attr_operation_from_http(
                 source: param_source_code(ParamSource::Body),
                 serde_rename: None,
                 is_sequence: matches!(&p.ty, xidl_parser::hir::TypeSpec::SequenceType(_)),
-                maximum: env.scope().sequence_maximum(&p.ty),
+                is_bounded_sequence: matches!(&p.ty, hir::TypeSpec::SequenceType(sequence) if sequence.len.is_some()),
+
                 is_floating: match &p.ty {
                     xidl_parser::hir::TypeSpec::FloatingPtType => true,
                     xidl_parser::hir::TypeSpec::SequenceType(sequence) => {
@@ -108,6 +109,7 @@ pub(crate) fn render_attr_operation_from_http(
         .return_type
         .as_ref()
         .map(|ty| env.axum_type(ty))
+        .transpose()?
         .unwrap_or_else(|| "()".to_string());
     let ret_in_ty = match &http_op.signature.return_type {
         Some(ty) => transport.map_type(ty, TransportDirection::In, env.scope())?,

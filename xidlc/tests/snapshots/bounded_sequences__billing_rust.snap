@@ -36,12 +36,15 @@ pub trait Batches {
         &self,
         values: billing::InvoiceIds,
     ) -> ::xidl_rust_axum::Result<billing::InvoiceIds>;
-    async fn upload(&self, bytes: Vec<u8>) -> ::xidl_rust_axum::Result<billing::Total>;
+    async fn upload(
+        &self,
+        bytes: ::xidl_rust_axum::BoundedVec<u8, 2>,
+    ) -> ::xidl_rust_axum::Result<billing::Total>;
     async fn metadata(
         &self,
         invalid: bool,
-        groups: ::std::collections::BTreeMap<String, billing::InvoiceIds>,
-        backup: ::std::collections::BTreeMap<String, billing::InvoiceIds>,
+        groups: billing::Regions,
+        backup: billing::Regions,
     ) -> ::xidl_rust_axum::Result<BatchesMetadataResponse>;
     async fn exported(
         &self,
@@ -96,14 +99,6 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for BatchesRejectedError {
                     let mut headers = ::xidl_rust_axum::axum::http::HeaderMap::new();
                     {
                         let value = &err.retry;
-                        ::xidl_rust_axum::SequenceLimit::check(value.len(), 2)
-                            .map_err(|err| xidl_rust_axum::Error::new(
-                                500,
-                                format!("exception retry: {err}"),
-                            ))?;
-                    }
-                    {
-                        let value = &err.retry;
                         let value = xidl_rust_axum::serde_json::to_string(value)
                             .map_err(|err| xidl_rust_axum::Error::new(
                                 500,
@@ -149,14 +144,6 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for BatchesRejectedError {
                                 format!("exception tag: {err}"),
                             ))?;
                         headers.append("tag", value);
-                    }
-                    {
-                        let value = &err.tokens;
-                        ::xidl_rust_axum::SequenceLimit::check(value.len(), 2)
-                            .map_err(|err| xidl_rust_axum::Error::new(
-                                500,
-                                format!("exception tokens: {err}"),
-                            ))?;
                     }
                     {
                         let value = &err.tokens;
@@ -276,36 +263,29 @@ pub(super) mod __xidl_in_Batches {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub struct billing_Batch {
-        pub invoices: ::xidl_rust_axum::SequenceWire<i32, 2>,
-        pub windows: ::xidl_rust_axum::SequenceWire<
-            ::xidl_rust_axum::SequenceWire<i32, 2>,
+        pub invoices: ::xidl_rust_axum::BoundedVec<i32, 2>,
+        pub windows: ::xidl_rust_axum::BoundedVec<
+            ::xidl_rust_axum::BoundedVec<i32, 2>,
             2,
         >,
-        pub regions: ::std::collections::BTreeMap<
+        pub regions: ::xidl_rust_axum::BoundedMap<
             String,
-            ::xidl_rust_axum::SequenceWire<i32, 2>,
+            ::xidl_rust_axum::BoundedVec<i32, 2>,
+            2,
         >,
-        pub days: [::xidl_rust_axum::SequenceWire<i32, 2>; 2],
+        pub days: [::xidl_rust_axum::BoundedVec<i32, 2>; 2],
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        pub retry: Option<::xidl_rust_axum::SequenceWire<i32, 2>>,
+        pub retry: Option<::xidl_rust_axum::BoundedVec<i32, 2>>,
     }
     #[allow(unused_variables, unreachable_code)]
     impl From<super::billing::Batch> for billing_Batch {
         fn from(value: super::billing::Batch) -> Self {
             Self {
-                invoices: value.invoices.into_iter().collect(),
-                windows: value
-                    .windows
-                    .into_iter()
-                    .map(|value| value.into_iter().collect())
-                    .collect(),
-                regions: value
-                    .regions
-                    .into_iter()
-                    .map(|(key, value)| (key, value.into_iter().collect()))
-                    .collect(),
-                days: value.days.map(|value| value.into_iter().collect()),
-                retry: value.retry.map(|value| value.into_iter().collect()),
+                invoices: value.invoices,
+                windows: value.windows,
+                regions: value.regions,
+                days: value.days,
+                retry: value.retry,
             }
         }
     }
@@ -313,19 +293,11 @@ pub(super) mod __xidl_in_Batches {
     impl From<billing_Batch> for super::billing::Batch {
         fn from(value: billing_Batch) -> Self {
             Self {
-                invoices: value.invoices.into_iter().collect(),
-                windows: value
-                    .windows
-                    .into_iter()
-                    .map(|value| value.into_iter().collect())
-                    .collect(),
-                regions: value
-                    .regions
-                    .into_iter()
-                    .map(|(key, value)| (key, value.into_iter().collect()))
-                    .collect(),
-                days: value.days.map(|value| value.into_iter().collect()),
-                retry: value.retry.map(|value| value.into_iter().collect()),
+                invoices: value.invoices,
+                windows: value.windows,
+                regions: value.regions,
+                days: value.days,
+                retry: value.retry,
             }
         }
     }
@@ -369,36 +341,29 @@ pub(super) mod __xidl_out_Batches {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub struct billing_Batch {
-        pub invoices: ::xidl_rust_axum::SequenceWire<i32, 2>,
-        pub windows: ::xidl_rust_axum::SequenceWire<
-            ::xidl_rust_axum::SequenceWire<i32, 2>,
+        pub invoices: ::xidl_rust_axum::BoundedVec<i32, 2>,
+        pub windows: ::xidl_rust_axum::BoundedVec<
+            ::xidl_rust_axum::BoundedVec<i32, 2>,
             2,
         >,
-        pub regions: ::std::collections::BTreeMap<
+        pub regions: ::xidl_rust_axum::BoundedMap<
             String,
-            ::xidl_rust_axum::SequenceWire<i32, 2>,
+            ::xidl_rust_axum::BoundedVec<i32, 2>,
+            2,
         >,
-        pub days: [::xidl_rust_axum::SequenceWire<i32, 2>; 2],
+        pub days: [::xidl_rust_axum::BoundedVec<i32, 2>; 2],
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        pub retry: Option<::xidl_rust_axum::SequenceWire<i32, 2>>,
+        pub retry: Option<::xidl_rust_axum::BoundedVec<i32, 2>>,
     }
     #[allow(unused_variables, unreachable_code)]
     impl From<super::billing::Batch> for billing_Batch {
         fn from(value: super::billing::Batch) -> Self {
             Self {
-                invoices: value.invoices.into_iter().collect(),
-                windows: value
-                    .windows
-                    .into_iter()
-                    .map(|value| value.into_iter().collect())
-                    .collect(),
-                regions: value
-                    .regions
-                    .into_iter()
-                    .map(|(key, value)| (key, value.into_iter().collect()))
-                    .collect(),
-                days: value.days.map(|value| value.into_iter().collect()),
-                retry: value.retry.map(|value| value.into_iter().collect()),
+                invoices: value.invoices,
+                windows: value.windows,
+                regions: value.regions,
+                days: value.days,
+                retry: value.retry,
             }
         }
     }
@@ -406,19 +371,11 @@ pub(super) mod __xidl_out_Batches {
     impl From<billing_Batch> for super::billing::Batch {
         fn from(value: billing_Batch) -> Self {
             Self {
-                invoices: value.invoices.into_iter().collect(),
-                windows: value
-                    .windows
-                    .into_iter()
-                    .map(|value| value.into_iter().collect())
-                    .collect(),
-                regions: value
-                    .regions
-                    .into_iter()
-                    .map(|(key, value)| (key, value.into_iter().collect()))
-                    .collect(),
-                days: value.days.map(|value| value.into_iter().collect()),
-                retry: value.retry.map(|value| value.into_iter().collect()),
+                invoices: value.invoices,
+                windows: value.windows,
+                regions: value.regions,
+                days: value.days,
+                retry: value.retry,
             }
         }
     }
@@ -430,15 +387,16 @@ pub(super) mod __xidl_out_Batches {
     }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub struct billing_BatchRejected {
-        pub ids: ::xidl_rust_axum::SequenceWire<i32, 2>,
-        pub regions: ::std::collections::BTreeMap<
+        pub ids: ::xidl_rust_axum::BoundedVec<i32, 2>,
+        pub regions: ::xidl_rust_axum::BoundedMap<
             super::billing::Region,
-            ::xidl_rust_axum::SequenceWire<i32, 2>,
+            ::xidl_rust_axum::BoundedVec<i32, 2>,
+            2,
         >,
         #[serde(skip)]
-        pub retry: ::xidl_rust_axum::SequenceWire<i32, 2>,
+        pub retry: ::xidl_rust_axum::BoundedVec<i32, 2>,
         #[serde(skip)]
-        pub tokens: ::xidl_rust_axum::SequenceWire<i32, 2>,
+        pub tokens: ::xidl_rust_axum::BoundedVec<i32, 2>,
         #[serde(skip)]
         pub detail: __xidl_out_Batches::billing_Total,
         #[serde(skip)]
@@ -452,14 +410,10 @@ pub(super) mod __xidl_out_Batches {
     impl From<super::billing::BatchRejected> for billing_BatchRejected {
         fn from(value: super::billing::BatchRejected) -> Self {
             Self {
-                ids: value.ids.into_iter().collect(),
-                regions: value
-                    .regions
-                    .into_iter()
-                    .map(|(key, value)| (key, value.into_iter().collect()))
-                    .collect(),
-                retry: value.retry.into_iter().collect(),
-                tokens: value.tokens.into_iter().collect(),
+                ids: value.ids,
+                regions: value.regions,
+                retry: value.retry,
+                tokens: value.tokens,
                 detail: value.detail.into(),
                 state: value.state.into(),
                 tag: value.tag,
@@ -471,14 +425,10 @@ pub(super) mod __xidl_out_Batches {
     impl From<billing_BatchRejected> for super::billing::BatchRejected {
         fn from(value: billing_BatchRejected) -> Self {
             Self {
-                ids: value.ids.into_iter().collect(),
-                regions: value
-                    .regions
-                    .into_iter()
-                    .map(|(key, value)| (key, value.into_iter().collect()))
-                    .collect(),
-                retry: value.retry.into_iter().collect(),
-                tokens: value.tokens.into_iter().collect(),
+                ids: value.ids,
+                regions: value.regions,
+                retry: value.retry,
+                tokens: value.tokens,
                 detail: value.detail.into(),
                 state: value.state.into(),
                 tag: value.tag,
@@ -517,15 +467,16 @@ pub(super) mod __xidl_out_Batches {
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub enum codes_RetryState {
         #[serde(rename = "true")]
-        blocked,
-        retryable,
+        Blocked,
+        #[serde(rename = "retryable")]
+        Retryable,
     }
     #[allow(unused_variables, unreachable_code)]
     impl From<super::codes::RetryState> for codes_RetryState {
         fn from(value: super::codes::RetryState) -> Self {
             match value {
-                super::codes::RetryState::blocked => Self::blocked,
-                super::codes::RetryState::retryable => Self::retryable,
+                super::codes::RetryState::Blocked => Self::Blocked,
+                super::codes::RetryState::Retryable => Self::Retryable,
             }
         }
     }
@@ -533,8 +484,8 @@ pub(super) mod __xidl_out_Batches {
     impl From<codes_RetryState> for super::codes::RetryState {
         fn from(value: codes_RetryState) -> Self {
             match value {
-                codes_RetryState::blocked => Self::blocked,
-                codes_RetryState::retryable => Self::retryable,
+                codes_RetryState::Blocked => Self::Blocked,
+                codes_RetryState::Retryable => Self::Retryable,
             }
         }
     }
@@ -637,16 +588,16 @@ where
 #[derive(::serde::Serialize, ::core::default::Default)]
 struct BatchesQueryRequestOutQuery {
     #[serde(default)]
-    values: ::xidl_rust_axum::SequenceWire<i32, 2>,
+    values: ::xidl_rust_axum::BoundedVec<i32, 2>,
 }
 #[derive(::serde::Deserialize)]
 struct BatchesQueryRequestInQuery {
     #[serde(default)]
-    values: ::xidl_rust_axum::SequenceWire<i32, 2>,
+    values: ::xidl_rust_axum::BoundedVec<i32, 2>,
 }
 #[derive(::serde::Deserialize)]
 struct BatchesQueryRequest {
-    values: ::xidl_rust_axum::SequenceWire<i32, 2>,
+    values: ::xidl_rust_axum::BoundedVec<i32, 2>,
 }
 #[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S> for BatchesQueryRequest
@@ -678,7 +629,7 @@ where
 }
 #[derive(::serde::Deserialize)]
 struct BatchesHeadersRequest {
-    values: ::xidl_rust_axum::SequenceWire<i32, 2>,
+    values: ::xidl_rust_axum::BoundedVec<i32, 2>,
 }
 #[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S> for BatchesHeadersRequest
@@ -714,15 +665,16 @@ where
                     values.push(parsed);
                 }
             }
-            let values = ::xidl_rust_axum::SequenceWire::<_, 2>::try_from(values)
-                .map_err(|error| ::xidl_rust_axum::Error::new(400, error.to_string()))?;
+            let values: ::xidl_rust_axum::BoundedVec<i32, 2> = values
+                .try_into()
+                .map_err(|error| ::xidl_rust_axum::Error::new(400, format!("{error}")))?;
             Ok(Self { values })
         }
     }
 }
 #[derive(::serde::Deserialize)]
 struct BatchesCookiesRequest {
-    values: ::xidl_rust_axum::SequenceWire<i32, 2>,
+    values: ::xidl_rust_axum::BoundedVec<i32, 2>,
 }
 #[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S> for BatchesCookiesRequest
@@ -774,15 +726,16 @@ where
                     values.push(parsed);
                 }
             }
-            let values = ::xidl_rust_axum::SequenceWire::<_, 2>::try_from(values)
-                .map_err(|error| ::xidl_rust_axum::Error::new(400, error.to_string()))?;
+            let values: ::xidl_rust_axum::BoundedVec<i32, 2> = values
+                .try_into()
+                .map_err(|error| ::xidl_rust_axum::Error::new(400, format!("{error}")))?;
             Ok(Self { values })
         }
     }
 }
 #[derive(::serde::Deserialize)]
 struct BatchesUploadRequest {
-    bytes: ::xidl_rust_axum::SequenceWire<u8, 2>,
+    bytes: ::xidl_rust_axum::BoundedVec<u8, 2>,
 }
 #[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S> for BatchesUploadRequest
@@ -811,11 +764,10 @@ where
                     err.status().as_u16(),
                     err.body_text(),
                 ))?;
-            let bytes = ::xidl_rust_axum::SequenceWire::<
-                _,
-                2,
-            >::try_from(xidl_body_bytes.to_vec())
-                .map_err(|error| ::xidl_rust_axum::Error::new(400, error.to_string()))?;
+            let bytes: ::xidl_rust_axum::BoundedVec<u8, 2> = xidl_body_bytes
+                .to_vec()
+                .try_into()
+                .map_err(|error| ::xidl_rust_axum::Error::new(400, format!("{error}")))?;
             Ok(Self { bytes })
         }
     }
@@ -832,8 +784,16 @@ struct BatchesMetadataRequestInQuery {
 #[derive(::serde::Deserialize)]
 struct BatchesMetadataRequest {
     invalid: bool,
-    groups: ::std::collections::BTreeMap<String, ::xidl_rust_axum::SequenceWire<i32, 2>>,
-    backup: ::std::collections::BTreeMap<String, ::xidl_rust_axum::SequenceWire<i32, 2>>,
+    groups: ::xidl_rust_axum::BoundedMap<
+        String,
+        ::xidl_rust_axum::BoundedVec<i32, 2>,
+        2,
+    >,
+    backup: ::xidl_rust_axum::BoundedMap<
+        String,
+        ::xidl_rust_axum::BoundedVec<i32, 2>,
+        2,
+    >,
 }
 #[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S> for BatchesMetadataRequest
@@ -859,9 +819,10 @@ where
             let BatchesMetadataRequestInQuery { invalid } = xidl_query;
             let xidl_headers = &parts.headers;
             let _ = xidl_headers;
-            let groups: ::std::collections::BTreeMap<
+            let groups: ::xidl_rust_axum::BoundedMap<
                 String,
-                ::xidl_rust_axum::SequenceWire<i32, 2>,
+                ::xidl_rust_axum::BoundedVec<i32, 2>,
+                2,
             > = match xidl_headers.get("groups") {
                 Some(header_value) => {
                     let header_str = header_value
@@ -907,9 +868,10 @@ where
                         .push(cookie.value().to_string());
                 }
             }
-            let backup: ::std::collections::BTreeMap<
+            let backup: ::xidl_rust_axum::BoundedMap<
                 String,
-                ::xidl_rust_axum::SequenceWire<i32, 2>,
+                ::xidl_rust_axum::BoundedVec<i32, 2>,
+                2,
             > = match cookie_map.get("backup").and_then(|values| values.first()) {
                 Some(value) => {
                     ::xidl_rust_axum::serde_json::from_str(value)
@@ -932,7 +894,7 @@ where
     }
 }
 pub struct BatchesMetadataResponse {
-    pub value: ::std::collections::BTreeMap<String, billing::InvoiceIds>,
+    pub value: billing::Regions,
 }
 #[derive(::serde::Serialize, ::core::default::Default)]
 struct BatchesExportedRequestOutQuery {
@@ -1237,13 +1199,11 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let BatchesQueryRequest { values } = request;
-        let values: billing::InvoiceIds = values.into_iter().collect();
+        let values: billing::InvoiceIds = values;
         let mut resp = match svc.query(values).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: ::xidl_rust_axum::SequenceWire<i32, 2> = resp_value
-                        .into_iter()
-                        .collect();
+                    let body_value: ::xidl_rust_axum::BoundedVec<i32, 2> = resp_value;
                     let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
@@ -1292,13 +1252,11 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let BatchesHeadersRequest { values } = request;
-        let values: billing::InvoiceIds = values.into_iter().collect();
+        let values: billing::InvoiceIds = values;
         let mut resp = match svc.headers(values).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: ::xidl_rust_axum::SequenceWire<i32, 2> = resp_value
-                        .into_iter()
-                        .collect();
+                    let body_value: ::xidl_rust_axum::BoundedVec<i32, 2> = resp_value;
                     let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
@@ -1347,13 +1305,11 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let BatchesCookiesRequest { values } = request;
-        let values: billing::InvoiceIds = values.into_iter().collect();
+        let values: billing::InvoiceIds = values;
         let mut resp = match svc.cookies(values).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: ::xidl_rust_axum::SequenceWire<i32, 2> = resp_value
-                        .into_iter()
-                        .collect();
+                    let body_value: ::xidl_rust_axum::BoundedVec<i32, 2> = resp_value;
                     let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
@@ -1402,7 +1358,7 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let BatchesUploadRequest { bytes } = request;
-        let bytes: Vec<u8> = bytes.into_iter().collect();
+        let bytes: ::xidl_rust_axum::BoundedVec<u8, 2> = bytes;
         let mut resp = match svc.upload(bytes).await {
             Ok(resp_value) => {
                 let mut resp = {
@@ -1454,25 +1410,17 @@ where
         let _ = &headers;
         let BatchesMetadataRequest { invalid, groups, backup } = request;
         let invalid: bool = invalid;
-        let groups: ::std::collections::BTreeMap<String, billing::InvoiceIds> = groups
-            .into_iter()
-            .map(|(key, value)| (key, value.into_iter().collect()))
-            .collect();
-        let backup: ::std::collections::BTreeMap<String, billing::InvoiceIds> = backup
-            .into_iter()
-            .map(|(key, value)| (key, value.into_iter().collect()))
-            .collect();
+        let groups: billing::Regions = groups;
+        let backup: billing::Regions = backup;
         let mut resp = match svc.metadata(invalid, groups, backup).await {
             Ok(resp_value) => {
-                let value_wire: ::std::collections::BTreeMap<
+                let value_wire: ::xidl_rust_axum::BoundedMap<
                     String,
-                    ::xidl_rust_axum::SequenceWire<i32, 2>,
+                    ::xidl_rust_axum::BoundedVec<i32, 2>,
+                    2,
                 > = {
                     let value = ::core::clone::Clone::clone(&resp_value.value);
                     value
-                        .into_iter()
-                        .map(|(key, value)| (key, value.into_iter().collect()))
-                        .collect()
                 };
                 let value_header_value: String = {
                     let value = &value_wire;
@@ -1527,24 +1475,14 @@ where
         let invalid: bool = invalid;
         let mut resp = match svc.exported(invalid).await {
             Ok(resp_value) => {
-                let ids_wire: ::xidl_rust_axum::SequenceWire<i32, 2> = {
+                let ids_wire: ::xidl_rust_axum::BoundedVec<i32, 2> = {
                     let ids = ::core::clone::Clone::clone(&resp_value.ids);
-                    ids.into_iter().collect()
+                    ids
                 };
-                ::xidl_rust_axum::SequenceLimit::check((ids_wire).len(), 2)
-                    .map_err(|error| ::xidl_rust_axum::Error::new(
-                        500,
-                        error.to_string(),
-                    ))?;
-                let tokens_wire: ::xidl_rust_axum::SequenceWire<i32, 2> = {
+                let tokens_wire: ::xidl_rust_axum::BoundedVec<i32, 2> = {
                     let tokens = ::core::clone::Clone::clone(&resp_value.tokens);
-                    tokens.into_iter().collect()
+                    tokens
                 };
-                ::xidl_rust_axum::SequenceLimit::check((tokens_wire).len(), 2)
-                    .map_err(|error| ::xidl_rust_axum::Error::new(
-                        500,
-                        error.to_string(),
-                    ))?;
                 let ids_header_value: String = {
                     let value = &ids_wire;
                     xidl_rust_axum::serde_json::to_string(value)
@@ -1633,9 +1571,7 @@ where
                             ) {
                                 return Err(xidl_rust_axum::Error::not_acceptable());
                             }
-                            let payload: ::xidl_rust_axum::SequenceWire<i32, 2> = payload
-                                .into_iter()
-                                .collect();
+                            let payload: ::xidl_rust_axum::BoundedVec<i32, 2> = payload;
                             let body = xidl_rust_axum::SerializeFactory::new(
                                     xidl_rust_axum::http::ContentType::Json.as_str(),
                                 )
@@ -1662,11 +1598,6 @@ where
                             ) {
                                 return Err(xidl_rust_axum::Error::not_acceptable());
                             }
-                            ::xidl_rust_axum::SequenceLimit::check((payload).len(), 2)
-                                .map_err(|error| ::xidl_rust_axum::Error::new(
-                                    500,
-                                    error.to_string(),
-                                ))?;
                             ::xidl_rust_axum::axum::response::Response::builder()
                                 .status(
                                     ::xidl_rust_axum::axum::http::StatusCode::from_u16(200)
@@ -1676,7 +1607,11 @@ where
                                     ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
                                     xidl_rust_axum::http::ContentType::OctetStream.as_str(),
                                 )
-                                .body(::xidl_rust_axum::axum::body::Body::from(payload))
+                                .body(
+                                    ::xidl_rust_axum::axum::body::Body::from(
+                                        payload.into_inner(),
+                                    ),
+                                )
                                 .map_err(|err| xidl_rust_axum::Error::new(
                                     500,
                                     format!("{err:?}"),
@@ -2032,8 +1967,6 @@ impl BatchesClient {
         &self,
         values: billing::InvoiceIds,
     ) -> Result<billing::InvoiceIds, xidl_rust_axum::Error> {
-        ::xidl_rust_axum::SequenceLimit::check((values).len(), 2)
-            .map_err(|error| ::xidl_rust_axum::Error::new(400, error.to_string()))?;
         let xidl_path = "/query".to_string();
         let mut req = self
             .client
@@ -2050,7 +1983,7 @@ impl BatchesClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let query = BatchesQueryRequestOutQuery {
-            values: values.into_iter().collect(),
+            values,
         };
         let query = xidl_rust_axum::serde_html_form::to_string(&query)
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
@@ -2070,11 +2003,11 @@ impl BatchesClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: ::xidl_rust_axum::SequenceWire<i32, 2> = xidl_rust_axum::DeserializeFactory::new(
+            let body: ::xidl_rust_axum::BoundedVec<i32, 2> = xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into_iter().collect())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -2086,11 +2019,7 @@ impl BatchesClient {
         &self,
         values: billing::InvoiceIds,
     ) -> Result<billing::InvoiceIds, xidl_rust_axum::Error> {
-        ::xidl_rust_axum::SequenceLimit::check((values).len(), 2)
-            .map_err(|error| ::xidl_rust_axum::Error::new(400, error.to_string()))?;
-        let values: ::xidl_rust_axum::SequenceWire<i32, 2> = values
-            .into_iter()
-            .collect();
+        let values: ::xidl_rust_axum::BoundedVec<i32, 2> = values;
         let xidl_path = "/headers".to_string();
         let mut req = self
             .client
@@ -2145,11 +2074,11 @@ impl BatchesClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: ::xidl_rust_axum::SequenceWire<i32, 2> = xidl_rust_axum::DeserializeFactory::new(
+            let body: ::xidl_rust_axum::BoundedVec<i32, 2> = xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into_iter().collect())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -2161,11 +2090,7 @@ impl BatchesClient {
         &self,
         values: billing::InvoiceIds,
     ) -> Result<billing::InvoiceIds, xidl_rust_axum::Error> {
-        ::xidl_rust_axum::SequenceLimit::check((values).len(), 2)
-            .map_err(|error| ::xidl_rust_axum::Error::new(400, error.to_string()))?;
-        let values: ::xidl_rust_axum::SequenceWire<i32, 2> = values
-            .into_iter()
-            .collect();
+        let values: ::xidl_rust_axum::BoundedVec<i32, 2> = values;
         let xidl_path = "/cookies".to_string();
         let mut req = self
             .client
@@ -2231,11 +2156,11 @@ impl BatchesClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: ::xidl_rust_axum::SequenceWire<i32, 2> = xidl_rust_axum::DeserializeFactory::new(
+            let body: ::xidl_rust_axum::BoundedVec<i32, 2> = xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into_iter().collect())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -2245,10 +2170,8 @@ impl BatchesClient {
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn upload(
         &self,
-        bytes: Vec<u8>,
+        bytes: ::xidl_rust_axum::BoundedVec<u8, 2>,
     ) -> Result<billing::Total, xidl_rust_axum::Error> {
-        ::xidl_rust_axum::SequenceLimit::check((bytes).len(), 2)
-            .map_err(|error| ::xidl_rust_axum::Error::new(400, error.to_string()))?;
         let xidl_path = "/upload".to_string();
         let mut req = self
             .client
@@ -2273,7 +2196,7 @@ impl BatchesClient {
                     "application/octet-stream",
                 ),
             );
-        *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(bytes));
+        *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(bytes.into_inner()));
         let resp = self
             .client
             .http()
@@ -2300,23 +2223,19 @@ impl BatchesClient {
     pub async fn metadata(
         &self,
         invalid: bool,
-        groups: ::std::collections::BTreeMap<String, billing::InvoiceIds>,
-        backup: ::std::collections::BTreeMap<String, billing::InvoiceIds>,
+        groups: billing::Regions,
+        backup: billing::Regions,
     ) -> Result<BatchesMetadataResponse, xidl_rust_axum::Error> {
-        let groups: ::std::collections::BTreeMap<
+        let groups: ::xidl_rust_axum::BoundedMap<
             String,
-            ::xidl_rust_axum::SequenceWire<i32, 2>,
-        > = groups
-            .into_iter()
-            .map(|(key, value)| (key, value.into_iter().collect()))
-            .collect();
-        let backup: ::std::collections::BTreeMap<
+            ::xidl_rust_axum::BoundedVec<i32, 2>,
+            2,
+        > = groups;
+        let backup: ::xidl_rust_axum::BoundedMap<
             String,
-            ::xidl_rust_axum::SequenceWire<i32, 2>,
-        > = backup
-            .into_iter()
-            .map(|(key, value)| (key, value.into_iter().collect()))
-            .collect();
+            ::xidl_rust_axum::BoundedVec<i32, 2>,
+            2,
+        > = backup;
         let xidl_path = "/metadata".to_string();
         let mut req = self
             .client
@@ -2395,9 +2314,10 @@ impl BatchesClient {
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         if resp.status().is_success() {
             let headers = resp.headers().clone();
-            let value: ::std::collections::BTreeMap<
+            let value: ::xidl_rust_axum::BoundedMap<
                 String,
-                ::xidl_rust_axum::SequenceWire<i32, 2>,
+                ::xidl_rust_axum::BoundedVec<i32, 2>,
+                2,
             > = match headers.get("value") {
                 Some(header_value) => {
                     let header_str = header_value
@@ -2414,10 +2334,7 @@ impl BatchesClient {
                 }
                 None => ::core::default::Default::default(),
             };
-            let value: ::std::collections::BTreeMap<String, billing::InvoiceIds> = value
-                .into_iter()
-                .map(|(key, value)| (key, value.into_iter().collect()))
-                .collect();
+            let value: billing::Regions = value;
             Ok(BatchesMetadataResponse { value })
         } else {
             let status = resp.status();
@@ -2461,7 +2378,7 @@ impl BatchesClient {
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         if resp.status().is_success() {
             let headers = resp.headers().clone();
-            let ids: ::xidl_rust_axum::SequenceWire<i32, 2> = match headers.get("ids") {
+            let ids: ::xidl_rust_axum::BoundedVec<i32, 2> = match headers.get("ids") {
                 Some(header_value) => {
                     let header_str = header_value
                         .to_str()
@@ -2477,11 +2394,11 @@ impl BatchesClient {
                 }
                 None => ::core::default::Default::default(),
             };
-            let ids: billing::InvoiceIds = ids.into_iter().collect();
+            let ids: billing::InvoiceIds = ids;
             let cookie_map = xidl_rust_axum::http::parse_set_cookies(
                 headers.get_all(::xidl_rust_axum::reqwest::header::SET_COOKIE).iter(),
             );
-            let tokens: ::xidl_rust_axum::SequenceWire<i32, 2> = match cookie_map
+            let tokens: ::xidl_rust_axum::BoundedVec<i32, 2> = match cookie_map
                 .get("tokens")
                 .and_then(|values| values.first())
             {
@@ -2494,7 +2411,7 @@ impl BatchesClient {
                 }
                 None => ::core::default::Default::default(),
             };
-            let tokens: billing::InvoiceIds = tokens.into_iter().collect();
+            let tokens: billing::InvoiceIds = tokens;
             Ok(BatchesExportedResponse {
                 ids,
                 tokens,
@@ -2558,11 +2475,11 @@ impl BatchesClient {
                     .bytes()
                     .await
                     .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-                let payload: ::xidl_rust_axum::SequenceWire<i32, 2> = xidl_rust_axum::DeserializeFactory::new(
+                let payload: ::xidl_rust_axum::BoundedVec<i32, 2> = xidl_rust_axum::DeserializeFactory::new(
                         xidl_rust_axum::http::ContentType::Json.as_str(),
                     )
                     .from_slice(&body)?;
-                let payload: billing::InvoiceIds = payload.into_iter().collect();
+                let payload: billing::InvoiceIds = payload;
                 return Ok(billing::Export::Json(payload));
             }
             if xidl_rust_axum::http::media_type_eq(
@@ -2574,10 +2491,11 @@ impl BatchesClient {
                     .await
                     .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?
                     .to_vec();
-                ::xidl_rust_axum::SequenceLimit::check((payload).len(), 2)
-                    .map_err(|error| ::xidl_rust_axum::Error::new(
+                let payload: ::xidl_rust_axum::BoundedVec<u8, 2> = payload
+                    .try_into()
+                    .map_err(|error| xidl_rust_axum::Error::new(
                         400,
-                        error.to_string(),
+                        format!("{error}"),
                     ))?;
                 return Ok(billing::Export::OctetStream(payload));
             }
@@ -2647,8 +2565,9 @@ pub mod codes {
     pub enum RetryState {
         #[serde(rename = "true")]
         #[default]
-        blocked,
-        retryable,
+        Blocked,
+        #[serde(rename = "retryable")]
+        Retryable,
     }
     pub type State = RetryState;
 }
@@ -2663,7 +2582,8 @@ pub mod billing {
         );
         _xidl_1 as u16
     };
-    pub type InvoiceIds = Vec<i32>;
+    pub type InvoiceIds = ::xidl_rust_axum::BoundedVec<i32, 2>;
+    pub type Regions = ::xidl_rust_axum::BoundedMap<String, InvoiceIds, 2>;
     pub type Token = String;
     #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
     #[derive(Default)]
@@ -2684,15 +2604,17 @@ pub mod billing {
         Default,
     )]
     pub enum Region {
+        #[serde(rename = "eu")]
         #[default]
-        eu,
-        us,
+        Eu,
+        #[serde(rename = "us")]
+        Us,
     }
     #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
     #[derive(Default)]
     pub struct BatchRejected {
         pub ids: InvoiceIds,
-        pub regions: ::std::collections::BTreeMap<Region, InvoiceIds>,
+        pub regions: ::xidl_rust_axum::BoundedMap<Region, InvoiceIds, 2>,
         #[serde(skip)]
         pub retry: InvoiceIds,
         #[serde(skip)]
@@ -2710,8 +2632,8 @@ pub mod billing {
     #[derive(Default)]
     pub struct Batch {
         pub invoices: InvoiceIds,
-        pub windows: Vec<InvoiceIds>,
-        pub regions: ::std::collections::BTreeMap<String, InvoiceIds>,
+        pub windows: ::xidl_rust_axum::BoundedVec<InvoiceIds, 2>,
+        pub regions: Regions,
         pub days: [InvoiceIds; 2],
         #[serde(skip_serializing_if = "Option::is_none")]
         pub retry: Option<InvoiceIds>,
@@ -2723,6 +2645,6 @@ pub mod billing {
     #[serde(untagged)]
     pub enum Export {
         Json(InvoiceIds),
-        OctetStream(Vec<u8>),
+        OctetStream(::xidl_rust_axum::BoundedVec<u8, 2>),
     }
 }

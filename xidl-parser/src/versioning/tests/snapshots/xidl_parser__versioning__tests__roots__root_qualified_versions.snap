@@ -20,7 +20,7 @@ module v1 {
         struct Address {
             ::v1::Identifier id;
             sequence<::v1::Identifier, 8> labels;
-            map<string, ::v1::Identifier, ::v1::WIDTH> by_tag;
+            map<string, ::v1::Identifier, 8> by_tag;
             string<::v1::WIDTH> label;
             wstring<::v1::WIDTH> wide;
             fixed<::v1::WIDTH, 0> amount;
@@ -57,7 +57,7 @@ module v2 {
         struct Address {
             ::v2::Identifier id;
             sequence<::v2::Identifier, 8> labels;
-            map<string, ::v2::Identifier, ::v2::WIDTH> by_tag;
+            map<string, ::v2::Identifier, 8> by_tag;
             string<::v2::WIDTH> label;
             wstring<::v2::WIDTH> wide;
             fixed<::v2::WIDTH, 0> amount;

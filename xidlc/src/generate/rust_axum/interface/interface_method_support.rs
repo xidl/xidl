@@ -32,9 +32,9 @@ pub(crate) fn method_struct_prefix(interface_name: &str, method_name: &str) -> S
     )
 }
 
-pub(crate) fn op_return_ty(op_ty: &hir::OpTypeSpec, env: RenderEnv<'_>) -> String {
+pub(crate) fn op_return_ty(op_ty: &hir::OpTypeSpec, env: RenderEnv<'_>) -> IdlcResult<String> {
     match op_ty {
-        hir::OpTypeSpec::Void => "()".to_string(),
+        hir::OpTypeSpec::Void => Ok("()".to_string()),
         hir::OpTypeSpec::TypeSpec(ty) => env.axum_type(ty),
     }
 }

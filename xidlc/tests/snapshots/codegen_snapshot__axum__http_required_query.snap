@@ -143,12 +143,12 @@ where
         }
         let RequiredQueryListRequest { limit, values, archived } = request;
         let limit: i32 = limit;
-        let values: Vec<String> = values.into_iter().collect();
+        let values: Vec<String> = values;
         let archived: Option<bool> = archived;
         let mut resp = match svc.list(limit, values, archived).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: Vec<String> = resp_value.into_iter().collect();
+                    let body_value: Vec<String> = resp_value;
                     let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
@@ -229,7 +229,7 @@ impl RequiredQueryClient {
             );
         let query = RequiredQueryListRequestOutQuery {
             limit,
-            values: values.into_iter().collect(),
+            values,
             archived,
         };
         let query = xidl_rust_axum::serde_html_form::to_string(&query)
@@ -254,7 +254,7 @@ impl RequiredQueryClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into_iter().collect())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();

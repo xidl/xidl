@@ -39,7 +39,7 @@ impl TypeDeclarations<'_> {
                     len: sequence.len.clone(),
                 }))
             }
-            _ => Ok(ty.clone()),
+            _ => Ok(self.qualified(ty, scope)),
         }
     }
 }

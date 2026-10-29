@@ -766,7 +766,7 @@ where
                 };
                 let tags_wire: Vec<String> = {
                     let tags = ::core::clone::Clone::clone(&resp_value.tags);
-                    tags.into_iter().collect()
+                    tags
                 };
                 let cached_wire: bool = {
                     let cached = ::core::clone::Clone::clone(&resp_value.cached);
@@ -1187,7 +1187,7 @@ impl EnvelopeApiClient {
                 let parsed: String = header_str.to_string();
                 tags.push(parsed);
             }
-            let tags: Vec<String> = tags.into_iter().collect();
+            let tags: Vec<String> = tags;
             let cookie_map = xidl_rust_axum::http::parse_set_cookies(
                 headers.get_all(::xidl_rust_axum::reqwest::header::SET_COOKIE).iter(),
             );

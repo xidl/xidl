@@ -1,0 +1,7 @@
+{%- if maximum is not none -%}
+{{ runtime }}::Bounded{% if kind == "sequence" %}Vec{% else %}Map{% endif %}<{{ elements | join(", ") }}, {{ maximum }}>
+{%- elif kind == "sequence" -%}
+Vec<{{ elements | join(", ") }}>
+{%- else -%}
+::std::collections::BTreeMap<{{ elements | join(", ") }}>
+{%- endif -%}

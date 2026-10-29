@@ -1,0 +1,24 @@
+#pragma xidlc package bounded_batches
+
+@version enum V { v1, v2, v3 };
+
+struct Invoice {
+    long id;
+    @added(V::v2) @optional string memo;
+    @added(V::v3) @optional string label;
+};
+
+typedef sequence<Invoice, 2> Invoices;
+typedef map<string, Invoices, 2> Regions;
+
+struct Batch {
+    Invoices invoices;
+    Regions regions;
+    Invoices days[2];
+    @optional Invoices retry;
+};
+
+interface Batches {
+    @post(path="/batches") Batch reserve(@body Batch batch);
+    @post(path="/upload") long upload(@body sequence<octet, 2> bytes);
+};

@@ -1,6 +1,13 @@
 pub mod doc;
 #[cfg(feature = "gen-rust")]
 pub mod filter;
+#[cfg(any(
+    feature = "gen-rust-axum",
+    feature = "gen-rust-axum-adapters",
+    feature = "gen-typescript-rest",
+    feature = "gen-typescript-rest-adapters",
+    feature = "gen-openapi"
+))]
 pub mod scope;
 
 pub use doc::doc_lines_from_annotations;

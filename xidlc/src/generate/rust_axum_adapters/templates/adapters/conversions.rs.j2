@@ -2,7 +2,7 @@
 {% macro value(plan, source, path) -%}
     {%- if plan.kind == "Identity" -%}Ok::<_, UnsupportedProjection>(::std::clone::Clone::clone({{ source }}))
     {%- elif plan.kind == "Named" -%}{{ plan.data.name }}({{ source }}{% if plan.data.current %}, current{% endif %}{% if plan.data.stored %}, stored{% endif %}, adapters)
-    {%- elif plan.kind == "Sequence" -%}map_sequence({{ source }}, |item| {{ value(plan.data, "item", path) }}, {{ path | tojson }})
+    {%- elif plan.kind == "Sequence" -%}map_sequence({{ source }}, |item| {{ value(plan.data, "item", path) }}, refusal, {{ path | tojson }})
     {%- elif plan.kind == "Array" -%}map_array({{ source }}, |item| {{ value(plan.data, "item", path) }}, refusal, {{ path | tojson }})
     {%- elif plan.kind == "Map" -%}map_record({{ source }}, |key| {{ value(plan.data.key, "key", path) }}, |item| {{ value(plan.data.value, "item", path) }}, refusal, {{ path | tojson }})
     {%- elif plan.kind == "Optional" -%}::std::option::Option::as_ref({{ source }}).map(|item| {{ value(plan.data, "item", path) }}).transpose()

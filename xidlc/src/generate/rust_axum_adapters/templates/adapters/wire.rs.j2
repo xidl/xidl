@@ -7,10 +7,9 @@
     {%- elif schema.kind == "Sequence" or schema.kind == "Array" -%}(|| {
         let array = ({{ source }}).as_array().ok_or_else(|| "expected an array".to_string())?;
         {% if schema.kind == "Array" %}if array.len() != ({{ schema.data.length }}) as usize { return Err("fixed array length differs".into()); }{% endif %}
-        {% if schema.kind == "Sequence" and schema.data.maximum is not none %}if array.len() > ({{ schema.data.maximum }}) as usize { return Err("sequence maximum length exceeded".into()); }{% endif %}
             {% set inner = schema.data.inner %}
             let values = array.iter().map({% if inner.kind == "Named" %}{{ inner.data }}{% else %}|item| {{ decode(inner, "item") }}{% endif %}).collect::<Result<Vec<_>, String>>()?;
-            {% if schema.kind == "Array" %}values.try_into().map_err(|_: Vec<_>| "fixed array length differs".to_string()){% else %}Ok::<_, String>(values){% endif %}
+            {% if schema.kind == "Array" %}values.try_into().map_err(|_: Vec<_>| "fixed array length differs".to_string()){% else %}<{{ schema.data.ty }}>::try_from(values).map_err(|error| error.to_string()){% endif %}
             })()
             {%- elif schema.kind == "Map" -%}(|| {
                 let object = ({{ source }}).as_object().ok_or_else(|| "expected a map".to_string())?;
@@ -22,7 +21,7 @@
                     let value = {{ decode(schema.data.value, "raw_value") }}?;
                     if decoded.insert(key, value).is_some() { return Err("distinct wire keys decode to the same map key".into()); }
                 }
-                Ok::<_, String>(decoded)
+                <{{ schema.data.ty }}>::try_from(decoded).map_err(|error| error.to_string())
             })()
         {%- endif -%}
     {%- endmacro %}

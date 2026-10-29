@@ -117,12 +117,21 @@ pub mod version_adapters {
                 ..error
             })
     }
-    fn map_sequence<S, T>(
+    fn map_sequence<S, T, C>(
         source: &[S],
         convert: impl Fn(&S) -> VersionedResult<T>,
+        refusal: impl Fn(&str) -> UnsupportedProjection,
         path: &str,
-    ) -> VersionedResult<Vec<T>> {
-        source.iter().map(|item| locate(convert(item), path)).collect()
+    ) -> VersionedResult<C>
+    where
+        C: TryFrom<Vec<T>>,
+        C::Error: ::std::fmt::Display,
+    {
+        let values = source
+            .iter()
+            .map(|item| locate(convert(item), path))
+            .collect::<VersionedResult<Vec<_>>>()?;
+        C::try_from(values).map_err(|error| refusal(&error.to_string()))
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn event_upcast_from_v_2026_01_01(
@@ -263,6 +272,7 @@ pub mod version_adapters {
         let projected_0 = map_sequence(
             source,
             |item| event_downcast_to_v_2026_01_01(item, adapters),
+            refusal,
             "NotifierFeedResponse.r#return",
         )?;
         Ok(projected_0)
@@ -431,6 +441,7 @@ pub mod version_adapters {
         let projected_0 = map_sequence(
             source,
             |item| event_downcast_to_v_2026_04_01(item, adapters),
+            refusal,
             "NotifierFeedResponse.r#return",
         )?;
         Ok(projected_0)

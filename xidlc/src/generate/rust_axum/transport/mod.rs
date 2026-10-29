@@ -163,26 +163,20 @@ pub(super) fn map_type_inner(
         hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => "String".to_string(),
         hir::TypeSpec::SequenceType(seq) => {
             let element = map_type_inner(&seq.ty, direction, module_name, scope, tracker)?;
-            match &seq.len {
-                Some(bound) => {
-                    let maximum = hir::const_expr_to_i64(&bound.0).ok_or_else(|| {
-                        IdlcError::rpc("unresolved sequence bound in Rust transport")
-                    })?;
-                    super::render::RustAxumRenderer::new()?
-                        .render_template(
-                            "interface/sequence_type.rs.j2",
-                            &serde_json::json!({ "element": element, "maximum": maximum }),
-                        )?
-                        .trim()
-                        .to_owned()
-                }
-                None => format!("Vec<{element}>"),
-            }
+            scope.types.collection_type(
+                crate::generate::rust::types::CollectionKind::Sequence,
+                &[element],
+                seq.len.as_ref(),
+            )?
         }
         hir::TypeSpec::MapType(map) => {
-            let key_ty = scope.public_type(&map.key);
+            let key_ty = scope.public_type(&map.key)?;
             let value_ty = map_type_inner(&map.value, direction, module_name, scope, tracker)?;
-            format!("::std::collections::BTreeMap<{key_ty}, {value_ty}>")
+            scope.types.collection_type(
+                crate::generate::rust::types::CollectionKind::Map,
+                &[key_ty, value_ty],
+                map.len.as_ref(),
+            )?
         }
         hir::TypeSpec::TemplateType(value) => format!(
             "{}<{}>",

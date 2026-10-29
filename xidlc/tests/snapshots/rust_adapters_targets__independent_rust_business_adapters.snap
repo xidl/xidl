@@ -527,12 +527,21 @@ pub mod version_adapters {
                 ..error
             })
     }
-    fn map_sequence<S, T>(
+    fn map_sequence<S, T, C>(
         source: &[S],
         convert: impl Fn(&S) -> VersionedResult<T>,
+        refusal: impl Fn(&str) -> UnsupportedProjection,
         path: &str,
-    ) -> VersionedResult<Vec<T>> {
-        source.iter().map(|item| locate(convert(item), path)).collect()
+    ) -> VersionedResult<C>
+    where
+        C: TryFrom<Vec<T>>,
+        C::Error: ::std::fmt::Display,
+    {
+        let values = source
+            .iter()
+            .map(|item| locate(convert(item), path))
+            .collect::<VersionedResult<Vec<_>>>()?;
+        C::try_from(values).map_err(|error| refusal(&error.to_string()))
     }
     fn map_array<S, T, const N: usize>(
         source: &[S; N],
@@ -548,13 +557,17 @@ pub mod version_adapters {
             .try_into()
             .map_err(|_: Vec<T>| refusal("array projection changed its length"))
     }
-    fn map_record<K: Ord, V, L: Ord, W>(
+    fn map_record<K: Ord, V, L: Ord, W, C>(
         source: &::std::collections::BTreeMap<K, V>,
         key: impl Fn(&K) -> VersionedResult<L>,
         value: impl Fn(&V) -> VersionedResult<W>,
         refusal: impl Fn(&str) -> UnsupportedProjection,
         path: &str,
-    ) -> VersionedResult<::std::collections::BTreeMap<L, W>> {
+    ) -> VersionedResult<C>
+    where
+        C: TryFrom<::std::collections::BTreeMap<L, W>>,
+        C::Error: ::std::fmt::Display,
+    {
         let mut target = ::std::collections::BTreeMap::new();
         for (old_key, old_value) in source {
             let next_key = locate(key(old_key), path)?;
@@ -563,7 +576,7 @@ pub mod version_adapters {
                 return Err(refusal("map key projection is not injective"));
             }
         }
-        Ok(target)
+        C::try_from(target).map_err(|error| refusal(&error.to_string()))
     }
     /// Projects one adjacent declaration by borrowing its source value.
     pub fn address_upcast_from_v_1(
@@ -887,6 +900,7 @@ pub mod version_adapters {
             .map(|item| map_sequence(
                 item,
                 |item| node_upcast_from_v_1(item, adapters),
+                refusal,
                 "Node.children",
             ))
             .transpose()?;
@@ -914,6 +928,7 @@ pub mod version_adapters {
             .map(|item| map_sequence(
                 item,
                 |item| node_downcast_to_v_1(item, adapters),
+                refusal,
                 "Node.children",
             ))
             .transpose()?;
@@ -1039,6 +1054,7 @@ pub mod version_adapters {
         let projected_3 = map_sequence(
             &source.stops,
             |item| address_upcast_from_v_1(item, adapters),
+            refusal,
             "Parcel.stops",
         )?;
         let projected_4 = map_record(
@@ -1091,6 +1107,7 @@ pub mod version_adapters {
         let projected_3 = map_sequence(
             &source.stops,
             |item| address_downcast_to_v_1(item, adapters),
+            refusal,
             "Parcel.stops",
         )?;
         let projected_4 = map_record(
@@ -2250,6 +2267,7 @@ pub mod version_adapters {
             .map(|item| map_sequence(
                 item,
                 |item| node_upcast_from_v_2(item, adapters),
+                refusal,
                 "Node.children",
             ))
             .transpose()?;
@@ -2277,6 +2295,7 @@ pub mod version_adapters {
             .map(|item| map_sequence(
                 item,
                 |item| node_downcast_to_v_2(item, adapters),
+                refusal,
                 "Node.children",
             ))
             .transpose()?;
@@ -2414,6 +2433,7 @@ pub mod version_adapters {
         let projected_5 = map_sequence(
             &source.stops,
             |item| address_upcast_from_v_2(item, adapters),
+            refusal,
             "Parcel.stops",
         )?;
         let projected_6 = map_record(
@@ -2476,6 +2496,7 @@ pub mod version_adapters {
         let projected_5 = map_sequence(
             &source.stops,
             |item| address_downcast_to_v_2(item, stored, adapters),
+            refusal,
             "Parcel.stops",
         )?;
         let projected_6 = map_record(
@@ -3767,7 +3788,8 @@ pub mod version_adapters {
                     return Err("distinct wire keys decode to the same map key".into());
                 }
             }
-            Ok::<_, String>(decoded)
+            <::std::collections::BTreeMap<String, String>>::try_from(decoded)
+                .map_err(|error| error.to_string())
         })()?;
         Ok(v1::Contact {
             address: value_0,
@@ -3838,8 +3860,8 @@ pub mod version_adapters {
             .map(|(key, value)| (key.clone(), value.clone()))
             .collect::<::serde_json::Map<_, _>>();
         let flattened_wire = ::serde_json::Value::Object(flattened);
-        let value_1: ::serde_json::Value = ::serde_json::from_value::<
-            ::serde_json::Value,
+        let value_1: ::xidl_rust_axum::serde_json::Value = ::serde_json::from_value::<
+            ::xidl_rust_axum::serde_json::Value,
         >(::std::clone::Clone::clone(&flattened_wire))
             .map_err(|error| error.to_string())?;
         Ok(v1::Extra {
@@ -3879,7 +3901,7 @@ pub mod version_adapters {
                     .iter()
                     .map(decode_wire_v_1_node)
                     .collect::<Result<Vec<_>, String>>()?;
-                Ok::<_, String>(values)
+                <Vec<v1::Node>>::try_from(values).map_err(|error| error.to_string())
             })()
                 .map(Some)
         }?;
@@ -3930,7 +3952,8 @@ pub mod version_adapters {
                     return Err("distinct wire keys decode to the same map key".into());
                 }
             }
-            Ok::<_, String>(decoded)
+            <::std::collections::BTreeMap<i32, v1::Address>>::try_from(decoded)
+                .map_err(|error| error.to_string())
         })()?;
         Ok(v1::NumericIndex {
             addresses: value_0,
@@ -4033,7 +4056,7 @@ pub mod version_adapters {
                 .iter()
                 .map(decode_wire_v_1_address)
                 .collect::<Result<Vec<_>, String>>()?;
-            Ok::<_, String>(values)
+            <Vec<v1::Address>>::try_from(values).map_err(|error| error.to_string())
         })()?;
         let raw_5 = object
             .get("by_tag")
@@ -4064,7 +4087,8 @@ pub mod version_adapters {
                     return Err("distinct wire keys decode to the same map key".into());
                 }
             }
-            Ok::<_, String>(decoded)
+            <::std::collections::BTreeMap<String, v1::Address>>::try_from(decoded)
+                .map_err(|error| error.to_string())
         })()?;
         let raw_6 = object
             .get("fixed")
@@ -4329,7 +4353,8 @@ pub mod version_adapters {
                     return Err("distinct wire keys decode to the same map key".into());
                 }
             }
-            Ok::<_, String>(decoded)
+            <::std::collections::BTreeMap<String, String>>::try_from(decoded)
+                .map_err(|error| error.to_string())
         })()?;
         Ok(v2::Contact {
             address: value_0,
@@ -4400,8 +4425,8 @@ pub mod version_adapters {
             .map(|(key, value)| (key.clone(), value.clone()))
             .collect::<::serde_json::Map<_, _>>();
         let flattened_wire = ::serde_json::Value::Object(flattened);
-        let value_1: ::serde_json::Value = ::serde_json::from_value::<
-            ::serde_json::Value,
+        let value_1: ::xidl_rust_axum::serde_json::Value = ::serde_json::from_value::<
+            ::xidl_rust_axum::serde_json::Value,
         >(::std::clone::Clone::clone(&flattened_wire))
             .map_err(|error| error.to_string())?;
         Ok(v2::Extra {
@@ -4441,7 +4466,7 @@ pub mod version_adapters {
                     .iter()
                     .map(decode_wire_v_2_node)
                     .collect::<Result<Vec<_>, String>>()?;
-                Ok::<_, String>(values)
+                <Vec<v2::Node>>::try_from(values).map_err(|error| error.to_string())
             })()
                 .map(Some)
         }?;
@@ -4492,7 +4517,8 @@ pub mod version_adapters {
                     return Err("distinct wire keys decode to the same map key".into());
                 }
             }
-            Ok::<_, String>(decoded)
+            <::std::collections::BTreeMap<i32, v2::Address>>::try_from(decoded)
+                .map_err(|error| error.to_string())
         })()?;
         Ok(v2::NumericIndex {
             addresses: value_0,
@@ -4620,7 +4646,7 @@ pub mod version_adapters {
                 .iter()
                 .map(decode_wire_v_2_address)
                 .collect::<Result<Vec<_>, String>>()?;
-            Ok::<_, String>(values)
+            <Vec<v2::Address>>::try_from(values).map_err(|error| error.to_string())
         })()?;
         let raw_8 = object
             .get("by_tag")
@@ -4651,7 +4677,8 @@ pub mod version_adapters {
                     return Err("distinct wire keys decode to the same map key".into());
                 }
             }
-            Ok::<_, String>(decoded)
+            <::std::collections::BTreeMap<String, v2::Address>>::try_from(decoded)
+                .map_err(|error| error.to_string())
         })()?;
         let raw_9 = object
             .get("fixed")
@@ -4919,7 +4946,8 @@ pub mod version_adapters {
                     return Err("distinct wire keys decode to the same map key".into());
                 }
             }
-            Ok::<_, String>(decoded)
+            <::std::collections::BTreeMap<String, String>>::try_from(decoded)
+                .map_err(|error| error.to_string())
         })()?;
         Ok(v3::Contact {
             address: value_0,
@@ -4990,8 +5018,8 @@ pub mod version_adapters {
             .map(|(key, value)| (key.clone(), value.clone()))
             .collect::<::serde_json::Map<_, _>>();
         let flattened_wire = ::serde_json::Value::Object(flattened);
-        let value_1: ::serde_json::Value = ::serde_json::from_value::<
-            ::serde_json::Value,
+        let value_1: ::xidl_rust_axum::serde_json::Value = ::serde_json::from_value::<
+            ::xidl_rust_axum::serde_json::Value,
         >(::std::clone::Clone::clone(&flattened_wire))
             .map_err(|error| error.to_string())?;
         let raw_2 = object.get("future").unwrap_or(&::serde_json::Value::Null);
@@ -5040,7 +5068,7 @@ pub mod version_adapters {
                     .iter()
                     .map(decode_wire_v_3_node)
                     .collect::<Result<Vec<_>, String>>()?;
-                Ok::<_, String>(values)
+                <Vec<v3::Node>>::try_from(values).map_err(|error| error.to_string())
             })()
                 .map(Some)
         }?;
@@ -5091,7 +5119,8 @@ pub mod version_adapters {
                     return Err("distinct wire keys decode to the same map key".into());
                 }
             }
-            Ok::<_, String>(decoded)
+            <::std::collections::BTreeMap<i32, v3::Address>>::try_from(decoded)
+                .map_err(|error| error.to_string())
         })()?;
         Ok(v3::NumericIndex {
             addresses: value_0,
@@ -5235,7 +5264,7 @@ pub mod version_adapters {
                 .iter()
                 .map(decode_wire_v_3_address)
                 .collect::<Result<Vec<_>, String>>()?;
-            Ok::<_, String>(values)
+            <Vec<v3::Address>>::try_from(values).map_err(|error| error.to_string())
         })()?;
         let raw_10 = object
             .get("by_tag")
@@ -5266,7 +5295,8 @@ pub mod version_adapters {
                     return Err("distinct wire keys decode to the same map key".into());
                 }
             }
-            Ok::<_, String>(decoded)
+            <::std::collections::BTreeMap<String, v3::Address>>::try_from(decoded)
+                .map_err(|error| error.to_string())
         })()?;
         let raw_11 = object
             .get("fixed")
@@ -5702,7 +5732,7 @@ pub mod version_adapters {
                         .map_err(|error| error.to_string())
                 })
                 .collect::<Result<Vec<_>, String>>()?;
-            Ok::<_, String>(values)
+            <Vec<u8>>::try_from(values).map_err(|error| error.to_string())
         })()
             .map_err(AdaptationError::Validation)?;
         let source = DepotBlobRequestV1 {
@@ -7821,7 +7851,7 @@ pub mod version_adapters {
                         .map_err(|error| error.to_string())
                 })
                 .collect::<Result<Vec<_>, String>>()?;
-            Ok::<_, String>(values)
+            <Vec<u8>>::try_from(values).map_err(|error| error.to_string())
         })()
             .map_err(AdaptationError::Validation)?;
         let source = DepotBlobRequestV2 {
@@ -9483,7 +9513,7 @@ pub mod version_adapters {
                         .map_err(|error| error.to_string())
                 })
                 .collect::<Result<Vec<_>, String>>()?;
-            Ok::<_, String>(values)
+            <Vec<u8>>::try_from(values).map_err(|error| error.to_string())
         })()
             .map_err(AdaptationError::Validation)?;
         let source = DepotBlobRequestV3 {

@@ -18,8 +18,8 @@ use xidl_parser::rest_hir::{
 /// The parameter positions that arrive as text: scalar transports always,
 /// and the fields of a text-encoded (form) body with them. Exactly these
 /// positions coerce; every JSON position stays strict like the Rust target.
-pub(super) fn text_positions(op: &HttpOperation) -> std::collections::BTreeSet<String> {
-    let mut names = op
+pub(super) fn text_inputs(op: &HttpOperation) -> std::collections::BTreeMap<&str, &hir::TypeSpec> {
+    let mut inputs = op
         .http
         .request
         .path
@@ -27,8 +27,8 @@ pub(super) fn text_positions(op: &HttpOperation) -> std::collections::BTreeSet<S
         .chain(&op.http.request.query)
         .chain(&op.http.request.header)
         .chain(&op.http.request.cookie)
-        .map(|binding| binding.source_param.clone())
-        .collect::<std::collections::BTreeSet<_>>();
+        .map(|binding| (binding.source_param.as_str(), &binding.ty))
+        .collect::<std::collections::BTreeMap<_, _>>();
     let form_body = op
         .http
         .request
@@ -39,11 +39,11 @@ pub(super) fn text_positions(op: &HttpOperation) -> std::collections::BTreeSet<S
     if form_body {
         if let HttpRequestBodyShape::Object { fields } = &op.http.request.body.shape {
             for field in fields {
-                names.insert(field.source_param.clone());
+                inputs.insert(field.source_param.as_str(), &field.ty);
             }
         }
     }
-    names
+    inputs
 }
 
 pub(super) fn build_response_fields(

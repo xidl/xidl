@@ -1,4 +1,4 @@
-use crate::generate::rust::util::{render_const, rust_ident, rust_type};
+use crate::generate::rust::util::{render_const, rust_ident};
 use serde_json::json;
 use xidl_parser::hir;
 
@@ -23,16 +23,6 @@ pub fn declarator_name(decl: &hir::Declarator) -> String {
     match decl {
         hir::Declarator::SimpleDeclarator(value) => value.0.clone(),
         hir::Declarator::ArrayDeclarator(value) => value.ident.clone(),
-    }
-}
-
-pub fn type_with_decl(ty: &hir::TypeSpec, decl: &hir::Declarator) -> String {
-    let base = rust_type(ty);
-    let dims = declarator_dims(decl);
-    if dims.is_empty() {
-        base
-    } else {
-        array_type(&base, &dims)
     }
 }
 

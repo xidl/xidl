@@ -14,7 +14,6 @@ use crate::generate::rust_axum::transport::TypeRegistry;
 use crate::generate::rust_axum::{RustAxumRenderOutput, RustAxumRenderer};
 use xidl_parser::hir;
 
-#[cfg(feature = "gen-rust-axum-adapters")]
 pub(crate) use interface_model::{
     ApiKeyContext, DeprecatedContext, ExceptionMemberContext, HttpMethod, MethodContext,
     ParamContext, ParamSource, RaisesContext, RenderEnv, RepresentationContext,

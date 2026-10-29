@@ -1,4 +1,3 @@
-{% from "interface/sequence_limits.rs.j2" import check as check_sequence %}
 pub struct {{ ident }}Server<T> {
     inner: ::std::sync::Arc<T>,
 }
@@ -258,7 +257,6 @@ T: {{ ident }} + Send + Sync + 'static,
                                             let {{ param.name }} = ::core::clone::Clone::clone(&{{ sequence_value }});
                                             {{ param.out_expr }}
                                         };
-                                        {{ check_sequence(param.name ~ "_wire", param.maximum, 500, param.optional) }}
                                     {% endfor %}
                                     {% for param in method.response_header_params %}
                                         {% if method.response_struct %}
@@ -353,14 +351,13 @@ T: {{ ident }} + Send + Sync + 'static,
                                                         return Err(xidl_rust_axum::Error::not_acceptable());
                                                     }
                                                     {% if repr.is_byte %}
-                                                        {{ check_sequence("payload", repr.maximum, 500) }}
                                                         ::xidl_rust_axum::axum::response::Response::builder()
                                                         .status(::xidl_rust_axum::axum::http::StatusCode::from_u16({{ method.response_status }}).unwrap())
                                                         .header(
                                                         ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
                                                         xidl_rust_axum::http::ContentType::{{ repr.variant }}.as_str(),
                                                         )
-                                                        .body(::xidl_rust_axum::axum::body::Body::from(payload))
+                                                        .body(::xidl_rust_axum::axum::body::Body::from(payload{% if repr.is_bounded_sequence %}.into_inner(){% endif %}))
                                                         .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?
                                                     {% else %}
                                                         let payload: {{ repr.wire_ty }} = {{ repr.encode_expr }};

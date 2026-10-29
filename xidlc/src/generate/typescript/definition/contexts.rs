@@ -55,6 +55,13 @@ pub(crate) enum TsType {
     Optional(Box<TsType>),
 }
 
+/// Whether a schema position may coerce text into the declared type.
+#[derive(Clone, Copy)]
+pub(super) enum ZodCoercion {
+    Strict,
+    Coerce,
+}
+
 #[derive(Serialize, Clone)]
 #[serde(tag = "kind", content = "data")]
 pub(crate) enum ZodSchema {
@@ -72,10 +79,17 @@ pub(crate) enum ZodSchema {
         length: Option<i64>,
         maximum: Option<i64>,
     },
+    #[cfg(any(
+        feature = "gen-typescript-rest",
+        feature = "gen-typescript-rest-adapters"
+    ))]
     ByteBuffer {
         maximum: Option<i64>,
     },
-    Record(Box<ZodSchema>),
+    Record {
+        value: Box<ZodSchema>,
+        maximum: Option<i64>,
+    },
     Object(Vec<FieldZodContext>),
     Enum(Vec<String>),
     Union(Vec<ZodSchema>),

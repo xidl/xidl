@@ -351,11 +351,18 @@ impl SchemaScope<'_> {
                 }
                 RefOr::T(Schema::from(schema))
             }
-            hir::TypeSpec::MapType(map) => RefOr::T(Schema::from(
-                ObjectBuilder::new()
+            hir::TypeSpec::MapType(map) => {
+                let schema = ObjectBuilder::new()
                     .schema_type(Type::Object)
-                    .additional_properties(Some(self.schema_for_type(&map.value)?)),
-            )),
+                    .additional_properties(Some(self.schema_for_type(&map.value)?))
+                    .max_properties(
+                        map.len
+                            .as_ref()
+                            .and_then(|bound| hir::const_expr_to_i64(&bound.0))
+                            .map(|bound| bound as usize),
+                    );
+                RefOr::T(Schema::from(schema))
+            }
             hir::TypeSpec::TemplateType(_) => {
                 RefOr::T(Schema::from(ObjectBuilder::new().schema_type(Type::Object)))
             }

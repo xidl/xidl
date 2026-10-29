@@ -1,21 +1,22 @@
 module codes {
-    enum RetryState { @rename("true") blocked, retryable };
+    enum RetryState { @rename("true") Blocked, @rename("retryable") Retryable };
     typedef RetryState State;
 };
 
 module billing {
     const unsigned short BATCH_LIMIT = 2;
     typedef sequence<long, BATCH_LIMIT / 1> InvoiceIds;
+    typedef map<string, InvoiceIds, BATCH_LIMIT / 1> Regions;
     typedef string Token;
 
     struct Total { long count; };
     @derive(PartialOrd, Ord)
-    enum Region { eu, us };
+    enum Region { @rename("eu") Eu, @rename("us") Us };
 
     @http(409)
     exception BatchRejected {
         InvoiceIds ids;
-        map<Region, InvoiceIds> regions;
+        map<Region, InvoiceIds, BATCH_LIMIT> regions;
         @header InvoiceIds retry;
         @cookie InvoiceIds tokens;
         @header Total detail;
@@ -27,7 +28,7 @@ module billing {
     struct Batch {
         InvoiceIds invoices;
         sequence<InvoiceIds, BATCH_LIMIT> windows;
-        map<string, InvoiceIds> regions;
+        Regions regions;
         InvoiceIds days[2];
         @optional InvoiceIds retry;
     };

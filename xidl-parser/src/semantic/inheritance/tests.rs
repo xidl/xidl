@@ -137,6 +137,13 @@ fn inherited_collection_bounds_resolve_while_other_expressions_keep_their_declar
         crate::hir::const_expr_to_i64(&sequence.len.as_ref().unwrap().0),
         Some(8)
     );
+    let TypeSpec::MapType(map) = &inherited[2].ty else {
+        panic!("inherited totals map");
+    };
+    assert_eq!(
+        crate::hir::const_expr_to_i64(&map.len.as_ref().unwrap().0),
+        Some(8)
+    );
     let json = serde_json::to_value(inherited).expect("inherited receipt fields");
     let mut names = Vec::new();
     collect_names(&json, &mut names);
@@ -149,7 +156,7 @@ fn inherited_collection_bounds_resolve_while_other_expressions_keep_their_declar
     assert_eq!(
         counts,
         std::collections::BTreeMap::from([
-            ("limits::WIDTH".to_string(), 5),
+            ("limits::WIDTH".to_string(), 4),
             ("limits::SCALE".to_string(), 2),
         ])
     );

@@ -59,13 +59,14 @@ fn render_struct(
         .map(str::to_string)
         .collect::<Vec<_>>();
     declaration.pop();
+    let renderer = super::super::render::RustAxumRenderer::new()?;
     let scope = TypeScope {
+        types: &renderer.models,
         registry,
         declaration: &declaration,
         output: &output,
     };
     let mut fields = Vec::new();
-    let renderer = super::super::render::RustAxumRenderer::new()?;
     if let Some(parent) = def.parent.first() {
         let ty = map_type_inner(
             &hir::TypeSpec::ScopedName(parent.clone()),
