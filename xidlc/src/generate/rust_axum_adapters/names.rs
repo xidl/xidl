@@ -197,3 +197,17 @@ impl Names<'_> {
         Ok(crate::generate::rust::util::render_const(&value))
     }
 }
+
+/// Method struct/error prefix shared with the ordinary Rust Axum generator.
+///
+/// Declared locally so the adapter does not depend on the sibling interface
+/// plugin's `rust_axum::interface` module.
+pub(crate) fn method_struct_prefix(interface_name: &str, method_name: &str) -> String {
+    let interface = interface_name.strip_prefix("r#").unwrap_or(interface_name);
+    let method = method_name.strip_prefix("r#").unwrap_or(method_name);
+    format!(
+        "{}{}",
+        interface.to_case(Case::Pascal),
+        method.to_case(Case::Pascal)
+    )
+}

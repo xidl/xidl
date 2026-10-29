@@ -2,7 +2,8 @@
 
 use super::*;
 use crate::generate::adapter::{Operation as SurfaceOperation, OperationPlan, ValueRepresentation};
-use crate::generate::rust_axum::interface::{RaisesContext, method_struct_prefix};
+use crate::generate::rust_axum_adapters::errors::error_variant_names;
+use crate::generate::rust_axum_adapters::names::method_struct_prefix;
 use xidl_parser::hir;
 
 impl AdapterRenderer<'_> {
@@ -170,9 +171,9 @@ impl AdapterRenderer<'_> {
         )?;
         let source_error = self.error_type(&plan.target, new);
         let target_error = self.error_type(&plan.source, old);
-        let source_variants = RaisesContext::variant_names(&plan.target.http, self.http)
+        let source_variants = error_variant_names(&plan.target.http, self.http)
             .map_err(|error| Layout::error(&plan.key, &error.to_string()))?;
-        let target_variants = RaisesContext::variant_names(&plan.source.http, self.http)
+        let target_variants = error_variant_names(&plan.source.http, self.http)
             .map_err(|error| Layout::error(&plan.key, &error.to_string()))?;
         let mut arms = Vec::new();
         for (key, variant) in plan.target.raises.iter().zip(source_variants) {

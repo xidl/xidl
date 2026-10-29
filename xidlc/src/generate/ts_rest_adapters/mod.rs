@@ -1,21 +1,25 @@
-//! Independent Rust Axum adapter artifact, consuming public HIR and map facts.
+//! Independent TypeScript REST adapter target.
 
-mod construction;
 mod context;
-mod layout;
+mod endpoints;
+mod error;
 mod names;
 mod render;
+mod renderer;
+mod symbols;
+mod type_endpoints;
+mod wire;
+mod wire_context;
 
 use crate::generate::adapter::AdapterPlanner;
-use crate::generate::rust_axum::RustAxumRenderer;
 use crate::jsonrpc::{Artifact, ArtifactFile, Codegen, CodegenInput, RpcError};
 use crate::macros::hashmap;
 use std::path::Path;
 use xidl_parser::hir::ParserProperties;
 
-pub(crate) struct RustAxumAdaptersCodegen;
+pub(crate) struct TypescriptRestAdaptersCodegen;
 
-impl Codegen for RustAxumAdaptersCodegen {
+impl Codegen for TypescriptRestAdaptersCodegen {
     fn get_engine_version(&self) -> Result<String, RpcError> {
         Ok("*".into())
     }
@@ -39,16 +43,22 @@ impl Codegen for RustAxumAdaptersCodegen {
         let stem = Path::new(&path)
             .file_stem()
             .and_then(|stem| stem.to_str())
-            .ok_or_else(|| RpcError::new(format!("rust-axum-adapters: invalid contract {path}")))?;
-        let renderer = RustAxumRenderer::new().map_err(|error| RpcError::new(error.to_string()))?;
+            .ok_or_else(|| {
+                RpcError::new(format!(
+                    "typescript-rest-adapters: invalid contract path {path}"
+                ))
+            })?;
+        let mut renderer = renderer::TsRestAdaptersRenderer::new()
+            .map_err(|error| RpcError::new(error.to_string()))?;
+        renderer.extend(&props);
         let context = render::AdapterRenderer::new(&http, &plan)
-            .context()
+            .context(stem)
             .map_err(|error| RpcError::new(error.to_string()))?;
         let content = renderer
-            .render_template("adapters.rs.j2", &context)
+            .render_template("adapters.ts.j2", &context)
             .map_err(|error| RpcError::new(error.to_string()))?;
         Ok(vec![Artifact::new_file(ArtifactFile {
-            path: format!("{stem}.adapters.rs"),
+            path: format!("{stem}.adapters.ts"),
             content,
         })])
     }

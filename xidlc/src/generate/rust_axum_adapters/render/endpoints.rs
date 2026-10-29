@@ -67,7 +67,7 @@ impl AdapterRenderer<'_> {
                     .operations
                     .get(key)
                     .filter(|update| !update.stored.is_empty())
-                    .map(|_| crate::generate::rust_axum::adapters::names::Names::stored_type(key));
+                    .map(|_| crate::generate::rust_axum_adapters::names::Names::stored_type(key));
                 let mut upcast = Vec::new();
                 let mut downcast = Vec::new();
                 let mut downcast_error = Vec::new();
@@ -224,7 +224,7 @@ impl AdapterRenderer<'_> {
                 stored: threads,
                 stored_type: update
                     .filter(|update| !update.stored.is_empty())
-                    .map(|_| crate::generate::rust_axum::adapters::names::Names::stored_type(key)),
+                    .map(|_| crate::generate::rust_axum_adapters::names::Names::stored_type(key)),
                 current: update.is_some(),
                 current_type: update.map(|update| names.named(&update.return_key)),
             });

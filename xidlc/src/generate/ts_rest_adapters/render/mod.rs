@@ -12,11 +12,11 @@ use crate::generate::adapter::{
     AdapterPlan, ConversionPlan, Member, OperationPlan, StepPlan, StepUpdates, TypeConversion,
     Updates,
 };
+use crate::generate::ts_rest_adapters::error::error_ident;
 use crate::generate::typescript::definition::contexts::{FieldTypeContext, TsType};
 use crate::generate::typescript::definition::names::{
     method_struct_prefix, scoped_name, ts_prop_name,
 };
-use crate::generate::typescript_rest::model::TsRaisesContext;
 use conversion::ConversionInput;
 use convert_case::{Case, Casing};
 use std::collections::BTreeSet;
@@ -162,6 +162,6 @@ impl<'a> AdapterRenderer<'a> {
             .ok_or_else(|| {
                 IdlcError::rpc(format!("typescript adapters: missing exception {full}"))
             })?;
-        Ok(TsRaisesContext::error_ident(exception, exceptions))
+        Ok(error_ident(exception, exceptions))
     }
 }

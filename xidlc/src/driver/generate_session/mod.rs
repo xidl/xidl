@@ -102,11 +102,11 @@ impl CodegenSession {
             }
             #[cfg(feature = "gen-typescript-rest-adapters")]
             Plugin::TypescriptRestAdapters => {
-                Box::new(crate::generate::typescript_rest::adapters::TypescriptRestAdaptersCodegen)
+                Box::new(crate::generate::ts_rest_adapters::TypescriptRestAdaptersCodegen)
             }
             #[cfg(feature = "gen-rust-axum-adapters")]
             Plugin::RustAxumAdapters => {
-                Box::new(crate::generate::rust_axum::adapters::RustAxumAdaptersCodegen)
+                Box::new(crate::generate::rust_axum_adapters::RustAxumAdaptersCodegen)
             }
             Plugin::VersionMap => Box::new(crate::generate::hir_gen::HirGen),
             Plugin::Custom(_) => unreachable!("custom plugins use spawn_custom_session"),

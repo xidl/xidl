@@ -20,8 +20,12 @@ pub mod rest_hir_gen;
 pub mod rust;
 #[cfg(feature = "gen-rust-axum")]
 pub mod rust_axum;
+#[cfg(feature = "gen-rust-axum-adapters")]
+pub(crate) mod rust_axum_adapters;
 #[cfg(feature = "gen-rust-jsonrpc")]
 pub mod rust_jsonrpc;
+#[cfg(feature = "gen-typescript-rest-adapters")]
+pub(crate) mod ts_rest_adapters;
 pub mod typed_ast_gen;
 #[cfg(feature = "gen-typescript")]
 pub mod typescript;

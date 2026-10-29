@@ -70,7 +70,7 @@ function mapOptional<S, T>(source: S | undefined, convert: (value: S) => Version
     return source === undefined ? ok(undefined) : convert(source);
 }
 
-{% include "http/adapters_wire.ts.j2" %}
+{% include "adapters_wire.ts.j2" %}
 
 /** Required pure application decisions. Use strictFunctionTypes to reject narrower inputs. */
 export interface VersionAdapters {
@@ -238,4 +238,4 @@ export interface VersionAdapters {
     }
 {% endfor %}
 
-{% include "http/adapters_endpoints.ts.j2" %}
+{% include "adapters_endpoints.ts.j2" %}
