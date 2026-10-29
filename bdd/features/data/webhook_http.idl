@@ -1,0 +1,13 @@
+#include "webhook_http/types.idl"
+
+interface Receiver {
+    @get(path = "/events")
+    @response("json") long accepted();
+
+    @webhooks
+    @post(path = "/events")
+    notifications::Receipt receive(
+        @header(name = "X-Delivery-ID") string delivery_id,
+        @body notifications::Event event
+    ) raises(notifications::Rejected);
+};

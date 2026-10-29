@@ -156,6 +156,12 @@ impl AnnotationDefinition {
         site: Site,
     ) -> Result<(), String> {
         let args = Arguments::read(annotation)?;
+        if self.kind == AnnotationKind::Webhooks && !args.values.is_empty() {
+            return Err(
+                "takes no arguments; declare body and headers on the HTTP operation, and handle signatures in the application"
+                    .to_string(),
+            );
+        }
         match self.arguments {
             ArgumentShape::Marker => args.keys(&[], &[]),
             ArgumentShape::Value => args.single(&[], false),

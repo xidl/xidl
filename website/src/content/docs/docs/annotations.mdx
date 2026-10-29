@@ -35,7 +35,10 @@ remain available to plugins; `--deny warnings` only changes the CLI exit policy.
 The command checks every supplied file and exits with status 1 for errors,
 including unreadable or unparseable files. Warnings alone exit with status 0
 unless `--deny warnings` is set. It does not rewrite sources or generate files.
-`xidlc gen` does not run lint, so CI should invoke both commands explicitly.
+`xidlc gen` does not run the complete lint pass, so CI should invoke both commands
+explicitly. Generation does enforce required contract checks, including the
+argument-free `@webhooks` marker's declaration positions and arguments, before
+version projection can remove a declaration.
 
 Editor integrations can use `xidl_parser::lint::BUILTIN_ANNOTATIONS` for completion
 and `xidl_parser::lint::lint(&typed_ast::Specification)` for the same diagnostics.

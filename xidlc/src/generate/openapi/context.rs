@@ -7,7 +7,7 @@ use super::schema::{
 use super::scope::SchemaScope;
 use super::security::register_security_schemes;
 use super::stream::{OpenApiStreamPatch, request_stream_content_type, stream_patch_item_schema};
-use crate::error::IdlcResult;
+use crate::error::{IdlcError, IdlcResult};
 use crate::openapi::RefOr;
 use crate::openapi::path::{ParameterIn, PathItem};
 use crate::openapi::schema::{ObjectBuilder, Schema, Type};
@@ -16,7 +16,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::mem;
 use xidl_parser::hir;
 use xidl_parser::rest_hir::{
-    RestHirDocument,
+    HttpOperationPublication, RestHirDocument,
     semantics::{DeprecatedInfo, has_annotation},
 };
 
@@ -25,6 +25,7 @@ pub(crate) struct OpenApiContext {
     pub(crate) schemas: BTreeMap<String, RefOr<Schema>>,
     pub(crate) security_schemes: BTreeMap<String, crate::openapi::security::SecurityScheme>,
     pub(crate) paths: crate::openapi::path::PathsBuilder,
+    pub(crate) webhooks: BTreeMap<String, RefOr<PathItem>>,
     pub(crate) info_title: Option<String>,
     pub(crate) info_version: Option<String>,
     pub(crate) servers: Vec<Server>,
@@ -232,12 +233,11 @@ impl OpenApiContext {
             return Ok(());
         };
         self.tags.insert(def.header.ident.clone());
-        for method in http_interface.operations.iter().map(|op| {
-            render_http_operation(op, scope, &def.header.ident, &rest_hir.document.exceptions)
-        }) {
-            let mut method = method?;
+        for op in &http_interface.operations {
+            let mut method =
+                render_http_operation(op, scope, &def.header.ident, &rest_hir.document.exceptions)?;
             self.apply_version_parameter(&mut method, rest_hir);
-            self.collect_method(method)?;
+            self.collect_method(method, op.meta.publication)?;
         }
         self.schemas
             .entry("Error".to_string())
@@ -289,13 +289,43 @@ impl OpenApiContext {
         }
     }
 
-    fn collect_method(&mut self, method: MethodInfo) -> IdlcResult<()> {
+    fn collect_method(
+        &mut self,
+        method: MethodInfo,
+        publication: HttpOperationPublication,
+    ) -> IdlcResult<()> {
         if let Some(security_requirements) = &method.security_requirements {
             register_security_schemes(&mut self.security_schemes, security_requirements);
         }
 
+        if publication == HttpOperationPublication::Webhook {
+            let key = &method.operation_id;
+            if method
+                .parameters
+                .iter()
+                .any(|parameter| parameter.parameter_in == ParameterIn::Path)
+            {
+                return Err(IdlcError::fmt(format!(
+                    "xidl openapi: webhook '{key}' has path parameters without a Paths Object template; webhook keys are operation identifiers"
+                )));
+            }
+            if self.webhooks.contains_key(key) {
+                return Err(IdlcError::fmt(format!(
+                    "xidl openapi: duplicate webhook operationId '{key}'"
+                )));
+            }
+            self.collect_stream_patches(&method, key, publication);
+            self.webhooks.insert(
+                key.clone(),
+                RefOr::T(PathItem::new(
+                    method.http_method.clone(),
+                    build_operation(&method),
+                )),
+            );
+            return Ok(());
+        }
         for path in method.paths.clone() {
-            self.collect_stream_patches(&method, &path);
+            self.collect_stream_patches(&method, &path, publication);
             self.paths = mem::take(&mut self.paths).path(
                 path,
                 PathItem::new(method.http_method.clone(), build_operation(&method)),
@@ -304,9 +334,15 @@ impl OpenApiContext {
         Ok(())
     }
 
-    fn collect_stream_patches(&mut self, method: &MethodInfo, path: &str) {
+    fn collect_stream_patches(
+        &mut self,
+        method: &MethodInfo,
+        path: &str,
+        publication: HttpOperationPublication,
+    ) {
         if let Some(item_schema) = &method.request_stream_item_schema {
             self.stream_patches.push(OpenApiStreamPatch {
+                publication,
                 path: path.to_string(),
                 method: openapi_method_name(&method.http_method),
                 response_status: None,
@@ -316,6 +352,7 @@ impl OpenApiContext {
         }
         if let Some(item_schema) = &method.response_stream_item_schema {
             self.stream_patches.push(OpenApiStreamPatch {
+                publication,
                 path: path.to_string(),
                 method: openapi_method_name(&method.http_method),
                 response_status: Some(method.response_status.clone()),

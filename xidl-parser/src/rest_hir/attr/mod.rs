@@ -279,6 +279,7 @@ fn base_attribute_operation(args: AttributeOperationArgs<'_>) -> HttpOperation {
         meta: HttpOperationMeta {
             name: name.to_string(),
             operation_id: operation_id(module_path, interface_name, name),
+            publication: super::HttpOperationPublication::Path,
             source,
             method,
             routes,
@@ -344,6 +345,8 @@ pub(super) fn project_attribute_group(
     );
     for operation in &mut operations {
         operation.meta.cors = cors.clone();
+        operation.meta.publication =
+            super::HttpOperationPublication::from_annotations(interface_annotations, &[]);
     }
     Ok(operations)
 }

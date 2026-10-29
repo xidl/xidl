@@ -183,6 +183,7 @@ annotations! {
     Verbatim, "verbatim", &[], Grammar;
     Service, "service", &[Interface], Grammar;
     Oneway, "oneway", &[Operation], OptionalValue;
+    Webhooks, "webhooks", &[Interface, Operation], Marker;
     Ami, "ami", &[Interface, Operation], OptionalValue;
     HashId, "hashid", &[Member, UnionMember], OptionalValue;
     DefaultNested, "default_nested", &[Module], OptionalValue;

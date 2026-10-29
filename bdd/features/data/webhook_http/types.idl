@@ -1,0 +1,15 @@
+module notifications {
+    struct Event {
+        string event_type;
+        string invoice_id;
+        long amount;
+        @optional string note;
+    };
+    struct Receipt {
+        string event_type;
+        string invoice_id;
+        boolean accepted;
+    };
+    @http(status = 409)
+    exception Rejected { string reason; };
+};
