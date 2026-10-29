@@ -3,7 +3,7 @@ use std::ops::Range;
 use crate::typed_ast::{AnnotationAppl, AnnotationName};
 use serde::Serialize;
 
-use super::{AnnotationDefinition, BUILTIN_ANNOTATIONS, Site};
+use super::{AnnotationDefinition, AnnotationKind, BUILTIN_ANNOTATIONS, Site};
 
 /// Stable identifier of an annotation diagnostic.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
@@ -59,9 +59,17 @@ pub struct Diagnostic {
 #[derive(Default)]
 pub(super) struct Checker {
     diagnostics: Vec<Diagnostic>,
+    selected: Option<AnnotationKind>,
 }
 
 impl Checker {
+    pub(super) fn for_annotation(kind: AnnotationKind) -> Self {
+        Self {
+            selected: Some(kind),
+            ..Self::default()
+        }
+    }
+
     pub(super) fn finish(mut self) -> Vec<Diagnostic> {
         self.diagnostics
             .sort_by_key(|diagnostic| diagnostic.span.start);
@@ -76,8 +84,10 @@ impl Checker {
     }
 
     fn annotation(&mut self, annotation: &AnnotationAppl, site: Site) {
-        let Some(span) = annotation.span.clone() else {
-            return;
+        let span = match &annotation.span {
+            Some(span) => span.clone(),
+            None if self.selected.is_some() => 0..0,
+            None => return,
         };
         let name = match &annotation.name {
             AnnotationName::Builtin(name) => name.clone(),
@@ -94,9 +104,14 @@ impl Checker {
             return;
         }
         let Some(definition) = AnnotationDefinition::lookup(&name) else {
-            self.unknown(name, span);
+            if self.selected.is_none() {
+                self.unknown(name, span);
+            }
             return;
         };
+        if self.selected.is_some_and(|kind| kind != definition.kind) {
+            return;
+        }
         if !definition.allows(site) {
             self.diagnostics.push(Diagnostic {
                 code: DiagnosticCode::MisplacedAnnotation,

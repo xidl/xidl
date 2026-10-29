@@ -1,0 +1,424 @@
+---
+source: xidlc/tests/webhook_publication.rs
+expression: documents
+---
+{
+  "openapi_webhook_http.v1.json": {
+    "components": {
+      "schemas": {
+        "Error": {
+          "properties": {
+            "code": {
+              "type": "integer"
+            },
+            "details": {
+              "type": "object"
+            },
+            "msg": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "msg"
+          ],
+          "type": "object"
+        },
+        "v1.Event": {
+          "properties": {
+            "event_type": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "event_type"
+          ],
+          "type": "object"
+        },
+        "v1.V": {
+          "enum": [
+            "v1",
+            "v2",
+            "v3"
+          ],
+          "type": "string"
+        }
+      }
+    },
+    "info": {
+      "title": "xidl",
+      "version": "v1"
+    },
+    "openapi": "3.1.0",
+    "paths": {},
+    "tags": [
+      {
+        "name": "Receiver"
+      }
+    ]
+  },
+  "openapi_webhook_http.v2.json": {
+    "components": {
+      "schemas": {
+        "Error": {
+          "properties": {
+            "code": {
+              "type": "integer"
+            },
+            "details": {
+              "type": "object"
+            },
+            "msg": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "msg"
+          ],
+          "type": "object"
+        },
+        "v2.Event": {
+          "properties": {
+            "event_type": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "event_type"
+          ],
+          "type": "object"
+        },
+        "v2.V": {
+          "enum": [
+            "v1",
+            "v2",
+            "v3"
+          ],
+          "type": "string"
+        }
+      }
+    },
+    "info": {
+      "title": "xidl",
+      "version": "v2"
+    },
+    "openapi": "3.1.0",
+    "paths": {},
+    "tags": [
+      {
+        "name": "Receiver"
+      }
+    ],
+    "webhooks": {
+      "v2.Receiver.legacy": {
+        "delete": {
+          "operationId": "v2.Receiver.legacy",
+          "parameters": [
+            {
+              "description": "API version; this document describes v2.",
+              "in": "header",
+              "name": "X-Version",
+              "required": false,
+              "schema": {
+                "enum": [
+                  "v2"
+                ],
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "OK",
+              "headers": {
+                "X-Version": {
+                  "schema": {
+                    "enum": [
+                      "v2"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Bad Request",
+              "headers": {
+                "X-Version": {
+                  "schema": {
+                    "enum": [
+                      "v2"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "500": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Internal Server Error",
+              "headers": {
+                "X-Version": {
+                  "schema": {
+                    "enum": [
+                      "v2"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "Receiver"
+          ]
+        }
+      },
+      "v2.Receiver.receive": {
+        "post": {
+          "operationId": "v2.Receiver.receive",
+          "parameters": [
+            {
+              "description": "API version; this document describes v2.",
+              "in": "header",
+              "name": "X-Version",
+              "required": false,
+              "schema": {
+                "enum": [
+                  "v2"
+                ],
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2.Event"
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": "OK",
+              "headers": {
+                "X-Version": {
+                  "schema": {
+                    "enum": [
+                      "v2"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Bad Request",
+              "headers": {
+                "X-Version": {
+                  "schema": {
+                    "enum": [
+                      "v2"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "500": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Internal Server Error",
+              "headers": {
+                "X-Version": {
+                  "schema": {
+                    "enum": [
+                      "v2"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "Receiver"
+          ]
+        }
+      }
+    }
+  },
+  "openapi_webhook_http.v3.json": {
+    "components": {
+      "schemas": {
+        "Error": {
+          "properties": {
+            "code": {
+              "type": "integer"
+            },
+            "details": {
+              "type": "object"
+            },
+            "msg": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "msg"
+          ],
+          "type": "object"
+        },
+        "v3.Event": {
+          "properties": {
+            "event_type": {
+              "type": "string"
+            },
+            "note": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "event_type"
+          ],
+          "type": "object"
+        },
+        "v3.V": {
+          "enum": [
+            "v1",
+            "v2",
+            "v3"
+          ],
+          "type": "string"
+        }
+      }
+    },
+    "info": {
+      "title": "xidl",
+      "version": "v3"
+    },
+    "openapi": "3.1.0",
+    "paths": {},
+    "tags": [
+      {
+        "name": "Receiver"
+      }
+    ],
+    "webhooks": {
+      "v3.Receiver.receive": {
+        "post": {
+          "operationId": "v3.Receiver.receive",
+          "parameters": [
+            {
+              "description": "API version; this document describes v3.",
+              "in": "header",
+              "name": "X-Version",
+              "required": false,
+              "schema": {
+                "enum": [
+                  "v3"
+                ],
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v3.Event"
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": "OK",
+              "headers": {
+                "X-Version": {
+                  "schema": {
+                    "enum": [
+                      "v3"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Bad Request",
+              "headers": {
+                "X-Version": {
+                  "schema": {
+                    "enum": [
+                      "v3"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "500": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "Internal Server Error",
+              "headers": {
+                "X-Version": {
+                  "schema": {
+                    "enum": [
+                      "v3"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "Receiver"
+          ]
+        }
+      }
+    }
+  }
+}

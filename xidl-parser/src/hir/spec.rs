@@ -223,6 +223,7 @@ impl Specification {
         value: crate::typed_ast::Specification,
         includes: &mut VersionedIncludes<'_>,
     ) -> crate::error::ParserResult<Self> {
+        crate::lint::AnnotationKind::Webhooks.validate_source(&value.0)?;
         let mut definitions = Vec::new();
         collect_defs(value.0, &mut definitions, includes)?;
         let spec = Self(definitions);

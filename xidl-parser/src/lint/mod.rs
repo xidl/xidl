@@ -1,11 +1,12 @@
 //! Pure annotation diagnostics and the built-in annotation vocabulary.
 //!
-//! Generation consumes the vocabulary, never the lint pass. Editors can use
+//! Generation can validate selected contracts without enabling the lint pass. Editors use
 //! `BUILTIN_ANNOTATIONS` for completion and `lint` for source diagnostics.
 
 mod arguments;
 mod check;
 mod registry;
+mod required;
 mod walk;
 
 pub use check::{Diagnostic, DiagnosticCode, Severity};

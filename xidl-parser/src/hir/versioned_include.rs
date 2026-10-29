@@ -65,6 +65,7 @@ impl<'a> VersionedIncludes<'a> {
         version: &str,
     ) -> ParserResult<Vec<Definition>> {
         let typed = parser_text_with_resolver(content, Some(file), &mut *self.resolver)?;
+        crate::lint::AnnotationKind::Webhooks.validate_source(&typed.0)?;
         let current = self.current.replace(file.to_string());
         let mut definitions = Vec::new();
         let collected = collect_defs(typed.0, &mut definitions, self);

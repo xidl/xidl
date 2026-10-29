@@ -18,6 +18,9 @@ builder! {
         #[serde(skip_serializing_if = "Option::is_none")]
         pub servers: Option<Vec<Server>>,
         pub paths: Paths,
+        /// Receiver contracts keyed by operation identifier, independent of destination URLs.
+        #[serde(default, skip_serializing_if = "std::collections::BTreeMap::is_empty")]
+        pub webhooks: std::collections::BTreeMap<String, super::RefOr<super::path::PathItem>>,
         #[serde(skip_serializing_if = "Option::is_none")]
         pub components: Option<Components>,
         #[serde(skip_serializing_if = "Option::is_none")]
@@ -57,6 +60,7 @@ impl OpenApi {
 
     pub fn merge(&mut self, mut other: OpenApi) {
         merge_servers(&mut self.servers, &mut other.servers);
+        self.webhooks.append(&mut other.webhooks);
         if !other.paths.paths.is_empty() {
             self.paths.merge(other.paths);
         }
@@ -94,6 +98,15 @@ impl OpenApi {
 }
 
 impl OpenApiBuilder {
+    /// Sets the receiver contracts published by this document.
+    pub fn webhooks(
+        mut self,
+        webhooks: std::collections::BTreeMap<String, super::RefOr<super::path::PathItem>>,
+    ) -> Self {
+        self.webhooks = webhooks;
+        self
+    }
+
     pub fn info<I: Into<Info>>(mut self, info: I) -> Self {
         set_value!(self info info.into())
     }

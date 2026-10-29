@@ -2,8 +2,13 @@ use crate::hir;
 use serde::{Deserialize, Serialize};
 
 mod document;
+mod operation;
+mod publication;
 mod references;
 mod types;
+
+pub use operation::{HttpOperation, HttpOperationMeta};
+pub use publication::HttpOperationPublication;
 
 #[cfg(test)]
 mod tests;
@@ -138,33 +143,6 @@ pub struct HttpExceptionField {
 pub struct HttpExceptionRef {
     pub module_path: Vec<String>,
     pub ident: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct HttpOperation {
-    pub meta: HttpOperationMeta,
-    pub signature: HttpOperationSignature,
-    pub http: HttpOperationHttpMapping,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct HttpOperationMeta {
-    pub name: String,
-    pub operation_id: String,
-    pub source: HttpOperationSource,
-    pub method: HttpMethod,
-    pub routes: Vec<HttpRoute>,
-    pub stream: super::semantics::HttpStreamConfig,
-    pub cors: Option<super::semantics::HttpCorsProfile>,
-    pub security: Option<super::semantics::HttpSecurityProfile>,
-    pub basic_auth_realm: Option<String>,
-    pub deprecated: Option<super::semantics::DeprecatedInfo>,
-    pub upgrade_protocol: Option<String>,
-    pub upgrade_mode: Option<super::semantics::UpgradeMode>,
-    pub websocket: Option<super::semantics::WebSocketConfig>,
-    /// Exceptions declared via `raises(...)` on this operation.
-    #[serde(default)]
-    pub raises: Vec<HttpExceptionRef>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

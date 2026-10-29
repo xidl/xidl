@@ -1,0 +1,195 @@
+---
+source: xidlc/tests/webhook_publication.rs
+expression: marked
+---
+{
+  "components": {
+    "schemas": {
+      "Error": {
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "msg"
+        ],
+        "type": "object"
+      },
+      "notifications.Event": {
+        "properties": {
+          "amount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "event_type": {
+            "type": "string"
+          },
+          "invoice_id": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "event_type",
+          "invoice_id",
+          "amount"
+        ],
+        "type": "object"
+      },
+      "notifications.Receipt": {
+        "properties": {
+          "accepted": {
+            "type": "boolean"
+          },
+          "event_type": {
+            "type": "string"
+          },
+          "invoice_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "event_type",
+          "invoice_id",
+          "accepted"
+        ],
+        "type": "object"
+      },
+      "notifications.Rejected": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "xidl",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/events": {
+      "get": {
+        "operationId": "Receiver.accepted",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Receiver"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Receiver"
+    }
+  ],
+  "webhooks": {
+    "Receiver.receive": {
+      "post": {
+        "operationId": "Receiver.receive",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Delivery-ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/notifications.Event"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/notifications.Receipt"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/notifications.Rejected"
+                }
+              }
+            },
+            "description": "Error: Rejected"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Receiver"
+        ]
+      }
+    }
+  }
+}

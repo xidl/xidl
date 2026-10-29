@@ -167,7 +167,14 @@ async function decodeRequestBody(
     );
   }
   if (mime === 'application/json' || mime.endsWith('+json')) {
-    return request.json();
+    try {
+      return await request.json();
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        throw new XidlServerError(400, 'invalid JSON request body');
+      }
+      throw error;
+    }
   }
   if (mime === 'application/x-www-form-urlencoded') {
     const form = new URLSearchParams(await request.text());

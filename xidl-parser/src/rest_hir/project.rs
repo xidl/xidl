@@ -349,6 +349,10 @@ fn project_operation(
         meta: HttpOperationMeta {
             name: op.ident.clone(),
             operation_id: operation_id(module_path, interface_name, &op.ident),
+            publication: super::HttpOperationPublication::from_annotations(
+                interface_annotations,
+                &op.annotations,
+            ),
             source: HttpOperationSource::Method,
             method,
             routes,

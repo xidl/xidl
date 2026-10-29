@@ -156,6 +156,7 @@ pub(crate) fn render_openapi(
     let document = OpenApiBuilder::new()
         .info(InfoBuilder::new().title(title).version(version).build())
         .paths(ctx.paths.build())
+        .webhooks(ctx.webhooks)
         .components(Some(components.build()))
         .servers(servers)
         .tags(tags)

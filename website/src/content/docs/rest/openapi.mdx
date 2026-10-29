@@ -38,6 +38,36 @@ approximate.
 `version` pragma below. It is also unrelated to `--api-version`, which selects
 which API version of a versioned contract to generate.
 
+## Webhook Publication
+
+Add the argument-free `@webhooks` marker to an interface or operation to publish
+its HTTP contract under OpenAPI `webhooks`. Other operations remain in `paths`.
+The webhook key is the operation's existing `operationId`.
+
+```idl
+interface Receiver {
+  @get(path="/events") boolean ready();
+  @webhooks @post(path="/events")
+  string receive(@header(name="X-Delivery-ID") string delivery_id, @body string event);
+};
+```
+
+The marked operation keeps the same request, response, exceptions, security and
+version semantics. Ordinary client and server targets still generate the same
+HTTP operation. The application supplies the destination URL, event envelope,
+signing, delivery and replay policy; the marker does not add a runtime dependency.
+
+OpenAPI generation rejects duplicate webhook operation identifiers and webhook
+operations with path parameters: a webhook key is an identifier, not a path
+template. Ordinary client and server generation retains its existing path
+parameters. Equivalent route aliases publish one webhook per operation.
+
+The earlier draft form `@webhooks(signature=..., envelope=...)` is rejected.
+Declare bodies and headers with ordinary HTTP annotations and implement signing
+in the application or a separate library. See the
+[Webhook FRD](https://github.com/xidl/xidl/wiki/Webhook-薄标记与HTTP复用-FRD)
+for the design boundary.
+
 ## Metadata Pragmas
 
 The generator reads the following pragmas to populate the document metadata:

@@ -2,8 +2,10 @@ use crate::openapi::RefOr;
 use crate::openapi::request_body::RequestBody;
 use crate::openapi::schema::Schema;
 use serde_json::Value;
+use xidl_parser::rest_hir::HttpOperationPublication;
 
 pub(crate) struct OpenApiStreamPatch {
+    pub(crate) publication: HttpOperationPublication,
     pub(crate) path: String,
     pub(crate) method: &'static str,
     pub(crate) response_status: Option<String>,
@@ -26,7 +28,11 @@ pub(crate) fn stream_patch_item_schema(schema: &RefOr<Schema>, direction: &str) 
 }
 
 pub(crate) fn patch_openapi_stream_content(doc: &mut Value, patch: &OpenApiStreamPatch) {
-    let Some(paths) = doc.get_mut("paths").and_then(Value::as_object_mut) else {
+    let container = match patch.publication {
+        HttpOperationPublication::Path => "paths",
+        HttpOperationPublication::Webhook => "webhooks",
+    };
+    let Some(paths) = doc.get_mut(container).and_then(Value::as_object_mut) else {
         return;
     };
     let Some(path_item) = paths.get_mut(&patch.path).and_then(Value::as_object_mut) else {
