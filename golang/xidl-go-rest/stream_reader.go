@@ -3,6 +3,7 @@ package xidlgohttp
 import (
 	"bufio"
 	"context"
+	stdjson "encoding/json"
 	"errors"
 	json "github.com/xidl/xidl/golang/xidl-go-codec"
 	"io"
@@ -47,10 +48,11 @@ func (r *streamReader) interrupted(err error) error {
 }
 func (r *streamReader) failure(raw []byte) error {
 	var failure StreamFailure
-	if err := json.Unmarshal(raw, &failure); err != nil {
+	// Preserve explicit JSON null separately from an absent error body.
+	if err := stdjson.Unmarshal(raw, &failure); err != nil {
 		return r.interrupted(err)
 	}
-	if failure.Status < 400 || failure.Status > 599 || failure.Body == nil {
+	if failure.Status < 300 || failure.Status > 599 || failure.Body == nil {
 		return r.interrupted(errors.New("invalid stream error frame"))
 	}
 	r.finish(StreamFailed)

@@ -3,7 +3,7 @@
 interface Ledger {
     @server_stream
     @get(path = "/exports/{job}")
-    ExportRow export_rows(@path string job) raises(Conflict, Retired);
+    ExportRow export_rows(@path string job) raises(Conflict, Retired, NotModified);
 
     @client_stream
     @post(path = "/imports")

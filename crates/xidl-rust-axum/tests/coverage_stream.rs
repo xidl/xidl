@@ -179,7 +179,7 @@ async fn open_sse_covers_success_and_error_responses() {
             "/heartbeat",
             get(|| async {
                 let wire =
-                    ": heartbeat\r\n\r\ndata: \"雪\"\r\n\r\nevent: complete\r\ndata: {}\r\n\r\n";
+                    ": heartbeat\r\n\r\nevent:\r\ndata: \"雪\"\r\n\r\nevent: complete\r\ndata: {}\r\n\r\n";
                 let chunks = wire
                     .as_bytes()
                     .iter()

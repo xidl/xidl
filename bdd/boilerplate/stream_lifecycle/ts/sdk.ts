@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { LedgerClient } from './stream_lifecycle.client.js';
-import { Conflict, Retired } from './stream_lifecycle.errors.js';
+import { Conflict, NotModified, Retired } from './stream_lifecycle.errors.js';
 
 const client = new LedgerClient(process.argv[2]);
 async function collect<T>(source: AsyncIterable<T>): Promise<T[]> {
@@ -17,6 +17,10 @@ await assert.rejects(
   error => error instanceof Conflict && error.detail.job === 'locked',
 );
 await assert.rejects(collect(client.export_rows('retired')), Retired);
+await assert.rejects(collect(client.export_rows('cached')), NotModified);
+const cached = client.export_rows('partial-cached')[Symbol.asyncIterator]();
+assert.equal((await cached.next()).value.quantity, 0);
+await assert.rejects(cached.next(), NotModified);
 const partial = client.export_rows('partial')[Symbol.asyncIterator]();
 assert.equal((await partial.next()).value.quantity, 0);
 await assert.rejects(

@@ -21,6 +21,8 @@ func (*ledger) ExportRows(ctx context.Context, req *LedgerExportRowsRequest, str
 		return conflict(req.Job, "locked")
 	case "retired":
 		return &Retired{}
+	case "cached":
+		return &NotModified{}
 	case "empty":
 		return nil
 	}
@@ -29,6 +31,9 @@ func (*ledger) ExportRows(ctx context.Context, req *LedgerExportRowsRequest, str
 	}
 	if req.Job == "partial" {
 		return conflict(req.Job, "locked")
+	}
+	if req.Job == "partial-cached" {
+		return &NotModified{}
 	}
 	return stream.Write(ExportRow{Id: "雪", Quantity: 2})
 }

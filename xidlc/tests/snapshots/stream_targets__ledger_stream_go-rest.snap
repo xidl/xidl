@@ -93,7 +93,7 @@ func (c *LedgerClient) ExportRows(ctx context.Context, req *LedgerExportRowsRequ
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode >= 400 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		defer resp.Body.Close()
 		return nil, xidlgohttp.DecodeStreamHTTPError(resp, decodeLedgerExportRowsFailure)
 	}
@@ -108,7 +108,7 @@ func (c *LedgerClient) ImportRows(ctx context.Context) (*xidlgohttp.ClientStream
 	httpReq.Header.Set("Accept", "application/json")
 	xidlgohttp.ApplyClientAuth(httpReq, c.auth, LedgerImportRowsSecurityRequirements())
 	stream := xidlgohttp.NewClientStreamWriter[LedgerImportRowsRequest, LedgerImportRowsResponse](ctx, c.httpClient, httpReq, func(resp *http.Response) (LedgerImportRowsResponse, error) {
-		if resp.StatusCode >= 400 {
+		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 			var zero LedgerImportRowsResponse
 			return zero, xidlgohttp.DecodeStreamHTTPError(resp, decodeLedgerImportRowsFailure)
 		}
@@ -164,6 +164,12 @@ func encodeLedgerExportRowsFailure(err error) xidlgohttp.StreamFailure {
 
 	}
 
+	var ex3 *NotModified
+	if errors.As(err, &ex3) {
+		return xidlgohttp.StreamFailure{Status: 304}
+
+	}
+
 	return xidlgohttp.EncodeStreamError(err)
 }
 
@@ -188,6 +194,12 @@ func decodeLedgerExportRowsFailure(failure xidlgohttp.StreamFailure) error {
 
 	if failure.Status == 410 {
 		var exception Retired
+
+		return &exception
+	}
+
+	if failure.Status == 304 {
+		var exception NotModified
 
 		return &exception
 	}
@@ -296,4 +308,11 @@ type Retired struct {
 
 func (e *Retired) Error() string {
 	return "Retired"
+}
+
+type NotModified struct {
+}
+
+func (e *NotModified) Error() string {
+	return "NotModified"
 }

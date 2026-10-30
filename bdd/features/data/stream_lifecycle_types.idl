@@ -17,3 +17,5 @@ exception Conflict {
 };
 @http(status = 410)
 exception Retired {};
+@http(status = 304)
+exception NotModified {};

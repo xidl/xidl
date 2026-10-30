@@ -34,6 +34,15 @@ func runSDK(base string) {
 	var retired *Retired
 	_, err = client.ExportRows(ctx, &LedgerExportRowsRequest{Job: "retired"})
 	require(errors.As(err, &retired))
+	var notModified *NotModified
+	_, err = client.ExportRows(ctx, &LedgerExportRowsRequest{Job: "cached"})
+	require(errors.As(err, &notModified))
+	cached, err := client.ExportRows(ctx, &LedgerExportRowsRequest{Job: "partial-cached"})
+	require(err == nil)
+	_, err = cached.Read()
+	require(err == nil)
+	_, err = cached.Read()
+	require(errors.As(err, &notModified) && cached.Outcome() == xidlgohttp.StreamFailed)
 	partial, err := client.ExportRows(ctx, &LedgerExportRowsRequest{Job: "partial"})
 	require(err == nil)
 	first, err = partial.Read()

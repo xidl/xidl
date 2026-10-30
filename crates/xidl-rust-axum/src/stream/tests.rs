@@ -157,6 +157,14 @@ fn sse_decode_state_ignores_comments_and_decodes_terminal_payloads() {
         state.push_line::<Payload, Error>("").unwrap(),
         StreamAction::Item(Payload { value: 3 })
     ));
+    state.push_line::<Payload, Error>("event:").unwrap();
+    state
+        .push_line::<Payload, Error>("data: {\"value\":0}")
+        .unwrap();
+    assert!(matches!(
+        state.push_line::<Payload, Error>("").unwrap(),
+        StreamAction::Item(Payload { value: 0 })
+    ));
     for line in ["event: complete", "data: {}"] {
         state.push_line::<Payload, Error>(line).unwrap();
     }

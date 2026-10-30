@@ -33,6 +33,9 @@ impl gen::Ledger for Ledger {
             "retired" => vec![Err(gen::LedgerExportRowsError::Retired(
                 gen::Retired::default(),
             ))],
+            "cached" => vec![Err(gen::LedgerExportRowsError::NotModified(
+                gen::NotModified::default(),
+            ))],
             "empty" => vec![],
             _ => {
                 let mut rows = vec![Ok(gen::ExportRow {
@@ -43,6 +46,10 @@ impl gen::Ledger for Ledger {
                     rows.push(Err(gen::LedgerExportRowsError::Conflict(conflict(
                         &job, "locked",
                     ))));
+                } else if job == "partial-cached" {
+                    rows.push(Err(gen::LedgerExportRowsError::NotModified(
+                        gen::NotModified::default(),
+                    )));
                 } else {
                     rows.push(Ok(gen::ExportRow {
                         id: "雪".into(),
@@ -100,6 +107,17 @@ async fn sdk(base: String) -> Result<(), Box<dyn std::error::Error>> {
         client.export_rows("retired".into()).await,
         Err(gen::LedgerExportRowsError::Retired(_))
     ));
+    assert!(matches!(
+        client.export_rows("cached".into()).await,
+        Err(gen::LedgerExportRowsError::NotModified(_))
+    ));
+    let mut cached = client.export_rows("partial-cached".into()).await?;
+    assert_eq!(cached.read().await.unwrap()?.quantity, 0);
+    assert!(matches!(
+        cached.read().await.unwrap(),
+        Err(StreamError::Failed(gen::LedgerExportRowsError::NotModified(_)))
+    ));
+    assert_eq!(cached.outcome(), Some(StreamOutcome::Failed));
     let mut partial = client.export_rows("partial".into()).await?;
     assert_eq!(partial.read().await.unwrap()?.quantity, 0);
     assert!(

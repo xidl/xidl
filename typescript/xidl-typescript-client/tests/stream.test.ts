@@ -173,7 +173,7 @@ test('ndjsonBody invokes cancel on the source', async () => {
 test('heartbeats and split UTF-8 preserve data; truncation never completes', async () => {
   const encoder = new TextEncoder();
   const bytes = encoder.encode(
-    ': heartbeat\r\n\r\ndata: "雪"\r\n\r\nevent: complete\r\ndata: {}\r\n\r\n',
+    ': heartbeat\r\n\r\nevent:\r\ndata: "雪"\r\n\r\nevent: complete\r\ndata: {}\r\n\r\n',
   );
   const response = () =>
     new Response(

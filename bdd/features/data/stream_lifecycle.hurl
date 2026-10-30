@@ -27,6 +27,18 @@ body not contains "event: next"
 GET {{base_url}}/exports/retired
 HTTP 410
 
+# Conditional exports reuse the existing non-success HTTP exception channel.
+GET {{base_url}}/exports/cached
+HTTP 304
+
+GET {{base_url}}/exports/partial-cached
+HTTP 200
+[Asserts]
+body contains "event: next"
+body contains "event: error"
+body contains "\"status\":304"
+body not contains "event: complete"
+
 POST {{base_url}}/imports
 Content-Type: application/x-ndjson
 ```

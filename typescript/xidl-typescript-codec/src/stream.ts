@@ -59,7 +59,7 @@ export function decodeStreamFrame(raw: unknown): StreamFrame {
     if (
       typeof error.status === 'number' &&
       Number.isInteger(error.status) &&
-      error.status >= 400 &&
+      error.status >= 300 &&
       error.status <= 599 &&
       Object.hasOwn(error, 'body')
     ) {

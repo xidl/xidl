@@ -22,8 +22,10 @@ func TestReadersOwnTerminalOutcomeAndRelease(t *testing.T) {
 		name, wire string
 		outcome    StreamOutcome
 	}{
-		{"completed", ": heartbeat\r\n\r\ndata: 0\r\n\r\nevent: complete\r\ndata: {}\r\n\r\ndata: 99\n\n", StreamCompleted},
+		{"completed", ": heartbeat\r\n\r\nevent:\r\ndata: 0\r\n\r\nevent: complete\r\ndata: {}\r\n\r\ndata: 99\n\n", StreamCompleted},
 		{"failed", "data: 0\n\nevent: error\ndata: {\"status\":409,\"body\":{\"code\":409,\"msg\":\"locked\"}}\n\ndata: 99\n\n", StreamFailed},
+		{"bodyless failure", "data: 0\n\nevent: error\ndata: {\"status\":304,\"body\":null}\n\n", StreamFailed},
+		{"missing error body", "data: 0\n\nevent: error\ndata: {\"status\":409}\n\n", StreamInterrupted},
 		{"truncated", "data: 0\n\nevent: complete\ndata: {}\n", StreamInterrupted},
 	}
 	for _, c := range cases {
