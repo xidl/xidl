@@ -109,13 +109,11 @@ pub(super) fn from_builtin_annotation(
         },
         Builtin::Choice => Annotation::Choice,
         Builtin::Empty => Annotation::Empty,
-        Builtin::DdsService => Annotation::DdsService,
-        Builtin::DdsRequestTopic { name } => Annotation::DdsRequestTopic {
-            name: const_expr(name),
-        },
-        Builtin::DdsReplyTopic { name } => Annotation::DdsReplyTopic {
-            name: const_expr(name),
-        },
+        // The concrete grammar also describes DDS annotations. Preserve those
+        // through the ordinary source-annotation fallback without DDS semantics.
+        Builtin::DdsService | Builtin::DdsRequestTopic { .. } | Builtin::DdsReplyTopic { .. } => {
+            return None;
+        }
     })
 }
 

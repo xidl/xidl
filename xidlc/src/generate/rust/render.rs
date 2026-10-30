@@ -56,9 +56,6 @@ impl RustRenderer {
     pub fn new(attribute: HashMap<String, serde_json::Value>) -> IdlcResult<Self> {
         let mut env = Environment::new();
         env.set_loader(|name| load_template(name).map(Some));
-        env.add_function("md5_14", |value: String| md5_prefix(value.as_bytes(), 14));
-        env.add_function("md5_4", |value: String| md5_prefix(value.as_bytes(), 4));
-        env.add_function("name_hash", |value: String| md5_prefix(value.as_bytes(), 4));
         env.add_function("is_upper", is_upper_case);
         env.add_filter("rustfmt", rust_format_filter);
         env.add_global("opt", minijinja::Value::from_serialize(&attribute));
@@ -191,10 +188,4 @@ fn load_template(name: &str) -> std::result::Result<String, Error> {
             format!("template {name} is not valid utf-8"),
         )
     })
-}
-
-fn md5_prefix(input: &[u8], len: usize) -> Vec<u8> {
-    let digest = md5::compute(input).0;
-    let end = len.min(digest.len());
-    digest[..end].to_vec()
 }

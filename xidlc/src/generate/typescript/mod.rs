@@ -45,7 +45,6 @@ impl crate::jsonrpc::Codegen for TypescriptCodegen {
 
     fn get_properties(&self) -> Result<ParserProperties, crate::jsonrpc::RpcError> {
         Ok(hashmap! {
-            "expand_interface" => false,
             "enable_metadata" => true
         })
     }

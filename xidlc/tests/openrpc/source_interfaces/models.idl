@@ -1,0 +1,21 @@
+module dds {
+    module rpc {
+        struct RequestHeader { string correlation_id; };
+        struct ReplyHeader { string receipt_id; };
+        struct UnusedMember { string note; };
+        struct UnknownOperation { string reason; };
+    };
+};
+
+module audit {
+    struct Envelope {
+        ::dds::rpc::RequestHeader request;
+        ::dds::rpc::ReplyHeader receipt;
+        ::dds::rpc::UnusedMember note;
+    };
+
+    union Dispatch switch(long) {
+        case 1: ::audit::Envelope accepted;
+        default: ::dds::rpc::UnknownOperation rejected;
+    };
+};

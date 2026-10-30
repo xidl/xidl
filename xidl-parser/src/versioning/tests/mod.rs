@@ -39,7 +39,7 @@ pub(super) fn lower_error(text: &str) -> crate::error::ParseError {
 
 /// Properties that keep the lowering focused on versioning.
 pub(super) fn test_properties() -> ParserProperties {
-    ParserProperties::from([("expand_interface".to_string(), Value::Bool(false))])
+    ParserProperties::from([])
 }
 
 /// Analyses IDL text that must declare a version timeline.

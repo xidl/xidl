@@ -64,13 +64,6 @@ fn render_annotations_covers_builtin_and_parameter_shapes() {
         },
         Annotation::Choice,
         Annotation::Empty,
-        Annotation::DdsService,
-        Annotation::DdsRequestTopic {
-            name: "request".into(),
-        },
-        Annotation::DdsReplyTopic {
-            name: "reply".into(),
-        },
         Annotation::DefaultLiteral,
         Annotation::Rename {
             name: "wire_name".into(),
@@ -126,9 +119,6 @@ fn render_annotations_covers_builtin_and_parameter_shapes() {
         "@topic(events, DDS)",
         "@choice",
         "@empty",
-        "@dds_service",
-        "@dds_request_topic(request)",
-        "@dds_reply_topic(reply)",
         "@default_literal",
         "@rename(\"wire_name\")",
         "@rename_all(\"camelCase\")",

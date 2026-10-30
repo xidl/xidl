@@ -7,7 +7,7 @@ use super::render_typescript;
 
 fn parse_spec(source: &str) -> hir::Specification {
     let typed = xidl_parser::parser::parser_text(source).expect("parse typed ast");
-    hir::Specification::from_typed_ast_with_properties(typed, HashMap::new())
+    hir::Specification::from(typed)
 }
 
 #[test]
@@ -65,10 +65,7 @@ fn rooted_interface_envelopes_import_their_file_namespace_only_when_rendered() {
         "#,
     )
     .expect("rooted interface IDL");
-    let spec = hir::Specification::from_typed_ast_with_properties(
-        typed,
-        HashMap::from([("expand_interface".to_string(), false.into())]),
-    );
+    let spec = hir::Specification::from(typed);
     let mut renderer = TypescriptRenderer::new().expect("renderer");
     renderer.extend(&HashMap::new());
     for mode in [TsMode::All, TsMode::InterfaceOnly] {

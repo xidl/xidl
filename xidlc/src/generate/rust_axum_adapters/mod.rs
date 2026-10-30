@@ -22,9 +22,7 @@ impl Codegen for RustAxumAdaptersCodegen {
     }
 
     fn get_properties(&self) -> Result<ParserProperties, RpcError> {
-        Ok(
-            hashmap! { "expand_interface" => false, "hir_kind" => "http", "enable_metadata" => true },
-        )
+        Ok(hashmap! { "hir_kind" => "http", "enable_metadata" => true })
     }
 
     fn generate(

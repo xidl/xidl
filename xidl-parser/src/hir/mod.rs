@@ -11,7 +11,6 @@ mod expr;
 mod include;
 mod integer;
 mod interface;
-mod interface_codegen;
 mod pragma;
 pub mod printer;
 mod references;

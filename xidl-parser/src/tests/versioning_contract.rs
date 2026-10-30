@@ -3,7 +3,7 @@ use crate::{hir, parser::parser_text, versioning::VersioningRecord};
 fn lower(source: &str) -> hir::Specification {
     hir::Specification::from_typed_ast_with_properties_and_path(
         parser_text(source).expect("parse contract"),
-        [("expand_interface".into(), false.into())].into(),
+        Default::default(),
         "contract.idl",
     )
     .expect("lower contract")

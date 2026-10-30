@@ -109,13 +109,6 @@ pub enum Annotation {
     },
     Choice,
     Empty,
-    DdsService,
-    DdsRequestTopic {
-        name: String,
-    },
-    DdsReplyTopic {
-        name: String,
-    },
     Builtin {
         name: String,
         params: Option<AnnotationParams>,

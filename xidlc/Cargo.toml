@@ -76,7 +76,6 @@ owo-colors = { version = "4.2", optional = true }
 tree-sitter-idl.workspace = true
 prettyplease = "0.3.0"
 syn = "3.0"
-md5.workspace = true
 percent-encoding = { version = "2.3", optional = true }
 indexmap = { version = "2", features = ["serde"] }
 

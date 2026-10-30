@@ -39,8 +39,7 @@ impl RustRender for hir::Definition {
     }
 }
 
-/// Returns an error because the legacy Rust target emits DDS-style request/reply
-/// plumbing for interfaces, which is no longer supported.
+/// The Rust model target requires a transport target for interface declarations.
 fn unsupported_interface_error(interface: &hir::InterfaceDcl) -> IdlcError {
     let ident = match &interface.decl {
         hir::InterfaceDclInner::InterfaceForwardDcl(forward) => rust_ident(&forward.ident),

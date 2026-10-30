@@ -90,8 +90,7 @@ fn typed_ast_keeps_versioning_annotations() {
 #[test]
 fn hir_keeps_typed_versioning_annotations() {
     let typed = parse(CARRIERS);
-    let mut properties = ParserProperties::new();
-    properties.insert("expand_interface".to_string(), json!(false));
+    let properties = ParserProperties::new();
     let hir = xidl_parser::hir::Specification::from_typed_ast_with_properties_and_path(
         typed,
         properties,

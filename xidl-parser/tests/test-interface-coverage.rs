@@ -1,18 +1,8 @@
 use xidl_parser::hir::{Definition, Specification, TypeDcl};
 use xidl_parser::parser::parser_text;
 
-fn parse_hir(source: &str, expand_interface: bool) -> Specification {
-    let typed = parser_text(source).expect("parse should succeed");
-    if expand_interface {
-        Specification::from(typed)
-    } else {
-        Specification::from_typed_ast_with_properties(
-            typed,
-            [("expand_interface".to_string(), serde_json::json!(false))]
-                .into_iter()
-                .collect(),
-        )
-    }
+fn parse_hir(source: &str) -> Specification {
+    Specification::from(parser_text(source).expect("parse should succeed"))
 }
 
 fn count_defs(defs: &[Definition]) -> usize {
@@ -25,7 +15,7 @@ fn count_defs(defs: &[Definition]) -> usize {
 }
 
 #[test]
-fn rich_interface_expansion_generates_rpc_shapes_and_hash_consts() {
+fn rich_interfaces_preserve_only_source_declarations() {
     let hir = parse_hir(
         r#"
         module demo {
@@ -67,20 +57,18 @@ fn rich_interface_expansion_generates_rpc_shapes_and_hash_consts() {
             };
         };
         "#,
-        true,
     );
-    assert!(count_defs(&hir.0) > 5);
+    assert_eq!(count_defs(&hir.0), 2);
 }
 
 #[test]
-fn disabling_interface_expansion_keeps_only_original_interface() {
+fn source_lowering_keeps_only_the_declared_interface() {
     let hir = parse_hir(
         r#"
         interface Service {
             void ping();
         };
         "#,
-        false,
     );
 
     assert_eq!(hir.0.len(), 1);
@@ -109,7 +97,6 @@ fn interface_conversion_preserves_attr_and_raises_variants() {
             };
         };
         "#,
-        false,
     );
 
     let Definition::InterfaceDcl(interface) = &hir.0[0] else {

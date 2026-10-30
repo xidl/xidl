@@ -14,16 +14,7 @@ pub(super) fn schema_for_type(ty: &hir::TypeSpec) -> Value {
         hir::TypeSpec::AnyType | hir::TypeSpec::ObjectType | hir::TypeSpec::ValueBaseType => {
             json!({})
         }
-        hir::TypeSpec::ScopedName(value) => match value.name.join(".").as_str() {
-            "dds.rpc.UnusedMember" => {
-                json!({ "type": "object", "properties": {}, "required": [] })
-            }
-            "dds.rpc.RequestHeader" | "dds.rpc.ReplyHeader" => {
-                json!({ "type": "object", "additionalProperties": true })
-            }
-            "dds.rpc.UnknownOperation" => json!({ "type": "object" }),
-            scoped => schema_ref(scoped),
-        },
+        hir::TypeSpec::ScopedName(value) => schema_ref(&value.name.join(".")),
         hir::TypeSpec::SequenceType(seq) => {
             let mut out = json!({ "type": "array", "items": schema_for_type(&seq.ty) });
             if let Some(len) = &seq.len
@@ -59,26 +50,5 @@ fn integer_schema(value: &hir::IntegerType) -> Value {
         }
         hir::IntegerType::I64 => json!({ "type": "integer", "format": "int64" }),
         _ => json!({ "type": "integer", "format": "int32" }),
-    }
-}
-
-pub(super) fn is_internal_rpc_marker_type(ty: &hir::TypeSpec) -> bool {
-    matches!(
-        ty,
-        hir::TypeSpec::ScopedName(value)
-            if matches!(value.name.join(".").as_str(), "dds.rpc.UnusedMember" | "dds.rpc.RequestHeader" | "dds.rpc.ReplyHeader")
-    )
-}
-
-pub(super) fn is_internal_rpc_marker_element(ty: &hir::ElementSpecTy) -> bool {
-    match ty {
-        hir::ElementSpecTy::TypeSpec(spec) => {
-            matches!(
-                spec,
-                hir::TypeSpec::ScopedName(value)
-                    if value.name.join(".") == "dds.rpc.UnknownOperation"
-            )
-        }
-        hir::ElementSpecTy::ConstrTypeDcl(_) => false,
     }
 }

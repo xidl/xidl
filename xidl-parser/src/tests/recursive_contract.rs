@@ -4,7 +4,7 @@ use std::collections::BTreeSet;
 fn lower(source: &str) -> hir::Specification {
     hir::Specification::from_typed_ast_with_properties_and_path(
         parser_text(source).unwrap(),
-        [("expand_interface".into(), false.into())].into(),
+        Default::default(),
         "graph.idl",
     )
     .unwrap()

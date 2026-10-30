@@ -3,18 +3,13 @@ use xidl_parser::hir;
 
 use super::annotations::doc_text;
 use super::names::{declarator_name, scoped_name};
-use super::schema_types::{
-    is_internal_rpc_marker_element, is_internal_rpc_marker_type, schema_for_type,
-};
+use super::schema_types::schema_for_type;
 
 pub(super) fn schema_for_struct(members: &[hir::Member]) -> Value {
     let mut properties = Map::new();
     let mut required = Vec::new();
 
     for member in members {
-        if is_internal_rpc_marker_type(&member.ty) {
-            continue;
-        }
         let doc = doc_text(&member.annotations);
         for decl in &member.ident {
             let name = declarator_name(decl);
@@ -40,7 +35,6 @@ pub(super) fn schema_for_union(def: &hir::UnionDef) -> Value {
     let variants = def
         .case
         .iter()
-        .filter(|case| !is_internal_rpc_marker_element(&case.element.ty))
         .map(union_variant_schema)
         .collect::<Vec<_>>();
 

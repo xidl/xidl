@@ -28,17 +28,11 @@ fn builtin_annotations_reparse_with_their_original_semantics() {
     {
         let typed =
             crate::parser::parser_text(contract).unwrap_or_else(|err| panic!("{contract}: {err}"));
-        let spec = Specification::from_typed_ast_with_properties(
-            typed,
-            [("expand_interface".into(), false.into())].into(),
-        );
+        let spec = Specification::from(typed);
         let printed = IdlPrinter::render(&spec);
         let typed = crate::parser::parser_text(&printed)
             .unwrap_or_else(|err| panic!("rendered {printed}: {err}"));
-        let reparsed = Specification::from_typed_ast_with_properties(
-            typed,
-            [("expand_interface".into(), false.into())].into(),
-        );
+        let reparsed = Specification::from(typed);
         assert_eq!(
             serde_json::to_value(&reparsed).unwrap(),
             serde_json::to_value(&spec).unwrap(),

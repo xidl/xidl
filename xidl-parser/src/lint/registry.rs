@@ -194,9 +194,6 @@ annotations! {
     Topic, "topic", &[Struct, Union], Grammar;
     Choice, "choice", &[Union], Marker;
     Empty, "empty", &[Struct], Marker;
-    DdsService, "dds_service", &[Interface], Marker;
-    DdsRequestTopic, "dds_request_topic", &[Operation], Grammar;
-    DdsReplyTopic, "dds_reply_topic", &[Operation], Grammar;
     Rename, "rename", &[], String(&["name"]);
     Name, "name", &[], String(&["name"]);
     RenameAll, "rename_all", &[Struct, Union, Enum, Bitmask, Exception, Interface], String(&["rule"]);

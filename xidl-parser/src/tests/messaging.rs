@@ -5,7 +5,7 @@ const SOURCE: &str = include_str!("../../../bdd/features/data/relay_messaging/re
 fn lower(source: &str) -> hir::Specification {
     hir::Specification::from_typed_ast_with_properties_and_path(
         parser_text(source).expect("messaging syntax"),
-        [("expand_interface".into(), false.into())].into(),
+        Default::default(),
         "relay_messaging.idl",
     )
     .expect("messaging HIR")

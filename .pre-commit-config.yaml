@@ -1,5 +1,5 @@
 # See https://pre-commit.com/hooks.html for more hooks
-exclude: ^(tests/snapshots)|(xidl-xcdr/include/xidl_xcdr.h)|(.*.snap)|(xidlc-examples/api/.*.json)|(CHANGELOG.md)$|(openapi_.*\.json)|^xidl-typeobject/src/dds_xtypes_typeobject\.rs$
+exclude: ^(tests/snapshots)|(.*.snap)|(xidlc-examples/api/.*.json)|(CHANGELOG.md)$|(openapi_.*\.json)
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -14,7 +14,7 @@ repos:
       - id: xidlc-fmt
         name: xidlc fmt
         language: system
-        files: ^(xidlc-examples/api/|golang/xidlc-examples/api/|xidlc/src/jsonrpc/|xidl-typeobject/idl/).+\.idl$
+        files: ^(xidlc-examples/api/|golang/xidlc-examples/api/|xidlc/src/jsonrpc/).+\.idl$
         entry: cargo run -p xidlc --features cli -- fmt --inplace --lang idl
       - id: rustfmt
         name: rustfmt
@@ -91,7 +91,6 @@ repos:
           (?x)^(
             bdd/boilerplate/e2e_test/rust/src/main\.rs|
             bdd/boilerplate/e2e_test/ts/server\.ts|
-            xidl-typeobject/src/dds_xtypes_typeobject\.rs|
             xidlc-examples/src/e2e_test\.rs|
             xidlc/src/import/openapi\.rs|
             xidlc/src/jsonrpc/ipc\.rs|

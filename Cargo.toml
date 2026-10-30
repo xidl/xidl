@@ -17,7 +17,7 @@ edition = "2024"
 description = "A IDL codegen."
 license = "Apache-2.0"
 readme = "./README.md"
-keywords = ["omg", "dds", "idl", "http", "jsonrpc"]
+keywords = ["omg", "idl", "http", "jsonrpc"]
 categories = ["compilers", "parser-implementations", "network-programming"]
 repository = "https://github.com/xidl/xidl"
 
@@ -41,7 +41,6 @@ futures-util = "0.3"
 http = "1"
 bytes = "1"
 insta = "1.44"
-md5 = "0.8.0"
 minijinja = "2.19.0"
 reqwest = "0.13.2"
 glob = "0.3.3"

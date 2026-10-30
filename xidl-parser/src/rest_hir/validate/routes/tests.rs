@@ -1,14 +1,9 @@
-use std::collections::HashMap;
-
 use crate::hir;
 use crate::rest_hir;
 
 fn parser_result(source: &str) -> Result<rest_hir::RestHirDocument, crate::error::ParseError> {
     let typed = crate::parser::parser_text(source).expect("parse idl");
-    let spec = hir::Specification::from_typed_ast_with_properties(
-        typed,
-        HashMap::from([("hir_kind".to_string(), "http".into())]),
-    );
+    let spec = hir::Specification::from(typed);
     rest_hir::project(&spec)
 }
 

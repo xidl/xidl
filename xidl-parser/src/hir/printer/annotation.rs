@@ -96,9 +96,6 @@ impl IdlPrinter {
             }
             Annotation::Choice => "@choice".to_string(),
             Annotation::Empty => "@empty".to_string(),
-            Annotation::DdsService => "@dds_service".to_string(),
-            Annotation::DdsRequestTopic { name } => format!("@dds_request_topic({name})"),
-            Annotation::DdsReplyTopic { name } => format!("@dds_reply_topic({name})"),
             Annotation::Builtin { name, params } => {
                 Self::render_named_annotation(name, params.as_ref())
             }
