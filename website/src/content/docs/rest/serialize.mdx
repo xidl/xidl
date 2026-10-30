@@ -9,13 +9,13 @@ This page describes how method parameters and return values are shaped into
 HTTP request and response bodies.
 
 Renaming and skipping annotations (`@rename`, `@rename_all`, `@skip`,
-`@optional`) are documented in the [Wire Shape](../../docs/annotations/wire/)
+`@optional`) are documented in the [Wire Shape](/docs/annotations/wire/)
 reference.
 
 Struct inheritance is flattened into the same JSON object. A base struct's
 members participate in request decoding, response encoding, OpenAPI schemas,
 and generated validators exactly like the derived struct's own members. See
-[Struct Inheritance](../../docs/#struct-inheritance) for the inheritance rules.
+[Struct Inheritance](/docs/#struct-inheritance) for the inheritance rules.
 
 ## Parameter Encoding Methods
 
@@ -94,5 +94,5 @@ TypeScript REST, and OpenAPI; it is not currently supported by Go REST.
 
 ## Recommended Reading
 
-- [HTTP & REST Basics](../)
-- [Annotations](../../docs/annotations/)
+- [HTTP & REST Basics](/rest/)
+- [Annotations](/docs/annotations/)

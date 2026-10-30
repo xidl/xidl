@@ -24,7 +24,7 @@ $ xidlc gen -o out rust-axum api.idl
 ```
 
 For the TypeScript server contract (including Next.js App Router integration),
-see [TypeScript REST Server](./typescript-server/).
+see [TypeScript REST Server](/rest/typescript-server/).
 
 RESTful can configure details such as HTTP methods, paths, parameter sources, media types, and security requirements through annotations.
 
@@ -177,7 +177,7 @@ Each target renders the deprecation in its native form: OpenAPI sets `deprecated
 
 Mark a parameter as `@optional` when it may be absent. This does not make it
 nullable or give it a default value. Path parameters are always required; see
-[field and parameter presence](../../docs/annotations/wire/#optional).
+[field and parameter presence](/docs/annotations/wire/#optional).
 
 ```idl
 interface UserApi {
