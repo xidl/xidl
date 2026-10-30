@@ -84,7 +84,6 @@ impl crate::jsonrpc::Codegen for GoRestCodegen {
 
     fn get_properties(&self) -> Result<ParserProperties, crate::jsonrpc::RpcError> {
         Ok(hashmap! {
-            "expand_interface" => false,
             "hir_kind" => "http",
             "enable_client" => true,
             "enable_server" => true,

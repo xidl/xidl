@@ -23,12 +23,7 @@ fn named_annotation(name: &str) -> Annotation {
 }
 
 fn lower(source: &str) -> Specification {
-    Specification::from_typed_ast_with_properties(
-        crate::parser::parser_text(source).expect("parse source"),
-        [("expand_interface".to_string(), serde_json::json!(false))]
-            .into_iter()
-            .collect(),
-    )
+    Specification::from(crate::parser::parser_text(source).expect("parse source"))
 }
 
 mod annotations;

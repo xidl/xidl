@@ -3,7 +3,7 @@ use crate::{hir, parser::parser_text};
 fn lower(source: &str) -> hir::Specification {
     hir::Specification::from_typed_ast_with_properties_and_path(
         parser_text(source).expect("parse source"),
-        [("expand_interface".into(), false.into())].into(),
+        Default::default(),
         "printer.idl",
     )
     .expect("lower source")
@@ -32,7 +32,7 @@ fn versioned_includes_keep_the_callers_resolver_during_lowering() {
         crate::parser::parser_text_with_resolver(source, Some("api.idl"), &mut Dependency).unwrap();
     let spec = hir::Specification::from_typed_ast_with_resolver(
         typed,
-        [("expand_interface".into(), false.into())].into(),
+        Default::default(),
         "api.idl",
         &mut Dependency,
     )

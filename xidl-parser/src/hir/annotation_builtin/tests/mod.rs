@@ -316,23 +316,6 @@ fn maps_builtin_annotations_to_hir_variants() {
         ),
         (BuiltinAnnotation::Choice, Annotation::Choice),
         (BuiltinAnnotation::Empty, Annotation::Empty),
-        (BuiltinAnnotation::DdsService, Annotation::DdsService),
-        (
-            BuiltinAnnotation::DdsRequestTopic {
-                name: string_expr("\"req\""),
-            },
-            Annotation::DdsRequestTopic {
-                name: "\"req\"".to_string(),
-            },
-        ),
-        (
-            BuiltinAnnotation::DdsReplyTopic {
-                name: string_expr("\"rep\""),
-            },
-            Annotation::DdsReplyTopic {
-                name: "\"rep\"".to_string(),
-            },
-        ),
     ];
 
     for (input, expected) in cases {

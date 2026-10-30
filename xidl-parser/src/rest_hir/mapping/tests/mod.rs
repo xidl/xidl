@@ -1,18 +1,12 @@
 use super::*;
 use crate::hir;
 use crate::rest_hir::semantics::HttpStreamCodec;
-use std::collections::HashMap;
 
 mod streams;
 
 fn parse(source: &str) -> hir::Specification {
     let typed = crate::parser::parser_text(source).expect("parse idl");
-    let mut properties = HashMap::new();
-    properties.insert(
-        "expand_interface".to_string(),
-        serde_json::Value::Bool(false),
-    );
-    hir::Specification::from_typed_ast_with_properties(typed, properties)
+    hir::Specification::from(typed)
 }
 
 fn string_param(name: &str, kind: HttpParamKind) -> HttpParam {

@@ -1,0 +1,245 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+openrpc_source_interfaces.json
+===============
+{
+  "components": {
+    "schemas": {
+      "audit.Dispatch": {
+        "oneOf": [
+          {
+            "properties": {
+              "accepted": {
+                "$ref": "#/components/schemas/audit.Envelope"
+              }
+            },
+            "required": [
+              "accepted"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "rejected": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            },
+            "required": [
+              "rejected"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "audit.Envelope": {
+        "properties": {
+          "note": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          },
+          "request": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        },
+        "required": [
+          "request",
+          "receipt",
+          "note"
+        ],
+        "type": "object"
+      },
+      "dds.rpc.ReplyHeader": {
+        "properties": {
+          "receipt_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "receipt_id"
+        ],
+        "type": "object"
+      },
+      "dds.rpc.RequestHeader": {
+        "properties": {
+          "correlation_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "correlation_id"
+        ],
+        "type": "object"
+      },
+      "dds.rpc.UnknownOperation": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
+      "dds.rpc.UnusedMember": {
+        "properties": {
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "note"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "xidl",
+    "version": "0.1.0"
+  },
+  "methods": [
+    {
+      "name": "Ledger.get_attribute_channel",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {
+          "properties": {
+            "return": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "return"
+          ],
+          "type": "object"
+        }
+      }
+    },
+    {
+      "name": "Ledger.get_attribute_ready",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {
+          "properties": {
+            "return": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "return"
+          ],
+          "type": "object"
+        }
+      }
+    },
+    {
+      "name": "Ledger.inspect",
+      "params": [
+        {
+          "name": "request",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "properties": {
+            "return": {
+              "$ref": "#/components/schemas/audit.Dispatch"
+            }
+          },
+          "required": [
+            "return"
+          ],
+          "type": "object"
+        }
+      }
+    },
+    {
+      "name": "Ledger.ping",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {
+          "properties": {},
+          "type": "object"
+        }
+      }
+    },
+    {
+      "name": "Ledger.revise",
+      "params": [
+        {
+          "name": "envelope",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/audit.Envelope"
+          }
+        },
+        {
+          "name": "revision",
+          "required": true,
+          "schema": {
+            "format": "int32",
+            "type": "integer"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "properties": {
+            "receipt": {
+              "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+            },
+            "return": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "revision": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "return",
+            "receipt",
+            "revision"
+          ],
+          "type": "object"
+        }
+      }
+    },
+    {
+      "name": "Ledger.set_attribute_channel",
+      "params": [
+        {
+          "name": "channel",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "properties": {},
+          "type": "object"
+        }
+      }
+    }
+  ],
+  "openrpc": "1.3.2"
+}

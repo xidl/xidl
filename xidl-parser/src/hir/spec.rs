@@ -1,6 +1,6 @@
 use super::{
     Definition, FsIncludeResolver, InterfaceDcl, ModuleDcl, ParserProperties, Specification,
-    TypeDcl, VersionedIncludes, expand_annotations, interface_codegen, parse_xidlc_pragma,
+    TypeDcl, VersionedIncludes, expand_annotations, parse_xidlc_pragma,
 };
 use crate::jsonrpc_hir;
 use crate::parser::IncludeResolver;
@@ -14,15 +14,15 @@ impl From<crate::typed_ast::Specification> for Specification {
     fn from(value: crate::typed_ast::Specification) -> Self {
         let mut resolver = FsIncludeResolver;
         let mut includes = VersionedIncludes::new(&mut resolver, None);
-        spec_from_typed_ast(value, true, &mut includes)
+        spec_from_typed_ast(value, &mut includes)
     }
 }
 
 impl Specification {
     /// Lowers source declarations for an export index without evaluating them.
     ///
-    /// Includes use the caller's resolver. Version projection, semantic analysis
-    /// and interface expansion remain the responsibility of compilation.
+    /// Includes use the caller's resolver. Version projection and semantic
+    /// analysis remain the responsibility of compilation.
     pub fn source_from_typed_ast_with_resolver(
         value: crate::typed_ast::Specification,
         path: impl AsRef<Path>,
@@ -31,15 +31,6 @@ impl Specification {
         let current = Self::current_path(path.as_ref());
         let mut includes = VersionedIncludes::new(resolver, current);
         Self::lower_source(value, &mut includes)
-    }
-
-    pub fn from_typed_ast_with_properties(
-        value: crate::typed_ast::Specification,
-        properties: ParserProperties,
-    ) -> Self {
-        let mut resolver = FsIncludeResolver;
-        let mut includes = VersionedIncludes::new(&mut resolver, None);
-        spec_from_typed_ast(value, expand_interface(&properties), &mut includes)
     }
 
     pub fn from_typed_ast_with_properties_and_path(
@@ -64,12 +55,7 @@ impl Specification {
         let current = Self::current_path(path.as_ref());
         let mut includes = VersionedIncludes::new(resolver, current);
         let imports = semantic::IntegerImports::from_properties(&properties)?;
-        Self::lower(
-            value,
-            expand_interface(&properties),
-            &mut includes,
-            &imports,
-        )
+        Self::lower(value, &mut includes, &imports)
     }
 
     pub fn from_typed_ast_with_path(
@@ -79,12 +65,7 @@ impl Specification {
         let mut resolver = FsIncludeResolver;
         let current = Self::current_path(path.as_ref());
         let mut includes = VersionedIncludes::new(&mut resolver, current);
-        Self::lower(
-            value,
-            true,
-            &mut includes,
-            &semantic::IntegerImports::default(),
-        )
+        Self::lower(value, &mut includes, &semantic::IntegerImports::default())
     }
 
     /// Lowers a typed AST and returns one HIR projection per requested version.
@@ -122,14 +103,13 @@ impl Specification {
         let mut includes = VersionedIncludes::new(resolver, current);
         let layout = versioning::VersionLayout::from_properties(&properties)?;
         let selection = versioning::selection_from_properties(&properties)?;
-        let expand = expand_interface(&properties);
         let integer_imports = semantic::IntegerImports::from_properties(&properties)?;
         let source = Self::lower_source(value, &mut includes)?;
         let Some(record) = VersioningRecord::analyze(&source)? else {
             if let Some(selection) = &selection {
                 return Err(versioning::unversioned_selection_error(selection));
             }
-            let spec = Self::finalize_projection(source, expand, &integer_imports)?;
+            let spec = Self::finalize_projection(source, &integer_imports)?;
             return Ok(vec![VersionedProjection {
                 versions: Vec::new(),
                 version: None,
@@ -152,7 +132,7 @@ impl Specification {
                     .collect::<Vec<_>>();
                 let values = version_values(&selected);
                 let spec = record.merge_source(&source, &versions)?;
-                let spec = Self::finalize_projection(spec, expand, &integer_imports)?;
+                let spec = Self::finalize_projection(spec, &integer_imports)?;
                 Ok(vec![VersionedProjection {
                     versions: selected,
                     version: None,
@@ -163,7 +143,7 @@ impl Specification {
                 let mut projections = Vec::new();
                 for version in versions {
                     let spec = record.project_source(&source, version)?;
-                    let spec = Self::finalize_projection(spec, expand, &integer_imports)?;
+                    let spec = Self::finalize_projection(spec, &integer_imports)?;
                     let definition = record.timeline().get(version).cloned();
                     let values = definition
                         .iter()
@@ -234,35 +214,27 @@ impl Specification {
         Ok(spec)
     }
 
-    /// Resolves selected integer expression types before interface expansion.
+    /// Resolves integer expressions in the selected source declarations.
     fn finalize_projection(
         mut spec: Self,
-        expand: bool,
         imports: &semantic::IntegerImports,
     ) -> crate::error::ParserResult<Self> {
         semantic::IntegerDeclarations::normalize(&mut spec, imports)?;
-        Self::finalize(spec, expand, imports)
+        Self::finalize(spec, imports)
     }
 
-    /// Runs interface expansion and semantic analysis on an already lowered spec.
+    /// Validates collection bounds and structure on an already lowered spec.
     fn finalize(
         mut spec: Self,
-        expand_interfaces: bool,
         imports: &semantic::IntegerImports,
     ) -> crate::error::ParserResult<Self> {
         semantic::CollectionBounds::normalize(&mut spec, imports)?;
-        // Validate lexical source scopes before adding RPC wrapper declarations
-        // at their generated scopes.
-        if expand_interfaces {
-            Self::expand_interfaces(&mut spec.0, &mut Vec::new())?;
-        }
         semantic::Analysis::structure(&mut spec)?;
         Ok(spec)
     }
 
     fn lower(
         value: crate::typed_ast::Specification,
-        expand_interfaces: bool,
         includes: &mut VersionedIncludes<'_>,
         imports: &semantic::IntegerImports,
     ) -> crate::error::ParserResult<Self> {
@@ -270,48 +242,21 @@ impl Specification {
         // API versioning annotations are validated on every compile, even when
         // no version is projected.
         VersioningRecord::analyze(&spec)?;
-        Self::finalize(spec, expand_interfaces, imports)
+        Self::finalize(spec, imports)
     }
 
     /// Path handed to include resolution, when it is valid utf-8.
     fn current_path(path: &Path) -> Option<String> {
         path.to_str().map(str::to_string)
     }
-
-    fn expand_interfaces(
-        definitions: &mut Vec<Definition>,
-        modules: &mut Vec<String>,
-    ) -> crate::error::ParserResult<()> {
-        for mut definition in std::mem::take(definitions) {
-            match &mut definition {
-                Definition::ModuleDcl(module) => {
-                    modules.push(module.ident.clone());
-                    Self::expand_interfaces(&mut module.definition, modules)?;
-                    modules.pop();
-                }
-                Definition::InterfaceDcl(interface) => {
-                    definitions.extend(interface_codegen::expand_interface(interface, modules)?);
-                }
-                _ => {}
-            }
-            definitions.push(definition);
-        }
-        Ok(())
-    }
 }
 
 pub(crate) fn spec_from_typed_ast(
     value: crate::typed_ast::Specification,
-    expand_interfaces: bool,
     includes: &mut VersionedIncludes<'_>,
 ) -> Specification {
-    Specification::lower(
-        value,
-        expand_interfaces,
-        includes,
-        &semantic::IntegerImports::default(),
-    )
-    .expect("HIR conversion should not fail")
+    Specification::lower(value, includes, &semantic::IntegerImports::default())
+        .expect("HIR conversion should not fail")
 }
 
 pub(super) fn collect_defs(
@@ -377,14 +322,6 @@ fn include_path_text(include: &crate::typed_ast::PreprocInclude) -> Option<Strin
         crate::typed_ast::PreprocIncludePath::SystemLibString(_)
         | crate::typed_ast::PreprocIncludePath::Identifier(_) => None,
     }
-}
-
-fn expand_interface(properties: &ParserProperties) -> bool {
-    if let Some(expand) = properties.get("expand_interface").and_then(Value::as_bool) {
-        return expand;
-    }
-
-    matches!(hir_projection_kind(properties), HirProjectionKind::Rpc)
 }
 
 fn hir_projection_kind(properties: &ParserProperties) -> HirProjectionKind {

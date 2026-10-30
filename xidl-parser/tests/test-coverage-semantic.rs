@@ -41,12 +41,7 @@ fn converts_semantic_matrix_without_interface_expansion() {
     )
     .expect("parse should succeed");
 
-    let hir = Specification::from_typed_ast_with_properties(
-        typed,
-        [("expand_interface".to_string(), serde_json::json!(false))]
-            .into_iter()
-            .collect(),
-    );
+    let hir = Specification::from(typed);
 
     assert!(hir.0.iter().any(|def| matches!(def, Definition::Pragma(_))));
     assert!(

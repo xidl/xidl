@@ -1,0 +1,9 @@
+#include "source_interfaces/models.idl"
+
+interface Ledger {
+    void ping();
+    long revise(in ::audit::Envelope envelope, out ::dds::rpc::ReplyHeader receipt, inout long revision);
+    ::audit::Dispatch inspect(in ::dds::rpc::RequestHeader request);
+    readonly attribute boolean ready;
+    attribute string channel;
+};

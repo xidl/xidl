@@ -74,25 +74,16 @@ generated REST decoder to trim or discard a value.
 | Annotation | Allowed positions | Form |
 | --- | --- | --- |
 | `@verbatim(...)` | Any annotation-bearing position | Text expression, optionally preceded by language and placement, such as `@verbatim(C, BEGIN_FILE, "text")` |
-| `@service` | Interface | Bare or a platform such as `DDS` or `CORBA` |
+| `@service` | Interface | Bare or a platform such as `CORBA` |
 | `@oneway` | Operation | Bare or one value |
 | `@ami` | Interface, operation | Bare or one value |
-| `@topic` | Struct, union | Bare, a name, a platform, or both, such as `@topic("accounts", DDS)` |
+| `@topic` | Struct, union | Bare, a name, a platform, or both, such as `@topic("accounts")` |
 | `@choice` | Union | Marker |
 | `@empty` | Struct | Marker |
-| `@dds_service` | Interface | Marker |
-| `@dds_request_topic`, `@dds_reply_topic` | Operation in the registry | Argument-bearing forms are not currently lint-clean; see the spelling limitation below |
 
 These are preserved metadata. They do not inject source text, start a broker,
 create topics, or turn an HTTP request into a fire-and-forget call. The
 `@oneway` annotation is also distinct from the IDL `oneway` operation keyword.
-
-The DDS request/reply topic names have a parser/lint spelling mismatch:
-`@dds_request_topic("request")` and `@dds_reply_topic("reply")` are registered
-names but fail the built-in grammar check. The grammar spellings
-`@DDSRequestTopic("request")` and `@DDSReplyTopic("reply")` parse but fail lint
-as misspelled names. Neither spelling is a supported, lint-clean alternative.
-Do not rely on these annotations to generate a service or topic.
 
 The accepted grammar-specific arguments are represented by the
 [typed annotation model](https://github.com/xidl/xidl/blob/master/xidl-parser/src/typed_ast/annotation_builtin/mod.rs).

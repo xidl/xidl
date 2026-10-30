@@ -142,7 +142,7 @@ fn runtime_types_can_shadow_the_builtin_in_modules_and_interfaces() {
 }
 
 #[test]
-fn interface_expansion_preserves_source_scope_validation() {
+fn interface_projection_preserves_source_scope_validation() {
     let source = r#"
         @http union Payload switch(ContentType) { case ContentType::Json: string value; };
         interface Api {
@@ -153,20 +153,13 @@ fn interface_expansion_preserves_source_scope_validation() {
     "#;
     let typed = crate::parser::parser_text(source).expect("valid source");
     Specification::from_typed_ast_with_path(typed, "interface-local.idl")
-        .expect("source scope is checked before generated wrappers are added");
-    for expand in [false, true] {
-        Specification::project_typed_ast_with_properties_and_path(
-            crate::parser::parser_text(source).expect("valid source"),
-            HashMap::from([
-                ("hir_kind".to_string(), "http".into()),
-                ("expand_interface".to_string(), expand.into()),
-            ]),
-            "interface-local.idl",
-        )
-        .expect(
-            "projection collects representations without rechecking generated wrappers as source",
-        );
-    }
+        .expect("source declarations retain their lexical scope");
+    Specification::project_typed_ast_with_properties_and_path(
+        crate::parser::parser_text(source).expect("valid source"),
+        HashMap::from([("hir_kind".to_string(), "http".into())]),
+        "interface-local.idl",
+    )
+    .expect("projection collects representations in their source scope");
 }
 
 #[test]

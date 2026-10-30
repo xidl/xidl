@@ -72,7 +72,6 @@ impl crate::jsonrpc::Codegen for RustJsonRpcCodegen {
     fn get_properties(&self) -> Result<ParserProperties, crate::jsonrpc::RpcError> {
         Ok(hashmap! {
             "hir_kind" => "jsonrpc",
-            "expand_interface" => false,
             "enable_render_header" => true,
             "enable_serialize" => true,
             "enable_deserialize" => true,

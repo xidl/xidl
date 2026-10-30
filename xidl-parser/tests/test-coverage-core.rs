@@ -2,7 +2,6 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use serde_json::json;
 use xidl_parser::hir::{
     Annotation, AnnotationParams, Definition, Pragma, Specification, annotation_id_value,
     const_expr_to_i64,
@@ -142,7 +141,7 @@ fn hir_parses_pragmas_and_include_errors() {
         #pragma vendor keep-me
         "#,
     );
-    write_file(&system_include, "#include <dds/core.idl>\n");
+    write_file(&system_include, "#include <vendor/core.idl>\n");
     write_file(&identifier_include, "#include SOME_HEADER\n");
 
     let hir = parse_hir_with_path(&pragma).expect("pragma parse should succeed");
@@ -231,12 +230,8 @@ fn expr_and_annotation_helpers_cover_resolution_branches() {
     ));
     assert_eq!(const_expr_to_i64(&unsupported.into()), None);
 
-    let custom = Specification::from_typed_ast_with_properties(
-        parser_text("interface Example { void ping(); };").expect("parse"),
-        [("expand_interface".to_string(), json!(false))]
-            .into_iter()
-            .collect(),
-    );
+    let custom =
+        Specification::from(parser_text("interface Example { void ping(); };").expect("parse"));
     assert_eq!(custom.0.len(), 1);
 
     let float: xidl_parser::hir::Literal = Literal::FloatingPtLiteral(FloatingPtLiteral {

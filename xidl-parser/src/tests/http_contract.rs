@@ -3,7 +3,7 @@ use crate::{hir, parser::parser_text, rest_hir::semantics::*};
 fn annotations(source: &str) -> Vec<hir::Annotation> {
     let spec = hir::Specification::from_typed_ast_with_properties_and_path(
         parser_text(&format!("{source} interface Api {{}};")).unwrap(),
-        [("expand_interface".into(), false.into())].into(),
+        Default::default(),
         "security.idl",
     )
     .unwrap();

@@ -77,7 +77,6 @@ impl crate::jsonrpc::Codegen for GoCodegen {
 
     fn get_properties(&self) -> Result<ParserProperties, crate::jsonrpc::RpcError> {
         Ok(crate::macros::hashmap! {
-            "expand_interface" => false,
             "enable_interfaces" => true,
             "enable_render_header" => true,
             "enable_metadata" => true

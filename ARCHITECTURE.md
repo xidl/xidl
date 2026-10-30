@@ -9,7 +9,7 @@ of the architectural boundaries that contributors should preserve.
 
 ## Scope
 
-XIDL is an IDL-first code generator built on OMG DDS IDL with XIDL-specific
+XIDL is an IDL-first code generator built on OMG IDL with XIDL-specific
 extensions. One source contract can drive multiple outputs, including language
 bindings, HTTP surfaces, JSON-RPC surfaces, and machine-readable specs.
 
@@ -404,7 +404,7 @@ This crate acts as both documentation and an integration surface.
 
 Responsibility:
 
-- parse OMG DDS IDL syntax into a concrete syntax tree foundation
+- parse OMG IDL syntax into a concrete syntax tree foundation
 
 Non-goal:
 

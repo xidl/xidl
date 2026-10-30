@@ -28,7 +28,7 @@ pub enum HirProjectionKind {
     JsonRpc,
 }
 
-/// Represents either the standard DDS/RPC HIR or the projected REST HIR.
+/// A source specification or its HTTP or JSON-RPC projection.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ProjectedHir {
     Rpc(crate::hir::Specification),

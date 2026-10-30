@@ -32,9 +32,12 @@ impl VersionDiff {
         })?;
         let mut resolver = crate::library::include_resolver(resolved.mounts());
         let typed = parser_text_with_resolver(unit.source(), path.to_str(), &mut *resolver)?;
-        let properties = [("expand_interface".into(), false.into())].into();
-        let spec =
-            Specification::from_typed_ast_with_resolver(typed, properties, path, &mut *resolver)?;
+        let spec = Specification::from_typed_ast_with_resolver(
+            typed,
+            Default::default(),
+            path,
+            &mut *resolver,
+        )?;
         let record = VersioningRecord::analyze(&spec)?.ok_or_else(|| {
             IdlcError::fmt(format!(
                 "version diff: contract '{}' requires a @version enum",

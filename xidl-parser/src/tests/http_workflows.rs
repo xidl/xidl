@@ -3,7 +3,7 @@ use crate::{hir, parser::parser_text, rest_hir::*};
 fn project_contract(source: &str) -> Result<RestHirDocument, String> {
     let spec = hir::Specification::from_typed_ast_with_properties_and_path(
         parser_text(source).expect("contract syntax"),
-        [("expand_interface".into(), false.into())].into(),
+        Default::default(),
         "workflow.idl",
     )
     .expect("contract HIR");

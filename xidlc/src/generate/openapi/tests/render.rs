@@ -1,15 +1,11 @@
 use super::super::*;
 use crate::openapi::RefOr;
 use crate::openapi::schema::Schema;
-use std::collections::HashMap;
 use xidl_parser::hir;
 
 fn parse_spec(source: &str) -> hir::Specification {
     let typed = xidl_parser::parser::parser_text(source).expect("parse typed ast");
-    hir::Specification::from_typed_ast_with_properties(
-        typed,
-        HashMap::from([("hir_kind".to_string(), "http".into())]),
-    )
+    hir::Specification::from(typed)
 }
 
 fn render_openapi_json_from_spec(
