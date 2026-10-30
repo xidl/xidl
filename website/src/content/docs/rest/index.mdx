@@ -40,7 +40,8 @@ interface HelloWorld {
 };
 ```
 
-The following method types are supported: `@get`, `@post`, `@put`, `@delete`, and `@patch`.
+The following method types are supported: `@get`, `@post`, `@put`, `@delete`,
+`@patch`, `@head`, and `@options`.
 
 ## Route Templates
 
@@ -65,7 +66,7 @@ If you need to rename route parameters, you can use the `@path @rename("...")` a
 interface UserApi {
     @get(path = "/users/{x-id}{?x-lang}")
     string getUser(
-        @path @rename("x-id") string user_id
+        @path @rename("x-id") string user_id,
         @query @rename("x-lang") @optional string lang
     );
 };
@@ -79,7 +80,7 @@ RESTful supports parameters from multiple sources, which can be explicitly speci
 interface UserApi {
     @get(path = "/users/{id}")
     string getUser(
-        @path string user_id,
+        @path string id,
         @query string locale,
         @header @rename("USER_NAME") string name,
         @cookie string session_id,
@@ -174,13 +175,15 @@ Each target renders the deprecation in its native form: OpenAPI sets `deprecated
 
 ## Optional Parameters
 
-If a parameter can be null/empty, it needs to be marked as `@optional`:
+Mark a parameter as `@optional` when it may be absent. This does not make it
+nullable or give it a default value. Path parameters are always required; see
+[field and parameter presence](../../docs/annotations/wire/#optional).
 
 ```idl
 interface UserApi {
     @get(path = "/users/{id}")
     string getUser(
-        @path string user_id,
+        @path string id,
         @query @optional string locale
     );
 };

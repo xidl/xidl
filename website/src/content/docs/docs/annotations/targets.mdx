@@ -1,0 +1,79 @@
+---
+title: "Documentation and Target Extensions"
+description: "Documentation strings, Rust derives, and the boundary between lint passthrough and generated behavior."
+sidebar:
+  order: 5
+---
+
+## `@doc`
+
+Attach one string to an annotation-bearing declaration or member:
+
+```idl
+@doc("A public account identifier.")
+struct Account {
+    @doc(text = "Stable across API versions.") string id;
+};
+```
+
+The string can be positional or named `value`, `text`, or `doc`. Generators
+consume documentation through their documentation renderers, such as Rust doc
+comments, TypeScript JSDoc, and OpenAPI descriptions. Use one `@doc` per
+declaration: the shared renderer reads the first one rather than joining
+several annotations. It reads string literals, not string constant references.
+Documentation does not change validation, serialization, or version availability.
+
+## `@derive`
+
+Allowed on structs, unions, enums, bitsets, bitmasks, typedefs, natives, and
+exceptions. Supply target derive names as positional values:
+
+```idl
+@derive(Eq)
+struct AccountKey {
+    string id;
+};
+```
+
+The Rust generator consumes derives on structs, unions, enums, bitsets,
+bitmasks, and exceptions, adding them to the generated derives and deduplicating
+them. Typedef and native positions pass lint, but render type aliases without
+these derives. A requested derive must apply to the generated type and its
+members, and its macro or trait must be available to the consuming Rust crate.
+This annotation does not define new IDL traits or validator behavior in other
+targets.
+
+## Rust attribute extensions
+
+The Rust generator recognizes the `rust-` and `rust_` prefixes at supported
+rendering sites and removes the prefix when rendering a Rust attribute:
+
+```idl
+@rust_non_exhaustive
+struct Account {
+    string id;
+};
+```
+
+The struct receives `#[non_exhaustive]`. These attributes are
+target-specific: XIDL does not check that their Rust syntax, names, or effects
+are valid. The target compiler and the consuming crate own that validation.
+Keep transport and lifecycle semantics in their built-in annotations instead
+of hiding them in a Rust attribute.
+
+## Recognized names without portable effects
+
+| Spelling | What recognition means |
+| --- | --- |
+| `@rust(value)` | Registered with one required value and any annotation-bearing position; no general code-injection behavior is implemented |
+| `rust-...`, `rust_...` | Exempt from built-in lint checks; Rust renderers can pass through attributes at supported sites |
+| `ts-...`, `ts_...` | Exempt from built-in lint checks; no general TypeScript attribute passthrough behavior is implemented |
+| Other project annotations | Reported as `unknown-annotation` warnings; recognition as project metadata does not create a generator extension |
+
+The prefix exemption concerns lint only. It does not make an unsupported
+annotation portable, and `--deny warnings` does not validate target compiler
+attributes. Inspect the rendered attributes and compile the intended target
+when using an extension.
+
+For the supported output targets and combinations, see
+[Target Generators](../../targets/).

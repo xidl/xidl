@@ -1,17 +1,60 @@
 ---
 title: "Annotations"
-description: "XIDL built-in annotations: rename, rename_all, skip, and optional."
+description: "A complete index of XIDL built-in annotations, their syntax, scope, and target support."
 sidebar:
-  order: 3
+  label: "Overview"
+  order: 0
 ---
 
-This page is the single reference for annotations that are built into the XIDL
-language. Protocol-specific annotations (HTTP verbs, streams, security, ...)
-are documented in their own sections.
+Annotations describe a declaration's wire shape, lifecycle, transport mapping,
+or target metadata. Place them immediately before the declaration or member
+they describe. Each annotation has its own allowed positions and arguments;
+being recognized by the parser does not mean every generator implements it.
+
+## Reference by responsibility
+
+| Reference | Annotations |
+| --- | --- |
+| [Wire shape](./wire/) | `@rename`, `@name`, `@rename_all`, `@skip`, `@optional`, `@flatten`, `@omitempty` |
+| [Defaults and constraints](./values/) | `@default`, `@range`, `@min`, `@max`, `@unit` |
+| [Lifecycle](./lifecycle/) | `@version`, `@added`, `@removed`, `@deprecated` |
+| [HTTP mapping](./http/) | `@get`, `@post`, `@put`, `@patch`, `@delete`, `@head`, `@options`, `@path`, `@query`, `@header`, `@cookie`, `@body`, `@request`, `@response`, `@http`, `@webhooks`, `@cors` |
+| [Security and streams](./http/#security-and-streams) | `@http_basic`, `@http_bearer`, `@api_key`, `@no_security`, `@server_stream`, `@client_stream`, `@bidi_stream`, `@stream_codec`, `@upgrade` |
+| [Documentation and target extensions](./targets/) | `@doc`, `@derive`, `@rust`; the `rust-`, `rust_`, `ts-`, and `ts_` extension prefixes |
+| [IDL type metadata](./type-metadata/) | `@id`, `@autoid`, `@position`, `@value`, `@default_literal`, `@extensibility`, `@final`, `@appendable`, `@mutable`, `@key`, `@must_understand`, `@hashid`, `@bit_bound`, `@external`, `@nested`, `@default_nested`, `@ignore_literal_names`, `@try_construct`, `@non_serialized`, `@data_representation`, `@verbatim`, `@service`, `@oneway`, `@ami`, `@topic`, `@choice`, `@empty`, `@dds_service`, `@dds_request_topic`, `@dds_reply_topic` |
+
+## Argument forms
+
+Use the form documented for the particular annotation:
+
+```idl
+@doc(text = "Public account fields.")
+@rename_all("snake_case")
+struct Account {
+    @rename(name = "account_id") string id;
+    @optional string displayName;
+};
+```
+
+- A marker, such as `@skip`, takes no arguments.
+- A single-value annotation can accept a positional value or a named `value`.
+  Some also accept a specific alias: `@rename(name = "account_id")` and
+  `@rename("account_id")` are equivalent.
+- Named-argument annotations have their own required keys. For example,
+  `@api_key(in = "header", name = "X-Api-Key")` requires both keys.
+- Do not mix positional and named arguments in one annotation or repeat a
+  named key.
+- Built-in names ignore ASCII case. String values follow the rules of their
+  consumer; for example, naming rules use the exact spellings listed in the
+  [wire reference](./wire/#rename_all).
+
+An annotation only applies to its declaration unless its reference explicitly
+defines inheritance, such as interface-level HTTP defaults. For example,
+`@optional` does not make every member of a struct optional.
 
 ## Checking annotations
 
-Run annotation checks explicitly before generating a contract:
+Run the annotation checker before generating code:
 
 ```sh
 xidlc lint api.idl shared.idl
@@ -19,90 +62,78 @@ xidlc lint --deny warnings api.idl
 ```
 
 `lint` checks built-in names, declaration positions, and argument shapes. It
-reports source locations and stable diagnostic codes:
+checks only the files explicitly passed on the command line. Include the
+imported files when checking a split contract.
 
-| Code | Level | Example |
+| Diagnostic | Severity | Example |
 | --- | --- | --- |
 | `misspelled-annotation` | error | `@remvoed` suggests `@removed` |
 | `misplaced-annotation` | error | `@optional` on an interface |
 | `bad-annotation-args` | error | `@api_key` without `name` |
-| `unknown-annotation` | warning | An external plugin's `@relay_audit` |
+| `unknown-annotation` | warning | a project-specific `@relay_audit` |
 
-Built-in annotation names ignore ASCII case. Target-specific `rust-`, `rust_`,
-`ts-`, and `ts_` attributes pass through without validation. Unknown annotations
-remain available to plugins; `--deny warnings` only changes the CLI exit policy.
+Warnings remain visible without making the command fail. `--deny warnings`
+makes them fail the check. Target extension prefixes bypass built-in argument
+and position checks; that is not a guarantee of generated behavior.
 
-The command checks every supplied file and exits with status 1 for errors,
-including unreadable or unparseable files. Warnings alone exit with status 0
-unless `--deny warnings` is set. It does not rewrite sources or generate files.
-`xidlc gen` does not run the complete lint pass, so CI should invoke both commands
-explicitly. Generation does enforce required contract checks, including the
-argument-free `@webhooks` marker's declaration positions and arguments, before
-version projection can remove a declaration.
+`gen` does not run this whole lint pass. Semantic validation and individual
+targets check the contracts they consume; for example, generation validates
+`@webhooks` placement and arguments before version projection. A clean lint
+result alone does not prove a route, stream, or target combination is valid.
+Generate the intended targets as well:
 
-Editor integrations can use `xidl_parser::lint::BUILTIN_ANNOTATIONS` for completion
-and `xidl_parser::lint::lint(&typed_ast::Specification)` for the same diagnostics.
-The library is a pure function; diagnostic spans are half-open UTF-8 byte ranges
-in the parsed source. Type resolution and generator-specific semantic validation
-remain separate checks.
-
-## `@rename`
-
-`@rename("...")` is used to rename the serialized name of a field or
-parameter.
-
-- Acts on `struct` / `union` members and method parameters.
-- Used as the wire / property name when generating HTTP / JSON mappings.
-- Typically maps to `#[serde(rename = "...")]` in Rust.
-
-Example:
-
-```idl
-struct User {
-  uint32 id;
-  @rename("new_name")
-  string name;
-};
+```sh
+xidlc gen --out-dir out typescript-rest --client --server api.idl
+xidlc gen --out-dir out openapi api.idl
 ```
 
-## `@rename_all`
+Editor integrations can use `xidl_parser::lint::BUILTIN_ANNOTATIONS` for
+completion metadata and `xidl_parser::lint::lint(&typed_ast::Specification)`
+for structured diagnostics.
 
-`@rename_all("...")` renames all fields of a struct, or all parameters of a
-method, according to a naming rule.
+## Compose independent concerns
 
-```idl
-@rename_all("snake_case")
-struct User {
-  uint32 id;
-  string name;
-};
-```
+| Concern | Primitive | What it does not decide |
+| --- | --- | --- |
+| Wire name | `@rename`, `@rename_all` | How to translate a value between versions |
+| Presence | `@optional` | A business default for an omitted value |
+| Availability | `@added`, `@removed` | Which version a request selects |
+| Transport | `@path`, `@query`, `@body` | Authentication or business authorization |
+| HTTP publication | `@webhooks` | Delivery retries, signing, or event storage |
 
-Supported parameters:
+Combine these declarations to describe a contract. Keep version selection,
+business conversions, persistence, authorization, and delivery policy in the
+application. The generated types, validators, and OpenAPI documents show the
+result for each target and version.
 
-- lowercase
-- UPPERCASE
-- PascalCase
-- camelCase
-- snake_case
-- SCREAMING_SNAKE_CASE
-- kebab-case
-- SCREAMING-KEBAB-CASE
+## Frequently used annotations
 
-## `@skip`
+### `@rename`
 
-`@skip` excludes a struct field from serialization and deserialization:
+Selects a wire name without changing the IDL identifier.
+[Syntax, alias, and precedence](./wire/#rename-and-name).
 
-```idl
-struct User {
-  uint32 id;
-  @skip
-  string internal_note;
-};
-```
+### `@rename_all`
 
-## `@optional`
+Sets a container's wire naming rule where the target consumes it.
+[Supported rules and positions](./wire/#rename_all).
 
-`@optional` marks a field or parameter that may be absent. In HTTP scenarios,
-optional query parameters and body fields can be omitted; path parameters
-cannot be optional. See the [HTTP RFC](../../rfc/http/) for details.
+### `@skip`
+
+Excludes supported fields or parameters from their wire representation.
+[Target differences](./wire/#skip).
+
+### `@optional`
+
+Marks a field or parameter as potentially absent.
+[Presence and HTTP restrictions](./wire/#optional).
+
+## Maintaining this reference
+
+The [built-in registry](https://github.com/xidl/xidl/blob/master/xidl-parser/src/lint/registry.rs)
+defines recognized names, positions, and argument shapes. The
+[typed annotation model](https://github.com/xidl/xidl/blob/master/xidl-parser/src/typed_ast/annotation_builtin/mod.rs)
+defines the grammar-specific forms. Semantic passes and target renderers define
+the effects described on the linked pages. When adding or changing an
+annotation, update its reference and verify both lint and the generated output;
+do not infer implementation support from a registered name alone.

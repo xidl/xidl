@@ -1,0 +1,101 @@
+---
+title: "IDL Type Metadata"
+description: "Recognized IDL and XTypes annotations, their syntax, and which effects XIDL currently implements."
+sidebar:
+  order: 6
+---
+
+XIDL recognizes the following IDL/XTypes vocabulary in addition to its wire,
+HTTP, and lifecycle annotations. Recognition preserves a declaration's metadata;
+it does not promise a DDS runtime, binary layout, XML codec, or automatic
+recovery behavior.
+
+In the tables, **type** means a struct, union, enum, bitset, bitmask, typedef,
+native, or exception. **Field** means a struct/exception member, union element,
+or operation parameter. Bitfields are not included in these groups.
+
+## Metadata with generated effects
+
+| Annotation | Allowed positions | Arguments and current effect |
+| --- | --- | --- |
+| `@id(7)` | Struct/exception member, union element | A decimal `u32` literal sets the HIR member's field ID, not its JSON name; unspecified IDs follow source order |
+| `@position(3)` | Bitmask value | Position expression; decimal positions populate HIR and determine generated Rust bit constants |
+| `@default_literal` | Enum value | No arguments; selects the generated Rust enum's `Default` variant; without it, Rust selects the first variant |
+
+```idl
+struct Account {
+    @id(7) string id;
+};
+
+bitmask Permissions {
+    @position(0) read,
+    @position(3) write,
+};
+
+enum State {
+    pending,
+    @default_literal active,
+};
+```
+
+`@default_literal` does not make an unknown wire value valid or automatically
+replace it with the default. `@id` does not enable hash-based ID allocation
+through `@autoid`.
+
+## Preserved type and member metadata
+
+These forms are parsed and preserved in the typed AST / HIR and the IDL
+printer. Ordinary code and HTTP targets do not currently implement their
+standardized runtime semantics.
+
+| Annotation | Allowed positions | Form |
+| --- | --- | --- |
+| `@autoid` | Module, struct, union, exception | Bare, `@autoid(SEQUENTIAL)`, or `@autoid(HASH)`; does not implement hash allocation |
+| `@value(expr)` | Enum value | One expression; does not turn ordinary generated enums into numeric wire enums |
+| `@extensibility(FINAL)` | Type | `FINAL`, `APPENDABLE`, or `MUTABLE` |
+| `@final`, `@appendable`, `@mutable` | Type | Markers corresponding to the extensibility vocabulary |
+| `@key`, `@must_understand`, `@hashid` | Struct/exception member, union element | Bare or one value |
+| `@bit_bound(16)` | Enum, bitmask | One value; does not change the generated bitmask's integer width |
+| `@external` | Field | Bare or one value; does not change Rust ownership or create external storage |
+| `@nested` | Type | Bare or one value |
+| `@default_nested` | Module | Bare or one value |
+| `@ignore_literal_names` | Enum | Bare or one value |
+| `@try_construct` | Field | Bare, `@try_construct(DISCARD)`, `@try_construct(USE_DEFAULT)`, or `@try_construct(TRIM)` |
+| `@non_serialized` | Field | Bare or an uppercase Boolean literal, such as `FALSE`; not an alias for `@skip` |
+| `@data_representation(XML)` | Type | Grammar-specific representation list; the current typed model recognizes `XML`, without generating an XML codec |
+
+Use [Wire Shape](../wire/) for implemented JSON omission and presence rules,
+and [Defaults and Constraints](../values/) for default and range metadata.
+Neither a preserved `@try_construct(TRIM)` nor `@non_serialized` causes a
+generated REST decoder to trim or discard a value.
+
+## Service and source metadata
+
+| Annotation | Allowed positions | Form |
+| --- | --- | --- |
+| `@verbatim(...)` | Any annotation-bearing position | Text expression, optionally preceded by language and placement, such as `@verbatim(C, BEGIN_FILE, "text")` |
+| `@service` | Interface | Bare or a platform such as `DDS` or `CORBA` |
+| `@oneway` | Operation | Bare or one value |
+| `@ami` | Interface, operation | Bare or one value |
+| `@topic` | Struct, union | Bare, a name, a platform, or both, such as `@topic("accounts", DDS)` |
+| `@choice` | Union | Marker |
+| `@empty` | Struct | Marker |
+| `@dds_service` | Interface | Marker |
+| `@dds_request_topic`, `@dds_reply_topic` | Operation in the registry | Argument-bearing forms are not currently lint-clean; see the spelling limitation below |
+
+These are preserved metadata. They do not inject source text, start a broker,
+create topics, or turn an HTTP request into a fire-and-forget call. The
+`@oneway` annotation is also distinct from the IDL `oneway` operation keyword.
+
+The DDS request/reply topic names have a parser/lint spelling mismatch:
+`@dds_request_topic("request")` and `@dds_reply_topic("reply")` are registered
+names but fail the built-in grammar check. The grammar spellings
+`@DDSRequestTopic("request")` and `@DDSReplyTopic("reply")` parse but fail lint
+as misspelled names. Neither spelling is a supported, lint-clean alternative.
+Do not rely on these annotations to generate a service or topic.
+
+The accepted grammar-specific arguments are represented by the
+[typed annotation model](https://github.com/xidl/xidl/blob/master/xidl-parser/src/typed_ast/annotation_builtin/mod.rs).
+Use only syntax accepted by that model and check the intended generator before
+relying on an effect. For example, a standard's data-representation vocabulary
+does not establish support for that representation in XIDL.
