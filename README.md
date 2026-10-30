@@ -87,12 +87,13 @@ Format IDL files:
 xidlc fmt --inplace api.idl
 ```
 
-Use this repository as a `pre-commit` hook:
+Use this repository as a `pre-commit` hook (Node.js installs the pinned
+`xidlc` npm package on the first run):
 
 ```yaml
 repos:
   - repo: https://github.com/xidl/xidl
-    rev: v0.89.1
+    rev: v0.108.0 # x-release-please-version
     hooks:
       - id: xidlc-fmt
 ```
