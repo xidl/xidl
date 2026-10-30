@@ -253,6 +253,7 @@
                   "additionalProperties": {
                     "type": "integer",
                     "format": "int32",
+                    "maximum": 255,
                     "minimum": 0
                   }
                 }
@@ -284,6 +285,7 @@
                 "additionalProperties": {
                   "type": "integer",
                   "format": "int32",
+                  "maximum": 255,
                   "minimum": 0
                 }
               }
@@ -1511,6 +1513,7 @@
                     "b": {
                       "type": "integer",
                       "format": "int32",
+                      "maximum": 255,
                       "minimum": 0
                     },
                     "c": {
@@ -1584,6 +1587,7 @@
                     "b": {
                       "type": "integer",
                       "format": "int32",
+                      "maximum": 255,
                       "minimum": 0
                     },
                     "c": {
@@ -1658,6 +1662,7 @@
                     "b": {
                       "type": "integer",
                       "format": "int32",
+                      "maximum": 255,
                       "minimum": 0
                     },
                     "c": {
@@ -1738,6 +1743,7 @@
                     "b": {
                       "type": "integer",
                       "format": "int32",
+                      "maximum": 255,
                       "minimum": 0
                     },
                     "c": {
@@ -2024,6 +2030,7 @@
                   "additionalProperties": {
                     "type": "integer",
                     "format": "int32",
+                    "maximum": 255,
                     "minimum": 0
                   }
                 }
@@ -2416,6 +2423,7 @@
               "items": {
                 "type": "integer",
                 "format": "int32",
+                "maximum": 255,
                 "minimum": 0
               }
             }
@@ -4692,54 +4700,84 @@
           {
             "type": "object",
             "required": [
-              "case1"
+              "tag",
+              "data"
             ],
             "properties": {
-              "case1": {
+              "data": {
                 "type": "integer",
                 "format": "int32",
+                "maximum": 255,
                 "minimum": 0
+              },
+              "tag": {
+                "type": "string",
+                "enum": [
+                  "V1"
+                ]
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "case2"
+              "tag",
+              "data"
             ],
             "properties": {
-              "case2": {
+              "data": {
                 "type": "array",
                 "items": {
                   "type": "object"
                 }
+              },
+              "tag": {
+                "type": "string",
+                "enum": [
+                  "V2"
+                ]
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "case3"
+              "tag",
+              "data"
             ],
             "properties": {
-              "case3": {
+              "data": {
                 "type": "object",
                 "additionalProperties": {
                   "type": "string"
                 }
+              },
+              "tag": {
+                "type": "string",
+                "enum": [
+                  "V3"
+                ]
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "default"
+              "tag",
+              "data"
             ],
             "properties": {
-              "default": {
+              "data": {
                 "type": "integer",
                 "format": "int32",
+                "maximum": 255,
                 "minimum": 0
+              },
+              "tag": {
+                "type": "string",
+                "enum": [
+                  "default"
+                ]
               }
             }
           }

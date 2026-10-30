@@ -61,24 +61,26 @@ func RegisterHttpDefaultsServiceHandler(r gin.IRouter, svc HttpDefaultsServiceSe
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-		resp, err := svc.GetName(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpDefaultsServiceGetNameFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.GetName(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpDefaultsServiceGetNameFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.GET("/list_orders/:uid", func(c *gin.Context) {
@@ -111,24 +113,26 @@ func RegisterHttpDefaultsServiceHandler(r gin.IRouter, svc HttpDefaultsServiceSe
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-		resp, err := svc.ListOrders(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpDefaultsServiceListOrdersFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.ListOrders(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpDefaultsServiceListOrdersFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.POST("/users", func(c *gin.Context) {
@@ -140,24 +144,26 @@ func RegisterHttpDefaultsServiceHandler(r gin.IRouter, svc HttpDefaultsServiceSe
 			return
 		}
 		req.Req = body
-		resp, err := svc.CreateUser(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpDefaultsServiceCreateUserFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.CreateUser(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpDefaultsServiceCreateUserFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.POST("/users/search", func(c *gin.Context) {
@@ -170,24 +176,26 @@ func RegisterHttpDefaultsServiceHandler(r gin.IRouter, svc HttpDefaultsServiceSe
 		}
 		req.Name = body.Name
 		req.Age = body.Age
-		resp, err := svc.SearchUser(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpDefaultsServiceSearchUserFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.SearchUser(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpDefaultsServiceSearchUserFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.GET("/v1/users/:id", func(c *gin.Context) {
@@ -211,24 +219,26 @@ func RegisterHttpDefaultsServiceHandler(r gin.IRouter, svc HttpDefaultsServiceSe
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-		resp, err := svc.GetUser(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpDefaultsServiceGetUserFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.GetUser(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpDefaultsServiceGetUserFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.POST("/get_user_alias/:id", func(c *gin.Context) {
@@ -252,24 +262,26 @@ func RegisterHttpDefaultsServiceHandler(r gin.IRouter, svc HttpDefaultsServiceSe
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-		resp, err := svc.GetUserAlias(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpDefaultsServiceGetUserAliasFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.GetUserAlias(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpDefaultsServiceGetUserAliasFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 }

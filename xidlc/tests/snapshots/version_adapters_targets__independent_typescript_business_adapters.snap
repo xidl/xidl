@@ -156,23 +156,33 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
-            ["text"]: z.unknown().optional(),
+            ["tag"]: z.unknown().optional(),
+        
+            ["data"]: z.unknown().optional(),
         
     }).strict()
     
     .transform((wire): Record<string, unknown> => ({
         
-            ["text"]: wire["text"],
+            ["tag"]: wire["tag"],
+        
+            ["data"]: wire["data"],
         
     }))
     .pipe(z.object({
         
-            ["text"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
+            ["tag"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.enum(["0"])),
+        
+            ["data"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
     })).transform((value) => ({
         
             
-                ["text"]: value["text"],
+                ["tag"]: value["tag"],
+            
+        
+            
+                ["data"]: value["data"],
             
         
     })))
@@ -883,46 +893,66 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
-            ["text"]: z.unknown().optional(),
+            ["tag"]: z.unknown().optional(),
+        
+            ["data"]: z.unknown().optional(),
         
     }).strict()
     
     .transform((wire): Record<string, unknown> => ({
         
-            ["text"]: wire["text"],
+            ["tag"]: wire["tag"],
+        
+            ["data"]: wire["data"],
         
     }))
     .pipe(z.object({
         
-            ["text"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
+            ["tag"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.enum(["0"])),
+        
+            ["data"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
     })).transform((value) => ({
         
             
-                ["text"]: value["text"],
+                ["tag"]: value["tag"],
+            
+        
+            
+                ["data"]: value["data"],
             
         
     }))),
         
             z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
-            ["count"]: z.unknown().optional(),
+            ["tag"]: z.unknown().optional(),
+        
+            ["data"]: z.unknown().optional(),
         
     }).strict()
     
     .transform((wire): Record<string, unknown> => ({
         
-            ["count"]: wire["count"],
+            ["tag"]: wire["tag"],
+        
+            ["data"]: wire["data"],
         
     }))
     .pipe(z.object({
         
-            ["count"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")),
+            ["tag"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.enum(["1"])),
+        
+            ["data"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")),
         
     })).transform((value) => ({
         
             
-                ["count"]: value["count"],
+                ["tag"]: value["tag"],
+            
+        
+            
+                ["data"]: value["data"],
             
         
     })))
@@ -1665,46 +1695,66 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
-            ["text"]: z.unknown().optional(),
+            ["tag"]: z.unknown().optional(),
+        
+            ["data"]: z.unknown().optional(),
         
     }).strict()
     
     .transform((wire): Record<string, unknown> => ({
         
-            ["text"]: wire["text"],
+            ["tag"]: wire["tag"],
+        
+            ["data"]: wire["data"],
         
     }))
     .pipe(z.object({
         
-            ["text"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
+            ["tag"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.enum(["0"])),
+        
+            ["data"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
     })).transform((value) => ({
         
             
-                ["text"]: value["text"],
+                ["tag"]: value["tag"],
+            
+        
+            
+                ["data"]: value["data"],
             
         
     }))),
         
             z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
-            ["count"]: z.unknown().optional(),
+            ["tag"]: z.unknown().optional(),
+        
+            ["data"]: z.unknown().optional(),
         
     }).strict()
     
     .transform((wire): Record<string, unknown> => ({
         
-            ["count"]: wire["count"],
+            ["tag"]: wire["tag"],
+        
+            ["data"]: wire["data"],
         
     }))
     .pipe(z.object({
         
-            ["count"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")),
+            ["tag"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.enum(["1"])),
+        
+            ["data"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")),
         
     })).transform((value) => ({
         
             
-                ["count"]: value["count"],
+                ["tag"]: value["tag"],
+            
+        
+            
+                ["data"]: value["data"],
             
         
     })))
@@ -2418,7 +2468,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
 /** Required pure application decisions. Use strictFunctionTypes to reject narrower inputs. */
 export interface VersionAdapters {
     
-        choiceDowncastToV1: (source: { count: number }) => VersionedResult<types.v1.Choice>;
+        choiceDowncastToV1: (source: { tag: "1", data: number }) => VersionedResult<types.v1.Choice>;
     
         optionalChangeUpcastFromV1: (source: types.v1.OptionalChange) => VersionedResult<OptionalChangeUpcastDecisionFromV1>;
     
@@ -2645,32 +2695,43 @@ export interface VersionAdapters {
 
     export function upcastChoiceFromV1(source: types.v1.Choice, adapters: VersionAdapters): VersionedResult<types.v2.Choice> {
         
-            
-                if ("text" in source) {
-                    const projected = ok(source["text"]);
-                    if (!projected.ok) return projected;
-                    return ok({ ["text"]: projected.value });
-                }
-            
-            
-                const exhaustive: never = source;
-                return ok(exhaustive);
-            
+            const tag = source.tag;
+            switch (tag) {
+                
+                    
+                        case "0":
+                    
+                    {
+                        const projected = ok(source.data);
+                        if (!projected.ok) return projected;
+                        return ok({ tag, data: projected.value });
+                    }
+                
+                
+                    default: { const exhaustive: never = tag; return ok(exhaustive); }
+                
+            }
         
     }
 
     export function downcastChoiceToV1(source: types.v2.Choice, adapters: VersionAdapters): VersionedResult<types.v1.Choice> {
         
-            
-                if ("text" in source) {
-                    const projected = ok(source["text"]);
-                    if (!projected.ok) return projected;
-                    return ok({ ["text"]: projected.value });
-                }
-            
-            
-                return adapters.choiceDowncastToV1(source);
-            
+            const tag = source.tag;
+            switch (tag) {
+                
+                    
+                        case "0":
+                    
+                    {
+                        const projected = ok(source.data);
+                        if (!projected.ok) return projected;
+                        return ok({ tag, data: projected.value });
+                    }
+                
+                
+                    default: return adapters.choiceDowncastToV1(source);
+                
+            }
         
     }
 
@@ -3439,45 +3500,61 @@ export interface VersionAdapters {
 
     export function upcastChoiceFromV2(source: types.v2.Choice, adapters: VersionAdapters): VersionedResult<types.v3.Choice> {
         
-            
-                if ("text" in source) {
-                    const projected = ok(source["text"]);
-                    if (!projected.ok) return projected;
-                    return ok({ ["text"]: projected.value });
-                }
-            
-                if ("count" in source) {
-                    const projected = ok(source["count"]);
-                    if (!projected.ok) return projected;
-                    return ok({ ["count"]: projected.value });
-                }
-            
-            
-                const exhaustive: never = source;
-                return ok(exhaustive);
-            
+            const tag = source.tag;
+            switch (tag) {
+                
+                    
+                        case "0":
+                    
+                    {
+                        const projected = ok(source.data);
+                        if (!projected.ok) return projected;
+                        return ok({ tag, data: projected.value });
+                    }
+                
+                    
+                        case "1":
+                    
+                    {
+                        const projected = ok(source.data);
+                        if (!projected.ok) return projected;
+                        return ok({ tag, data: projected.value });
+                    }
+                
+                
+                    default: { const exhaustive: never = tag; return ok(exhaustive); }
+                
+            }
         
     }
 
     export function downcastChoiceToV2(source: types.v3.Choice, adapters: VersionAdapters): VersionedResult<types.v2.Choice> {
         
-            
-                if ("text" in source) {
-                    const projected = ok(source["text"]);
-                    if (!projected.ok) return projected;
-                    return ok({ ["text"]: projected.value });
-                }
-            
-                if ("count" in source) {
-                    const projected = ok(source["count"]);
-                    if (!projected.ok) return projected;
-                    return ok({ ["count"]: projected.value });
-                }
-            
-            
-                const exhaustive: never = source;
-                return ok(exhaustive);
-            
+            const tag = source.tag;
+            switch (tag) {
+                
+                    
+                        case "0":
+                    
+                    {
+                        const projected = ok(source.data);
+                        if (!projected.ok) return projected;
+                        return ok({ tag, data: projected.value });
+                    }
+                
+                    
+                        case "1":
+                    
+                    {
+                        const projected = ok(source.data);
+                        if (!projected.ok) return projected;
+                        return ok({ tag, data: projected.value });
+                    }
+                
+                
+                    default: { const exhaustive: never = tag; return ok(exhaustive); }
+                
+            }
         
     }
 

@@ -19,7 +19,7 @@ fn generated_union_deserializes_string_tag() {
     }))
     .expect("deserialize generated union");
 
-    assert_eq!(decoded.tag(), &Tag::V3);
+    assert_eq!(decoded.tag(), Some(&Tag::V3));
     assert_eq!(decoded.as_case3().get("k"), Some(&"v".to_string()));
 }
 
@@ -41,7 +41,7 @@ fn generated_union_roundtrips_map_case() {
     let encoded = serde_json::to_string(&value).expect("serialize generated map case");
     let decoded: UnionValue =
         serde_json::from_str(&encoded).expect("deserialize generated map case");
-    assert_eq!(decoded.tag(), &Tag::V3);
+    assert_eq!(decoded.tag(), Some(&Tag::V3));
     assert_eq!(decoded.as_case3().get("lang"), Some(&"rust".to_string()));
 }
 
@@ -59,7 +59,7 @@ fn generated_int_tag_union_deserializes_multi_label_tag() {
         "data": 9
     }))
     .expect("deserialize int tag union");
-    assert_eq!(decoded.tag(), &3);
+    assert_eq!(decoded.tag(), Some(&3));
     assert_eq!(decoded.as_two_or_three(), &9);
     assert_eq!(
         serde_json::to_value(&decoded).expect("re-serialize multi label tag"),
@@ -74,7 +74,7 @@ fn generated_int_tag_union_uses_default_tag_string() {
         "data": true
     }))
     .expect("deserialize int tag default case");
-    assert_eq!(decoded.tag(), &0);
+    assert_eq!(decoded.tag(), None);
     assert_eq!(decoded.as_fallback(), &true);
     assert_eq!(
         serde_json::to_value(&decoded).expect("serialize default case"),
@@ -101,7 +101,7 @@ fn generated_char_tag_union_roundtrips_char_string_tag() {
     let value = CharTagValue::new_why("because".to_string());
     let encoded = serde_json::to_string(&value).expect("serialize char tag union");
     let decoded: CharTagValue = serde_json::from_str(&encoded).expect("deserialize char tag union");
-    assert_eq!(decoded.tag(), &'y');
+    assert_eq!(decoded.tag(), Some(&'y'));
     assert_eq!(decoded.as_why(), "because");
 }
 
@@ -112,6 +112,6 @@ fn generated_char_tag_union_uses_default_tag_string() {
         "data": "fallback"
     }))
     .expect("deserialize char default case");
-    assert_eq!(decoded.tag(), &'\0');
+    assert_eq!(decoded.tag(), None);
     assert_eq!(decoded.as_other(), "fallback");
 }

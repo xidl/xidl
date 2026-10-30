@@ -286,12 +286,12 @@ impl WireBuilder<'_> {
                 definition.kind = "alias";
                 definition.inner = Some(self.schema(value, version, false)?);
             }
-            TypeShape::Union(members) => {
+            TypeShape::Union(shape) => {
                 let names = self.names(version);
                 let union = self.renderer.union_definition(&names, key)?;
                 let is_http = crate::generate::utils::has_annotation(&union.annotations, "http");
                 definition.kind = if is_http { "http_union" } else { "union" };
-                for member in members {
+                for member in &shape.members {
                     let value = member
                         .value
                         .as_ref()

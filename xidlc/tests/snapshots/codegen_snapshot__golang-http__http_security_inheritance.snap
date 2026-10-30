@@ -61,24 +61,26 @@ func RegisterHttpSecurityInheritanceServiceHandler(r gin.IRouter, svc HttpSecuri
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-		resp, err := svc.GetReport(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpSecurityInheritanceServiceGetReportFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.GetReport(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpSecurityInheritanceServiceGetReportFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.POST("/reports/:id", func(c *gin.Context) {
@@ -105,47 +107,51 @@ func RegisterHttpSecurityInheritanceServiceHandler(r gin.IRouter, svc HttpSecuri
 			return
 		}
 		req.Body = body
-		resp, err := svc.UpdateReport(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpSecurityInheritanceServiceUpdateReportFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.UpdateReport(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpSecurityInheritanceServiceUpdateReportFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.GET("/health", func(c *gin.Context) {
 
 		req := &HttpSecurityInheritanceServiceHealthRequest{}
-		resp, err := svc.Health(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpSecurityInheritanceServiceHealthFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.Health(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpSecurityInheritanceServiceHealthFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 }

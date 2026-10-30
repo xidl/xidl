@@ -6,7 +6,7 @@ use super::names::Names;
 use super::wire_context::*;
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::adapter::wire_layout::WireLayouts;
-use crate::generate::adapter::{AdapterPlan, Member, TypeShape};
+use crate::generate::adapter::{AdapterPlan, Member, TypeShape, UnionLayout, UnionShape};
 use crate::generate::typescript::definition::contexts::{TsType, ZodSchema};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -114,16 +114,7 @@ impl<'a> WireDecoderBuilder<'a> {
             } else {
                 ZodSchema::Enum(members.into_iter().map(|member| member.wire).collect())
             }),
-            TypeShape::Union(members) => WireBody::Union(
-                members
-                    .iter()
-                    .map(|member| {
-                        let mut member = member.clone();
-                        member.wire = member.name.clone();
-                        self.object(version, std::slice::from_ref(&member), BTreeSet::new())
-                    })
-                    .collect::<IdlcResult<_>>()?,
-            ),
+            TypeShape::Union(union) => WireBody::Union(self.union_objects(version, &union)?),
             TypeShape::Alias(value) => WireBody::Value(self.schema(version, &value)?),
             TypeShape::Unsupported(reason) => {
                 return Err(Self::error(
@@ -138,6 +129,49 @@ impl<'a> WireDecoderBuilder<'a> {
             body,
         });
         Ok(symbol)
+    }
+
+    fn union_objects(&mut self, version: &str, union: &UnionShape) -> IdlcResult<Vec<WireObject>> {
+        union
+            .members
+            .iter()
+            .map(|member| match &union.layout {
+                UnionLayout::Http => {
+                    let mut member = member.clone();
+                    member.wire = member.name.clone();
+                    self.object(version, &[member], BTreeSet::new())
+                }
+                UnionLayout::Tagged(tags) => {
+                    let tags = tags
+                        .get(&member.name)
+                        .cloned()
+                        .ok_or_else(|| Self::error(&member.name, "union case tags are missing"))?;
+                    let value = member
+                        .value
+                        .as_ref()
+                        .ok_or_else(|| Self::error(&member.name, "union case type is missing"))?;
+                    Ok(WireObject {
+                        keys: vec!["tag".into(), "data".into()],
+                        forbidden: Vec::new(),
+                        catch_all: false,
+                        fields: vec![
+                            WireField {
+                                prop: "tag".into(),
+                                optional: false,
+                                schema: ZodSchema::Enum(tags),
+                                input: WireInput::Named("tag".into()),
+                            },
+                            WireField {
+                                prop: "data".into(),
+                                optional: false,
+                                schema: self.schema(version, value)?,
+                                input: WireInput::Named("data".into()),
+                            },
+                        ],
+                    })
+                }
+            })
+            .collect()
     }
 
     fn object(

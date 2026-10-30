@@ -136,6 +136,25 @@ export interface VersionAdapters {
                 {% endif %}
             }
         {% elif c.kind == "union" %}
+            const tag = source.tag;
+            switch (tag) {
+                {% for copy in c.copies %}
+                    {% for tag in copy.tags %}
+                        case {{ tag | tojson }}:
+                    {% endfor %}
+                    {
+                        const projected = {{ convert(copy.value, "source.data", c.path ~ "." ~ copy.source) }};
+                        if (!projected.ok) return projected;
+                        return ok({ tag, data: projected.value });
+                    }
+                {% endfor %}
+                {% if c.hook %}
+                    default: return adapters.{{ c.hook }}(source);
+                {% else %}
+                    default: { const exhaustive: never = tag; return ok(exhaustive); }
+                {% endif %}
+            }
+        {% elif c.kind == "http_union" %}
             {% for copy in c.copies %}
                 if ({{ copy.source | tojson }} in source) {
                     const projected = {{ convert(copy.value, "source[" ~ (copy.source | tojson) ~ "]", c.path ~ "." ~ copy.source) }};

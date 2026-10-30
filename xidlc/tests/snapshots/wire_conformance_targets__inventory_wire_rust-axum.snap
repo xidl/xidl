@@ -1642,7 +1642,9 @@ pub mod catalog {
             match helper.tag.as_str() {
                 "0" => {
                     let value = ::serde_json::from_value::<Item>(helper.data)
-                        .map_err(serde::de::Error::custom)?;
+                        .map_err(|error| serde::de::Error::custom(
+                            format!("union Change.item payload decode failed: {error}"),
+                        ))?;
                     Ok(Self {
                         tag: Some(0),
                         data: ChangeData::Item(value),
@@ -1650,7 +1652,9 @@ pub mod catalog {
                 }
                 "1" => {
                     let value = ::serde_json::from_value::<Item>(helper.data)
-                        .map_err(serde::de::Error::custom)?;
+                        .map_err(|error| serde::de::Error::custom(
+                            format!("union Change.item payload decode failed: {error}"),
+                        ))?;
                     Ok(Self {
                         tag: Some(1),
                         data: ChangeData::Item(value),
@@ -1658,7 +1662,9 @@ pub mod catalog {
                 }
                 "2" => {
                     let value = ::serde_json::from_value::<Vec<Item>>(helper.data)
-                        .map_err(serde::de::Error::custom)?;
+                        .map_err(|error| serde::de::Error::custom(
+                            format!("union Change.batch payload decode failed: {error}"),
+                        ))?;
                     Ok(Self {
                         tag: Some(2),
                         data: ChangeData::Batch(value),
@@ -1666,7 +1672,9 @@ pub mod catalog {
                 }
                 "default" => {
                     let value = ::serde_json::from_value::<String>(helper.data)
-                        .map_err(serde::de::Error::custom)?;
+                        .map_err(|error| serde::de::Error::custom(
+                            format!("union Change.reason payload decode failed: {error}"),
+                        ))?;
                     Ok(Self {
                         tag: None,
                         data: ChangeData::Reason(value),
@@ -1910,7 +1918,11 @@ pub mod catalog {
             match helper.tag.as_str() {
                 "'\"'" => {
                     let value = ::serde_json::from_value::<String>(helper.data)
-                        .map_err(serde::de::Error::custom)?;
+                        .map_err(|error| serde::de::Error::custom(
+                            format!(
+                                "union LabelChange.quoted payload decode failed: {error}"
+                            ),
+                        ))?;
                     Ok(Self {
                         tag: Some('"'),
                         data: LabelChangeData::Quoted(value),
@@ -1918,7 +1930,11 @@ pub mod catalog {
                 }
                 "'\\\\'" => {
                     let value = ::serde_json::from_value::<String>(helper.data)
-                        .map_err(serde::de::Error::custom)?;
+                        .map_err(|error| serde::de::Error::custom(
+                            format!(
+                                "union LabelChange.escaped payload decode failed: {error}"
+                            ),
+                        ))?;
                     Ok(Self {
                         tag: Some('\\'),
                         data: LabelChangeData::Escaped(value),
@@ -1926,7 +1942,11 @@ pub mod catalog {
                 }
                 "'\\n'" => {
                     let value = ::serde_json::from_value::<String>(helper.data)
-                        .map_err(serde::de::Error::custom)?;
+                        .map_err(|error| serde::de::Error::custom(
+                            format!(
+                                "union LabelChange.newline payload decode failed: {error}"
+                            ),
+                        ))?;
                     Ok(Self {
                         tag: Some('\n'),
                         data: LabelChangeData::Newline(value),
@@ -1934,7 +1954,11 @@ pub mod catalog {
                 }
                 "'A'" => {
                     let value = ::serde_json::from_value::<String>(helper.data)
-                        .map_err(serde::de::Error::custom)?;
+                        .map_err(|error| serde::de::Error::custom(
+                            format!(
+                                "union LabelChange.reason payload decode failed: {error}"
+                            ),
+                        ))?;
                     Ok(Self {
                         tag: Some('A'),
                         data: LabelChangeData::Reason(value),
@@ -1942,7 +1966,11 @@ pub mod catalog {
                 }
                 "default" => {
                     let value = ::serde_json::from_value::<String>(helper.data)
-                        .map_err(serde::de::Error::custom)?;
+                        .map_err(|error| serde::de::Error::custom(
+                            format!(
+                                "union LabelChange.reason payload decode failed: {error}"
+                            ),
+                        ))?;
                     Ok(Self {
                         tag: None,
                         data: LabelChangeData::Reason(value),

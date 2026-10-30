@@ -120,40 +120,20 @@ impl StepPlanner<'_> {
             .types
             .get(key)
             .ok_or_else(|| self.error(key, "missing target type"))?;
-        let facts = self.facts.types.get(key);
-        match (old, new) {
-            (TypeShape::Struct(old), TypeShape::Struct(new))
-            | (TypeShape::Enum(old), TypeShape::Enum(new))
-            | (TypeShape::Union(old), TypeShape::Union(new)) => {
-                let changes = MapFacts::type_members(&self.facts.types, key, old, new);
-                MapFacts::validate_members(&changes, old, new, key)?;
-                let kind = match self.source.types.get(key) {
-                    Some(TypeShape::Enum(_) | TypeShape::Union(_)) => MemberSetKind::Variants,
-                    _ => MemberSetKind::Fields,
-                };
-                let (source, target) = if direction == Direction::Upcast {
-                    (old, new)
-                } else {
-                    (new, old)
-                };
-                let mut plan = MemberClassifier {
-                    source,
-                    target,
-                    facts: &changes,
-                    direction,
-                    kind,
-                    context: key,
-                }
-                .plan()?;
-                references.copies(&mut plan)?;
-                Ok(match self.source.types.get(key) {
-                    Some(TypeShape::Enum(_)) => TypeConversion::Enum(plan),
-                    Some(TypeShape::Union(_)) => TypeConversion::Union(plan),
-                    _ => TypeConversion::Struct(plan),
-                })
+        let (old_members, new_members, kind) = match (old, new) {
+            (TypeShape::Struct(old), TypeShape::Struct(new)) => {
+                (old.as_slice(), new.as_slice(), MemberSetKind::Fields)
             }
+            (TypeShape::Enum(old), TypeShape::Enum(new)) => {
+                (old.as_slice(), new.as_slice(), MemberSetKind::Variants)
+            }
+            (TypeShape::Union(old), TypeShape::Union(new)) => (
+                old.members.as_slice(),
+                new.members.as_slice(),
+                MemberSetKind::Variants,
+            ),
             (TypeShape::Alias(old), TypeShape::Alias(new)) => {
-                if facts.is_some() {
+                if self.facts.types.contains_key(key) {
                     return Ok(TypeConversion::Hook);
                 }
                 let value = if direction == Direction::Upcast {
@@ -161,13 +141,45 @@ impl StepPlanner<'_> {
                 } else {
                     new
                 };
-                Ok(TypeConversion::Alias(references.value(value)?))
+                return Ok(TypeConversion::Alias(references.value(value)?));
             }
             (TypeShape::Unsupported(kind), _) | (_, TypeShape::Unsupported(kind)) => {
-                Err(self.error(key, &format!("{kind} conversion is not supported")))
+                return Err(self.error(key, &format!("{kind} conversion is not supported")));
             }
-            _ => Ok(TypeConversion::Hook),
+            _ => return Ok(TypeConversion::Hook),
+        };
+        let changes = MapFacts::type_members(&self.facts.types, key, old_members, new_members);
+        MapFacts::validate_members(&changes, old_members, new_members, key)?;
+        let (source, target) = if direction == Direction::Upcast {
+            (old_members, new_members)
+        } else {
+            (new_members, old_members)
+        };
+        let mut plan = MemberClassifier {
+            source,
+            target,
+            facts: &changes,
+            direction,
+            kind,
+            context: key,
         }
+        .plan()?;
+        if let (TypeShape::Union(old), TypeShape::Union(new)) = (old, new) {
+            let (source, target) = if direction == Direction::Upcast {
+                (old, new)
+            } else {
+                (new, old)
+            };
+            if !source.preserves_copies(target, &plan.copies) {
+                return Ok(TypeConversion::Hook);
+            }
+        }
+        references.copies(&mut plan)?;
+        Ok(match old {
+            TypeShape::Enum(_) => TypeConversion::Enum(plan),
+            TypeShape::Union(_) => TypeConversion::Union(plan),
+            _ => TypeConversion::Struct(plan),
+        })
     }
 
     fn operations(

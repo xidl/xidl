@@ -57,7 +57,7 @@ const hooks: a.VersionAdapters = {
     return ok({ gate: stored.addressGate(source) ?? a.OMIT });
   },
   addressUpcastFromV2: () => ok({ gate: a.IGNORED }),
-  choiceDowncastToV1: source => ok({ text: String(source.count) }),
+  choiceDowncastToV1: source => ok({ data: String(source.data), tag: '0' }),
   depotGetBusyErrorDowncastToV1: source => {
     exceptionHooks++;
     return ok(new errors.v1$NotFound({ id: source.reason }));
@@ -194,17 +194,25 @@ assert.deepEqual(
   { state: 'pending' },
 );
 assert.equal(
-  a.decodeAndUpcastDepotChooseFromV1({ choice: { count: 1 } }, hooks).ok,
-  false,
-);
-assert.equal(
-  a.decodeAndUpcastDepotChooseFromV2({ choice: { count: 1, text: 'x' } }, hooks)
+  a.decodeAndUpcastDepotChooseFromV1({ choice: { data: 1, tag: '1' } }, hooks)
     .ok,
   false,
 );
+assert.equal(
+  a.decodeAndUpcastDepotChooseFromV2(
+    { choice: { data: 1, tag: '1', text: 'x' } },
+    hooks,
+  ).ok,
+  false,
+);
 assert.deepEqual(
-  take(a.decodeAndUpcastDepotChooseFromV2({ choice: { count: 1 } }, hooks)),
-  { choice: { count: 1 } },
+  take(
+    a.decodeAndUpcastDepotChooseFromV2(
+      { choice: { data: 1, tag: '1' } },
+      hooks,
+    ),
+  ),
+  { choice: { data: 1, tag: '1' } },
 );
 assert.deepEqual(
   take(

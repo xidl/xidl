@@ -53,22 +53,24 @@ func RegisterIssue171ReproServiceHandler(r gin.IRouter, svc Issue171ReproService
 			return
 		}
 		req.Payload = body
-		_, err := svc.FlattenAny(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeIssue171ReproServiceFlattenAnyFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			_, err := svc.FlattenAny(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeIssue171ReproServiceFlattenAnyFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
+			c.Status(http.StatusNoContent)
 		}
-		c.Status(http.StatusNoContent)
 	})
 	r.POST("/flatten-struct-with-any", func(c *gin.Context) {
 
@@ -79,22 +81,24 @@ func RegisterIssue171ReproServiceHandler(r gin.IRouter, svc Issue171ReproService
 			return
 		}
 		req.Payload = body
-		_, err := svc.FlattenStructWithAny(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeIssue171ReproServiceFlattenStructWithAnyFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			_, err := svc.FlattenStructWithAny(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeIssue171ReproServiceFlattenStructWithAnyFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
+			c.Status(http.StatusNoContent)
 		}
-		c.Status(http.StatusNoContent)
 	})
 }
 

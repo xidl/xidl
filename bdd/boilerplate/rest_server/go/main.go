@@ -180,6 +180,8 @@ func ErrorMappingMiddleware() gin.HandlerFunc {
 
 		status := blw.Status()
 		if status == http.StatusInternalServerError && (strings.Contains(blw.body.String(), "not found") || strings.Contains(blw.body.String(), "key not found")) {
+			// Replacing a buffered body also replaces its declared byte length.
+			blw.Header().Del("Content-Length")
 			blw.ResponseWriter.WriteHeader(http.StatusNotFound)
 			_, _ = blw.ResponseWriter.Write([]byte(`{"code":404,"msg":"Not Found"}`))
 		} else {

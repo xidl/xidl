@@ -156,7 +156,9 @@ impl<'de> serde::Deserialize<'de> for SimpleUnion {
         match helper.tag.as_str() {
             "A" => {
                 let value = ::serde_json::from_value::<int>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union SimpleUnion.a payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: Some(Tag::A),
                     data: SimpleUnionData::A(value),
@@ -164,7 +166,9 @@ impl<'de> serde::Deserialize<'de> for SimpleUnion {
             }
             "B" => {
                 let value = ::serde_json::from_value::<int>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union SimpleUnion.b payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: Some(Tag::B),
                     data: SimpleUnionData::B(value),

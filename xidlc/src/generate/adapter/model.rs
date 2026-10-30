@@ -42,9 +42,23 @@ pub(crate) struct TypeUse {
 pub(crate) enum TypeShape {
     Struct(Vec<Member>),
     Enum(Vec<Member>),
-    Union(Vec<Member>),
+    Union(UnionShape),
     Alias(TypeUse),
     Unsupported(String),
+}
+
+/// Projected union members and their language-independent wire discriminators.
+#[derive(Debug, Clone)]
+pub(crate) struct UnionShape {
+    pub members: Vec<Member>,
+    pub layout: UnionLayout,
+}
+
+/// HTTP representations retain member objects; ordinary unions use tag/data.
+#[derive(Debug, Clone)]
+pub(crate) enum UnionLayout {
+    Http,
+    Tagged(BTreeMap<String, Vec<String>>),
 }
 
 #[derive(Debug, Clone)]

@@ -215,7 +215,9 @@ pub mod left {
             match helper.tag.as_str() {
                 "TEXT" => {
                     let value = ::serde_json::from_value::<String>(helper.data)
-                        .map_err(serde::de::Error::custom)?;
+                        .map_err(|error| serde::de::Error::custom(
+                            format!("union Choice.text payload decode failed: {error}"),
+                        ))?;
                     Ok(Self {
                         tag: Some(super::choices::TEXT),
                         data: ChoiceData::Text(value),
@@ -223,7 +225,9 @@ pub mod left {
                 }
                 "Number" => {
                     let value = ::serde_json::from_value::<i64>(helper.data)
-                        .map_err(serde::de::Error::custom)?;
+                        .map_err(|error| serde::de::Error::custom(
+                            format!("union Choice.number payload decode failed: {error}"),
+                        ))?;
                     Ok(Self {
                         tag: Some(super::choices::Kind::Number),
                         data: ChoiceData::Number(value),

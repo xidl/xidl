@@ -95,6 +95,7 @@
                 "schema": {
                   "type": "integer",
                   "format": "int32",
+                  "maximum": 65535,
                   "minimum": 0
                 }
               }
@@ -279,6 +280,7 @@
             "schema": {
               "type": "integer",
               "format": "int64",
+              "maximum": 18446744073709551615,
               "minimum": 0
             }
           }
@@ -501,6 +503,7 @@
             "schema": {
               "type": "integer",
               "format": "int64",
+              "maximum": 18446744073709551615,
               "minimum": 0
             }
           }
@@ -959,6 +962,7 @@
               "schema": {
                 "type": "integer",
                 "format": "int64",
+                "maximum": 18446744073709551615,
                 "minimum": 0
               }
             }
@@ -1010,6 +1014,7 @@
                   "id": {
                     "type": "integer",
                     "format": "int64",
+                    "maximum": 18446744073709551615,
                     "minimum": 0
                   },
                   "info": {
@@ -1061,6 +1066,7 @@
             "schema": {
               "type": "integer",
               "format": "int64",
+              "maximum": 18446744073709551615,
               "minimum": 0
             }
           }
@@ -1113,6 +1119,7 @@
             "schema": {
               "type": "integer",
               "format": "int64",
+              "maximum": 18446744073709551615,
               "minimum": 0
             }
           }
@@ -1203,6 +1210,7 @@
           "seconds": {
             "type": "integer",
             "format": "int64",
+            "maximum": 18446744073709551615,
             "minimum": 0
           }
         }

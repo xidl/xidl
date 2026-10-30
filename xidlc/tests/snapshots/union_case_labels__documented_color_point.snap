@@ -243,7 +243,9 @@ impl<'de> serde::Deserialize<'de> for ColorPoint {
         match helper.tag.as_str() {
             "Red" => {
                 let value = ::serde_json::from_value::<Coordinates>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union ColorPoint.red payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: Some(Color::Red),
                     data: ColorPointData::Red(value),
@@ -251,7 +253,9 @@ impl<'de> serde::Deserialize<'de> for ColorPoint {
             }
             "Green" => {
                 let value = ::serde_json::from_value::<Coordinates>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union ColorPoint.green payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: Some(Color::Green),
                     data: ColorPointData::Green(value),
@@ -259,7 +263,9 @@ impl<'de> serde::Deserialize<'de> for ColorPoint {
             }
             "Blue" => {
                 let value = ::serde_json::from_value::<Coordinates>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union ColorPoint.blue payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: Some(Color::Blue),
                     data: ColorPointData::Blue(value),
@@ -267,7 +273,9 @@ impl<'de> serde::Deserialize<'de> for ColorPoint {
             }
             "default" => {
                 let value = ::serde_json::from_value::<Coordinates>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union ColorPoint.other payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: None,
                     data: ColorPointData::Other(value),

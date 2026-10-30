@@ -56,6 +56,20 @@ def validate_unsigned(context):
             assert validator.is_valid(value), value
         for value in [-1, 4294967296, 1.5, "4294967295", None, True]:
             assert not validator.is_valid(value), value
-    assert fields["small"] == {"type": "integer", "format": "int32", "minimum": 0}
-    assert fields["signed_count"] == {"type": "integer", "format": "int32"}
-    assert fields["wide"] == {"type": "integer", "format": "int64", "minimum": 0}
+    for name, format_name, minimum, maximum in [
+        ("small", "int32", 0, 65535),
+        ("signed_count", "int32", -2147483648, 2147483647),
+        ("wide", "int64", 0, 18446744073709551615),
+    ]:
+        schema = fields[name]
+        assert schema == {
+            "type": "integer",
+            "format": format_name,
+            "minimum": minimum,
+            "maximum": maximum,
+        }
+        validator = Draft202012Validator(schema)
+        for value in [minimum, 0, maximum]:
+            assert validator.is_valid(value), (name, value)
+        for value in [minimum - 1, maximum + 1, 1.5, "1", None, True]:
+            assert not validator.is_valid(value), (name, value)

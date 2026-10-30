@@ -52,24 +52,26 @@ func RegisterMediaHandler(r gin.IRouter, svc MediaService) {
 	r.GET("/participant", func(c *gin.Context) {
 
 		req := &MediaWhoRequest{}
-		resp, err := svc.Who(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeMediaWhoFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.Who(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeMediaWhoFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 }

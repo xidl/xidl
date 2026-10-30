@@ -37,23 +37,28 @@ export async function runDispatchJourney(
   // oldest contract never declared reaches it as text through the hook, the
   // declared variant passes mechanically, and a refusal keeps the Head outcome.
   const counted = take(
-    a.decodeAndUpcastDepotChooseFromV2({ choice: { count: 7 } }, hooks),
+    a.decodeAndUpcastDepotChooseFromV2(
+      { choice: { data: 7, tag: '1' } },
+      hooks,
+    ),
   ).choice;
   assert.deepEqual(take(a.downcastChoice('v1', counted, hooks)), {
-    text: '7',
+    data: '7',
+    tag: '0',
   });
-  assert.deepEqual(take(a.downcastChoice('v1', { text: 'kept' }, hooks)), {
-    text: 'kept',
-  });
+  assert.deepEqual(
+    take(a.downcastChoice('v1', { data: 'kept', tag: '0' }, hooks)),
+    { data: 'kept', tag: '0' },
+  );
   const chosen = await a.dispatchDepotChooseFromV1(
-    { choice: { text: 'seed' } },
+    { choice: { data: 'seed', tag: '0' } },
     async () => ({ ok: true, value: counted }),
     hooks,
   );
   assert(chosen.dispatched && chosen.projected && chosen.value.ok);
-  assert.deepEqual(chosen.value.value, { text: '7' });
+  assert.deepEqual(chosen.value.value, { data: '7', tag: '0' });
   const refusedChoice = await a.dispatchDepotChooseFromV1(
-    { choice: { text: 'seed' } },
+    { choice: { data: 'seed', tag: '0' } },
     async () => ({ ok: true, value: counted }),
     { ...hooks, choiceDowncastToV1: () => refuse('2026-01', 'Choice') },
   );

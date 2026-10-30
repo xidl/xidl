@@ -139,22 +139,36 @@
           {
             "type": "object",
             "required": [
-              "yes"
+              "tag",
+              "data"
             ],
             "properties": {
-              "yes": {
+              "data": {
                 "type": "string"
+              },
+              "tag": {
+                "type": "string",
+                "enum": [
+                  "true"
+                ]
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "no"
+              "tag",
+              "data"
             ],
             "properties": {
-              "no": {
+              "data": {
                 "type": "string"
+              },
+              "tag": {
+                "type": "string",
+                "enum": [
+                  "false"
+                ]
               }
             }
           }
@@ -165,33 +179,54 @@
           {
             "type": "object",
             "required": [
-              "ex"
+              "tag",
+              "data"
             ],
             "properties": {
-              "ex": {
+              "data": {
                 "type": "string"
+              },
+              "tag": {
+                "type": "string",
+                "enum": [
+                  "'x'"
+                ]
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "why"
+              "tag",
+              "data"
             ],
             "properties": {
-              "why": {
+              "data": {
                 "type": "string"
+              },
+              "tag": {
+                "type": "string",
+                "enum": [
+                  "'y'"
+                ]
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "other"
+              "tag",
+              "data"
             ],
             "properties": {
-              "other": {
+              "data": {
                 "type": "string"
+              },
+              "tag": {
+                "type": "string",
+                "enum": [
+                  "default"
+                ]
               }
             }
           }
@@ -220,36 +255,58 @@
           {
             "type": "object",
             "required": [
-              "one"
+              "tag",
+              "data"
             ],
             "properties": {
-              "one": {
+              "data": {
                 "type": "string"
+              },
+              "tag": {
+                "type": "string",
+                "enum": [
+                  "1"
+                ]
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "two_or_three"
+              "tag",
+              "data"
             ],
             "properties": {
-              "two_or_three": {
+              "data": {
                 "type": "integer",
                 "format": "int64",
                 "maximum": 4294967295,
                 "minimum": 0
+              },
+              "tag": {
+                "type": "string",
+                "enum": [
+                  "2",
+                  "3"
+                ]
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "fallback"
+              "tag",
+              "data"
             ],
             "properties": {
-              "fallback": {
+              "data": {
                 "type": "boolean"
+              },
+              "tag": {
+                "type": "string",
+                "enum": [
+                  "default"
+                ]
               }
             }
           }
@@ -268,41 +325,63 @@
           {
             "type": "object",
             "required": [
-              "case1"
+              "tag",
+              "data"
             ],
             "properties": {
-              "case1": {
+              "data": {
                 "type": "integer",
                 "format": "int32",
+                "maximum": 255,
                 "minimum": 0
+              },
+              "tag": {
+                "type": "string",
+                "enum": [
+                  "V1"
+                ]
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "case2"
+              "tag",
+              "data"
             ],
             "properties": {
-              "case2": {
+              "data": {
                 "type": "array",
                 "items": {
                   "type": "string"
                 }
+              },
+              "tag": {
+                "type": "string",
+                "enum": [
+                  "V2"
+                ]
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "case3"
+              "tag",
+              "data"
             ],
             "properties": {
-              "case3": {
+              "data": {
                 "type": "object",
                 "additionalProperties": {
                   "type": "string"
                 }
+              },
+              "tag": {
+                "type": "string",
+                "enum": [
+                  "V3"
+                ]
               }
             }
           }

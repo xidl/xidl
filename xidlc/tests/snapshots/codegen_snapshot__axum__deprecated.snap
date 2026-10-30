@@ -179,7 +179,9 @@ pub mod legacy {
             match helper.tag.as_str() {
                 "1" => {
                     let value = ::serde_json::from_value::<String>(helper.data)
-                        .map_err(serde::de::Error::custom)?;
+                        .map_err(|error| serde::de::Error::custom(
+                            format!("union Payload.text payload decode failed: {error}"),
+                        ))?;
                     Ok(Self {
                         tag: Some(1),
                         data: PayloadData::Text(value),
@@ -187,7 +189,9 @@ pub mod legacy {
                 }
                 "2" => {
                     let value = ::serde_json::from_value::<Message>(helper.data)
-                        .map_err(serde::de::Error::custom)?;
+                        .map_err(|error| serde::de::Error::custom(
+                            format!("union Payload.media payload decode failed: {error}"),
+                        ))?;
                     Ok(Self {
                         tag: Some(2),
                         data: PayloadData::Media(value),

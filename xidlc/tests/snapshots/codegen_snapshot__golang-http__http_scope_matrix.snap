@@ -56,47 +56,51 @@ func RegisterHttpScopeMatrixServiceHandler(r gin.IRouter, svc HttpScopeMatrixSer
 	r.GET("/attribute/inherited_attr", func(c *gin.Context) {
 
 		req := &HttpScopeMatrixServiceGetAttributeInheritedAttrRequest{}
-		resp, err := svc.GetAttributeInheritedAttr(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpScopeMatrixServiceGetAttributeInheritedAttrFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.GetAttributeInheritedAttr(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpScopeMatrixServiceGetAttributeInheritedAttrFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.GET("/attribute/bare_attr", func(c *gin.Context) {
 
 		req := &HttpScopeMatrixServiceGetAttributeBareAttrRequest{}
-		resp, err := svc.GetAttributeBareAttr(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpScopeMatrixServiceGetAttributeBareAttrFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.GetAttributeBareAttr(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpScopeMatrixServiceGetAttributeBareAttrFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.POST("/v2/scope/default", func(c *gin.Context) {
@@ -116,24 +120,26 @@ func RegisterHttpScopeMatrixServiceHandler(r gin.IRouter, svc HttpScopeMatrixSer
 			return
 		}
 		req.Req = body
-		resp, err := svc.DefaultScope(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpScopeMatrixServiceDefaultScopeFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.DefaultScope(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpScopeMatrixServiceDefaultScopeFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.POST("/v2/scope/override-consumes", func(c *gin.Context) {
@@ -154,28 +160,30 @@ func RegisterHttpScopeMatrixServiceHandler(r gin.IRouter, svc HttpScopeMatrixSer
 		}
 		req.Name = body.Name
 		req.Age = body.Age
-		resp, err := svc.OverrideConsumesOnly(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpScopeMatrixServiceOverrideConsumesOnlyFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.OverrideConsumesOnly(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpScopeMatrixServiceOverrideConsumesOnlyFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		respBody := HttpScopeMatrixServiceOverrideConsumesOnlyResponseBody{
-			Return:         resp.Return,
-			NormalizedName: resp.NormalizedName,
-		}
-		if err := xidlgohttp.GinEncodeBody(c, "application/json", respBody); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			respBody := HttpScopeMatrixServiceOverrideConsumesOnlyResponseBody{
+				Return:         resp.Return,
+				NormalizedName: resp.NormalizedName,
+			}
+			if err := xidlgohttp.GinEncodeBody(c, "application/json", respBody); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.GET("/v2/scope/override-produces/:id", func(c *gin.Context) {
@@ -194,28 +202,30 @@ func RegisterHttpScopeMatrixServiceHandler(r gin.IRouter, svc HttpScopeMatrixSer
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-		resp, err := svc.OverrideProducesOnly(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpScopeMatrixServiceOverrideProducesOnlyFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.OverrideProducesOnly(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpScopeMatrixServiceOverrideProducesOnlyFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		respBody := HttpScopeMatrixServiceOverrideProducesOnlyResponseBody{
-			Return:   resp.Return,
-			Revision: resp.Revision,
-		}
-		if err := xidlgohttp.GinEncodeBody(c, "application/msgpack", respBody); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			respBody := HttpScopeMatrixServiceOverrideProducesOnlyResponseBody{
+				Return:   resp.Return,
+				Revision: resp.Revision,
+			}
+			if err := xidlgohttp.GinEncodeBody(c, "application/msgpack", respBody); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.POST("/v2/scope/override-both", func(c *gin.Context) {
@@ -236,28 +246,30 @@ func RegisterHttpScopeMatrixServiceHandler(r gin.IRouter, svc HttpScopeMatrixSer
 		}
 		req.Name = body.Name
 		req.Age = body.Age
-		resp, err := svc.OverrideBothMedia(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpScopeMatrixServiceOverrideBothMediaFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.OverrideBothMedia(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpScopeMatrixServiceOverrideBothMediaFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		respBody := HttpScopeMatrixServiceOverrideBothMediaResponseBody{
-			Return:         resp.Return,
-			NormalizedName: resp.NormalizedName,
-		}
-		if err := xidlgohttp.GinEncodeBody(c, "application/msgpack", respBody); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			respBody := HttpScopeMatrixServiceOverrideBothMediaResponseBody{
+				Return:         resp.Return,
+				NormalizedName: resp.NormalizedName,
+			}
+			if err := xidlgohttp.GinEncodeBody(c, "application/msgpack", respBody); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.GET("/v2/scope/deprecated/plain/:id", func(c *gin.Context) {
@@ -276,24 +288,26 @@ func RegisterHttpScopeMatrixServiceHandler(r gin.IRouter, svc HttpScopeMatrixSer
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-		resp, err := svc.DeprecatedPlain(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpScopeMatrixServiceDeprecatedPlainFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.DeprecatedPlain(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpScopeMatrixServiceDeprecatedPlainFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.GET("/v2/scope/deprecated/since/:id", func(c *gin.Context) {
@@ -312,24 +326,26 @@ func RegisterHttpScopeMatrixServiceHandler(r gin.IRouter, svc HttpScopeMatrixSer
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-		resp, err := svc.DeprecatedSinceOnly(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpScopeMatrixServiceDeprecatedSinceOnlyFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.DeprecatedSinceOnly(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpScopeMatrixServiceDeprecatedSinceOnlyFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.GET("/v2/scope/deprecated/window/:id", func(c *gin.Context) {
@@ -348,24 +364,26 @@ func RegisterHttpScopeMatrixServiceHandler(r gin.IRouter, svc HttpScopeMatrixSer
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-		resp, err := svc.DeprecatedWindow(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpScopeMatrixServiceDeprecatedWindowFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.DeprecatedWindow(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpScopeMatrixServiceDeprecatedWindowFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "application/json", resp.Return); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 }
@@ -406,24 +424,26 @@ func RegisterHttpSecurityMatrixServiceHandler(r gin.IRouter, svc HttpSecurityMat
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-		resp, err := svc.InheritedSecurity(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpSecurityMatrixServiceInheritedSecurityFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.InheritedSecurity(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpSecurityMatrixServiceInheritedSecurityFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.POST("/v2/security/bearer-cookie", func(c *gin.Context) {
@@ -442,24 +462,26 @@ func RegisterHttpSecurityMatrixServiceHandler(r gin.IRouter, svc HttpSecurityMat
 		}
 		req.Action = body.Action
 		req.Note = body.Note
-		resp, err := svc.BearerOrCookieSecurity(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpSecurityMatrixServiceBearerOrCookieSecurityFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.BearerOrCookieSecurity(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpSecurityMatrixServiceBearerOrCookieSecurityFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.GET("/v2/security/alternatives/:id", func(c *gin.Context) {
@@ -486,24 +508,26 @@ func RegisterHttpSecurityMatrixServiceHandler(r gin.IRouter, svc HttpSecurityMat
 				return
 			}
 		}
-		resp, err := svc.AlternativeSecurity(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpSecurityMatrixServiceAlternativeSecurityFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.AlternativeSecurity(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpSecurityMatrixServiceAlternativeSecurityFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.POST("/v2/security/oauth-search", func(c *gin.Context) {
@@ -522,47 +546,51 @@ func RegisterHttpSecurityMatrixServiceHandler(r gin.IRouter, svc HttpSecurityMat
 		}
 		req.Keyword = body.Keyword
 		req.Page = body.Page
-		resp, err := svc.OauthSecurity(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpSecurityMatrixServiceOauthSecurityFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.OauthSecurity(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpSecurityMatrixServiceOauthSecurityFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.GET("/v2/security/public/ping", func(c *gin.Context) {
 
 		req := &HttpSecurityMatrixServicePublicPingRequest{}
-		resp, err := svc.PublicPing(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpSecurityMatrixServicePublicPingFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.PublicPing(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpSecurityMatrixServicePublicPingFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 }

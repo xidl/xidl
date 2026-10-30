@@ -1162,16 +1162,10 @@ def step_impl(context, count, district):
     'the client can upload {count:d} chunks for asset "{asset_id}" with bearer auth and get result containing "{expected}"'
 )
 def step_impl(context, count, asset_id, expected):
-    import base64
-
     url = f"http://127.0.0.1:{context.port}/assets"
 
     def gen():
-        chunk = (
-            list(b"data")
-            if context.lang == "ts"
-            else base64.b64encode(b"data").decode()
-        )
+        chunk = list(b"data")
         for _ in range(count):
             yield (
                 json.dumps(

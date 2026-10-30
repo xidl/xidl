@@ -156,7 +156,9 @@ impl<'de> serde::Deserialize<'de> for DefaultUnion {
         match helper.tag.as_str() {
             "A" => {
                 let value = ::serde_json::from_value::<int>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union DefaultUnion.a payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: Some(Tag::A),
                     data: DefaultUnionData::A(value),
@@ -164,7 +166,11 @@ impl<'de> serde::Deserialize<'de> for DefaultUnion {
             }
             "default" => {
                 let value = ::serde_json::from_value::<String>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!(
+                            "union DefaultUnion.fallback payload decode failed: {error}"
+                        ),
+                    ))?;
                 Ok(Self {
                     tag: None,
                     data: DefaultUnionData::Fallback(value),
