@@ -22,8 +22,8 @@ Lint also accepts interface-level `@path`, but the current REST projection does
 not apply it as a route prefix. Use explicit operation paths. Likewise,
 `name = "..."` is a parameter binding name, not an operation route argument.
 `HEAD` operations must return `void` and cannot have a response body.
-See [HTTP & REST Basics](../../../rest/) for route templates and the
-[HTTP RFC](../../../rfc/http/) for inferred methods and paths.
+See [HTTP & REST Basics](/rest/) for route templates and the
+[HTTP RFC](/rfc/http/) for inferred methods and paths.
 
 ## Parameter sources
 
@@ -69,8 +69,8 @@ header names compare without case.
 A sole body parameter is encoded as that value. Multiple body parameters form
 an object. `@flatten` is only allowed on the sole request body parameter and
 does not change that direct-value rule. See
-[HTTP serialization](../../../rest/serialize/) for body shapes and
-[Wire Shape](../wire/) for field naming and presence.
+[HTTP serialization](/rest/serialize/) for body shapes and
+[Wire Shape](/docs/annotations/wire/) for field naming and presence.
 
 ## Media types
 
@@ -84,7 +84,7 @@ An argument-free `@http` on a union selects HTTP response representations.
 It requires the built-in `ContentType` discriminator and distinct supported
 case labels, with no `default` branch. It cannot be combined with a stream,
 upgrade, or additional response body output. See the full
-[multiple-representation example](../../../rest/serialize/#multiple-response-media-types).
+[multiple-representation example](/rest/serialize/#multiple-response-media-types).
 
 ## Exceptions
 
@@ -134,22 +134,22 @@ Operation security declarations replace interface defaults. `@no_security`
 clears inherited requirements and cannot coexist with other security
 annotations at the same level. Credentials and the application's
 authentication implementation are separate from business authorization. See
-[HTTP Authentication](../../../rest/security/) and its
-[protocol rules](../../../rfc/http-security/) for scheme combinations.
+[HTTP Authentication](/rest/security/) and its
+[protocol rules](/rfc/http-security/) for scheme combinations.
 
 For structured HTTP streams, the default is SSE for server streams and NDJSON
 for client streams. A bare `@stream_codec` selects SSE. A sole
 `sequence<octet>` stream payload follows the raw-byte rules in
-[HTTP Streaming](../../../rest/stream/) instead of structured framing.
+[HTTP Streaming](/rest/stream/) instead of structured framing.
 
 TypeScript REST and Go REST support SSE server streams, NDJSON client streams,
 and JSON WebSocket items; they reject raw upgrades. Rust Axum also supports
 raw connection upgrades. `@upgrade(protocol = "websocket")` has separate
 WebSocket options and cannot be combined with the stream annotations. See
-the [stream RFC](../../../rfc/http-stream/) and
-[upgrade RFC](../../../rfc/http-upgrade/) for signatures, allowed methods, and
+the [stream RFC](/rfc/http-stream/) and
+[upgrade RFC](/rfc/http-upgrade/) for signatures, allowed methods, and
 target restrictions. The stream markers also have transport-specific use in
-[JSON-RPC](../../../rfc/jsonrpc-stream/).
+[JSON-RPC](/rfc/jsonrpc-stream/).
 
 ## CORS
 
@@ -157,7 +157,7 @@ target restrictions. The stream markers also have transport-specific use in
 origin, or positional strings such as `@cors("https://console.example.com")`
 for explicit origins. Named arguments are not accepted. An operation's CORS
 declaration overrides its interface default. See
-[HTTP & REST Basics](../../../rest/#cors) for examples.
+[HTTP & REST Basics](/rest/#cors) for examples.
 
 ## Webhook publication
 
@@ -169,5 +169,5 @@ HTTP behavior. Other operations stay in `paths`.
 Body, header, security, exception, and lifecycle annotations compose with the
 same operation. The marker does not add an envelope, signer, delivery queue,
 or version policy. OpenAPI webhook operations cannot use path parameters.
-See [Webhook Publication](../../../rest/openapi/#webhook-publication) for a
+See [Webhook Publication](/rest/openapi/#webhook-publication) for a
 complete example and the application boundary.

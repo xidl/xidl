@@ -64,8 +64,8 @@ standardized runtime semantics.
 | `@non_serialized` | Field | Bare or an uppercase Boolean literal, such as `FALSE`; not an alias for `@skip` |
 | `@data_representation(XML)` | Type | Grammar-specific representation list; the current typed model recognizes `XML`, without generating an XML codec |
 
-Use [Wire Shape](../wire/) for implemented JSON omission and presence rules,
-and [Defaults and Constraints](../values/) for default and range metadata.
+Use [Wire Shape](/docs/annotations/wire/) for implemented JSON omission and presence rules,
+and [Defaults and Constraints](/docs/annotations/values/) for default and range metadata.
 Neither a preserved `@try_construct(TRIM)` nor `@non_serialized` causes a
 generated REST decoder to trim or discard a value.
 

@@ -107,7 +107,7 @@ Implemented effects differ by position and target:
 Acceptance at enum, bitmask, or union positions does not guarantee that all
 targets remove that declaration. Inspect the generated artifact for those
 positions. To remove a declaration from selected API versions, use
-[lifecycle annotations](../lifecycle/) rather than `@skip`.
+[lifecycle annotations](/docs/annotations/lifecycle/) rather than `@skip`.
 
 ## `@flatten`
 
@@ -135,7 +135,7 @@ not a language-level inheritance declaration.
 
 On a request parameter, `@flatten` is allowed only on the sole body parameter.
 A sole body parameter is already encoded as its value, so the marker does not
-remove an additional envelope. See [HTTP serialization](../../../rest/serialize/)
+remove an additional envelope. See [HTTP serialization](/rest/serialize/)
 for the operation body rules. Do not use flattening to convert a scalar into an
 object or combine it with colliding field names.
 

@@ -16,7 +16,7 @@ and protocol handling for each target.
 - `@bidi_stream`: full-duplex communication, typically over WebSocket.
 - `@upgrade(protocol = "websocket", ...)`: explicit RFC 6455 WebSocket with
   optional `codec` / `subprotocol` / `heartbeat` / `max_message` (see the
-  [HTTP Upgrade / WebSocket RFC](../../rfc/http-upgrade/)).
+  [HTTP Upgrade / WebSocket RFC](/rfc/http-upgrade/)).
 - `@stream_codec("ndjson" | "sse")`: choose the framed encoding.
 
 In practice:
@@ -140,6 +140,6 @@ The generated OpenAPI documents byte stream operations with
 
 ## Recommended Reading
 
-- [HTTP & REST Basics](../)
-- [TypeScript REST Server](../typescript-server/)
-- [HTTP Authentication](../security/)
+- [HTTP & REST Basics](/rest/)
+- [TypeScript REST Server](/rest/typescript-server/)
+- [HTTP Authentication](/rest/security/)

@@ -15,13 +15,13 @@ being recognized by the parser does not mean every generator implements it.
 
 | Reference | Annotations |
 | --- | --- |
-| [Wire shape](./wire/) | `@rename`, `@name`, `@rename_all`, `@skip`, `@optional`, `@flatten`, `@omitempty` |
-| [Defaults and constraints](./values/) | `@default`, `@range`, `@min`, `@max`, `@unit` |
-| [Lifecycle](./lifecycle/) | `@version`, `@added`, `@removed`, `@deprecated` |
-| [HTTP mapping](./http/) | `@get`, `@post`, `@put`, `@patch`, `@delete`, `@head`, `@options`, `@path`, `@query`, `@header`, `@cookie`, `@body`, `@request`, `@response`, `@http`, `@webhooks`, `@cors` |
-| [Security and streams](./http/#security-and-streams) | `@http_basic`, `@http_bearer`, `@api_key`, `@no_security`, `@server_stream`, `@client_stream`, `@bidi_stream`, `@stream_codec`, `@upgrade` |
-| [Documentation and target extensions](./targets/) | `@doc`, `@derive`, `@rust`; the `rust-`, `rust_`, `ts-`, and `ts_` extension prefixes |
-| [IDL type metadata](./type-metadata/) | `@id`, `@autoid`, `@position`, `@value`, `@default_literal`, `@extensibility`, `@final`, `@appendable`, `@mutable`, `@key`, `@must_understand`, `@hashid`, `@bit_bound`, `@external`, `@nested`, `@default_nested`, `@ignore_literal_names`, `@try_construct`, `@non_serialized`, `@data_representation`, `@verbatim`, `@service`, `@oneway`, `@ami`, `@topic`, `@choice`, `@empty`, `@dds_service`, `@dds_request_topic`, `@dds_reply_topic` |
+| [Wire shape](/docs/annotations/wire/) | `@rename`, `@name`, `@rename_all`, `@skip`, `@optional`, `@flatten`, `@omitempty` |
+| [Defaults and constraints](/docs/annotations/values/) | `@default`, `@range`, `@min`, `@max`, `@unit` |
+| [Lifecycle](/docs/annotations/lifecycle/) | `@version`, `@added`, `@removed`, `@deprecated` |
+| [HTTP mapping](/docs/annotations/http/) | `@get`, `@post`, `@put`, `@patch`, `@delete`, `@head`, `@options`, `@path`, `@query`, `@header`, `@cookie`, `@body`, `@request`, `@response`, `@http`, `@webhooks`, `@cors` |
+| [Security and streams](/docs/annotations/http/#security-and-streams) | `@http_basic`, `@http_bearer`, `@api_key`, `@no_security`, `@server_stream`, `@client_stream`, `@bidi_stream`, `@stream_codec`, `@upgrade` |
+| [Documentation and target extensions](/docs/annotations/targets/) | `@doc`, `@derive`, `@rust`; the `rust-`, `rust_`, `ts-`, and `ts_` extension prefixes |
+| [IDL type metadata](/docs/annotations/type-metadata/) | `@id`, `@autoid`, `@position`, `@value`, `@default_literal`, `@extensibility`, `@final`, `@appendable`, `@mutable`, `@key`, `@must_understand`, `@hashid`, `@bit_bound`, `@external`, `@nested`, `@default_nested`, `@ignore_literal_names`, `@try_construct`, `@non_serialized`, `@data_representation`, `@verbatim`, `@service`, `@oneway`, `@ami`, `@topic`, `@choice`, `@empty`, `@dds_service`, `@dds_request_topic`, `@dds_reply_topic` |
 
 ## Argument forms
 
@@ -46,7 +46,7 @@ struct Account {
   named key.
 - Built-in names ignore ASCII case. String values follow the rules of their
   consumer; for example, naming rules use the exact spellings listed in the
-  [wire reference](./wire/#rename_all).
+  [wire reference](/docs/annotations/wire/#rename_all).
 
 An annotation only applies to its declaration unless its reference explicitly
 defines inheritance, such as interface-level HTTP defaults. For example,
@@ -111,22 +111,22 @@ result for each target and version.
 ### `@rename`
 
 Selects a wire name without changing the IDL identifier.
-[Syntax, alias, and precedence](./wire/#rename-and-name).
+[Syntax, alias, and precedence](/docs/annotations/wire/#rename-and-name).
 
 ### `@rename_all`
 
 Sets a container's wire naming rule where the target consumes it.
-[Supported rules and positions](./wire/#rename_all).
+[Supported rules and positions](/docs/annotations/wire/#rename_all).
 
 ### `@skip`
 
 Excludes supported fields or parameters from their wire representation.
-[Target differences](./wire/#skip).
+[Target differences](/docs/annotations/wire/#skip).
 
 ### `@optional`
 
 Marks a field or parameter as potentially absent.
-[Presence and HTTP restrictions](./wire/#optional).
+[Presence and HTTP restrictions](/docs/annotations/wire/#optional).
 
 ## Maintaining this reference
 
