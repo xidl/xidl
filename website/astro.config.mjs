@@ -94,7 +94,21 @@ export default defineConfig({
         },
         {
           items: [
-            { autogenerate: { directory: 'rest', exclude: ['versioning/**'] } },
+            { label: 'HTTP & REST Basics', link: '/rest/' },
+            { label: 'Serialization', link: '/rest/serialize/' },
+            { label: 'HTTP Streaming', link: '/rest/stream/' },
+            {
+              badge: 'PREVIEW',
+              label: 'HTTP Authentication',
+              link: '/rest/security/',
+            },
+            { label: 'Exceptions', link: '/rest/exceptions/' },
+            { label: 'Rust Axum Target', link: '/rest/rust-axum/' },
+            {
+              label: 'TypeScript REST Server',
+              link: '/rest/typescript-server/',
+            },
+            { label: 'OpenAPI Metadata', link: '/rest/openapi/' },
             {
               badge: 'PREVIEW',
               items: [{ autogenerate: { directory: 'rest/versioning' } }],
