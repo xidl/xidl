@@ -33,7 +33,8 @@ pub(crate) fn render_format_path_fn(out: &mut String, method: &MethodMeta) -> Id
     Ok(())
 }
 
-pub(crate) fn strip_interfaces(spec: hir::Specification) -> hir::Specification {
+/// Retains model declarations in their original module and interface scopes.
+pub(crate) fn model_spec(spec: hir::Specification) -> hir::Specification {
     hir::Specification(strip_defs(spec.0))
 }
 
@@ -53,7 +54,25 @@ fn strip_defs(defs: Vec<hir::Definition>) -> Vec<hir::Definition> {
     let mut out = Vec::new();
     for def in defs {
         match def {
-            hir::Definition::InterfaceDcl(_) => {}
+            hir::Definition::InterfaceDcl(mut interface) => {
+                let hir::InterfaceDclInner::InterfaceDef(def) = &mut interface.decl else {
+                    continue;
+                };
+                let Some(body) = &mut def.interface_body else {
+                    continue;
+                };
+                body.0.retain(|export| {
+                    matches!(
+                        export,
+                        hir::Export::TypeDcl(_)
+                            | hir::Export::ConstDcl(_)
+                            | hir::Export::ExceptDcl(_)
+                    )
+                });
+                if !body.0.is_empty() {
+                    out.push(hir::Definition::InterfaceDcl(interface));
+                }
+            }
             hir::Definition::ModuleDcl(mut module) => {
                 module.definition = strip_defs(module.definition);
                 if !module.definition.is_empty() {

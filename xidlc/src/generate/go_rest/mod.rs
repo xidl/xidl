@@ -4,7 +4,7 @@ mod render;
 mod spec;
 
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::go::{GoImport, GoPackages};
+use crate::generate::go::{GoImport, GoNames, GoPackages, GoScope};
 use crate::generate::utils::go_package_name;
 use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir};
 use crate::macros::hashmap;
@@ -44,20 +44,26 @@ pub fn generate(
         Some(path) => format!("{}_http.go", path.trim_end_matches(".idl")),
         None => format!("{}_http.go", package),
     };
-    let content = spec::render_spec(&spec, &package, &rest_hir, &props)?;
-
-    let mut artifacts = vec![Artifact::new_file(ArtifactFile {
-        path: filename,
-        content,
-    })];
+    let mut artifacts = Vec::new();
+    if rest_hir
+        .interfaces
+        .iter()
+        .any(|interface| !interface.operations.is_empty())
+    {
+        let content = spec::render_spec(&spec, &package, &rest_hir, &props)?;
+        artifacts.push(Artifact::new_file(ArtifactFile {
+            path: filename,
+            content,
+        }));
+    }
 
     let enable_metadata = props
         .get("enable_metadata")
         .cloned()
         .unwrap_or_else(|| serde_json::Value::from(true));
 
-    let non_interface = definition::strip_interfaces(spec);
-    if !non_interface.0.is_empty() {
+    let models = definition::model_spec(spec);
+    if !models.0.is_empty() {
         let props = hashmap! {
             "enable_interfaces" => false,
             "enable_render_header" => false,
@@ -67,7 +73,7 @@ pub fn generate(
         };
         artifacts.push(Artifact::new_hir(ArtifactHir {
             lang: "go".into(),
-            hir: non_interface,
+            hir: models,
             props,
         }));
     }
@@ -137,6 +143,7 @@ pub(crate) struct GoRestRenderContext<'a> {
     pub(crate) rest_hir: &'a xidl_parser::rest_hir::RestHirDocument,
     pub(crate) mode: GoRestRenderMode,
     pub(crate) packages: GoPackages,
+    pub(crate) names: GoNames,
     pub(crate) versioned_modules: bool,
 }
 
@@ -151,8 +158,9 @@ impl GoRestRenderContext<'_> {
         })
     }
 
-    pub(crate) fn versioned_modules(&self) -> bool {
-        self.versioned_modules
+    /// Resolves references at an IDL declaration site.
+    pub(crate) fn scope<'a>(&'a self, path: &'a [String]) -> GoScope<'a> {
+        GoScope::new(&self.names, &self.packages, path)
     }
 }
 

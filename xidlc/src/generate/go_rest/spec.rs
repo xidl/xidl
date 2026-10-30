@@ -18,6 +18,7 @@ pub(crate) fn render_spec(
         rest_hir,
         mode: GoRestRenderMode::from_properties(properties)?,
         packages: crate::generate::go::GoPackages::of(properties),
+        names: crate::generate::go::GoNames::collect(spec),
         versioned_modules: properties
             .get(xidl_parser::versioning::API_VERSION_MODULES_PROPERTY)
             .and_then(serde_json::Value::as_array)

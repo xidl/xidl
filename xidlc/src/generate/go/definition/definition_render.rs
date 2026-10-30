@@ -11,16 +11,23 @@ use super::definition_templates::{
 };
 use super::definition_type_render::{render_exception, render_type_dcl};
 
+/// Naming and annotations shared by an interface's exported declarations.
+pub(super) struct InterfaceContext<'a> {
+    pub(super) name: String,
+    pub(super) annotations: &'a [hir::Annotation],
+    pub(super) scope: Vec<String>,
+}
+
 pub(super) fn render_const(
     ctx: &mut GoRenderContext,
     def: &hir::ConstDcl,
     prefix: &[String],
 ) -> IdlcResult<()> {
     let name = go_export_name(prefix, &def.ident);
-    let ty = ctx.const_type(&def.ty);
+    let ty = super::go_const_type(&def.ty, ctx.scope(prefix));
     let value = match ctx.integer_constant(def, &name)? {
         Some(value) => value,
-        None => ctx.const_expr(&def.value)?,
+        None => super::render_const_expr(&def.value, ctx.scope(prefix)),
     };
     ctx.push_template("const.go.j2", &ConstTemplate { name, ty, value })
 }
@@ -30,32 +37,43 @@ pub(super) fn render_interface(
     def: &hir::InterfaceDcl,
     prefix: &[String],
 ) -> IdlcResult<()> {
-    let container_annotations = &def.annotations;
+    let annotations = &def.annotations;
     let hir::InterfaceDclInner::InterfaceDef(def) = &def.decl else {
         return Ok(());
     };
-    ctx.state.uses_context = true;
+    let enabled = ctx
+        .properties
+        .get("enable_interfaces")
+        .and_then(serde_json::Value::as_bool)
+        .unwrap_or(true);
+    ctx.state.uses_context |= enabled;
     let interface_name = go_export_name(prefix, &def.header.ident);
+    let mut scope = prefix.to_vec();
+    scope.push(def.header.ident.clone());
+    let interface = InterfaceContext {
+        name: interface_name.clone(),
+        annotations,
+        scope,
+    };
     let mut methods = Vec::new();
     if let Some(body) = &def.interface_body {
         for export in &body.0 {
             match export {
-                hir::Export::OpDcl(op) => {
-                    methods.push(render_operation_types(
-                        ctx,
-                        &interface_name,
-                        op,
-                        container_annotations,
-                    )?);
+                hir::Export::OpDcl(op) if enabled => {
+                    methods.push(render_operation_types(ctx, &interface, op)?);
                 }
-                hir::Export::AttrDcl(attr) => {
-                    methods.extend(render_attr_types(ctx, &interface_name, attr)?)
+                hir::Export::AttrDcl(attr) if enabled => {
+                    methods.extend(render_attr_types(ctx, &interface, attr)?)
                 }
-                hir::Export::TypeDcl(type_dcl) => render_type_dcl(ctx, type_dcl, prefix)?,
-                hir::Export::ConstDcl(const_dcl) => render_const(ctx, const_dcl, prefix)?,
-                hir::Export::ExceptDcl(except) => render_exception(ctx, except, prefix)?,
+                hir::Export::OpDcl(_) | hir::Export::AttrDcl(_) => {}
+                hir::Export::TypeDcl(type_dcl) => render_type_dcl(ctx, type_dcl, &interface.scope)?,
+                hir::Export::ConstDcl(const_dcl) => render_const(ctx, const_dcl, &interface.scope)?,
+                hir::Export::ExceptDcl(except) => render_exception(ctx, except, &interface.scope)?,
             }
         }
+    }
+    if !enabled {
+        return Ok(());
     }
     ctx.push_template(
         "interface.go.j2",
@@ -68,10 +86,11 @@ pub(super) fn render_interface(
 
 fn render_operation_types(
     ctx: &mut GoRenderContext,
-    interface_name: &str,
+    interface: &InterfaceContext<'_>,
     op: &hir::OpDcl,
-    container_annotations: &[hir::Annotation],
 ) -> IdlcResult<MethodTemplate> {
+    let interface_name = &interface.name;
+    let container_annotations = interface.annotations;
     let request_name = format!("{}{}Request", interface_name, go_capitalize(&op.ident));
     let response_name = format!("{}{}Response", interface_name, go_capitalize(&op.ident));
     let mut request_fields = Vec::new();
@@ -97,7 +116,7 @@ fn render_operation_types(
 
         request_fields.push(FieldTemplate {
             name: field,
-            ty: ctx.type_ref(&param.ty),
+            ty: ctx.scope(&interface.scope).type_ref(&param.ty),
             tag: wire_name,
         });
     }
@@ -130,7 +149,7 @@ fn render_operation_types(
 
         response_fields.push(FieldTemplate {
             name: field,
-            ty: ctx.type_ref(ty),
+            ty: ctx.scope(&interface.scope).type_ref(ty),
             tag: wire_name,
         });
     }
@@ -150,7 +169,7 @@ fn render_operation_types(
 
         response_fields.push(FieldTemplate {
             name: field,
-            ty: ctx.type_ref(&param.ty),
+            ty: ctx.scope(&interface.scope).type_ref(&param.ty),
             tag: wire_name,
         });
     }

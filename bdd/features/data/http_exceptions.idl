@@ -49,7 +49,7 @@ interface Files {
 
 module left {
     struct Detail { string message; };
-    @http(409) exception Failure { @body ::left::Detail detail; };
+    @http(409) exception Failure { @body Detail detail; };
 };
 module right {
     @http(422) exception Failure { @body string reason; };

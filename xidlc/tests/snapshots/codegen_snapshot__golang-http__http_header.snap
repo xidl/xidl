@@ -56,7 +56,7 @@ func (value *TestStatus) UnmarshalJSON(data []byte) error {
 type TestUser struct {
 	Id uint32 `xjson:"id"`
 	Name string `xjson:"full_name"`
-	Status Status `xjson:"status"`
+	Status TestStatus `xjson:"status"`
 }
 ===============
 http_header_http.go

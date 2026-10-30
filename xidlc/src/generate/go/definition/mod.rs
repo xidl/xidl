@@ -20,8 +20,7 @@ pub(crate) use self::definition_support::{
 };
 #[allow(unused_imports)]
 pub(crate) use self::definition_types::{
-    constr_type_name, go_const_type, go_literal, go_scoped_name, go_type, render_const_expr,
-    type_with_decl,
+    constr_type_name, go_const_type, go_literal, go_type, render_const_expr, type_with_decl,
 };
 use super::GoRenderContext;
 
@@ -64,14 +63,7 @@ fn render_definition(
             definition_type_render::render_exception(ctx, except, prefix)?
         }
         hir::Definition::InterfaceDcl(interface) => {
-            if ctx
-                .properties
-                .get("enable_interfaces")
-                .and_then(|value| value.as_bool())
-                .unwrap_or(true)
-            {
-                definition_render::render_interface(ctx, interface, prefix)?;
-            }
+            definition_render::render_interface(ctx, interface, prefix)?;
         }
         _ => {}
     }

@@ -1,8 +1,6 @@
-use crate::error::IdlcResult;
-
 use xidl_parser::hir;
 
-use super::super::GoPackages;
+use super::super::GoScope;
 use super::definition_names::{go_capitalize, go_export_name};
 
 pub(crate) fn constr_type_name(constr: &hir::ConstrTypeDcl, prefix: &[String]) -> String {
@@ -20,52 +18,32 @@ pub(crate) fn constr_type_name(constr: &hir::ConstrTypeDcl, prefix: &[String]) -
 pub(crate) fn type_with_decl(
     ty: &hir::TypeSpec,
     decl: &hir::Declarator,
-    packages: &GoPackages,
+    scope: GoScope<'_>,
 ) -> String {
-    let base = go_type(ty, packages);
+    let base = go_type(ty, scope);
     match decl {
         hir::Declarator::SimpleDeclarator(_) => base,
         hir::Declarator::ArrayDeclarator(value) => {
             let mut out = base;
             for len in value.len.iter().rev() {
-                out = format!(
-                    "[{}]{}",
-                    render_const_expr(&len.0, packages).unwrap_or_else(|_| "0".to_string()),
-                    out
-                );
+                out = format!("[{}]{}", render_const_expr(&len.0, scope), out);
             }
             out
         }
     }
 }
 
-pub(crate) fn render_const_expr(
-    expr: &hir::ConstExpr,
-    packages: &GoPackages,
-) -> IdlcResult<String> {
-    Ok(crate::generate::render_const_expr(
+pub(crate) fn render_const_expr(expr: &hir::ConstExpr, scope: GoScope<'_>) -> String {
+    crate::generate::render_const_expr(
         expr,
-        &|value| go_scoped_name(value, packages),
+        &|value| scope.reference(value),
         &go_literal,
         &|operator| match operator {
             hir::UnaryOperator::Add => "+",
             hir::UnaryOperator::Sub => "-",
             hir::UnaryOperator::Not => "^",
         },
-    ))
-}
-
-/// Go name of a scoped reference inside the file that renders it.
-pub(crate) fn go_scoped_name(value: &hir::ScopedName, packages: &GoPackages) -> String {
-    if let Some(reference) = packages.reference(value) {
-        return reference;
-    }
-    value
-        .name
-        .iter()
-        .map(|part| go_capitalize(part))
-        .collect::<Vec<_>>()
-        .join("")
+    )
 }
 
 pub(crate) fn go_literal(value: &hir::Literal) -> String {
@@ -89,37 +67,41 @@ pub(crate) fn go_literal(value: &hir::Literal) -> String {
     }
 }
 
-pub(crate) fn go_const_type(ty: &hir::ConstType, packages: &GoPackages) -> String {
+pub(crate) fn go_const_type(ty: &hir::ConstType, scope: GoScope<'_>) -> String {
     match ty {
         hir::ConstType::IntegerType(value) => go_integer_type(value),
         hir::ConstType::FloatingPtType | hir::ConstType::FixedPtConstType => "float64".to_string(),
-        hir::ConstType::CharType | hir::ConstType::WideCharType => packages.runtime_type("Char"),
+        hir::ConstType::CharType | hir::ConstType::WideCharType => {
+            scope.packages.runtime_type("Char")
+        }
         hir::ConstType::BooleanType => "bool".to_string(),
         hir::ConstType::OctetType => "byte".to_string(),
         hir::ConstType::StringType(_) | hir::ConstType::WideStringType(_) => "string".to_string(),
-        hir::ConstType::ScopedName(value) => go_scoped_name(value, packages),
+        hir::ConstType::ScopedName(value) => scope.reference(value),
         hir::ConstType::SequenceType(_) => "any".to_string(),
     }
 }
 
-pub(crate) fn go_type(ty: &hir::TypeSpec, packages: &GoPackages) -> String {
+pub(crate) fn go_type(ty: &hir::TypeSpec, scope: GoScope<'_>) -> String {
     match ty {
         hir::TypeSpec::IntegerType(value) => go_integer_type(value),
         hir::TypeSpec::FloatingPtType => "float64".to_string(),
-        hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => packages.runtime_type("Char"),
+        hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => {
+            scope.packages.runtime_type("Char")
+        }
         hir::TypeSpec::Boolean => "bool".to_string(),
         hir::TypeSpec::AnyType | hir::TypeSpec::ObjectType | hir::TypeSpec::ValueBaseType => {
             "any".to_string()
         }
-        hir::TypeSpec::ScopedName(value) => go_scoped_name(value, packages),
-        hir::TypeSpec::SequenceType(seq) => format!("[]{}", go_type(&seq.ty, packages)),
+        hir::TypeSpec::ScopedName(value) => scope.reference(value),
+        hir::TypeSpec::SequenceType(seq) => format!("[]{}", go_type(&seq.ty, scope)),
         hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => "string".to_string(),
         hir::TypeSpec::FixedPtType(_) => "float64".to_string(),
         hir::TypeSpec::MapType(map) => {
             format!(
                 "map[{}]{}",
-                go_type(&map.key, packages),
-                go_type(&map.value, packages)
+                go_type(&map.key, scope),
+                go_type(&map.value, scope)
             )
         }
         hir::TypeSpec::TemplateType(value) => format!(
@@ -128,7 +110,7 @@ pub(crate) fn go_type(ty: &hir::TypeSpec, packages: &GoPackages) -> String {
             value
                 .args
                 .iter()
-                .map(|arg| go_type(arg, packages))
+                .map(|arg| go_type(arg, scope))
                 .collect::<Vec<_>>()
                 .join(", "),
         ),

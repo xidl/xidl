@@ -1,7 +1,9 @@
 mod definition;
 mod integer;
+mod names;
 mod packages;
 mod render;
+mod scope;
 mod spec;
 
 use crate::error::IdlcResult;
@@ -14,8 +16,10 @@ use xidl_parser::hir;
 use xidl_parser::hir::ParserProperties;
 
 #[cfg(feature = "gen-go-rest")]
-pub(crate) use definition::{go_export_name, go_field_name, go_type};
+pub(crate) use definition::go_field_name;
+pub(crate) use names::GoNames;
 pub(crate) use packages::{GoImport, GoPackages};
+pub(crate) use scope::GoScope;
 
 pub fn generate_with_properties(
     spec: &hir::Specification,
@@ -107,12 +111,17 @@ pub(crate) struct GoRenderContext {
     pub(crate) properties: ParserProperties,
     pub(crate) state: GoRenderState,
     pub(crate) packages: GoPackages,
+    names: GoNames,
     renderer: GoRenderer,
     pub(crate) body: String,
 }
 
 impl GoRenderContext {
-    pub(crate) fn new(package_name: String, properties: ParserProperties) -> IdlcResult<Self> {
+    pub(crate) fn new(
+        package_name: String,
+        properties: ParserProperties,
+        spec: &hir::Specification,
+    ) -> IdlcResult<Self> {
         let packages = GoPackages::of(&properties);
         let renderer = GoRenderer::new(&properties)?;
         Ok(Self {
@@ -120,24 +129,15 @@ impl GoRenderContext {
             properties,
             state: GoRenderState::default(),
             packages,
+            names: GoNames::collect(spec),
             renderer,
             body: String::new(),
         })
     }
 
-    /// Go type of `ty`, with imported units qualified by their package.
-    pub(crate) fn type_ref(&self, ty: &hir::TypeSpec) -> String {
-        definition::go_type(ty, &self.packages)
-    }
-
-    /// Go type of a constant declaration.
-    pub(crate) fn const_type(&self, ty: &hir::ConstType) -> String {
-        definition::go_const_type(ty, &self.packages)
-    }
-
-    /// Go source of a constant value.
-    pub(crate) fn const_expr(&self, expr: &hir::ConstExpr) -> IdlcResult<String> {
-        definition::render_const_expr(expr, &self.packages)
+    /// Resolves types and values from one IDL declaration scope.
+    pub(crate) fn scope<'a>(&'a self, path: &'a [String]) -> GoScope<'a> {
+        GoScope::new(&self.names, &self.packages, path)
     }
 
     pub(crate) fn push_template<S: Serialize>(&mut self, name: &str, ctx: &S) -> IdlcResult<()> {
