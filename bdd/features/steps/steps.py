@@ -1058,12 +1058,23 @@ def step_impl(context, count):
         resp = requests.get(url, stream=True, timeout=10)
     assert resp.status_code == 200, f"Got {resp.status_code}: {resp.text}"
     received = 0
+    completed = 0
+    event = None
     for line in resp.iter_lines():
-        if line:
-            raw = line.decode()
-            if raw.startswith("data:") and "done" not in raw:
+        raw = line.decode()
+        if raw.startswith("event:"):
+            event = raw[6:].strip()
+        elif raw.startswith("data:"):
+            if event == "next":
                 received += 1
-    assert received == count
+            elif event == "complete":
+                completed += 1
+            else:
+                assert False, f"Unexpected stream event {event}: {raw}"
+        elif not raw:
+            event = None
+    assert received == count, f"Expected {count} next events, received {received}"
+    assert completed == 1, f"Expected one complete event, received {completed}"
 
 
 @then('the client can submit a form with name "{name}" and age {age:d}')
@@ -1156,25 +1167,19 @@ def step_impl(context, count, asset_id, expected):
     url = f"http://127.0.0.1:{context.port}/assets"
 
     def gen():
-        for i in range(count):
-            if context.lang == "ts":
-                yield (
-                    json.dumps({"asset_id": asset_id, "chunk": list(b"data")}) + "\n"
-                ).encode()
-            else:
-                # Go uses the xidl StreamFrame envelope.
-                chunk_b64 = base64.b64encode(b"data").decode()
-                yield (
-                    json.dumps(
-                        {
-                            "t": "next",
-                            "data": {"asset_id": asset_id, "chunk": chunk_b64},
-                        }
-                    )
-                    + "\n"
-                ).encode()
-        if context.lang != "ts":
-            yield (json.dumps({"t": "complete"}) + "\n").encode()
+        chunk = (
+            list(b"data")
+            if context.lang == "ts"
+            else base64.b64encode(b"data").decode()
+        )
+        for _ in range(count):
+            yield (
+                json.dumps(
+                    {"t": "next", "data": {"asset_id": asset_id, "chunk": chunk}}
+                )
+                + "\n"
+            ).encode()
+        yield (json.dumps({"t": "complete"}) + "\n").encode()
 
     headers = {
         "Authorization": "Bearer token-1",
