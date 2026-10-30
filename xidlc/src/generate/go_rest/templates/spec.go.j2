@@ -11,6 +11,12 @@ import (
 "net/http"
 "net/url"
 "strings"
+{% if blocks.stream_raises %}
+"errors"
+{% endif %}
+{% if blocks.stream_error_body %}
+json "github.com/xidl/xidl/golang/xidl-go-codec"
+{% endif %}
 
 {% if opt.enable_server -%}
     "github.com/gin-gonic/gin"

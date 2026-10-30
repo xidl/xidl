@@ -1,0 +1,19 @@
+// Exported rows and exception details live in a reusable contract file.
+struct ExportRow {
+    string id;
+    int32 quantity;
+};
+struct ImportResult {
+    int32 accepted;
+    int32 total;
+};
+struct ConflictDetail {
+    @rename("job_id") string job;
+    string reason;
+};
+@http(status = 409)
+exception Conflict {
+    ConflictDetail detail;
+};
+@http(status = 410)
+exception Retired {};

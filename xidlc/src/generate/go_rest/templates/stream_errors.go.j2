@@ -1,0 +1,29 @@
+func encode{{ prefix }}Failure(err error) xidlgohttp.StreamFailure {
+{% for exception in exceptions %}
+    var ex{{ loop.index }} *{{ exception.name }}
+    if errors.As(err, &ex{{ loop.index }}) {
+        {% if exception.has_body %}body, encodingError := json.Marshal(ex{{ loop.index }})
+        if encodingError != nil { return xidlgohttp.EncodeStreamError(fmt.Errorf("{{ prefix }} exception encoding: %w", encodingError)) }
+        return xidlgohttp.StreamFailure{Status: {{ exception.status }}, Body: body}
+        {% else %}return xidlgohttp.StreamFailure{Status: {{ exception.status }}}
+        {% endif %}
+    }
+{% endfor %}
+    return xidlgohttp.EncodeStreamError(err)
+}
+
+func decode{{ prefix }}Failure(failure xidlgohttp.StreamFailure) error {
+{% for exception in exceptions %}
+    if failure.Status == {{ exception.status }} {
+        var exception {{ exception.name }}
+        {% if exception.has_body %}
+        var fields map[string]json.RawMessage
+        if err := json.Unmarshal(failure.Body, &fields); err != nil || fields == nil { return xidlgohttp.DecodeStreamError(failure) }
+        {% for field in exception.required %}if value, ok := fields[{{ field | tojson }}]; !ok || string(value) == "null" { return xidlgohttp.DecodeStreamError(failure) }
+        {% endfor %}if err := json.Unmarshal(failure.Body, &exception); err != nil { return xidlgohttp.DecodeStreamError(failure) }
+        {% endif %}
+        return &exception
+    }
+{% endfor %}
+    return xidlgohttp.DecodeStreamError(failure)
+}

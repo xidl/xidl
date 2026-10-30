@@ -70,7 +70,7 @@ import {
                 const url = joinUrl(this.baseUrl, xidlPath);
                 headers.set("Content-Type", "application/x-ndjson");
             headers.set("Accept", "text/plain");
-            const resp = await this.fetchImpl(url, { method: "POST", headers, body: ndjsonBody(stream, undefined) });
+            const resp = await this.fetchImpl(url, { method: "POST", headers, duplex: "half", body: ndjsonBody(stream, ifaceSchemas.HttpClientStreamServiceUploadChunkRequestSchema) });
             if (!resp.ok) {
                 throw await parseXidlError(resp);
             
@@ -141,6 +141,7 @@ export const HttpClientStreamServiceOperations = {
             request: {
                 kind: "stream",
                 args: ["stream"],
+                schema: ifaceSchemas.HttpClientStreamServiceUploadChunkRequestSchema,
                 path: [],
                 query: [],
                 headers: [],
@@ -149,7 +150,7 @@ export const HttpClientStreamServiceOperations = {
                     kind: "stream",
                     contentType: "application/x-ndjson",
                     fields: [{ wireName: "file_id", key: "file_id" }],
-                    
+                    schema: ifaceSchemas.HttpClientStreamServiceUploadChunkRequestSchema,
             },
         },
         response: {

@@ -1,0 +1,18 @@
+@version(in = "header", name = "X-API-Version")
+enum Version {
+    @rename("2026-01-01") v1,
+    @rename("2026-07-01") v2,
+};
+
+module billing {
+    @http(409) exception Conflict { string reason; };
+    @added(Version::v2) @http(410) exception Retired {};
+
+    interface Exports {
+        @server_stream @get(path = "/exports")
+        string rows() raises(Conflict, Retired);
+
+        @client_stream @post(path = "/imports")
+        int32 import_rows(in string row) raises(Conflict);
+    };
+};

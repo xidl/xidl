@@ -273,7 +273,7 @@ where
             .await
         {
             Ok(resp_value) => {
-                let mut resp = xidl_rust_axum::stream::sse_response(resp_value);
+                let mut resp = xidl_rust_axum::stream::sse_response(resp_value).await;
                 resp
             }
             Err(err) => {
@@ -444,6 +444,10 @@ impl ReportApiClient {
         let auth_target = &self.client;
         let _ = auth_target;
         auth_target.apply_auth(&mut req, xidl_rust_axum::ClientAuthRequirement::Bearer)?;
-        xidl_rust_axum::stream::open_sse::<String>(self.client.http(), req).await
+        xidl_rust_axum::stream::open_sse::<
+            String,
+            xidl_rust_axum::Error,
+        >(self.client.http(), req)
+            .await
     }
 }

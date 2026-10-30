@@ -91,11 +91,7 @@ func RegisterReportApiHandler(r gin.IRouter, svc ReportApiService) {
 		}
 		stream := xidlgohttp.NewSSEServerStreamWriter[string](c.Writer)
 		if err := svc.WatchReport(c.Request.Context(), req, stream); err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
-			}
+			_ = stream.Fail(encodeReportApiWatchReportFailure(err))
 			return
 		}
 		_ = stream.Close()
@@ -162,9 +158,9 @@ func (c *ReportApiClient) WatchReport(ctx context.Context, req *ReportApiWatchRe
 	}
 	if resp.StatusCode >= 400 {
 		defer resp.Body.Close()
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+		return nil, xidlgohttp.DecodeStreamHTTPError(resp, decodeReportApiWatchReportFailure)
 	}
-	return xidlgohttp.NewSSEStreamReader[string](resp.Body), nil
+	return xidlgohttp.NewSSEStreamReader[string](resp.Body).WithContext(ctx).WithErrorDecoder(decodeReportApiWatchReportFailure), nil
 }
 
 type ReportApiGetReportRequest struct {
@@ -234,4 +230,13 @@ func formatReportApiWatchReportPath(req *ReportApiWatchReportRequest) string {
 func decodeReportApiWatchReportResponse(resp *http.Response) (ReportApiWatchReportResponse, error) {
 	out := ReportApiWatchReportResponse{}
 	return out, nil
+}
+func encodeReportApiWatchReportFailure(err error) xidlgohttp.StreamFailure {
+
+	return xidlgohttp.EncodeStreamError(err)
+}
+
+func decodeReportApiWatchReportFailure(failure xidlgohttp.StreamFailure) error {
+
+	return xidlgohttp.DecodeStreamError(failure)
 }

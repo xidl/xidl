@@ -111,7 +111,6 @@ impl MethodModel {
             .then(|| format!("{prefix}Response"));
         let request_schema_ref = request_name
             .as_ref()
-            .filter(|_| !matches!(op.meta.stream.kind, Some(HttpStreamKind::Client)))
             .map(|name| scoped_name(module_path, name));
         let response_schema_ref = response_name
             .as_ref()
@@ -292,16 +291,7 @@ impl MethodModel {
                 }
             }
             HttpRequestBodyShape::Object { .. } => request_schema_ref.clone(),
-            HttpRequestBodyShape::Stream { item_ty, .. } => match item_ty {
-                hir::TypeSpec::ScopedName(scoped) => {
-                    let parts = crate::generate::typescript::definition::names::scoped_name_parts(
-                        scoped,
-                        module_path,
-                    );
-                    Some(format!("models.{}", parts.join(".")))
-                }
-                _ => None,
-            },
+            HttpRequestBodyShape::Stream { .. } => request_schema_ref.clone(),
         };
 
         let stream_item_schema_ref = if let HttpResponseBodyShape::Stream { item_ty, .. } =

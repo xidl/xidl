@@ -1,161 +1,153 @@
 ---
 title: "HTTP Stream RFC"
-description: "Interaction model, codec, and lifecycle rules for XIDL HTTP streaming mapping."
+description: "Structured HTTP stream frames, terminal outcomes, and declared exceptions."
 ---
 
 # XIDL HTTP Stream Mapping Specification
 
-This page defines a streaming profile built on top of HTTP mapping, used to express long-connection request or response streams.
+This profile defines structured, one-directional HTTP streams. It reuses HTTP
+operation types and exceptions; it introduces no additional IDL syntax.
 
-## Scope
+## Operation Model
 
-This RFC mainly defines:
+| Annotation | Direction | Default method | Default codec |
+| --- | --- | --- | --- |
+| `@server_stream` | One request, multiple response items | GET | SSE |
+| `@client_stream` | Multiple request items, one response | POST | NDJSON |
 
-- Streaming method models.
-- Annotations and type constraints.
-- HTTP wire protocol recommendations.
-- Codec selection.
-- Lifecycle, cancellation, and error semantics.
+An operation's return type describes **one** server-stream item. Client-stream
+items use the generated request type containing the operation's input members.
+A sequence type represents a batch within each item; it is not required to
+declare a stream. Standard HTTP path and security annotations still apply.
 
-This page does not define:
+```idl
+@http(409) exception Conflict { string reason; };
+struct Row { string id; int32 quantity; };
+interface Ledger {
+    @server_stream @get(path = "/exports")
+    Row export_rows() raises(Conflict);
 
-- Message broker transport.
-- Reliability semantics beyond HTTP itself.
-- Exactly-once delivery.
-
-## Relationship to WebSocket Upgrade
-
-`@bidi_stream` is the abstract bidirectional stream. On HTTP it maps to a
-WebSocket session with the default profile defined by the
-[HTTP Upgrade / WebSocket RFC](../http-upgrade/).
-
-For explicit RFC 6455 options (`codec`, `subprotocol`, `heartbeat`,
-`max_message`), use `@upgrade(protocol = "websocket", ...)` instead.
-
-## Streaming Method Annotations
-
-A method is considered a streaming method if it carries one of the following annotations:
-
-- `@server_stream`
-- `@client_stream`
-
-Optional annotations:
-
-- `@path @rename("...")`
-- `@stream_codec("ndjson" | "sse")`
-- HTTP security-related annotations.
-
-Default values:
-
-- HTTP method: `POST`
-- Codec: `ndjson`
-- Path: `/{method_name}`
-
-## Type Constraints
-
-- `@client_stream` must have exactly one streaming input parameter of type `sequence<T>`.
-- The return value of `@server_stream` must be `sequence<T>`.
-- `@server_stream` and `@client_stream` are mutually exclusive.
-
-## Interaction Model
-
-### Server Stream
-
-- The client sends a single request object.
-- The server continuously returns multiple stream items.
-
-### Client Stream
-
-- The client continuously sends multiple stream items.
-- The server finally returns a single completion result.
-
-## Route Templates
-
-Streaming methods follow the same path template rules as the standard HTTP RFC:
-
-- `{name}`
-- `{*name}`
-- `{?name1,name2,...}`
-
-Query and Path variables are still bound by `@query` and `@path`.
-
-## Security Model
-
-Streaming methods reuse the rules from the HTTP Security RFC:
-
-- Interface-level declarations provide defaults.
-- Method-level declarations override defaults.
-- `@no_security` clears inherited requirements.
-
-Additional notes for streaming:
-
-- Authentication occurs before the stream is established.
-- Credentials are not part of the stream item payload.
-- Token refresh and session renewal are implementation concerns.
-
-## Wire Profile
-
-### General HTTP Requirements
-
-- `Content-Type` must match the selected codec.
-- Long-connection responses typically use chunked transfer encoding.
-- Proxies or gateways should avoid unnecessary buffering.
-
-### NDJSON
-
-The default codec is `ndjson`.
-
-Common MIME type:
-
-- `application/x-ndjson`
-
-Frame object example:
-
-```json
-{ "t": "next", "seq": 1, "data": 42 }
+    @client_stream @post(path = "/imports")
+    int32 import_rows(in Row row) raises(Conflict);
+};
 ```
 
-Common fields:
+The Rust, Go, and TypeScript REST targets support structured SSE server streams
+and NDJSON client streams. An explicit codec selection does not imply that every
+target supports that combination; unsupported combinations fail generation.
 
-- `t`: Frame type.
-- `seq`: Monotonically increasing sequence number for each direction.
-- `data`: Business data.
-- `error`: Error information.
-- `meta`: Additional metadata.
+## Frames
 
-### SSE
+Frames separate business data from stream control. A reader ignores heartbeat
+frames and never yields control frames as application data. A `next` frame must
+contain `data`, even when its value is zero, false, or null.
 
-`sse` is only applicable to `@server_stream`.
+### SSE Responses
 
-Common mappings:
+The response content type is `text/event-stream`. Events end with an empty line:
 
-- `event: next`
-- `event: error`
-- `event: complete`
+```text
+: heartbeat
 
-## Lifecycle
+event: next
+data: {"id":"r1","quantity":0}
 
-Start:
+event: complete
+data: {}
 
-- The stream is considered established only after the server accepts the request and returns a success status.
+```
 
-End:
+Comments and empty event blocks are ignored. An unterminated event at EOF does
+not count as a received frame. Completion includes a data line so standard SSE
+consumers dispatch the event. Sending heartbeats is application/runtime policy.
 
-- Receipt of `complete`.
-- Receipt of `error`.
-- Explicit `cancel`.
-- Transport disconnection.
+### NDJSON Requests
 
-## Byte Stream Modeling
+The request content type is `application/x-ndjson`. Each line is a frame:
 
-If you want to express a byte stream, you can model the stream item type as `octet`:
+```json
+{"t":"heartbeat"}
+{"t":"next","seq":1,"data":{"row":{"id":"r1","quantity":0}}}
+{"t":"complete"}
+```
 
-- `sequence<octet>` represents a sequence of byte items.
+`seq` is optional transport metadata; it does not provide replay, deduplication,
+or ordering guarantees across requests. Empty lines are ignored. A bare JSON
+business value is not a framed stream item.
 
-The specific on-wire encoding depends on the selected codec.
+When updating from runtimes that sent bare NDJSON values, regenerate the SDKs
+and update both endpoints together. This profile requires control frames.
 
-## Implementation Recommendations
+## Terminal Outcomes
 
-- Prioritize robust implementation of `server_stream`.
-- Codec and security rules should remain consistent with standard HTTP mapping.
-- `seq` should be guaranteed to monotonically increase for each direction and stream.
+Each structured stream has one immutable terminal outcome:
+
+| Outcome | Trigger |
+| --- | --- |
+| Completed | A complete frame is received |
+| Failed | An error frame is received, or the producer cannot encode an item |
+| Cancelled | The consumer explicitly cancels or drops the stream |
+| Interrupted | Transport EOF, malformed framing, or disconnection without a terminal frame |
+
+A producer sends exactly one terminal frame, either complete or error. An error
+is never followed by complete. Readers stop at the first terminal frame and
+release the body; appended frames cannot become additional business items.
+Cleanup cannot overwrite a terminal outcome. EOF without a terminal frame is
+reported as an error, including for an otherwise empty stream.
+
+Consumers must propagate stream-read errors and consume through completion
+before treating an import/export as successful. Cancellation does not imply
+transaction rollback. Storage atomicity remains the application's responsibility.
+
+## Exceptions and the First Output Boundary
+
+A structured stream can declare the same `raises(...)` exceptions as a unary
+operation. HTTP exception status codes must uniquely identify the operation's
+declared exceptions. Generated codecs use the exception set of the selected API
+version.
+
+The boundary is the first **serialized output**, not merely obtaining the first
+business value:
+
+- Before output is committed, failures use the ordinary HTTP exception status
+  and JSON body. An item serialization failure produces an HTTP error.
+- After output is committed, failures use one terminal error frame. An item
+  serialization failure produces a runtime error frame, never a fabricated null
+  item. The producer stops reading the source after failure.
+
+The in-band error carries the same status and projected JSON body as HTTP:
+
+```text
+event: error
+data: {"status":409,"body":{"reason":"locked"}}
+
+```
+
+The corresponding NDJSON frame is:
+
+```json
+{"t":"error","error":{"status":409,"body":{"reason":"locked"}}}
+```
+
+A bodyless exception uses `body: null` in a frame. Exceptions with header or
+cookie members are rejected for streams because those members cannot be sent
+after the HTTP headers have been committed. Undeclared runtime errors remain
+runtime errors; they are not converted into an arbitrary declared exception.
+
+Go writers flush every frame. Proxies and hosting adapters must permit streaming
+and avoid buffering. Generated readers do not transparently retry failed streams.
+
+## Separate Protocols
+
+A sole `sequence<octet>` stream payload uses raw `application/octet-stream`
+bytes. It has no control frames: transport EOF remains the end of the byte
+stream. Raw response streams cannot declare `raises(...)`; raw uploads can use
+declared exceptions in their ordinary HTTP response.
+
+`@bidi_stream` and WebSocket `@upgrade` use their own close protocol, documented
+in the [HTTP Upgrade / WebSocket RFC](/rfc/http-upgrade/). They do not support
+stream `raises(...)` in this profile.
+
+Retries, replay cursors, version conversion of frames, heartbeat scheduling,
+authentication refresh, and delivery guarantees belong to separate capabilities
+or application policy. See [HTTP Streaming](/rest/stream/) for generated APIs.

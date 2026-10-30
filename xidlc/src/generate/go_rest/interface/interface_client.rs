@@ -1,7 +1,7 @@
 use crate::error::IdlcResult;
 use crate::generate::go_rest::{MethodMeta, definition};
 use std::fmt::Write;
-use xidl_parser::rest_hir::semantics::{HttpStreamCodec, HttpStreamKind};
+use xidl_parser::rest_hir::semantics::HttpStreamKind;
 
 use super::GoRestRenderer;
 use super::interface_binding::{render_client_build_request, render_client_decode_response};
@@ -52,7 +52,7 @@ pub(super) fn render_client(
                 render_client_server_stream(out, interface_name, method, renderer)?
             }
             Some(HttpStreamKind::Client) => {
-                render_client_client_stream(out, interface_name, method)?
+                render_client_client_stream(out, interface_name, method, renderer)?
             }
             Some(HttpStreamKind::Bidi) => render_client_bidi_stream(out, interface_name, method)?,
             None => render_client_unary(out, interface_name, method, renderer)?,
@@ -94,47 +94,14 @@ fn render_client_server_stream(
     method: &MethodMeta,
     renderer: &GoRestRenderer,
 ) -> IdlcResult<()> {
-    let item_ty = method
-        .return_ty
-        .clone()
-        .unwrap_or_else(|| "string".to_string());
-    let reader_ty = if method.stream_codec == HttpStreamCodec::Sse {
-        format!("*xidlgohttp.SSEStreamReader[{item_ty}]")
-    } else {
-        format!("*xidlgohttp.ServerStreamReader[{item_ty}]")
-    };
-    writeln!(
-        out,
-        "func (c *{interface_name}Client) {}(ctx context.Context, req *{}) ({}, error) {{",
-        method.method_name, method.request_struct, reader_ty
-    )
-    .unwrap();
-    render_client_build_request(out, method, renderer)?;
-    writeln!(out, "\tresp, err := c.httpClient.Do(httpReq)").unwrap();
-    writeln!(out, "\tif err != nil {{ return nil, err }}").unwrap();
-    writeln!(out, "\tif resp.StatusCode >= 400 {{ defer resp.Body.Close(); return nil, fmt.Errorf(\"http %d\", resp.StatusCode) }}").unwrap();
-    if method.stream_codec == HttpStreamCodec::Sse {
-        writeln!(
-            out,
-            "\treturn xidlgohttp.NewSSEStreamReader[{item_ty}](resp.Body), nil"
-        )
-        .unwrap();
-    } else {
-        writeln!(
-            out,
-            "\treturn xidlgohttp.NewNDJSONStreamReader[{item_ty}](resp.Body), nil"
-        )
-        .unwrap();
-    }
-    writeln!(out, "}}").unwrap();
-    writeln!(out).unwrap();
-    Ok(())
+    super::stream::StreamMethod::new(method).render_client(out, interface_name, renderer)
 }
 
 fn render_client_client_stream(
     out: &mut String,
     interface_name: &str,
     method: &MethodMeta,
+    renderer: &GoRestRenderer,
 ) -> IdlcResult<()> {
     writeln!(
         out,
@@ -191,12 +158,7 @@ fn render_client_client_stream(
         method.request_struct, method.response_struct, method.response_struct
     )
     .unwrap();
-    writeln!(
-        out,
-        "\t\tif resp.StatusCode >= 400 {{ var zero {}; return zero, fmt.Errorf(\"http %d\", resp.StatusCode) }}",
-        method.response_struct
-    )
-    .unwrap();
+    super::stream::StreamMethod::new(method).render_http_error(out, renderer)?;
     writeln!(
         out,
         "\t\tdecoded, err := decode{}Response(resp)",

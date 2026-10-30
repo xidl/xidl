@@ -353,7 +353,6 @@ import {
                         fields: [{ wireName: "item", key: "item" }],
                         singleKey: "item",
                         schema: ifaceSchemas.models.v1.ItemSchema,
-                    
                 },
             },
             response: {
@@ -442,7 +441,6 @@ import {
                         fields: [{ wireName: "item", key: "item" }],
                         singleKey: "item",
                         schema: ifaceSchemas.models.v2.ItemSchema,
-                    
                 },
             },
             response: {

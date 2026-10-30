@@ -1,0 +1,36 @@
+impl xidl_rust_axum::stream::StreamException for {{ method.error_ty }} {
+    fn into_failure(self) -> xidl_rust_axum::Result<xidl_rust_axum::stream::StreamFailure> {
+        match self {
+            Self::Framework(error) => xidl_rust_axum::stream::StreamException::into_failure(error),
+            {% for ex in method.raises %}
+                Self::{{ ex.variant }}(value) => {
+                    {% if ex.has_body %}let value: {{ ex.wire_ty }} = value.into();
+                    let body = xidl_rust_axum::serde_json::to_value(value)
+                        .map_err(|error| xidl_rust_axum::Error::message(format!("stream exception {{ ex.ty }}: {error}")))?;
+                    {% else %}let _ = value;
+                    let body = xidl_rust_axum::serde_json::Value::Null;
+                    {% endif %}Ok(xidl_rust_axum::stream::StreamFailure { status: {{ ex.status }}, body })
+                }
+            {% endfor %}
+        }
+    }
+
+    fn from_failure(failure: xidl_rust_axum::stream::StreamFailure) -> xidl_rust_axum::Result<Self> {
+        match failure.status {
+            {% for ex in method.raises %}
+                {{ ex.status }} => {
+                    {% if ex.has_body %}
+                        let value: {{ ex.wire_ty }} = match xidl_rust_axum::serde_json::from_value(failure.body.clone()) {
+                            Ok(value) => value,
+                            Err(_) => return xidl_rust_axum::stream::StreamException::from_failure(failure).map(Self::Framework),
+                        };
+                    {% else %}
+                        let value: {{ ex.wire_ty }} = {{ ex.ty }}::default().into();
+                    {% endif %}
+                    Ok(Self::{{ ex.variant }}(value.into()))
+                }
+            {% endfor %}
+            _ => xidl_rust_axum::stream::StreamException::from_failure(failure).map(Self::Framework),
+        }
+    }
+}

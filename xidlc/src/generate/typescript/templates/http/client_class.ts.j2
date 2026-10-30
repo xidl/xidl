@@ -16,7 +16,7 @@
         }
         {% for method in methods %}
             {% if method.is_server_stream %}{{ method.name }}{% else %}async {{ method.name }}{% endif %}({% for param in method.params %}{{ param.name }}: {{ render_type(param.ty) }}{% if not loop.last %}, {% endif %}{% endfor %}): {% if method.is_server_stream %}{{ render_type(method.return_ty) }}{% else %}Promise<{{ render_type(method.return_ty) }}>{% endif %} {
-                {% if method.request_schema_ref %}const parsed = ifaceSchemas.{{ method.request_schema_ref }}Schema.parse({ {% for entry in method.request_payload %}"{{ entry.raw_name }}": {{ entry.access }}{% if not loop.last %}, {% endif %}{% endfor %} });
+                {% if method.request_schema_ref and not method.is_client_stream %}const parsed = ifaceSchemas.{{ method.request_schema_ref }}Schema.parse({ {% for entry in method.request_payload %}"{{ entry.raw_name }}": {{ entry.access }}{% if not loop.last %}, {% endif %}{% endfor %} });
                 {% endif %}let xidlPath = "{{ method.path }}";
                 {% for param in method.path_params %}xidlPath = xidlPath.replace("{" + "{% if param.catch_all %}*{% endif %}{{ param.template_name }}" + "}", {% if param.catch_all %}encodePathCatchAll{% else %}encodePathSegment{% endif %}({{ param.access }}));
                 {% endfor %}const query = new URLSearchParams();
@@ -33,17 +33,19 @@
                 }
                 const url = joinUrl(this.baseUrl, xidlPath);
                 {% if method.is_server_stream %}{% if method.response_content_type == "application/octet-stream" %}return byteResponseStream(this.fetchImpl, url, { method: "{{ method.http_method }}", headers{% if cookie_version %}, credentials: "include"{% endif %} });
-                {% else %}return sseJsonStream<{{ render_type(method.stream_item_ty) }}>(this.fetchImpl, url, { method: "{{ method.http_method }}", headers{% if cookie_version %}, credentials: "include"{% endif %} }, {% if method.stream_item_schema_ref %}ifaceSchemas.{{ method.stream_item_schema_ref }}Schema{% else %}undefined{% endif %});
+                {% else %}return sseJsonStream<{{ render_type(method.stream_item_ty) }}>(this.fetchImpl, url, { method: "{{ method.http_method }}", headers{% if cookie_version %}, credentials: "include"{% endif %} }, { schema: {% if method.stream_item_schema_ref %}ifaceSchemas.{{ method.stream_item_schema_ref }}Schema{% else %}undefined{% endif %}{% if method.raises | length > 0 %}, raise: failure => this.{{ method.raise_helper }}(failure.status, failure.body){% endif %} });
             {% endif %}
             {% elif method.is_client_stream %}headers.set("Content-Type", "{{ method.request_content_type }}");
             headers.set("Accept", "{{ method.response_content_type }}");
-            const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers{% if cookie_version %}, credentials: "include"{% endif %}, body: {% if method.request_content_type == "application/octet-stream" %}byteStreamBody(stream){% else %}ndjsonBody(stream, {% if method.request_schema_ref %}ifaceSchemas.{{ method.request_schema_ref }}Schema{% else %}undefined{% endif %}){% endif %} });
+            const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers{% if cookie_version %}, credentials: "include"{% endif %}, duplex: "half", body: {% if method.request_content_type == "application/octet-stream" %}byteStreamBody(stream){% else %}ndjsonBody(stream, {% if method.request_schema_ref %}ifaceSchemas.{{ method.request_schema_ref }}Schema{% else %}undefined{% endif %}){% endif %} });
             if (!resp.ok) {
-                {% if method.raises | length > 0 %}await this.{{ method.raise_helper }}(resp);
+                {% if method.raises | length > 0 %}await this.{{ method.raise_helper }}(resp.status, await resp.json().catch(() => undefined), resp.headers);
                 {% else %}throw await parseXidlError(resp);
             {% endif %}
         }
-        {% if method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs);
+        {% if method.response_schema_is_model %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs);
+        return ifaceSchemas.{{ method.response_schema_ref }}Schema.parse(deserialize(responseBody, ifaceSchemas.{{ method.response_schema_ref }}Schema)) as {{ render_type(method.return_ty) }};
+        {%- elif method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs);
         const responsePayload = buildResponsePayload(responseBody, resp, "{{ method.response_body_mode }}", [{% for entry in method.response_body_entries %}{ wireName: "{{ entry.raw_name }}", key: "{{ entry.key_name }}" }{% if not loop.last %}, {% endif %}{% endfor %}], {{ response_value_specs(method.response_header_params) }}, {{ response_value_specs(method.response_cookie_params) }});
         return ifaceSchemas.{{ method.response_schema_ref }}Schema.parse(deserialize(responsePayload, ifaceSchemas.{{ method.response_schema_ref }}Schema)) as {{ render_type(method.return_ty) }};
         {%- elif method.response_value_schema %}const schema = {{ render_zod(method.response_value_schema) }};
@@ -61,7 +63,7 @@
         {% endif %}headers.set("Accept", "{% if method.representations | length > 0 %}{{ method.union_accept }}{% else %}{{ method.response_content_type }}{% endif %}");
         const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers{% if cookie_version %}, credentials: "include"{% endif %}{% if method.body_single or method.body_entries | length > 0 %}, body: encodeRequestBody(xidlBody, "{{ method.request_content_type }}", this.codecs, {% if method.body_schema_ref %}ifaceSchemas.{{ method.body_schema_ref }}Schema{% else %}undefined{% endif %}){% endif %} });
         if (!resp.ok) {
-            {% if method.raises | length > 0 %}await this.{{ method.raise_helper }}(resp);
+            {% if method.raises | length > 0 %}await this.{{ method.raise_helper }}(resp.status, await resp.json().catch(() => undefined), resp.headers);
             {% else %}throw await parseXidlError(resp);
             {% endif %}
         }
@@ -88,18 +90,17 @@
     }
     {% endfor %}
     {% for method in methods %}{% if method.raises | length > 0 %}
-        async {{ method.raise_helper }}(resp: Response): Promise<never> {
-            const status = resp.status;
+        async {{ method.raise_helper }}(status: number, rawBodyValue: unknown, headers: Headers = new Headers()): Promise<never> {
+            const rawBody = rawBodyValue as Record<string, unknown> | undefined;
             {% for ex in method.raises %}if (status === {{ ex.status }}) {
                 {% if ex.has_body %}const bodySchema = z.object({ {% for field in ex.body %}"{{ field.wire_name }}": {{ render_zod(field.schema) }}{% if field.optional %}.optional(){% endif %}, {% endfor %} });
-                const rawBody = await resp.clone().json().catch(() => undefined);
-                if (rawBody == null{% for field in ex.body %}{% if not field.optional %} || rawBody["{{ field.wire_name }}"] === undefined{% endif %}{% endfor %}) throw await parseXidlError(resp);
+                if (rawBody == null{% for field in ex.body %}{% if not field.optional %} || rawBody["{{ field.wire_name }}"] === undefined{% endif %}{% endfor %}) throw decodeXidlError(status, rawBody);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
-                if (!decoded.success) throw await parseXidlError(resp);
+                if (!decoded.success) throw decodeXidlError(status, rawBody);
                 const body = decoded.data;
                 {% endif %}const error = new {{ ex.ident }}({
-                    {% for member in ex.headers %}"{{ member.field }}": {% if member.optional %}(readResponseHeader(resp.headers, "{{ member.wire_name }}", {{ member.is_multi | lower }}{% if member.item_is_string %}, value => value{% endif %}) ?? undefined) as never{% else %}readResponseHeader(resp.headers, "{{ member.wire_name }}", {{ member.is_multi | lower }}{% if member.item_is_string %}, value => value{% endif %}) as never{% endif %},
-                    {% endfor %}{% for member in ex.cookies %}"{{ member.field }}": {% if member.is_multi %}(readResponseCookies(resp.headers{% if member.item_is_string %}, value => value{% endif %}).get("{{ member.wire_name }}") ?? {% if member.optional %}undefined{% else %}[]{% endif %}) as never{% else %}(readResponseCookies(resp.headers{% if member.item_is_string %}, value => value{% endif %}).get("{{ member.wire_name }}")?.[0]) as never{% endif %},
+                    {% for member in ex.headers %}"{{ member.field }}": {% if member.optional %}(readResponseHeader(headers, "{{ member.wire_name }}", {{ member.is_multi | lower }}{% if member.item_is_string %}, value => value{% endif %}) ?? undefined) as never{% else %}readResponseHeader(headers, "{{ member.wire_name }}", {{ member.is_multi | lower }}{% if member.item_is_string %}, value => value{% endif %}) as never{% endif %},
+                    {% endfor %}{% for member in ex.cookies %}"{{ member.field }}": {% if member.is_multi %}(readResponseCookies(headers{% if member.item_is_string %}, value => value{% endif %}).get("{{ member.wire_name }}") ?? {% if member.optional %}undefined{% else %}[]{% endif %}) as never{% else %}(readResponseCookies(headers{% if member.item_is_string %}, value => value{% endif %}).get("{{ member.wire_name }}")?.[0]) as never{% endif %},
                     {% endfor %}{% for field in ex.body %}"{{ field.field }}": {% if field.optional %}(body["{{ field.wire_name }}"] ?? undefined){% else %}body["{{ field.wire_name }}"]{% endif %} as never,
                     {% endfor %}});
                 {% for kind in ["headers", "cookies"] %}{% for member in ex[kind] %}
@@ -107,7 +108,7 @@
                 {% endfor %}{% endfor %}
                 throw error;
             }
-            {% endfor %}throw await parseXidlError(resp);
+            {% endfor %}throw decodeXidlError(status, rawBody);
         }
     {% endif %}{% endfor %}
 }

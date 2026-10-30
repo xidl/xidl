@@ -494,7 +494,6 @@ export const HttpAnnoServiceOperations = {
                     contentType: "application/json",
                     fields: [{ wireName: "name", key: "name" }, { wireName: "age", key: "age" }],
                     schema: ifaceSchemas.HttpAnnoServiceCreateUserRequestSchema,
-                
             },
         },
         response: {
@@ -631,7 +630,6 @@ export const HttpAnnoServiceOperations = {
                     contentType: "application/json",
                     fields: [{ wireName: "a", key: "a" }, { wireName: "b", key: "b" }],
                     schema: ifaceSchemas.HttpAnnoServiceAddRequestSchema,
-                
             },
         },
         response: {

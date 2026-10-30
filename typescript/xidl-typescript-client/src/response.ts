@@ -138,15 +138,29 @@ export function readResponseCookies(
   return out;
 }
 
-export async function parseXidlError(resp: Response): Promise<XidlClientError> {
-  const status = resp.status;
-  try {
-    const body = await resp.json();
-    if (body && typeof body.code === 'number' && typeof body.msg === 'string') {
-      return new XidlClientError(body.msg, body.code, status);
-    }
-  } catch {
-    // ignored
+export function decodeXidlError(
+  status: number,
+  body: unknown,
+): XidlClientError {
+  if (
+    body &&
+    typeof body === 'object' &&
+    'code' in body &&
+    'msg' in body &&
+    typeof body.code === 'number' &&
+    typeof body.msg === 'string'
+  ) {
+    return new XidlClientError(body.msg, body.code, status);
   }
   return new XidlClientError(`http error: ${status}`, status, status);
+}
+
+export async function parseXidlError(resp: Response): Promise<XidlClientError> {
+  let body: unknown;
+  try {
+    body = await resp.json();
+  } catch {
+    /* HTTP failures may have no JSON body. */
+  }
+  return decodeXidlError(resp.status, body);
 }

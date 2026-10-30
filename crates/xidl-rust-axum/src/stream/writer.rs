@@ -3,14 +3,17 @@ use tokio::sync::mpsc;
 use tokio::task::JoinHandle;
 
 /// Client-side writer for request-streaming endpoints.
-pub struct ClientStreamWriter<T, R> {
+pub struct ClientStreamWriter<T, R, E = Error> {
     tx: Option<mpsc::Sender<Result<T>>>,
-    response: Option<JoinHandle<Result<R>>>,
+    response: Option<JoinHandle<std::result::Result<R, E>>>,
 }
 
-impl<T, R> ClientStreamWriter<T, R> {
+impl<T, R, E: From<Error>> ClientStreamWriter<T, R, E> {
     /// Creates a new writer from a send channel and response task.
-    pub fn new(tx: mpsc::Sender<Result<T>>, response: JoinHandle<Result<R>>) -> Self {
+    pub fn new(
+        tx: mpsc::Sender<Result<T>>,
+        response: JoinHandle<std::result::Result<R, E>>,
+    ) -> Self {
         Self {
             tx: Some(tx),
             response: Some(response),
@@ -29,7 +32,7 @@ impl<T, R> ClientStreamWriter<T, R> {
     }
 
     /// Closes the request stream and awaits the final response.
-    pub async fn close(mut self) -> Result<R> {
+    pub async fn close(mut self) -> std::result::Result<R, E> {
         let _ = self.tx.take();
         let response = self
             .response
@@ -37,7 +40,7 @@ impl<T, R> ClientStreamWriter<T, R> {
             .ok_or_else(|| Error::new(500, "stream writer is already closed"))?;
         response
             .await
-            .map_err(|err| Error::new(500, err.to_string()))?
+            .map_err(|err| E::from(Error::new(500, format!("stream response task: {err}"))))?
     }
 
     /// Aborts the request stream without waiting for a response.
@@ -45,13 +48,21 @@ impl<T, R> ClientStreamWriter<T, R> {
         let _ = self.tx.take();
         if let Some(response) = self.response.take() {
             response.abort();
+            if let Err(error) = response.await
+                && !error.is_cancelled()
+            {
+                return Err(Error::message(format!("stream cancellation: {error}")));
+            }
         }
         Ok(())
     }
 }
 
-impl<T, R> Drop for ClientStreamWriter<T, R> {
+impl<T, R, E> Drop for ClientStreamWriter<T, R, E> {
     fn drop(&mut self) {
         let _ = self.tx.take();
+        if let Some(response) = self.response.take() {
+            response.abort();
+        }
     }
 }

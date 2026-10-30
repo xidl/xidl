@@ -299,7 +299,6 @@ impl HttpClientStreamReportServiceClient {
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn upload_parts(
         &self,
-        chunk: UploadChunk,
     ) -> Result<
         xidl_rust_axum::stream::Writer<
             HttpClientStreamReportServiceUploadPartsRequest,

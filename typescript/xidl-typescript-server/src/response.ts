@@ -1,6 +1,6 @@
 import { serialize, type XidlSchema } from 'xidl-typescript-codec';
 
-import { XidlServerError } from './error.ts';
+import { projectError, XidlServerError } from './error.ts';
 import { assertAccepts, encodeScalar, normalizeMime } from './scalar.ts';
 import { byteStreamResponse, sseResponse } from './stream.ts';
 import type {
@@ -15,7 +15,7 @@ export function encodeOperationResponse<TService>(
   result: unknown,
   requestHeaders: Headers,
   codecs: Record<string, HttpCodec>,
-): Response {
+): Response | Promise<Response> {
   if (operation.response.stream) {
     if (
       normalizeMime(operation.response.contentType) ===
@@ -26,6 +26,10 @@ export function encodeOperationResponse<TService>(
     return sseResponse(
       result as AsyncIterable<unknown>,
       operation.response.streamSchema,
+      error => {
+        const failure = operation.errors?.match(error) ?? projectError(error);
+        return { body: failure.body ?? null, status: failure.status };
+      },
     );
   }
 

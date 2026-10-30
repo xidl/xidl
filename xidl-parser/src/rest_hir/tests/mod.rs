@@ -1,6 +1,7 @@
 mod collection_presence;
 mod input_types;
 mod publication;
+mod stream_lifecycle;
 mod version_parameter;
 
 use std::collections::HashMap;

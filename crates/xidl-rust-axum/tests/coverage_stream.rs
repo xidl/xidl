@@ -151,6 +151,7 @@ async fn open_sse_covers_success_and_error_responses() {
                     Ok(Payload { value: 1 }),
                     Err(Error::new(410, "gone")),
                 ])))
+                .await
             }),
         )
         .route(
@@ -167,7 +168,30 @@ async fn open_sse_covers_success_and_error_responses() {
         )
         .route(
             "/complete",
-            get(|| async { sse_response(boxed_sse(stream::iter(vec![Ok(Payload { value: 9 })]))) }),
+            get(|| async {
+                sse_response(boxed_sse(stream::iter(vec![Ok::<_, Error>(Payload {
+                    value: 9,
+                })])))
+                .await
+            }),
+        )
+        .route(
+            "/heartbeat",
+            get(|| async {
+                let wire =
+                    ": heartbeat\r\n\r\ndata: \"雪\"\r\n\r\nevent: complete\r\ndata: {}\r\n\r\n";
+                let chunks = wire
+                    .as_bytes()
+                    .iter()
+                    .map(|byte| {
+                        Ok::<_, std::io::Error>(axum::body::Bytes::copy_from_slice(&[*byte]))
+                    })
+                    .collect::<Vec<_>>();
+                (
+                    [(axum::http::header::CONTENT_TYPE, "text/event-stream")],
+                    Body::from_stream(stream::iter(chunks)),
+                )
+            }),
         )
         .route(
             "/eof",
@@ -182,26 +206,48 @@ async fn open_sse_covers_success_and_error_responses() {
     let http = reqwest::Client::new();
 
     let req = http.get(format!("http://{addr}/ok")).build().unwrap();
-    let mut reader = open_sse::<Payload>(&http, req).await.unwrap();
+    let mut reader = open_sse::<Payload, Error>(&http, req).await.unwrap();
     assert_eq!(reader.read().await.unwrap().unwrap(), Payload { value: 1 });
     let err = reader.read().await.unwrap().unwrap_err();
-    assert_eq!(err.code, 410);
+    assert!(matches!(
+        err,
+        xidl_rust_axum::stream::StreamError::Failed(Error { code: 410, .. })
+    ));
 
     let req = http.get(format!("http://{addr}/err")).build().unwrap();
-    let err = match open_sse::<Payload>(&http, req).await {
+    let err = match open_sse::<Payload, Error>(&http, req).await {
         Err(err) => err,
         Ok(_) => panic!("expected non-success response"),
     };
     assert_eq!(err.code, 404);
 
     let req = http.get(format!("http://{addr}/complete")).build().unwrap();
-    let mut reader = open_sse::<Payload>(&http, req).await.unwrap();
+    let mut reader = open_sse::<Payload, Error>(&http, req).await.unwrap();
     assert_eq!(reader.read().await.unwrap().unwrap(), Payload { value: 9 });
     assert!(reader.read().await.is_none());
 
-    let req = http.get(format!("http://{addr}/eof")).build().unwrap();
-    let mut reader = open_sse::<Payload>(&http, req).await.unwrap();
+    let req = http
+        .get(format!("http://{addr}/heartbeat"))
+        .build()
+        .unwrap();
+    let mut reader = open_sse::<String, Error>(&http, req).await.unwrap();
+    assert_eq!(reader.read().await.unwrap().unwrap(), "雪");
     assert!(reader.read().await.is_none());
+    assert_eq!(
+        reader.outcome(),
+        Some(xidl_rust_axum::stream::StreamOutcome::Completed)
+    );
+
+    let req = http.get(format!("http://{addr}/eof")).build().unwrap();
+    let mut reader = open_sse::<Payload, Error>(&http, req).await.unwrap();
+    assert!(matches!(
+        reader.read().await.unwrap(),
+        Err(xidl_rust_axum::stream::StreamError::Interrupted(_))
+    ));
+    assert_eq!(
+        reader.outcome(),
+        Some(xidl_rust_axum::stream::StreamOutcome::Interrupted)
+    );
 
     stop_server(handle).await;
 }
@@ -231,9 +277,20 @@ async fn ndjson_helpers_cover_success_streaming_and_stream_errors() {
         .text()
         .await
         .unwrap();
-    assert_eq!(text, "{\"value\":1}\n{\"value\":2}\n");
+    assert_eq!(
+        text.lines()
+            .map(|line| serde_json::from_str::<serde_json::Value>(line).unwrap())
+            .collect::<Vec<_>>(),
+        vec![
+            serde_json::json!({"t":"next", "seq":1, "data":{"value":1}}),
+            serde_json::json!({"t":"next", "seq":2, "data":{"value":2}}),
+            serde_json::json!({"t":"complete"}),
+        ]
+    );
 
-    let mut stream = decode_ndjson_body::<Payload>(Body::from("{\"value\":3}\nnot-json\n"));
+    let mut stream = decode_ndjson_body::<Payload>(Body::from(
+        "{\"t\":\"next\",\"data\":{\"value\":3}}\nnot-json\n",
+    ));
     assert_eq!(stream.next().await.unwrap().unwrap(), Payload { value: 3 });
     let err = stream.next().await.unwrap().unwrap_err();
     assert_eq!(err.code, 400);

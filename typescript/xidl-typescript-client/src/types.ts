@@ -2,7 +2,7 @@ import type { XidlSchema } from 'xidl-typescript-codec';
 
 export type FetchLike = (
   input: RequestInfo | URL,
-  init?: RequestInit,
+  init?: RequestInit & { duplex?: 'half' },
 ) => Promise<Response>;
 
 export interface HttpCodec {

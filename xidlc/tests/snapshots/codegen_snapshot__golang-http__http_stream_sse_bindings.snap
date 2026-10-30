@@ -72,11 +72,7 @@ func RegisterHttpStreamSseBindingsServiceHandler(r gin.IRouter, svc HttpStreamSs
 		}
 		stream := xidlgohttp.NewSSEServerStreamWriter[[]string](c.Writer)
 		if err := svc.TailFile(c.Request.Context(), req, stream); err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
-			}
+			_ = stream.Fail(encodeHttpStreamSseBindingsServiceTailFileFailure(err))
 			return
 		}
 		_ = stream.Close()
@@ -117,9 +113,9 @@ func (c *HttpStreamSseBindingsServiceClient) TailFile(ctx context.Context, req *
 	}
 	if resp.StatusCode >= 400 {
 		defer resp.Body.Close()
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+		return nil, xidlgohttp.DecodeStreamHTTPError(resp, decodeHttpStreamSseBindingsServiceTailFileFailure)
 	}
-	return xidlgohttp.NewSSEStreamReader[[]string](resp.Body), nil
+	return xidlgohttp.NewSSEStreamReader[[]string](resp.Body).WithContext(ctx).WithErrorDecoder(decodeHttpStreamSseBindingsServiceTailFileFailure), nil
 }
 
 type HttpStreamSseBindingsServiceTailFileRequest struct {
@@ -151,4 +147,13 @@ func formatHttpStreamSseBindingsServiceTailFilePath(req *HttpStreamSseBindingsSe
 func decodeHttpStreamSseBindingsServiceTailFileResponse(resp *http.Response) (HttpStreamSseBindingsServiceTailFileResponse, error) {
 	out := HttpStreamSseBindingsServiceTailFileResponse{}
 	return out, nil
+}
+func encodeHttpStreamSseBindingsServiceTailFileFailure(err error) xidlgohttp.StreamFailure {
+
+	return xidlgohttp.EncodeStreamError(err)
+}
+
+func decodeHttpStreamSseBindingsServiceTailFileFailure(failure xidlgohttp.StreamFailure) error {
+
+	return xidlgohttp.DecodeStreamError(failure)
 }

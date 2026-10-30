@@ -131,7 +131,7 @@ where
             .await
         {
             Ok(resp_value) => {
-                let mut resp = xidl_rust_axum::stream::sse_response(resp_value);
+                let mut resp = xidl_rust_axum::stream::sse_response(resp_value).await;
                 resp
             }
             Err(err) => {
@@ -166,7 +166,7 @@ where
             .await
         {
             Ok(resp_value) => {
-                let mut resp = xidl_rust_axum::stream::sse_response(resp_value);
+                let mut resp = xidl_rust_axum::stream::sse_response(resp_value).await;
                 resp
             }
             Err(err) => {
@@ -274,7 +274,11 @@ impl HttpSecurityStreamServiceClient {
         let auth_target = &self.client;
         let _ = auth_target;
         auth_target.apply_auth(&mut req, xidl_rust_axum::ClientAuthRequirement::Bearer)?;
-        xidl_rust_axum::stream::open_sse::<String>(self.client.http(), req).await
+        xidl_rust_axum::stream::open_sse::<
+            String,
+            xidl_rust_axum::Error,
+        >(self.client.http(), req)
+            .await
     }
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn watch_public(
@@ -297,6 +301,10 @@ impl HttpSecurityStreamServiceClient {
             );
         let auth_target = &self.client;
         let _ = auth_target;
-        xidl_rust_axum::stream::open_sse::<String>(self.client.http(), req).await
+        xidl_rust_axum::stream::open_sse::<
+            String,
+            xidl_rust_axum::Error,
+        >(self.client.http(), req)
+            .await
     }
 }

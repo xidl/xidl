@@ -404,7 +404,6 @@ export const BodyShapeOperations = {
                     fields: [{ wireName: "document", key: "document" }],
                     singleKey: "document",
                     schema: ifaceSchemas.models.DocumentSchema,
-                
             },
         },
         response: {

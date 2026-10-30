@@ -1,3 +1,4 @@
+import { StreamInterruptedError } from 'xidl-typescript-codec';
 export class XidlServerError extends Error {
   readonly code: number;
   readonly msg: string;
@@ -27,29 +28,33 @@ function isZodErrorLike(error: unknown): error is { issues: unknown[] } {
   return true;
 }
 
-export function errorResponse(error: unknown): Response {
+export function projectError(error: unknown): {
+  status: number;
+  body: unknown;
+} {
+  if (error instanceof StreamInterruptedError) {
+    return { body: { code: 400, msg: error.message }, status: 400 };
+  }
   if (error instanceof XidlServerError) {
-    return jsonError(error.code, error.code, error.msg, error.headers);
+    return { body: { code: error.code, msg: error.msg }, status: error.code };
   }
   if (isZodErrorLike(error)) {
-    return jsonError(400, 400, 'invalid request', undefined, error.issues);
+    return {
+      body: { code: 400, detail: error.issues, msg: 'invalid request' },
+      status: 400,
+    };
   }
-  return jsonError(500, 500, String(error));
+  return { body: { code: 500, msg: String(error) }, status: 500 };
 }
 
-function jsonError(
-  status: number,
-  code: number,
-  message: string,
-  extraHeaders?: Record<string, string>,
-  detail?: unknown,
-): Response {
-  const headers = new Headers({ 'Content-Type': 'application/json' });
-  for (const [name, value] of Object.entries(extraHeaders ?? {})) {
-    headers.set(name, value);
-  }
-  return new Response(JSON.stringify({ code, detail, msg: message }), {
+export function errorResponse(error: unknown): Response {
+  const failure = projectError(error);
+  const headers = new Headers(
+    error instanceof XidlServerError ? error.headers : undefined,
+  );
+  headers.set('Content-Type', 'application/json');
+  return new Response(JSON.stringify(failure.body), {
     headers,
-    status,
+    status: failure.status,
   });
 }

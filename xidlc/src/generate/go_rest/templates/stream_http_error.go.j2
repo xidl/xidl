@@ -1,0 +1,4 @@
+if resp.StatusCode >= 400 {
+    var zero {{ response }}
+    return zero, xidlgohttp.DecodeStreamHTTPError(resp, decode{{ prefix }}Failure)
+}

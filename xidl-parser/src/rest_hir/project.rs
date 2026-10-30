@@ -40,6 +40,11 @@ pub fn project_with_options(
     super::types::TypeDeclarations::collect(&spec.0)
         .normalize(&mut ctx.interfaces, &mut ctx.exceptions)
         .map_err(parse_err)?;
+    for interface in &ctx.interfaces {
+        for operation in &interface.operations {
+            operation.validate_stream_exceptions(&ctx.exceptions)?;
+        }
+    }
     ctx.document.exceptions = ctx.exceptions;
     ctx.document.version_parameter = options.version_parameter.clone();
     ctx.document.version_values = options.version_values.iter().cloned().collect();
@@ -338,12 +343,6 @@ fn project_operation(
         &response_params,
         &return_type,
     );
-    if op.raises.is_some() && (stream.kind.is_some() || has_upgrade) {
-        return Err(ParseError::Message(format!(
-            "operation '{}': raises(...) is only supported on non-stream, non-upgrade operations",
-            op.ident
-        )));
-    }
     let raises = HttpExceptionRef::for_operation(op, module_path, exceptions)?;
     let mut operation = HttpOperation {
         meta: HttpOperationMeta {

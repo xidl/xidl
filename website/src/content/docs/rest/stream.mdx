@@ -23,20 +23,56 @@ In practice:
 
 - Server push streaming is the most common.
 - `sse` (Server-Sent Events) is the default for structured server streams.
-- `ndjson` is the default for structured client streams; each chunk is a JSON line.
+- `ndjson` is the default for structured client streams; each line is a control
+  or data frame.
 
 ```idl
 interface StreamApi {
     @server_stream
     @stream_codec("sse")
     @get(path = "/v1/events")
-    sequence<LogEntry> watch_logs();
+    LogEntry watch_logs();
 
     @client_stream
     @post(path = "/v1/logs")
-    void upload_logs(in sequence<LogEntry> logs);
+    void upload_logs(in LogEntry log);
 };
 ```
+
+The return type describes one server-stream item. A sequence return type means
+one batch per item. Each client-stream item uses the generated request type,
+such as an object containing `log` in the example above.
+
+## Completion and Declared Errors
+
+Structured streams require an explicit complete or error frame. EOF without one
+is an interruption error. Readers ignore heartbeats, stop at the first terminal
+frame, and release the body when completed, failed, or cancelled. A failed stream
+never emits complete afterward, and serialization errors never become null data.
+
+```idl
+@http(409) exception Conflict { string reason; };
+interface Exports {
+    @server_stream @get(path = "/exports")
+    LogEntry rows() raises(Conflict);
+};
+```
+
+Before the first serialized item, `Conflict` is an HTTP 409 response. After that
+item, it is a terminal SSE error carrying the same status and JSON body. Generated
+Rust, Go, and TypeScript REST clients decode both into the declared exception.
+Stream exceptions cannot carry header or cookie members. Consumers must check
+read errors through completion; partial data alone does not establish success.
+
+The TypeScript REST runtime works with standard Request/Response objects; the
+host adapter controls HTTP serving. Rust's stream reader exposes its terminal
+outcome; Go's reader and writer expose `Outcome()`. In TypeScript, the SSE runtime
+accepts a `StreamLifecycle` through its read options. Closing an already finished
+reader does not change its outcome. No reader automatically retries the stream.
+
+See the [HTTP Stream RFC](/rfc/http-stream/) for frame examples, the first-output
+boundary, and the distinction between completion, failure, cancellation, and
+interruption.
 
 ## Raw Byte Streams (`sequence<octet>`)
 

@@ -28,7 +28,7 @@
             {%- if method.deprecated %}
                 #[deprecated{% if method.deprecated_note %}(note = "{{ method.deprecated_note }}"){% endif %}]
             {% endif -%}
-            {%- set ret_ty %}{% if method.is_server_stream %}{% if method.is_byte_stream %}xidl_rust_axum::stream::ByteStream{% else %}xidl_rust_axum::stream::SseStream<{{ method.response_ty }}>{% endif %}{% elif method.is_bidi_stream %}(){% elif method.is_upgrade %}::xidl_rust_axum::axum::response::Response{% else %}{{ method.response_ty }}{% endif %}{% endset %}
+            {%- set ret_ty %}{% if method.is_server_stream %}{% if method.is_byte_stream %}xidl_rust_axum::stream::ByteStream{% else %}xidl_rust_axum::stream::SseStream<{{ method.response_ty }}{% if method.raises | length > 0 %}, {{ method.error_ty }}{% endif %}>{% endif %}{% elif method.is_bidi_stream %}(){% elif method.is_upgrade %}::xidl_rust_axum::axum::response::Response{% else %}{{ method.response_ty }}{% endif %}{% endset %}
                 async fn {{ method.name }}(
                 &self{% if method.is_server_stream or method.is_client_stream or method.is_bidi_stream %},
                 req: ::xidl_rust_axum::Request<{{ method.request_payload_ty }}>{% if method.handshake_params | length > 0 %},
@@ -78,6 +78,9 @@
                     Self::Framework(err)
                 }
             }
+            {% if method.is_server_stream or method.is_client_stream %}
+                {% include 'interface/stream_exceptions.rs.j2' %}
+            {% endif %}
             {% if opt.enable_server %}
                 impl ::xidl_rust_axum::axum::response::IntoResponse for {{ method.error_ty }} {
                     fn into_response(self) -> ::xidl_rust_axum::axum::response::Response {
