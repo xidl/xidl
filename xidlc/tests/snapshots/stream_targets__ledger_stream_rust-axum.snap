@@ -35,6 +35,9 @@ pub struct Conflict {
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct Retired {}
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
+pub struct NotModified {}
 #[allow(
     non_snake_case,
     unused_attributes,
@@ -65,6 +68,7 @@ pub trait Ledger {
 pub enum LedgerExportRowsError {
     Conflict(Conflict),
     Retired(Retired),
+    NotModified(NotModified),
     Framework(xidl_rust_axum::Error),
 }
 impl ::std::fmt::Display for LedgerExportRowsError {
@@ -72,6 +76,7 @@ impl ::std::fmt::Display for LedgerExportRowsError {
         match self {
             Self::Conflict(_) => f.write_str("HTTP 409: Conflict"),
             Self::Retired(_) => f.write_str("HTTP 410: Retired"),
+            Self::NotModified(_) => f.write_str("HTTP 304: NotModified"),
             Self::Framework(err) => ::std::fmt::Display::fmt(err, f),
         }
     }
@@ -116,6 +121,14 @@ impl xidl_rust_axum::stream::StreamException for LedgerExportRowsError {
                     body,
                 })
             }
+            Self::NotModified(value) => {
+                let _ = value;
+                let body = xidl_rust_axum::serde_json::Value::Null;
+                Ok(xidl_rust_axum::stream::StreamFailure {
+                    status: 304,
+                    body,
+                })
+            }
         }
     }
     fn from_failure(
@@ -139,6 +152,11 @@ impl xidl_rust_axum::stream::StreamException for LedgerExportRowsError {
             410 => {
                 let value: __xidl_out_Ledger::Retired = Retired::default().into();
                 Ok(Self::Retired(value.into()))
+            }
+            304 => {
+                let value: __xidl_out_Ledger::NotModified = NotModified::default()
+                    .into();
+                Ok(Self::NotModified(value.into()))
             }
             _ => {
                 xidl_rust_axum::stream::StreamException::from_failure(failure)
@@ -184,6 +202,15 @@ impl ::xidl_rust_axum::axum::response::IntoResponse for LedgerExportRowsError {
                 let mut response = ::xidl_rust_axum::axum::response::Response::new(body);
                 *response.status_mut() = ::xidl_rust_axum::axum::http::StatusCode::from_u16(
                         410u16,
+                    )
+                    .unwrap();
+                response
+            }
+            Self::NotModified(_) => {
+                let body = ::xidl_rust_axum::axum::body::Body::empty();
+                let mut response = ::xidl_rust_axum::axum::response::Response::new(body);
+                *response.status_mut() = ::xidl_rust_axum::axum::http::StatusCode::from_u16(
+                        304u16,
                     )
                     .unwrap();
                 response
@@ -489,6 +516,26 @@ pub(super) mod __xidl_out_Ledger {
         #[allow(unreachable_code)]
         fn default() -> Self {
             super::ImportResult::default().into()
+        }
+    }
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub struct NotModified {}
+    #[allow(unused_variables, unreachable_code)]
+    impl From<super::NotModified> for NotModified {
+        fn from(value: super::NotModified) -> Self {
+            Self {}
+        }
+    }
+    #[allow(unused_variables, unreachable_code)]
+    impl From<NotModified> for super::NotModified {
+        fn from(value: NotModified) -> Self {
+            Self {}
+        }
+    }
+    impl Default for NotModified {
+        #[allow(unreachable_code)]
+        fn default() -> Self {
+            super::NotModified::default().into()
         }
     }
     #[derive(::serde::Serialize, ::serde::Deserialize)]

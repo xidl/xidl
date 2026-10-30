@@ -125,7 +125,7 @@ func (c *V1BillingExportsClient) Rows(ctx context.Context, req *V1BillingExports
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode >= 400 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		defer resp.Body.Close()
 		return nil, xidlgohttp.DecodeStreamHTTPError(resp, decodeV1BillingExportsRowsFailure)
 	}
@@ -141,7 +141,7 @@ func (c *V1BillingExportsClient) ImportRows(ctx context.Context) (*xidlgohttp.Cl
 	httpReq.Header.Set("Accept", "text/plain")
 	xidlgohttp.ApplyClientAuth(httpReq, c.auth, V1BillingExportsImportRowsSecurityRequirements())
 	stream := xidlgohttp.NewClientStreamWriter[V1BillingExportsImportRowsRequest, V1BillingExportsImportRowsResponse](ctx, c.httpClient, httpReq, func(resp *http.Response) (V1BillingExportsImportRowsResponse, error) {
-		if resp.StatusCode >= 400 {
+		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 			var zero V1BillingExportsImportRowsResponse
 			return zero, xidlgohttp.DecodeStreamHTTPError(resp, decodeV1BillingExportsImportRowsFailure)
 		}
@@ -178,7 +178,7 @@ func (c *V2BillingExportsClient) Rows(ctx context.Context, req *V2BillingExports
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode >= 400 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		defer resp.Body.Close()
 		return nil, xidlgohttp.DecodeStreamHTTPError(resp, decodeV2BillingExportsRowsFailure)
 	}
@@ -194,7 +194,7 @@ func (c *V2BillingExportsClient) ImportRows(ctx context.Context) (*xidlgohttp.Cl
 	httpReq.Header.Set("Accept", "text/plain")
 	xidlgohttp.ApplyClientAuth(httpReq, c.auth, V2BillingExportsImportRowsSecurityRequirements())
 	stream := xidlgohttp.NewClientStreamWriter[V2BillingExportsImportRowsRequest, V2BillingExportsImportRowsResponse](ctx, c.httpClient, httpReq, func(resp *http.Response) (V2BillingExportsImportRowsResponse, error) {
-		if resp.StatusCode >= 400 {
+		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 			var zero V2BillingExportsImportRowsResponse
 			return zero, xidlgohttp.DecodeStreamHTTPError(resp, decodeV2BillingExportsImportRowsFailure)
 		}

@@ -103,8 +103,9 @@ transaction rollback. Storage atomicity remains the application's responsibility
 
 A structured stream can declare the same `raises(...)` exceptions as a unary
 operation. HTTP exception status codes must uniquely identify the operation's
-declared exceptions. Generated codecs use the exception set of the selected API
-version.
+declared exceptions. The error channel uses the existing 300 through 599 status
+range, including bodyless 304 exceptions. Generated codecs use the exception set
+of the selected API version.
 
 The boundary is the first **serialized output**, not merely obtaining the first
 business value:

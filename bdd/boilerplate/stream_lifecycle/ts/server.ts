@@ -2,7 +2,7 @@ import { createServer } from 'node:http';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { createRouter } from 'xidl-typescript-server';
-import { Conflict, Retired } from './{{MODULE_NAME}}.errors.js';
+import { Conflict, NotModified, Retired } from './{{MODULE_NAME}}.errors.js';
 import type { LedgerImportRowsRequest } from './{{MODULE_NAME}}.iface.js';
 import { type Ledger, LedgerOperations } from './{{MODULE_NAME}}.server.js';
 
@@ -11,10 +11,12 @@ const service: Ledger = {
     if (job === 'locked')
       throw new Conflict({ detail: { job, reason: 'locked' } });
     if (job === 'retired') throw new Retired({});
+    if (job === 'cached') throw new NotModified({});
     if (job === 'empty') return;
     yield { id: 'zero', quantity: 0 };
     if (job === 'partial')
       throw new Conflict({ detail: { job, reason: 'locked' } });
+    if (job === 'partial-cached') throw new NotModified({});
     yield { id: '雪', quantity: 2 };
   },
   async import_rows(stream: AsyncIterable<LedgerImportRowsRequest>) {

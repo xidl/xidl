@@ -37,7 +37,7 @@ impl SseDecodeState {
         }
         let payload = std::mem::take(&mut self.data).join("\n");
         match event.as_deref().unwrap_or("message") {
-            "next" | "message" => serde_json::from_str(&payload)
+            "" | "next" | "message" => serde_json::from_str(&payload)
                 .map(StreamAction::Item)
                 .map_err(|error| Error::message(format!("invalid SSE item: {error}"))),
             "error" => {

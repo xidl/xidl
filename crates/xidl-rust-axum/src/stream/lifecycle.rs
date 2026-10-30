@@ -27,9 +27,9 @@ pub struct StreamFailure {
 
 impl StreamFailure {
     pub(super) fn validate(&self) -> Result<()> {
-        if !(400..=599).contains(&self.status) {
+        if !(300..=599).contains(&self.status) {
             return Err(Error::message(
-                "stream failure status must be 400 through 599",
+                "stream failure status must be 300 through 599",
             ));
         }
         Ok(())

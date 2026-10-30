@@ -156,7 +156,7 @@ func (c *ReportApiClient) WatchReport(ctx context.Context, req *ReportApiWatchRe
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode >= 400 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		defer resp.Body.Close()
 		return nil, xidlgohttp.DecodeStreamHTTPError(resp, decodeReportApiWatchReportFailure)
 	}
