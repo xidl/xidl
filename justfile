@@ -1,10 +1,10 @@
 set shell := ["bash", "-c"]
 
-go_cache := env_var_or_default("GO_CACHE", "/tmp/xidl-go-cache")
-go_path := env_var_or_default("GO_PATH", "/tmp/xidl-go-path")
-xidlc_snapshot_version := env_var_or_default("XIDLC_SNAPSHOT_VERSION", "0.0.1")
-xidlc_snapshot_hash := env_var_or_default("XIDLC_SNAPSHOT_HASH", "snapshot")
-bdd_features := env_var_or_default("BDD_FEATURES", "bdd/features")
+go_cache := env("GO_CACHE", "/tmp/xidl-go-cache")
+go_path := env("GO_PATH", "/tmp/xidl-go-path")
+xidlc_snapshot_version := env("XIDLC_SNAPSHOT_VERSION", "0.0.1")
+xidlc_snapshot_hash := env("XIDLC_SNAPSHOT_HASH", "snapshot")
+bdd_features := env("BDD_FEATURES", "bdd/features")
 
 # Run all tests
 test: test-rust test-go test-typescript test-npm test-bdd
