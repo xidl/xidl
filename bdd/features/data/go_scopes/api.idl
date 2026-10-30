@@ -1,6 +1,13 @@
 import "sources/origin.idl";
 #include "types.idl"
 
+const origin::HTTPState InitialState = origin::HTTPState::ready;
+struct ImportedExports {
+    origin::SourceDetail detail;
+    origin::SourceAlias alias;
+    origin::SourceEvent::Payload payload;
+};
+
 module ledger {
     @http(409)
     exception Failure { @body Detail detail; };

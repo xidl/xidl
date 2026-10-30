@@ -40,9 +40,14 @@ fn concurrent_output_filename_renames_do_not_race() {
     fs::write(&input, "interface City { void noop(); };").expect("failed to write input idl");
 
     let previous_path = std::env::var_os("PATH");
+    let mut search_paths = vec![bin_dir.clone()];
+    search_paths.extend(std::env::split_paths(
+        previous_path.as_deref().unwrap_or_default(),
+    ));
+    let test_path = std::env::join_paths(search_paths).expect("test executable search path");
     // SAFETY: single-test binary; see the module docs.
     unsafe {
-        std::env::set_var("PATH", &bin_dir);
+        std::env::set_var("PATH", &test_path);
     }
 
     let barrier = std::sync::Arc::new(Barrier::new(2));

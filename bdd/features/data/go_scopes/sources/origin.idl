@@ -1,3 +1,10 @@
+enum HTTPState { ready, done };
+
 module httpAPI {
     struct Detail { string source; };
+};
+
+typedef struct SourceDetail { string message; } SourceAlias;
+union SourceEvent switch(long) {
+    case 0: struct Payload { string message; } payload;
 };

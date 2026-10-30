@@ -3527,6 +3527,7 @@ dependencies = [
 name = "xidl-build"
 version = "0.108.0"
 dependencies = [
+ "serde_json",
  "tempfile",
  "xidlc",
 ]

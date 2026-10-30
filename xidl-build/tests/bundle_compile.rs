@@ -126,6 +126,9 @@ fn bundle_backend_selects_and_renames_a_versioned_document() {
     let document = fs::read_to_string(out_dir.join("api.json")).expect("renamed document");
     assert!(document.contains("\"version\": \"1.0\""), "{document}");
 
+    // Old default documents must not mask a request that emits several versions.
+    fs::write(out_dir.join("openapi_versioned.json"), "stale default")
+        .expect("old default document");
     let failure = xidl_build::Builder::new()
         .with_lang("openapi")
         .with_output_filename("api.json")
@@ -139,5 +142,9 @@ fn bundle_backend_selects_and_renames_a_versioned_document() {
         ),
         other => panic!("expected Error::Compile, got {other:?}"),
     }
+    assert_eq!(
+        fs::read_to_string(out_dir.join("api.json")).expect("previous document"),
+        document
+    );
     let _ = fs::remove_dir_all(&scratch);
 }

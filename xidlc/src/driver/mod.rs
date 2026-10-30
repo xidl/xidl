@@ -120,7 +120,7 @@ impl Driver {
         let graph = UnitGraph::build(resolved.files(), resolved.mounts())?;
         for unit in graph.units() {
             let mut unit_props = props.clone();
-            unit_props.insert(IMPORT_PROPERTY.to_string(), unit.import_property());
+            unit_props.insert(IMPORT_PROPERTY.to_string(), graph.import_property(unit));
             unit_props.insert(
                 INTEGER_IMPORTS_PROPERTY.to_owned(),
                 serde_json::to_value(graph.integer_imports(unit))?,

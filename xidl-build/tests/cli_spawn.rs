@@ -72,13 +72,105 @@ fn cli_backend_invokes_xidlc_from_path() {
         out_dir.display()
     );
 
+    // Each subprocess waits until both generators have completed their writes.
+    // With a shared intermediate, one of the two renames must then fail.
+    for shared_destination in [true, false] {
+        let ready = scratch.join(format!("ready-{shared_destination}"));
+        fs::create_dir_all(&ready).expect("create subprocess barrier");
+        let source = format!(
+            r#"#!/bin/sh
+out="$3"
+printf '{{"openapi":"3.1.0","source":"%s"}}' "$5" > "$out/openapi_city.json"
+: > '{ready}/'"$$"
+attempt=0
+while :; do
+    set -- '{ready}/'*
+    [ "$#" -ge 2 ] && break
+    attempt=$((attempt + 1))
+    [ "$attempt" -lt 500 ] || exit 9
+    /bin/sleep 0.01
+done
+"#,
+            ready = ready.display(),
+        );
+        fs::write(&stub, source).expect("write synchronized generator");
+        let inputs: Vec<_> = ["left", "right"]
+            .into_iter()
+            .map(|side| {
+                let dir = scratch.join(side);
+                fs::create_dir_all(&dir).expect("create distinct input directory");
+                let path = dir.join("city.idl");
+                fs::write(&path, "interface City { void noop(); };").expect("write input");
+                path
+            })
+            .collect();
+        std::thread::scope(|scope| {
+            let handles: Vec<_> = inputs
+                .iter()
+                .enumerate()
+                .map(|(index, input)| {
+                    let out_dir = &out_dir;
+                    scope.spawn(move || {
+                        let name = if shared_destination {
+                            "shared.json".to_string()
+                        } else {
+                            format!("request-{index}.json")
+                        };
+                        xidl_build::Builder::new()
+                            .with_lang("openapi")
+                            .with_out_dir(out_dir)
+                            .with_output_filename(name)
+                            .compile(&[input])
+                    })
+                })
+                .collect();
+            for handle in handles {
+                handle
+                    .join()
+                    .expect("generation thread")
+                    .expect("both subprocesses must publish successfully");
+            }
+        });
+        for index in 0..2 {
+            let name = if shared_destination {
+                "shared.json".to_string()
+            } else {
+                format!("request-{index}.json")
+            };
+            let bytes = fs::read(out_dir.join(name)).expect("published document");
+            let document: serde_json::Value =
+                serde_json::from_slice(&bytes).expect("complete JSON document");
+            let source = document["source"].as_str().expect("document provenance");
+            if shared_destination {
+                assert!(inputs.iter().any(|input| input.to_str() == Some(source)));
+            } else {
+                assert_eq!(source, inputs[index].to_str().expect("input path"));
+            }
+        }
+    }
+    assert!(
+        fs::read_dir(&out_dir)
+            .expect("published directory")
+            .all(|entry| !entry
+                .expect("entry")
+                .file_name()
+                .to_string_lossy()
+                .starts_with(".xidl-build-")),
+        "private generation directories must be cleaned"
+    );
+
     fs::write(&stub, "#!/bin/sh\necho 'idl parse failure' >&2\nexit 3\n")
         .expect("failed to rewrite xidlc stub");
     let failure = xidl_build::Builder::new()
         .with_lang("openapi")
         .with_out_dir(&out_dir)
+        .with_output_filename("city.json")
         .compile(&[&input])
         .expect_err("failing xidlc stub should surface an error");
+    assert_eq!(
+        fs::read_to_string(out_dir.join("city.json")).expect("previous output"),
+        "{}"
+    );
     match failure {
         Error::Compile(message) => {
             assert!(

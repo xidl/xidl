@@ -24,6 +24,7 @@
 
 mod builder;
 mod error;
+mod output;
 
 #[cfg(not(feature = "bundle"))]
 mod cli;
