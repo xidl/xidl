@@ -71,7 +71,7 @@ import {
                     xidlPath = `${xidlPath}?${queryString}`;
                 }
                 const url = joinUrl(this.baseUrl, xidlPath);
-                return sseJsonStream<string>(this.fetchImpl, url, { method: "GET", headers }, undefined);
+                return sseJsonStream<string>(this.fetchImpl, url, { method: "GET", headers }, { schema: undefined });
             
             
     }
@@ -134,7 +134,7 @@ import {
                     xidlPath = `${xidlPath}?${queryString}`;
                 }
                 const url = joinUrl(this.baseUrl, xidlPath);
-                return sseJsonStream<boolean>(this.fetchImpl, url, { method: "GET", headers }, undefined);
+                return sseJsonStream<boolean>(this.fetchImpl, url, { method: "GET", headers }, { schema: undefined });
             
             
     }

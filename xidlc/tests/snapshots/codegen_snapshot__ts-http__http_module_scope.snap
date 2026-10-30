@@ -338,7 +338,6 @@ import {
                         fields: [{ wireName: "item", key: "item" }],
                         singleKey: "item",
                         schema: ifaceSchemas.models.nm.ItemSchema,
-                    
                 },
             },
             response: {

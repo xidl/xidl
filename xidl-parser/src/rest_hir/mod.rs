@@ -6,6 +6,7 @@ mod project;
 pub(crate) mod project_params;
 mod route;
 pub mod semantics;
+mod stream_errors;
 #[cfg(test)]
 mod tests;
 mod types;

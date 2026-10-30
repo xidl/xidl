@@ -106,7 +106,7 @@ fn register_route(
         render_request_binding(out, method, renderer)?;
     }
     match method.stream_kind {
-        Some(HttpStreamKind::Server) => render_server_stream_handler(out, method),
+        Some(HttpStreamKind::Server) => render_server_stream_handler(out, method, renderer)?,
         Some(HttpStreamKind::Client) => render_client_stream_handler(out, method, renderer)?,
         Some(HttpStreamKind::Bidi) => render_bidi_stream_handler(out, method, renderer)?,
         None => render_unary_handler(out, method, renderer)?,

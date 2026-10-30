@@ -1,7 +1,12 @@
 export type { XidlSchema } from 'xidl-typescript-codec';
+export {
+  type StreamFailure,
+  StreamInterruptedError,
+  StreamLifecycle,
+  type StreamOutcome,
+} from 'xidl-typescript-codec';
 export { XidlClientError } from './error.ts';
 export { resolveFetch, resolveFetchLegacy } from './fetch.ts';
-export { ndjsonBodyLegacy, sseJsonStreamLegacy } from './legacy.ts';
 export {
   appendCookie,
   appendHeader,
@@ -14,6 +19,7 @@ export {
   buildResponsePayload,
   decodeOptionalResponseBody,
   decodeResponseBody,
+  decodeXidlError,
   parseXidlError,
   readResponseCookies,
   readResponseHeader,

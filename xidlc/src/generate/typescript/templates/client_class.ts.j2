@@ -63,12 +63,12 @@ export class {{ client_name }}Client {
         const url = joinUrl(this.baseUrl, xidlPath);
         {% if method.is_server_stream %}
             const itemSchema = zodSchemas.{{ method.return_schema_ref }}Schema;
-            return sseJsonStreamLegacy<{{ render_type(method.stream_item_ty) }}>(this.fetchImpl, url, options, itemSchema);
+            return sseJsonStream<{{ render_type(method.stream_item_ty) }}>(this.fetchImpl, url, options, { schema: itemSchema });
         {% elif method.is_client_stream %}
             headers.set("Content-Type", "application/x-ndjson");
             const itemSchema = zodSchemas.{{ method.request_schema_ref }}Schema;
-            const streamBody = ndjsonBodyLegacy<{{ render_type(method.client_stream_item_ty) }}>(stream, itemSchema);
-            const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers, body: streamBody });
+            const streamBody = ndjsonBody<{{ render_type(method.client_stream_item_ty) }}>(stream, itemSchema);
+            const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers, duplex: "half", body: streamBody });
             if (!resp.ok) {
                 throw await parseXidlError(resp);
             }

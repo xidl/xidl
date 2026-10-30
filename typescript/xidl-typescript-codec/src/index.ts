@@ -1,4 +1,13 @@
 // biome-ignore-all lint/suspicious/noExplicitAny: JSON serialization library needs to handle arbitrary object structures.
+export {
+  decodeStreamFrame,
+  SseDecoder,
+  type StreamFailure,
+  type StreamFrame,
+  StreamInterruptedError,
+  StreamLifecycle,
+  type StreamOutcome,
+} from './stream.js';
 /**
  * Minimal structural schema accepted by the codec.
  *

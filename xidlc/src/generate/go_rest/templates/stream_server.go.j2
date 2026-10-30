@@ -1,0 +1,6 @@
+stream := xidlgohttp.NewSSEServerStreamWriter[{{ item }}](c.Writer)
+if err := svc.{{ name }}(c.Request.Context(), req, stream); err != nil {
+    _ = stream.Fail(encode{{ prefix }}Failure(err))
+    return
+}
+_ = stream.Close()

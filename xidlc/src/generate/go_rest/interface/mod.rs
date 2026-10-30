@@ -6,6 +6,8 @@ mod interface_server;
 mod interface_server_support;
 mod interface_templates;
 mod interface_types;
+mod stream;
+pub(crate) use stream::StreamExceptionContext;
 
 use crate::error::IdlcResult;
 use crate::generate::go_rest::{GoRestRenderBlocks, MethodMeta};
@@ -43,18 +45,29 @@ pub(crate) fn render_interface(
             )
         })
         .map(|operation| {
-            build_method_meta(
+            let mut method = build_method_meta(
                 &interface_name,
                 operation,
                 &context.packages,
                 prefix,
                 context.version_parameter(prefix),
                 context.versioned_modules(),
-            )
+            )?;
+            method.stream_exceptions = StreamExceptionContext::collect(operation, context)?;
+            Ok(method)
         })
         .collect::<IdlcResult<Vec<_>>>()?;
 
-    let mut blocks = GoRestRenderBlocks::default();
+    let mut blocks = GoRestRenderBlocks {
+        stream_raises: methods
+            .iter()
+            .any(|method| !method.stream_exceptions.is_empty()),
+        stream_error_body: methods
+            .iter()
+            .flat_map(|method| &method.stream_exceptions)
+            .any(|exception| exception.has_body),
+        ..Default::default()
+    };
 
     let mut server = String::new();
     writeln!(server, "type {interface_name}Service interface {{").unwrap();
@@ -73,6 +86,9 @@ pub(crate) fn render_interface(
     let mut shared = String::new();
     for method in &methods {
         render_method_types(&mut shared, method, context.renderer)?;
+        if method.stream_kind.is_some() && !method.is_websocket {
+            stream::StreamMethod::new(method).render_errors(&mut shared, context.renderer)?;
+        }
     }
     blocks.push_shared(shared);
     Ok(blocks)

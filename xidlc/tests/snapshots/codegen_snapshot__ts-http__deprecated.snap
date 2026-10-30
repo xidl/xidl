@@ -9,7 +9,7 @@ deprecated.client.ts
 
 
 import type * as types from "./deprecated";
-import { readResponseCookies, readResponseHeader } from "xidl-typescript-client";
+import { decodeXidlError, readResponseCookies, readResponseHeader } from "xidl-typescript-client";
 import * as $xidlErrors from "./deprecated.errors";
 
 import type * as ifaceTypes from "./deprecated.iface";
@@ -80,7 +80,7 @@ export namespace legacy {
                     headers.set("Accept", "application/json");
             const resp = await this.fetchImpl(url, { method: "GET", headers });
             if (!resp.ok) {
-                await this.throwGetError(resp);
+                await this.throwGetError(resp.status, await resp.json().catch(() => undefined), resp.headers);
                 
             }
             const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
@@ -88,14 +88,13 @@ export namespace legacy {
         }
         
         
-            async throwGetError(resp: Response): Promise<never> {
-                const status = resp.status;
+            async throwGetError(status: number, rawBodyValue: unknown, headers: Headers = new Headers()): Promise<never> {
+                const rawBody = rawBodyValue as Record<string, unknown> | undefined;
                 if (status === 410) {
                     const bodySchema = z.object({ "reason": z.string(),  });
-                    const rawBody = await resp.clone().json().catch(() => undefined);
-                    if (rawBody == null || rawBody["reason"] === undefined) throw await parseXidlError(resp);
+                    if (rawBody == null || rawBody["reason"] === undefined) throw decodeXidlError(status, rawBody);
                     const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
-                    if (!decoded.success) throw await parseXidlError(resp);
+                    if (!decoded.success) throw decodeXidlError(status, rawBody);
                     const body = decoded.data;
                     const error = new $xidlErrors.Gone({
                         "reason": body["reason"] as never,
@@ -103,7 +102,7 @@ export namespace legacy {
                     
                     throw error;
                 }
-                throw await parseXidlError(resp);
+                throw decodeXidlError(status, rawBody);
             }
         
     }
@@ -400,6 +399,7 @@ deprecated.server.ts
 
 
 import type * as types from "./deprecated";
+import { serialize } from "xidl-typescript-codec";
 import * as $xidlErrors from "./deprecated.errors";
 
 import type * as ifaceTypes from "./deprecated.iface";
@@ -472,7 +472,7 @@ export namespace legacy {
                                 return {
                                     status: 410,
                                     headers,
-                                    body: { "reason": error.reason, },
+                                    body: { "reason": serialize(error.reason, z.string()), },
                                 };
                                 
                         }
@@ -519,7 +519,6 @@ export namespace legacy {
                         fields: [{ wireName: "envelope", key: "envelope" }],
                         singleKey: "envelope",
                         schema: ifaceSchemas.models.current.EnvelopeSchema,
-                    
                 },
             },
             response: {

@@ -25,8 +25,7 @@ export const {{ service_name }}Operations = {
                     contentType: "{{ method.request_content_type }}",
                     fields: [{% for entry in method.body_entries %}{ wireName: "{{ entry.raw_name }}", key: "{{ entry.key_name }}" }{% if not loop.last %}, {% endif %}{% endfor %}],
                     {% if method.body_single_key %}singleKey: "{{ method.body_single_key }}",
-                    {% endif %}{% if method.body_schema_ref %}schema: ifaceSchemas.{{ method.body_schema_ref }}Schema,
-                {% endif %}
+                    {% endif %}{% if method.body_schema_ref %}schema: ifaceSchemas.{{ method.body_schema_ref }}Schema,{% endif %}
             },
         },
         response: {
@@ -63,7 +62,7 @@ export const {{ service_name }}Operations = {
                             return {
                                 status: {{ ex.status }},
                                 headers,
-                                body: { {% for field in ex.body %}"{{ field.wire_name }}": error.{{ field.field }}, {% endfor %}},
+                                body: { {% for field in ex.body %}"{{ field.wire_name }}": serialize(error.{{ field.field }}, {{ render_zod(field.schema) }}{% if field.optional %}.optional(){% endif %}), {% endfor %}},
                             };
                             {% else %}return { status: {{ ex.status }}, headers };
                         {% endif %}

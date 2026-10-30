@@ -9,7 +9,7 @@ version_parameter_query.client.ts
 
 
 import type * as types from "./version_parameter_query";
-import { readResponseCookies, readResponseHeader } from "xidl-typescript-client";
+import { decodeXidlError, readResponseCookies, readResponseHeader } from "xidl-typescript-client";
 import * as $xidlErrors from "./version_parameter_query.errors";
 
 import type * as ifaceTypes from "./version_parameter_query.iface";
@@ -131,7 +131,7 @@ import {
                         headers.set("Accept", "application/json");
                 const resp = await this.fetchImpl(url, { method: "GET", headers });
                 if (!resp.ok) {
-                    await this.throwFailError(resp);
+                    await this.throwFailError(resp.status, await resp.json().catch(() => undefined), resp.headers);
 
                 }
                 const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
@@ -157,7 +157,7 @@ import {
                 headers.set("Content-Type", "application/x-ndjson");
 
                 headers.set("Accept", "application/x-ndjson");
-                const resp = await this.fetchImpl(url, { method: "GET", headers, body: encodeRequestBody(xidlBody, "application/x-ndjson", this.codecs, undefined) });
+                const resp = await this.fetchImpl(url, { method: "GET", headers, body: encodeRequestBody(xidlBody, "application/x-ndjson", this.codecs, ifaceSchemas.v1.business.StoreChatRequestSchema) });
                 if (!resp.ok) {
                     throw await parseXidlError(resp);
 
@@ -168,14 +168,13 @@ import {
             }
 
 
-                async throwFailError(resp: Response): Promise<never> {
-                    const status = resp.status;
+                async throwFailError(status: number, rawBodyValue: unknown, headers: Headers = new Headers()): Promise<never> {
+                    const rawBody = rawBodyValue as Record<string, unknown> | undefined;
                     if (status === 409) {
                         const bodySchema = z.object({ "message": z.string(),  });
-                        const rawBody = await resp.clone().json().catch(() => undefined);
-                        if (rawBody == null || rawBody["message"] === undefined) throw await parseXidlError(resp);
+                        if (rawBody == null || rawBody["message"] === undefined) throw decodeXidlError(status, rawBody);
                         const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
-                        if (!decoded.success) throw await parseXidlError(resp);
+                        if (!decoded.success) throw decodeXidlError(status, rawBody);
                         const body = decoded.data;
                         const error = new $xidlErrors.v1$business$Conflict({
                             "message": body["message"] as never,
@@ -183,7 +182,7 @@ import {
 
                         throw error;
                     }
-                    throw await parseXidlError(resp);
+                    throw decodeXidlError(status, rawBody);
                 }
 
         }
@@ -287,7 +286,7 @@ import {
                 headers.set("Content-Type", "application/x-ndjson");
 
                 headers.set("Accept", "application/x-ndjson");
-                const resp = await this.fetchImpl(url, { method: "GET", headers, body: encodeRequestBody(xidlBody, "application/x-ndjson", this.codecs, undefined) });
+                const resp = await this.fetchImpl(url, { method: "GET", headers, body: encodeRequestBody(xidlBody, "application/x-ndjson", this.codecs, ifaceSchemas.v1.business.DuplexShapesScalarRequestSchema) });
                 if (!resp.ok) {
                     throw await parseXidlError(resp);
 
@@ -313,7 +312,7 @@ import {
                 headers.set("Content-Type", "application/x-ndjson");
 
                 headers.set("Accept", "application/x-ndjson");
-                const resp = await this.fetchImpl(url, { method: "GET", headers, body: encodeRequestBody(xidlBody, "application/x-ndjson", this.codecs, undefined) });
+                const resp = await this.fetchImpl(url, { method: "GET", headers, body: encodeRequestBody(xidlBody, "application/x-ndjson", this.codecs, ifaceSchemas.v1.business.DuplexShapesModelRequestSchema) });
                 if (!resp.ok) {
                     throw await parseXidlError(resp);
 
@@ -340,7 +339,7 @@ import {
                 headers.set("Content-Type", "application/x-ndjson");
 
                 headers.set("Accept", "");
-                const resp = await this.fetchImpl(url, { method: "GET", headers, body: encodeRequestBody(xidlBody, "application/x-ndjson", this.codecs, undefined) });
+                const resp = await this.fetchImpl(url, { method: "GET", headers, body: encodeRequestBody(xidlBody, "application/x-ndjson", this.codecs, ifaceSchemas.v1.business.DuplexShapesSinkRequestSchema) });
                 if (!resp.ok) {
                     throw await parseXidlError(resp);
 
@@ -538,7 +537,7 @@ import {
                         headers.set("Accept", "application/json");
                 const resp = await this.fetchImpl(url, { method: "GET", headers });
                 if (!resp.ok) {
-                    await this.throwFailError(resp);
+                    await this.throwFailError(resp.status, await resp.json().catch(() => undefined), resp.headers);
 
                 }
                 const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
@@ -564,7 +563,7 @@ import {
                 headers.set("Content-Type", "application/x-ndjson");
 
                 headers.set("Accept", "application/x-ndjson");
-                const resp = await this.fetchImpl(url, { method: "GET", headers, body: encodeRequestBody(xidlBody, "application/x-ndjson", this.codecs, undefined) });
+                const resp = await this.fetchImpl(url, { method: "GET", headers, body: encodeRequestBody(xidlBody, "application/x-ndjson", this.codecs, ifaceSchemas.v2.business.StoreChatRequestSchema) });
                 if (!resp.ok) {
                     throw await parseXidlError(resp);
 
@@ -575,14 +574,13 @@ import {
             }
 
 
-                async throwFailError(resp: Response): Promise<never> {
-                    const status = resp.status;
+                async throwFailError(status: number, rawBodyValue: unknown, headers: Headers = new Headers()): Promise<never> {
+                    const rawBody = rawBodyValue as Record<string, unknown> | undefined;
                     if (status === 409) {
                         const bodySchema = z.object({ "message": z.string(),  });
-                        const rawBody = await resp.clone().json().catch(() => undefined);
-                        if (rawBody == null || rawBody["message"] === undefined) throw await parseXidlError(resp);
+                        if (rawBody == null || rawBody["message"] === undefined) throw decodeXidlError(status, rawBody);
                         const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
-                        if (!decoded.success) throw await parseXidlError(resp);
+                        if (!decoded.success) throw decodeXidlError(status, rawBody);
                         const body = decoded.data;
                         const error = new $xidlErrors.v2$business$Conflict({
                             "message": body["message"] as never,
@@ -590,7 +588,7 @@ import {
 
                         throw error;
                     }
-                    throw await parseXidlError(resp);
+                    throw decodeXidlError(status, rawBody);
                 }
 
         }
@@ -694,7 +692,7 @@ import {
                 headers.set("Content-Type", "application/x-ndjson");
 
                 headers.set("Accept", "application/x-ndjson");
-                const resp = await this.fetchImpl(url, { method: "GET", headers, body: encodeRequestBody(xidlBody, "application/x-ndjson", this.codecs, undefined) });
+                const resp = await this.fetchImpl(url, { method: "GET", headers, body: encodeRequestBody(xidlBody, "application/x-ndjson", this.codecs, ifaceSchemas.v2.business.DuplexShapesScalarRequestSchema) });
                 if (!resp.ok) {
                     throw await parseXidlError(resp);
 
@@ -720,7 +718,7 @@ import {
                 headers.set("Content-Type", "application/x-ndjson");
 
                 headers.set("Accept", "application/x-ndjson");
-                const resp = await this.fetchImpl(url, { method: "GET", headers, body: encodeRequestBody(xidlBody, "application/x-ndjson", this.codecs, undefined) });
+                const resp = await this.fetchImpl(url, { method: "GET", headers, body: encodeRequestBody(xidlBody, "application/x-ndjson", this.codecs, ifaceSchemas.v2.business.DuplexShapesModelRequestSchema) });
                 if (!resp.ok) {
                     throw await parseXidlError(resp);
 
@@ -747,7 +745,7 @@ import {
                 headers.set("Content-Type", "application/x-ndjson");
 
                 headers.set("Accept", "");
-                const resp = await this.fetchImpl(url, { method: "GET", headers, body: encodeRequestBody(xidlBody, "application/x-ndjson", this.codecs, undefined) });
+                const resp = await this.fetchImpl(url, { method: "GET", headers, body: encodeRequestBody(xidlBody, "application/x-ndjson", this.codecs, ifaceSchemas.v2.business.DuplexShapesSinkRequestSchema) });
                 if (!resp.ok) {
                     throw await parseXidlError(resp);
 
@@ -1107,6 +1105,7 @@ version_parameter_query.server.ts
 
 
 import type * as types from "./version_parameter_query";
+import { serialize } from "xidl-typescript-codec";
 import * as $xidlErrors from "./version_parameter_query.errors";
 
 import type * as ifaceTypes from "./version_parameter_query.iface";
@@ -1270,7 +1269,7 @@ import {
                                     return {
                                         status: 409,
                                         headers,
-                                        body: { "message": error.message, },
+                                        body: { "message": serialize(error.message, z.string()), },
                                     };
                                     
                             }
@@ -1298,7 +1297,7 @@ import {
                             kind: "value",
                             contentType: "application/x-ndjson",
                             fields: [{ wireName: "text", key: "text" }],
-                            
+                            schema: ifaceSchemas.v1.business.StoreChatRequestSchema,
                     },
                 },
                 response: {
@@ -1464,7 +1463,7 @@ import {
                             kind: "value",
                             contentType: "application/x-ndjson",
                             fields: [{ wireName: "text", key: "text" }],
-                            
+                            schema: ifaceSchemas.v1.business.DuplexShapesScalarRequestSchema,
                     },
                 },
                 response: {
@@ -1498,7 +1497,7 @@ import {
                             kind: "value",
                             contentType: "application/x-ndjson",
                             fields: [{ wireName: "id", key: "id" }],
-                            
+                            schema: ifaceSchemas.v1.business.DuplexShapesModelRequestSchema,
                     },
                 },
                 response: {
@@ -1534,7 +1533,7 @@ import {
                             kind: "value",
                             contentType: "application/x-ndjson",
                             fields: [{ wireName: "text", key: "text" }],
-                            
+                            schema: ifaceSchemas.v1.business.DuplexShapesSinkRequestSchema,
                     },
                 },
                 response: {
@@ -1740,7 +1739,7 @@ import {
                                     return {
                                         status: 409,
                                         headers,
-                                        body: { "message": error.message, },
+                                        body: { "message": serialize(error.message, z.string()), },
                                     };
                                     
                             }
@@ -1768,7 +1767,7 @@ import {
                             kind: "value",
                             contentType: "application/x-ndjson",
                             fields: [{ wireName: "text", key: "text" }],
-                            
+                            schema: ifaceSchemas.v2.business.StoreChatRequestSchema,
                     },
                 },
                 response: {
@@ -1934,7 +1933,7 @@ import {
                             kind: "value",
                             contentType: "application/x-ndjson",
                             fields: [{ wireName: "text", key: "text" }],
-                            
+                            schema: ifaceSchemas.v2.business.DuplexShapesScalarRequestSchema,
                     },
                 },
                 response: {
@@ -1968,7 +1967,7 @@ import {
                             kind: "value",
                             contentType: "application/x-ndjson",
                             fields: [{ wireName: "id", key: "id" }],
-                            
+                            schema: ifaceSchemas.v2.business.DuplexShapesModelRequestSchema,
                     },
                 },
                 response: {
@@ -2004,7 +2003,7 @@ import {
                             kind: "value",
                             contentType: "application/x-ndjson",
                             fields: [{ wireName: "text", key: "text" }],
-                            
+                            schema: ifaceSchemas.v2.business.DuplexShapesSinkRequestSchema,
                     },
                 },
                 response: {

@@ -1,5 +1,6 @@
 mod bidi;
 mod bytes;
+mod lifecycle;
 mod ndjson;
 mod sse;
 mod writer;
@@ -16,6 +17,7 @@ pub use bytes::open_byte_stream;
 pub use bytes::{ByteReader, boxed_bytes};
 #[cfg(feature = "server")]
 pub use bytes::{byte_stream_response, decode_bytes_body};
+pub use lifecycle::{StreamError, StreamException, StreamFailure, StreamOutcome};
 pub use ndjson::boxed_ndjson;
 #[cfg(feature = "server")]
 pub use ndjson::decode_ndjson_body;
@@ -40,15 +42,17 @@ use std::pin::Pin;
 pub type ByteStream = Pin<Box<dyn Stream<Item = Result<::bytes::Bytes>> + Send + 'static>>;
 
 /// Boxed server-sent event stream used by generated handlers.
-pub type SseStream<T> = Pin<Box<dyn Stream<Item = Result<T>> + Send + 'static>>;
+pub type SseStream<T, E = crate::Error> =
+    Pin<Box<dyn Stream<Item = std::result::Result<T, E>> + Send + 'static>>;
 /// Boxed server-sent event stream consumed by generated clients.
-pub type SseClientStream<T> = Pin<Box<dyn Stream<Item = Result<T>> + Send + 'static>>;
+pub type SseClientStream<T, E = crate::Error> =
+    Pin<Box<dyn Stream<Item = std::result::Result<T, StreamError<E>>> + Send + 'static>>;
 /// Boxed NDJSON receive stream.
 pub type NdjsonStream<T> = Pin<Box<dyn Stream<Item = Result<T>> + Send + 'static>>;
 /// Boxed NDJSON send stream.
 pub type NdjsonSendStream<T> = Pin<Box<dyn Stream<Item = Result<T>> + Send + 'static>>;
 /// Alias for a client-stream writer.
-pub type Writer<T, R> = ClientStreamWriter<T, R>;
+pub type Writer<T, R, E = crate::Error> = ClientStreamWriter<T, R, E>;
 /// Alias for a bidirectional client stream.
 pub type ReaderWriter<TIn, TOut> = BidiClientStream<TIn, TOut>;
 

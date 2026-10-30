@@ -16,10 +16,21 @@ struct Payload {
 
 #[tokio::test]
 async fn reader_reads_items_from_boxed_stream() {
-    let stream = boxed_sse(stream::iter(vec![Ok(Payload { value: 1 })]));
+    let stream = Box::pin(stream::iter(vec![Ok::<_, StreamError<Error>>(Payload {
+        value: 1,
+    })]));
     let mut reader = Reader::new(stream);
     assert_eq!(reader.read().await.unwrap().unwrap(), Payload { value: 1 });
     assert!(reader.read().await.is_none());
+    assert_eq!(reader.outcome(), Some(StreamOutcome::Completed));
+    reader.cancel();
+    assert_eq!(reader.outcome(), Some(StreamOutcome::Completed));
+    let mut reader = Reader::new(Box::pin(stream::pending::<
+        std::result::Result<Payload, StreamError<Error>>,
+    >()));
+    reader.cancel();
+    assert!(reader.read().await.is_none());
+    assert_eq!(reader.outcome(), Some(StreamOutcome::Cancelled));
 }
 
 #[cfg(feature = "server")]
@@ -105,11 +116,12 @@ async fn client_stream_writer_close_and_cancel_handle_state() {
 
 #[cfg(feature = "server")]
 #[tokio::test]
-async fn sse_response_emits_next_error_and_complete_events() {
+async fn sse_response_stops_after_the_error_without_completing() {
     let response = sse_response(boxed_sse(stream::iter(vec![
         Ok(Payload { value: 5 }),
         Err(Error::new(409, "boom")),
-    ])));
+    ])))
+    .await;
     let bytes = body::to_bytes(response.into_body(), usize::MAX)
         .await
         .unwrap();
@@ -117,14 +129,14 @@ async fn sse_response_emits_next_error_and_complete_events() {
     assert!(text.contains("event: next"));
     assert!(text.contains(r#"data: {"value":5}"#));
     assert!(text.contains("event: error"));
-    assert!(text.contains(r#"data: {"code":409,"msg":"boom"}"#));
-    assert!(text.contains("event: complete"));
+    assert!(text.contains(r#"data: {"status":409,"body":{"code":409,"msg":"boom"}}"#));
+    assert!(!text.contains("event: complete"));
 }
 
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn decode_ndjson_body_decodes_valid_and_invalid_lines() {
-    let body = Body::from("{\"value\":1}\nnot-json\n");
+    let body = Body::from("{\"t\":\"next\",\"data\":{\"value\":1}}\nnot-json\n");
     let mut stream = decode_ndjson_body::<Payload>(body);
 
     assert_eq!(stream.next().await.unwrap().unwrap(), Payload { value: 1 });
@@ -133,73 +145,37 @@ async fn decode_ndjson_body_decodes_valid_and_invalid_lines() {
 }
 
 #[test]
-fn sse_decode_state_handles_next_error_complete_and_comments() {
+fn sse_decode_state_ignores_comments_and_decodes_terminal_payloads() {
     let mut state = SseDecodeState::default();
-    assert!(matches!(
-        state.push_line::<Payload>(": keepalive").unwrap(),
-        StreamAction::Continue
-    ));
-    assert!(matches!(
-        state.push_line::<Payload>("event: next").unwrap(),
-        StreamAction::Continue
-    ));
-    assert!(matches!(
-        state.push_line::<Payload>("data: {\"value\":3}").unwrap(),
-        StreamAction::Continue
-    ));
-    match state.push_line::<Payload>("").unwrap() {
-        StreamAction::Item(item) => assert_eq!(item, Payload { value: 3 }),
-        _ => panic!("expected decoded item"),
+    for line in [": heartbeat", "", "event: next", "data: {\"value\":3}"] {
+        assert!(matches!(
+            state.push_line::<Payload, Error>(line).unwrap(),
+            StreamAction::Continue
+        ));
     }
-
     assert!(matches!(
-        state.push_line::<Payload>("event: complete").unwrap(),
-        StreamAction::Continue
+        state.push_line::<Payload, Error>("").unwrap(),
+        StreamAction::Item(Payload { value: 3 })
     ));
+    for line in ["event: complete", "data: {}"] {
+        state.push_line::<Payload, Error>(line).unwrap();
+    }
     assert!(matches!(
-        state.push_line::<Payload>("").unwrap(),
+        state.push_line::<Payload, Error>("").unwrap(),
         StreamAction::Done
     ));
-
-    assert!(matches!(
-        state.push_line::<Payload>("event: error").unwrap(),
-        StreamAction::Continue
-    ));
-    assert!(matches!(
-        state
-            .push_line::<Payload>("data: {\"code\":418,\"msg\":\"teapot\"}")
-            .unwrap(),
-        StreamAction::Continue
-    ));
-    let err = match state.push_line::<Payload>("") {
-        Err(err) => err,
-        Ok(_) => panic!("expected error event"),
-    };
-    assert_eq!(err.code, 418);
-
-    assert!(matches!(
-        state.push_line::<Payload>("event: unknown").unwrap(),
-        StreamAction::Continue
-    ));
-    assert!(matches!(
-        state.push_line::<Payload>("").unwrap(),
-        StreamAction::Continue
-    ));
-
-    assert!(matches!(
-        SseDecodeState::default().flush::<Payload>().unwrap(),
-        StreamAction::Continue
-    ));
-
-    let mut state = SseDecodeState::default();
-    state.push_line::<Payload>("event: error").unwrap();
-    state.push_line::<Payload>("data: raw failure").unwrap();
-    let err = match state.push_line::<Payload>("") {
-        Err(err) => err,
-        Ok(_) => panic!("expected raw error"),
-    };
-    assert_eq!(err.code, 500);
-    assert_eq!(err.message, "raw failure");
+    for line in [
+        "event: error",
+        "data: {\"status\":418,\"body\":{\"code\":418,\"msg\":\"teapot\"}}",
+    ] {
+        state.push_line::<Payload, Error>(line).unwrap();
+    }
+    match state.push_line::<Payload, Error>("").unwrap() {
+        StreamAction::Failed(error) => assert_eq!(error.code, 418),
+        _ => panic!("expected a terminal failure"),
+    }
+    state.push_line::<Payload, Error>("data: not-json").unwrap();
+    assert!(state.push_line::<Payload, Error>("").is_err());
 }
 
 struct BrokenReader;
@@ -218,7 +194,8 @@ impl AsyncRead for BrokenReader {
 async fn decode_ndjson_reader_surfaces_io_errors() {
     let mut stream = decode_ndjson_reader::<Payload, _>(BrokenReader);
     let err = stream.next().await.unwrap().unwrap_err();
-    assert_eq!(err.code, 500);
+    assert_eq!(err.code, 400);
+    assert!(stream.next().await.is_none());
 }
 
 #[test]

@@ -9,7 +9,7 @@ http_exceptions.client.ts
 
 
 import type * as types from "./http_exceptions";
-import { readResponseCookies, readResponseHeader } from "xidl-typescript-client";
+import { decodeXidlError, readResponseCookies, readResponseHeader } from "xidl-typescript-client";
 import * as $xidlErrors from "./http_exceptions.errors";
 
 import type * as ifaceTypes from "./http_exceptions.iface";
@@ -75,7 +75,7 @@ import {
                 headers.set("Accept", "application/json");
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
-            await this.throwGetFileError(resp);
+            await this.throwGetFileError(resp.status, await resp.json().catch(() => undefined), resp.headers);
             
         }
         const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
@@ -83,11 +83,11 @@ import {
     }
     
     
-        async throwGetFileError(resp: Response): Promise<never> {
-            const status = resp.status;
+        async throwGetFileError(status: number, rawBodyValue: unknown, headers: Headers = new Headers()): Promise<never> {
+            const rawBody = rawBodyValue as Record<string, unknown> | undefined;
             if (status === 304) {
                 const error = new $xidlErrors.NotModified({
-                    "etag": readResponseHeader(resp.headers, "ETag", false, value => value) as never,
+                    "etag": readResponseHeader(headers, "ETag", false, value => value) as never,
                     });
                 
                     z.string().parse(error.etag);
@@ -96,17 +96,16 @@ import {
             }
             if (status === 412) {
                 const bodySchema = z.object({ "code": z.number().int().nonnegative(), "message": z.string(), "detail": z.string().optional(),  });
-                const rawBody = await resp.clone().json().catch(() => undefined);
-                if (rawBody == null || rawBody["code"] === undefined || rawBody["message"] === undefined) throw await parseXidlError(resp);
+                if (rawBody == null || rawBody["code"] === undefined || rawBody["message"] === undefined) throw decodeXidlError(status, rawBody);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
-                if (!decoded.success) throw await parseXidlError(resp);
+                if (!decoded.success) throw decodeXidlError(status, rawBody);
                 const body = decoded.data;
                 const error = new $xidlErrors.PreconditionFailed({
-                    "etag": readResponseHeader(resp.headers, "ETag", false, value => value) as never,
-                    "hints": (readResponseHeader(resp.headers, "X-Hint", true, value => value) ?? undefined) as never,
-                    "session_id": (readResponseCookies(resp.headers, value => value).get("session")?.[0]) as never,
-                    "retry_token": (readResponseCookies(resp.headers, value => value).get("retry")?.[0]) as never,
-                    "attempts": (readResponseCookies(resp.headers, value => value).get("attempt") ?? undefined) as never,
+                    "etag": readResponseHeader(headers, "ETag", false, value => value) as never,
+                    "hints": (readResponseHeader(headers, "X-Hint", true, value => value) ?? undefined) as never,
+                    "session_id": (readResponseCookies(headers, value => value).get("session")?.[0]) as never,
+                    "retry_token": (readResponseCookies(headers, value => value).get("retry")?.[0]) as never,
+                    "attempts": (readResponseCookies(headers, value => value).get("attempt") ?? undefined) as never,
                     "code": body["code"] as never,
                     "msg": body["message"] as never,
                     "detail": (body["detail"] ?? undefined) as never,
@@ -126,10 +125,9 @@ import {
             }
             if (status === 404) {
                 const bodySchema = z.object({ "code": z.number().int().nonnegative(), "msg": z.string(),  });
-                const rawBody = await resp.clone().json().catch(() => undefined);
-                if (rawBody == null || rawBody["code"] === undefined || rawBody["msg"] === undefined) throw await parseXidlError(resp);
+                if (rawBody == null || rawBody["code"] === undefined || rawBody["msg"] === undefined) throw decodeXidlError(status, rawBody);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
-                if (!decoded.success) throw await parseXidlError(resp);
+                if (!decoded.success) throw decodeXidlError(status, rawBody);
                 const body = decoded.data;
                 const error = new $xidlErrors.NotFound({
                     "code": body["code"] as never,
@@ -144,7 +142,7 @@ import {
                 
                 throw error;
             }
-            throw await parseXidlError(resp);
+            throw decodeXidlError(status, rawBody);
         }
     
 }
@@ -181,21 +179,20 @@ import {
                 headers.set("Accept", "text/plain");
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
-            await this.throwReadError(resp);
+            await this.throwReadError(resp.status, await resp.json().catch(() => undefined), resp.headers);
             
         }
         return await decodeResponseBody<string>(resp, "text/plain", this.codecs);
     }
     
     
-        async throwReadError(resp: Response): Promise<never> {
-            const status = resp.status;
+        async throwReadError(status: number, rawBodyValue: unknown, headers: Headers = new Headers()): Promise<never> {
+            const rawBody = rawBodyValue as Record<string, unknown> | undefined;
             if (status === 409) {
                 const bodySchema = z.object({ "detail": ifaceSchemas.models.left.DetailSchema,  });
-                const rawBody = await resp.clone().json().catch(() => undefined);
-                if (rawBody == null || rawBody["detail"] === undefined) throw await parseXidlError(resp);
+                if (rawBody == null || rawBody["detail"] === undefined) throw decodeXidlError(status, rawBody);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
-                if (!decoded.success) throw await parseXidlError(resp);
+                if (!decoded.success) throw decodeXidlError(status, rawBody);
                 const body = decoded.data;
                 const error = new $xidlErrors.left$Failure({
                     "detail": body["detail"] as never,
@@ -205,10 +202,9 @@ import {
             }
             if (status === 422) {
                 const bodySchema = z.object({ "reason": z.string(),  });
-                const rawBody = await resp.clone().json().catch(() => undefined);
-                if (rawBody == null || rawBody["reason"] === undefined) throw await parseXidlError(resp);
+                if (rawBody == null || rawBody["reason"] === undefined) throw decodeXidlError(status, rawBody);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
-                if (!decoded.success) throw await parseXidlError(resp);
+                if (!decoded.success) throw decodeXidlError(status, rawBody);
                 const body = decoded.data;
                 const error = new $xidlErrors.right$Failure({
                     "reason": body["reason"] as never,
@@ -216,7 +212,7 @@ import {
                 
                 throw error;
             }
-            throw await parseXidlError(resp);
+            throw decodeXidlError(status, rawBody);
         }
     
 }
@@ -255,21 +251,20 @@ import {
                 headers.set("Accept", "");
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
-            await this.throwReadError(resp);
+            await this.throwReadError(resp.status, await resp.json().catch(() => undefined), resp.headers);
             
         }
         return;
     }
     
     
-        async throwReadError(resp: Response): Promise<never> {
-            const status = resp.status;
+        async throwReadError(status: number, rawBodyValue: unknown, headers: Headers = new Headers()): Promise<never> {
+            const rawBody = rawBodyValue as Record<string, unknown> | undefined;
             if (status === 409) {
                 const bodySchema = z.object({ "reason": z.string(),  });
-                const rawBody = await resp.clone().json().catch(() => undefined);
-                if (rawBody == null || rawBody["reason"] === undefined) throw await parseXidlError(resp);
+                if (rawBody == null || rawBody["reason"] === undefined) throw decodeXidlError(status, rawBody);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
-                if (!decoded.success) throw await parseXidlError(resp);
+                if (!decoded.success) throw decodeXidlError(status, rawBody);
                 const body = decoded.data;
                 const error = new $xidlErrors.FilesClient({
                     "reason": body["reason"] as never,
@@ -279,10 +274,9 @@ import {
             }
             if (status === 502) {
                 const bodySchema = z.object({ "reason": z.string(),  });
-                const rawBody = await resp.clone().json().catch(() => undefined);
-                if (rawBody == null || rawBody["reason"] === undefined) throw await parseXidlError(resp);
+                if (rawBody == null || rawBody["reason"] === undefined) throw decodeXidlError(status, rawBody);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
-                if (!decoded.success) throw await parseXidlError(resp);
+                if (!decoded.success) throw decodeXidlError(status, rawBody);
                 const body = decoded.data;
                 const error = new $xidlErrors.Framework({
                     "reason": body["reason"] as never,
@@ -290,7 +284,7 @@ import {
                 
                 throw error;
             }
-            throw await parseXidlError(resp);
+            throw decodeXidlError(status, rawBody);
         }
     
 }
@@ -552,6 +546,7 @@ http_exceptions.server.ts
 
 
 import type * as types from "./http_exceptions";
+import { serialize } from "xidl-typescript-codec";
 import * as $xidlErrors from "./http_exceptions.errors";
 
 import type * as ifaceTypes from "./http_exceptions.iface";
@@ -632,7 +627,7 @@ export const FilesOperations = {
                             return {
                                 status: 412,
                                 headers,
-                                body: { "code": error.code, "message": error.msg, "detail": error.detail, },
+                                body: { "code": serialize(error.code, z.number().int().nonnegative()), "message": serialize(error.msg, z.string()), "detail": serialize(error.detail, z.string().optional()), },
                             };
                             
                     }
@@ -649,7 +644,7 @@ export const FilesOperations = {
                             return {
                                 status: 404,
                                 headers,
-                                body: { "code": error.code, "msg": error.msg, },
+                                body: { "code": serialize(error.code, z.number().int().nonnegative()), "msg": serialize(error.msg, z.string()), },
                             };
                             
                     }
@@ -729,7 +724,7 @@ export const ScopedOperations = {
                             return {
                                 status: 409,
                                 headers,
-                                body: { "detail": error.detail, },
+                                body: { "detail": serialize(error.detail, ifaceSchemas.models.left.DetailSchema), },
                             };
                             
                     }
@@ -746,7 +741,7 @@ export const ScopedOperations = {
                             return {
                                 status: 422,
                                 headers,
-                                body: { "reason": error.reason, },
+                                body: { "reason": serialize(error.reason, z.string()), },
                             };
                             
                     }
@@ -815,7 +810,7 @@ export const NamingOperations = {
                             return {
                                 status: 409,
                                 headers,
-                                body: { "reason": error.reason, },
+                                body: { "reason": serialize(error.reason, z.string()), },
                             };
                             
                     }
@@ -832,7 +827,7 @@ export const NamingOperations = {
                             return {
                                 status: 502,
                                 headers,
-                                body: { "reason": error.reason, },
+                                body: { "reason": serialize(error.reason, z.string()), },
                             };
                             
                     }

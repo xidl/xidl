@@ -72,7 +72,7 @@ import {
                     xidlPath = `${xidlPath}?${queryString}`;
                 }
                 const url = joinUrl(this.baseUrl, xidlPath);
-                return sseJsonStream<types.ProjectEvent>(this.fetchImpl, url, { method: "GET", headers }, ifaceSchemas.models.ProjectEventSchema);
+                return sseJsonStream<types.ProjectEvent>(this.fetchImpl, url, { method: "GET", headers }, { schema: ifaceSchemas.models.ProjectEventSchema });
             
             
     }

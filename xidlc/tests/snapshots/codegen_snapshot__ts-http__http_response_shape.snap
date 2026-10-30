@@ -367,7 +367,6 @@ export const HttpResponseShapeServiceOperations = {
                     contentType: "application/json",
                     fields: [{ wireName: "a", key: "a" }, { wireName: "b", key: "b" }],
                     schema: ifaceSchemas.HttpResponseShapeServiceAddRequestSchema,
-                
             },
         },
         response: {

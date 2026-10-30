@@ -179,8 +179,6 @@ impl HttpClientStreamServiceClient {
     #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn upload_chunk(
         &self,
-        file_id: String,
-        chunk: Vec<u8>,
     ) -> Result<
         xidl_rust_axum::stream::Writer<
             HttpClientStreamServiceUploadChunkRequest,

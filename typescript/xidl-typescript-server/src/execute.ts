@@ -62,7 +62,7 @@ export async function executeOperation<
       const args = (operation.request.args ?? []).map(key => record[key]);
       result = await invoke.call(service, ...args);
     }
-    response = encodeOperationResponse(
+    response = await encodeOperationResponse(
       operation,
       result,
       request.headers,

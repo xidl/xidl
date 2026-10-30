@@ -1,7 +1,7 @@
 use crate::error::IdlcResult;
 use crate::generate::go_rest::{MethodMeta, definition};
 use std::fmt::Write;
-use xidl_parser::rest_hir::semantics::{HttpStreamCodec, HttpStreamKind};
+use xidl_parser::rest_hir::semantics::HttpStreamKind;
 
 use super::GoRestRenderer;
 use super::interface_binding::render_response_write;
@@ -70,39 +70,12 @@ pub(super) fn render_content_type_check(out: &mut String, method: &MethodMeta) {
     writeln!(out, "\t\t}}").unwrap();
 }
 
-pub(super) fn render_server_stream_handler(out: &mut String, method: &MethodMeta) {
-    let item_ty = method
-        .return_ty
-        .clone()
-        .unwrap_or_else(|| "string".to_string());
-    let ctor = if method.stream_codec == HttpStreamCodec::Sse {
-        "NewSSEServerStreamWriter"
-    } else {
-        "NewNDJSONServerStreamWriter"
-    };
-    writeln!(out, "\t\tstream := xidlgohttp.{ctor}[{item_ty}](c.Writer)").unwrap();
-    writeln!(
-        out,
-        "\t\tif err := svc.{}(c.Request.Context(), req, stream); err != nil {{",
-        method.method_name
-    )
-    .unwrap();
-    writeln!(
-        out,
-        "\t\t\tif httpErr, ok := err.(*xidlgohttp.HttpError); ok {{"
-    )
-    .unwrap();
-    writeln!(
-        out,
-        "\t\t\t\txidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)"
-    )
-    .unwrap();
-    writeln!(out, "\t\t\t}} else {{").unwrap();
-    writeln!(out, "\t\t\t\txidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())").unwrap();
-    writeln!(out, "\t\t\t}}").unwrap();
-    writeln!(out, "\t\t\treturn").unwrap();
-    writeln!(out, "\t\t}}").unwrap();
-    writeln!(out, "\t\t_ = stream.Close()").unwrap();
+pub(super) fn render_server_stream_handler(
+    out: &mut String,
+    method: &MethodMeta,
+    renderer: &GoRestRenderer,
+) -> IdlcResult<()> {
+    super::stream::StreamMethod::new(method).render_server(out, renderer)
 }
 
 pub(super) fn render_client_stream_handler(
@@ -110,34 +83,7 @@ pub(super) fn render_client_stream_handler(
     method: &MethodMeta,
     renderer: &GoRestRenderer,
 ) -> IdlcResult<()> {
-    writeln!(
-        out,
-        "\t\tstream := xidlgohttp.NewClientStreamReader[{}](c.Request.Context(), c.Request.Body)",
-        method.request_struct
-    )
-    .unwrap();
-    writeln!(
-        out,
-        "\t\tresp, err := svc.{}(c.Request.Context(), stream)",
-        method.method_name
-    )
-    .unwrap();
-    writeln!(out, "\t\tif err != nil {{").unwrap();
-    writeln!(
-        out,
-        "\t\t\tif httpErr, ok := err.(*xidlgohttp.HttpError); ok {{"
-    )
-    .unwrap();
-    writeln!(
-        out,
-        "\t\t\t\txidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)"
-    )
-    .unwrap();
-    writeln!(out, "\t\t\t}} else {{").unwrap();
-    writeln!(out, "\t\t\t\txidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())").unwrap();
-    writeln!(out, "\t\t\t}}").unwrap();
-    writeln!(out, "\t\t\treturn").unwrap();
-    writeln!(out, "\t\t}}").unwrap();
+    super::stream::StreamMethod::new(method).render_upload(out, renderer)?;
     render_response_write(out, method, "resp", renderer)
 }
 

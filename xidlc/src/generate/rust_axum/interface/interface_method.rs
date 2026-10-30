@@ -156,7 +156,7 @@ pub(crate) fn render_op_from_http(
     // Handshake-scope params are passed separately on WebSocket/stream methods.
     let mut handshake_params = Vec::new();
     let mut handshake_param_names = Vec::new();
-    if is_bidi_stream {
+    if is_bidi_stream || is_client_stream {
         for ctx in params
             .path_params
             .iter()
@@ -195,7 +195,11 @@ pub(crate) fn render_op_from_http(
 
     let mut auth_param = None;
     let mut auth_param_ty = String::new();
-    let mut params_list = params.params.clone();
+    let mut params_list = if is_client_stream {
+        handshake_params.clone()
+    } else {
+        params.params.clone()
+    };
     let mut server_params = params.server_params.clone();
     let mut server_param_names = params.server_param_names.clone();
     if security.auth_source_method && has_auth {
