@@ -216,9 +216,9 @@ The assignments are business decisions, not a generated matching rule.
 
 ## Generated output
 
-Projection wraps every version in `module <member-name> { ... }` and removes
-the version enum and the lifecycle annotations, so generators never see a
-versioned contract.
+Projection wraps every version in `module <member-name> { ... }`, evaluates
+declaration availability, and removes lifecycle annotations before rendering
+the per-version contract.
 
 Code targets keep one module per version inside a single artifact:
 

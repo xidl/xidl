@@ -1,0 +1,173 @@
+---
+title: "HTTP Mapping"
+description: "HTTP annotation syntax, valid positions, composition rules, and links to the protocol references."
+sidebar:
+  order: 4
+---
+
+HTTP annotations map an interface's typed operations to requests and responses.
+Their shared semantic model is used by REST code targets and OpenAPI; each
+target can impose additional transport restrictions.
+
+## Methods and routes
+
+| Annotation | Allowed positions | Arguments |
+| --- | --- | --- |
+| `@get`, `@post`, `@put`, `@patch`, `@delete`, `@head`, `@options` | Operation | No argument, a path string, or `path = "..."` |
+| `@path` | Interface, operation, parameter | No argument, one string, or named `path` / `name` |
+
+On an operation, `@path("/accounts")` or `@path(path = "/accounts")` sets the
+route. On a parameter, it binds a path variable and can use `name = "id"`.
+Lint also accepts interface-level `@path`, but the current REST projection does
+not apply it as a route prefix. Use explicit operation paths. Likewise,
+`name = "..."` is a parameter binding name, not an operation route argument.
+`HEAD` operations must return `void` and cannot have a response body.
+See [HTTP & REST Basics](../../../rest/) for route templates and the
+[HTTP RFC](../../../rfc/http/) for inferred methods and paths.
+
+## Parameter sources
+
+| Annotation | Allowed positions | Arguments |
+| --- | --- | --- |
+| `@query` | Parameter | No argument, one string, or `name = "..."` |
+| `@header`, `@cookie` | Parameter, struct/exception member | No argument, one string, or `name = "..."` |
+| `@body` | Parameter, struct/exception member | No argument or one positional string; use `@rename` for a body field's name |
+
+Single-string forms also accept `value = "..."`. A parameter's direction
+decides whether a supported binding belongs to the request (`in`), response
+(`out`), or both (`inout`). A path binding is always required. HTTP movement of
+annotated members is implemented for exceptions; putting `@header` on a member
+of an ordinary returned struct does not move it to a response header.
+
+```idl
+struct Account {
+    string id;
+};
+
+@request("json")
+@response("json")
+interface Accounts {
+    @get(path = "/accounts/{id}")
+    Account read(
+        @path string id,
+        @query(name = "include") @optional string expansion,
+        @header("X-Request-ID") @optional string request_id
+    );
+
+    @post(path = "/accounts")
+    Account create(@body Account account);
+};
+```
+
+Choose one explicit source per parameter. Conflicting sources, such as
+`@query @header`, are rejected rather than resolved by a priority list. With no
+explicit source, the compiler infers it from the route, method, and direction.
+For a wire name, explicit `@rename` / `@name` takes precedence over a source's
+name argument. Request bindings reject duplicate names at the same location;
+header names compare without case.
+
+A sole body parameter is encoded as that value. Multiple body parameters form
+an object. `@flatten` is only allowed on the sole request body parameter and
+does not change that direct-value rule. See
+[HTTP serialization](../../../rest/serialize/) for body shapes and
+[Wire Shape](../wire/) for field naming and presence.
+
+## Media types
+
+`@request("json")` and `@response("json")` are allowed on interfaces and
+operations. Both require a string, also accepted as `format = "..."` or
+`value = "..."`. Supported format tokens are `json`, `urlencoded`, and
+`msgpack`, rather than arbitrary MIME strings. An operation overrides its
+interface's default.
+
+An argument-free `@http` on a union selects HTTP response representations.
+It requires the built-in `ContentType` discriminator and distinct supported
+case labels, with no `default` branch. It cannot be combined with a stream,
+upgrade, or additional response body output. See the full
+[multiple-representation example](../../../rest/serialize/#multiple-response-media-types).
+
+## Exceptions
+
+On an exception, `@http(412)` or `@http(status = 412)` declares its status.
+Unlike the union marker, this form requires a value. Statuses must be in
+`300..599`, and one operation cannot raise two exceptions with the same status.
+A `304` exception cannot have a body.
+
+```idl
+@http(304)
+exception NotModified {
+    @header("ETag") string etag;
+};
+
+@http(status = 412)
+exception PreconditionFailed {
+    @header("ETag") string etag;
+    @cookie("retry") @optional string retry_token;
+    @body uint32 code;
+};
+
+interface Accounts {
+    @get(path = "/accounts/{id}")
+    string read(@path string id) raises(NotModified, PreconditionFailed);
+};
+```
+
+Unmarked exception members go into the body. Header and cookie annotations
+move their members to those response locations. Body field names use
+`@rename` / `@rename_all`; the string in `@body("...")` does not rename an
+exception body field.
+
+## Security and streams
+
+| Annotation | Allowed positions | Arguments |
+| --- | --- | --- |
+| `@http_basic` | Interface, operation, attribute | No argument or `realm = "..."`; other single-string forms pass lint but do not set the realm |
+| `@http_bearer` | Interface, operation, attribute | None |
+| `@api_key` | Interface, operation, attribute | Required strings `in = "header" / "query" / "cookie"` and `name = "..."` |
+| `@no_security` | Interface, operation, attribute | None |
+| `@server_stream` | Operation, attribute | None; an attribute uses watch semantics |
+| `@client_stream`, `@bidi_stream` | Operation | None |
+| `@stream_codec` | Operation | No argument or one string, `"sse"` or `"ndjson"` |
+| `@upgrade` | Operation | Required `protocol`; optional `codec`, `subprotocol`, `heartbeat`, `max_message` |
+
+Operation security declarations replace interface defaults. `@no_security`
+clears inherited requirements and cannot coexist with other security
+annotations at the same level. Credentials and the application's
+authentication implementation are separate from business authorization. See
+[HTTP Authentication](../../../rest/security/) and its
+[protocol rules](../../../rfc/http-security/) for scheme combinations.
+
+For structured HTTP streams, the default is SSE for server streams and NDJSON
+for client streams. A bare `@stream_codec` selects SSE. A sole
+`sequence<octet>` stream payload follows the raw-byte rules in
+[HTTP Streaming](../../../rest/stream/) instead of structured framing.
+
+TypeScript REST and Go REST support SSE server streams, NDJSON client streams,
+and JSON WebSocket items; they reject raw upgrades. Rust Axum also supports
+raw connection upgrades. `@upgrade(protocol = "websocket")` has separate
+WebSocket options and cannot be combined with the stream annotations. See
+the [stream RFC](../../../rfc/http-stream/) and
+[upgrade RFC](../../../rfc/http-upgrade/) for signatures, allowed methods, and
+target restrictions. The stream markers also have transport-specific use in
+[JSON-RPC](../../../rfc/jsonrpc-stream/).
+
+## CORS
+
+`@cors` is allowed on interfaces and operations. Use the bare marker for any
+origin, or positional strings such as `@cors("https://console.example.com")`
+for explicit origins. Named arguments are not accepted. An operation's CORS
+declaration overrides its interface default. See
+[HTTP & REST Basics](../../../rest/#cors) for examples.
+
+## Webhook publication
+
+`@webhooks` is an argument-free marker on an interface or operation. It
+publishes the marked HTTP operations under OpenAPI `webhooks`, using their
+operation identifiers as keys; ordinary client and server targets keep their
+HTTP behavior. Other operations stay in `paths`.
+
+Body, header, security, exception, and lifecycle annotations compose with the
+same operation. The marker does not add an envelope, signer, delivery queue,
+or version policy. OpenAPI webhook operations cannot use path parameters.
+See [Webhook Publication](../../../rest/openapi/#webhook-publication) for a
+complete example and the application boundary.

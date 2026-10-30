@@ -1,0 +1,110 @@
+---
+title: "Lifecycle"
+description: "Version availability and deprecation are independent contract declarations."
+sidebar:
+  order: 3
+---
+
+Version availability selects which declarations a generated contract contains.
+Deprecation marks a declaration as discouraged while keeping it available.
+Neither performs runtime version selection or schedules route removal.
+
+## `@version`
+
+Allowed only on an enum. Use either the bare marker or both named string
+arguments:
+
+```idl
+@version(in = "header", name = "X-Api-Version")
+enum Versions {
+    @rename("2026-01-01") v1,
+    @rename("2026-07-01") v2,
+};
+
+struct Account {
+    string id;
+    @removed(Versions::v2) string label;
+    @added(Versions::v2) string display_name;
+};
+```
+
+`in` accepts `header`, `query`, or `cookie`, ignoring case. `name` must satisfy
+the selected transport's naming rules. A bare `@version` declares the timeline
+without a transport parameter.
+
+Versions follow enum declaration order, not numeric or date sorting. The last
+member is Head. `@rename` supplies the external version value, while lifecycle
+references still use the enum member's IDL name, such as `Versions::v2`.
+
+A compilation unit can declare at most one timeline. It must have at least
+one member, with unique external version values. The timeline enum and its
+members cannot themselves carry `@added` or `@removed`.
+
+Generated REST clients pin their version parameter. Generated servers serve
+their own version module; they do not choose one by reading a request. Header
+versions also declare and emit that module's response header. The application
+or gateway resolves the requested version and routes it to the appropriate
+module or adapter. See [API Versioning](../../../guide/versioning/) for name
+collisions, browser restrictions, target support, and selection flags.
+
+## `@added` and `@removed`
+
+Each takes exactly one scoped enum member, for example
+`@added(Versions::v2)`. A string such as `@added("2026-07-01")` is not a version
+reference.
+
+| Annotation | Availability |
+| --- | --- |
+| `@added(Versions::v2)` | Present from v2 onward, including v2 |
+| `@removed(Versions::v2)` | Absent from v2 onward |
+| Both | Present in the half-open interval `[added, removed)` |
+
+Allowed on modules; structs, unions, enums, bitsets, bitmasks, typedefs,
+natives, and exceptions; struct/exception members, union elements, enum and
+bitmask values; interfaces, operations, parameters, and attributes. Constants
+and bitfields are not lifecycle positions.
+
+- A declaration has at most one of each annotation. `added` must precede
+  `removed`; annotation order in source does not matter.
+- A child's interval must stay inside its parent's.
+- A declaration cannot reference a type absent from the selected version.
+- A field rename or type change uses separate declarations with disjoint
+  intervals. The compiler does not infer a conversion between them.
+
+Version projection evaluates declaration availability and removes lifecycle
+annotations before rendering ordinary per-version contracts. Use the generated
+OpenAPI documents to inspect the exact published shape. Translation hooks,
+stored facts, and business defaults remain application responsibilities.
+
+## `@deprecated`
+
+```idl
+@deprecated(since = "2026-01-01", after = "2027-01-01")
+interface LegacyAccounts {
+    @get(path = "/legacy/accounts/{id}")
+    string read(@path string id);
+};
+```
+
+Supported forms are the bare marker, one positional date or RFC 3339 timestamp, or
+named `since` and/or `after` values. A positional value means `since`. Named
+and positional arguments cannot be mixed. Dates are normalized to UTC;
+`since` uses the start of the day, and `after` its end. If both are present,
+`since` must be no later than `after`.
+
+Allowed on modules, structs, unions, enums, exceptions, their struct/exception
+members and enum values, interfaces, operations, parameters, and attributes.
+This list is narrower than the lifecycle positions above.
+
+Module deprecation propagates to contained declarations. An interface supplies
+the default for its operations and attributes. A nearer explicit annotation
+takes precedence.
+
+| Target | Representation |
+| --- | --- |
+| TypeScript | JSDoc `@deprecated` |
+| Rust | `#[deprecated]` on supported declarations |
+| OpenAPI | `deprecated: true` on supported schemas, parameters, and operations; enum-value notes in descriptions |
+
+The dates are metadata, not a clock-driven policy. `@deprecated` does not
+delete a declaration, reject calls after a date, or replace `@removed`.

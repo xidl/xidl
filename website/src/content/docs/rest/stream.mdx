@@ -22,8 +22,8 @@ and protocol handling for each target.
 In practice:
 
 - Server push streaming is the most common.
-- `ndjson` is the default stream encoding; each chunk is a JSON line.
-- `sse` (Server-Sent Events) is mainly used for server-side streaming.
+- `sse` (Server-Sent Events) is the default for structured server streams.
+- `ndjson` is the default for structured client streams; each chunk is a JSON line.
 
 ```idl
 interface StreamApi {

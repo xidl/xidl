@@ -1,0 +1,149 @@
+---
+title: "Wire Shape"
+description: "Wire names, field presence, omission, and flattening, with target-specific behavior."
+sidebar:
+  order: 1
+---
+
+Wire annotations describe names and object shape. They do not convert business
+values or establish relationships between declarations in different versions.
+
+## `@rename` and `@name`
+
+```idl
+@rename_all("snake_case")
+struct Account {
+    @rename("account_id") string accountId;
+    @name(name = "display_label") string displayName;
+    string createdAt;
+};
+```
+
+`@name` is an alias of `@rename`. Both take one string, either positionally,
+as `value = "..."`, or as `name = "..."`. An explicit member rename takes
+precedence over the container's naming rule. In this example, the wire fields
+are `account_id`, `display_label`, and `created_at`.
+
+Lint accepts these annotations at every annotation-bearing position. Their
+effect depends on the consumer: struct fields, enum wire values, REST
+parameters, and version enum display values use wire names. This does not imply
+that annotating a type or operation renames the generated language symbol or
+its HTTP route. Use the IDL identifier for language names and HTTP annotations
+for routes.
+
+For HTTP parameters, the precedence is explicit `@rename` / `@name`, then the
+name supplied by the source annotation, then the inferred name. For example,
+`@header(name = "X-Trace") string trace` and
+`@header @rename("X-Trace") string trace` select the same header. Declare one
+source per parameter; `@query @header` is an error.
+
+## `@rename_all`
+
+`@rename_all("snake_case")` also accepts `value = "snake_case"` or
+`rule = "snake_case"`. Lint permits it on structs, unions, enums, bitmasks,
+exceptions, and interfaces; it does **not** permit it on an operation.
+
+| Rule | Example input | Wire name |
+| --- | --- | --- |
+| `lowercase` | `DisplayName` | `displayname` |
+| `UPPERCASE` | `DisplayName` | `DISPLAYNAME` |
+| `PascalCase` | `display_name` | `DisplayName` |
+| `camelCase` | `display_name` | `displayName` |
+| `snake_case` | `DisplayName` | `display_name` |
+| `SCREAMING_SNAKE_CASE` | `DisplayName` | `DISPLAY_NAME` |
+| `kebab-case` | `DisplayName` | `display-name` |
+| `SCREAMING-KEBAB-CASE` | `DisplayName` | `DISPLAY-NAME` |
+
+Use these exact strings. The rule is consumed by the relevant target's
+container rendering; it is not recursive. An interface-level `@rename_all`
+does not rename all REST operation parameters. Give those parameters their own
+wire names.
+
+## `@optional`
+
+```idl
+struct AccountPatch {
+    @optional string display_name;
+    @optional boolean locked;
+};
+```
+
+Allowed on struct/exception members, union elements, and operation parameters.
+Use the bare marker to describe a value that may be absent. In generated struct
+models, Rust uses `Option<T>` and TypeScript uses an optional property; OpenAPI
+does not list the property as required.
+
+Absence is distinct from an empty string, `false`, or zero. It is also distinct
+from JSON `null`; `@optional` alone does not promise nullable wire data or a
+default value. The current consumers test whether the annotation is present,
+so `@optional(false)` does **not** restore requiredness. Leave the annotation
+off a required value.
+
+An HTTP path parameter is always required. `@optional` is invalid on a path
+binding. Query, header, cookie, and body parameters can be optional when their
+transport and operation shape permit it.
+
+## `@skip`
+
+```idl
+struct Account {
+    string id;
+    @skip string internal_note;
+};
+```
+
+This marker takes no arguments. Lint allows it on struct/exception members,
+union elements, enum values, bitmask values, and operation parameters.
+Implemented effects differ by position and target:
+
+| Position / target | Effect |
+| --- | --- |
+| Struct member, TypeScript | Omitted from the generated model and schema |
+| Struct member, Rust | Retained as a field with `serde(skip)` |
+| Struct member, Go | Retained with the JSON exclusion tag `"-"` |
+| Struct member, OpenAPI | Omitted from the published properties |
+| REST operation parameter | Excluded from the wire parameter projection |
+
+Acceptance at enum, bitmask, or union positions does not guarantee that all
+targets remove that declaration. Inspect the generated artifact for those
+positions. To remove a declaration from selected API versions, use
+[lifecycle annotations](../lifecycle/) rather than `@skip`.
+
+## `@flatten`
+
+This marker takes no arguments and is allowed on struct/exception members and
+operation parameters. It combines an object's fields with its enclosing wire
+object instead of adding a nested property:
+
+```idl
+struct Trace {
+    string request_id;
+};
+
+struct Reply {
+    @flatten Trace trace;
+    string result;
+};
+```
+
+In the generated Rust and TypeScript codecs, the wire object has `request_id`
+and `result`, without a `trace` wrapper. Rust uses Serde flattening; TypeScript
+emits codec metadata for the same wire shape. The ordinary Go model renderer
+does not currently consume this annotation.
+The generated language model can still have a `trace` property. Flattening is
+not a language-level inheritance declaration.
+
+On a request parameter, `@flatten` is allowed only on the sole body parameter.
+A sole body parameter is already encoded as its value, so the marker does not
+remove an additional envelope. See [HTTP serialization](../../../rest/serialize/)
+for the operation body rules. Do not use flattening to convert a scalar into an
+object or combine it with colliding field names.
+
+## `@omitempty`
+
+This marker is allowed only on struct/exception members. The TypeScript
+generator emits `xjson` codec metadata that omits zero values during encoding.
+It does not make an input optional or add a default. Other targets do not
+currently provide the same behavior for this annotation. Use `@optional` for
+portable presence semantics; use `@omitempty` only when the TypeScript codec's
+output omission is the intended contract.

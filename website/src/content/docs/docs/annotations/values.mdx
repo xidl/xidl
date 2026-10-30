@@ -1,0 +1,82 @@
+---
+title: "Defaults and Constraints"
+description: "Declared defaults and numeric metadata, including the limits of generated validation."
+sidebar:
+  order: 2
+---
+
+These annotations are allowed on struct/exception members, union elements, and
+operation parameters. They describe values independently of wire naming and
+presence. Current support is narrower than their names may suggest.
+
+| Annotation | Arguments | Current effect |
+| --- | --- | --- |
+| `@default(false)` | One value; `value = false` is also accepted | Preserves a declared default; struct version adapters recognize that a default was declared |
+| `@range(min = 1, max = 100)` | Both named keys are required | Preserves range metadata |
+| `@min(1)` | One value, optionally named `value` | Preserves lower-bound metadata |
+| `@max(100)` | One value, optionally named `value` | Preserves upper-bound metadata |
+| `@unit("seconds")` | One value, optionally named `value` | Preserves unit metadata |
+
+## Defaults do not fill missing input
+
+```idl
+struct Settings {
+    @default(false) boolean locked;
+    @optional @default(30) uint32 retry_seconds;
+};
+```
+
+`@default` does not make `locked` optional. Ordinary generated model decoders,
+HTTP bindings, Zod schemas, and OpenAPI documents do not use it to fill omitted
+input. In particular, this example does not promise that an omitted
+`retry_seconds` becomes `30`. Apply that policy explicitly in the application.
+
+A member can also declare a default with the IDL member syntax. When both
+forms occur, the member's HIR default accessor reads `@default` first. Use one
+form to keep the contract unambiguous.
+
+## Defaults in version adapters
+
+```idl
+@version
+enum Versions { v1, v2 };
+
+struct Settings {
+    string id;
+    @added(Versions::v2) @optional @default(false) boolean locked;
+};
+
+interface Configuration {
+    @post(path = "/settings")
+    Settings update(@body Settings settings);
+};
+```
+
+A default on a newly added request member does not decide what an old caller
+meant. The adapter plan requires the application's upcast hook to declare the
+implied value explicitly. A default for a new version and the behavior of an
+old version are separate facts. This prevents a change in a new default from
+silently changing an old contract. See the
+[API versioning guide](../../../guide/versioning/) for the generated adapter
+interfaces and target boundaries.
+
+## Constraint metadata is not a validator
+
+```idl
+struct RetryPolicy {
+    @range(min = 1, max = 100) uint32 attempts;
+    @min(1) @max(3600) @unit("seconds") uint32 delay;
+};
+```
+
+These declarations are retained in the typed AST and HIR and can be rendered
+back to IDL. They do not currently add their declared range checks to generated
+servers or Zod schemas, apply those bounds as OpenAPI `minimum` / `maximum`, or
+perform unit conversions. The underlying IDL type still determines the
+generated type and its supported checks. For example, OpenAPI describes a
+`uint32` with bounds `0..4294967295`; `@range(min = 1, max = 100)` does not
+replace those bounds with `1..100`.
+
+Use application validation for the range and unit rules that your service
+requires, and test that boundary explicitly. A successful lint or generation
+run does not prove that `attempts = 0` will be rejected because of `@range`.

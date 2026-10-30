@@ -162,16 +162,16 @@ Results in:
 POST /findUser/{id}
 ```
 
-## Parameter Source Priority
+## Parameter Source Resolution
 
-Each parameter's source is resolved according to the following priority:
+A parameter may declare one explicit source: `@path`, `@query`, `@body`,
+`@header`, or `@cookie`. Conflicting sources are rejected; the compiler does
+not choose one by priority. With no explicit source, it infers the binding
+from the route template, HTTP method, and parameter direction.
 
-1. Explicit `@path`
-2. Explicit `@query`
-3. Explicit `@body`
-4. Explicit `@header`
-5. Explicit `@cookie`
-6. Default inference based on the HTTP method and direction.
+Wire naming is independent of source selection: `@rename` / `@name` overrides
+a name supplied by a source annotation. See the
+[HTTP annotation reference](../../docs/annotations/http/#parameter-sources).
 
 Default inference practices:
 
@@ -225,7 +225,8 @@ Common interpretation in HTTP mapping:
 `@head` has additional constraints:
 
 - The return type must be `void`.
-- It can only contain request-side parameters.
+- It cannot have response body parameters; response header and cookie
+  parameters are allowed.
 - The response does not contain a body.
 
 ## Media Types
