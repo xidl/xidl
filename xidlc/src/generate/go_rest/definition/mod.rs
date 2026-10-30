@@ -36,7 +36,7 @@ pub(crate) fn go_type(
             hir::IntegerType::I64 => "int64".to_string(),
         },
         hir::TypeSpec::FloatingPtType => "float64".to_string(),
-        hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => "rune".to_string(),
+        hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => packages.runtime_type("Char"),
         hir::TypeSpec::Boolean => "bool".to_string(),
         hir::TypeSpec::AnyType | hir::TypeSpec::ObjectType | hir::TypeSpec::ValueBaseType => {
             "any".to_string()

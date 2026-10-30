@@ -1,6 +1,5 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
-assertion_line: 145
 expression: output
 ---
 ===============
@@ -32,6 +31,7 @@ openapi_http_client_stream_report.json
           "bytes": {
             "items": {
               "format": "int32",
+              "maximum": 255,
               "minimum": 0,
               "type": "integer"
             },

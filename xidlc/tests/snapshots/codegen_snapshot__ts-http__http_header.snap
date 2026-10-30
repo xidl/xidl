@@ -167,10 +167,10 @@ import { xjson } from "xidl-typescript-codec";
     export namespace test {
 
     export const HeaderServiceGetUserRequestSchema = z.object({
-            id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+            id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
             req_id: z.coerce.string(),
             flags: z.array(z.coerce.string()),
-            age: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+            age: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
             session_id: z.coerce.string(),
             prefs: z.array(z.coerce.string()),
         });
@@ -297,7 +297,7 @@ import { xjson } from "xidl-typescript-codec";
 
         export const UserSchema = z.object({
             
-                id: z.number().int().nonnegative(),
+                id: z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer"),
             
                 name: xjson(z.string(), {"name":"full_name"}),
             

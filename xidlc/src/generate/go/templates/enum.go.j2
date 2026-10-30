@@ -1,3 +1,35 @@
 type {{ name }} string
 
 const ({{ "\n" }}{{ members }}){{ "\n" }}
+
+{% if values %}
+// MarshalText validates the enum's published wire value.
+func (value {{ name }}) MarshalText() ([]byte, error) {
+    switch string(value) {
+    case {% for value in values %}{{ value | tojson }}{% if not loop.last %}, {% endif %}{% endfor %}:
+        return []byte(value), nil
+    default:
+        return nil, fmt.Errorf("enum {{ name }} has an invalid value %q", value)
+    }
+}
+
+// UnmarshalText accepts only values declared by the IDL enum.
+func (value *{{ name }}) UnmarshalText(data []byte) error {
+    decoded := {{ name }}(data)
+    if _, err := decoded.MarshalText(); err != nil { return err }
+    *value = decoded
+    return nil
+}
+
+func (value {{ name }}) MarshalJSON() ([]byte, error) {
+    text, err := value.MarshalText()
+    if err != nil { return nil, err }
+    return json.Marshal(string(text))
+}
+
+func (value *{{ name }}) UnmarshalJSON(data []byte) error {
+    var text string
+    if err := json.Unmarshal(data, &text); err != nil { return err }
+    return value.UnmarshalText([]byte(text))
+}
+{% endif %}

@@ -199,7 +199,7 @@ pub(crate) fn build_method_meta(
         response_header_params,
         response_cookie_params,
         return_ty,
-        stream_exceptions: Vec::new(),
+        exceptions: Vec::new(),
         stream_kind: op.meta.stream.kind,
         cors: op.meta.cors.clone(),
         security,
@@ -221,6 +221,20 @@ fn build_param_meta(
     let p = op.signature.params.iter().find(|p| p.name == name).unwrap();
     let optional = p.is_optional;
     let flatten = p.is_flatten;
+    let request = &op.http.request;
+    use xidl_parser::rest_hir::HttpParamKind;
+    let requires_presence = [
+        (&request.path, HttpParamKind::Path),
+        (&request.query, HttpParamKind::Query),
+        (&request.header, HttpParamKind::Header),
+        (&request.cookie, HttpParamKind::Cookie),
+    ]
+    .into_iter()
+    .flat_map(|(bindings, location)| bindings.iter().map(move |binding| (binding, location)))
+    .find(|(binding, _)| binding.source_param == name)
+    .map_or(!optional, |(binding, location)| {
+        binding.requires_presence(location)
+    });
 
     let (source, wire_name) =
         if let Some(b) = op.http.request.path.iter().find(|b| b.source_param == name) {
@@ -281,6 +295,7 @@ fn build_param_meta(
         wire_name,
         ty: definition::go_type(&p.ty, packages, prefix, versioned_modules),
         optional,
+        requires_presence,
         source,
     }
 }
@@ -314,6 +329,7 @@ fn build_response_param_meta(
         wire_name,
         ty: definition::go_type(&p.ty, packages, prefix, versioned_modules),
         optional: false,
+        requires_presence: false,
         source,
     }
 }

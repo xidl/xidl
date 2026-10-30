@@ -24,8 +24,8 @@ import { xjson } from "xidl-typescript-codec";
     
     export const SkipStructSchema = z.object({
         
-            a: z.number().int(),
+            a: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"),
         
-            c: z.number().int()
+            c: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")
         
     });

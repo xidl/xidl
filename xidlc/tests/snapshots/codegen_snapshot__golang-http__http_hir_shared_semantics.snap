@@ -43,28 +43,42 @@ func RegisterReportApiHandler(r gin.IRouter, svc ReportApiService) {
 		c.Request = c.Request.WithContext(ctx)
 
 		req := &ReportApiGetReportRequest{}
-
-		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			req.Id = value
+		if raw, err := xidlgohttp.GinPathString(c, "id"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Id); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-
-		req.Lang = xidlgohttp.QueryOptionalString(c.Request.URL.Query(), "lang")
-
-		if value, err := xidlgohttp.HeaderString(c.Request.Header, "X-Trace-Id"); err == nil {
-			req.TraceId = value
+		if raw, err := xidlgohttp.QueryString(c.Request.URL.Query(), "lang"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Lang); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		if raw, err := xidlgohttp.HeaderString(c.Request.Header, "X-Trace-Id"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.TraceId); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		resp, err := svc.GetReport(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeReportApiGetReportFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -82,9 +96,11 @@ func RegisterReportApiHandler(r gin.IRouter, svc ReportApiService) {
 		c.Request = c.Request.WithContext(ctx)
 
 		req := &ReportApiWatchReportRequest{}
-
-		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			req.Id = value
+		if raw, err := xidlgohttp.GinPathString(c, "id"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Id); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
@@ -114,9 +130,12 @@ func NewReportApiClient(baseURL string, httpClient *http.Client, auth xidlgohttp
 func (c *ReportApiClient) GetReport(ctx context.Context, req *ReportApiGetReportRequest) (*ReportApiGetReportResponse, error) {
 	requestURL := c.baseURL + formatReportApiGetReportPath(req)
 	query := url.Values{}
-
 	if req.Lang != nil {
-		query.Set("lang", *req.Lang)
+		raw, err := xidlgohttp.FormatText(req.Lang)
+		if err != nil {
+			return nil, err
+		}
+		query.Set("lang", raw)
 	}
 	if encoded := query.Encode(); encoded != "" {
 		requestURL += "?" + encoded
@@ -126,16 +145,22 @@ func (c *ReportApiClient) GetReport(ctx context.Context, req *ReportApiGetReport
 		return nil, err
 	}
 	httpReq.Header.Set("Accept", "text/plain")
-
-	httpReq.Header.Set("X-Trace-Id", req.TraceId)
+	{
+		raw, err := xidlgohttp.FormatText(req.TraceId)
+		if err != nil {
+			return nil, err
+		}
+		httpReq.Header.Set("X-Trace-Id", raw)
+	}
 	xidlgohttp.ApplyClientAuth(httpReq, c.auth, ReportApiGetReportSecurityRequirements())
 	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *ReportApiGetReportResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeReportApiGetReportFailure)
 	}
 	decoded, err := decodeReportApiGetReportResponse(resp)
 	if err != nil {
@@ -158,7 +183,7 @@ func (c *ReportApiClient) WatchReport(ctx context.Context, req *ReportApiWatchRe
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		defer resp.Body.Close()
-		return nil, xidlgohttp.DecodeStreamHTTPError(resp, decodeReportApiWatchReportFailure)
+		return nil, xidlgohttp.ReadHTTPError(resp, decodeReportApiWatchReportFailure)
 	}
 	return xidlgohttp.NewSSEStreamReader[string](resp.Body).WithContext(ctx).WithErrorDecoder(decodeReportApiWatchReportFailure), nil
 }
@@ -201,6 +226,16 @@ func decodeReportApiGetReportResponse(resp *http.Response) (ReportApiGetReportRe
 	return out, nil
 }
 
+func encodeReportApiGetReportFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeReportApiGetReportFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type ReportApiWatchReportRequest struct {
 	Id string `xjson:"id" form:"id"`
 }
@@ -231,12 +266,13 @@ func decodeReportApiWatchReportResponse(resp *http.Response) (ReportApiWatchRepo
 	out := ReportApiWatchReportResponse{}
 	return out, nil
 }
-func encodeReportApiWatchReportFailure(err error) xidlgohttp.StreamFailure {
 
-	return xidlgohttp.EncodeStreamError(err)
+func encodeReportApiWatchReportFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
 }
 
-func decodeReportApiWatchReportFailure(failure xidlgohttp.StreamFailure) error {
+func decodeReportApiWatchReportFailure(failure xidlgohttp.HTTPFailure) error {
 
-	return xidlgohttp.DecodeStreamError(failure)
+	return xidlgohttp.DecodeHTTPError(failure)
 }

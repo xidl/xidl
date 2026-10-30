@@ -81,182 +81,124 @@ pub mod left {
         pub root: super::Root,
     }
     impl Envelope {}
+    #[derive(Debug, Clone, PartialEq)]
     pub struct Choice {
-        tag: super::choices::Kind,
+        tag: Option<super::choices::Kind>,
         data: ChoiceData,
     }
-    union ChoiceData {
-        text: core::mem::ManuallyDrop<String>,
-        number: core::mem::ManuallyDrop<i64>,
-    }
-    impl Drop for Choice {
-        #[allow(unreachable_patterns)]
-        fn drop(&mut self) {
-            match self.tag {
-                super::choices::TEXT => {
-                    unsafe {
-                        core::mem::ManuallyDrop::drop(&mut self.data.text);
-                    }
-                }
-                super::choices::Kind::Number => {
-                    unsafe {
-                        core::mem::ManuallyDrop::drop(&mut self.data.number);
-                    }
-                }
-                _ => {}
-            }
-        }
-    }
-    impl Clone for Choice {
-        #[allow(clippy::clone_on_copy)]
-        #[allow(unreachable_patterns)]
-        fn clone(&self) -> Self {
-            match self.tag {
-                super::choices::TEXT => Self::new_text(self.as_text().clone()),
-                super::choices::Kind::Number => {
-                    Self::new_number(self.as_number().clone())
-                }
-                _ => unreachable!(),
-            }
-        }
-    }
-    impl core::fmt::Debug for Choice {
-        #[allow(unreachable_patterns)]
-        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-            let mut d = f.debug_struct("Choice");
-            d.field("tag", &self.tag);
-            match self.tag {
-                super::choices::TEXT => {
-                    d.field("text", self.as_text());
-                }
-                super::choices::Kind::Number => {
-                    d.field("number", self.as_number());
-                }
-                _ => {}
-            }
-            d.finish()
-        }
-    }
-    impl PartialEq for Choice {
-        #[allow(unreachable_patterns)]
-        fn eq(&self, other: &Self) -> bool {
-            if self.tag != other.tag {
-                return false;
-            }
-            match self.tag {
-                super::choices::TEXT => self.as_text() == other.as_text(),
-                super::choices::Kind::Number => self.as_number() == other.as_number(),
-                _ => false,
-            }
-        }
+    #[derive(Debug, Clone, PartialEq)]
+    enum ChoiceData {
+        Text(String),
+        Number(i64),
     }
     impl Choice {
         pub fn new_text(value: String) -> Self {
             Self {
-                tag: super::choices::TEXT,
-                data: ChoiceData {
-                    text: core::mem::ManuallyDrop::new(value),
-                },
+                tag: Some(super::choices::TEXT),
+                data: ChoiceData::Text(value),
             }
         }
         pub fn is_text(&self) -> bool {
-            matches!(self.tag, super::choices::TEXT)
+            matches!(& self.data, ChoiceData::Text(_))
         }
         #[allow(clippy::borrowed_box)]
         pub fn as_text(&self) -> &String {
-            debug_assert!(self.is_text());
-            unsafe { &self.data.text }
+            match &self.data {
+                ChoiceData::Text(value) => value,
+                #[allow(unreachable_patterns)]
+                _ => panic!("union Choice does not contain text"),
+            }
         }
         #[allow(clippy::borrowed_box)]
         pub fn as_text_mut(&mut self) -> &mut String {
-            debug_assert!(self.is_text());
-            unsafe { &mut self.data.text }
+            match &mut self.data {
+                ChoiceData::Text(value) => value,
+                #[allow(unreachable_patterns)]
+                _ => panic!("union Choice does not contain text"),
+            }
         }
         pub fn into_text(self) -> String {
-            debug_assert!(self.is_text());
-            unsafe {
-                let mut forget = core::mem::ManuallyDrop::new(self);
-                core::mem::ManuallyDrop::take(&mut forget.data.text)
+            match self.data {
+                ChoiceData::Text(value) => value,
+                #[allow(unreachable_patterns)]
+                _ => panic!("union Choice does not contain text"),
             }
         }
         pub fn new_number(value: i64) -> Self {
             Self {
-                tag: super::choices::Kind::Number,
-                data: ChoiceData {
-                    number: core::mem::ManuallyDrop::new(value),
-                },
+                tag: Some(super::choices::Kind::Number),
+                data: ChoiceData::Number(value),
             }
         }
         pub fn is_number(&self) -> bool {
-            matches!(self.tag, super::choices::Kind::Number)
+            matches!(& self.data, ChoiceData::Number(_))
         }
         #[allow(clippy::borrowed_box)]
         pub fn as_number(&self) -> &i64 {
-            debug_assert!(self.is_number());
-            unsafe { &self.data.number }
+            match &self.data {
+                ChoiceData::Number(value) => value,
+                #[allow(unreachable_patterns)]
+                _ => panic!("union Choice does not contain number"),
+            }
         }
         #[allow(clippy::borrowed_box)]
         pub fn as_number_mut(&mut self) -> &mut i64 {
-            debug_assert!(self.is_number());
-            unsafe { &mut self.data.number }
-        }
-        pub fn into_number(self) -> i64 {
-            debug_assert!(self.is_number());
-            unsafe {
-                let mut forget = core::mem::ManuallyDrop::new(self);
-                core::mem::ManuallyDrop::take(&mut forget.data.number)
+            match &mut self.data {
+                ChoiceData::Number(value) => value,
+                #[allow(unreachable_patterns)]
+                _ => panic!("union Choice does not contain number"),
             }
         }
-        pub fn tag(&self) -> &super::choices::Kind {
-            &self.tag
+        pub fn into_number(self) -> i64 {
+            match self.data {
+                ChoiceData::Number(value) => value,
+                #[allow(unreachable_patterns)]
+                _ => panic!("union Choice does not contain number"),
+            }
+        }
+        /// The explicit discriminator, or None for the default case.
+        pub fn tag(&self) -> Option<&super::choices::Kind> {
+            self.tag.as_ref()
         }
     }
     impl Default for Choice {
         fn default() -> Self {
-            Self {
-                tag: super::choices::TEXT,
-                data: ChoiceData {
-                    text: core::mem::ManuallyDrop::new(String::default()),
-                },
-            }
+            Self::new_text(Default::default())
         }
     }
     #[derive(::serde::Serialize)]
-    struct ChoiceSerdeRef<'__a> {
-        tag: &'__a str,
-        data: ChoiceSerdeRefData<'__a>,
+    struct ChoiceSerdeRef<'a> {
+        tag: &'a str,
+        data: ChoiceSerdeRefData<'a>,
     }
-    #[allow(clippy::borrowed_box)]
     #[derive(::serde::Serialize)]
     #[serde(untagged)]
-    enum ChoiceSerdeRefData<'__a> {
-        Case0(&'__a String),
-        Case1(&'__a i64),
+    enum ChoiceSerdeRefData<'a> {
+        Case0(&'a String),
+        Case1(&'a i64),
     }
     impl serde::Serialize for Choice {
-        #[allow(unreachable_patterns)]
-        fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where
-            __S: serde::Serializer,
+            S: serde::Serializer,
         {
-            let helper = match self.tag {
-                super::choices::TEXT => {
+            let helper = match &self.data {
+                ChoiceData::Text(data) => {
                     let tag = "TEXT";
                     ChoiceSerdeRef {
                         tag,
-                        data: ChoiceSerdeRefData::Case0(self.as_text()),
+                        data: ChoiceSerdeRefData::Case0(data),
                     }
                 }
-                super::choices::Kind::Number => {
+                ChoiceData::Number(data) => {
                     let tag = "Number";
                     ChoiceSerdeRef {
                         tag,
-                        data: ChoiceSerdeRefData::Case1(self.as_number()),
+                        data: ChoiceSerdeRefData::Case1(data),
                     }
                 }
-                _ => unreachable!(),
             };
-            helper.serialize(__serializer)
+            helper.serialize(serializer)
         }
     }
     #[derive(::serde::Deserialize)]
@@ -273,30 +215,18 @@ pub mod left {
             match helper.tag.as_str() {
                 "TEXT" => {
                     let value = ::serde_json::from_value::<String>(helper.data)
-                        .map_err(|err| serde::de::Error::custom(
-                            format!(
-                                "union Choice payload decode failed for tag `TEXT`: {err}"
-                            ),
-                        ))?;
+                        .map_err(serde::de::Error::custom)?;
                     Ok(Self {
-                        tag: super::choices::TEXT,
-                        data: ChoiceData {
-                            text: core::mem::ManuallyDrop::new(value),
-                        },
+                        tag: Some(super::choices::TEXT),
+                        data: ChoiceData::Text(value),
                     })
                 }
                 "Number" => {
                     let value = ::serde_json::from_value::<i64>(helper.data)
-                        .map_err(|err| serde::de::Error::custom(
-                            format!(
-                                "union Choice payload decode failed for tag `Number`: {err}"
-                            ),
-                        ))?;
+                        .map_err(serde::de::Error::custom)?;
                     Ok(Self {
-                        tag: super::choices::Kind::Number,
-                        data: ChoiceData {
-                            number: core::mem::ManuallyDrop::new(value),
-                        },
+                        tag: Some(super::choices::Kind::Number),
+                        data: ChoiceData::Number(value),
                     })
                 }
                 _ => {

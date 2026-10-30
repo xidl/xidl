@@ -17,6 +17,55 @@ members participate in request decoding, response encoding, OpenAPI schemas,
 and generated validators exactly like the derived struct's own members. See
 [Struct Inheritance](/docs/#struct-inheritance) for the inheritance rules.
 
+## JSON Wire Values
+
+Rust Axum, Go REST, TypeScript REST and OpenAPI share these JSON shapes:
+
+| IDL value | JSON representation |
+| --- | --- |
+| Ordinary union | An object with `tag` and `data` |
+| `sequence<octet>` | An array of numbers from 0 through 255 |
+| `char` / `wchar` | A string containing one Unicode scalar value |
+| Fixed array | An array with exactly the declared dimensions |
+| Integer | A JSON number within the declared IDL range |
+| Absent `@optional` member | An omitted property |
+
+For example, both labels select the same payload type while retaining the
+label received on the wire:
+
+```idl
+union Change switch (long) {
+    case 0:
+    case 1: string title;
+    default: string reason;
+};
+```
+
+```json
+{ "tag": "1", "data": "New title" }
+```
+
+The default label is represented as `"default"`. Unknown tags and payloads
+that do not match the selected branch are rejected. Nested payloads retain
+their own `@rename`, `@rename_all`, `@skip` and optional-member rules.
+An `@http union` uses the media-type mapping below.
+
+JSON fields use their declared types: numeric strings, fractional integers,
+missing required members and malformed array dimensions are rejected. Path,
+query, header and cookie bindings arrive as text and are parsed into their
+declared types. Declared HTTP exceptions encode their body fields as JSON;
+header and cookie members travel in their respective HTTP bindings.
+
+64-bit integers remain JSON numbers. JavaScript can lose integer precision
+above `2^53 - 1`; a contract that requires exact large values declares a
+`string`, and the application parses it. See the
+[serialization decision in #335](https://github.com/xidl/xidl/issues/335).
+
+The cross-target BDD probe runs the same Hurl requests against all three
+generated servers, validates recorded responses against generated OpenAPI,
+and runs each generated SDK against every server. Structured stream checks
+also validate item and declared error bodies, including their terminal frame.
+
 ## Parameter Encoding Methods
 
 ### Multi-parameter Input Encoding Method

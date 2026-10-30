@@ -54,10 +54,16 @@ func RegisterMediaHandler(r gin.IRouter, svc MediaService) {
 		req := &MediaWhoRequest{}
 		resp, err := svc.Who(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeMediaWhoFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -93,8 +99,9 @@ func (c *MediaClient) Who(ctx context.Context, req *MediaWhoRequest) (*MediaWhoR
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *MediaWhoResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeMediaWhoFailure)
 	}
 	decoded, err := decodeMediaWhoResponse(resp)
 	if err != nil {
@@ -132,4 +139,14 @@ func decodeMediaWhoResponse(resp *http.Response) (MediaWhoResponse, error) {
 	}
 	out.Return = body
 	return out, nil
+}
+
+func encodeMediaWhoFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeMediaWhoFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }

@@ -1,0 +1,89 @@
+{% macro body_type(exception) -%}
+struct {
+{% for field in exception.body %}
+    {{ field.field }} {{ field.ty }} `xjson:"{{ field.wire }}{% if field.optional %},omitempty{% endif %}"`
+{% endfor %}
+}
+{%- endmacro %}
+
+func encode{{ prefix }}Failure(err error) xidlgohttp.HTTPFailure {
+{% for exception in exceptions %}
+    var ex{{ loop.index }} *{{ exception.name }}
+    if errors.As(err, &ex{{ loop.index }}) {
+        {% if exception.has_body or exception.headers or exception.cookies %}exception := ex{{ loop.index }}{% endif %}
+        failure := xidlgohttp.HTTPFailure{Status: {{ exception.status }}, Headers: make(http.Header)}
+        {% if exception.has_body %}
+        body, encodingError := json.Marshal({{ body_type(exception) }}{
+        {% for field in exception.body %}{{ field.field }}: exception.{{ field.field }},{% endfor %}
+        })
+        if encodingError != nil { return xidlgohttp.EncodeHTTPError(fmt.Errorf("{{ prefix }} exception encoding: %w", encodingError)) }
+        failure.Body = body
+        {% endif %}
+        {% for field in exception.headers %}
+        {
+            values, encodingError := xidlgohttp.FormatTextValues(exception.{{ field.field }})
+            if encodingError != nil { return xidlgohttp.EncodeHTTPError(encodingError) }
+            for _, value := range values { failure.Headers.Add({{ field.wire | tojson }}, value) }
+        }
+        {% endfor %}
+        {% for field in exception.cookies %}
+        {
+            values, encodingError := xidlgohttp.FormatTextValues(exception.{{ field.field }})
+            if encodingError != nil { return xidlgohttp.EncodeHTTPError(encodingError) }
+            for _, value := range values {
+                cookie := http.Cookie{Name: {{ field.wire | tojson }}, Value: xidlgohttp.EncodeCookieValue(value)}
+                failure.Headers.Add("Set-Cookie", cookie.String())
+            }
+        }
+        {% endfor %}
+        return failure
+    }
+{% endfor %}
+    return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decode{{ prefix }}Failure(failure xidlgohttp.HTTPFailure) error {
+{% for exception in exceptions %}
+    if failure.Status == {{ exception.status }} {
+        var exception {{ exception.name }}
+        {% if exception.has_body %}
+        var body {{ body_type(exception) }}
+        if err := json.Unmarshal(failure.Body, &body); err != nil { return xidlgohttp.DecodeHTTPError(failure) }
+        {% for field in exception.body %}exception.{{ field.field }} = body.{{ field.field }}
+        {% endfor %}
+        {% endif %}
+        if failure.Headers != nil {
+        {% for field in exception.headers %}
+            {
+                values := failure.Headers.Values({{ field.wire | tojson }})
+                if len(values) == 0 {
+                    {% if not field.optional and not field.multi %}return xidlgohttp.DecodeHTTPError(failure){% endif %}
+                } else if err := xidlgohttp.ParseText({% if field.multi %}strings.Join(values, ","){% else %}values[0]{% endif %}, &exception.{{ field.field }}); err != nil {
+                    return xidlgohttp.DecodeHTTPError(failure)
+                }
+            }
+        {% endfor %}
+        {% for field in exception.cookies %}
+            {
+                var values []string
+                response := http.Response{Header: failure.Headers}
+                for _, cookie := range response.Cookies() {
+                    if cookie.Name == {{ field.wire | tojson }} {
+                        value, err := xidlgohttp.DecodeCookieValue(cookie.Value)
+                        if err != nil { return xidlgohttp.DecodeHTTPError(failure) }
+                        values = append(values, value)
+                    }
+                }
+                if len(values) == 0 {
+                    {% if not field.optional and not field.multi %}return xidlgohttp.DecodeHTTPError(failure){% endif %}
+                } else if err := xidlgohttp.ParseTextValues({% if field.multi %}values{% else %}values[:1]{% endif %}, &exception.{{ field.field }}); err != nil {
+                    return xidlgohttp.DecodeHTTPError(failure)
+                }
+            }
+        {% endfor %}
+        }
+        return &exception
+    }
+{% endfor %}
+    return xidlgohttp.DecodeHTTPError(failure)
+}

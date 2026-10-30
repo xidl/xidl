@@ -172,7 +172,7 @@ export const CollectionInputsOperations = {
             bodyFields: [{ wireName: "return", key: "return" }],
             headers: [],
             cookies: [],
-            schema: z.array(z.string()),
+            schema: z.array(z.string().regex(/^[^\uD800-\uDFFF](?![\s\S])/u)),
             stream: false,
             
         },
@@ -311,7 +311,7 @@ export const CollectionInputsOperations = {
             bodyFields: [{ wireName: "return", key: "return" }],
             headers: [],
             cookies: [],
-            schema: z.array(z.string()),
+            schema: z.array(z.string().regex(/^[^\uD800-\uDFFF](?![\s\S])/u)),
             stream: false,
             
         },

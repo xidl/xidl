@@ -9,12 +9,49 @@ http_header.go
 
 package http_header
 
+import (
+	"fmt"
+	"github.com/xidl/xidl/golang/xidl-go-codec"
+)
+
 type TestStatus string
 
 const (
 	TestStatusOK TestStatus = "ok"
 	TestStatusFAILED TestStatus = "FAILED"
 )
+
+
+
+// MarshalText validates the enum's published wire value.
+func (value TestStatus) MarshalText() ([]byte, error) {
+    switch string(value) {
+    case "ok", "FAILED":
+        return []byte(value), nil
+    default:
+        return nil, fmt.Errorf("enum TestStatus has an invalid value %q", value)
+    }
+}
+
+// UnmarshalText accepts only values declared by the IDL enum.
+func (value *TestStatus) UnmarshalText(data []byte) error {
+    decoded := TestStatus(data)
+    if _, err := decoded.MarshalText(); err != nil { return err }
+    *value = decoded
+    return nil
+}
+
+func (value TestStatus) MarshalJSON() ([]byte, error) {
+    text, err := value.MarshalText()
+    if err != nil { return nil, err }
+    return json.Marshal(string(text))
+}
+
+func (value *TestStatus) UnmarshalJSON(data []byte) error {
+    var text string
+    if err := json.Unmarshal(data, &text); err != nil { return err }
+    return value.UnmarshalText([]byte(text))
+}
 
 type TestUser struct {
 	Id uint32 `xjson:"id"`
@@ -56,50 +93,66 @@ func RegisterTestHeaderServiceHandler(r gin.IRouter, svc TestHeaderServiceServic
 	r.GET("/v1/headers/:id", func(c *gin.Context) {
 
 		req := &TestHeaderServiceGetUserRequest{}
-
 		if raw, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			if value, parseErr := xidlgohttp.ParseUint32(raw); parseErr == nil {
-				req.Id = value
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, parseErr.Error())
+			if err := xidlgohttp.ParseText(raw, &req.Id); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 				return
 			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-
-		if value, err := xidlgohttp.HeaderString(c.Request.Header, "X-Req-Id"); err == nil {
-			req.ReqId = value
+		if raw, err := xidlgohttp.HeaderString(c.Request.Header, "X-Req-Id"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.ReqId); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-
+		if raw, err := xidlgohttp.HeaderString(c.Request.Header, "X-Flags"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Flags); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
 		if raw, err := xidlgohttp.HeaderString(c.Request.Header, "X-Age"); err == nil {
-			if value, parseErr := xidlgohttp.ParseUint32(raw); parseErr == nil {
-				req.Age = value
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, parseErr.Error())
+			if err := xidlgohttp.ParseText(raw, &req.Age); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 				return
 			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-
-		if value, err := xidlgohttp.GinCookieString(c, "sid"); err == nil {
-			req.SessionId = value
+		if raw, err := xidlgohttp.GinCookieString(c, "sid"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.SessionId); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
+		}
+		if raw, err := xidlgohttp.GinCookieString(c, "pref"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Prefs); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		}
 		resp, err := svc.GetUser(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeTestHeaderServiceGetUserFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -111,16 +164,20 @@ func RegisterTestHeaderServiceHandler(r gin.IRouter, svc TestHeaderServiceServic
 	r.POST("/v1/headers", func(c *gin.Context) {
 
 		req := &TestHeaderServiceCreateUserRequest{}
-
-		if value, err := xidlgohttp.HeaderString(c.Request.Header, "X-Token"); err == nil {
-			req.Token = value
+		if raw, err := xidlgohttp.HeaderString(c.Request.Header, "X-Token"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Token); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-
-		if value, err := xidlgohttp.GinCookieString(c, "sid"); err == nil {
-			req.SessionId = value
+		if raw, err := xidlgohttp.GinCookieString(c, "sid"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.SessionId); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
@@ -131,11 +188,18 @@ func RegisterTestHeaderServiceHandler(r gin.IRouter, svc TestHeaderServiceServic
 			return
 		}
 		req.Name = body
-		if _, err := svc.CreateUser(c.Request.Context(), req); err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+		_, err := svc.CreateUser(c.Request.Context(), req)
+		if err != nil {
+			failure := encodeTestHeaderServiceCreateUserFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -163,19 +227,49 @@ func (c *TestHeaderServiceClient) GetUser(ctx context.Context, req *TestHeaderSe
 		return nil, err
 	}
 	httpReq.Header.Set("Accept", "application/json")
-
-	httpReq.Header.Set("X-Req-Id", req.ReqId)
-
-	httpReq.Header.Set("X-Age", xidlgohttp.FormatUint32(req.Age))
-
-	httpReq.AddCookie(&http.Cookie{Name: "sid", Value: req.SessionId})
+	{
+		raw, err := xidlgohttp.FormatText(req.ReqId)
+		if err != nil {
+			return nil, err
+		}
+		httpReq.Header.Set("X-Req-Id", raw)
+	}
+	{
+		raw, err := xidlgohttp.FormatText(req.Flags)
+		if err != nil {
+			return nil, err
+		}
+		httpReq.Header.Set("X-Flags", raw)
+	}
+	{
+		raw, err := xidlgohttp.FormatText(req.Age)
+		if err != nil {
+			return nil, err
+		}
+		httpReq.Header.Set("X-Age", raw)
+	}
+	{
+		raw, err := xidlgohttp.FormatText(req.SessionId)
+		if err != nil {
+			return nil, err
+		}
+		httpReq.AddCookie(&http.Cookie{Name: "sid", Value: xidlgohttp.EncodeCookieValue(raw)})
+	}
+	{
+		raw, err := xidlgohttp.FormatText(req.Prefs)
+		if err != nil {
+			return nil, err
+		}
+		httpReq.AddCookie(&http.Cookie{Name: "pref", Value: xidlgohttp.EncodeCookieValue(raw)})
+	}
 	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *TestHeaderServiceGetUserResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeTestHeaderServiceGetUserFailure)
 	}
 	decoded, err := decodeTestHeaderServiceGetUserResponse(resp)
 	if err != nil {
@@ -197,17 +291,28 @@ func (c *TestHeaderServiceClient) CreateUser(ctx context.Context, req *TestHeade
 	}
 	httpReq.Header.Set("Content-Type", "text/plain")
 	httpReq.Header.Set("Accept", "")
-
-	httpReq.Header.Set("X-Token", req.Token)
-
-	httpReq.AddCookie(&http.Cookie{Name: "sid", Value: req.SessionId})
+	{
+		raw, err := xidlgohttp.FormatText(req.Token)
+		if err != nil {
+			return nil, err
+		}
+		httpReq.Header.Set("X-Token", raw)
+	}
+	{
+		raw, err := xidlgohttp.FormatText(req.SessionId)
+		if err != nil {
+			return nil, err
+		}
+		httpReq.AddCookie(&http.Cookie{Name: "sid", Value: xidlgohttp.EncodeCookieValue(raw)})
+	}
 	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *TestHeaderServiceCreateUserResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeTestHeaderServiceCreateUserFailure)
 	}
 	decoded, err := decodeTestHeaderServiceCreateUserResponse(resp)
 	if err != nil {
@@ -255,6 +360,16 @@ func decodeTestHeaderServiceGetUserResponse(resp *http.Response) (TestHeaderServ
 	return out, nil
 }
 
+func encodeTestHeaderServiceGetUserFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeTestHeaderServiceGetUserFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type TestHeaderServiceCreateUserRequest struct {
 	Token     string `xjson:"token" form:"token"`
 	SessionId string `xjson:"session_id" form:"session_id"`
@@ -281,4 +396,14 @@ func formatTestHeaderServiceCreateUserPath(req *TestHeaderServiceCreateUserReque
 func decodeTestHeaderServiceCreateUserResponse(resp *http.Response) (TestHeaderServiceCreateUserResponse, error) {
 	out := TestHeaderServiceCreateUserResponse{}
 	return out, nil
+}
+
+func encodeTestHeaderServiceCreateUserFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeTestHeaderServiceCreateUserFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }

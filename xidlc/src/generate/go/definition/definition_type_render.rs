@@ -85,7 +85,7 @@ fn render_typedef(
     Ok(())
 }
 
-fn render_constr_type(
+pub(super) fn render_constr_type(
     ctx: &mut GoRenderContext,
     constr: &hir::ConstrTypeDcl,
     prefix: &[String],
@@ -93,11 +93,17 @@ fn render_constr_type(
     match constr {
         hir::ConstrTypeDcl::StructDcl(def) => render_struct(ctx, def, prefix),
         hir::ConstrTypeDcl::EnumDcl(def) => render_enum(ctx, def, prefix),
-        hir::ConstrTypeDcl::UnionDef(def) => render_simple_struct(
-            ctx,
-            &go_export_name(prefix, &def.ident),
-            &[("Tag", "string", "tag"), ("Value", "any", ",flatten")],
-        ),
+        hir::ConstrTypeDcl::UnionDef(def) => {
+            if crate::generate::utils::has_annotation(&def.annotations, "http") {
+                render_simple_struct(
+                    ctx,
+                    &go_export_name(prefix, &def.ident),
+                    &[("Tag", "string", "tag"), ("Value", "any", ",flatten")],
+                )
+            } else {
+                super::union::UnionTemplate::render(ctx, def, prefix)
+            }
+        }
         hir::ConstrTypeDcl::BitsetDcl(def) => render_simple_struct(
             ctx,
             &go_export_name(prefix, &def.ident),
@@ -144,10 +150,20 @@ fn render_enum(ctx: &mut GoRenderContext, def: &hir::EnumDcl, prefix: &[String])
             wire_name,
         });
     }
+    if !members.is_empty() {
+        ctx.packages.require("fmt", "fmt");
+        ctx.packages
+            .require("json", "github.com/xidl/xidl/golang/xidl-go-codec");
+    }
+    let values = members
+        .iter()
+        .map(|member| member.wire_name.clone())
+        .collect();
     ctx.push_template(
         "enum.go.j2",
         &EnumTemplate {
             name,
+            values,
             members: render_enum_member_block(ctx, members)?,
         },
     )

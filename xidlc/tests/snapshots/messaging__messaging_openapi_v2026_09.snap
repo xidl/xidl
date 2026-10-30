@@ -36,6 +36,8 @@ expression: document
           },
           "size": {
             "format": "int64",
+            "maximum": 9223372036854775807,
+            "minimum": -9223372036854775808,
             "type": "integer"
           }
         },
@@ -67,34 +69,55 @@ expression: document
         "oneOf": [
           {
             "properties": {
-              "text": {
+              "data": {
                 "$ref": "#/components/schemas/v2026_09.Relay.TextContent"
+              },
+              "tag": {
+                "enum": [
+                  "1"
+                ],
+                "type": "string"
               }
             },
             "required": [
-              "text"
+              "tag",
+              "data"
             ],
             "type": "object"
           },
           {
             "properties": {
-              "attachment": {
+              "data": {
                 "$ref": "#/components/schemas/v2026_09.Relay.Attachment"
+              },
+              "tag": {
+                "enum": [
+                  "2"
+                ],
+                "type": "string"
               }
             },
             "required": [
-              "attachment"
+              "tag",
+              "data"
             ],
             "type": "object"
           },
           {
             "properties": {
-              "poll": {
+              "data": {
                 "$ref": "#/components/schemas/v2026_09.Relay.PollContent"
+              },
+              "tag": {
+                "enum": [
+                  "3"
+                ],
+                "type": "string"
               }
             },
             "required": [
-              "poll"
+              "tag",
+              "data"
             ],
             "type": "object"
           }
@@ -248,34 +271,55 @@ expression: document
         "oneOf": [
           {
             "properties": {
-              "like_by": {
+              "data": {
+                "type": "string"
+              },
+              "tag": {
+                "enum": [
+                  "LIKE"
+                ],
                 "type": "string"
               }
             },
             "required": [
-              "like_by"
+              "tag",
+              "data"
             ],
             "type": "object"
           },
           {
             "properties": {
-              "love_by": {
+              "data": {
+                "type": "string"
+              },
+              "tag": {
+                "enum": [
+                  "LOVE"
+                ],
                 "type": "string"
               }
             },
             "required": [
-              "love_by"
+              "tag",
+              "data"
             ],
             "type": "object"
           },
           {
             "properties": {
-              "emphasize_by": {
+              "data": {
+                "type": "string"
+              },
+              "tag": {
+                "enum": [
+                  "EMPHASIZE"
+                ],
                 "type": "string"
               }
             },
             "required": [
-              "emphasize_by"
+              "tag",
+              "data"
             ],
             "type": "object"
           }
@@ -302,6 +346,8 @@ expression: document
           },
           "member_count": {
             "format": "int32",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
             "type": "integer"
           },
           "topic": {
@@ -368,6 +414,7 @@ expression: document
           "bytes": {
             "items": {
               "format": "int32",
+              "maximum": 255,
               "minimum": 0,
               "type": "integer"
             },
@@ -394,6 +441,7 @@ expression: document
         "properties": {
           "total_bytes": {
             "format": "int64",
+            "maximum": 18446744073709551615,
             "minimum": 0,
             "type": "integer"
           },
@@ -1270,6 +1318,8 @@ expression: document
               "Retry-After": {
                 "schema": {
                   "format": "int32",
+                  "maximum": 2147483647,
+                  "minimum": -2147483648,
                   "type": "integer"
                 }
               }
@@ -1355,6 +1405,8 @@ expression: document
             "required": false,
             "schema": {
               "format": "int32",
+              "maximum": 2147483647,
+              "minimum": -2147483648,
               "type": "integer"
             }
           }
@@ -1481,6 +1533,8 @@ expression: document
               "Retry-After": {
                 "schema": {
                   "format": "int32",
+                  "maximum": 2147483647,
+                  "minimum": -2147483648,
                   "type": "integer"
                 }
               }
@@ -1557,6 +1611,8 @@ expression: document
               "Retry-After": {
                 "schema": {
                   "format": "int32",
+                  "maximum": 2147483647,
+                  "minimum": -2147483648,
                   "type": "integer"
                 }
               }
@@ -1604,10 +1660,14 @@ expression: document
                   "properties": {
                     "count": {
                       "format": "int32",
+                      "maximum": 2147483647,
+                      "minimum": -2147483648,
                       "type": "integer"
                     },
                     "mentions": {
                       "format": "int32",
+                      "maximum": 2147483647,
+                      "minimum": -2147483648,
                       "type": "integer"
                     }
                   },

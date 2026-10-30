@@ -1,3 +1,5 @@
+mod unions;
+
 use super::scope::SchemaScope;
 use crate::error::IdlcError;
 use crate::error::IdlcResult;
@@ -142,32 +144,19 @@ pub(crate) fn apply_deprecation(
 }
 
 fn integer_schema(value: &hir::IntegerType) -> RefOr<Schema> {
-    let mut object = ObjectBuilder::new().schema_type(Type::Integer);
-    match value {
-        hir::IntegerType::U64 => {
-            object = object
-                .format(Some(SchemaFormat::KnownFormat(KnownFormat::Int64)))
-                .minimum(Some(0));
-        }
-        hir::IntegerType::U32 => {
-            object = object
-                .format(Some(SchemaFormat::KnownFormat(KnownFormat::Int64)))
-                .minimum(Some(0))
-                .maximum(Some(u32::MAX));
-        }
-        hir::IntegerType::U16
-        | hir::IntegerType::U8
-        | hir::IntegerType::Octet
-        | hir::IntegerType::UChar => {
-            object = object
-                .format(Some(SchemaFormat::KnownFormat(KnownFormat::Int32)))
-                .minimum(Some(0));
-        }
-        hir::IntegerType::I64 => {
-            object = object.format(Some(SchemaFormat::KnownFormat(KnownFormat::Int64)));
-        }
-        _ => object = object.format(Some(SchemaFormat::KnownFormat(KnownFormat::Int32))),
-    }
+    let kind = hir::IntegerKind::from_hir(value);
+    let (minimum, maximum) = kind.bounds();
+    let object = ObjectBuilder::new()
+        .schema_type(Type::Integer)
+        .format(Some(SchemaFormat::KnownFormat(
+            if kind.bits() > 32 || matches!(value, hir::IntegerType::U32) {
+                KnownFormat::Int64
+            } else {
+                KnownFormat::Int32
+            },
+        )))
+        .minimum(Some(minimum as i64))
+        .maximum(Some(maximum as u64));
     RefOr::T(Schema::from(object))
 }
 
@@ -256,26 +245,6 @@ impl SchemaScope<'_> {
         Ok(RefOr::T(Schema::from(combined)))
     }
 
-    pub(crate) fn schema_for_union(self, def: &hir::UnionDef) -> IdlcResult<RefOr<Schema>> {
-        let mut variants = Vec::new();
-        for case in &def.case {
-            let decl = &case.element.value;
-            let name = declarator_name(decl);
-            let schema = apply_schema_description(
-                self.schema_for_element(&case.element.ty, decl)?,
-                doc_text(&case.element.annotations).as_deref(),
-            );
-            let object = ObjectBuilder::new()
-                .schema_type(Type::Object)
-                .property(name.clone(), schema)
-                .required(name);
-            variants.push(RefOr::T(Schema::from(object)));
-        }
-        let mut one_of = OneOf::new();
-        one_of.items = variants;
-        Ok(RefOr::T(Schema::from(one_of)))
-    }
-
     fn schema_for_element(
         self,
         ty: &hir::ElementSpecTy,
@@ -325,10 +294,14 @@ impl SchemaScope<'_> {
                         .format(Some(SchemaFormat::KnownFormat(KnownFormat::Double))),
                 ))
             }
-            hir::TypeSpec::CharType
-            | hir::TypeSpec::WideCharType
-            | hir::TypeSpec::StringType(_)
-            | hir::TypeSpec::WideStringType(_) => {
+            hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => RefOr::T(Schema::from(
+                ObjectBuilder::new()
+                    .schema_type(Type::String)
+                    .min_length(Some(1))
+                    .max_length(Some(1))
+                    .pattern(Some(r"^[^\uD800-\uDFFF]$")),
+            )),
+            hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => {
                 RefOr::T(Schema::from(ObjectBuilder::new().schema_type(Type::String)))
             }
             hir::TypeSpec::Boolean => RefOr::T(Schema::from(

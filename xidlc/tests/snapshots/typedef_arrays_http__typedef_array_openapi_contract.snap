@@ -85,10 +85,14 @@ expression: document
       },
       "client.Label": {
         "format": "int32",
+        "maximum": 2147483647,
+        "minimum": -2147483648,
         "type": "integer"
       },
       "client.RootPair": {
         "format": "int32",
+        "maximum": 2147483647,
+        "minimum": -2147483648,
         "type": "integer"
       },
       "spatial.Batches": {

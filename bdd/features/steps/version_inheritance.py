@@ -10,6 +10,7 @@ import time
 from behave import given, then, when
 import requests
 
+from openapi_responses import OpenAPIResponses
 from server_process import start_server_process
 from version_adapters import prepare_application
 
@@ -37,7 +38,7 @@ def inherited_generate(context):
     output = Path(context.temp_dir)
     rust = output / "rust"
     typescript = output / "ts"
-    cli = root / "target/debug/xidlc"
+    cli = root / os.environ.get("CARGO_TARGET_DIR", "target") / "debug/xidlc"
     libraries = root / "bdd/features/data/versioned_libraries"
     run(
         [str(cli), "lint", "--deny", "warnings", *map(str, libraries.rglob("*.idl"))],
@@ -155,8 +156,6 @@ def inherited_hurl(context):
 
 @then("inherited address responses match their generated OpenAPI contracts")
 def inherited_openapi(context):
-    from jsonschema import Draft202012Validator
-
     documents = {
         document["info"]["version"]: document
         for path in (Path(context.temp_dir) / "openapi").glob("*.json")
@@ -184,20 +183,16 @@ def inherited_openapi(context):
                 version = request_headers.get("x-address-version", "2026-07-01")
                 assert headers.get("x-address-version") == version
                 document = documents[version]
+                body = OpenAPIResponses(context.inherited_report).validate(
+                    call, document
+                )
                 operation = document["paths"]["/tenants/{tenant}/addresses/{id}"][
                     call["request"]["method"].lower()
                 ]
-                media_type = headers["content-type"].split(";", 1)[0].strip()
                 contract = operation["responses"][str(response["status"])]["content"][
-                    media_type
+                    "application/json"
                 ]["schema"]
-                body = json.loads(
-                    (context.inherited_report / response["body"]).read_text()
-                )
-                validator = Draft202012Validator(
-                    {**contract, "components": document["components"]}
-                )
-                validator.validate(body)
+                validator = OpenAPIResponses.validator(contract, document)
                 if (
                     response["status"] == 200
                     and version not in checked_recursive_contracts

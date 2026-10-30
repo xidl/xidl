@@ -52,33 +52,42 @@ func RegisterHttpSecurityServiceHandler(r gin.IRouter, svc HttpSecurityServiceSe
 		c.Request = c.Request.WithContext(ctx)
 
 		req := &HttpSecurityServiceGetUserRequest{}
-
 		if raw, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			if value, parseErr := xidlgohttp.ParseUint32(raw); parseErr == nil {
-				req.Id = value
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, parseErr.Error())
+			if err := xidlgohttp.ParseText(raw, &req.Id); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 				return
 			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-
-		req.Locale = xidlgohttp.QueryOptionalString(c.Request.URL.Query(), "locale")
-
-		if value, err := xidlgohttp.HeaderString(c.Request.Header, "X-Trace-Id"); err == nil {
-			req.TraceId = value
+		if raw, err := xidlgohttp.QueryString(c.Request.URL.Query(), "locale"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Locale); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		if raw, err := xidlgohttp.HeaderString(c.Request.Header, "X-Trace-Id"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.TraceId); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		resp, err := svc.GetUser(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpSecurityServiceGetUserFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -99,10 +108,16 @@ func RegisterHttpSecurityServiceHandler(r gin.IRouter, svc HttpSecurityServiceSe
 		req.Page = body.Page
 		resp, err := svc.SearchUser(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpSecurityServiceSearchUserFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -116,10 +131,16 @@ func RegisterHttpSecurityServiceHandler(r gin.IRouter, svc HttpSecurityServiceSe
 		req := &HttpSecurityServiceHealthRequest{}
 		resp, err := svc.Health(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpSecurityServiceHealthFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -146,9 +167,12 @@ func NewHttpSecurityServiceClient(baseURL string, httpClient *http.Client, auth 
 func (c *HttpSecurityServiceClient) GetUser(ctx context.Context, req *HttpSecurityServiceGetUserRequest) (*HttpSecurityServiceGetUserResponse, error) {
 	requestURL := c.baseURL + formatHttpSecurityServiceGetUserPath(req)
 	query := url.Values{}
-
 	if req.Locale != nil {
-		query.Set("locale", *req.Locale)
+		raw, err := xidlgohttp.FormatText(req.Locale)
+		if err != nil {
+			return nil, err
+		}
+		query.Set("locale", raw)
 	}
 	if encoded := query.Encode(); encoded != "" {
 		requestURL += "?" + encoded
@@ -158,16 +182,22 @@ func (c *HttpSecurityServiceClient) GetUser(ctx context.Context, req *HttpSecuri
 		return nil, err
 	}
 	httpReq.Header.Set("Accept", "text/plain")
-
-	httpReq.Header.Set("X-Trace-Id", req.TraceId)
+	{
+		raw, err := xidlgohttp.FormatText(req.TraceId)
+		if err != nil {
+			return nil, err
+		}
+		httpReq.Header.Set("X-Trace-Id", raw)
+	}
 	xidlgohttp.ApplyClientAuth(httpReq, c.auth, HttpSecurityServiceGetUserSecurityRequirements())
 	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpSecurityServiceGetUserResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpSecurityServiceGetUserFailure)
 	}
 	decoded, err := decodeHttpSecurityServiceGetUserResponse(resp)
 	if err != nil {
@@ -197,8 +227,9 @@ func (c *HttpSecurityServiceClient) SearchUser(ctx context.Context, req *HttpSec
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpSecurityServiceSearchUserResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpSecurityServiceSearchUserFailure)
 	}
 	decoded, err := decodeHttpSecurityServiceSearchUserResponse(resp)
 	if err != nil {
@@ -219,8 +250,9 @@ func (c *HttpSecurityServiceClient) Health(ctx context.Context, req *HttpSecurit
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpSecurityServiceHealthResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpSecurityServiceHealthFailure)
 	}
 	decoded, err := decodeHttpSecurityServiceHealthResponse(resp)
 	if err != nil {
@@ -270,6 +302,16 @@ func decodeHttpSecurityServiceGetUserResponse(resp *http.Response) (HttpSecurity
 	return out, nil
 }
 
+func encodeHttpSecurityServiceGetUserFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpSecurityServiceGetUserFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type HttpSecurityServiceSearchUserRequest struct {
 	Keyword string  `xjson:"keyword" form:"keyword"`
 	Page    *uint32 `xjson:"page" form:"page"`
@@ -308,6 +350,16 @@ func decodeHttpSecurityServiceSearchUserResponse(resp *http.Response) (HttpSecur
 	return out, nil
 }
 
+func encodeHttpSecurityServiceSearchUserFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpSecurityServiceSearchUserFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type HttpSecurityServiceHealthRequest struct {
 }
 
@@ -340,4 +392,14 @@ func decodeHttpSecurityServiceHealthResponse(resp *http.Response) (HttpSecurityS
 	}
 	out.Return = body
 	return out, nil
+}
+
+func encodeHttpSecurityServiceHealthFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpSecurityServiceHealthFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }

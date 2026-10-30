@@ -9,6 +9,11 @@ types.go
 
 package types
 
+import (
+	"fmt"
+	"github.com/xidl/xidl/golang/xidl-go-codec"
+)
+
 const _xidl_Answer_0 = 42
 const _xidl_Answer_1 = _xidl_Answer_0
 const _ int32 = _xidl_Answer_1
@@ -33,7 +38,92 @@ type Flags struct {
 	Bits uint64 `xjson:"bits"`
 }
 
+// Result contains one payload selected by its IDL discriminator.
 type Result struct {
-	Tag string `xjson:"tag"`
-	Value any `xjson:",flatten"`
+    tag string
+    data any
+}
+
+func (value Result) Tag() string { return value.tag }
+
+
+func NewResultNumber(data int32) Result {
+    return Result{tag: "0", data: data}
+}
+
+func (value Result) AsNumber() (int32, bool) {
+    switch value.tag {
+    case "0":
+        
+        data, ok := value.data.(int32)
+        return data, ok
+        
+    }
+    var zero int32
+    return zero, false
+}
+
+func NewResultText(data string) Result {
+    return Result{tag: "1", data: data}
+}
+
+func (value Result) AsText() (string, bool) {
+    switch value.tag {
+    case "1":
+        
+        data, ok := value.data.(string)
+        return data, ok
+        
+    }
+    var zero string
+    return zero, false
+}
+
+
+func (value Result) MarshalJSON() ([]byte, error) {
+    switch value.tag {
+    
+    case "0":
+        if _, ok := value.AsNumber(); !ok {
+            return nil, fmt.Errorf("union Result has an invalid payload for tag %q", value.tag)
+        }
+    
+    case "1":
+        if _, ok := value.AsText(); !ok {
+            return nil, fmt.Errorf("union Result has an invalid payload for tag %q", value.tag)
+        }
+    
+    default:
+        return nil, fmt.Errorf("union Result has an invalid tag %q", value.tag)
+    }
+    return json.Marshal(struct {
+        Tag string `json:"tag" xjson:"tag"`
+        Data any `json:"data" xjson:"data"`
+    }{Tag: value.tag, Data: value.data})
+}
+
+func (value *Result) UnmarshalJSON(data []byte) error {
+    var wire map[string]json.RawMessage
+    if err := json.Unmarshal(data, &wire); err != nil { return err }
+    var tag string
+    if err := json.Unmarshal(wire["tag"], &tag); err != nil { return fmt.Errorf("union Result tag: %w", err) }
+    payload, present := wire["data"]
+    if !present { return fmt.Errorf("union Result requires data") }
+    switch tag {
+    
+    case "0":
+        var decoded int32
+        if err := json.Unmarshal(payload, &decoded); err != nil { return fmt.Errorf("union Result payload for tag %q: %w", tag, err) }
+        *value = Result{tag: tag, data: decoded}
+        return nil
+    
+    case "1":
+        var decoded string
+        if err := json.Unmarshal(payload, &decoded); err != nil { return fmt.Errorf("union Result payload for tag %q: %w", tag, err) }
+        *value = Result{tag: tag, data: decoded}
+        return nil
+    
+    default:
+        return fmt.Errorf("union Result has an invalid tag %q", tag)
+    }
 }

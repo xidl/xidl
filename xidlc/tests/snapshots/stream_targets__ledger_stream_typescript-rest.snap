@@ -443,16 +443,16 @@ import { xjson } from "xidl-typescript-codec";
         
             id: z.string(),
         
-            quantity: z.number().int()
+            quantity: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")
         
     });
 
     
     export const ImportResultSchema = z.object({
         
-            accepted: z.number().int(),
+            accepted: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"),
         
-            total: z.number().int()
+            total: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")
         
     });
 

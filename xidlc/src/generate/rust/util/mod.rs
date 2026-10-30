@@ -5,7 +5,7 @@ mod util_derives;
 mod util_types;
 mod util_union;
 
-pub use util_union::{http_union_case_ident, union_serde_tag_string};
+pub use util_union::http_union_case_ident;
 
 #[allow(unused_imports)]
 pub use self::util_annotations::{rust_deprecated_attr, rust_passthrough_attrs_from_annotations};

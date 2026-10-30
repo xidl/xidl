@@ -2,10 +2,7 @@ use xidl_parser::hir;
 
 use super::contexts::{FieldTypeContext, FieldZodContext, TsType, ZodCoercion, ZodSchema};
 use super::method::TypeRefTarget;
-use super::names::{
-    declarator_name, integer_schema_primitive, ts_ident, ts_prop_name, ts_scoped_name,
-    zod_schema_ref,
-};
+use super::names::{declarator_name, ts_ident, ts_prop_name, ts_scoped_name, zod_schema_ref};
 
 pub(crate) fn ts_type_for_decl(
     ty: &hir::TypeSpec,
@@ -77,21 +74,11 @@ pub(crate) fn ts_type_for_constr_inline(
 }
 
 fn inline_union_ts(def: &hir::UnionDef, module_path: &[String], target: TypeRefTarget) -> TsType {
-    let variants = def
-        .case
-        .iter()
-        .map(|case| {
-            let name = ts_prop_name(declarator_name(&case.element.value));
-            let ty =
-                ts_type_for_element(&case.element.ty, &case.element.value, module_path, target);
-            TsType::InlineStruct(vec![FieldTypeContext {
-                prop: name,
-                ty,
-                optional: false,
-                doc: Vec::new(),
-            }])
-        })
-        .collect::<Vec<_>>();
+    let variants = super::union::TsUnion {
+        definition: def,
+        module_path,
+    }
+    .types(target);
     if variants.is_empty() {
         TsType::Void
     } else if variants.len() == 1 {
@@ -174,29 +161,15 @@ fn inline_enum_zod(def: &hir::EnumDcl) -> ZodSchema {
 }
 
 fn inline_union_zod(def: &hir::UnionDef, module_path: &[String]) -> ZodSchema {
-    let variants = def
-        .case
-        .iter()
-        .map(|case| {
-            let name = ts_prop_name(declarator_name(&case.element.value));
-            let schema = zod_schema_for_element(&case.element.ty, &case.element.value, module_path);
-            FieldZodContext {
-                prop: name,
-                schema,
-                optional: false,
-                xjson_meta: None,
-            }
-        })
-        .collect::<Vec<_>>();
+    let variants = super::union::TsUnion {
+        definition: def,
+        module_path,
+    }
+    .schemas();
     match variants.len() {
         0 => ZodSchema::Never,
-        1 => ZodSchema::Object(vec![variants[0].clone()]),
-        _ => ZodSchema::Union(
-            variants
-                .into_iter()
-                .map(|v| ZodSchema::Object(vec![v]))
-                .collect(),
-        ),
+        1 => variants.into_iter().next().unwrap_or(ZodSchema::Never),
+        _ => ZodSchema::Union(variants),
     }
 }
 
@@ -279,21 +252,17 @@ fn zod_schema_for_type_spec_impl(
     coercion: ZodCoercion,
 ) -> ZodSchema {
     match ty {
-        hir::TypeSpec::IntegerType(value) => match coercion {
-            ZodCoercion::Strict => ZodSchema::Primitive(integer_schema_primitive(value)),
-            ZodCoercion::Coerce => ZodSchema::CoercedNumber {
-                integer: true,
-                unsigned: matches!(
-                    value,
-                    hir::IntegerType::U64
-                        | hir::IntegerType::U32
-                        | hir::IntegerType::U16
-                        | hir::IntegerType::U8
-                        | hir::IntegerType::UChar
-                        | hir::IntegerType::Octet
-                ),
-            },
-        },
+        hir::TypeSpec::IntegerType(value) => {
+            let kind = hir::IntegerKind::from_hir(value);
+            let (minimum, maximum) = kind.bounds();
+            ZodSchema::Integer {
+                minimum: minimum.to_string(),
+                maximum: (maximum + i128::from(kind.bits() == 64)).to_string(),
+                maximum_exclusive: kind.bits() == 64,
+                unsigned: !kind.is_signed(),
+                coerce: matches!(coercion, ZodCoercion::Coerce),
+            }
+        }
         hir::TypeSpec::FloatingPtType => match coercion {
             ZodCoercion::Strict => ZodSchema::Primitive("number()".to_string()),
             ZodCoercion::Coerce => ZodSchema::CoercedNumber {
@@ -301,9 +270,7 @@ fn zod_schema_for_type_spec_impl(
                 unsigned: false,
             },
         },
-        hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => {
-            ZodSchema::Primitive("string()".to_string())
-        }
+        hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => ZodSchema::Character,
         hir::TypeSpec::Boolean => match coercion {
             ZodCoercion::Strict => ZodSchema::Primitive("boolean()".to_string()),
             // Truthiness coercion would turn every non-empty text into true,

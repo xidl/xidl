@@ -1,4 +1,4 @@
-use super::util::{http_union_case_ident, union_serde_tag_string};
+use super::util::http_union_case_ident;
 use crate::error::IdlcResult;
 use crate::generate::rust::util::{
     constr_type_scoped_name, declarator_name, render_const, rust_deprecated_attr,
@@ -7,9 +7,9 @@ use crate::generate::rust::util::{
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
+use crate::generate::utils::union_wire::UnionWire;
 use convert_case::{Case as ConvertCase, Casing};
 use serde_json::json;
-use std::collections::BTreeSet;
 use xidl_parser::hir;
 
 impl RustRender for hir::UnionForwardDcl {
@@ -78,46 +78,12 @@ pub(crate) fn render_union_with_config(
     if crate::generate::utils::has_annotation(&def.annotations, "http") {
         return render_http_union(def, renderer);
     }
-    let mut fields = Vec::new();
-    let mut seen = BTreeSet::new();
-    let mut any_references = false;
-    for case in &def.case {
-        let name = crate::generate::rust::util::rust_ident(&declarator_name(&case.element.value));
-        if seen.insert(name.clone()) {
-            let doc = doc_lines_from_annotations(&case.element.annotations);
-            let rust_attrs = rust_passthrough_attrs_from_annotations(&case.element.annotations);
-            if case.element.references_deprecated {
-                any_references = true;
-            }
-            fields.push((
-                name,
-                &case.element.ty,
-                &case.element.value,
-                doc,
-                rust_attrs,
-                case.element.recursive,
-            ));
-        }
-    }
-
-    let allow_deprecated = any_references || rust_deprecated_attr(&[&def.annotations])?.is_some();
-    let members = fields
-        .into_iter()
-        .map(|(name, ty, decl, doc, rust_attrs, recursive)| {
-            let mut ty = match ty {
-                hir::ElementSpecTy::TypeSpec(spec) => renderer.declared_type(spec, decl)?,
-                hir::ElementSpecTy::ConstrTypeDcl(constr) => {
-                    rust_scoped_name(&constr_type_scoped_name(constr))
-                }
-            };
-            if recursive {
-                ty = format!("Box<{ty}>");
-            }
-            Ok(json!({ "name": name, "ty": ty, "doc": doc, "rust_attrs": rust_attrs }))
-        })
-        .collect::<IdlcResult<Vec<_>>>()?;
-
-    let mut cases = def
+    let allow_deprecated = def
+        .case
+        .iter()
+        .any(|case| case.element.references_deprecated)
+        || rust_deprecated_attr(&[&def.annotations])?.is_some();
+    let cases = def
         .case
         .iter()
         .enumerate()
@@ -131,18 +97,8 @@ pub(crate) fn render_union_with_config(
                 })
                 .collect::<Vec<_>>();
             let is_default = labels.iter().any(|label| label == "default");
-            let pattern = if is_default {
-                "_".to_string()
-            } else {
-                labels.join(" | ")
-            };
             let member = rust_ident(&declarator_name(&case.element.value));
             let helper_variant = member.to_case(ConvertCase::Pascal);
-            let field_id = case
-                .element
-                .field_id
-                .map(|value| format!("{value}u32"))
-                .unwrap_or_else(|| "1u32".to_string());
             let mut field_ty = match &case.element.ty {
                 hir::ElementSpecTy::TypeSpec(spec) => {
                     renderer.declared_type(spec, &case.element.value)?
@@ -154,100 +110,53 @@ pub(crate) fn render_union_with_config(
             if case.element.recursive {
                 field_ty = format!("Box<{field_ty}>");
             }
-            let serde_arms = if is_default {
-                vec![json!({
-                    "match_expr": "_",
-                    "tag": "default",
-                    "tag_expr": format!("{}::default()", rust_switch_type(&def.switch_type_spec)),
-                })]
-            } else {
-                labels
-                    .iter()
-                    .map(|label| {
-                        json!({
-                            "match_expr": label,
-                            "tag": union_serde_tag_string(label),
-                            "tag_expr": label,
-                        })
+            let serde_arms = case
+                .label
+                .iter()
+                .zip(&labels)
+                .map(|(wire, label)| {
+                    let is_default = matches!(wire, hir::CaseLabel::Default);
+                    json!({
+                        "match_expr": label,
+                        "tag_literal": format!("{:?}", UnionWire::label(wire)),
+                        "tag_expr": label,
+                        "is_default": is_default,
                     })
-                    .collect::<Vec<_>>()
-            };
+                })
+                .collect::<Vec<_>>();
             Ok(json!({
                 "case_index": case_index,
-                "constructor_tag": if is_default {
-                    format!("{}::default()", rust_switch_type(&def.switch_type_spec))
-                } else {
-                    labels
-                        .first()
-                        .expect("union case label")
-                        .to_string()
-                },
+                "constructor_tag": labels.first().ok_or_else(|| crate::error::IdlcError::rpc(
+                    format!("union '{}' has a case without a label", def.ident)
+                ))?,
+                "constructor_default": matches!(case.label.first(), Some(hir::CaseLabel::Default)),
                 "labels": labels,
                 "serde_arms": serde_arms,
-                "pattern": pattern,
                 "type": field_ty,
                 "is_default": is_default,
                 "member": member,
                 "helper_variant": helper_variant,
-                "field_id": field_id,
             }))
         })
         .collect::<IdlcResult<Vec<_>>>()?;
 
-    if let Some(pos) = cases
-        .iter()
-        .position(|c| c["is_default"].as_bool() == Some(true))
-    {
-        let default_case = cases.remove(pos);
-        cases.push(default_case);
-    }
-
-    let has_default = cases
-        .iter()
-        .any(|case| case["is_default"].as_bool() == Some(true));
     let default_case = cases
         .iter()
         .find(|case| case["is_default"].as_bool() == Some(true))
         .or_else(|| cases.first())
-        .map(|case| {
-            let tag = if case["is_default"].as_bool() == Some(true) {
-                format!("{}::default()", rust_switch_type(&def.switch_type_spec))
-            } else {
-                case["labels"][0]
-                    .as_str()
-                    .expect("union case label")
-                    .to_string()
-            };
-            json!({
-                "member": case["member"].clone(),
-                "type": case["type"].clone(),
-                "tag": tag,
-            })
-        });
+        .map(|case| json!({ "member": case["member"].clone() }));
 
     let derive = rust_derive_info_with_extra(&def.annotations, &def.annotations);
-    let mut manual_derives = Vec::new();
-    let mut auto_derives = Vec::new();
-    for d in derive.non_serde {
-        if matches!(d.as_str(), "Debug" | "Clone" | "PartialEq") {
-            manual_derives.push(d);
-        } else {
-            auto_derives.push(d);
-        }
-    }
 
     let ctx = renderer.enrich_scoped_ctx(
         json!({
             "ident": crate::generate::rust::util::rust_ident(&def.ident),
             "switch_ty": rust_switch_type(&def.switch_type_spec),
-            "members": members,
             "cases": cases,
-            "has_default": has_default,
             "default_case": default_case,
             "has_serde_serialize": derive.has_serde_serialize,
             "has_serde_deserialize": derive.has_serde_deserialize,
-            "derive": auto_derives,
-            "manual_derives": manual_derives,
+            "derives": derive.non_serde,
             "rust_attrs": rust_attrs_from(def)?,
             "deprecated": allow_deprecated,
         }),

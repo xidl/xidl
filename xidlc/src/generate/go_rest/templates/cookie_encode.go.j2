@@ -1,9 +1,5 @@
-{%- if optional %}
-    {%- if ty == "string" %}
-        if {{ field }} != nil { httpReq.AddCookie(&http.Cookie{Name: "{{ wire_name }}", Value: *{{ field }}}) }
-    {%- endif %}
-{%- else %}
-    {%- if ty == "string" %}
-        httpReq.AddCookie(&http.Cookie{Name: "{{ wire_name }}", Value: {{ field }}})
-    {%- endif %}
-{%- endif %}
+{% if optional %}if {{ field }} != nil {% endif %}{
+    raw, err := xidlgohttp.FormatText({{ field }})
+    if err != nil { return nil, err }
+    httpReq.AddCookie(&http.Cookie{Name: "{{ wire_name }}", Value: xidlgohttp.EncodeCookieValue(raw)})
+}

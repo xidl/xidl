@@ -161,7 +161,13 @@ func ParseOptionalString(value string) *string {
 }
 
 func ParseBool(value string) (bool, error) {
-	return strconv.ParseBool(value)
+	if value == "true" {
+		return true, nil
+	}
+	if value == "false" {
+		return false, nil
+	}
+	return false, errors.New("HTTP boolean requires true or false")
 }
 
 func ParseUint32(value string) (uint32, error) {
@@ -191,7 +197,11 @@ func GinPathString(c *gin.Context, key string) (string, error) {
 }
 
 func QueryString(values url.Values, key string) (string, error) {
-	return ParseString(values.Get(key))
+	items := values[key]
+	if len(items) == 0 {
+		return "", fmt.Errorf("HTTP query %q is required", key)
+	}
+	return items[0], nil
 }
 
 func QueryOptionalString(values url.Values, key string) *string {
@@ -199,7 +209,11 @@ func QueryOptionalString(values url.Values, key string) *string {
 }
 
 func HeaderString(h http.Header, key string) (string, error) {
-	return ParseString(h.Get(key))
+	items := h.Values(key)
+	if len(items) == 0 {
+		return "", fmt.Errorf("HTTP header %q is required", key)
+	}
+	return items[0], nil
 }
 
 func HeaderStrings(h http.Header, key string) []string {
@@ -215,7 +229,11 @@ func CookieString(r *http.Request, key string) (string, error) {
 }
 
 func GinCookieString(c *gin.Context, key string) (string, error) {
-	return c.Cookie(key)
+	cookie, err := c.Request.Cookie(key)
+	if err != nil {
+		return "", err
+	}
+	return url.PathUnescape(cookie.Value)
 }
 
 // EncodeCookieValue preserves arbitrary version values in an HTTP cookie.

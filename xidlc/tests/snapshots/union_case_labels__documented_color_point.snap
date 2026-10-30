@@ -27,260 +27,206 @@ pub struct Coordinates {
     pub y: u32,
 }
 impl Coordinates {}
+#[derive(Debug, Clone, PartialEq)]
 pub struct ColorPoint {
-    tag: Color,
+    tag: Option<Color>,
     data: ColorPointData,
 }
-union ColorPointData {
-    red: core::mem::ManuallyDrop<Coordinates>,
-    green: core::mem::ManuallyDrop<Coordinates>,
-    blue: core::mem::ManuallyDrop<Coordinates>,
-    other: core::mem::ManuallyDrop<Coordinates>,
-}
-impl Drop for ColorPoint {
-    #[allow(unreachable_patterns)]
-    fn drop(&mut self) {
-        if matches!(self.tag, Color::Red) {
-            unsafe {
-                core::mem::ManuallyDrop::drop(&mut self.data.red);
-            }
-        } else if matches!(self.tag, Color::Green) {
-            unsafe {
-                core::mem::ManuallyDrop::drop(&mut self.data.green);
-            }
-        } else if matches!(self.tag, Color::Blue) {
-            unsafe {
-                core::mem::ManuallyDrop::drop(&mut self.data.blue);
-            }
-        } else {
-            unsafe {
-                core::mem::ManuallyDrop::drop(&mut self.data.other);
-            }
-        }
-    }
-}
-impl Clone for ColorPoint {
-    #[allow(clippy::clone_on_copy)]
-    #[allow(unreachable_patterns)]
-    fn clone(&self) -> Self {
-        if matches!(self.tag, Color::Red) {
-            Self::new_red(self.as_red().clone())
-        } else if matches!(self.tag, Color::Green) {
-            Self::new_green(self.as_green().clone())
-        } else if matches!(self.tag, Color::Blue) {
-            Self::new_blue(self.as_blue().clone())
-        } else {
-            Self::new_other(self.as_other().clone())
-        }
-    }
-}
-impl core::fmt::Debug for ColorPoint {
-    #[allow(unreachable_patterns)]
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let mut d = f.debug_struct("ColorPoint");
-        d.field("tag", &self.tag);
-        if matches!(self.tag, Color::Red) {
-            d.field("red", self.as_red());
-        } else if matches!(self.tag, Color::Green) {
-            d.field("green", self.as_green());
-        } else if matches!(self.tag, Color::Blue) {
-            d.field("blue", self.as_blue());
-        } else {
-            d.field("other", self.as_other());
-        }
-        d.finish()
-    }
-}
-impl PartialEq for ColorPoint {
-    #[allow(unreachable_patterns)]
-    fn eq(&self, other: &Self) -> bool {
-        if self.tag != other.tag {
-            return false;
-        }
-        if matches!(self.tag, Color::Red) {
-            self.as_red() == other.as_red()
-        } else if matches!(self.tag, Color::Green) {
-            self.as_green() == other.as_green()
-        } else if matches!(self.tag, Color::Blue) {
-            self.as_blue() == other.as_blue()
-        } else {
-            self.as_other() == other.as_other()
-        }
-    }
+#[derive(Debug, Clone, PartialEq)]
+enum ColorPointData {
+    Red(Coordinates),
+    Green(Coordinates),
+    Blue(Coordinates),
+    Other(Coordinates),
 }
 impl ColorPoint {
     pub fn new_red(value: Coordinates) -> Self {
         Self {
-            tag: Color::Red,
-            data: ColorPointData {
-                red: core::mem::ManuallyDrop::new(value),
-            },
+            tag: Some(Color::Red),
+            data: ColorPointData::Red(value),
         }
     }
     pub fn is_red(&self) -> bool {
-        matches!(self.tag, Color::Red)
+        matches!(& self.data, ColorPointData::Red(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_red(&self) -> &Coordinates {
-        debug_assert!(self.is_red());
-        unsafe { &self.data.red }
+        match &self.data {
+            ColorPointData::Red(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union ColorPoint does not contain red"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_red_mut(&mut self) -> &mut Coordinates {
-        debug_assert!(self.is_red());
-        unsafe { &mut self.data.red }
+        match &mut self.data {
+            ColorPointData::Red(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union ColorPoint does not contain red"),
+        }
     }
     pub fn into_red(self) -> Coordinates {
-        debug_assert!(self.is_red());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.red)
+        match self.data {
+            ColorPointData::Red(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union ColorPoint does not contain red"),
         }
     }
     pub fn new_green(value: Coordinates) -> Self {
         Self {
-            tag: Color::Green,
-            data: ColorPointData {
-                green: core::mem::ManuallyDrop::new(value),
-            },
+            tag: Some(Color::Green),
+            data: ColorPointData::Green(value),
         }
     }
     pub fn is_green(&self) -> bool {
-        matches!(self.tag, Color::Green)
+        matches!(& self.data, ColorPointData::Green(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_green(&self) -> &Coordinates {
-        debug_assert!(self.is_green());
-        unsafe { &self.data.green }
+        match &self.data {
+            ColorPointData::Green(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union ColorPoint does not contain green"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_green_mut(&mut self) -> &mut Coordinates {
-        debug_assert!(self.is_green());
-        unsafe { &mut self.data.green }
+        match &mut self.data {
+            ColorPointData::Green(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union ColorPoint does not contain green"),
+        }
     }
     pub fn into_green(self) -> Coordinates {
-        debug_assert!(self.is_green());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.green)
+        match self.data {
+            ColorPointData::Green(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union ColorPoint does not contain green"),
         }
     }
     pub fn new_blue(value: Coordinates) -> Self {
         Self {
-            tag: Color::Blue,
-            data: ColorPointData {
-                blue: core::mem::ManuallyDrop::new(value),
-            },
+            tag: Some(Color::Blue),
+            data: ColorPointData::Blue(value),
         }
     }
     pub fn is_blue(&self) -> bool {
-        matches!(self.tag, Color::Blue)
+        matches!(& self.data, ColorPointData::Blue(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_blue(&self) -> &Coordinates {
-        debug_assert!(self.is_blue());
-        unsafe { &self.data.blue }
+        match &self.data {
+            ColorPointData::Blue(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union ColorPoint does not contain blue"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_blue_mut(&mut self) -> &mut Coordinates {
-        debug_assert!(self.is_blue());
-        unsafe { &mut self.data.blue }
+        match &mut self.data {
+            ColorPointData::Blue(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union ColorPoint does not contain blue"),
+        }
     }
     pub fn into_blue(self) -> Coordinates {
-        debug_assert!(self.is_blue());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.blue)
+        match self.data {
+            ColorPointData::Blue(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union ColorPoint does not contain blue"),
         }
     }
     pub fn new_other(value: Coordinates) -> Self {
         Self {
-            tag: Color::default(),
-            data: ColorPointData {
-                other: core::mem::ManuallyDrop::new(value),
-            },
+            tag: None,
+            data: ColorPointData::Other(value),
         }
     }
     pub fn is_other(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(& self.data, ColorPointData::Other(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_other(&self) -> &Coordinates {
-        debug_assert!(self.is_other());
-        unsafe { &self.data.other }
+        match &self.data {
+            ColorPointData::Other(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union ColorPoint does not contain other"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_other_mut(&mut self) -> &mut Coordinates {
-        debug_assert!(self.is_other());
-        unsafe { &mut self.data.other }
-    }
-    pub fn into_other(self) -> Coordinates {
-        debug_assert!(self.is_other());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.other)
+        match &mut self.data {
+            ColorPointData::Other(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union ColorPoint does not contain other"),
         }
     }
-    pub fn tag(&self) -> &Color {
-        &self.tag
+    pub fn into_other(self) -> Coordinates {
+        match self.data {
+            ColorPointData::Other(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union ColorPoint does not contain other"),
+        }
+    }
+    /// The explicit discriminator, or None for the default case.
+    pub fn tag(&self) -> Option<&Color> {
+        self.tag.as_ref()
     }
 }
 impl Default for ColorPoint {
     fn default() -> Self {
-        Self {
-            tag: Color::default(),
-            data: ColorPointData {
-                other: core::mem::ManuallyDrop::new(Coordinates::default()),
-            },
-        }
+        Self::new_other(Default::default())
     }
 }
 #[derive(::serde::Serialize)]
-struct ColorPointSerdeRef<'__a> {
-    tag: &'__a str,
-    data: ColorPointSerdeRefData<'__a>,
+struct ColorPointSerdeRef<'a> {
+    tag: &'a str,
+    data: ColorPointSerdeRefData<'a>,
 }
-#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
-enum ColorPointSerdeRefData<'__a> {
-    Case0(&'__a Coordinates),
-    Case1(&'__a Coordinates),
-    Case2(&'__a Coordinates),
-    Case3(&'__a Coordinates),
+enum ColorPointSerdeRefData<'a> {
+    Case0(&'a Coordinates),
+    Case1(&'a Coordinates),
+    Case2(&'a Coordinates),
+    Case3(&'a Coordinates),
 }
 impl serde::Serialize for ColorPoint {
-    #[allow(unreachable_patterns)]
-    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        __S: serde::Serializer,
+        S: serde::Serializer,
     {
-        let helper = if matches!(self.tag, Color::Red) {
-            let tag = "Red";
-            ColorPointSerdeRef {
-                tag,
-                data: ColorPointSerdeRefData::Case0(self.as_red()),
+        let helper = match &self.data {
+            ColorPointData::Red(data) => {
+                let tag = "Red";
+                ColorPointSerdeRef {
+                    tag,
+                    data: ColorPointSerdeRefData::Case0(data),
+                }
             }
-        } else if matches!(self.tag, Color::Green) {
-            let tag = "Green";
-            ColorPointSerdeRef {
-                tag,
-                data: ColorPointSerdeRefData::Case1(self.as_green()),
+            ColorPointData::Green(data) => {
+                let tag = "Green";
+                ColorPointSerdeRef {
+                    tag,
+                    data: ColorPointSerdeRefData::Case1(data),
+                }
             }
-        } else if matches!(self.tag, Color::Blue) {
-            let tag = "Blue";
-            ColorPointSerdeRef {
-                tag,
-                data: ColorPointSerdeRefData::Case2(self.as_blue()),
+            ColorPointData::Blue(data) => {
+                let tag = "Blue";
+                ColorPointSerdeRef {
+                    tag,
+                    data: ColorPointSerdeRefData::Case2(data),
+                }
             }
-        } else {
-            let tag = "default";
-            ColorPointSerdeRef {
-                tag,
-                data: ColorPointSerdeRefData::Case3(self.as_other()),
+            ColorPointData::Other(data) => {
+                let tag = "default";
+                ColorPointSerdeRef {
+                    tag,
+                    data: ColorPointSerdeRefData::Case3(data),
+                }
             }
         };
-        helper.serialize(__serializer)
+        helper.serialize(serializer)
     }
 }
 #[derive(::serde::Deserialize)]
@@ -297,58 +243,34 @@ impl<'de> serde::Deserialize<'de> for ColorPoint {
         match helper.tag.as_str() {
             "Red" => {
                 let value = ::serde_json::from_value::<Coordinates>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union ColorPoint payload decode failed for tag `Red`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: Color::Red,
-                    data: ColorPointData {
-                        red: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: Some(Color::Red),
+                    data: ColorPointData::Red(value),
                 })
             }
             "Green" => {
                 let value = ::serde_json::from_value::<Coordinates>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union ColorPoint payload decode failed for tag `Green`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: Color::Green,
-                    data: ColorPointData {
-                        green: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: Some(Color::Green),
+                    data: ColorPointData::Green(value),
                 })
             }
             "Blue" => {
                 let value = ::serde_json::from_value::<Coordinates>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union ColorPoint payload decode failed for tag `Blue`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: Color::Blue,
-                    data: ColorPointData {
-                        blue: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: Some(Color::Blue),
+                    data: ColorPointData::Blue(value),
                 })
             }
             "default" => {
                 let value = ::serde_json::from_value::<Coordinates>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union ColorPoint payload decode failed for tag `default`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: Color::default(),
-                    data: ColorPointData {
-                        other: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: None,
+                    data: ColorPointData::Other(value),
                 })
             }
             _ => {

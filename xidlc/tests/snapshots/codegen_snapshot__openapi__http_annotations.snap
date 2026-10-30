@@ -1,6 +1,5 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
-assertion_line: 145
 expression: output
 ---
 ===============
@@ -45,10 +44,14 @@ openapi_http_annotations.json
                 "properties": {
                   "a": {
                     "format": "int32",
+                    "maximum": 2147483647,
+                    "minimum": -2147483648,
                     "type": "integer"
                   },
                   "b": {
                     "format": "int32",
+                    "maximum": 2147483647,
+                    "minimum": -2147483648,
                     "type": "integer"
                   }
                 },
@@ -69,10 +72,14 @@ openapi_http_annotations.json
                   "properties": {
                     "return": {
                       "format": "int32",
+                      "maximum": 2147483647,
+                      "minimum": -2147483648,
                       "type": "integer"
                     },
                     "sum": {
                       "format": "int32",
+                      "maximum": 2147483647,
+                      "minimum": -2147483648,
                       "type": "integer"
                     }
                   },
@@ -120,6 +127,8 @@ openapi_http_annotations.json
             "text/plain": {
               "schema": {
                 "format": "int32",
+                "maximum": 2147483647,
+                "minimum": -2147483648,
                 "type": "integer"
               }
             }
@@ -133,10 +142,14 @@ openapi_http_annotations.json
                   "properties": {
                     "return": {
                       "format": "int32",
+                      "maximum": 2147483647,
+                      "minimum": -2147483648,
                       "type": "integer"
                     },
                     "value": {
                       "format": "int32",
+                      "maximum": 2147483647,
+                      "minimum": -2147483648,
                       "type": "integer"
                     }
                   },
@@ -249,6 +262,8 @@ openapi_http_annotations.json
               "text/plain": {
                 "schema": {
                   "format": "int32",
+                  "maximum": 2147483647,
+                  "minimum": -2147483648,
                   "type": "integer"
                 }
               }

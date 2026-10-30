@@ -26,7 +26,7 @@ export interface Foo {
 export type BarSeq = Array<Bar>;
 
 
-export type Bar = { l_mem: number } | { s_mem: { d_mem: number, nested: BarSeq } };
+export type Bar = { tag: "0", data: number } | { tag: "1", data: { d_mem: number, nested: BarSeq } };
 export namespace M {
     export type Size = "small" | "medium" | "large";
 }
@@ -54,7 +54,7 @@ export const FooSeqSchema: z.ZodType<import("./misc").FooSeq> = z.lazy(() => z.a
     
 export const FooSchema: z.ZodType<import("./misc").Foo> = z.lazy(() => z.object({
     
-        value: z.number().int(),
+        value: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"),
     
         chain: FooSeqSchema
     
@@ -64,7 +64,7 @@ export const FooSchema: z.ZodType<import("./misc").Foo> = z.lazy(() => z.object(
 export const BarSeqSchema: z.ZodType<import("./misc").BarSeq> = z.lazy(() => z.array(BarSchema));
 
     
-export const BarSchema: z.ZodType<import("./misc").Bar> = z.lazy(() => z.union([z.object({ l_mem: z.number().int() }), z.object({ s_mem: z.object({ d_mem: z.number(), nested: BarSeqSchema }) })]));
+export const BarSchema: z.ZodType<import("./misc").Bar> = z.lazy(() => z.union([z.object({ tag: z.enum(["0"]), data: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer") }), z.object({ tag: z.enum(["1"]), data: z.object({ d_mem: z.number(), nested: BarSeqSchema }) })]));
 
     export namespace M {
     export const SizeSchema = z.enum(["small", "medium", "large"]);

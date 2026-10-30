@@ -22,168 +22,124 @@ pub enum Tag {
     A,
     B,
 }
+#[derive(Debug, Clone, PartialEq)]
 pub struct DefaultUnion {
-    tag: Tag,
+    tag: Option<Tag>,
     data: DefaultUnionData,
 }
-union DefaultUnionData {
-    a: core::mem::ManuallyDrop<int>,
-    fallback: core::mem::ManuallyDrop<String>,
-}
-impl Drop for DefaultUnion {
-    #[allow(unreachable_patterns)]
-    fn drop(&mut self) {
-        if matches!(self.tag, Tag::A) {
-            unsafe {
-                core::mem::ManuallyDrop::drop(&mut self.data.a);
-            }
-        } else {
-            unsafe {
-                core::mem::ManuallyDrop::drop(&mut self.data.fallback);
-            }
-        }
-    }
-}
-impl Clone for DefaultUnion {
-    #[allow(clippy::clone_on_copy)]
-    #[allow(unreachable_patterns)]
-    fn clone(&self) -> Self {
-        if matches!(self.tag, Tag::A) {
-            Self::new_a(self.as_a().clone())
-        } else {
-            Self::new_fallback(self.as_fallback().clone())
-        }
-    }
-}
-impl core::fmt::Debug for DefaultUnion {
-    #[allow(unreachable_patterns)]
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let mut d = f.debug_struct("DefaultUnion");
-        d.field("tag", &self.tag);
-        if matches!(self.tag, Tag::A) {
-            d.field("a", self.as_a());
-        } else {
-            d.field("fallback", self.as_fallback());
-        }
-        d.finish()
-    }
-}
-impl PartialEq for DefaultUnion {
-    #[allow(unreachable_patterns)]
-    fn eq(&self, other: &Self) -> bool {
-        if self.tag != other.tag {
-            return false;
-        }
-        if matches!(self.tag, Tag::A) {
-            self.as_a() == other.as_a()
-        } else {
-            self.as_fallback() == other.as_fallback()
-        }
-    }
+#[derive(Debug, Clone, PartialEq)]
+enum DefaultUnionData {
+    A(int),
+    Fallback(String),
 }
 impl DefaultUnion {
     pub fn new_a(value: int) -> Self {
         Self {
-            tag: Tag::A,
-            data: DefaultUnionData {
-                a: core::mem::ManuallyDrop::new(value),
-            },
+            tag: Some(Tag::A),
+            data: DefaultUnionData::A(value),
         }
     }
     pub fn is_a(&self) -> bool {
-        matches!(self.tag, Tag::A)
+        matches!(& self.data, DefaultUnionData::A(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_a(&self) -> &int {
-        debug_assert!(self.is_a());
-        unsafe { &self.data.a }
+        match &self.data {
+            DefaultUnionData::A(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union DefaultUnion does not contain a"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_a_mut(&mut self) -> &mut int {
-        debug_assert!(self.is_a());
-        unsafe { &mut self.data.a }
+        match &mut self.data {
+            DefaultUnionData::A(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union DefaultUnion does not contain a"),
+        }
     }
     pub fn into_a(self) -> int {
-        debug_assert!(self.is_a());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.a)
+        match self.data {
+            DefaultUnionData::A(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union DefaultUnion does not contain a"),
         }
     }
     pub fn new_fallback(value: String) -> Self {
         Self {
-            tag: Tag::default(),
-            data: DefaultUnionData {
-                fallback: core::mem::ManuallyDrop::new(value),
-            },
+            tag: None,
+            data: DefaultUnionData::Fallback(value),
         }
     }
     pub fn is_fallback(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(& self.data, DefaultUnionData::Fallback(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_fallback(&self) -> &String {
-        debug_assert!(self.is_fallback());
-        unsafe { &self.data.fallback }
+        match &self.data {
+            DefaultUnionData::Fallback(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union DefaultUnion does not contain fallback"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_fallback_mut(&mut self) -> &mut String {
-        debug_assert!(self.is_fallback());
-        unsafe { &mut self.data.fallback }
-    }
-    pub fn into_fallback(self) -> String {
-        debug_assert!(self.is_fallback());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.fallback)
+        match &mut self.data {
+            DefaultUnionData::Fallback(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union DefaultUnion does not contain fallback"),
         }
     }
-    pub fn tag(&self) -> &Tag {
-        &self.tag
+    pub fn into_fallback(self) -> String {
+        match self.data {
+            DefaultUnionData::Fallback(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union DefaultUnion does not contain fallback"),
+        }
+    }
+    /// The explicit discriminator, or None for the default case.
+    pub fn tag(&self) -> Option<&Tag> {
+        self.tag.as_ref()
     }
 }
 impl Default for DefaultUnion {
     fn default() -> Self {
-        Self {
-            tag: Tag::default(),
-            data: DefaultUnionData {
-                fallback: core::mem::ManuallyDrop::new(String::default()),
-            },
-        }
+        Self::new_fallback(Default::default())
     }
 }
 #[derive(::serde::Serialize)]
-struct DefaultUnionSerdeRef<'__a> {
-    tag: &'__a str,
-    data: DefaultUnionSerdeRefData<'__a>,
+struct DefaultUnionSerdeRef<'a> {
+    tag: &'a str,
+    data: DefaultUnionSerdeRefData<'a>,
 }
-#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
-enum DefaultUnionSerdeRefData<'__a> {
-    Case0(&'__a int),
-    Case1(&'__a String),
+enum DefaultUnionSerdeRefData<'a> {
+    Case0(&'a int),
+    Case1(&'a String),
 }
 impl serde::Serialize for DefaultUnion {
-    #[allow(unreachable_patterns)]
-    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        __S: serde::Serializer,
+        S: serde::Serializer,
     {
-        let helper = if matches!(self.tag, Tag::A) {
-            let tag = "A";
-            DefaultUnionSerdeRef {
-                tag,
-                data: DefaultUnionSerdeRefData::Case0(self.as_a()),
+        let helper = match &self.data {
+            DefaultUnionData::A(data) => {
+                let tag = "A";
+                DefaultUnionSerdeRef {
+                    tag,
+                    data: DefaultUnionSerdeRefData::Case0(data),
+                }
             }
-        } else {
-            let tag = "default";
-            DefaultUnionSerdeRef {
-                tag,
-                data: DefaultUnionSerdeRefData::Case1(self.as_fallback()),
+            DefaultUnionData::Fallback(data) => {
+                let tag = "default";
+                DefaultUnionSerdeRef {
+                    tag,
+                    data: DefaultUnionSerdeRefData::Case1(data),
+                }
             }
         };
-        helper.serialize(__serializer)
+        helper.serialize(serializer)
     }
 }
 #[derive(::serde::Deserialize)]
@@ -200,30 +156,18 @@ impl<'de> serde::Deserialize<'de> for DefaultUnion {
         match helper.tag.as_str() {
             "A" => {
                 let value = ::serde_json::from_value::<int>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union DefaultUnion payload decode failed for tag `A`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: Tag::A,
-                    data: DefaultUnionData {
-                        a: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: Some(Tag::A),
+                    data: DefaultUnionData::A(value),
                 })
             }
             "default" => {
                 let value = ::serde_json::from_value::<String>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union DefaultUnion payload decode failed for tag `default`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: Tag::default(),
-                    data: DefaultUnionData {
-                        fallback: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: None,
+                    data: DefaultUnionData::Fallback(value),
                 })
             }
             _ => {

@@ -468,9 +468,9 @@ export type HttpDefaultsServiceGetNameRequest = z.infer<typeof HttpDefaultsServi
 
     
 export const HttpDefaultsServiceListOrdersRequestSchema = z.object({
-        user_id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
-        page: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
-        size: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        user_id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
+        page: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
+        size: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
     });
 export type HttpDefaultsServiceListOrdersRequest = z.infer<typeof HttpDefaultsServiceListOrdersRequestSchema>;
 
@@ -489,7 +489,7 @@ export type HttpDefaultsServiceCreateUserFlatRequest = z.infer<typeof HttpDefaul
     
 export const HttpDefaultsServiceSearchUserRequestSchema = z.object({
         name: z.string(),
-        age: z.number().int().nonnegative(),
+        age: z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer"),
     });
 export type HttpDefaultsServiceSearchUserRequest = z.infer<typeof HttpDefaultsServiceSearchUserRequestSchema>;
 
@@ -501,52 +501,52 @@ export type HttpDefaultsServicePreviewUserRequest = z.infer<typeof HttpDefaultsS
 
     
 export const HttpDefaultsServiceGetUserRequestSchema = z.object({
-        id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
         lang: z.coerce.string(),
     });
 export type HttpDefaultsServiceGetUserRequest = z.infer<typeof HttpDefaultsServiceGetUserRequestSchema>;
 
     
 export const HttpDefaultsServiceGetUserAliasRequestSchema = z.object({
-        user_id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        user_id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
         locale: z.coerce.string(),
     });
 export type HttpDefaultsServiceGetUserAliasRequest = z.infer<typeof HttpDefaultsServiceGetUserAliasRequestSchema>;
 
     
 export const HttpDefaultsServiceDeleteUserRequestSchema = z.object({
-        id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
-        revision: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
+        revision: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
     });
 export type HttpDefaultsServiceDeleteUserRequest = z.infer<typeof HttpDefaultsServiceDeleteUserRequestSchema>;
 
     
 export const HttpDefaultsServiceProbeUserRequestSchema = z.object({
-        id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
-        revision: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
+        revision: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
     });
 export type HttpDefaultsServiceProbeUserRequest = z.infer<typeof HttpDefaultsServiceProbeUserRequestSchema>;
 
     
 export const HttpDefaultsServiceUserOptionsRequestSchema = z.object({
-        id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
-        revision: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
+        revision: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
     });
 export type HttpDefaultsServiceUserOptionsRequest = z.infer<typeof HttpDefaultsServiceUserOptionsRequestSchema>;
 
     
 export const HttpDefaultsServiceReplaceUserRequestSchema = z.object({
-        user_id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        user_id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
         name: z.string(),
-        age: z.number().int().nonnegative(),
+        age: z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer"),
     });
 export type HttpDefaultsServiceReplaceUserRequest = z.infer<typeof HttpDefaultsServiceReplaceUserRequestSchema>;
 
     
 export const HttpDefaultsServicePatchUserRequestSchema = z.object({
-        user_id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        user_id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
         name: z.string(),
-        age: z.number().int().nonnegative(),
+        age: z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer"),
     });
 export type HttpDefaultsServicePatchUserRequest = z.infer<typeof HttpDefaultsServicePatchUserRequestSchema>;
 ===============
@@ -1058,6 +1058,6 @@ import { xjson } from "xidl-typescript-codec";
         
             name: z.string(),
         
-            age: z.number().int().nonnegative()
+            age: z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")
         
     });

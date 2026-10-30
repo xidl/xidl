@@ -54,7 +54,7 @@ import * as $xidl_root from "./struct_def.zod";
     
     export const A1Schema = z.object({
         
-            a: z.number().int()
+            a: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")
         
     });
 
@@ -68,14 +68,14 @@ import * as $xidl_root from "./struct_def.zod";
     
     export const BSchema = z.object({
         
-            value: z.number().int()
+            value: z.number().min(-9223372036854775808).lt(9223372036854775808).refine(Number.isInteger, "expected an integer")
         
     });
 
     
     export const A3Schema = z.object({
         
-            value: z.number().int()
+            value: z.number().min(-9223372036854775808).lt(9223372036854775808).refine(Number.isInteger, "expected an integer")
         
     });
 

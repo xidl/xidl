@@ -4,10 +4,7 @@ use serde::Serialize;
 pub(super) struct RequestBindTemplate<'a> {
     pub(super) field: &'a str,
     pub(super) call: &'a str,
-    pub(super) ty: &'a str,
-    pub(super) optional: bool,
-    pub(super) wire_name: &'a str,
-    pub(super) source_kind: &'a str,
+    pub(super) requires_presence: bool,
 }
 
 #[derive(Serialize)]

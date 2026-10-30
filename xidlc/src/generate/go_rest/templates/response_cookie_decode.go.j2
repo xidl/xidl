@@ -1,3 +1,5 @@
-{%- if ty == "string" %}
-    if cookie, err := resp.Request.Cookie("{{ wire_name }}"); err == nil { out.{{ field_name }} = cookie.Value }
-{%- endif %}
+for _, cookie := range resp.Cookies() {
+    if cookie.Name == "{{ wire_name }}" {
+        if err := xidlgohttp.ParseCookieText(cookie.Value, &out.{{ field_name }}); err != nil { return out, err }
+    }
+}

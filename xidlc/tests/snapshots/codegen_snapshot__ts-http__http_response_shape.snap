@@ -219,34 +219,34 @@ import { xjson } from "xidl-typescript-codec";
 
     
 export const HttpResponseShapeServiceGetCountResponseSchema = z.object({
-        count: z.number().int(),
+        count: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"),
     });
 export type HttpResponseShapeServiceGetCountResponse = z.infer<typeof HttpResponseShapeServiceGetCountResponseSchema>;
 
     
 export const HttpResponseShapeServiceAddRequestSchema = z.object({
-        a: z.number().int(),
-        b: z.number().int(),
+        a: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"),
+        b: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"),
     });
 export type HttpResponseShapeServiceAddRequest = z.infer<typeof HttpResponseShapeServiceAddRequestSchema>;
 
     
 export const HttpResponseShapeServiceAddResponseSchema = z.object({
-        return: z.number().int(),
-        sum: z.number().int(),
+        return: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"),
+        sum: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"),
     });
 export type HttpResponseShapeServiceAddResponse = z.infer<typeof HttpResponseShapeServiceAddResponseSchema>;
 
     
 export const HttpResponseShapeServiceBumpRequestSchema = z.object({
-        value: z.number().int(),
+        value: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"),
     });
 export type HttpResponseShapeServiceBumpRequest = z.infer<typeof HttpResponseShapeServiceBumpRequestSchema>;
 
     
 export const HttpResponseShapeServiceBumpResponseSchema = z.object({
-        return: z.number().int(),
-        value: z.number().int(),
+        return: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"),
+        value: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"),
     });
 export type HttpResponseShapeServiceBumpResponse = z.infer<typeof HttpResponseShapeServiceBumpResponseSchema>;
 ===============

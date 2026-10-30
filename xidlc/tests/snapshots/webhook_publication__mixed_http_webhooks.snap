@@ -27,6 +27,8 @@ expression: marked
         "properties": {
           "amount": {
             "format": "int32",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
             "type": "integer"
           },
           "event_type": {
@@ -93,6 +95,8 @@ expression: marked
               "application/json": {
                 "schema": {
                   "format": "int32",
+                  "maximum": 2147483647,
+                  "minimum": -2147483648,
                   "type": "integer"
                 }
               }

@@ -917,7 +917,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["count"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.number().int()),
+            ["count"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")),
         
     })).transform((value) => ({
         
@@ -1699,7 +1699,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["count"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.number().int()),
+            ["count"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")),
         
     })).transform((value) => ({
         

@@ -30,10 +30,14 @@ openapi_struct_skip.json
         "properties": {
           "a": {
             "format": "int32",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
             "type": "integer"
           },
           "c": {
             "format": "int32",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
             "type": "integer"
           }
         },

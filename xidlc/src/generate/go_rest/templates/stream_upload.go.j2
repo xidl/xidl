@@ -1,7 +1,3 @@
 stream := xidlgohttp.NewClientStreamReader[{{ request }}](c.Request.Context(), c.Request.Body)
 resp, err := svc.{{ name }}(c.Request.Context(), stream)
-if err != nil {
-    failure := encode{{ prefix }}Failure(err)
-    c.Data(failure.Status, "application/json", failure.Body)
-    return
-}
+{% include "server_error.go.j2" %}

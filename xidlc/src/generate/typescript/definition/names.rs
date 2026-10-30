@@ -90,18 +90,6 @@ pub(crate) fn zod_schema_ref(
 
 /// JSON positions reject values whose JSON type differs from the declared
 /// member type, matching the Rust target's strict serde decoding.
-pub(crate) fn integer_schema_primitive(value: &hir::IntegerType) -> String {
-    match value {
-        hir::IntegerType::U64
-        | hir::IntegerType::U32
-        | hir::IntegerType::U16
-        | hir::IntegerType::U8
-        | hir::IntegerType::UChar
-        | hir::IntegerType::Octet => "number().int().nonnegative()".to_string(),
-        _ => "number().int()".to_string(),
-    }
-}
-
 pub(crate) fn ts_ident(value: &str) -> String {
     let mut out = String::new();
     for (idx, ch) in value.chars().enumerate() {

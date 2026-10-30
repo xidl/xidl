@@ -26,8 +26,6 @@ pub(super) struct OperationModelInput<'a> {
     pub(super) module_path: &'a [String],
     pub(super) op: &'a HttpOperation,
     pub(super) exceptions: &'a [xidl_parser::rest_hir::HttpException],
-    /// Switched-union idents; their schemas keep raw response passthrough.
-    pub(super) union_idents: &'a std::collections::BTreeSet<String>,
     /// Typedef shapes behind scalar transport positions.
     pub(super) text_aliases: &'a super::text_aliases::TextAliases,
 }
@@ -39,7 +37,6 @@ impl MethodModel {
             module_path,
             op,
             exceptions,
-            union_idents,
             text_aliases,
         }: OperationModelInput<'_>,
     ) -> IdlcResult<MethodModel> {
@@ -121,13 +118,7 @@ impl MethodModel {
                         scoped,
                         module_path,
                     );
-                    // Switched-union schemas do not yet match the `{tag, data}`
-                    // wire shape, so those responses keep raw passthrough.
-                    let is_union = parts
-                        .last()
-                        .map(|name| union_idents.contains(name))
-                        .unwrap_or(false);
-                    (!is_union).then(|| format!("models.{}", parts.join(".")))
+                    Some(format!("models.{}", parts.join(".")))
                 }
                 _ => None,
             });

@@ -151,6 +151,8 @@ openapi_version_parameter_query.v1.json
             "required": true,
             "schema": {
               "format": "int32",
+              "maximum": 2147483647,
+              "minimum": -2147483648,
               "type": "integer"
             }
           },
@@ -278,6 +280,8 @@ openapi_version_parameter_query.v1.json
             "required": true,
             "schema": {
               "format": "int32",
+              "maximum": 2147483647,
+              "minimum": -2147483648,
               "type": "integer"
             }
           },
@@ -332,6 +336,8 @@ openapi_version_parameter_query.v1.json
             "required": true,
             "schema": {
               "format": "int32",
+              "maximum": 2147483647,
+              "minimum": -2147483648,
               "type": "integer"
             }
           },
@@ -821,6 +827,8 @@ openapi_version_parameter_query.v2.json
             "required": true,
             "schema": {
               "format": "int32",
+              "maximum": 2147483647,
+              "minimum": -2147483648,
               "type": "integer"
             }
           },
@@ -948,6 +956,8 @@ openapi_version_parameter_query.v2.json
             "required": true,
             "schema": {
               "format": "int32",
+              "maximum": 2147483647,
+              "minimum": -2147483648,
               "type": "integer"
             }
           },
@@ -1002,6 +1012,8 @@ openapi_version_parameter_query.v2.json
             "required": true,
             "schema": {
               "format": "int32",
+              "maximum": 2147483647,
+              "minimum": -2147483648,
               "type": "integer"
             }
           },

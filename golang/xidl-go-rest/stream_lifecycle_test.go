@@ -92,7 +92,7 @@ func TestWritersCommitOnlyPreparedFramesAndFlush(t *testing.T) {
 				t.Fatal("first item was buffered")
 			}
 		}
-		if err := writer.Fail(EncodeStreamError(NewHttpError(409, "locked"))); err != nil {
+		if err := writer.Fail(EncodeHTTPError(NewHttpError(409, "locked"))); err != nil {
 			t.Fatal(err)
 		}
 		_ = writer.Close()

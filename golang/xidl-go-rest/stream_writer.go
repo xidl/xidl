@@ -72,13 +72,20 @@ func (w *streamWriter) send(kind string, data []byte) error {
 }
 
 // Fail uses the normal HTTP exception response before the first output.
-func (w *streamWriter) Fail(failure StreamFailure) error {
+func (w *streamWriter) Fail(failure HTTPFailure) error {
 	if w.outcome != "" {
 		return nil
 	}
 	if !w.committed {
 		w.outcome = StreamFailed
-		w.response.Header().Set("Content-Type", "application/json")
+		for name, values := range failure.Headers {
+			for _, value := range values {
+				w.response.Header().Add(name, value)
+			}
+		}
+		if len(failure.Body) > 0 {
+			w.response.Header().Set("Content-Type", "application/json")
+		}
 		w.response.WriteHeader(failure.Status)
 		_, err := w.response.Write(failure.Body)
 		return err
@@ -106,7 +113,7 @@ func NewNDJSONServerStreamWriter[T any](w http.ResponseWriter) *NDJSONServerStre
 func (s *NDJSONServerStreamWriter[T]) Write(value T) error {
 	data, err := json.Marshal(value)
 	if err != nil {
-		if failure := s.Fail(EncodeStreamError(err)); failure != nil {
+		if failure := s.Fail(EncodeHTTPError(err)); failure != nil {
 			return failure
 		}
 		return err
@@ -122,7 +129,7 @@ func NewSSEServerStreamWriter[T any](w http.ResponseWriter) *SSEServerStreamWrit
 func (s *SSEServerStreamWriter[T]) Write(value T) error {
 	data, err := json.Marshal(value)
 	if err != nil {
-		if failure := s.Fail(EncodeStreamError(err)); failure != nil {
+		if failure := s.Fail(EncodeHTTPError(err)); failure != nil {
 			return failure
 		}
 		return err

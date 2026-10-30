@@ -77,11 +77,7 @@ fn render_client_unary(
     writeln!(out, "\tresp, err := c.httpClient.Do(httpReq)").unwrap();
     writeln!(out, "\tif err != nil {{ return nil, err }}").unwrap();
     writeln!(out, "\tdefer resp.Body.Close()").unwrap();
-    writeln!(
-        out,
-        "\tif resp.StatusCode >= 400 {{ return nil, fmt.Errorf(\"http %d\", resp.StatusCode) }}"
-    )
-    .unwrap();
+    super::exceptions::ExceptionCodec::new(method).render_http_error(out, renderer)?;
     render_client_decode_response(out, method);
     writeln!(out, "}}").unwrap();
     writeln!(out).unwrap();
@@ -158,7 +154,7 @@ fn render_client_client_stream(
         method.request_struct, method.response_struct, method.response_struct
     )
     .unwrap();
-    super::stream::StreamMethod::new(method).render_http_error(out, renderer)?;
+    super::exceptions::ExceptionCodec::new(method).render_http_error(out, renderer)?;
     writeln!(
         out,
         "\t\tdecoded, err := decode{}Response(resp)",

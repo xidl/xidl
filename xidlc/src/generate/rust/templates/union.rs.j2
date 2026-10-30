@@ -1,320 +1,129 @@
 {%- for line in doc %}
-    /// {{ line }}
+/// {{ line }}
 {%- endfor %}
-{% for attr in rust_attrs %}
-    #[{{ attr }}]
+{% for attr in rust_attrs %}#[{{ attr }}]
 {% endfor %}
-{% if derive and derive | length > 0 %}
-    #[derive({{ derive | join(", ") }})]
-{%- endif %}
+{% if derives %}#[derive({{ derives | join(", ") }})]{% endif %}
 pub struct {{ ident }} {
-    tag: {{ switch_ty }},
+    tag: Option<{{ switch_ty }}>,
     data: {{ ident }}Data,
 }
 
-{% if deprecated %}#[allow(deprecated)]
-{% endif %}
-{% if derive and derive | length > 0 %}
-    #[derive({{ derive | join(", ") }})]
-{% endif %}
-union {{ ident }}Data {
-    {%- for member in members %}
-        {%- for line in member.doc %}
-            /// {{ line }}
-        {%- endfor %}
-        {% for attr in member.rust_attrs %}
-            #[{{ attr }}]
-        {% endfor %}
-        {{ member.name }}: core::mem::ManuallyDrop<{{ member.ty }}>,
-    {%- endfor %}
+{% if deprecated %}#[allow(deprecated)]{% endif %}
+{% if derives %}#[derive({{ derives | join(", ") }})]{% endif %}
+enum {{ ident }}Data {
+{% for case in cases %}
+    {{ case.helper_variant }}({{ case.type }}),
+{% endfor %}
 }
 
-{% if deprecated %}#[allow(deprecated)]
-{% endif %}
-impl Drop for {{ ident }} {
-    #[allow(unreachable_patterns)]
-    fn drop(&mut self) {
-        {% if has_default %}
-            {% for case in cases %}
-                {% if not loop.first %}else {% endif %}{% if not loop.last %}if matches!(self.tag, {{ case.pattern }}) {% endif %}{
-                    unsafe {
-                        core::mem::ManuallyDrop::drop(&mut self.data.{{ case.member }});
-                    }
-                }
-            {% endfor %}
-        {% else %}
-            match self.tag {
-                {% for case in cases %}
-                    {{ case.pattern }} => {
-                        unsafe {
-                            core::mem::ManuallyDrop::drop(&mut self.data.{{ case.member }});
-                        }
-                    }
-                {% endfor %}
-                _ => {}
-            }
-        {% endif %}
-    }
-}
-
-{% if manual_derives and "Clone" in manual_derives %}
-    {% if deprecated %}    #[allow(deprecated)]
-    {% endif %}
-    impl Clone for {{ ident }} {
-        #[allow(clippy::clone_on_copy)]
-        #[allow(unreachable_patterns)]
-        fn clone(&self) -> Self {
-            {% if has_default %}
-                {% for case in cases %}
-                    {% if not loop.first %}else {% endif %}{% if not loop.last %}if matches!(self.tag, {{ case.pattern }}) {% endif %}{
-                        Self::new_{{ case.member }}(self.as_{{ case.member }}().clone())
-                    }
-                {% endfor %}
-            {% else %}
-                match self.tag {
-                    {% for case in cases %}
-                        {{ case.pattern }} => {
-                            Self::new_{{ case.member }}(self.as_{{ case.member }}().clone())
-                        }
-                    {% endfor %}
-                    _ => unreachable!(),
-                }
-            {% endif %}
-        }
-    }
-{% endif %}
-
-{% if manual_derives and "Debug" in manual_derives %}
-    {% if deprecated %}    #[allow(deprecated)]
-    {% endif %}
-    impl core::fmt::Debug for {{ ident }} {
-        #[allow(unreachable_patterns)]
-        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let mut d = f.debug_struct("{{ ident }}");
-        d.field("tag", &self.tag);
-        {% if has_default %}
-            {% for case in cases %}
-                {% if not loop.first %}else {% endif %}{% if not loop.last %}if matches!(self.tag, {{ case.pattern }}) {% endif %}{
-                    d.field("{{ case.member }}", self.as_{{ case.member }}());
-                }
-            {% endfor %}
-        {% else %}
-            match self.tag {
-                {% for case in cases %}
-                    {{ case.pattern }} => {
-                        d.field("{{ case.member }}", self.as_{{ case.member }}());
-                    }
-                {% endfor %}
-                _ => {}
-            }
-        {% endif %}
-        d.finish()
-    }
-    }
-{% endif %}
-
-{% if manual_derives and "PartialEq" in manual_derives %}
-    {% if deprecated %}    #[allow(deprecated)]
-    {% endif %}
-    impl PartialEq for {{ ident }} {
-        #[allow(unreachable_patterns)]
-        fn eq(&self, other: &Self) -> bool {
-            if self.tag != other.tag {
-                return false;
-            }
-            {% if has_default %}
-                {% for case in cases %}
-                    {% if not loop.first %}else {% endif %}{% if not loop.last %}if matches!(self.tag, {{ case.pattern }}) {% endif %}{
-                        self.as_{{ case.member }}() == other.as_{{ case.member }}()
-                    }
-                {% endfor %}
-            {% else %}
-                match self.tag {
-                    {% for case in cases %}
-                        {{ case.pattern }} => {
-                            self.as_{{ case.member }}() == other.as_{{ case.member }}()
-                        }
-                    {% endfor %}
-                    _ => false,
-                }
-            {% endif %}
-        }
-    }
-{% endif %}
-
-{% if deprecated %}#[allow(deprecated)]
-{% endif %}
+{% if deprecated %}#[allow(deprecated)]{% endif %}
 impl {{ ident }} {
-    {% for member in members %}
-        {%- for line in member.doc %}
-            /// {{ line }}
-        {%- endfor %}
-        pub fn new_{{ member.name }}(value: {{ member.ty }}) -> Self {
-            Self {
-                tag: {{ cases[loop.index - 1].constructor_tag }},
-                data: {{ ident }}Data {
-                    {{ member.name }}: core::mem::ManuallyDrop::new(value),
-                }
-            }
-        }
-
-        pub fn is_{{ member.name }}(&self) -> bool {
-            {% if switch_ty == "bool" %}
-                {% if cases[loop.index - 1].pattern == "true" %}
-                    self.tag
-                {% else %}
-                    !self.tag
-                {% endif %}
-            {% else %}
-                matches!(self.tag, {{ cases[loop.index - 1].pattern }})
-            {% endif %}
-        }
-
-        #[allow(clippy::borrowed_box)]
-        pub fn as_{{ member.name }}(&self) -> &{{ member.ty }} {
-            debug_assert!(self.is_{{ member.name }}());
-            unsafe { &self.data.{{ member.name }} }
-        }
-
-        #[allow(clippy::borrowed_box)]
-        pub fn as_{{ member.name }}_mut(&mut self) -> &mut {{ member.ty }} {
-            debug_assert!(self.is_{{ member.name }}());
-            unsafe { &mut self.data.{{ member.name }} }
-        }
-
-        pub fn into_{{ member.name }}(self) -> {{ member.ty }} {
-            debug_assert!(self.is_{{ member.name }}());
-            unsafe {
-                let mut forget = core::mem::ManuallyDrop::new(self);
-                core::mem::ManuallyDrop::take(&mut forget.data.{{ member.name }})
-            }
-        }
-    {% endfor %}
-
-    pub fn tag(&self) -> &{{ switch_ty }} {
-        &self.tag
+{% for case in cases %}
+    pub fn new_{{ case.member }}(value: {{ case.type }}) -> Self {
+        Self { tag: {% if case.constructor_default %}None{% else %}Some({{ case.constructor_tag }}){% endif %}, data: {{ ident }}Data::{{ case.helper_variant }}(value) }
     }
+    pub fn is_{{ case.member }}(&self) -> bool {
+        matches!(&self.data, {{ ident }}Data::{{ case.helper_variant }}(_))
+    }
+    #[allow(clippy::borrowed_box)]
+    pub fn as_{{ case.member }}(&self) -> &{{ case.type }} {
+        match &self.data {
+            {{ ident }}Data::{{ case.helper_variant }}(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union {{ ident }} does not contain {{ case.member }}"),
+        }
+    }
+    #[allow(clippy::borrowed_box)]
+    pub fn as_{{ case.member }}_mut(&mut self) -> &mut {{ case.type }} {
+        match &mut self.data {
+            {{ ident }}Data::{{ case.helper_variant }}(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union {{ ident }} does not contain {{ case.member }}"),
+        }
+    }
+    pub fn into_{{ case.member }}(self) -> {{ case.type }} {
+        match self.data {
+            {{ ident }}Data::{{ case.helper_variant }}(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union {{ ident }} does not contain {{ case.member }}"),
+        }
+    }
+{% endfor %}
+    /// The explicit discriminator, or None for the default case.
+    pub fn tag(&self) -> Option<&{{ switch_ty }}> { self.tag.as_ref() }
 }
 
 {% if default_case %}
-    {% if deprecated %}    #[allow(deprecated)]
-    {% endif %}
-    impl Default for {{ ident }} {
-        fn default() -> Self {
-            Self {
-                tag: {{ default_case.tag }},
-                data: {{ ident }}Data {
-                    {{ default_case.member }}: core::mem::ManuallyDrop::new(
-                    {{ default_case.type }}::default(),
-                    ),
-                },
-            }
-        }
-    }
+{% if deprecated %}#[allow(deprecated)]{% endif %}
+impl Default for {{ ident }} {
+    fn default() -> Self { Self::new_{{ default_case.member }}(Default::default()) }
+}
 {% endif %}
 
 {% if has_serde_serialize %}
-    {% macro serialize_arm(case) -%}
-        {% if case.serde_arms | length == 1 %}
-            let tag = "{{ case.serde_arms[0].tag }}";
-        {% else %}
-            let tag = match self.tag {
-                {% for arm in case.serde_arms %}
-                    {% if loop.last %}
-                        _ => "{{ arm.tag }}",
-                    {% else %}
-                        {{ arm.match_expr }} => "{{ arm.tag }}",
-                    {% endif %}
-                {% endfor %}
-            };
-        {% endif %}
-        {{ ident }}SerdeRef {
-            tag,
-            data: {{ ident }}SerdeRefData::Case{{ case.case_index }}(self.as_{{ case.member }}()),
-        }
-    {%- endmacro %}
-
-    #[derive(::serde::Serialize)]
-    struct {{ ident }}SerdeRef<'__a> {
-    tag: &'__a str,
-    data: {{ ident }}SerdeRefData<'__a>,
-    }
-
-    #[allow(clippy::borrowed_box)]
-    #[derive(::serde::Serialize)]
-    #[serde(untagged)]
-    enum {{ ident }}SerdeRefData<'__a> {
-    {% for case in cases %}
-        Case{{ case.case_index }}(&'__a {{ case.type }}),
-    {% endfor %}
-    }
-
-    {% if deprecated %}    #[allow(deprecated)]
-    {% endif %}
-    impl serde::Serialize for {{ ident }} {
-        #[allow(unreachable_patterns)]
-        fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
-        where
-        __S: serde::Serializer,
-        {
-            let helper = {% if has_default %}
-            {% for case in cases %}
-                {% if not loop.first %}else {% endif %}{% if not loop.last %}if matches!(self.tag, {{ case.pattern }}) {% endif %}{
-                    {{ serialize_arm(case) }}
-                }
-            {% endfor %}
-        {% else %}
-            match self.tag {
-                {% for case in cases %}
-                    {{ case.pattern }} => {
-                        {{ serialize_arm(case) }}
-                    }
-                {% endfor %}
-                _ => unreachable!(),
+#[derive(::serde::Serialize)]
+struct {{ ident }}SerdeRef<'a> {
+    tag: &'a str,
+    data: {{ ident }}SerdeRefData<'a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum {{ ident }}SerdeRefData<'a> {
+{% for case in cases %}
+    Case{{ case.case_index }}(&'a {{ case.type }}),
+{% endfor %}
+}
+{% if deprecated %}#[allow(deprecated)]{% endif %}
+impl serde::Serialize for {{ ident }} {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where S: serde::Serializer,
+    {
+        let helper = match &self.data {
+{% for case in cases %}
+            {{ ident }}Data::{{ case.helper_variant }}(data) => {
+                let tag = {% if case.serde_arms | length == 1 %}{{ case.serde_arms[0].tag_literal }}{% else %}match self.tag.as_ref() {
+{% for arm in case.serde_arms %}
+                    {% if arm.is_default %}None{% else %}Some({{ arm.match_expr }}){% endif %} => {{ arm.tag_literal }},
+{% endfor %}
+                    _ => return Err(serde::ser::Error::custom("union {{ ident }} discriminator does not select {{ case.member }}")),
+                }{% endif %};
+                {{ ident }}SerdeRef { tag, data: {{ ident }}SerdeRefData::Case{{ case.case_index }}(data) }
             }
-            {% endif %};
-            helper.serialize(__serializer)
-        }
+{% endfor %}
+        };
+        helper.serialize(serializer)
     }
+}
 {% endif %}
 
 {% if has_serde_deserialize %}
-    #[derive(::serde::Deserialize)]
-    struct {{ ident }}SerdeOwned {
-        tag: String,
-        data: ::serde_json::Value,
-    }
-
-    {% if deprecated %}    #[allow(deprecated)]
-    {% endif %}
-    impl<'de> serde::Deserialize<'de> for {{ ident }} {
-        fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where
-        D: serde::Deserializer<'de>,
-        {
-            let helper = {{ ident }}SerdeOwned::deserialize(deserializer)?;
-            match helper.tag.as_str() {
-                {% for case in cases %}
-                    {% for arm in case.serde_arms %}
-                        "{{ arm.tag }}" => {
-                            let value = ::serde_json::from_value::<{{ case.type }}>(helper.data)
-                            .map_err(|err| serde::de::Error::custom(format!(
-                            "union {{ ident }} payload decode failed for tag `{{ arm.tag }}`: {err}"
-                            )))?;
-                            Ok(Self {
-                                tag: {{ arm.tag_expr }},
-                                data: {{ ident }}Data {
-                                    {{ case.member }}: core::mem::ManuallyDrop::new(value),
-                                },
-                            })
-                        }
-                    {% endfor %}
-                {% endfor %}
-                _ => Err(serde::de::Error::custom(format!(
-                "union {{ ident }} tag/data mismatch for tag `{}`",
-                helper.tag
-                ))),
+#[derive(::serde::Deserialize)]
+struct {{ ident }}SerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+{% if deprecated %}#[allow(deprecated)]{% endif %}
+impl<'de> serde::Deserialize<'de> for {{ ident }} {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where D: serde::Deserializer<'de>,
+    {
+        let helper = {{ ident }}SerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+{% for case in cases %}
+{% for arm in case.serde_arms %}
+            {{ arm.tag_literal }} => {
+                let value = ::serde_json::from_value::<{{ case.type }}>(helper.data)
+                    .map_err(serde::de::Error::custom)?;
+                Ok(Self {
+                    tag: {% if arm.is_default %}None{% else %}Some({{ arm.tag_expr }}){% endif %},
+                    data: {{ ident }}Data::{{ case.helper_variant }}(value),
+                })
             }
+{% endfor %}
+{% endfor %}
+            _ => Err(serde::de::Error::custom(format!("union {{ ident }} tag/data mismatch for tag `{}`", helper.tag))),
         }
     }
+}
 {% endif %}

@@ -45,38 +45,45 @@ func RegisterHttpQueryTemplateServiceHandler(r gin.IRouter, svc HttpQueryTemplat
 	r.GET("/users/:id", func(c *gin.Context) {
 
 		req := &HttpQueryTemplateServiceGetUserRequest{}
-
 		if raw, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			if value, parseErr := xidlgohttp.ParseUint32(raw); parseErr == nil {
-				req.Id = value
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, parseErr.Error())
+			if err := xidlgohttp.ParseText(raw, &req.Id); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 				return
 			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-
-		if value, err := xidlgohttp.QueryString(c.Request.URL.Query(), "lang"); err == nil {
-			req.Lang = value
+		if raw, err := xidlgohttp.QueryString(c.Request.URL.Query(), "lang"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Lang); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-
-		if value, err := xidlgohttp.QueryString(c.Request.URL.Query(), "region"); err == nil {
-			req.Region = value
+		if raw, err := xidlgohttp.QueryString(c.Request.URL.Query(), "region"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Region); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		resp, err := svc.GetUser(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpQueryTemplateServiceGetUserFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -88,9 +95,11 @@ func RegisterHttpQueryTemplateServiceHandler(r gin.IRouter, svc HttpQueryTemplat
 	r.POST("/search", func(c *gin.Context) {
 
 		req := &HttpQueryTemplateServiceSearchRequest{}
-
-		if value, err := xidlgohttp.QueryString(c.Request.URL.Query(), "keyword"); err == nil {
-			req.Keyword = value
+		if raw, err := xidlgohttp.QueryString(c.Request.URL.Query(), "keyword"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Keyword); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
@@ -103,10 +112,16 @@ func RegisterHttpQueryTemplateServiceHandler(r gin.IRouter, svc HttpQueryTemplat
 		req.Payload = body
 		resp, err := svc.Search(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpQueryTemplateServiceSearchFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -133,10 +148,20 @@ func NewHttpQueryTemplateServiceClient(baseURL string, httpClient *http.Client, 
 func (c *HttpQueryTemplateServiceClient) GetUser(ctx context.Context, req *HttpQueryTemplateServiceGetUserRequest) (*HttpQueryTemplateServiceGetUserResponse, error) {
 	requestURL := c.baseURL + formatHttpQueryTemplateServiceGetUserPath(req)
 	query := url.Values{}
-
-	query.Set("lang", req.Lang)
-
-	query.Set("region", req.Region)
+	{
+		raw, err := xidlgohttp.FormatText(req.Lang)
+		if err != nil {
+			return nil, err
+		}
+		query.Set("lang", raw)
+	}
+	{
+		raw, err := xidlgohttp.FormatText(req.Region)
+		if err != nil {
+			return nil, err
+		}
+		query.Set("region", raw)
+	}
 	if encoded := query.Encode(); encoded != "" {
 		requestURL += "?" + encoded
 	}
@@ -150,8 +175,9 @@ func (c *HttpQueryTemplateServiceClient) GetUser(ctx context.Context, req *HttpQ
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpQueryTemplateServiceGetUserResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpQueryTemplateServiceGetUserFailure)
 	}
 	decoded, err := decodeHttpQueryTemplateServiceGetUserResponse(resp)
 	if err != nil {
@@ -163,8 +189,13 @@ func (c *HttpQueryTemplateServiceClient) GetUser(ctx context.Context, req *HttpQ
 func (c *HttpQueryTemplateServiceClient) Search(ctx context.Context, req *HttpQueryTemplateServiceSearchRequest) (*HttpQueryTemplateServiceSearchResponse, error) {
 	requestURL := c.baseURL + formatHttpQueryTemplateServiceSearchPath(req)
 	query := url.Values{}
-
-	query.Set("keyword", req.Keyword)
+	{
+		raw, err := xidlgohttp.FormatText(req.Keyword)
+		if err != nil {
+			return nil, err
+		}
+		query.Set("keyword", raw)
+	}
 	if encoded := query.Encode(); encoded != "" {
 		requestURL += "?" + encoded
 	}
@@ -184,8 +215,9 @@ func (c *HttpQueryTemplateServiceClient) Search(ctx context.Context, req *HttpQu
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpQueryTemplateServiceSearchResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpQueryTemplateServiceSearchFailure)
 	}
 	decoded, err := decodeHttpQueryTemplateServiceSearchResponse(resp)
 	if err != nil {
@@ -230,6 +262,16 @@ func decodeHttpQueryTemplateServiceGetUserResponse(resp *http.Response) (HttpQue
 	return out, nil
 }
 
+func encodeHttpQueryTemplateServiceGetUserFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpQueryTemplateServiceGetUserFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type HttpQueryTemplateServiceSearchRequest struct {
 	Keyword string `xjson:"keyword" form:"keyword"`
 	Payload string `xjson:"payload" form:"payload"`
@@ -261,4 +303,14 @@ func decodeHttpQueryTemplateServiceSearchResponse(resp *http.Response) (HttpQuer
 	}
 	out.Return = body
 	return out, nil
+}
+
+func encodeHttpQueryTemplateServiceSearchFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpQueryTemplateServiceSearchFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }

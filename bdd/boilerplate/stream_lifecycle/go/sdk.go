@@ -14,7 +14,7 @@ func require(ok bool) {
 }
 func runSDK(base string) {
 	for _, body := range []string{`{}`, `{"detail":null}`} {
-		failure := decodeLedgerExportRowsFailure(xidlgohttp.StreamFailure{Status: 409, Body: []byte(body)})
+		failure := decodeLedgerExportRowsFailure(xidlgohttp.HTTPFailure{Status: 409, Body: []byte(body)})
 		var runtime *xidlgohttp.HttpError
 		require(errors.As(failure, &runtime))
 	}

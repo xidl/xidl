@@ -2,6 +2,7 @@
 
 use async_trait::async_trait;
 
+#[allow(non_snake_case)] // The IDL deliberately preserves TypeID across targets.
 pub mod gen {
     include!("../{{MODULE_NAME}}.rs");
 }

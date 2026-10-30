@@ -25,227 +25,165 @@ pub enum Kind {
 }
 pub const FLAG: Kind = Kind::Flag;
 pub type Discriminant = Kind;
+#[derive(Debug, Clone, PartialEq)]
 pub struct Labels {
-    tag: Kind,
+    tag: Option<Kind>,
     data: LabelsData,
 }
-union LabelsData {
-    text: core::mem::ManuallyDrop<String>,
-    number: core::mem::ManuallyDrop<i64>,
-    flag: core::mem::ManuallyDrop<bool>,
-}
-impl Drop for Labels {
-    #[allow(unreachable_patterns)]
-    fn drop(&mut self) {
-        match self.tag {
-            Kind::Text => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.text);
-                }
-            }
-            Kind::Number => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.number);
-                }
-            }
-            FLAG => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.flag);
-                }
-            }
-            _ => {}
-        }
-    }
-}
-impl Clone for Labels {
-    #[allow(clippy::clone_on_copy)]
-    #[allow(unreachable_patterns)]
-    fn clone(&self) -> Self {
-        match self.tag {
-            Kind::Text => Self::new_text(self.as_text().clone()),
-            Kind::Number => Self::new_number(self.as_number().clone()),
-            FLAG => Self::new_flag(self.as_flag().clone()),
-            _ => unreachable!(),
-        }
-    }
-}
-impl core::fmt::Debug for Labels {
-    #[allow(unreachable_patterns)]
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let mut d = f.debug_struct("Labels");
-        d.field("tag", &self.tag);
-        match self.tag {
-            Kind::Text => {
-                d.field("text", self.as_text());
-            }
-            Kind::Number => {
-                d.field("number", self.as_number());
-            }
-            FLAG => {
-                d.field("flag", self.as_flag());
-            }
-            _ => {}
-        }
-        d.finish()
-    }
-}
-impl PartialEq for Labels {
-    #[allow(unreachable_patterns)]
-    fn eq(&self, other: &Self) -> bool {
-        if self.tag != other.tag {
-            return false;
-        }
-        match self.tag {
-            Kind::Text => self.as_text() == other.as_text(),
-            Kind::Number => self.as_number() == other.as_number(),
-            FLAG => self.as_flag() == other.as_flag(),
-            _ => false,
-        }
-    }
+#[derive(Debug, Clone, PartialEq)]
+enum LabelsData {
+    Text(String),
+    Number(i64),
+    Flag(bool),
 }
 impl Labels {
     pub fn new_text(value: String) -> Self {
         Self {
-            tag: Kind::Text,
-            data: LabelsData {
-                text: core::mem::ManuallyDrop::new(value),
-            },
+            tag: Some(Kind::Text),
+            data: LabelsData::Text(value),
         }
     }
     pub fn is_text(&self) -> bool {
-        matches!(self.tag, Kind::Text)
+        matches!(& self.data, LabelsData::Text(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_text(&self) -> &String {
-        debug_assert!(self.is_text());
-        unsafe { &self.data.text }
+        match &self.data {
+            LabelsData::Text(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union Labels does not contain text"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_text_mut(&mut self) -> &mut String {
-        debug_assert!(self.is_text());
-        unsafe { &mut self.data.text }
+        match &mut self.data {
+            LabelsData::Text(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union Labels does not contain text"),
+        }
     }
     pub fn into_text(self) -> String {
-        debug_assert!(self.is_text());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.text)
+        match self.data {
+            LabelsData::Text(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union Labels does not contain text"),
         }
     }
     pub fn new_number(value: i64) -> Self {
         Self {
-            tag: Kind::Number,
-            data: LabelsData {
-                number: core::mem::ManuallyDrop::new(value),
-            },
+            tag: Some(Kind::Number),
+            data: LabelsData::Number(value),
         }
     }
     pub fn is_number(&self) -> bool {
-        matches!(self.tag, Kind::Number)
+        matches!(& self.data, LabelsData::Number(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_number(&self) -> &i64 {
-        debug_assert!(self.is_number());
-        unsafe { &self.data.number }
+        match &self.data {
+            LabelsData::Number(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union Labels does not contain number"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_number_mut(&mut self) -> &mut i64 {
-        debug_assert!(self.is_number());
-        unsafe { &mut self.data.number }
+        match &mut self.data {
+            LabelsData::Number(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union Labels does not contain number"),
+        }
     }
     pub fn into_number(self) -> i64 {
-        debug_assert!(self.is_number());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.number)
+        match self.data {
+            LabelsData::Number(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union Labels does not contain number"),
         }
     }
     pub fn new_flag(value: bool) -> Self {
         Self {
-            tag: FLAG,
-            data: LabelsData {
-                flag: core::mem::ManuallyDrop::new(value),
-            },
+            tag: Some(FLAG),
+            data: LabelsData::Flag(value),
         }
     }
     pub fn is_flag(&self) -> bool {
-        matches!(self.tag, FLAG)
+        matches!(& self.data, LabelsData::Flag(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_flag(&self) -> &bool {
-        debug_assert!(self.is_flag());
-        unsafe { &self.data.flag }
+        match &self.data {
+            LabelsData::Flag(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union Labels does not contain flag"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_flag_mut(&mut self) -> &mut bool {
-        debug_assert!(self.is_flag());
-        unsafe { &mut self.data.flag }
-    }
-    pub fn into_flag(self) -> bool {
-        debug_assert!(self.is_flag());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.flag)
+        match &mut self.data {
+            LabelsData::Flag(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union Labels does not contain flag"),
         }
     }
-    pub fn tag(&self) -> &Kind {
-        &self.tag
+    pub fn into_flag(self) -> bool {
+        match self.data {
+            LabelsData::Flag(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union Labels does not contain flag"),
+        }
+    }
+    /// The explicit discriminator, or None for the default case.
+    pub fn tag(&self) -> Option<&Kind> {
+        self.tag.as_ref()
     }
 }
 impl Default for Labels {
     fn default() -> Self {
-        Self {
-            tag: Kind::Text,
-            data: LabelsData {
-                text: core::mem::ManuallyDrop::new(String::default()),
-            },
-        }
+        Self::new_text(Default::default())
     }
 }
 #[derive(::serde::Serialize)]
-struct LabelsSerdeRef<'__a> {
-    tag: &'__a str,
-    data: LabelsSerdeRefData<'__a>,
+struct LabelsSerdeRef<'a> {
+    tag: &'a str,
+    data: LabelsSerdeRefData<'a>,
 }
-#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
-enum LabelsSerdeRefData<'__a> {
-    Case0(&'__a String),
-    Case1(&'__a i64),
-    Case2(&'__a bool),
+enum LabelsSerdeRefData<'a> {
+    Case0(&'a String),
+    Case1(&'a i64),
+    Case2(&'a bool),
 }
 impl serde::Serialize for Labels {
-    #[allow(unreachable_patterns)]
-    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        __S: serde::Serializer,
+        S: serde::Serializer,
     {
-        let helper = match self.tag {
-            Kind::Text => {
+        let helper = match &self.data {
+            LabelsData::Text(data) => {
                 let tag = "Text";
                 LabelsSerdeRef {
                     tag,
-                    data: LabelsSerdeRefData::Case0(self.as_text()),
+                    data: LabelsSerdeRefData::Case0(data),
                 }
             }
-            Kind::Number => {
+            LabelsData::Number(data) => {
                 let tag = "Number";
                 LabelsSerdeRef {
                     tag,
-                    data: LabelsSerdeRefData::Case1(self.as_number()),
+                    data: LabelsSerdeRefData::Case1(data),
                 }
             }
-            FLAG => {
+            LabelsData::Flag(data) => {
                 let tag = "FLAG";
                 LabelsSerdeRef {
                     tag,
-                    data: LabelsSerdeRefData::Case2(self.as_flag()),
+                    data: LabelsSerdeRefData::Case2(data),
                 }
             }
-            _ => unreachable!(),
         };
-        helper.serialize(__serializer)
+        helper.serialize(serializer)
     }
 }
 #[derive(::serde::Deserialize)]
@@ -262,44 +200,26 @@ impl<'de> serde::Deserialize<'de> for Labels {
         match helper.tag.as_str() {
             "Text" => {
                 let value = ::serde_json::from_value::<String>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union Labels payload decode failed for tag `Text`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: Kind::Text,
-                    data: LabelsData {
-                        text: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: Some(Kind::Text),
+                    data: LabelsData::Text(value),
                 })
             }
             "Number" => {
                 let value = ::serde_json::from_value::<i64>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union Labels payload decode failed for tag `Number`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: Kind::Number,
-                    data: LabelsData {
-                        number: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: Some(Kind::Number),
+                    data: LabelsData::Number(value),
                 })
             }
             "FLAG" => {
                 let value = ::serde_json::from_value::<bool>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union Labels payload decode failed for tag `FLAG`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: FLAG,
-                    data: LabelsData {
-                        flag: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: Some(FLAG),
+                    data: LabelsData::Flag(value),
                 })
             }
             _ => {
@@ -314,214 +234,165 @@ impl<'de> serde::Deserialize<'de> for Labels {
         }
     }
 }
+#[derive(Debug, Clone, PartialEq)]
 pub struct Aliased {
-    tag: Discriminant,
+    tag: Option<Discriminant>,
     data: AliasedData,
 }
-union AliasedData {
-    text: core::mem::ManuallyDrop<String>,
-    number: core::mem::ManuallyDrop<i64>,
-    other: core::mem::ManuallyDrop<bool>,
-}
-impl Drop for Aliased {
-    #[allow(unreachable_patterns)]
-    fn drop(&mut self) {
-        if matches!(self.tag, Kind::Text) {
-            unsafe {
-                core::mem::ManuallyDrop::drop(&mut self.data.text);
-            }
-        } else if matches!(self.tag, Kind::Number) {
-            unsafe {
-                core::mem::ManuallyDrop::drop(&mut self.data.number);
-            }
-        } else {
-            unsafe {
-                core::mem::ManuallyDrop::drop(&mut self.data.other);
-            }
-        }
-    }
-}
-impl Clone for Aliased {
-    #[allow(clippy::clone_on_copy)]
-    #[allow(unreachable_patterns)]
-    fn clone(&self) -> Self {
-        if matches!(self.tag, Kind::Text) {
-            Self::new_text(self.as_text().clone())
-        } else if matches!(self.tag, Kind::Number) {
-            Self::new_number(self.as_number().clone())
-        } else {
-            Self::new_other(self.as_other().clone())
-        }
-    }
-}
-impl core::fmt::Debug for Aliased {
-    #[allow(unreachable_patterns)]
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let mut d = f.debug_struct("Aliased");
-        d.field("tag", &self.tag);
-        if matches!(self.tag, Kind::Text) {
-            d.field("text", self.as_text());
-        } else if matches!(self.tag, Kind::Number) {
-            d.field("number", self.as_number());
-        } else {
-            d.field("other", self.as_other());
-        }
-        d.finish()
-    }
-}
-impl PartialEq for Aliased {
-    #[allow(unreachable_patterns)]
-    fn eq(&self, other: &Self) -> bool {
-        if self.tag != other.tag {
-            return false;
-        }
-        if matches!(self.tag, Kind::Text) {
-            self.as_text() == other.as_text()
-        } else if matches!(self.tag, Kind::Number) {
-            self.as_number() == other.as_number()
-        } else {
-            self.as_other() == other.as_other()
-        }
-    }
+#[derive(Debug, Clone, PartialEq)]
+enum AliasedData {
+    Text(String),
+    Number(i64),
+    Other(bool),
 }
 impl Aliased {
     pub fn new_text(value: String) -> Self {
         Self {
-            tag: Kind::Text,
-            data: AliasedData {
-                text: core::mem::ManuallyDrop::new(value),
-            },
+            tag: Some(Kind::Text),
+            data: AliasedData::Text(value),
         }
     }
     pub fn is_text(&self) -> bool {
-        matches!(self.tag, Kind::Text)
+        matches!(& self.data, AliasedData::Text(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_text(&self) -> &String {
-        debug_assert!(self.is_text());
-        unsafe { &self.data.text }
+        match &self.data {
+            AliasedData::Text(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union Aliased does not contain text"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_text_mut(&mut self) -> &mut String {
-        debug_assert!(self.is_text());
-        unsafe { &mut self.data.text }
+        match &mut self.data {
+            AliasedData::Text(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union Aliased does not contain text"),
+        }
     }
     pub fn into_text(self) -> String {
-        debug_assert!(self.is_text());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.text)
+        match self.data {
+            AliasedData::Text(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union Aliased does not contain text"),
         }
     }
     pub fn new_number(value: i64) -> Self {
         Self {
-            tag: Kind::Number,
-            data: AliasedData {
-                number: core::mem::ManuallyDrop::new(value),
-            },
+            tag: Some(Kind::Number),
+            data: AliasedData::Number(value),
         }
     }
     pub fn is_number(&self) -> bool {
-        matches!(self.tag, Kind::Number)
+        matches!(& self.data, AliasedData::Number(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_number(&self) -> &i64 {
-        debug_assert!(self.is_number());
-        unsafe { &self.data.number }
+        match &self.data {
+            AliasedData::Number(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union Aliased does not contain number"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_number_mut(&mut self) -> &mut i64 {
-        debug_assert!(self.is_number());
-        unsafe { &mut self.data.number }
+        match &mut self.data {
+            AliasedData::Number(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union Aliased does not contain number"),
+        }
     }
     pub fn into_number(self) -> i64 {
-        debug_assert!(self.is_number());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.number)
+        match self.data {
+            AliasedData::Number(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union Aliased does not contain number"),
         }
     }
     pub fn new_other(value: bool) -> Self {
         Self {
-            tag: Discriminant::default(),
-            data: AliasedData {
-                other: core::mem::ManuallyDrop::new(value),
-            },
+            tag: None,
+            data: AliasedData::Other(value),
         }
     }
     pub fn is_other(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(& self.data, AliasedData::Other(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_other(&self) -> &bool {
-        debug_assert!(self.is_other());
-        unsafe { &self.data.other }
+        match &self.data {
+            AliasedData::Other(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union Aliased does not contain other"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_other_mut(&mut self) -> &mut bool {
-        debug_assert!(self.is_other());
-        unsafe { &mut self.data.other }
-    }
-    pub fn into_other(self) -> bool {
-        debug_assert!(self.is_other());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.other)
+        match &mut self.data {
+            AliasedData::Other(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union Aliased does not contain other"),
         }
     }
-    pub fn tag(&self) -> &Discriminant {
-        &self.tag
+    pub fn into_other(self) -> bool {
+        match self.data {
+            AliasedData::Other(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union Aliased does not contain other"),
+        }
+    }
+    /// The explicit discriminator, or None for the default case.
+    pub fn tag(&self) -> Option<&Discriminant> {
+        self.tag.as_ref()
     }
 }
 impl Default for Aliased {
     fn default() -> Self {
-        Self {
-            tag: Discriminant::default(),
-            data: AliasedData {
-                other: core::mem::ManuallyDrop::new(bool::default()),
-            },
-        }
+        Self::new_other(Default::default())
     }
 }
 #[derive(::serde::Serialize)]
-struct AliasedSerdeRef<'__a> {
-    tag: &'__a str,
-    data: AliasedSerdeRefData<'__a>,
+struct AliasedSerdeRef<'a> {
+    tag: &'a str,
+    data: AliasedSerdeRefData<'a>,
 }
-#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
-enum AliasedSerdeRefData<'__a> {
-    Case0(&'__a String),
-    Case1(&'__a i64),
-    Case2(&'__a bool),
+enum AliasedSerdeRefData<'a> {
+    Case0(&'a String),
+    Case1(&'a i64),
+    Case2(&'a bool),
 }
 impl serde::Serialize for Aliased {
-    #[allow(unreachable_patterns)]
-    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        __S: serde::Serializer,
+        S: serde::Serializer,
     {
-        let helper = if matches!(self.tag, Kind::Text) {
-            let tag = "Text";
-            AliasedSerdeRef {
-                tag,
-                data: AliasedSerdeRefData::Case0(self.as_text()),
+        let helper = match &self.data {
+            AliasedData::Text(data) => {
+                let tag = "Text";
+                AliasedSerdeRef {
+                    tag,
+                    data: AliasedSerdeRefData::Case0(data),
+                }
             }
-        } else if matches!(self.tag, Kind::Number) {
-            let tag = "Number";
-            AliasedSerdeRef {
-                tag,
-                data: AliasedSerdeRefData::Case1(self.as_number()),
+            AliasedData::Number(data) => {
+                let tag = "Number";
+                AliasedSerdeRef {
+                    tag,
+                    data: AliasedSerdeRefData::Case1(data),
+                }
             }
-        } else {
-            let tag = "default";
-            AliasedSerdeRef {
-                tag,
-                data: AliasedSerdeRefData::Case2(self.as_other()),
+            AliasedData::Other(data) => {
+                let tag = "default";
+                AliasedSerdeRef {
+                    tag,
+                    data: AliasedSerdeRefData::Case2(data),
+                }
             }
         };
-        helper.serialize(__serializer)
+        helper.serialize(serializer)
     }
 }
 #[derive(::serde::Deserialize)]
@@ -538,44 +409,26 @@ impl<'de> serde::Deserialize<'de> for Aliased {
         match helper.tag.as_str() {
             "Text" => {
                 let value = ::serde_json::from_value::<String>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union Aliased payload decode failed for tag `Text`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: Kind::Text,
-                    data: AliasedData {
-                        text: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: Some(Kind::Text),
+                    data: AliasedData::Text(value),
                 })
             }
             "Number" => {
                 let value = ::serde_json::from_value::<i64>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union Aliased payload decode failed for tag `Number`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: Kind::Number,
-                    data: AliasedData {
-                        number: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: Some(Kind::Number),
+                    data: AliasedData::Number(value),
                 })
             }
             "default" => {
                 let value = ::serde_json::from_value::<bool>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union Aliased payload decode failed for tag `default`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: Discriminant::default(),
-                    data: AliasedData {
-                        other: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: None,
+                    data: AliasedData::Other(value),
                 })
             }
             _ => {

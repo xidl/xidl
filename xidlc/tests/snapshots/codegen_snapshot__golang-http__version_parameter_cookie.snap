@@ -9,12 +9,49 @@ version_parameter.go
 
 package version_parameter
 
+import (
+	"fmt"
+	"github.com/xidl/xidl/golang/xidl-go-codec"
+)
+
 type V1Versions string
 
 const (
 	V1VersionsV1 V1Versions = "2026-04"
 	V1VersionsV2 V1Versions = "2026-07"
 )
+
+
+
+// MarshalText validates the enum's published wire value.
+func (value V1Versions) MarshalText() ([]byte, error) {
+    switch string(value) {
+    case "2026-04", "2026-07":
+        return []byte(value), nil
+    default:
+        return nil, fmt.Errorf("enum V1Versions has an invalid value %q", value)
+    }
+}
+
+// UnmarshalText accepts only values declared by the IDL enum.
+func (value *V1Versions) UnmarshalText(data []byte) error {
+    decoded := V1Versions(data)
+    if _, err := decoded.MarshalText(); err != nil { return err }
+    *value = decoded
+    return nil
+}
+
+func (value V1Versions) MarshalJSON() ([]byte, error) {
+    text, err := value.MarshalText()
+    if err != nil { return nil, err }
+    return json.Marshal(string(text))
+}
+
+func (value *V1Versions) UnmarshalJSON(data []byte) error {
+    var text string
+    if err := json.Unmarshal(data, &text); err != nil { return err }
+    return value.UnmarshalText([]byte(text))
+}
 
 type V1BusinessItem struct {
 	Id string `xjson:"id"`
@@ -34,6 +71,38 @@ const (
 	V2VersionsV1 V2Versions = "2026-04"
 	V2VersionsV2 V2Versions = "2026-07"
 )
+
+
+
+// MarshalText validates the enum's published wire value.
+func (value V2Versions) MarshalText() ([]byte, error) {
+    switch string(value) {
+    case "2026-04", "2026-07":
+        return []byte(value), nil
+    default:
+        return nil, fmt.Errorf("enum V2Versions has an invalid value %q", value)
+    }
+}
+
+// UnmarshalText accepts only values declared by the IDL enum.
+func (value *V2Versions) UnmarshalText(data []byte) error {
+    decoded := V2Versions(data)
+    if _, err := decoded.MarshalText(); err != nil { return err }
+    *value = decoded
+    return nil
+}
+
+func (value V2Versions) MarshalJSON() ([]byte, error) {
+    text, err := value.MarshalText()
+    if err != nil { return nil, err }
+    return json.Marshal(string(text))
+}
+
+func (value *V2Versions) UnmarshalJSON(data []byte) error {
+    var text string
+    if err := json.Unmarshal(data, &text); err != nil { return err }
+    return value.UnmarshalText([]byte(text))
+}
 
 type V2BusinessItem struct {
 	Id string `xjson:"id"`
@@ -61,6 +130,10 @@ import (
 	"net/url"
 	"strings"
 
+	"errors"
+
+	json "github.com/xidl/xidl/golang/xidl-go-codec"
+
 	"github.com/gin-gonic/gin"
 	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
 )
@@ -83,38 +156,45 @@ func RegisterV1BusinessStoreHandler(r gin.IRouter, svc V1BusinessStoreService) {
 	r.GET("/items/:id", func(c *gin.Context) {
 
 		req := &V1BusinessStoreGetRequest{}
-
 		if raw, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			if value, parseErr := xidlgohttp.ParseInt32(raw); parseErr == nil {
-				req.Id = value
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, parseErr.Error())
+			if err := xidlgohttp.ParseText(raw, &req.Id); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 				return
 			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-
-		if value, err := xidlgohttp.QueryString(c.Request.URL.Query(), "search"); err == nil {
-			req.Search = value
+		if raw, err := xidlgohttp.QueryString(c.Request.URL.Query(), "search"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Search); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-
-		if value, err := xidlgohttp.GinCookieString(c, "theme"); err == nil {
-			req.Theme = value
+		if raw, err := xidlgohttp.GinCookieString(c, "theme"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Theme); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		resp, err := svc.Get(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeV1BusinessStoreGetFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -126,23 +206,27 @@ func RegisterV1BusinessStoreHandler(r gin.IRouter, svc V1BusinessStoreService) {
 	r.DELETE("/items/:id", func(c *gin.Context) {
 
 		req := &V1BusinessStoreRemoveRequest{}
-
 		if raw, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			if value, parseErr := xidlgohttp.ParseInt32(raw); parseErr == nil {
-				req.Id = value
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, parseErr.Error())
+			if err := xidlgohttp.ParseText(raw, &req.Id); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 				return
 			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-		if _, err := svc.Remove(c.Request.Context(), req); err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+		_, err := svc.Remove(c.Request.Context(), req)
+		if err != nil {
+			failure := encodeV1BusinessStoreRemoveFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -151,12 +235,9 @@ func RegisterV1BusinessStoreHandler(r gin.IRouter, svc V1BusinessStoreService) {
 	r.GET("/fail/:id", func(c *gin.Context) {
 
 		req := &V1BusinessStoreFailRequest{}
-
 		if raw, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			if value, parseErr := xidlgohttp.ParseInt32(raw); parseErr == nil {
-				req.Id = value
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, parseErr.Error())
+			if err := xidlgohttp.ParseText(raw, &req.Id); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 				return
 			}
 		} else {
@@ -165,10 +246,16 @@ func RegisterV1BusinessStoreHandler(r gin.IRouter, svc V1BusinessStoreService) {
 		}
 		resp, err := svc.Fail(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeV1BusinessStoreFailFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -179,9 +266,11 @@ func RegisterV1BusinessStoreHandler(r gin.IRouter, svc V1BusinessStoreService) {
 	})
 	r.GET("/chat", func(c *gin.Context) {
 		req := &V1BusinessStoreChatRequest{}
-
-		if value, err := xidlgohttp.QueryString(c.Request.URL.Query(), "room"); err == nil {
-			req.Room = value
+		if raw, err := xidlgohttp.QueryString(c.Request.URL.Query(), "room"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Room); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
@@ -213,10 +302,16 @@ func RegisterV1BusinessHealthHandler(r gin.IRouter, svc V1BusinessHealthService)
 		req := &V1BusinessHealthHealthRequest{}
 		resp, err := svc.Health(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeV1BusinessHealthHealthFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -312,38 +407,45 @@ func RegisterV2BusinessStoreHandler(r gin.IRouter, svc V2BusinessStoreService) {
 	r.GET("/items/:id", func(c *gin.Context) {
 
 		req := &V2BusinessStoreGetRequest{}
-
 		if raw, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			if value, parseErr := xidlgohttp.ParseInt32(raw); parseErr == nil {
-				req.Id = value
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, parseErr.Error())
+			if err := xidlgohttp.ParseText(raw, &req.Id); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 				return
 			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-
-		if value, err := xidlgohttp.QueryString(c.Request.URL.Query(), "search"); err == nil {
-			req.Search = value
+		if raw, err := xidlgohttp.QueryString(c.Request.URL.Query(), "search"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Search); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-
-		if value, err := xidlgohttp.GinCookieString(c, "theme"); err == nil {
-			req.Theme = value
+		if raw, err := xidlgohttp.GinCookieString(c, "theme"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Theme); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		resp, err := svc.Get(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeV2BusinessStoreGetFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -355,23 +457,27 @@ func RegisterV2BusinessStoreHandler(r gin.IRouter, svc V2BusinessStoreService) {
 	r.DELETE("/items/:id", func(c *gin.Context) {
 
 		req := &V2BusinessStoreRemoveRequest{}
-
 		if raw, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			if value, parseErr := xidlgohttp.ParseInt32(raw); parseErr == nil {
-				req.Id = value
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, parseErr.Error())
+			if err := xidlgohttp.ParseText(raw, &req.Id); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 				return
 			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-		if _, err := svc.Remove(c.Request.Context(), req); err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+		_, err := svc.Remove(c.Request.Context(), req)
+		if err != nil {
+			failure := encodeV2BusinessStoreRemoveFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -380,12 +486,9 @@ func RegisterV2BusinessStoreHandler(r gin.IRouter, svc V2BusinessStoreService) {
 	r.GET("/fail/:id", func(c *gin.Context) {
 
 		req := &V2BusinessStoreFailRequest{}
-
 		if raw, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			if value, parseErr := xidlgohttp.ParseInt32(raw); parseErr == nil {
-				req.Id = value
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, parseErr.Error())
+			if err := xidlgohttp.ParseText(raw, &req.Id); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 				return
 			}
 		} else {
@@ -394,10 +497,16 @@ func RegisterV2BusinessStoreHandler(r gin.IRouter, svc V2BusinessStoreService) {
 		}
 		resp, err := svc.Fail(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeV2BusinessStoreFailFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -408,9 +517,11 @@ func RegisterV2BusinessStoreHandler(r gin.IRouter, svc V2BusinessStoreService) {
 	})
 	r.GET("/chat", func(c *gin.Context) {
 		req := &V2BusinessStoreChatRequest{}
-
-		if value, err := xidlgohttp.QueryString(c.Request.URL.Query(), "room"); err == nil {
-			req.Room = value
+		if raw, err := xidlgohttp.QueryString(c.Request.URL.Query(), "room"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Room); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
@@ -442,10 +553,16 @@ func RegisterV2BusinessHealthHandler(r gin.IRouter, svc V2BusinessHealthService)
 		req := &V2BusinessHealthHealthRequest{}
 		resp, err := svc.Health(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeV2BusinessHealthHealthFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -548,8 +665,13 @@ func NewV1BusinessStoreClient(baseURL string, httpClient *http.Client, auth xidl
 func (c *V1BusinessStoreClient) Get(ctx context.Context, req *V1BusinessStoreGetRequest) (*V1BusinessStoreGetResponse, error) {
 	requestURL := c.baseURL + formatV1BusinessStoreGetPath(req)
 	query := url.Values{}
-
-	query.Set("search", req.Search)
+	{
+		raw, err := xidlgohttp.FormatText(req.Search)
+		if err != nil {
+			return nil, err
+		}
+		query.Set("search", raw)
+	}
 	if encoded := query.Encode(); encoded != "" {
 		requestURL += "?" + encoded
 	}
@@ -558,16 +680,22 @@ func (c *V1BusinessStoreClient) Get(ctx context.Context, req *V1BusinessStoreGet
 		return nil, err
 	}
 	httpReq.Header.Set("Accept", "application/json")
-
-	httpReq.AddCookie(&http.Cookie{Name: "theme", Value: req.Theme})
+	{
+		raw, err := xidlgohttp.FormatText(req.Theme)
+		if err != nil {
+			return nil, err
+		}
+		httpReq.AddCookie(&http.Cookie{Name: "theme", Value: xidlgohttp.EncodeCookieValue(raw)})
+	}
 	httpReq.AddCookie(&http.Cookie{Name: "api%v", Value: xidlgohttp.EncodeCookieValue("2026-04")})
 	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *V1BusinessStoreGetResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeV1BusinessStoreGetFailure)
 	}
 	decoded, err := decodeV1BusinessStoreGetResponse(resp)
 	if err != nil {
@@ -589,8 +717,9 @@ func (c *V1BusinessStoreClient) Remove(ctx context.Context, req *V1BusinessStore
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *V1BusinessStoreRemoveResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeV1BusinessStoreRemoveFailure)
 	}
 	decoded, err := decodeV1BusinessStoreRemoveResponse(resp)
 	if err != nil {
@@ -612,8 +741,9 @@ func (c *V1BusinessStoreClient) Fail(ctx context.Context, req *V1BusinessStoreFa
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *V1BusinessStoreFailResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeV1BusinessStoreFailFailure)
 	}
 	decoded, err := decodeV1BusinessStoreFailResponse(resp)
 	if err != nil {
@@ -630,8 +760,13 @@ func (c *V1BusinessStoreClient) Chat(ctx context.Context, room string) (*xidlgoh
 	base = strings.Replace(base, "https://", "wss://", 1)
 	endpoint := base + path
 	query := url.Values{}
-
-	query.Set("room", req.Room)
+	{
+		raw, err := xidlgohttp.FormatText(req.Room)
+		if err != nil {
+			return nil, err
+		}
+		query.Set("room", raw)
+	}
 	if encoded := query.Encode(); encoded != "" {
 		endpoint += "?" + encoded
 	}
@@ -676,8 +811,9 @@ func (c *V1BusinessHealthClient) Health(ctx context.Context, req *V1BusinessHeal
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *V1BusinessHealthHealthResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeV1BusinessHealthHealthFailure)
 	}
 	decoded, err := decodeV1BusinessHealthHealthResponse(resp)
 	if err != nil {
@@ -799,8 +935,13 @@ func NewV2BusinessStoreClient(baseURL string, httpClient *http.Client, auth xidl
 func (c *V2BusinessStoreClient) Get(ctx context.Context, req *V2BusinessStoreGetRequest) (*V2BusinessStoreGetResponse, error) {
 	requestURL := c.baseURL + formatV2BusinessStoreGetPath(req)
 	query := url.Values{}
-
-	query.Set("search", req.Search)
+	{
+		raw, err := xidlgohttp.FormatText(req.Search)
+		if err != nil {
+			return nil, err
+		}
+		query.Set("search", raw)
+	}
 	if encoded := query.Encode(); encoded != "" {
 		requestURL += "?" + encoded
 	}
@@ -809,16 +950,22 @@ func (c *V2BusinessStoreClient) Get(ctx context.Context, req *V2BusinessStoreGet
 		return nil, err
 	}
 	httpReq.Header.Set("Accept", "application/json")
-
-	httpReq.AddCookie(&http.Cookie{Name: "theme", Value: req.Theme})
+	{
+		raw, err := xidlgohttp.FormatText(req.Theme)
+		if err != nil {
+			return nil, err
+		}
+		httpReq.AddCookie(&http.Cookie{Name: "theme", Value: xidlgohttp.EncodeCookieValue(raw)})
+	}
 	httpReq.AddCookie(&http.Cookie{Name: "api%v", Value: xidlgohttp.EncodeCookieValue("2026-07")})
 	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *V2BusinessStoreGetResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeV2BusinessStoreGetFailure)
 	}
 	decoded, err := decodeV2BusinessStoreGetResponse(resp)
 	if err != nil {
@@ -840,8 +987,9 @@ func (c *V2BusinessStoreClient) Remove(ctx context.Context, req *V2BusinessStore
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *V2BusinessStoreRemoveResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeV2BusinessStoreRemoveFailure)
 	}
 	decoded, err := decodeV2BusinessStoreRemoveResponse(resp)
 	if err != nil {
@@ -863,8 +1011,9 @@ func (c *V2BusinessStoreClient) Fail(ctx context.Context, req *V2BusinessStoreFa
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *V2BusinessStoreFailResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeV2BusinessStoreFailFailure)
 	}
 	decoded, err := decodeV2BusinessStoreFailResponse(resp)
 	if err != nil {
@@ -881,8 +1030,13 @@ func (c *V2BusinessStoreClient) Chat(ctx context.Context, room string) (*xidlgoh
 	base = strings.Replace(base, "https://", "wss://", 1)
 	endpoint := base + path
 	query := url.Values{}
-
-	query.Set("room", req.Room)
+	{
+		raw, err := xidlgohttp.FormatText(req.Room)
+		if err != nil {
+			return nil, err
+		}
+		query.Set("room", raw)
+	}
 	if encoded := query.Encode(); encoded != "" {
 		endpoint += "?" + encoded
 	}
@@ -927,8 +1081,9 @@ func (c *V2BusinessHealthClient) Health(ctx context.Context, req *V2BusinessHeal
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *V2BusinessHealthHealthResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeV2BusinessHealthHealthFailure)
 	}
 	decoded, err := decodeV2BusinessHealthHealthResponse(resp)
 	if err != nil {
@@ -1068,6 +1223,16 @@ func decodeV1BusinessStoreGetResponse(resp *http.Response) (V1BusinessStoreGetRe
 	return out, nil
 }
 
+func encodeV1BusinessStoreGetFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeV1BusinessStoreGetFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type V1BusinessStoreRemoveRequest struct {
 	Id int32 `xjson:"id" form:"id"`
 }
@@ -1094,6 +1259,16 @@ func formatV1BusinessStoreRemovePath(req *V1BusinessStoreRemoveRequest) string {
 func decodeV1BusinessStoreRemoveResponse(resp *http.Response) (V1BusinessStoreRemoveResponse, error) {
 	out := V1BusinessStoreRemoveResponse{}
 	return out, nil
+}
+
+func encodeV1BusinessStoreRemoveFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeV1BusinessStoreRemoveFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }
 
 type V1BusinessStoreFailRequest struct {
@@ -1128,6 +1303,51 @@ func decodeV1BusinessStoreFailResponse(resp *http.Response) (V1BusinessStoreFail
 	}
 	out.Return = body
 	return out, nil
+}
+
+func encodeV1BusinessStoreFailFailure(err error) xidlgohttp.HTTPFailure {
+
+	var ex1 *V1BusinessConflict
+	if errors.As(err, &ex1) {
+		exception := ex1
+		failure := xidlgohttp.HTTPFailure{Status: 409, Headers: make(http.Header)}
+
+		body, encodingError := json.Marshal(struct {
+			Message string `xjson:"message"`
+		}{
+			Message: exception.Message,
+		})
+		if encodingError != nil {
+			return xidlgohttp.EncodeHTTPError(fmt.Errorf("V1BusinessStoreFail exception encoding: %w", encodingError))
+		}
+		failure.Body = body
+
+		return failure
+	}
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeV1BusinessStoreFailFailure(failure xidlgohttp.HTTPFailure) error {
+
+	if failure.Status == 409 {
+		var exception V1BusinessConflict
+
+		var body struct {
+			Message string `xjson:"message"`
+		}
+		if err := json.Unmarshal(failure.Body, &body); err != nil {
+			return xidlgohttp.DecodeHTTPError(failure)
+		}
+		exception.Message = body.Message
+
+		if failure.Headers != nil {
+
+		}
+		return &exception
+	}
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }
 
 type V1BusinessStoreChatStreamIn struct {
@@ -1195,6 +1415,16 @@ func decodeV1BusinessHealthHealthResponse(resp *http.Response) (V1BusinessHealth
 	}
 	out.Return = body
 	return out, nil
+}
+
+func encodeV1BusinessHealthHealthFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeV1BusinessHealthHealthFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }
 
 type V1BusinessDuplexShapesScalarStreamIn struct {
@@ -1369,6 +1599,16 @@ func decodeV2BusinessStoreGetResponse(resp *http.Response) (V2BusinessStoreGetRe
 	return out, nil
 }
 
+func encodeV2BusinessStoreGetFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeV2BusinessStoreGetFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type V2BusinessStoreRemoveRequest struct {
 	Id int32 `xjson:"id" form:"id"`
 }
@@ -1395,6 +1635,16 @@ func formatV2BusinessStoreRemovePath(req *V2BusinessStoreRemoveRequest) string {
 func decodeV2BusinessStoreRemoveResponse(resp *http.Response) (V2BusinessStoreRemoveResponse, error) {
 	out := V2BusinessStoreRemoveResponse{}
 	return out, nil
+}
+
+func encodeV2BusinessStoreRemoveFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeV2BusinessStoreRemoveFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }
 
 type V2BusinessStoreFailRequest struct {
@@ -1429,6 +1679,51 @@ func decodeV2BusinessStoreFailResponse(resp *http.Response) (V2BusinessStoreFail
 	}
 	out.Return = body
 	return out, nil
+}
+
+func encodeV2BusinessStoreFailFailure(err error) xidlgohttp.HTTPFailure {
+
+	var ex1 *V2BusinessConflict
+	if errors.As(err, &ex1) {
+		exception := ex1
+		failure := xidlgohttp.HTTPFailure{Status: 409, Headers: make(http.Header)}
+
+		body, encodingError := json.Marshal(struct {
+			Message string `xjson:"message"`
+		}{
+			Message: exception.Message,
+		})
+		if encodingError != nil {
+			return xidlgohttp.EncodeHTTPError(fmt.Errorf("V2BusinessStoreFail exception encoding: %w", encodingError))
+		}
+		failure.Body = body
+
+		return failure
+	}
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeV2BusinessStoreFailFailure(failure xidlgohttp.HTTPFailure) error {
+
+	if failure.Status == 409 {
+		var exception V2BusinessConflict
+
+		var body struct {
+			Message string `xjson:"message"`
+		}
+		if err := json.Unmarshal(failure.Body, &body); err != nil {
+			return xidlgohttp.DecodeHTTPError(failure)
+		}
+		exception.Message = body.Message
+
+		if failure.Headers != nil {
+
+		}
+		return &exception
+	}
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }
 
 type V2BusinessStoreChatStreamIn struct {
@@ -1496,6 +1791,16 @@ func decodeV2BusinessHealthHealthResponse(resp *http.Response) (V2BusinessHealth
 	}
 	out.Return = body
 	return out, nil
+}
+
+func encodeV2BusinessHealthHealthFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeV2BusinessHealthHealthFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }
 
 type V2BusinessDuplexShapesScalarStreamIn struct {

@@ -247,7 +247,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["country_code"]: z.string().nullish().transform((value) => value ?? undefined),
         
-            ["priority"]: z.number().int().nullish().transform((value) => value ?? undefined),
+            ["priority"]: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer").nullish().transform((value) => value ?? undefined),
         
     })).transform((value) => ({
         
@@ -495,7 +495,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["country_code_v2"]: wireType26Schema.nullish().transform((value) => value ?? undefined),
         
-            ["priority"]: z.number().int().nullish().transform((value) => value ?? undefined),
+            ["priority"]: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer").nullish().transform((value) => value ?? undefined),
         
     })).transform((value) => ({
         
@@ -731,7 +731,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["country_code_v2"]: wireType46Schema.nullish().transform((value) => value ?? undefined),
         
-            ["priority"]: z.number().int().nullish().transform((value) => value ?? undefined),
+            ["priority"]: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer").nullish().transform((value) => value ?? undefined),
         
     })).transform((value) => ({
         

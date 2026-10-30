@@ -15,6 +15,7 @@ mod struct_fields;
 pub(crate) mod type_expr;
 mod type_render;
 mod type_render_helpers;
+mod union;
 
 #[cfg(test)]
 mod tests;

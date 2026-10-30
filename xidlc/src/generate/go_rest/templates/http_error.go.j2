@@ -1,4 +1,4 @@
 if resp.StatusCode < 200 || resp.StatusCode >= 300 {
     var zero {{ response }}
-    return zero, xidlgohttp.DecodeStreamHTTPError(resp, decode{{ prefix }}Failure)
+    return zero, xidlgohttp.ReadHTTPError(resp, decode{{ prefix }}Failure)
 }

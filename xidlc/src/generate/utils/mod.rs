@@ -9,12 +9,24 @@ pub mod filter;
     feature = "gen-openapi"
 ))]
 pub mod scope;
+#[cfg(any(
+    feature = "gen-rust",
+    feature = "gen-typescript",
+    feature = "gen-go",
+    feature = "gen-openapi"
+))]
+pub(crate) mod union_wire;
 
 pub use doc::doc_lines_from_annotations;
 #[cfg(feature = "gen-rust")]
 pub use filter::rust_format_filter;
 
-#[cfg(any(feature = "gen-rust", feature = "gen-openapi"))]
+#[cfg(any(
+    feature = "gen-rust",
+    feature = "gen-openapi",
+    feature = "gen-typescript",
+    feature = "gen-go"
+))]
 use xidl_parser::hir;
 
 /// Imported units that `definitions` reference, by their prefixes.
@@ -65,7 +77,12 @@ pub fn imported_units(properties: &xidl_parser::hir::ParserProperties) -> Vec<St
 }
 
 /// Whether any annotation carries the given name (e.g. `http`, `header`).
-#[cfg(any(feature = "gen-rust", feature = "gen-openapi"))]
+#[cfg(any(
+    feature = "gen-rust",
+    feature = "gen-openapi",
+    feature = "gen-typescript",
+    feature = "gen-go"
+))]
 pub fn has_annotation(annotations: &[hir::Annotation], target: &str) -> bool {
     annotations.iter().any(|annotation| match annotation {
         hir::Annotation::Builtin { name, .. } => name == target,

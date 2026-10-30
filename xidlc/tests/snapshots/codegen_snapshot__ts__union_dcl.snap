@@ -12,7 +12,7 @@ union_dcl.d.ts
 export type B = never;
 
 
-export type C = { a: number } | { b: string };
+export type C = { tag: "0", data: number } | { tag: "1", data: string };
 export {};
 ===============
 union_dcl.zod.ts
@@ -27,4 +27,4 @@ import { xjson } from "xidl-typescript-codec";
     export const BSchema = z.never()
 
     
-    export const CSchema = z.union([z.object({ a: z.number().int() }), z.object({ b: z.string() })]);
+    export const CSchema = z.union([z.object({ tag: z.enum(["0"]), data: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer") }), z.object({ tag: z.enum(["1"]), data: z.string() })]);

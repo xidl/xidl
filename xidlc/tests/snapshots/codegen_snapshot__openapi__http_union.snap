@@ -1,6 +1,5 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
-assertion_line: 145
 expression: output
 ---
 ===============
@@ -60,6 +59,7 @@ openapi_http_union.json
               "raw": {
                 "items": {
                   "format": "int32",
+                  "maximum": 255,
                   "minimum": 0,
                   "type": "integer"
                 },

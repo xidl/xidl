@@ -1,6 +1,5 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
-assertion_line: 145
 expression: output
 ---
 ===============
@@ -134,6 +133,7 @@ openapi_http_envelope.json
               "raw": {
                 "items": {
                   "format": "int32",
+                  "maximum": 255,
                   "minimum": 0,
                   "type": "integer"
                 },
@@ -345,6 +345,7 @@ openapi_http_envelope.json
               "X-Size": {
                 "schema": {
                   "format": "int64",
+                  "maximum": 18446744073709551615,
                   "minimum": 0,
                   "type": "integer"
                 }

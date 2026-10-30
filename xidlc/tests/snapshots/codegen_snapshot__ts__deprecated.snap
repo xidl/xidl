@@ -43,7 +43,7 @@ export namespace legacy {
          * @deprecated After 2027-01-01T23:59:59Z.
          */
 
-    export type Payload = { text: string } | { media: Message };
+    export type Payload = { tag: "1", data: string } | { tag: "2", data: Message };
     /**
      * @deprecated Since 2026-07-01T00:00:00Z.
      */
@@ -124,7 +124,7 @@ export namespace legacy {
             
         });
 
-        export const PayloadSchema = z.union([z.object({ text: z.string() }), z.object({ media: MessageSchema })]);
+        export const PayloadSchema = z.union([z.object({ tag: z.enum(["1"]), data: z.string() }), z.object({ tag: z.enum(["2"]), data: MessageSchema })]);
 
         export const EnvelopeSchema = z.object({
             

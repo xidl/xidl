@@ -58,10 +58,16 @@ func RegisterHttpScopeMatrixServiceHandler(r gin.IRouter, svc HttpScopeMatrixSer
 		req := &HttpScopeMatrixServiceGetAttributeInheritedAttrRequest{}
 		resp, err := svc.GetAttributeInheritedAttr(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpScopeMatrixServiceGetAttributeInheritedAttrFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -75,10 +81,16 @@ func RegisterHttpScopeMatrixServiceHandler(r gin.IRouter, svc HttpScopeMatrixSer
 		req := &HttpScopeMatrixServiceGetAttributeBareAttrRequest{}
 		resp, err := svc.GetAttributeBareAttr(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpScopeMatrixServiceGetAttributeBareAttrFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -106,10 +118,16 @@ func RegisterHttpScopeMatrixServiceHandler(r gin.IRouter, svc HttpScopeMatrixSer
 		req.Req = body
 		resp, err := svc.DefaultScope(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpScopeMatrixServiceDefaultScopeFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -138,10 +156,16 @@ func RegisterHttpScopeMatrixServiceHandler(r gin.IRouter, svc HttpScopeMatrixSer
 		req.Age = body.Age
 		resp, err := svc.OverrideConsumesOnly(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpScopeMatrixServiceOverrideConsumesOnlyFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -161,19 +185,27 @@ func RegisterHttpScopeMatrixServiceHandler(r gin.IRouter, svc HttpScopeMatrixSer
 		}
 
 		req := &HttpScopeMatrixServiceOverrideProducesOnlyRequest{}
-
-		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			req.Id = value
+		if raw, err := xidlgohttp.GinPathString(c, "id"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Id); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		resp, err := svc.OverrideProducesOnly(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpScopeMatrixServiceOverrideProducesOnlyFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -206,10 +238,16 @@ func RegisterHttpScopeMatrixServiceHandler(r gin.IRouter, svc HttpScopeMatrixSer
 		req.Age = body.Age
 		resp, err := svc.OverrideBothMedia(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpScopeMatrixServiceOverrideBothMediaFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -229,19 +267,27 @@ func RegisterHttpScopeMatrixServiceHandler(r gin.IRouter, svc HttpScopeMatrixSer
 		}
 
 		req := &HttpScopeMatrixServiceDeprecatedPlainRequest{}
-
-		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			req.Id = value
+		if raw, err := xidlgohttp.GinPathString(c, "id"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Id); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		resp, err := svc.DeprecatedPlain(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpScopeMatrixServiceDeprecatedPlainFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -257,19 +303,27 @@ func RegisterHttpScopeMatrixServiceHandler(r gin.IRouter, svc HttpScopeMatrixSer
 		}
 
 		req := &HttpScopeMatrixServiceDeprecatedSinceOnlyRequest{}
-
-		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			req.Id = value
+		if raw, err := xidlgohttp.GinPathString(c, "id"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Id); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		resp, err := svc.DeprecatedSinceOnly(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpScopeMatrixServiceDeprecatedSinceOnlyFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -285,19 +339,27 @@ func RegisterHttpScopeMatrixServiceHandler(r gin.IRouter, svc HttpScopeMatrixSer
 		}
 
 		req := &HttpScopeMatrixServiceDeprecatedWindowRequest{}
-
-		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			req.Id = value
+		if raw, err := xidlgohttp.GinPathString(c, "id"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Id); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		resp, err := svc.DeprecatedWindow(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpScopeMatrixServiceDeprecatedWindowFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -326,26 +388,36 @@ func RegisterHttpSecurityMatrixServiceHandler(r gin.IRouter, svc HttpSecurityMat
 		c.Request = c.Request.WithContext(ctx)
 
 		req := &HttpSecurityMatrixServiceInheritedSecurityRequest{}
-
-		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			req.Id = value
+		if raw, err := xidlgohttp.GinPathString(c, "id"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Id); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-
-		if value, err := xidlgohttp.HeaderString(c.Request.Header, "x_trace_id"); err == nil {
-			req.XTraceId = value
+		if raw, err := xidlgohttp.HeaderString(c.Request.Header, "x_trace_id"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.XTraceId); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		resp, err := svc.InheritedSecurity(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpSecurityMatrixServiceInheritedSecurityFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -372,10 +444,16 @@ func RegisterHttpSecurityMatrixServiceHandler(r gin.IRouter, svc HttpSecurityMat
 		req.Note = body.Note
 		resp, err := svc.BearerOrCookieSecurity(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpSecurityMatrixServiceBearerOrCookieSecurityFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -393,21 +471,33 @@ func RegisterHttpSecurityMatrixServiceHandler(r gin.IRouter, svc HttpSecurityMat
 		c.Request = c.Request.WithContext(ctx)
 
 		req := &HttpSecurityMatrixServiceAlternativeSecurityRequest{}
-
-		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			req.Id = value
+		if raw, err := xidlgohttp.GinPathString(c, "id"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Id); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-
-		req.Locale = xidlgohttp.QueryOptionalString(c.Request.URL.Query(), "locale")
+		if raw, err := xidlgohttp.QueryString(c.Request.URL.Query(), "locale"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Locale); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
 		resp, err := svc.AlternativeSecurity(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpSecurityMatrixServiceAlternativeSecurityFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -434,10 +524,16 @@ func RegisterHttpSecurityMatrixServiceHandler(r gin.IRouter, svc HttpSecurityMat
 		req.Page = body.Page
 		resp, err := svc.OauthSecurity(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpSecurityMatrixServiceOauthSecurityFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -451,10 +547,16 @@ func RegisterHttpSecurityMatrixServiceHandler(r gin.IRouter, svc HttpSecurityMat
 		req := &HttpSecurityMatrixServicePublicPingRequest{}
 		resp, err := svc.PublicPing(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpSecurityMatrixServicePublicPingFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -490,8 +592,9 @@ func (c *HttpScopeMatrixServiceClient) GetAttributeInheritedAttr(ctx context.Con
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpScopeMatrixServiceGetAttributeInheritedAttrResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpScopeMatrixServiceGetAttributeInheritedAttrFailure)
 	}
 	decoded, err := decodeHttpScopeMatrixServiceGetAttributeInheritedAttrResponse(resp)
 	if err != nil {
@@ -512,8 +615,9 @@ func (c *HttpScopeMatrixServiceClient) GetAttributeBareAttr(ctx context.Context,
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpScopeMatrixServiceGetAttributeBareAttrResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpScopeMatrixServiceGetAttributeBareAttrFailure)
 	}
 	decoded, err := decodeHttpScopeMatrixServiceGetAttributeBareAttrResponse(resp)
 	if err != nil {
@@ -540,8 +644,9 @@ func (c *HttpScopeMatrixServiceClient) DefaultScope(ctx context.Context, req *Ht
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpScopeMatrixServiceDefaultScopeResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpScopeMatrixServiceDefaultScopeFailure)
 	}
 	decoded, err := decodeHttpScopeMatrixServiceDefaultScopeResponse(resp)
 	if err != nil {
@@ -571,8 +676,9 @@ func (c *HttpScopeMatrixServiceClient) OverrideConsumesOnly(ctx context.Context,
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpScopeMatrixServiceOverrideConsumesOnlyResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpScopeMatrixServiceOverrideConsumesOnlyFailure)
 	}
 	decoded, err := decodeHttpScopeMatrixServiceOverrideConsumesOnlyResponse(resp)
 	if err != nil {
@@ -593,8 +699,9 @@ func (c *HttpScopeMatrixServiceClient) OverrideProducesOnly(ctx context.Context,
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpScopeMatrixServiceOverrideProducesOnlyResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpScopeMatrixServiceOverrideProducesOnlyFailure)
 	}
 	decoded, err := decodeHttpScopeMatrixServiceOverrideProducesOnlyResponse(resp)
 	if err != nil {
@@ -624,8 +731,9 @@ func (c *HttpScopeMatrixServiceClient) OverrideBothMedia(ctx context.Context, re
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpScopeMatrixServiceOverrideBothMediaResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpScopeMatrixServiceOverrideBothMediaFailure)
 	}
 	decoded, err := decodeHttpScopeMatrixServiceOverrideBothMediaResponse(resp)
 	if err != nil {
@@ -646,8 +754,9 @@ func (c *HttpScopeMatrixServiceClient) DeprecatedPlain(ctx context.Context, req 
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpScopeMatrixServiceDeprecatedPlainResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpScopeMatrixServiceDeprecatedPlainFailure)
 	}
 	decoded, err := decodeHttpScopeMatrixServiceDeprecatedPlainResponse(resp)
 	if err != nil {
@@ -668,8 +777,9 @@ func (c *HttpScopeMatrixServiceClient) DeprecatedSinceOnly(ctx context.Context, 
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpScopeMatrixServiceDeprecatedSinceOnlyResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpScopeMatrixServiceDeprecatedSinceOnlyFailure)
 	}
 	decoded, err := decodeHttpScopeMatrixServiceDeprecatedSinceOnlyResponse(resp)
 	if err != nil {
@@ -690,8 +800,9 @@ func (c *HttpScopeMatrixServiceClient) DeprecatedWindow(ctx context.Context, req
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpScopeMatrixServiceDeprecatedWindowResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpScopeMatrixServiceDeprecatedWindowFailure)
 	}
 	decoded, err := decodeHttpScopeMatrixServiceDeprecatedWindowResponse(resp)
 	if err != nil {
@@ -720,16 +831,22 @@ func (c *HttpSecurityMatrixServiceClient) InheritedSecurity(ctx context.Context,
 		return nil, err
 	}
 	httpReq.Header.Set("Accept", "text/plain")
-
-	httpReq.Header.Set("x_trace_id", req.XTraceId)
+	{
+		raw, err := xidlgohttp.FormatText(req.XTraceId)
+		if err != nil {
+			return nil, err
+		}
+		httpReq.Header.Set("x_trace_id", raw)
+	}
 	xidlgohttp.ApplyClientAuth(httpReq, c.auth, HttpSecurityMatrixServiceInheritedSecuritySecurityRequirements())
 	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpSecurityMatrixServiceInheritedSecurityResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpSecurityMatrixServiceInheritedSecurityFailure)
 	}
 	decoded, err := decodeHttpSecurityMatrixServiceInheritedSecurityResponse(resp)
 	if err != nil {
@@ -760,8 +877,9 @@ func (c *HttpSecurityMatrixServiceClient) BearerOrCookieSecurity(ctx context.Con
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpSecurityMatrixServiceBearerOrCookieSecurityResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpSecurityMatrixServiceBearerOrCookieSecurityFailure)
 	}
 	decoded, err := decodeHttpSecurityMatrixServiceBearerOrCookieSecurityResponse(resp)
 	if err != nil {
@@ -773,9 +891,12 @@ func (c *HttpSecurityMatrixServiceClient) BearerOrCookieSecurity(ctx context.Con
 func (c *HttpSecurityMatrixServiceClient) AlternativeSecurity(ctx context.Context, req *HttpSecurityMatrixServiceAlternativeSecurityRequest) (*HttpSecurityMatrixServiceAlternativeSecurityResponse, error) {
 	requestURL := c.baseURL + formatHttpSecurityMatrixServiceAlternativeSecurityPath(req)
 	query := url.Values{}
-
 	if req.Locale != nil {
-		query.Set("locale", *req.Locale)
+		raw, err := xidlgohttp.FormatText(req.Locale)
+		if err != nil {
+			return nil, err
+		}
+		query.Set("locale", raw)
 	}
 	if encoded := query.Encode(); encoded != "" {
 		requestURL += "?" + encoded
@@ -791,8 +912,9 @@ func (c *HttpSecurityMatrixServiceClient) AlternativeSecurity(ctx context.Contex
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpSecurityMatrixServiceAlternativeSecurityResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpSecurityMatrixServiceAlternativeSecurityFailure)
 	}
 	decoded, err := decodeHttpSecurityMatrixServiceAlternativeSecurityResponse(resp)
 	if err != nil {
@@ -823,8 +945,9 @@ func (c *HttpSecurityMatrixServiceClient) OauthSecurity(ctx context.Context, req
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpSecurityMatrixServiceOauthSecurityResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpSecurityMatrixServiceOauthSecurityFailure)
 	}
 	decoded, err := decodeHttpSecurityMatrixServiceOauthSecurityResponse(resp)
 	if err != nil {
@@ -845,8 +968,9 @@ func (c *HttpSecurityMatrixServiceClient) PublicPing(ctx context.Context, req *H
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpSecurityMatrixServicePublicPingResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpSecurityMatrixServicePublicPingFailure)
 	}
 	decoded, err := decodeHttpSecurityMatrixServicePublicPingResponse(resp)
 	if err != nil {
@@ -888,6 +1012,16 @@ func decodeHttpScopeMatrixServiceGetAttributeInheritedAttrResponse(resp *http.Re
 	return out, nil
 }
 
+func encodeHttpScopeMatrixServiceGetAttributeInheritedAttrFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpScopeMatrixServiceGetAttributeInheritedAttrFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type HttpScopeMatrixServiceGetAttributeBareAttrRequest struct {
 }
 
@@ -918,6 +1052,16 @@ func decodeHttpScopeMatrixServiceGetAttributeBareAttrResponse(resp *http.Respons
 	}
 	out.Return = body
 	return out, nil
+}
+
+func encodeHttpScopeMatrixServiceGetAttributeBareAttrFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpScopeMatrixServiceGetAttributeBareAttrFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }
 
 type HttpScopeMatrixServiceDefaultScopeRequest struct {
@@ -952,6 +1096,16 @@ func decodeHttpScopeMatrixServiceDefaultScopeResponse(resp *http.Response) (Http
 	}
 	out.Return = body
 	return out, nil
+}
+
+func encodeHttpScopeMatrixServiceDefaultScopeFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpScopeMatrixServiceDefaultScopeFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }
 
 type HttpScopeMatrixServiceOverrideConsumesOnlyRequest struct {
@@ -1001,6 +1155,16 @@ func decodeHttpScopeMatrixServiceOverrideConsumesOnlyResponse(resp *http.Respons
 	return out, nil
 }
 
+func encodeHttpScopeMatrixServiceOverrideConsumesOnlyFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpScopeMatrixServiceOverrideConsumesOnlyFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type HttpScopeMatrixServiceOverrideProducesOnlyRequest struct {
 	Id string `xjson:"id" form:"id"`
 }
@@ -1042,6 +1206,16 @@ func decodeHttpScopeMatrixServiceOverrideProducesOnlyResponse(resp *http.Respons
 	out.Return = body.Return
 	out.Revision = body.Revision
 	return out, nil
+}
+
+func encodeHttpScopeMatrixServiceOverrideProducesOnlyFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpScopeMatrixServiceOverrideProducesOnlyFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }
 
 type HttpScopeMatrixServiceOverrideBothMediaRequest struct {
@@ -1091,6 +1265,16 @@ func decodeHttpScopeMatrixServiceOverrideBothMediaResponse(resp *http.Response) 
 	return out, nil
 }
 
+func encodeHttpScopeMatrixServiceOverrideBothMediaFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpScopeMatrixServiceOverrideBothMediaFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type HttpScopeMatrixServiceDeprecatedPlainRequest struct {
 	Id string `xjson:"id" form:"id"`
 }
@@ -1124,6 +1308,16 @@ func decodeHttpScopeMatrixServiceDeprecatedPlainResponse(resp *http.Response) (H
 	}
 	out.Return = body
 	return out, nil
+}
+
+func encodeHttpScopeMatrixServiceDeprecatedPlainFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpScopeMatrixServiceDeprecatedPlainFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }
 
 type HttpScopeMatrixServiceDeprecatedSinceOnlyRequest struct {
@@ -1160,6 +1354,16 @@ func decodeHttpScopeMatrixServiceDeprecatedSinceOnlyResponse(resp *http.Response
 	}
 	out.Return = body
 	return out, nil
+}
+
+func encodeHttpScopeMatrixServiceDeprecatedSinceOnlyFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpScopeMatrixServiceDeprecatedSinceOnlyFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }
 
 type HttpScopeMatrixServiceDeprecatedWindowRequest struct {
@@ -1199,6 +1403,16 @@ func decodeHttpScopeMatrixServiceDeprecatedWindowResponse(resp *http.Response) (
 	return out, nil
 }
 
+func encodeHttpScopeMatrixServiceDeprecatedWindowFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpScopeMatrixServiceDeprecatedWindowFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type HttpSecurityMatrixServiceInheritedSecurityRequest struct {
 	Id       string `xjson:"id" form:"id"`
 	XTraceId string `xjson:"x_trace_id" form:"x_trace_id"`
@@ -1235,6 +1449,16 @@ func decodeHttpSecurityMatrixServiceInheritedSecurityResponse(resp *http.Respons
 	}
 	out.Return = body
 	return out, nil
+}
+
+func encodeHttpSecurityMatrixServiceInheritedSecurityFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpSecurityMatrixServiceInheritedSecurityFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }
 
 type HttpSecurityMatrixServiceBearerOrCookieSecurityRequest struct {
@@ -1278,6 +1502,16 @@ func decodeHttpSecurityMatrixServiceBearerOrCookieSecurityResponse(resp *http.Re
 	return out, nil
 }
 
+func encodeHttpSecurityMatrixServiceBearerOrCookieSecurityFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpSecurityMatrixServiceBearerOrCookieSecurityFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type HttpSecurityMatrixServiceAlternativeSecurityRequest struct {
 	Id     string  `xjson:"id" form:"id"`
 	Locale *string `xjson:"locale" form:"locale"`
@@ -1314,6 +1548,16 @@ func decodeHttpSecurityMatrixServiceAlternativeSecurityResponse(resp *http.Respo
 	}
 	out.Return = body
 	return out, nil
+}
+
+func encodeHttpSecurityMatrixServiceAlternativeSecurityFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpSecurityMatrixServiceAlternativeSecurityFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }
 
 type HttpSecurityMatrixServiceOauthSecurityRequest struct {
@@ -1357,6 +1601,16 @@ func decodeHttpSecurityMatrixServiceOauthSecurityResponse(resp *http.Response) (
 	return out, nil
 }
 
+func encodeHttpSecurityMatrixServiceOauthSecurityFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpSecurityMatrixServiceOauthSecurityFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type HttpSecurityMatrixServicePublicPingRequest struct {
 }
 
@@ -1386,4 +1640,14 @@ func decodeHttpSecurityMatrixServicePublicPingResponse(resp *http.Response) (Htt
 	}
 	out.Return = body
 	return out, nil
+}
+
+func encodeHttpSecurityMatrixServicePublicPingFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpSecurityMatrixServicePublicPingFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }

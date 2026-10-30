@@ -52,19 +52,27 @@ func RegisterHttpSecurityInheritanceServiceHandler(r gin.IRouter, svc HttpSecuri
 		c.Request = c.Request.WithContext(ctx)
 
 		req := &HttpSecurityInheritanceServiceGetReportRequest{}
-
-		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			req.Id = value
+		if raw, err := xidlgohttp.GinPathString(c, "id"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Id); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		resp, err := svc.GetReport(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpSecurityInheritanceServiceGetReportFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -82,9 +90,11 @@ func RegisterHttpSecurityInheritanceServiceHandler(r gin.IRouter, svc HttpSecuri
 		c.Request = c.Request.WithContext(ctx)
 
 		req := &HttpSecurityInheritanceServiceUpdateReportRequest{}
-
-		if value, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			req.Id = value
+		if raw, err := xidlgohttp.GinPathString(c, "id"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Id); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
@@ -97,10 +107,16 @@ func RegisterHttpSecurityInheritanceServiceHandler(r gin.IRouter, svc HttpSecuri
 		req.Body = body
 		resp, err := svc.UpdateReport(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpSecurityInheritanceServiceUpdateReportFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -114,10 +130,16 @@ func RegisterHttpSecurityInheritanceServiceHandler(r gin.IRouter, svc HttpSecuri
 		req := &HttpSecurityInheritanceServiceHealthRequest{}
 		resp, err := svc.Health(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpSecurityInheritanceServiceHealthFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -154,8 +176,9 @@ func (c *HttpSecurityInheritanceServiceClient) GetReport(ctx context.Context, re
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpSecurityInheritanceServiceGetReportResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpSecurityInheritanceServiceGetReportFailure)
 	}
 	decoded, err := decodeHttpSecurityInheritanceServiceGetReportResponse(resp)
 	if err != nil {
@@ -183,8 +206,9 @@ func (c *HttpSecurityInheritanceServiceClient) UpdateReport(ctx context.Context,
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpSecurityInheritanceServiceUpdateReportResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpSecurityInheritanceServiceUpdateReportFailure)
 	}
 	decoded, err := decodeHttpSecurityInheritanceServiceUpdateReportResponse(resp)
 	if err != nil {
@@ -205,8 +229,9 @@ func (c *HttpSecurityInheritanceServiceClient) Health(ctx context.Context, req *
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpSecurityInheritanceServiceHealthResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpSecurityInheritanceServiceHealthFailure)
 	}
 	decoded, err := decodeHttpSecurityInheritanceServiceHealthResponse(resp)
 	if err != nil {
@@ -252,6 +277,16 @@ func decodeHttpSecurityInheritanceServiceGetReportResponse(resp *http.Response) 
 	return out, nil
 }
 
+func encodeHttpSecurityInheritanceServiceGetReportFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpSecurityInheritanceServiceGetReportFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type HttpSecurityInheritanceServiceUpdateReportRequest struct {
 	Id   string `xjson:"id" form:"id"`
 	Body string `xjson:"body" form:"body"`
@@ -290,6 +325,16 @@ func decodeHttpSecurityInheritanceServiceUpdateReportResponse(resp *http.Respons
 	return out, nil
 }
 
+func encodeHttpSecurityInheritanceServiceUpdateReportFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpSecurityInheritanceServiceUpdateReportFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type HttpSecurityInheritanceServiceHealthRequest struct {
 }
 
@@ -319,4 +364,14 @@ func decodeHttpSecurityInheritanceServiceHealthResponse(resp *http.Response) (Ht
 	}
 	out.Return = body
 	return out, nil
+}
+
+func encodeHttpSecurityInheritanceServiceHealthFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpSecurityInheritanceServiceHealthFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }

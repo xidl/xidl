@@ -3,7 +3,6 @@ package json
 import (
 	"bytes"
 	"encoding"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"unicode/utf16"
 	"unicode/utf8"
 )
 
@@ -139,7 +139,7 @@ func Unmarshal(data []byte, v any) error {
 	}
 
 	d := &decoder{data: data, idx: 0}
-	if err := d.value(rv); err != nil {
+	if err := d.value(rv.Elem()); err != nil {
 		return err
 	}
 
@@ -196,12 +196,37 @@ type field struct {
 	tagged    string
 	omitempty bool
 	asString  bool
+	required  bool
 }
 
 type structFields struct {
 	list        []field
 	catchAll    *field
 	catchAllErr error
+}
+
+func (fields structFields) validatePresence(value reflect.Value, seen map[string]bool) error {
+	for _, field := range fields.list {
+		if !field.required || seen[field.name] {
+			continue
+		}
+		parent := value
+		optionalParentAbsent := false
+		for _, index := range field.index[:len(field.index)-1] {
+			parent = parent.Field(index)
+			if parent.Kind() == reflect.Ptr {
+				if parent.IsNil() {
+					optionalParentAbsent = true
+					break
+				}
+				parent = parent.Elem()
+			}
+		}
+		if !optionalParentAbsent {
+			return fmt.Errorf("json: %s requires field %q", value.Type(), field.name)
+		}
+	}
+	return nil
 }
 
 var (
@@ -289,6 +314,7 @@ func typeFields(t reflect.Type) structFields {
 						tagged:    tagName,
 						omitempty: opts.Contains("omitempty"),
 						asString:  opts.Contains("string"),
+						required:  f.Tag.Get("xjson") != "" && !opts.Contains("omitempty") && f.Type.Kind() != reflect.Ptr,
 					}
 					catchAlls = append(catchAlls, curr)
 					continue
@@ -308,6 +334,7 @@ func typeFields(t reflect.Type) structFields {
 				tagged:    tagName,
 				omitempty: opts.Contains("omitempty"),
 				asString:  opts.Contains("string"),
+				required:  f.Tag.Get("xjson") != "" && !opts.Contains("omitempty") && f.Type.Kind() != reflect.Ptr,
 			}
 
 			existing, exists := fieldsByName[name]
@@ -495,16 +522,6 @@ func marshalValue(val reflect.Value, buf *bytes.Buffer) error {
 		return nil
 
 	case reflect.Slice:
-		if val.IsNil() {
-			buf.WriteString("null")
-			return nil
-		}
-		if val.Type().Elem().Kind() == reflect.Uint8 {
-			bytesVal := val.Bytes()
-			encoded := base64.StdEncoding.EncodeToString(bytesVal)
-			writeString(encoded, buf)
-			return nil
-		}
 		fallthrough
 
 	case reflect.Array:
@@ -522,10 +539,6 @@ func marshalValue(val reflect.Value, buf *bytes.Buffer) error {
 		return nil
 
 	case reflect.Map:
-		if val.IsNil() {
-			buf.WriteString("null")
-			return nil
-		}
 		buf.WriteByte('{')
 		keys := val.MapKeys()
 		type keyStr struct {
@@ -534,6 +547,16 @@ func marshalValue(val reflect.Value, buf *bytes.Buffer) error {
 		}
 		kStrs := make([]keyStr, 0, len(keys))
 		for _, k := range keys {
+			if k.CanInterface() {
+				if encoder, ok := k.Interface().(encoding.TextMarshaler); ok {
+					text, err := encoder.MarshalText()
+					if err != nil {
+						return err
+					}
+					kStrs = append(kStrs, keyStr{key: k, str: string(text)})
+					continue
+				}
+			}
 			var s string
 			switch k.Kind() {
 			case reflect.String:
@@ -1013,6 +1036,20 @@ func (d *decoder) value(v reflect.Value) error {
 		return io.ErrUnexpectedEOF
 	}
 
+	if d.idx+4 <= len(d.data) && string(d.data[d.idx:d.idx+4]) == "null" {
+		if v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
+			v.Set(reflect.Zero(v.Type()))
+			d.idx += 4
+			return nil
+		}
+		// A RawMessage or another explicit codec may own a null wire value.
+		if decoder, ok := indirectUnmarshaler(v); ok {
+			d.idx += 4
+			return decoder.UnmarshalJSON([]byte("null"))
+		}
+		return fmt.Errorf("json: null is not a value of %s", v.Type())
+	}
+
 	if u, ok := indirectUnmarshaler(v); ok {
 		start := d.idx
 		if err := d.skipValue(); err != nil {
@@ -1028,20 +1065,6 @@ func (d *decoder) value(v reflect.Value) error {
 			return err
 		}
 		return u.UnmarshalText([]byte(s))
-	}
-
-	if d.idx+4 <= len(d.data) && string(d.data[d.idx:d.idx+4]) == "null" {
-		d.idx += 4
-		if v.Kind() == reflect.Ptr {
-			if v.Elem().CanSet() {
-				v.Elem().Set(reflect.Zero(v.Elem().Type()))
-			}
-		} else {
-			if v.CanSet() {
-				v.Set(reflect.Zero(v.Type()))
-			}
-		}
-		return nil
 	}
 
 	if v.Kind() == reflect.Ptr {
@@ -1068,6 +1091,9 @@ func (d *decoder) value(v reflect.Value) error {
 		if err != nil {
 			return err
 		}
+		if v.OverflowInt(i) {
+			return fmt.Errorf("json: integer %d overflows %s", i, v.Type())
+		}
 		v.SetInt(i)
 		return nil
 
@@ -1080,6 +1106,9 @@ func (d *decoder) value(v reflect.Value) error {
 		u, err := d.parseUint()
 		if err != nil {
 			return err
+		}
+		if v.OverflowUint(u) {
+			return fmt.Errorf("json: integer %d overflows %s", u, v.Type())
 		}
 		v.SetUint(u)
 		return nil
@@ -1101,18 +1130,6 @@ func (d *decoder) value(v reflect.Value) error {
 		return nil
 
 	case reflect.Slice:
-		if v.Type().Elem().Kind() == reflect.Uint8 {
-			s, err := d.parseString()
-			if err != nil {
-				return err
-			}
-			b, err := base64.StdEncoding.DecodeString(s)
-			if err != nil {
-				return err
-			}
-			v.Set(reflect.ValueOf(b))
-			return nil
-		}
 
 		if d.data[d.idx] != '[' {
 			return fmt.Errorf("json: expected array for slice at offset %d", d.idx)
@@ -1167,6 +1184,9 @@ func (d *decoder) value(v reflect.Value) error {
 			}
 			if d.data[d.idx] == ']' {
 				d.idx++
+				if i != n {
+					return fmt.Errorf("json: fixed array requires %d elements, got %d", n, i)
+				}
 				return nil
 			}
 
@@ -1176,9 +1196,7 @@ func (d *decoder) value(v reflect.Value) error {
 				}
 				i++
 			} else {
-				if err := d.skipValue(); err != nil {
-					return err
-				}
+				return fmt.Errorf("json: fixed array requires %d elements, got more", n)
 			}
 
 			d.skipSpace()
@@ -1191,6 +1209,9 @@ func (d *decoder) value(v reflect.Value) error {
 			}
 			if d.data[d.idx] == ']' {
 				d.idx++
+				if i != n {
+					return fmt.Errorf("json: fixed array requires %d elements, got %d", n, i)
+				}
 				return nil
 			}
 			return fmt.Errorf("json: expected comma or end of array at offset %d", d.idx)
@@ -1296,6 +1317,8 @@ func (d *decoder) value(v reflect.Value) error {
 			fieldsMap[f.name] = f
 		}
 
+		seen := make(map[string]bool)
+
 		var catchAllMap reflect.Value
 
 		for {
@@ -1305,7 +1328,7 @@ func (d *decoder) value(v reflect.Value) error {
 			}
 			if d.data[d.idx] == '}' {
 				d.idx++
-				return nil
+				return sFields.validatePresence(v, seen)
 			}
 
 			if d.data[d.idx] != '"' {
@@ -1326,7 +1349,7 @@ func (d *decoder) value(v reflect.Value) error {
 			if !ok {
 				lowerKey := strings.ToLower(key)
 				for _, fd := range sFields.list {
-					if strings.ToLower(fd.name) == lowerKey {
+					if !fd.required && strings.ToLower(fd.name) == lowerKey {
 						f = fd
 						ok = true
 						break
@@ -1335,6 +1358,7 @@ func (d *decoder) value(v reflect.Value) error {
 			}
 
 			if ok {
+				seen[f.name] = true
 				fVal := v
 				for _, idx := range f.index {
 					if fVal.Kind() == reflect.Ptr {
@@ -1349,14 +1373,8 @@ func (d *decoder) value(v reflect.Value) error {
 					fVal = fVal.Field(idx)
 				}
 
-				// Check if the next token is null first
 				d.skipSpace()
-				if d.idx+4 <= len(d.data) && string(d.data[d.idx:d.idx+4]) == "null" {
-					d.idx += 4
-					if fVal.CanSet() {
-						fVal.Set(reflect.Zero(fVal.Type()))
-					}
-				} else if f.asString {
+				if f.asString && !(d.idx+4 <= len(d.data) && string(d.data[d.idx:d.idx+4]) == "null") {
 					s, err := d.parseString()
 					if err != nil {
 						return err
@@ -1435,7 +1453,7 @@ func (d *decoder) value(v reflect.Value) error {
 			}
 			if d.data[d.idx] == '}' {
 				d.idx++
-				return nil
+				return sFields.validatePresence(v, seen)
 			}
 			return fmt.Errorf("json: expected comma or end of object at offset %d", d.idx)
 		}
@@ -1660,12 +1678,7 @@ func (d *decoder) parseInt() (int64, error) {
 	numStr := string(d.data[start:d.idx])
 	if d.idx < len(d.data) &&
 		(d.data[d.idx] == '.' || d.data[d.idx] == 'e' || d.data[d.idx] == 'E') {
-		d.idx = start
-		f, err := d.parseFloat()
-		if err != nil {
-			return 0, err
-		}
-		return int64(f), nil
+		return 0, fmt.Errorf("json: expected integer at offset %d", start)
 	}
 	i, err := strconv.ParseInt(numStr, 10, 64)
 	if err != nil {
@@ -1686,12 +1699,7 @@ func (d *decoder) parseUint() (uint64, error) {
 	numStr := string(d.data[start:d.idx])
 	if d.idx < len(d.data) &&
 		(d.data[d.idx] == '.' || d.data[d.idx] == 'e' || d.data[d.idx] == 'E') {
-		d.idx = start
-		f, err := d.parseFloat()
-		if err != nil {
-			return 0, err
-		}
-		return uint64(f), nil
+		return 0, fmt.Errorf("json: expected integer at offset %d", start)
 	}
 	u, err := strconv.ParseUint(numStr, 10, 64)
 	if err != nil {
@@ -1736,7 +1744,11 @@ func (d *decoder) parseString() (string, error) {
 		c := d.data[d.idx]
 		if c == '"' {
 			d.idx++
-			return sb.String(), nil
+			text := sb.String()
+			if !utf8.ValidString(text) {
+				return "", fmt.Errorf("json: invalid UTF-8 string")
+			}
+			return text, nil
 		}
 		if c == '\\' {
 			if d.idx+1 >= len(d.data) {
@@ -1745,7 +1757,7 @@ func (d *decoder) parseString() (string, error) {
 			escaped := d.data[d.idx+1]
 			d.idx += 2
 			switch escaped {
-			case '"', '\\', '/', '\'':
+			case '"', '\\', '/':
 				sb.WriteByte(escaped)
 			case 'b':
 				sb.WriteByte('\b')
@@ -1767,11 +1779,26 @@ func (d *decoder) parseString() (string, error) {
 				if err != nil {
 					return "", fmt.Errorf("json: invalid unicode escape %q", hexStr)
 				}
-				sb.WriteRune(rune(r))
+				if utf16.IsSurrogate(rune(r)) {
+					if r < 0xD800 || r > 0xDBFF || d.idx+6 > len(d.data) || string(d.data[d.idx:d.idx+2]) != "\\u" {
+						return "", fmt.Errorf("json: unpaired Unicode surrogate")
+					}
+					low, err := strconv.ParseUint(string(d.data[d.idx+2:d.idx+6]), 16, 16)
+					if err != nil || low < 0xDC00 || low > 0xDFFF {
+						return "", fmt.Errorf("json: unpaired Unicode surrogate")
+					}
+					d.idx += 6
+					sb.WriteRune(utf16.DecodeRune(rune(r), rune(low)))
+				} else {
+					sb.WriteRune(rune(r))
+				}
 			default:
 				return "", fmt.Errorf("json: invalid escape sequence \\%c", escaped)
 			}
 		} else {
+			if c < 0x20 {
+				return "", fmt.Errorf("json: unescaped control character in string")
+			}
 			sb.WriteByte(c)
 			d.idx++
 		}

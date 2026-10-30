@@ -258,6 +258,11 @@ export function serialize(value: any, schema: XidlSchema): any {
   if (defTypeOf(unwrapped) === 'record') {
     return transformRecordValues(value, unwrapped, serialize);
   }
+  if (defTypeOf(unwrapped) === 'union') {
+    for (const option of defOf(unwrapped).options) {
+      if (option.safeParse(value).success) return serialize(value, option);
+    }
+  }
 
   return value;
 }
@@ -342,6 +347,20 @@ export function deserialize(value: any, schema: XidlSchema): any {
   }
   if (defTypeOf(unwrapped) === 'record') {
     return transformRecordValues(value, unwrapped, deserialize);
+  }
+  if (defTypeOf(unwrapped) === 'union') {
+    let failure: unknown;
+    for (const option of defOf(unwrapped).options) {
+      try {
+        const candidate = deserialize(value, option);
+        const parsed = option.safeParse(candidate);
+        if (parsed.success) return candidate;
+        failure = parsed.error;
+      } catch (error) {
+        failure = error;
+      }
+    }
+    throw failure;
   }
 
   return value;

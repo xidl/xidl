@@ -2,9 +2,7 @@ package xidlgohttp
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	json "github.com/xidl/xidl/golang/xidl-go-codec"
 	"io"
 )
 
@@ -18,12 +16,6 @@ const (
 	StreamInterrupted StreamOutcome = "Interrupted"
 )
 
-// StreamFailure reuses an operation's HTTP exception status and JSON body.
-type StreamFailure struct {
-	Status int             `json:"status" xjson:"status"`
-	Body   json.RawMessage `json:"body" xjson:"body"`
-}
-
 // StreamInterruptedError distinguishes truncation from a complete frame.
 type StreamInterruptedError struct{ Cause error }
 
@@ -34,40 +26,15 @@ func (e *StreamInterruptedError) Unwrap() error { return e.Cause }
 
 // StreamFrame carries an explicit data field, including zero, false and null.
 type StreamFrame[T any] struct {
-	Type  string         `json:"t" xjson:"t"`
-	Seq   uint64         `json:"seq,omitempty" xjson:"seq,omitempty"`
-	Data  T              `json:"data" xjson:"data"`
-	Error *StreamFailure `json:"error,omitempty" xjson:"error,omitempty"`
+	Type  string       `json:"t" xjson:"t"`
+	Seq   uint64       `json:"seq,omitempty" xjson:"seq,omitempty"`
+	Data  T            `json:"data" xjson:"data"`
+	Error *HTTPFailure `json:"error,omitempty" xjson:"error,omitempty"`
 }
 
 type ServerStreamWriter[T any] interface {
 	Write(T) error
 	Close() error
-}
-
-func EncodeStreamError(err error) StreamFailure {
-	status := 500
-	var httpError *HttpError
-	if errors.As(err, &httpError) {
-		status = httpError.Status
-	}
-	body, marshalErr := json.Marshal(map[string]any{"code": status, "msg": err.Error()})
-	if marshalErr != nil {
-		body = []byte(`{"code":500,"msg":"stream error encoding failed"}`)
-		status = 500
-	}
-	return StreamFailure{Status: status, Body: body}
-}
-
-func DecodeStreamError(failure StreamFailure) error {
-	var body struct {
-		Code    int    `json:"code"`
-		Message string `json:"msg"`
-	}
-	if json.Unmarshal(failure.Body, &body) == nil && body.Message != "" {
-		return &HttpError{Status: failure.Status, Code: body.Code, Message: body.Message}
-	}
-	return NewHttpError(failure.Status, "undeclared stream exception: "+string(failure.Body))
 }
 
 type ClientStreamReader[T any] struct {

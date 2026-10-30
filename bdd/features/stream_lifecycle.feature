@@ -10,6 +10,7 @@ Feature: Structured streams retain terminal outcomes and declared business error
     Then the generated <language> code should be valid
     And I can run the generated <language> server using boilerplate
     And I can run hurl tests against the server
+    And every Hurl response matches its generated OpenAPI contract
     And generated stream SDKs preserve terminal business outcomes for "<language>"
 
     Examples:

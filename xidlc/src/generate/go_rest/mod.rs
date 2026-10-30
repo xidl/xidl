@@ -190,6 +190,7 @@ pub(crate) struct ParamMeta {
     pub(crate) wire_name: String,
     pub(crate) ty: String,
     pub(crate) optional: bool,
+    pub(crate) requires_presence: bool,
     pub(crate) source: ParamSource,
 }
 
@@ -220,7 +221,7 @@ pub(crate) struct MethodMeta {
     pub(crate) response_header_params: Vec<ParamMeta>,
     pub(crate) response_cookie_params: Vec<ParamMeta>,
     pub(crate) return_ty: Option<String>,
-    pub(crate) stream_exceptions: Vec<interface::StreamExceptionContext>,
+    pub(crate) exceptions: Vec<interface::ExceptionContext>,
     pub(crate) stream_kind: Option<xidl_parser::rest_hir::semantics::HttpStreamKind>,
     pub(crate) is_websocket: bool,
     pub(crate) websocket_subprotocol: Option<String>,
@@ -242,8 +243,8 @@ pub(crate) struct GoRestRenderBlocks {
     server: Vec<String>,
     client: Vec<String>,
     shared: Vec<String>,
-    stream_raises: bool,
-    stream_error_body: bool,
+    has_exceptions: bool,
+    has_exception_body: bool,
 }
 
 impl GoRestRenderBlocks {
@@ -251,8 +252,8 @@ impl GoRestRenderBlocks {
         self.server.extend(other.server);
         self.client.extend(other.client);
         self.shared.extend(other.shared);
-        self.stream_raises |= other.stream_raises;
-        self.stream_error_body |= other.stream_error_body;
+        self.has_exceptions |= other.has_exceptions;
+        self.has_exception_body |= other.has_exception_body;
     }
 
     pub(crate) fn push_server(&mut self, block: String) {

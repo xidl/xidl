@@ -5,7 +5,7 @@
     {%- elif ty.kind == "Map" -%}Record<string, {{ render_type(ty.data) }}>
     {%- elif ty.kind == "Template" -%}{{ ty.data.ident }}<{% for arg in ty.data.args %}{{ render_type(arg) }}{% if not loop.last %}, {% endif %}{% endfor %}>
     {%- elif ty.kind == "InlineStruct" -%}{ {% for field in ty.data %}{{ field.prop }}{% if field.optional %}?{% endif %}: {{ render_type(field.ty) }}{% if not loop.last %}, {% endif %}{% endfor %} }
-    {%- elif ty.kind == "InlineEnum" -%}{% for member in ty.data %}"{{ member }}"{% if not loop.last %} | {% endif %}{% endfor %}
+    {%- elif ty.kind == "InlineEnum" -%}{% for member in ty.data %}{{ member | tojson }}{% if not loop.last %} | {% endif %}{% endfor %}
     {%- elif ty.kind == "Union" -%}{% for variant in ty.data %}{{ render_type(variant) }}{% if not loop.last %} | {% endif %}{% endfor %}
     {%- elif ty.kind == "Any" -%}any
     {%- elif ty.kind == "Void" -%}void
@@ -17,6 +17,8 @@
 
 {% macro render_zod(schema) -%}
     {%- if schema.kind == "Primitive" -%}z.{{ schema.data }}
+    {%- elif schema.kind == "Character" -%}z.string().regex(/^[^\uD800-\uDFFF](?![\s\S])/u)
+    {%- elif schema.kind == "Integer" -%}{% if schema.data.coerce %}z.union([z.number(), z.string().regex(/{% if schema.data.unsigned %}^[+]?[0-9]+{% else %}^[+-]?[0-9]+{% endif %}(?![\s\S])/).transform(Number)]).pipe({% endif %}z.number().min({{ schema.data.minimum }}).{% if schema.data.maximum_exclusive %}lt{% else %}max{% endif %}({{ schema.data.maximum }}).refine(Number.isInteger, "expected an integer"){% if schema.data.coerce %}){% endif %}
     {%- elif schema.kind == "Raw" -%}{{ schema.data }}
     {%- elif schema.kind == "CoercedNumber" -%}z.union([z.number(), z.string().regex(/{% if schema.data.integer %}{% if schema.data.unsigned %}^[+]?[0-9]+{% else %}^[+-]?[0-9]+{% endif %}{% else %}^[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?{% endif %}(?![\s\S])/).transform(Number)]).pipe(z.number(){% if schema.data.integer %}.int(){% endif %}{% if schema.data.unsigned %}.nonnegative(){% endif %})
     {%- elif schema.kind == "ScopedName" -%}{{ schema.data }}
@@ -24,7 +26,7 @@
     {%- elif schema.kind == "Array" -%}z.array({{ render_zod(schema.data.element) }}){% if schema.data.length is not none %}.length({{ schema.data.length }}){% endif %}{% if schema.data.maximum is not none %}.max({{ schema.data.maximum }}){% endif %}
     {%- elif schema.kind == "Record" -%}z.record(z.string(), {{ render_zod(schema.data.value) }}){% if schema.data.maximum is not none %}.refine((value) => Object.keys(value).length <= {{ schema.data.maximum }}, "map maximum length exceeded"){% endif %}
     {%- elif schema.kind == "Object" -%}z.object({ {% for field in schema.data %}{{ field.prop }}: {{ render_field_zod(field) }}{% if not loop.last %}, {% endif %}{% endfor %} })
-    {%- elif schema.kind == "Enum" -%}z.enum([{% for value in schema.data %}"{{ value }}"{% if not loop.last %}, {% endif %}{% endfor %}])
+    {%- elif schema.kind == "Enum" -%}z.enum([{% for value in schema.data %}{{ value | tojson }}{% if not loop.last %}, {% endif %}{% endfor %}])
     {%- elif schema.kind == "Union" -%}{% if schema.data | length == 1 %}{{ render_zod(schema.data[0]) }}{% else %}z.union([{% for variant in schema.data %}{{ render_zod(variant) }}{% if not loop.last %}, {% endif %}{% endfor %}]){% endif %}
     {%- elif schema.kind == "Custom" -%}z.custom<{{ render_type(schema.data) }}>()
     {%- elif schema.kind == "Optional" -%}{{ render_zod(schema.data) }}.optional()

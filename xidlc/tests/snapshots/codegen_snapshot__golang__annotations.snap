@@ -11,6 +11,8 @@ package annotations
 
 import (
 	"context"
+	"fmt"
+	"github.com/xidl/xidl/golang/xidl-go-codec"
 )
 
 type User struct {
@@ -31,6 +33,38 @@ const (
 	ColorGreen Color = "Green"
 	ColorBlue Color = "Blue"
 )
+
+
+
+// MarshalText validates the enum's published wire value.
+func (value Color) MarshalText() ([]byte, error) {
+    switch string(value) {
+    case "RED", "Green", "Blue":
+        return []byte(value), nil
+    default:
+        return nil, fmt.Errorf("enum Color has an invalid value %q", value)
+    }
+}
+
+// UnmarshalText accepts only values declared by the IDL enum.
+func (value *Color) UnmarshalText(data []byte) error {
+    decoded := Color(data)
+    if _, err := decoded.MarshalText(); err != nil { return err }
+    *value = decoded
+    return nil
+}
+
+func (value Color) MarshalJSON() ([]byte, error) {
+    text, err := value.MarshalText()
+    if err != nil { return nil, err }
+    return json.Marshal(string(text))
+}
+
+func (value *Color) UnmarshalJSON(data []byte) error {
+    var text string
+    if err := json.Unmarshal(data, &text); err != nil { return err }
+    return value.UnmarshalText([]byte(text))
+}
 
 type ApiDoSomethingRequest struct {
 	Value string `xjson:"val"`

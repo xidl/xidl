@@ -64,25 +64,25 @@ export type BatchesReserveRequest = z.infer<typeof BatchesReserveRequestSchema>;
 
     
 export const BatchesRejectedRequestSchema = z.object({
-        fault: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
+        fault: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")),
     });
 export type BatchesRejectedRequest = z.infer<typeof BatchesRejectedRequestSchema>;
 
     
 export const BatchesQueryRequestSchema = z.object({
-        values: z.array(z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int())).max(2),
+        values: z.array(z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"))).max(2),
     });
 export type BatchesQueryRequest = z.infer<typeof BatchesQueryRequestSchema>;
 
     
 export const BatchesHeadersRequestSchema = z.object({
-        values: z.array(z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int())).max(2),
+        values: z.array(z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"))).max(2),
     });
 export type BatchesHeadersRequest = z.infer<typeof BatchesHeadersRequestSchema>;
 
     
 export const BatchesCookiesRequestSchema = z.object({
-        values: z.array(z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int())).max(2),
+        values: z.array(z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"))).max(2),
     });
 export type BatchesCookiesRequest = z.infer<typeof BatchesCookiesRequestSchema>;
 
@@ -1065,7 +1065,7 @@ import * as $xidl_root from "./bounded_sequences.zod";
 
     export namespace billing {
 
-        export const InvoiceIdsSchema = z.array(z.number().int()).max(2);
+        export const InvoiceIdsSchema = z.array(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")).max(2);
 
         export const RegionsSchema = z.record(z.string(), InvoiceIdsSchema).refine((value) => Object.keys(value).length <= 2, "map maximum length exceeded");
 
@@ -1073,7 +1073,7 @@ import * as $xidl_root from "./bounded_sequences.zod";
 
         export const TotalSchema = z.object({
             
-                count: z.number().int()
+                count: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")
             
         });
     export const RegionSchema = z.enum(["eu", "us"]);
@@ -1112,5 +1112,5 @@ import * as $xidl_root from "./bounded_sequences.zod";
             
         });
 
-        export const ExportSchema = z.union([z.object({ ids: InvoiceIdsSchema }), z.object({ bytes: z.array(z.number().int().nonnegative()).max(2) })]);
+        export const ExportSchema = z.union([z.object({ ids: InvoiceIdsSchema }), z.object({ bytes: z.array(z.number().min(0).max(255).refine(Number.isInteger, "expected an integer")).max(2) })]);
 }

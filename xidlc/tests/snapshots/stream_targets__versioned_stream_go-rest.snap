@@ -54,7 +54,16 @@ func RegisterV1BillingExportsHandler(r gin.IRouter, svc V1BillingExportsService)
 		resp, err := svc.ImportRows(c.Request.Context(), stream)
 		if err != nil {
 			failure := encodeV1BillingExportsImportRowsFailure(err)
-			c.Data(failure.Status, "application/json", failure.Body)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
+			} else {
+				c.Data(failure.Status, "application/json", failure.Body)
+			}
 			return
 		}
 
@@ -88,7 +97,16 @@ func RegisterV2BillingExportsHandler(r gin.IRouter, svc V2BillingExportsService)
 		resp, err := svc.ImportRows(c.Request.Context(), stream)
 		if err != nil {
 			failure := encodeV2BillingExportsImportRowsFailure(err)
-			c.Data(failure.Status, "application/json", failure.Body)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
+			} else {
+				c.Data(failure.Status, "application/json", failure.Body)
+			}
 			return
 		}
 
@@ -127,7 +145,7 @@ func (c *V1BillingExportsClient) Rows(ctx context.Context, req *V1BillingExports
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		defer resp.Body.Close()
-		return nil, xidlgohttp.DecodeStreamHTTPError(resp, decodeV1BillingExportsRowsFailure)
+		return nil, xidlgohttp.ReadHTTPError(resp, decodeV1BillingExportsRowsFailure)
 	}
 	return xidlgohttp.NewSSEStreamReader[string](resp.Body).WithContext(ctx).WithErrorDecoder(decodeV1BillingExportsRowsFailure), nil
 }
@@ -143,7 +161,7 @@ func (c *V1BillingExportsClient) ImportRows(ctx context.Context) (*xidlgohttp.Cl
 	stream := xidlgohttp.NewClientStreamWriter[V1BillingExportsImportRowsRequest, V1BillingExportsImportRowsResponse](ctx, c.httpClient, httpReq, func(resp *http.Response) (V1BillingExportsImportRowsResponse, error) {
 		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 			var zero V1BillingExportsImportRowsResponse
-			return zero, xidlgohttp.DecodeStreamHTTPError(resp, decodeV1BillingExportsImportRowsFailure)
+			return zero, xidlgohttp.ReadHTTPError(resp, decodeV1BillingExportsImportRowsFailure)
 		}
 		decoded, err := decodeV1BillingExportsImportRowsResponse(resp)
 		return decoded, err
@@ -180,7 +198,7 @@ func (c *V2BillingExportsClient) Rows(ctx context.Context, req *V2BillingExports
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		defer resp.Body.Close()
-		return nil, xidlgohttp.DecodeStreamHTTPError(resp, decodeV2BillingExportsRowsFailure)
+		return nil, xidlgohttp.ReadHTTPError(resp, decodeV2BillingExportsRowsFailure)
 	}
 	return xidlgohttp.NewSSEStreamReader[string](resp.Body).WithContext(ctx).WithErrorDecoder(decodeV2BillingExportsRowsFailure), nil
 }
@@ -196,7 +214,7 @@ func (c *V2BillingExportsClient) ImportRows(ctx context.Context) (*xidlgohttp.Cl
 	stream := xidlgohttp.NewClientStreamWriter[V2BillingExportsImportRowsRequest, V2BillingExportsImportRowsResponse](ctx, c.httpClient, httpReq, func(resp *http.Response) (V2BillingExportsImportRowsResponse, error) {
 		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 			var zero V2BillingExportsImportRowsResponse
-			return zero, xidlgohttp.DecodeStreamHTTPError(resp, decodeV2BillingExportsImportRowsFailure)
+			return zero, xidlgohttp.ReadHTTPError(resp, decodeV2BillingExportsImportRowsFailure)
 		}
 		decoded, err := decodeV2BillingExportsImportRowsResponse(resp)
 		return decoded, err
@@ -229,41 +247,50 @@ func decodeV1BillingExportsRowsResponse(resp *http.Response) (V1BillingExportsRo
 	out := V1BillingExportsRowsResponse{}
 	return out, nil
 }
-func encodeV1BillingExportsRowsFailure(err error) xidlgohttp.StreamFailure {
+
+func encodeV1BillingExportsRowsFailure(err error) xidlgohttp.HTTPFailure {
 
 	var ex1 *V1BillingConflict
 	if errors.As(err, &ex1) {
-		body, encodingError := json.Marshal(ex1)
-		if encodingError != nil {
-			return xidlgohttp.EncodeStreamError(fmt.Errorf("V1BillingExportsRows exception encoding: %w", encodingError))
-		}
-		return xidlgohttp.StreamFailure{Status: 409, Body: body}
+		exception := ex1
+		failure := xidlgohttp.HTTPFailure{Status: 409, Headers: make(http.Header)}
 
+		body, encodingError := json.Marshal(struct {
+			Reason string `xjson:"reason"`
+		}{
+			Reason: exception.Reason,
+		})
+		if encodingError != nil {
+			return xidlgohttp.EncodeHTTPError(fmt.Errorf("V1BillingExportsRows exception encoding: %w", encodingError))
+		}
+		failure.Body = body
+
+		return failure
 	}
 
-	return xidlgohttp.EncodeStreamError(err)
+	return xidlgohttp.EncodeHTTPError(err)
 }
 
-func decodeV1BillingExportsRowsFailure(failure xidlgohttp.StreamFailure) error {
+func decodeV1BillingExportsRowsFailure(failure xidlgohttp.HTTPFailure) error {
 
 	if failure.Status == 409 {
 		var exception V1BillingConflict
 
-		var fields map[string]json.RawMessage
-		if err := json.Unmarshal(failure.Body, &fields); err != nil || fields == nil {
-			return xidlgohttp.DecodeStreamError(failure)
+		var body struct {
+			Reason string `xjson:"reason"`
 		}
-		if value, ok := fields["reason"]; !ok || string(value) == "null" {
-			return xidlgohttp.DecodeStreamError(failure)
+		if err := json.Unmarshal(failure.Body, &body); err != nil {
+			return xidlgohttp.DecodeHTTPError(failure)
 		}
-		if err := json.Unmarshal(failure.Body, &exception); err != nil {
-			return xidlgohttp.DecodeStreamError(failure)
-		}
+		exception.Reason = body.Reason
 
+		if failure.Headers != nil {
+
+		}
 		return &exception
 	}
 
-	return xidlgohttp.DecodeStreamError(failure)
+	return xidlgohttp.DecodeHTTPError(failure)
 }
 
 type V1BillingExportsImportRowsRequest struct {
@@ -297,41 +324,50 @@ func decodeV1BillingExportsImportRowsResponse(resp *http.Response) (V1BillingExp
 	out.Return = body
 	return out, nil
 }
-func encodeV1BillingExportsImportRowsFailure(err error) xidlgohttp.StreamFailure {
+
+func encodeV1BillingExportsImportRowsFailure(err error) xidlgohttp.HTTPFailure {
 
 	var ex1 *V1BillingConflict
 	if errors.As(err, &ex1) {
-		body, encodingError := json.Marshal(ex1)
-		if encodingError != nil {
-			return xidlgohttp.EncodeStreamError(fmt.Errorf("V1BillingExportsImportRows exception encoding: %w", encodingError))
-		}
-		return xidlgohttp.StreamFailure{Status: 409, Body: body}
+		exception := ex1
+		failure := xidlgohttp.HTTPFailure{Status: 409, Headers: make(http.Header)}
 
+		body, encodingError := json.Marshal(struct {
+			Reason string `xjson:"reason"`
+		}{
+			Reason: exception.Reason,
+		})
+		if encodingError != nil {
+			return xidlgohttp.EncodeHTTPError(fmt.Errorf("V1BillingExportsImportRows exception encoding: %w", encodingError))
+		}
+		failure.Body = body
+
+		return failure
 	}
 
-	return xidlgohttp.EncodeStreamError(err)
+	return xidlgohttp.EncodeHTTPError(err)
 }
 
-func decodeV1BillingExportsImportRowsFailure(failure xidlgohttp.StreamFailure) error {
+func decodeV1BillingExportsImportRowsFailure(failure xidlgohttp.HTTPFailure) error {
 
 	if failure.Status == 409 {
 		var exception V1BillingConflict
 
-		var fields map[string]json.RawMessage
-		if err := json.Unmarshal(failure.Body, &fields); err != nil || fields == nil {
-			return xidlgohttp.DecodeStreamError(failure)
+		var body struct {
+			Reason string `xjson:"reason"`
 		}
-		if value, ok := fields["reason"]; !ok || string(value) == "null" {
-			return xidlgohttp.DecodeStreamError(failure)
+		if err := json.Unmarshal(failure.Body, &body); err != nil {
+			return xidlgohttp.DecodeHTTPError(failure)
 		}
-		if err := json.Unmarshal(failure.Body, &exception); err != nil {
-			return xidlgohttp.DecodeStreamError(failure)
-		}
+		exception.Reason = body.Reason
 
+		if failure.Headers != nil {
+
+		}
 		return &exception
 	}
 
-	return xidlgohttp.DecodeStreamError(failure)
+	return xidlgohttp.DecodeHTTPError(failure)
 }
 
 type V2BillingExportsRowsRequest struct {
@@ -359,53 +395,67 @@ func decodeV2BillingExportsRowsResponse(resp *http.Response) (V2BillingExportsRo
 	out := V2BillingExportsRowsResponse{}
 	return out, nil
 }
-func encodeV2BillingExportsRowsFailure(err error) xidlgohttp.StreamFailure {
+
+func encodeV2BillingExportsRowsFailure(err error) xidlgohttp.HTTPFailure {
 
 	var ex1 *V2BillingConflict
 	if errors.As(err, &ex1) {
-		body, encodingError := json.Marshal(ex1)
-		if encodingError != nil {
-			return xidlgohttp.EncodeStreamError(fmt.Errorf("V2BillingExportsRows exception encoding: %w", encodingError))
-		}
-		return xidlgohttp.StreamFailure{Status: 409, Body: body}
+		exception := ex1
+		failure := xidlgohttp.HTTPFailure{Status: 409, Headers: make(http.Header)}
 
+		body, encodingError := json.Marshal(struct {
+			Reason string `xjson:"reason"`
+		}{
+			Reason: exception.Reason,
+		})
+		if encodingError != nil {
+			return xidlgohttp.EncodeHTTPError(fmt.Errorf("V2BillingExportsRows exception encoding: %w", encodingError))
+		}
+		failure.Body = body
+
+		return failure
 	}
 
 	var ex2 *V2BillingRetired
 	if errors.As(err, &ex2) {
-		return xidlgohttp.StreamFailure{Status: 410}
 
+		failure := xidlgohttp.HTTPFailure{Status: 410, Headers: make(http.Header)}
+
+		return failure
 	}
 
-	return xidlgohttp.EncodeStreamError(err)
+	return xidlgohttp.EncodeHTTPError(err)
 }
 
-func decodeV2BillingExportsRowsFailure(failure xidlgohttp.StreamFailure) error {
+func decodeV2BillingExportsRowsFailure(failure xidlgohttp.HTTPFailure) error {
 
 	if failure.Status == 409 {
 		var exception V2BillingConflict
 
-		var fields map[string]json.RawMessage
-		if err := json.Unmarshal(failure.Body, &fields); err != nil || fields == nil {
-			return xidlgohttp.DecodeStreamError(failure)
+		var body struct {
+			Reason string `xjson:"reason"`
 		}
-		if value, ok := fields["reason"]; !ok || string(value) == "null" {
-			return xidlgohttp.DecodeStreamError(failure)
+		if err := json.Unmarshal(failure.Body, &body); err != nil {
+			return xidlgohttp.DecodeHTTPError(failure)
 		}
-		if err := json.Unmarshal(failure.Body, &exception); err != nil {
-			return xidlgohttp.DecodeStreamError(failure)
-		}
+		exception.Reason = body.Reason
 
+		if failure.Headers != nil {
+
+		}
 		return &exception
 	}
 
 	if failure.Status == 410 {
 		var exception V2BillingRetired
 
+		if failure.Headers != nil {
+
+		}
 		return &exception
 	}
 
-	return xidlgohttp.DecodeStreamError(failure)
+	return xidlgohttp.DecodeHTTPError(failure)
 }
 
 type V2BillingExportsImportRowsRequest struct {
@@ -439,41 +489,50 @@ func decodeV2BillingExportsImportRowsResponse(resp *http.Response) (V2BillingExp
 	out.Return = body
 	return out, nil
 }
-func encodeV2BillingExportsImportRowsFailure(err error) xidlgohttp.StreamFailure {
+
+func encodeV2BillingExportsImportRowsFailure(err error) xidlgohttp.HTTPFailure {
 
 	var ex1 *V2BillingConflict
 	if errors.As(err, &ex1) {
-		body, encodingError := json.Marshal(ex1)
-		if encodingError != nil {
-			return xidlgohttp.EncodeStreamError(fmt.Errorf("V2BillingExportsImportRows exception encoding: %w", encodingError))
-		}
-		return xidlgohttp.StreamFailure{Status: 409, Body: body}
+		exception := ex1
+		failure := xidlgohttp.HTTPFailure{Status: 409, Headers: make(http.Header)}
 
+		body, encodingError := json.Marshal(struct {
+			Reason string `xjson:"reason"`
+		}{
+			Reason: exception.Reason,
+		})
+		if encodingError != nil {
+			return xidlgohttp.EncodeHTTPError(fmt.Errorf("V2BillingExportsImportRows exception encoding: %w", encodingError))
+		}
+		failure.Body = body
+
+		return failure
 	}
 
-	return xidlgohttp.EncodeStreamError(err)
+	return xidlgohttp.EncodeHTTPError(err)
 }
 
-func decodeV2BillingExportsImportRowsFailure(failure xidlgohttp.StreamFailure) error {
+func decodeV2BillingExportsImportRowsFailure(failure xidlgohttp.HTTPFailure) error {
 
 	if failure.Status == 409 {
 		var exception V2BillingConflict
 
-		var fields map[string]json.RawMessage
-		if err := json.Unmarshal(failure.Body, &fields); err != nil || fields == nil {
-			return xidlgohttp.DecodeStreamError(failure)
+		var body struct {
+			Reason string `xjson:"reason"`
 		}
-		if value, ok := fields["reason"]; !ok || string(value) == "null" {
-			return xidlgohttp.DecodeStreamError(failure)
+		if err := json.Unmarshal(failure.Body, &body); err != nil {
+			return xidlgohttp.DecodeHTTPError(failure)
 		}
-		if err := json.Unmarshal(failure.Body, &exception); err != nil {
-			return xidlgohttp.DecodeStreamError(failure)
-		}
+		exception.Reason = body.Reason
 
+		if failure.Headers != nil {
+
+		}
 		return &exception
 	}
 
-	return xidlgohttp.DecodeStreamError(failure)
+	return xidlgohttp.DecodeHTTPError(failure)
 }
 
 === stream_versions.go ===
@@ -481,12 +540,49 @@ func decodeV2BillingExportsImportRowsFailure(failure xidlgohttp.StreamFailure) e
 
 package stream_versions
 
+import (
+	"fmt"
+	"github.com/xidl/xidl/golang/xidl-go-codec"
+)
+
 type V1Version string
 
 const (
 	V1VersionV1 V1Version = "2026-01-01"
 	V1VersionV2 V1Version = "2026-07-01"
 )
+
+
+
+// MarshalText validates the enum's published wire value.
+func (value V1Version) MarshalText() ([]byte, error) {
+    switch string(value) {
+    case "2026-01-01", "2026-07-01":
+        return []byte(value), nil
+    default:
+        return nil, fmt.Errorf("enum V1Version has an invalid value %q", value)
+    }
+}
+
+// UnmarshalText accepts only values declared by the IDL enum.
+func (value *V1Version) UnmarshalText(data []byte) error {
+    decoded := V1Version(data)
+    if _, err := decoded.MarshalText(); err != nil { return err }
+    *value = decoded
+    return nil
+}
+
+func (value V1Version) MarshalJSON() ([]byte, error) {
+    text, err := value.MarshalText()
+    if err != nil { return nil, err }
+    return json.Marshal(string(text))
+}
+
+func (value *V1Version) UnmarshalJSON(data []byte) error {
+    var text string
+    if err := json.Unmarshal(data, &text); err != nil { return err }
+    return value.UnmarshalText([]byte(text))
+}
 
 type V1BillingConflict struct {
 	Reason string `xjson:"reason"`
@@ -502,6 +598,38 @@ const (
 	V2VersionV1 V2Version = "2026-01-01"
 	V2VersionV2 V2Version = "2026-07-01"
 )
+
+
+
+// MarshalText validates the enum's published wire value.
+func (value V2Version) MarshalText() ([]byte, error) {
+    switch string(value) {
+    case "2026-01-01", "2026-07-01":
+        return []byte(value), nil
+    default:
+        return nil, fmt.Errorf("enum V2Version has an invalid value %q", value)
+    }
+}
+
+// UnmarshalText accepts only values declared by the IDL enum.
+func (value *V2Version) UnmarshalText(data []byte) error {
+    decoded := V2Version(data)
+    if _, err := decoded.MarshalText(); err != nil { return err }
+    *value = decoded
+    return nil
+}
+
+func (value V2Version) MarshalJSON() ([]byte, error) {
+    text, err := value.MarshalText()
+    if err != nil { return nil, err }
+    return json.Marshal(string(text))
+}
+
+func (value *V2Version) UnmarshalJSON(data []byte) error {
+    var text string
+    if err := json.Unmarshal(data, &text); err != nil { return err }
+    return value.UnmarshalText([]byte(text))
+}
 
 type V2BillingConflict struct {
 	Reason string `xjson:"reason"`
