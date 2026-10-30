@@ -1,0 +1,40 @@
+---
+title: "Updates and patches"
+description: "Update flow with @patch and paired conversions"
+sidebar:
+  order: 8
+---
+
+An operation can take part in the update flow when a member is retired in a
+way that represents a replacement of a writable value rather than a loss.
+The chain uses explicit conversions between versions with application hooks.
+
+## TypeScript updates
+
+The generated TypeScript updates chain exposes upcast and downcast
+conversions per step. For a `@patch` or `@put` operation whose Head
+declaration returns one named struct and takes part in the update flow when one
+adjacent step removes the same wire member from both its request payload and
+its return type, the retirement is a replacement of a writable value:
+
+```ts
+parcelPatchUpcastFromV2: (source, current) =>
+  ok({
+    handling_note: a.IGNORED,
+    stored: { handling_note: source.handling_note },
+  }),
+```
+
+`decodeAndUpcast<Operation>` and `dispatch<Operation>` accept `current` as an
+explicit parameter; the update handler receives it together with the context
+and the bag, persists the bag members with its own storage, and returns the
+Head outcome together with the stored values its response downcast still
+reads. Because the request member and the return member share one wire name,
+a value written by an old caller reads back identically: write-then-read and
+read-then-unchanged-write are golden properties of the generated chain.
+
+The selection stays strict. Request chains must be operation-disjoint; two
+update operations may not share one request conversion. `current` never
+routes through alias or union conversions, and never reaches a paired
+conversion hidden inside a sequence, map, or optional member. Every one of
+these shapes is a generation error naming the offending declaration.

@@ -1,0 +1,41 @@
+---
+title: "API Versioning"
+description: "Declare an API history once and derive every version from it"
+sidebar:
+  order: 1
+---
+
+A versioned IDL describes **one** contract: the latest state of the API. The
+version history is declared next to it, and older versions are derived from
+annotations instead of copied files.
+
+```idl
+#pragma xidlc package petstore
+
+@version
+enum ApiVersions {
+    @rename("1.0") v1,
+    @rename("2.0") v2,
+};
+
+struct Pet {
+    string id;
+
+    // introduced in v2
+    @added(ApiVersions::v2)
+    @optional string note;
+
+    // deprecated at v2 and gone from then on
+    @removed(ApiVersions::v2)
+    string color;
+};
+
+interface Pets {
+    @get(path = "/pets/{id}")
+    Pet get(@path string id);
+
+    @removed(ApiVersions::v2)
+    @get(path = "/legacy")
+    string legacy();
+};
+```

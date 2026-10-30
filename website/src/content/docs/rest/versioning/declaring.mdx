@@ -1,0 +1,25 @@
+---
+title: "Declaring the history"
+description: "Define the API version timeline"
+sidebar:
+  order: 2
+---
+
+`@version` marks exactly one enum as the API version timeline. Its members are
+the versions, **in declaration order**; the last member is the version the
+source describes. Annotate a member with `@rename("...")` to give it a display
+value such as a date or a semantic version:
+
+```idl
+@version
+enum ApiVersions {
+    @rename("2025-01") v2025_01,
+    @rename("2025-06") v2025_06,
+    @rename("2026-01") v2026_01,
+};
+```
+
+The member name (`v2025_06`) is the stable machine name used in output paths
+and selection flags; the value (`2025-06`) is what versioned documents carry.
+Per-version documents ignore `#pragma xidlc version` and use the projected
+version value as `info.version`.
