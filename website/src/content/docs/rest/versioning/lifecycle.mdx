@@ -1,0 +1,43 @@
+---
+title: "Lifecycle annotations"
+description: "@added and @removed rules"
+sidebar:
+  order: 4
+---
+
+| Annotation | Meaning |
+| --- | --- |
+| `@added(Versions::vN)` | the declaration exists from that version onward |
+| `@removed(Versions::vN)` | the declaration is removed at that version |
+
+Both can appear on modules, type declarations (structs, unions, enums,
+exceptions, typedefs, bitsets, bitmasks), struct/union members, enumerators,
+bitmask values, interfaces, operations, operation parameters and interface
+attributes.
+
+Rules:
+
+- Annotation order never matters. `@added(v2) @removed(v3)` and
+  `@removed(v3) @added(v2)` describe the same interval.
+- Each declaration carries at most one `@added` and one `@removed`, and
+  `@added` must come strictly before `@removed`. Cycles such as
+  `@added(v2) @removed(v3) @added(v4)` are rejected; declare a second member
+  with a disjoint interval instead.
+- A child's interval must stay inside its parent's. A member added in v1 of a
+  struct added in v2 is an error.
+- A surviving declaration must not reference a type that the projected version
+  drops. Such a reference is reported with the declaration and the version.
+- `raises(...)` entries are the one filtered position. An exception set has no
+  annotation slot, so an operation raises a versioned exception only in the
+  versions that declare it: older projections drop the entry.
+- Root-qualified references (`::Models::Item`) keep pointing at the same
+  declaration: projection rewrites them relative to the version module, so they
+  resolve inside `module <version>` rather than at the file root.
+
+Unsupported versioning annotations (`@versioned`, `@renamedFrom`, `@replaces`,
+`@madeOptional`, `@madeRequired`, `@typeChangedFrom`,
+`@returnTypeChangedFrom`, `@defaultVersion`) are rejected with an explicit
+error instead of being silently ignored. These names do not imply planned
+support. Use `@rename("wire_name")` to select a serialized name; it does not
+describe a rename at a particular version. Changes between versions use the
+disjoint declarations described below.

@@ -1,0 +1,87 @@
+---
+title: "Rust adapters"
+description: "Version adapters in Rust"
+sidebar:
+  order: 9
+---
+
+The Rust target writes a separate artifact beside the ordinary Axum models:
+
+```sh
+xidlc gen --out-dir gen rust-axum --client --server api.idl
+xidlc gen --out-dir gen rust-axum-adapters api.idl
+```
+
+Include `api.rs` and `api.adapters.rs` in the same Rust module. Implement the
+mandatory `VersionAdapters` trait with pure hooks, then pass an explicitly
+resolved `Version` to `dispatch_<interface>_<operation>`. As in TypeScript, raw
+request envelopes use IDL parameter names and nested payloads use wire keys.
+The application owns parameter extraction, version resolution and routing.
+
+The decoder constructs the exact served model while checking its wire layout.
+Nested structs, flattened records, arrays, recursion and unions follow the same
+rules before any hook or handler runs. Numeric record keys use ordinary Serde
+map-key decoding; distinct wire keys that decode to the same key are rejected.
+An HTTP union constructs its strictly matching variant directly; ambiguous
+payloads are rejected instead of choosing a different variant and losing data.
+
+Conversions borrow their sources. `downcast_<interface>_<operation>_outcome`
+returns the original owned Head result on refusal, including composite responses
+and typed errors that do not implement `Clone`. The Head identity branch moves
+that result directly. `downcast_<type>` consumes its Head model so its identity
+branch also avoids a whole-value clone. Asynchronous dispatch accepts thread-safe
+hooks and can be awaited inside an Axum handler; it never retries the handler.
+
+Retired members follow the same explicit-decision rule as TypeScript: an upcast
+acknowledges them with `IGNORED`, and a downcast decision requires the field —
+an optional retired member reads the generated `StoredValues` trait or writes
+`None` explicitly, a required one needs a value or a refusal. Every retired
+member needs one reader method, so a member retired too early shows up as a
+missing method, not as lost data. `NEEDS` lists the wire names each served
+version still reads; Head reads nothing. Dispatch handlers return
+`HeadOutcome { outcome, stored }` so the chain receives the readers.
+
+In addition to the shared phase-one limits, Rust rejects skipped physical model
+fields or cases and ordinary unions with multiple or default discriminator
+labels. Their public model constructors do not expose a lossless construction
+contract. Ordinary `rust-axum` output remains byte-identical when generating
+adapters separately.
+
+## Update adapters
+
+A `@patch` or `@put` operation whose Head declaration returns one named struct
+takes part in the update flow when one adjacent step removes the same wire
+member from both its request payload and its return type. The retirement is
+then a replacement of a writable value, not a loss: the step's upcast
+conversions return the persisted member to the application instead of
+acknowledging it.
+
+Such conversions return an `Upcast` value that pairs the projected request
+with a `stored` bag holding every paired member collected along the chain.
+The bag is named after the operation (for example `DepotUpdateStored`) and
+merges across steps, so a multi-step chain hands the handler one complete
+bag. The decision hook of a paired conversion receives `current`, the Head
+return-type instance the application is about to patch, and its decision
+records both the acknowledgement (`IGNORED`) and the values to persist:
+
+```ts
+parcelPatchUpcastFromV2: (source, current) =>
+  ok({
+    handling_note: IGNORED,
+    stored: { handling_note: source.handling_note },
+  }),
+```
+
+`decodeAndUpcast<Operation>` and `dispatch<Operation>` accept `current` as an
+explicit parameter; the update handler receives it together with the context
+and the bag, persists the bag members with its own storage, and returns the
+Head outcome together with the stored values its response downcast still
+reads. Because the request member and the return member share one wire name,
+a value written by an old caller reads back identically: write-then-read and
+read-then-unchanged-write are golden properties of the generated chain.
+
+The selection stays strict. Request chains must be operation-disjoint; two
+update operations may not share one request conversion. `current` never
+routes through alias or union conversions, and never reaches a paired
+conversion hidden inside a sequence, map, or optional member. Every one of
+these shapes is a generation error naming the offending declaration.
