@@ -131,7 +131,7 @@ export type BatchesDownloadRequest = z.infer<typeof BatchesDownloadRequestSchema
 
 
 import type * as types from "./bounded_sequences";
-import { readResponseCookies, readResponseHeader } from "xidl-typescript-client";
+import { decodeXidlError, readResponseCookies, readResponseHeader } from "xidl-typescript-client";
 import * as $xidlErrors from "./bounded_sequences.errors";
 
 import type * as ifaceTypes from "./bounded_sequences.iface";
@@ -245,7 +245,7 @@ import {
                 headers.set("Accept", "application/json");
         const resp = await this.fetchImpl(url, { method: "GET", headers });
         if (!resp.ok) {
-            await this.throwRejectedError(resp);
+            await this.throwRejectedError(resp.status, await resp.json().catch(() => undefined), resp.headers);
             
         }
         const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
@@ -463,22 +463,21 @@ import {
     }
     
     
-        async throwRejectedError(resp: Response): Promise<never> {
-            const status = resp.status;
+        async throwRejectedError(status: number, rawBodyValue: unknown, headers: Headers = new Headers()): Promise<never> {
+            const rawBody = rawBodyValue as Record<string, unknown> | undefined;
             if (status === 409) {
                 const bodySchema = z.object({ "ids": ifaceSchemas.models.billing.InvoiceIdsSchema, "regions": z.record(z.string(), ifaceSchemas.models.billing.InvoiceIdsSchema).refine((value) => Object.keys(value).length <= 2, "map maximum length exceeded"),  });
-                const rawBody = await resp.clone().json().catch(() => undefined);
-                if (rawBody == null || rawBody["ids"] === undefined || rawBody["regions"] === undefined) throw await parseXidlError(resp);
+                if (rawBody == null || rawBody["ids"] === undefined || rawBody["regions"] === undefined) throw decodeXidlError(status, rawBody);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
-                if (!decoded.success) throw await parseXidlError(resp);
+                if (!decoded.success) throw decodeXidlError(status, rawBody);
                 const body = decoded.data;
                 const error = new $xidlErrors.BatchRejected({
-                    "retry": readResponseHeader(resp.headers, "retry", false) as never,
-                    "detail": readResponseHeader(resp.headers, "detail", false) as never,
-                    "tag": readResponseHeader(resp.headers, "tag", false, value => value) as never,
-                    "tokens": (readResponseCookies(resp.headers).get("tokens")?.[0]) as never,
-                    "state": (readResponseCookies(resp.headers, value => value).get("state")?.[0]) as never,
-                    "token": (readResponseCookies(resp.headers, value => value).get("token")?.[0]) as never,
+                    "retry": readResponseHeader(headers, "retry", false) as never,
+                    "detail": readResponseHeader(headers, "detail", false) as never,
+                    "tag": readResponseHeader(headers, "tag", false, value => value) as never,
+                    "tokens": (readResponseCookies(headers).get("tokens")?.[0]) as never,
+                    "state": (readResponseCookies(headers, value => value).get("state")?.[0]) as never,
+                    "token": (readResponseCookies(headers, value => value).get("token")?.[0]) as never,
                     "ids": body["ids"] as never,
                     "regions": body["regions"] as never,
                     });
@@ -497,7 +496,7 @@ import {
                 
                 throw error;
             }
-            throw await parseXidlError(resp);
+            throw decodeXidlError(status, rawBody);
         }
     
 }
@@ -507,6 +506,7 @@ import {
 
 
 import type * as types from "./bounded_sequences";
+import { serialize } from "xidl-typescript-codec";
 import * as $xidlErrors from "./bounded_sequences.errors";
 
 import type * as ifaceTypes from "./bounded_sequences.iface";
@@ -566,7 +566,6 @@ export const BatchesOperations = {
                     fields: [{ wireName: "batch", key: "batch" }],
                     singleKey: "batch",
                     schema: ifaceSchemas.models.billing.BatchSchema,
-                
             },
         },
         response: {
@@ -666,7 +665,7 @@ export const BatchesOperations = {
                             return {
                                 status: 409,
                                 headers,
-                                body: { "ids": error.ids, "regions": error.regions, },
+                                body: { "ids": serialize(error.ids, ifaceSchemas.models.billing.InvoiceIdsSchema), "regions": serialize(error.regions, z.record(z.string(), ifaceSchemas.models.billing.InvoiceIdsSchema).refine((value) => Object.keys(value).length <= 2, "map maximum length exceeded")), },
                             };
                             
                     }

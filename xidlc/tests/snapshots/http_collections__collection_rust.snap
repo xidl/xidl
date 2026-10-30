@@ -1388,7 +1388,7 @@ where
             .await
         {
             Ok(resp_value) => {
-                let mut resp = xidl_rust_axum::stream::sse_response(resp_value);
+                let mut resp = xidl_rust_axum::stream::sse_response(resp_value).await;
                 resp
             }
             Err(err) => {
@@ -2075,7 +2075,11 @@ impl CollectionInputsClient {
         }
         let auth_target = &self.client;
         let _ = auth_target;
-        xidl_rust_axum::stream::open_sse::<StreamValues>(self.client.http(), req).await
+        xidl_rust_axum::stream::open_sse::<
+            StreamValues,
+            xidl_rust_axum::Error,
+        >(self.client.http(), req)
+            .await
     }
 }
 #[allow(clippy::too_many_arguments, clippy::large_enum_variant)]
