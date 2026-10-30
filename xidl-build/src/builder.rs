@@ -1,6 +1,7 @@
 //! Builder API that assembles and runs IDL generation for Cargo build scripts.
 
 use crate::error::Error;
+use crate::output::StagedOutput;
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -112,15 +113,13 @@ impl Builder {
         self
     }
 
-    /// Renames the generated single-file artifact after generation.
+    /// Publishes a generated single-file artifact under the requested name.
     ///
     /// This currently only works for generators that emit exactly one known file:
-    /// `openapi` (`openapi_{filename}.json`) and `openrpc` (`openrpc.json`).
-    ///
-    /// Generation targets a private staging directory inside the output
-    /// directory, so concurrent builds sharing one output directory cannot
-    /// race on the default artifact name. The artifact is published at the
-    /// requested path with an atomic rename once generation succeeds.
+    /// `openapi` (`openapi_{filename}.json`) and `openrpc` (`openrpc_{filename}.json`).
+    /// Generation uses a private directory, so concurrent calls do not share
+    /// intermediate files. Supporting documents are published beside the
+    /// destination before the completed artifact replaces it.
     ///
     /// Relative paths are resolved against the final output directory. Absolute
     /// paths are used as-is.
@@ -182,8 +181,8 @@ impl Builder {
     /// in-process.
     ///
     /// When [`with_output_filename`](Self::with_output_filename) is set, the
-    /// artifact is generated into a private staging directory and atomically
-    /// published under the requested filename after generation succeeds.
+    /// generated artifact is published from a private directory after successful
+    /// code generation. Other calls cannot consume its intermediate files.
     ///
     /// # Errors
     ///
@@ -201,34 +200,31 @@ impl Builder {
                     .map_err(|err| Error::Config(format!("OUT_DIR is not set: {err}")))?,
             ),
         };
-        if self.output_filename.is_some() && out_dir == Path::new("-") {
-            return Err(Error::Config(
-                "with_output_filename is not supported when out_dir is '-'".to_string(),
-            ));
-        }
         let inputs: Vec<PathBuf> = inputs.iter().map(|p| p.as_ref().to_path_buf()).collect();
-        // When an explicit output filename is requested, generate into a
-        // process-private staging directory inside `out_dir` so the default
-        // artifact name never becomes cross-process shared state (issue 458).
-        // The rename into the final directory is then atomic, because the
-        // staging directory shares `out_dir`'s filesystem.
-        let staging_dir: Option<tempfile::TempDir> = if self.output_filename.is_some() {
-            Self::default_artifact_name(&self.lang, &inputs)?;
-            Some(
-                tempfile::Builder::new()
-                    .prefix(".xidl-build-stage-")
-                    .tempdir_in(&out_dir)?,
-            )
-        } else {
-            None
-        };
-        let generation_dir = staging_dir
+        let staged = self
+            .output_filename
             .as_ref()
-            .map(|dir| dir.path().to_path_buf())
-            .unwrap_or_else(|| out_dir.clone());
+            .map(|name| {
+                if out_dir == Path::new("-") {
+                    return Err(Error::Config(
+                        "with_output_filename is not supported when out_dir is '-'".to_string(),
+                    ));
+                }
+                let default_name = Self::default_artifact_name(&self.lang, &inputs)?;
+                let destination = if name.is_absolute() {
+                    name.clone()
+                } else {
+                    out_dir.join(name)
+                };
+                Ok((StagedOutput::new(destination)?, default_name))
+            })
+            .transpose()?;
         let spec = GenerateSpec {
             lang: self.lang.clone(),
-            out_dir: generation_dir.clone(),
+            out_dir: staged
+                .as_ref()
+                .map(|(output, _)| output.directory().to_path_buf())
+                .unwrap_or(out_dir),
             client: self.client,
             server: self.server,
             mock: self.mock,
@@ -242,8 +238,9 @@ impl Builder {
         #[cfg(not(feature = "bundle"))]
         let result = CliBackend.run(&spec);
         result?;
-        if let Some(custom_name) = &self.output_filename {
-            self.apply_output_filename(&generation_dir, &out_dir, custom_name, &spec.inputs)?;
+        if let Some((output, default_name)) = staged {
+            let document = Self::output_document(&spec.out_dir, &default_name)?;
+            output.publish(&document)?;
         }
         Ok(())
     }
@@ -295,32 +292,18 @@ impl Builder {
         }
     }
 
-    fn apply_output_filename(
-        &self,
-        generation_dir: &Path,
-        out_dir: &Path,
-        custom_name: &Path,
-        inputs: &[PathBuf],
-    ) -> Result<(), Error> {
-        if out_dir == Path::new("-") {
-            return Err(Error::Config(
-                "with_output_filename is not supported when out_dir is '-'".to_string(),
-            ));
-        }
-
-        let default_name = Self::default_artifact_name(self.lang.as_str(), inputs)?;
-
-        let src = generation_dir.join(&default_name);
+    fn output_document(out_dir: &Path, default_name: &str) -> Result<PathBuf, Error> {
+        let src = out_dir.join(default_name);
         let src = if src.exists() {
             src
         } else {
-            let documents = Self::versioned_documents(generation_dir, &default_name)?;
+            let documents = Self::versioned_documents(out_dir, default_name)?;
             match documents.as_slice() {
                 [] => {
                     return Err(Error::Compile(format!(
                         "generated file '{}' does not exist in '{}'",
                         default_name,
-                        generation_dir.display()
+                        out_dir.display()
                     )));
                 }
                 [single] => single.clone(),
@@ -337,18 +320,7 @@ impl Builder {
                 }
             }
         };
-        let dst = if custom_name.is_absolute() {
-            custom_name.to_path_buf()
-        } else {
-            out_dir.join(custom_name)
-        };
-        if src == dst {
-            return Ok(());
-        }
-        if let Some(parent) = dst.parent() {
-            fs::create_dir_all(parent)?;
-        }
-        fs::rename(src, dst)?;
-        Ok(())
+
+        Ok(src)
     }
 }

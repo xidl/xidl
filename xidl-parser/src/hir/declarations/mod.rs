@@ -6,16 +6,35 @@ use std::collections::BTreeSet;
 
 /// Names declared in one specification, resolved with IDL lexical scope.
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
-pub(crate) struct DeclarationNames(BTreeSet<String>);
+pub struct DeclarationNames(BTreeSet<String>);
+
+/// The role of a named declaration within its lexical scope.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[non_exhaustive]
+pub enum DeclarationKind {
+    /// A module or interface that introduces a namespace.
+    Scope,
+    /// A named type, including an exception or a typedef.
+    Type,
+    /// A named constant value.
+    Constant,
+    /// An enum or bitmask member owned by its enclosing type.
+    Member,
+}
 
 impl DeclarationNames {
     /// Collects all declarations, including names exported by interfaces.
-    pub(crate) fn collect(definitions: &[Definition]) -> Self {
+    pub fn collect(definitions: &[Definition]) -> Self {
         let mut names = Self::default();
         Self::visit(definitions, "", &mut |name| {
             names.0.insert(name.to_string());
         });
         names
+    }
+
+    /// Checks whether a canonical path names a declaration.
+    pub fn contains(&self, name: &str) -> bool {
+        self.0.contains(name)
     }
 
     /// Resolves a known reference without rebinding it in a consumer's scope.
@@ -36,25 +55,39 @@ impl DeclarationNames {
 
     /// Visits the path of every named declaration in source order.
     pub(crate) fn visit(definitions: &[Definition], path: &str, visit: &mut impl FnMut(&str)) {
+        Self::visit_declarations(definitions, path, &mut |name, _| visit(name));
+    }
+
+    /// Visits canonical paths and declaration roles in source order.
+    pub fn visit_declarations(
+        definitions: &[Definition],
+        path: &str,
+        visit: &mut impl FnMut(&str, DeclarationKind),
+    ) {
         for definition in definitions {
             match definition {
                 Definition::Pragma(_) => {}
                 Definition::ModuleDcl(module) => {
                     let here = Self::join(path, &module.ident);
-                    visit(&here);
-                    Self::visit(&module.definition, &here, visit);
+                    visit(&here, DeclarationKind::Scope);
+                    Self::visit_declarations(&module.definition, &here, visit);
                 }
                 Definition::TypeDcl(type_dcl) => Self::type_dcl(type_dcl, path, visit),
                 Definition::ConstrTypeDcl(constr) => Self::constr(constr, path, visit),
-                Definition::ConstDcl(const_dcl) => visit(&Self::join(path, &const_dcl.ident)),
-                Definition::ExceptDcl(except) => visit(&Self::join(path, &except.ident)),
+                Definition::ConstDcl(const_dcl) => visit(
+                    &Self::join(path, &const_dcl.ident),
+                    DeclarationKind::Constant,
+                ),
+                Definition::ExceptDcl(except) => {
+                    visit(&Self::join(path, &except.ident), DeclarationKind::Type)
+                }
                 Definition::InterfaceDcl(interface) => {
                     let ident = match &interface.decl {
                         InterfaceDclInner::InterfaceForwardDcl(forward) => forward.ident.clone(),
                         InterfaceDclInner::InterfaceDef(def) => def.header.ident.clone(),
                     };
                     let here = Self::join(path, &ident);
-                    visit(&here);
+                    visit(&here, DeclarationKind::Scope);
                     let InterfaceDclInner::InterfaceDef(def) = &interface.decl else {
                         continue;
                     };
@@ -64,10 +97,13 @@ impl DeclarationNames {
                     for export in &body.0 {
                         match export {
                             Export::TypeDcl(type_dcl) => Self::type_dcl(type_dcl, &here, visit),
-                            Export::ExceptDcl(except) => visit(&Self::join(&here, &except.ident)),
-                            Export::ConstDcl(const_dcl) => {
-                                visit(&Self::join(&here, &const_dcl.ident))
+                            Export::ExceptDcl(except) => {
+                                visit(&Self::join(&here, &except.ident), DeclarationKind::Type)
                             }
+                            Export::ConstDcl(const_dcl) => visit(
+                                &Self::join(&here, &const_dcl.ident),
+                                DeclarationKind::Constant,
+                            ),
                             Export::OpDcl(_) | Export::AttrDcl(_) => {}
                         }
                     }
@@ -76,7 +112,7 @@ impl DeclarationNames {
         }
     }
 
-    fn type_dcl(type_dcl: &TypeDcl, path: &str, visit: &mut impl FnMut(&str)) {
+    fn type_dcl(type_dcl: &TypeDcl, path: &str, visit: &mut impl FnMut(&str, DeclarationKind)) {
         match type_dcl {
             TypeDcl::ConstrTypeDcl(constr) => Self::constr(constr, path, visit),
             TypeDcl::TypedefDcl(typedef) => {
@@ -84,14 +120,19 @@ impl DeclarationNames {
                     Self::constr(constr, path, visit);
                 }
                 for declarator in &typedef.decl {
-                    visit(&Self::join(path, Self::declarator_name(declarator)));
+                    visit(
+                        &Self::join(path, Self::declarator_name(declarator)),
+                        DeclarationKind::Type,
+                    );
                 }
             }
-            TypeDcl::NativeDcl(native) => visit(&Self::join(path, &native.decl.0)),
+            TypeDcl::NativeDcl(native) => {
+                visit(&Self::join(path, &native.decl.0), DeclarationKind::Type)
+            }
         }
     }
 
-    fn constr(constr: &ConstrTypeDcl, path: &str, visit: &mut impl FnMut(&str)) {
+    fn constr(constr: &ConstrTypeDcl, path: &str, visit: &mut impl FnMut(&str, DeclarationKind)) {
         let (ident, members): (&str, Vec<&str>) = match constr {
             ConstrTypeDcl::StructDcl(value) => (&value.ident, Vec::new()),
             ConstrTypeDcl::StructForwardDcl(value) => (&value.ident, Vec::new()),
@@ -112,9 +153,16 @@ impl DeclarationNames {
             ),
         };
         let here = Self::join(path, ident);
-        visit(&here);
+        visit(&here, DeclarationKind::Type);
         for member in members {
-            visit(&Self::join(&here, member));
+            visit(&Self::join(&here, member), DeclarationKind::Member);
+        }
+        if let ConstrTypeDcl::UnionDef(value) = constr {
+            for case in &value.case {
+                if let super::ElementSpecTy::ConstrTypeDcl(nested) = &case.element.ty {
+                    Self::constr(nested, &here, visit);
+                }
+            }
         }
     }
 
@@ -133,3 +181,6 @@ impl DeclarationNames {
         }
     }
 }
+
+#[cfg(test)]
+mod tests;

@@ -14,9 +14,10 @@ use xidl_parser::versioning::VersioningRecord;
 /// unversioned unit exposes one set for every reference.
 #[derive(Debug, Clone)]
 pub struct UnitInterface {
-    per_version: BTreeMap<String, BTreeSet<String>>,
+    per_version: BTreeMap<String, hir::DeclarationNames>,
     aliases: BTreeMap<String, String>,
-    unversioned: Option<BTreeSet<String>>,
+    unversioned: Option<hir::DeclarationNames>,
+    members: BTreeSet<String>,
     integer_exports: IntegerExports,
 }
 
@@ -35,12 +36,15 @@ impl UnitInterface {
         let spec = Self::lower(source, path, mounts)?;
         let record = VersioningRecord::analyze(&spec).map_err(|err| Self::error(path, err))?;
         let mut integer_exports = IntegerExports::default();
+        let mut members = BTreeSet::new();
         let Some(record) = record else {
             integer_exports.record(&spec, None);
+            Self::collect_members(&spec, &mut members);
             return Ok(Self {
                 per_version: BTreeMap::new(),
                 aliases: BTreeMap::new(),
-                unversioned: Some(Self::names(&spec.0)),
+                unversioned: Some(hir::DeclarationNames::collect(&spec.0)),
+                members,
                 integer_exports,
             });
         };
@@ -51,13 +55,18 @@ impl UnitInterface {
                 .project_source(&spec, id)
                 .map_err(|err| Self::error(path, err))?;
             integer_exports.record(&projected, Some(definition));
-            per_version.insert(definition.ident.clone(), Self::names(&projected.0));
+            Self::collect_members(&projected, &mut members);
+            per_version.insert(
+                definition.ident.clone(),
+                hir::DeclarationNames::collect(&projected.0),
+            );
             aliases.insert(definition.value.clone(), definition.ident.clone());
         }
         Ok(Self {
             per_version,
             aliases,
             unversioned: None,
+            members,
             integer_exports,
         })
     }
@@ -72,8 +81,14 @@ impl UnitInterface {
         let importer = unit.file().to_path_buf();
         let referenced = target.file().to_path_buf();
         let written = reference.qualified();
-        let declared = |version: Option<&str>| self.declares(version, reference.name());
+        let declared = |version: Option<&str>| self.declares(version, &reference.path());
         match reference.version() {
+            Some(scope)
+                if !self.is_versioned()
+                    && self.declares(None, &format!("{scope}::{}", reference.path())) =>
+            {
+                Ok(())
+            }
             Some(version) if !self.is_versioned() => Err(ImportError::UnexpectedVersion {
                 importer,
                 unit: referenced,
@@ -152,7 +167,20 @@ impl UnitInterface {
             .unwrap_or(version);
         self.per_version
             .get(ident)
-            .is_some_and(|names| names.contains(name))
+            .is_some_and(|names| names.contains(&format!("{ident}::{name}")))
+    }
+
+    /// Canonical enum and bitmask members exposed to generator targets.
+    pub(super) fn members(&self) -> &BTreeSet<String> {
+        &self.members
+    }
+
+    fn collect_members(spec: &hir::Specification, members: &mut BTreeSet<String>) {
+        hir::DeclarationNames::visit_declarations(&spec.0, "", &mut |name, kind| {
+            if kind == hir::DeclarationKind::Member {
+                members.insert(name.to_string());
+            }
+        });
     }
 
     /// Lowers one unit into the HIR its interface is read from.
@@ -169,92 +197,6 @@ impl UnitInterface {
         // or array dimensions are evaluated during compilation.
         hir::Specification::source_from_typed_ast_with_resolver(typed, path, &mut *resolver)
             .map_err(|err| Self::error(path, err))
-    }
-
-    /// Names every declaration of `definitions` introduces.
-    fn names(definitions: &[hir::Definition]) -> BTreeSet<String> {
-        let mut names = BTreeSet::new();
-        for definition in definitions {
-            match definition {
-                hir::Definition::ModuleDcl(module) => {
-                    names.insert(module.ident.clone());
-                    names.extend(Self::names(&module.definition));
-                }
-                hir::Definition::TypeDcl(type_dcl) => Self::type_dcl_names(type_dcl, &mut names),
-                hir::Definition::ConstrTypeDcl(constr) => {
-                    names.insert(Self::constr_ident(constr).to_string());
-                }
-                hir::Definition::ConstDcl(const_dcl) => {
-                    names.insert(const_dcl.ident.clone());
-                }
-                hir::Definition::ExceptDcl(except) => {
-                    names.insert(except.ident.clone());
-                }
-                hir::Definition::InterfaceDcl(interface) => {
-                    Self::interface_names(interface, &mut names)
-                }
-                hir::Definition::Pragma(_) => {}
-            }
-        }
-        names
-    }
-
-    /// Names a `type_dcl` introduces.
-    fn type_dcl_names(type_dcl: &hir::TypeDcl, names: &mut BTreeSet<String>) {
-        match type_dcl {
-            hir::TypeDcl::ConstrTypeDcl(constr) => {
-                names.insert(Self::constr_ident(constr).to_string());
-            }
-            hir::TypeDcl::TypedefDcl(typedef) => {
-                names.extend(typedef.decl.iter().map(|decl| match decl {
-                    hir::Declarator::SimpleDeclarator(simple) => simple.0.clone(),
-                    hir::Declarator::ArrayDeclarator(array) => array.ident.clone(),
-                }));
-            }
-            hir::TypeDcl::NativeDcl(native) => {
-                names.insert(native.decl.0.clone());
-            }
-        }
-    }
-
-    /// Name a constructed type declaration introduces.
-    fn constr_ident(constr: &hir::ConstrTypeDcl) -> &str {
-        match constr {
-            hir::ConstrTypeDcl::StructDcl(value) => &value.ident,
-            hir::ConstrTypeDcl::StructForwardDcl(value) => &value.ident,
-            hir::ConstrTypeDcl::UnionDef(value) => &value.ident,
-            hir::ConstrTypeDcl::UnionForwardDcl(value) => &value.ident,
-            hir::ConstrTypeDcl::EnumDcl(value) => &value.ident,
-            hir::ConstrTypeDcl::BitsetDcl(value) => &value.ident,
-            hir::ConstrTypeDcl::BitmaskDcl(value) => &value.ident,
-        }
-    }
-
-    /// Names an interface declares together with the types inside its body.
-    fn interface_names(interface: &hir::InterfaceDcl, names: &mut BTreeSet<String>) {
-        match &interface.decl {
-            hir::InterfaceDclInner::InterfaceForwardDcl(forward) => {
-                names.insert(forward.ident.clone());
-            }
-            hir::InterfaceDclInner::InterfaceDef(definition) => {
-                names.insert(definition.header.ident.clone());
-                let Some(body) = &definition.interface_body else {
-                    return;
-                };
-                for export in &body.0 {
-                    match export {
-                        hir::Export::TypeDcl(type_dcl) => Self::type_dcl_names(type_dcl, names),
-                        hir::Export::ConstDcl(const_dcl) => {
-                            names.insert(const_dcl.ident.clone());
-                        }
-                        hir::Export::ExceptDcl(except) => {
-                            names.insert(except.ident.clone());
-                        }
-                        hir::Export::OpDcl(_) | hir::Export::AttrDcl(_) => {}
-                    }
-                }
-            }
-        }
     }
 
     /// Names the file a failed interface read came from.

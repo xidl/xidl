@@ -6,7 +6,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use xidl_parser::hir;
 use xidl_parser::hir::ParserProperties;
 
-use super::definition::go_export_name;
+use super::definition::{go_capitalize, go_export_name};
 use crate::generate::utils::go_package_name;
 
 /// One Go package a file reaches.
@@ -26,6 +26,7 @@ pub(crate) struct GoImport {
 #[derive(Debug, Default)]
 pub(crate) struct GoPackages {
     packages: BTreeMap<String, Option<GoImport>>,
+    members: BTreeMap<String, BTreeSet<String>>,
     referenced: RefCell<BTreeSet<String>>,
     runtime: RefCell<BTreeMap<String, GoImport>>,
 }
@@ -43,6 +44,7 @@ impl GoPackages {
             return Self::default();
         };
         let mut packages = BTreeMap::new();
+        let mut members = BTreeMap::new();
         for import in imports {
             let prefix = import.get("prefix").and_then(serde_json::Value::as_str);
             let unit = import.get("unit").and_then(serde_json::Value::as_str);
@@ -58,10 +60,20 @@ impl GoPackages {
                 }
                 _ => None,
             };
+            let declared_members = import
+                .get("members")
+                .and_then(serde_json::Value::as_array)
+                .into_iter()
+                .flatten()
+                .filter_map(serde_json::Value::as_str)
+                .map(str::to_string)
+                .collect();
+            members.insert(prefix.to_string(), declared_members);
             packages.insert(prefix.to_string(), package);
         }
         Self {
             packages,
+            members,
             referenced: RefCell::default(),
             runtime: RefCell::default(),
         }
@@ -73,8 +85,17 @@ impl GoPackages {
         if rest.is_empty() || value.is_root {
             return None;
         }
-        let (ident, modules) = rest.split_last()?;
-        let name = go_export_name(modules, ident);
+        let (ident, scope) = rest.split_last()?;
+        let name = if self
+            .members
+            .get(first)
+            .is_some_and(|members| members.contains(&rest.join("::")))
+        {
+            let (owner, scope) = scope.split_last()?;
+            format!("{}{}", go_export_name(scope, owner), go_capitalize(ident))
+        } else {
+            go_export_name(scope, ident)
+        };
         match self.packages.get(first)? {
             Some(package) => {
                 self.referenced.borrow_mut().insert(package.path.clone());

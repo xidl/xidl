@@ -56,6 +56,28 @@ impl UnitGraph {
         &self.units
     }
 
+    /// Generator import metadata, including declared member identities.
+    pub fn import_property(&self, unit: &Unit) -> serde_json::Value {
+        let mut property = unit.import_property();
+        if let Some(imports) = property.as_array_mut() {
+            for import in imports {
+                let interface = import
+                    .get("prefix")
+                    .and_then(serde_json::Value::as_str)
+                    .and_then(|prefix| self.interfaces.get(prefix));
+                if let Some(interface) = interface
+                    && let Some(import) = import.as_object_mut()
+                {
+                    import.insert(
+                        "members".to_string(),
+                        interface.members().iter().cloned().collect(),
+                    );
+                }
+            }
+        }
+        property
+    }
+
     /// Supplies only the imported declaration contexts reachable from `unit`.
     pub fn integer_imports(&self, unit: &Unit) -> IntegerImports {
         let bindings = unit

@@ -24,7 +24,7 @@ mod versioned_include;
 pub use annotation::*;
 pub use compound::*;
 pub use const_dcl::*;
-pub(crate) use declarations::DeclarationNames;
+pub use declarations::{DeclarationKind, DeclarationNames};
 pub use declarator::*;
 pub use enum_dcl::*;
 pub use exception_dcl::*;

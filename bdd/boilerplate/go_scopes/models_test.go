@@ -43,6 +43,9 @@ func TestDeclaredScopesSurviveRoundTrips(t *testing.T) {
 	if len(decoded.Entry.Pair) != int(LedgerWidth) {
 		t.Fatal("array bound lost its declaring scope")
 	}
+	if InitialState != sources.HTTPStateReady {
+		t.Fatal("imported enum constant lost its declaring name")
+	}
 	view := LedgerEntriesView{Message: "interface alias"}
 	envelope := LedgerEntriesEnvelope{Entry: decoded.Entry, Detail: view}
 	if envelope.Detail.Message != view.Message {
@@ -82,5 +85,24 @@ func TestScopedEnumAndArrayRejectOtherWireShapes(t *testing.T) {
 	var pair LedgerDetails
 	if err := json.Unmarshal([]byte(`[{"message":"one"}]`), &pair); err == nil {
 		t.Fatal("accepted an array shorter than the scoped bound")
+	}
+}
+
+func TestImportedConstructedDeclarationsRemainUsable(t *testing.T) {
+	value := ImportedExports{
+		Detail:  sources.SourceDetail{Message: "declared"},
+		Alias:   sources.SourceAlias{Message: "aliased"},
+		Payload: sources.SourceEventPayload{Message: "nested"},
+	}
+	wire, err := json.Marshal(value)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var decoded ImportedExports
+	if err := json.Unmarshal(wire, &decoded); err != nil {
+		t.Fatal(err)
+	}
+	if decoded != value {
+		t.Fatalf("imported declaration identity changed: %+v", decoded)
 	}
 }

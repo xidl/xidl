@@ -55,6 +55,7 @@ fn split_modules_snapshot_the_names_used_by_go_and_go_rest() {
         assert!(model.contains("Detail LedgerDetail"));
         assert!(model.contains("Root Detail"));
         assert!(model.contains("Origin sources.HttpApiDetail"));
+        assert!(model.contains("InitialState sources.HTTPState = sources.HTTPStateReady"));
         assert!(model.contains("type LedgerEntriesView = LedgerDetail"));
         insta::assert_json_snapshot!(format!("split_module_{target}"), files);
     }
