@@ -1,4 +1,5 @@
 import netlify from '@astrojs/netlify';
+import react from '@astrojs/react';
 import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
@@ -11,6 +12,7 @@ export default defineConfig({
   base: '/',
 
   integrations: [
+    react(),
     starlight({
       components: {
         SiteTitle: './src/components/SiteTitle.astro',
@@ -61,7 +63,12 @@ export default defineConfig({
           lang: 'en',
         },
       },
-      plugins: [starlightLlmsTxt()],
+      plugins: [
+        starlightLlmsTxt({
+          customSelectors: { all: ['[data-xidlc-flow-source]'] },
+          rawContent: true,
+        }),
+      ],
       sidebar: [
         {
           items: [

@@ -2,16 +2,23 @@
   "dependencies": {
     "@astrojs/check": "^0.9.9",
     "@astrojs/netlify": "^8.0.0",
+    "@astrojs/react": "7.1.2",
     "@astrojs/starlight": "^0.42.0",
     "@astrojs/starlight-tailwind": "^5.0.0",
+    "@remotion/player": "4.0.539",
     "@tailwindcss/vite": "^4.2.4",
     "astro": "^7.0.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "remotion": "4.0.539",
     "sharp": "^0.33.3",
     "starlight-llms-txt": "^0.12.0",
     "tailwindcss": "^4.2.4"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.10",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "typescript": "^5.7.0"
   },
   "devEngines": {
