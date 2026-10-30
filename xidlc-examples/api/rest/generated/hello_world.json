@@ -101,6 +101,7 @@
           "a": {
             "type": "integer",
             "format": "int32",
+            "maximum": 255,
             "minimum": 0
           },
           "b": {
@@ -154,6 +155,7 @@
           "a": {
             "type": "integer",
             "format": "int32",
+            "maximum": 255,
             "minimum": 0
           }
         }

@@ -200,7 +200,9 @@ impl<'de> serde::Deserialize<'de> for Labels {
         match helper.tag.as_str() {
             "Text" => {
                 let value = ::serde_json::from_value::<String>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union Labels.text payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: Some(Kind::Text),
                     data: LabelsData::Text(value),
@@ -208,7 +210,9 @@ impl<'de> serde::Deserialize<'de> for Labels {
             }
             "Number" => {
                 let value = ::serde_json::from_value::<i64>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union Labels.number payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: Some(Kind::Number),
                     data: LabelsData::Number(value),
@@ -216,7 +220,9 @@ impl<'de> serde::Deserialize<'de> for Labels {
             }
             "FLAG" => {
                 let value = ::serde_json::from_value::<bool>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union Labels.flag payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: Some(FLAG),
                     data: LabelsData::Flag(value),
@@ -409,7 +415,9 @@ impl<'de> serde::Deserialize<'de> for Aliased {
         match helper.tag.as_str() {
             "Text" => {
                 let value = ::serde_json::from_value::<String>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union Aliased.text payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: Some(Kind::Text),
                     data: AliasedData::Text(value),
@@ -417,7 +425,9 @@ impl<'de> serde::Deserialize<'de> for Aliased {
             }
             "Number" => {
                 let value = ::serde_json::from_value::<i64>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union Aliased.number payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: Some(Kind::Number),
                     data: AliasedData::Number(value),
@@ -425,7 +435,9 @@ impl<'de> serde::Deserialize<'de> for Aliased {
             }
             "default" => {
                 let value = ::serde_json::from_value::<bool>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union Aliased.other payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: None,
                     data: AliasedData::Other(value),

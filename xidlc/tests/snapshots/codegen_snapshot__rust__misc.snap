@@ -174,7 +174,9 @@ impl<'de> serde::Deserialize<'de> for Bar {
         match helper.tag.as_str() {
             "0" => {
                 let value = ::serde_json::from_value::<i32>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union Bar.l_mem payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: Some(0),
                     data: BarData::LMem(value),
@@ -182,7 +184,9 @@ impl<'de> serde::Deserialize<'de> for Bar {
             }
             "1" => {
                 let value = ::serde_json::from_value::<Foo>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union Bar.s_mem payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: Some(1),
                     data: BarData::SMem(value),

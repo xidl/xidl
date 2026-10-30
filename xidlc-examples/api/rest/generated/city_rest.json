@@ -198,6 +198,7 @@
                       "items": {
                         "type": "integer",
                         "format": "int32",
+                        "maximum": 255,
                         "minimum": 0
                       }
                     }

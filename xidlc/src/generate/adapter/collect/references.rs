@@ -9,11 +9,10 @@ impl VersionSurface {
         for shape in self.types.values_mut() {
             match shape {
                 TypeShape::Alias(value) => value.localize(version),
-                TypeShape::Struct(members)
-                | TypeShape::Union(members)
-                | TypeShape::Enum(members) => {
+                TypeShape::Struct(members) | TypeShape::Enum(members) => {
                     Self::localize_members(members, version);
                 }
+                TypeShape::Union(union) => Self::localize_members(&mut union.members, version),
                 TypeShape::Unsupported(_) => {}
             }
         }

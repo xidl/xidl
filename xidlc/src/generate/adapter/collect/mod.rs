@@ -188,7 +188,8 @@ impl SurfaceCollector {
                         .into(),
                 )
             }
-            hir::ConstrTypeDcl::UnionDef(value) => TypeShape::Union(
+            hir::ConstrTypeDcl::UnionDef(value) => TypeShape::Union(UnionShape::new(
+                value,
                 value
                     .case
                     .iter()
@@ -240,7 +241,7 @@ impl SurfaceCollector {
                         }
                     })
                     .collect(),
-            ),
+            )),
             hir::ConstrTypeDcl::UnionForwardDcl(_) => {
                 TypeShape::Unsupported("forward union declaration".into())
             }

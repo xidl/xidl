@@ -198,7 +198,9 @@ impl<'de> serde::Deserialize<'de> for UnionValue {
         match helper.tag.as_str() {
             "V1" => {
                 let value = ::serde_json::from_value::<int>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union UnionValue.case1 payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: Some(Tag::V1),
                     data: UnionValueData::Case1(value),
@@ -206,7 +208,9 @@ impl<'de> serde::Deserialize<'de> for UnionValue {
             }
             "V2" => {
                 let value = ::serde_json::from_value::<Vec<String>>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union UnionValue.case2 payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: Some(Tag::V2),
                     data: UnionValueData::Case2(value),
@@ -216,7 +220,9 @@ impl<'de> serde::Deserialize<'de> for UnionValue {
                 let value = ::serde_json::from_value::<
                     ::std::collections::BTreeMap<String, String>,
                 >(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union UnionValue.case3 payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: Some(Tag::V3),
                     data: UnionValueData::Case3(value),
@@ -419,7 +425,9 @@ impl<'de> serde::Deserialize<'de> for IntTagValue {
         match helper.tag.as_str() {
             "1" => {
                 let value = ::serde_json::from_value::<String>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union IntTagValue.one payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: Some(1),
                     data: IntTagValueData::One(value),
@@ -427,7 +435,11 @@ impl<'de> serde::Deserialize<'de> for IntTagValue {
             }
             "2" => {
                 let value = ::serde_json::from_value::<int>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!(
+                            "union IntTagValue.two_or_three payload decode failed: {error}"
+                        ),
+                    ))?;
                 Ok(Self {
                     tag: Some(2),
                     data: IntTagValueData::TwoOrThree(value),
@@ -435,7 +447,11 @@ impl<'de> serde::Deserialize<'de> for IntTagValue {
             }
             "3" => {
                 let value = ::serde_json::from_value::<int>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!(
+                            "union IntTagValue.two_or_three payload decode failed: {error}"
+                        ),
+                    ))?;
                 Ok(Self {
                     tag: Some(3),
                     data: IntTagValueData::TwoOrThree(value),
@@ -443,7 +459,11 @@ impl<'de> serde::Deserialize<'de> for IntTagValue {
             }
             "default" => {
                 let value = ::serde_json::from_value::<bool>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!(
+                            "union IntTagValue.fallback payload decode failed: {error}"
+                        ),
+                    ))?;
                 Ok(Self {
                     tag: None,
                     data: IntTagValueData::Fallback(value),
@@ -596,7 +616,9 @@ impl<'de> serde::Deserialize<'de> for BoolTagValue {
         match helper.tag.as_str() {
             "true" => {
                 let value = ::serde_json::from_value::<String>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union BoolTagValue.yes payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: Some(true),
                     data: BoolTagValueData::Yes(value),
@@ -604,7 +626,9 @@ impl<'de> serde::Deserialize<'de> for BoolTagValue {
             }
             "false" => {
                 let value = ::serde_json::from_value::<String>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union BoolTagValue.no payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: Some(false),
                     data: BoolTagValueData::No(value),
@@ -798,7 +822,9 @@ impl<'de> serde::Deserialize<'de> for CharTagValue {
         match helper.tag.as_str() {
             "'x'" => {
                 let value = ::serde_json::from_value::<String>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union CharTagValue.ex payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: Some('x'),
                     data: CharTagValueData::Ex(value),
@@ -806,7 +832,9 @@ impl<'de> serde::Deserialize<'de> for CharTagValue {
             }
             "'y'" => {
                 let value = ::serde_json::from_value::<String>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union CharTagValue.why payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: Some('y'),
                     data: CharTagValueData::Why(value),
@@ -814,7 +842,11 @@ impl<'de> serde::Deserialize<'de> for CharTagValue {
             }
             "default" => {
                 let value = ::serde_json::from_value::<String>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!(
+                            "union CharTagValue.other payload decode failed: {error}"
+                        ),
+                    ))?;
                 Ok(Self {
                     tag: None,
                     data: CharTagValueData::Other(value),

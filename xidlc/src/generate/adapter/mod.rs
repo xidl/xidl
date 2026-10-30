@@ -6,6 +6,7 @@ mod facts;
 mod model;
 mod planner;
 mod references;
+mod unions;
 mod updates;
 
 pub(crate) use model::*;

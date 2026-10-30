@@ -13,7 +13,7 @@ from version_adapters import run
 @when("I generate the split Go integer mask library")
 def generate_go_masks(context):
     root = Path.cwd()
-    cli = root / "target/debug/xidlc"
+    cli = root / os.environ.get("CARGO_TARGET_DIR", "target") / "debug/xidlc"
     source = Path(context.idl_file)
     output = Path(context.lang_dir)
     run(
@@ -47,8 +47,17 @@ def execute_go_masks(context):
     for name in ("go.mod", "masks_test.go"):
         shutil.copy(boilerplate / name, output / name)
     shutil.copy(boilerplate / "masks.go.mod", output / "masks/go.mod")
+    module = output / "go.mod"
+    text = module.read_text()
+    for key, path in [
+        ("GOLANG_XIDL_GO_PATH", "golang/xidl-go"),
+        ("GOLANG_XIDL_GO_CODEC_PATH", "golang/xidl-go-codec"),
+    ]:
+        text = text.replace("{{" + key + "}}", str(Path.cwd() / path))
+    module.write_text(text)
     env = os.environ.copy()
     env.update(GOPROXY="off", GOSUMDB="off", GOTOOLCHAIN="local", GOWORK="off")
+    subprocess.run(["go", "mod", "tidy"], cwd=output, env=env, check=True, timeout=60)
     result = subprocess.run(
         ["go", "test", "-count=1", "./..."],
         cwd=output,

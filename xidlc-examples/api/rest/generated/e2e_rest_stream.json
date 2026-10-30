@@ -91,6 +91,7 @@
                   "items": {
                     "type": "integer",
                     "format": "int32",
+                    "maximum": 255,
                     "minimum": 0
                   }
                 }
@@ -284,6 +285,7 @@
                 "items": {
                   "type": "integer",
                   "format": "int32",
+                  "maximum": 255,
                   "minimum": 0
                 }
               }
@@ -419,6 +421,7 @@
           "bytes": {
             "type": "integer",
             "format": "int64",
+            "maximum": 18446744073709551615,
             "minimum": 0
           },
           "ok": {

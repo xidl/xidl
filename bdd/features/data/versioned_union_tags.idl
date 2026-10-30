@@ -1,0 +1,15 @@
+@version enum Versions { v1, v2 };
+
+union Delivery switch(long) {
+    case 0: case 2: string text;
+    case 1: case 3: @added(Versions::v2) long attempts;
+    default: boolean queued;
+};
+
+@removed(Versions::v2) union Notice switch(long) { case 0: string text; };
+@added(Versions::v2) union Notice switch(long) { case 2: string text; };
+
+interface Notifications {
+    @post(path = "/deliveries") Delivery submit(@body Delivery receipt);
+    @post(path = "/notices") Notice reissue(@body Notice notice);
+};

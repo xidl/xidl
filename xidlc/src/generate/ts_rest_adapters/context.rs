@@ -77,6 +77,7 @@ pub(super) struct Copy {
     pub target: String,
     pub value: Value,
     pub optional: bool,
+    pub tags: Vec<String>,
 }
 
 #[derive(Serialize, Clone)]

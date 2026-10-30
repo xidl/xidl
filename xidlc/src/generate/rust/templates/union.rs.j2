@@ -114,7 +114,7 @@ impl<'de> serde::Deserialize<'de> for {{ ident }} {
 {% for arm in case.serde_arms %}
             {{ arm.tag_literal }} => {
                 let value = ::serde_json::from_value::<{{ case.type }}>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(format!("union {{ ident }}.{{ case.member }} payload decode failed: {error}")))?;
                 Ok(Self {
                     tag: {% if arm.is_default %}None{% else %}Some({{ arm.tag_expr }}){% endif %},
                     data: {{ ident }}Data::{{ case.helper_variant }}(value),

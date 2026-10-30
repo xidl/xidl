@@ -173,7 +173,9 @@ impl<'de> serde::Deserialize<'de> for U {
         match helper.tag.as_str() {
             "0" => {
                 let value = ::serde_json::from_value::<i32>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union U.a payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: Some(0),
                     data: UData::A(value),
@@ -181,7 +183,9 @@ impl<'de> serde::Deserialize<'de> for U {
             }
             "default" => {
                 let value = ::serde_json::from_value::<i32>(helper.data)
-                    .map_err(serde::de::Error::custom)?;
+                    .map_err(|error| serde::de::Error::custom(
+                        format!("union U.b payload decode failed: {error}"),
+                    ))?;
                 Ok(Self {
                     tag: None,
                     data: UData::B(value),

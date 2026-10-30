@@ -92,6 +92,8 @@ pub(super) fn render_unary_handler(
     method: &MethodMeta,
     renderer: &GoRestRenderer,
 ) -> IdlcResult<()> {
+    // Invocation locals have their own scope, independent of authentication bindings.
+    out.push_str("\t\t{\n");
     let has_response = method.response_body_struct.is_some()
         || method.response_body_direct_field.is_some()
         || !method.response_header_params.is_empty()
@@ -109,6 +111,7 @@ pub(super) fn render_unary_handler(
     } else {
         writeln!(out, "\t\tc.Status(http.StatusNoContent)").unwrap();
     }
+    out.push_str("\t\t}\n");
     Ok(())
 }
 

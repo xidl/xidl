@@ -152,8 +152,15 @@ impl AdapterPlan {
                 continue;
             }
             match head.surface.types.get(&key) {
-                Some(TypeShape::Struct(members) | TypeShape::Union(members)) => {
+                Some(TypeShape::Struct(members)) => {
                     for member in members {
+                        if let Some(value) = &member.value {
+                            references.value(value)?.references(&mut pending);
+                        }
+                    }
+                }
+                Some(TypeShape::Union(union)) => {
+                    for member in &union.members {
                         if let Some(value) = &member.value {
                             references.value(value)?.references(&mut pending);
                         }

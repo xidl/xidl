@@ -58,8 +58,9 @@ impl AdapterRenderer<'_> {
                 plan
             }
             TypeConversion::Union(plan) => {
-                context.kind = "union";
-                plan
+                self.union_conversion(plan, &input, &mut context, file)?;
+                file.conversions.push(context);
+                return Ok(());
             }
             TypeConversion::Struct(plan) => plan,
         };
@@ -92,35 +93,10 @@ impl AdapterRenderer<'_> {
                     target: copy.target.name.clone(),
                     value: target.value(&copy.value)?,
                     optional: copy.target.value.as_ref().is_some_and(Names::optional),
+                    tags: Vec::new(),
                 });
             }
-            if context.kind == "union" {
-                if !plan.consumed.is_empty() {
-                    let hook = target.hook(key);
-                    let variants = plan
-                        .consumed
-                        .iter()
-                        .map(|member| {
-                            Ok(TsType::InlineStruct(vec![FieldTypeContext {
-                                prop: ts_prop_name(&member.name),
-                                ty: input.source.member_type(member)?,
-                                optional: false,
-                                doc: Vec::new(),
-                            }]))
-                        })
-                        .collect::<IdlcResult<Vec<_>>>()?;
-                    file.hooks.push(Hook {
-                        name: hook.clone(),
-                        input: TsType::Union(variants),
-                        output: input.target_type.clone(),
-                        stored: Vec::new(),
-                        current: None,
-                    });
-                    context.hook = Some(hook);
-                }
-            } else {
-                self.decision(plan, &input, &mark, &mut context, file)?;
-            }
+            self.decision(plan, &input, &mark, &mut context, file)?;
         }
         file.conversions.push(context);
         Ok(())

@@ -48,47 +48,51 @@ func RegisterHttpResponseShapeServiceHandler(r gin.IRouter, svc HttpResponseShap
 	r.POST("/hello", func(c *gin.Context) {
 
 		req := &HttpResponseShapeServiceHelloRequest{}
-		resp, err := svc.Hello(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpResponseShapeServiceHelloFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.Hello(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpResponseShapeServiceHelloFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Return); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.POST("/get_count", func(c *gin.Context) {
 
 		req := &HttpResponseShapeServiceGetCountRequest{}
-		resp, err := svc.GetCount(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpResponseShapeServiceGetCountFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.GetCount(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpResponseShapeServiceGetCountFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Count); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			if err := xidlgohttp.GinEncodeBody(c, "text/plain", resp.Count); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.POST("/add", func(c *gin.Context) {
@@ -101,28 +105,30 @@ func RegisterHttpResponseShapeServiceHandler(r gin.IRouter, svc HttpResponseShap
 		}
 		req.A = body.A
 		req.B = body.B
-		resp, err := svc.Add(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpResponseShapeServiceAddFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.Add(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpResponseShapeServiceAddFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		respBody := HttpResponseShapeServiceAddResponseBody{
-			Return: resp.Return,
-			Sum:    resp.Sum,
-		}
-		if err := xidlgohttp.GinEncodeBody(c, "application/json", respBody); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			respBody := HttpResponseShapeServiceAddResponseBody{
+				Return: resp.Return,
+				Sum:    resp.Sum,
+			}
+			if err := xidlgohttp.GinEncodeBody(c, "application/json", respBody); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.POST("/bump", func(c *gin.Context) {
@@ -134,49 +140,53 @@ func RegisterHttpResponseShapeServiceHandler(r gin.IRouter, svc HttpResponseShap
 			return
 		}
 		req.Value = body
-		resp, err := svc.Bump(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpResponseShapeServiceBumpFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			resp, err := svc.Bump(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpResponseShapeServiceBumpFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
-		}
 
-		respBody := HttpResponseShapeServiceBumpResponseBody{
-			Return: resp.Return,
-			Value:  resp.Value,
-		}
-		if err := xidlgohttp.GinEncodeBody(c, "application/json", respBody); err != nil {
-			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			respBody := HttpResponseShapeServiceBumpResponseBody{
+				Return: resp.Return,
+				Value:  resp.Value,
+			}
+			if err := xidlgohttp.GinEncodeBody(c, "application/json", respBody); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+			}
 		}
 	})
 	r.POST("/ping", func(c *gin.Context) {
 
 		req := &HttpResponseShapeServicePingRequest{}
-		_, err := svc.Ping(c.Request.Context(), req)
-		if err != nil {
-			failure := encodeHttpResponseShapeServicePingFailure(err)
-			for name, values := range failure.Headers {
-				for _, value := range values {
-					c.Writer.Header().Add(name, value)
+		{
+			_, err := svc.Ping(c.Request.Context(), req)
+			if err != nil {
+				failure := encodeHttpResponseShapeServicePingFailure(err)
+				for name, values := range failure.Headers {
+					for _, value := range values {
+						c.Writer.Header().Add(name, value)
+					}
 				}
+				if len(failure.Body) == 0 {
+					c.Status(failure.Status)
+				} else {
+					c.Data(failure.Status, "application/json", failure.Body)
+				}
+				return
 			}
-			if len(failure.Body) == 0 {
-				c.Status(failure.Status)
-			} else {
-				c.Data(failure.Status, "application/json", failure.Body)
-			}
-			return
+			c.Status(http.StatusNoContent)
 		}
-		c.Status(http.StatusNoContent)
 	})
 }
 

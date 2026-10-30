@@ -19,6 +19,11 @@ Feature: API versioning — independent adapter targets preserve frozen HTTP con
     When I generate TypeScript with the independent adapter target
     Then the single-version TypeScript application validates before dispatch
 
+  Scenario: delivery labels survive version translation and retagging requires a business decision
+    Given a versioned REST IDL file "bdd/features/data/versioned_union_tags.idl"
+    When I generate TypeScript with the independent adapter target
+    Then the delivery application preserves union labels and explicit retagging
+
   Scenario: an independent Rust adapter target preserves frozen HTTP contracts
     Given a versioned REST IDL file "bdd/features/data/versioned_adapters.idl"
     When I generate Rust with the independent adapter target

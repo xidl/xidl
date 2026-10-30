@@ -128,6 +128,13 @@ def expect_tsc_failure(output, name, content, needle, reason):
         path.unlink()
 
 
+@then("the delivery application preserves union labels and explicit retagging")
+def union_label_journey(context):
+    output = prepare_application(context, "union_tags.ts")
+    result = run(["pnpm", "exec", "tsx", "union_tags.ts"], cwd=output)
+    assert "PASS: union labels and explicit retagging" in result.stdout
+
+
 @then("the three-version TypeScript application enforces wire and business boundaries")
 def real_business_journey(context):
     output = prepare_application(context, "business.ts")

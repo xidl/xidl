@@ -3,6 +3,9 @@
 use std::collections::HashMap;
 use std::path::Path;
 
+#[path = "version_adapters/unions.rs"]
+mod unions;
+
 fn render(source: &str, name: &str) -> Vec<(String, String)> {
     xidlc::driver::Generator::new("typescript-rest-adapters".into())
         .generate_from_idl(source, Path::new(name), HashMap::new())
