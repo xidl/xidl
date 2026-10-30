@@ -1,0 +1,46 @@
+---
+title: "Exceptions"
+description: "HTTP exception mapping in XIDL REST"
+sidebar:
+  order: 4
+---
+
+REST operations can raise exceptions to return non-2xx HTTP responses. Exceptions are declared with `exception` and annotated with `@http(status = ...)` to specify the status code. Operations list which exceptions they may raise via `raises(...)`.
+
+```idl
+exception NotFound {
+    string message;
+};
+
+exception NotModified {
+};
+
+exception PreconditionFailed {
+    @header string etag;
+    string detail;
+};
+
+interface UserApi {
+    @get(path = "/users/{id}")
+    string getUser(@path string id)
+        raises(NotFound, NotModified, PreconditionFailed);
+};
+```
+
+## Status Codes
+
+- Use `@http(412)` or `@http(status = 412)` on an exception to declare its status code.
+- Allowed status codes are in the range `300..599`.
+- One operation cannot raise two exceptions with the same status code.
+- A `304` exception cannot have a body.
+
+## Exception Member Mapping
+
+Exception members follow the same parameter/response mapping rules as operations:
+
+- Unmarked members go into the response body.
+- Use `@header` to map a member to a response header.
+- Use `@cookie` to map a member to a response cookie.
+- Use `@rename` to change the serialized name of a header/cookie/body field.
+
+In the example above, `PreconditionFailed.etag` is sent as a header while `detail` goes in the body. `NotModified` has status `304` with no body.
